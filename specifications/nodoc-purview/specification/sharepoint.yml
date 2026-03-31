@@ -1,0 +1,38 @@
+paths:
+  /spo/admin/_api/SPO.Tenant/EnableAIPIntegration:
+    get:
+      operationId: checkAipIntegrationEnabled
+      summary: Check if Azure Information Protection integration is enabled
+      description: >-
+        Check whether Azure Information Protection (AIP) integration is enabled
+        for the SharePoint Online tenant. Returns the current enablement status.
+      tags: [SharePoint]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /spo/admin/_api/SPO.Tenant/EnableSensitivityLabelForPDF:
+    get:
+      operationId: checkSensitivityLabelForPdfEnabled
+      summary: Check if sensitivity labels for PDF are enabled
+      description: >-
+        Check whether sensitivity label support for PDF files is enabled
+        for the SharePoint Online tenant. Returns the current enablement status.
+      tags: [SharePoint]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

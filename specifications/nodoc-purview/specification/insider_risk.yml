@@ -1,0 +1,34 @@
+paths:
+  "/insiderrisk/insiderrisk/api/v1.0/{tenantId}/InsiderRiskAnalyticsInsightMetadata('{date}')":
+    get:
+      operationId: getInsiderRiskAnalyticsInsightMetadata
+      summary: Get insider risk analytics insight metadata
+      description: >-
+        Retrieve insider risk analytics insight metadata for a specific date.
+        Returns metadata about available risk analytics insights for the tenant.
+      tags: [InsiderRisk]
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          description: The unique identifier (GUID) of the tenant.
+          schema:
+            type: string
+            format: uuid
+        - name: date
+          in: path
+          required: true
+          description: The date for which to retrieve insight metadata (ISO 8601 date format).
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

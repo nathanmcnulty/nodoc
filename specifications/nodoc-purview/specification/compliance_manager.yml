@@ -1,0 +1,141 @@
+paths:
+  /cpm/v1.0/Tenant/CompliancePostureSummary:
+    post:
+      operationId: getTenantCompliancePostureSummary
+      summary: Get tenant compliance posture summary
+      description: >-
+        Retrieve the compliance posture summary for the tenant from Compliance Manager.
+        Returns an overview of the tenant's compliance score and assessment status.
+      tags: [ComplianceManager]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /cpm/v1.0/ApplicationUserContext:
+    get:
+      operationId: getApplicationUserContext
+      summary: Get application user context
+      description: >-
+        Retrieve the application user context for Compliance Manager.
+        Returns information about the current user's permissions and access level.
+      tags: [ComplianceManager]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /cpm/v1.0/Assessments/List:
+    post:
+      operationId: listComplianceAssessments
+      summary: List compliance assessments
+      description: >-
+        Retrieve a list of compliance assessments from Compliance Manager.
+        Assessments track the tenant's progress against regulatory frameworks and standards.
+      tags: [ComplianceManager]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /cpm/v1.0/Users/Profile:
+    get:
+      operationId: getComplianceManagerUserProfile
+      summary: Get user profile in Compliance Manager
+      description: >-
+        Retrieve the user profile for the current user in Compliance Manager.
+        Includes user preferences and role information.
+      tags: [ComplianceManager]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /cpm/v1.0/Tenant/Filters:
+    get:
+      operationId: getTenantAssessmentFilters
+      summary: Get tenant assessment filters
+      description: >-
+        Retrieve the available filter options for tenant assessments in Compliance Manager.
+        Returns filter categories such as regulation, status, and assessment type.
+      tags: [ComplianceManager]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /Ingestion/NativeConnectorJob:
+    get:
+      operationId: getNativeConnectorJobStatus
+      summary: Get native connector ingestion job status
+      description: >-
+        Retrieve the status of a native connector ingestion job.
+        Used to track the progress of data ingestion from native connectors.
+      tags: [ComplianceManager]
+      parameters:
+        - name: correlationId
+          in: query
+          required: false
+          description: A correlation identifier for tracking the job.
+          schema:
+            type: string
+            format: uuid
+        - name: locale
+          in: query
+          required: false
+          description: The locale for localized response content.
+          schema:
+            type: string
+            example: en-us
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

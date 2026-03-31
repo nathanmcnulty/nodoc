@@ -1,0 +1,45 @@
+paths:
+  /adtsch/AuditLogSearch:
+    get:
+      operationId: listAuditLogSearches
+      summary: List audit log searches
+      description: >-
+        Retrieve a list of audit log searches. Returns saved and recent audit log
+        search queries with their status and results metadata.
+      tags: [Audit]
+      parameters:
+        - name: pageSize
+          in: query
+          required: false
+          description: The number of results to return per page.
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /adtsch/AuditEnabled:
+    get:
+      operationId: checkAuditEnabled
+      summary: Check if audit is enabled for tenant
+      description: >-
+        Check whether audit logging is enabled for the tenant.
+        Returns a boolean indicating the audit enablement status.
+      tags: [Audit]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

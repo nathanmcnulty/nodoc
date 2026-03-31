@@ -1,0 +1,193 @@
+paths:
+  /purviewplatform/api/v1/insight/GetTypeAggregates:
+    get:
+      operationId: getPlatformTypeAggregates
+      summary: Get data scan type aggregates
+      description: >-
+        Retrieve data scan type aggregates from the Purview Platform.
+        Returns aggregated statistics for data assets grouped by type.
+      tags: [PlatformServices]
+      parameters:
+        - name: type
+          in: query
+          required: false
+          description: The type of aggregate to retrieve.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /purviewplatform/api/v1/insight/GetOverallProtectionStatus:
+    get:
+      operationId: getOverallProtectionStatus
+      summary: Get overall data protection status
+      description: >-
+        Retrieve the overall data protection status from the Purview Platform.
+        Returns a summary of data protection coverage across the tenant's data estate.
+      tags: [PlatformServices]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /purviewplatform/api/v1/insight/GetTypeAggregatesByWorkload:
+    get:
+      operationId: getTypeAggregatesByWorkload
+      summary: Get type aggregates by workload
+      description: >-
+        Retrieve type aggregates broken down by workload from the Purview Platform.
+        Returns aggregated statistics for data assets grouped by both type and workload.
+      tags: [PlatformServices]
+      parameters:
+        - name: type
+          in: query
+          required: false
+          description: The type of aggregate to retrieve.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /shell/api/shell/shellinfo:
+    get:
+      operationId: getShellInfo
+      summary: Get portal shell info
+      description: >-
+        Retrieve portal shell configuration information. Returns UI configuration,
+        navigation links, and feature flags for the Purview portal shell.
+      tags: [PlatformServices]
+      parameters:
+        - name: CultureName
+          in: query
+          required: false
+          description: The culture/locale name for localized content (e.g., en-US).
+          schema:
+            type: string
+        - name: CurrentMainLinkId
+          in: query
+          required: false
+          description: The identifier of the currently active main navigation link.
+          schema:
+            type: string
+        - name: TrackingGuid
+          in: query
+          required: false
+          description: A GUID for tracking the shell info request.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /iris/v4/api/selection:
+    get:
+      operationId: getIrisSelection
+      summary: Get IRIS promotional/feature selection
+      description: >-
+        Retrieve IRIS promotional and feature selection data. Returns targeted
+        content and feature recommendations based on placement, locale, and other criteria.
+      tags: [PlatformServices]
+      parameters:
+        - name: placement
+          in: query
+          required: false
+          description: The placement context for the selection.
+          schema:
+            type: string
+        - name: locale
+          in: query
+          required: false
+          description: The locale for localized content.
+          schema:
+            type: string
+        - name: country
+          in: query
+          required: false
+          description: The country code for regional content.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /azurepurview/account:
+    get:
+      operationId: getAzurePurviewAccount
+      summary: Get Azure Purview account info
+      description: >-
+        Retrieve Azure Purview account information. Returns details about the
+        Azure Purview account associated with the tenant.
+      tags: [PlatformServices]
+      parameters:
+        - name: api-version
+          in: query
+          required: false
+          description: The API version to use for the request.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /ocps/user/v1.0/web/policies:
+    get:
+      operationId: getOfficeConfigPolicies
+      summary: Get Office Configuration policies for user
+      description: >-
+        Retrieve Office Configuration Service (OCPS) policies for the current user.
+        Returns policy settings that control Office application behavior and features.
+      tags: [PlatformServices]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

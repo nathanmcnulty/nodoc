@@ -1,0 +1,312 @@
+openapi: 3.0.1
+info:
+  title: Microsoft Purview
+  description: |
+    The Microsoft Purview API is used by the Microsoft Purview portal (purview.microsoft.com) for managing compliance, governance, and data security, including:
+
+      - Data Infrastructure (entity discovery and search)
+      - eDiscovery case management
+      - Compliance Manager assessments
+      - Audit log search
+      - Governance Web Services (authorization, DLM, classification)
+      - Data Governance Services
+      - Security Copilot integration
+      - Microsoft Graph proxy
+      - Platform Services (shell, IRIS, Azure Purview)
+      - Billing and licensing
+      - DLP device management
+      - Insider Risk Management
+      - SharePoint Online settings
+
+    These APIs are accessed through the portal's API proxy layer at `purview.microsoft.com/apiproxy` and support delegated authentication flows.
+    They are used internally by the Purview portal and are not officially documented by Microsoft.
+
+    The proxy layer routes requests to various backend services using path prefixes:
+
+    | Prefix | Service |
+    | --- | --- |
+    | `/di/` | Data Infrastructure (entity discovery/search) |
+    | `/aedmcc/` | Advanced eDiscovery & Content Search |
+    | `/cpm/` | Compliance Manager |
+    | `/adtsch/` | Audit Search |
+    | `/gws/` | Governance Web Services |
+    | `/dgs/` | Data Governance Services |
+    | `/medeina/` | Security Copilot (Medeina) |
+    | `/cdssecuritycopilot/` | CDS Security Copilot |
+    | `/msgraph/` | Microsoft Graph Proxy |
+    | `/purviewplatform/` | Purview Platform |
+    | `/cbill/` | Purview Billing |
+    | `/mtp/` | Microsoft Threat Protection (DLP devices) |
+    | `/insiderrisk/` | Insider Risk Management |
+    | `/spo/` | SharePoint Online |
+    | `/shell/` | Portal Shell |
+    | `/iris/` | IRIS Feature Selection |
+    | `/azurepurview/` | Azure Purview |
+    | `/ocps/` | Office Configuration |
+    | `/Ingestion/` | Compliance Ingestion |
+
+    Documentation and specifications have been provided on a best efforts basis and may not be 100% accurate.
+
+  version: '1.0'
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+servers:
+  - url: https://purview.microsoft.com/apiproxy
+
+security:
+  - PortalSession: []
+
+components:
+  securitySchemes:
+    PortalSession:
+      type: apiKey
+      in: cookie
+      name: sccauth
+      description: >-
+        Session-based authentication via the Microsoft Purview portal.
+        Requires an authenticated browser session at purview.microsoft.com.
+
+tags:
+  - name: DataInfrastructure
+    description: |
+      Operations relating to the Data Infrastructure service, which powers entity discovery
+      across all Purview solutions including DLP, sensitivity labels, policies, and compliance tags.
+  - name: eDiscovery
+    description: |
+      Operations relating to eDiscovery case management via the AEDMCC service,
+      including case listing, settings, favorites, view state, and roles mapping.
+  - name: ComplianceManager
+    description: |
+      Operations relating to Compliance Manager, including compliance posture summaries,
+      assessments, user context, filters, and native connector ingestion.
+  - name: Audit
+    description: Operations relating to audit log search and audit enablement status.
+  - name: GovernanceServices
+    description: |
+      Operations relating to Governance Web Services for authorization, data lifecycle
+      management (DLM), and trainable classifier model metadata.
+  - name: DataGovernance
+    description: |
+      Operations relating to Data Governance Services for aggregates, licensing,
+      and classification type definitions.
+  - name: Copilot
+    description: |
+      Operations relating to Security Copilot (Medeina) and CDS Security Copilot,
+      including authentication, data sharing settings, agents, and trial status.
+  - name: GraphProxy
+    description: |
+      Operations relating to Microsoft Graph API endpoints proxied through Purview,
+      including subscribed SKUs, role assignments, conditional access, and service announcements.
+  - name: PlatformServices
+    description: |
+      Operations relating to Purview Platform infrastructure, portal shell configuration,
+      IRIS feature selection, Azure Purview accounts, and Office Configuration policies.
+  - name: Billing
+    description: Operations relating to Purview billing, licensing, and free trial offers.
+  - name: DLPDevices
+    description: |
+      Operations relating to DLP device management and incident alerts,
+      proxied through Microsoft Threat Protection (MTP).
+  - name: InsiderRisk
+    description: Operations relating to Insider Risk Management analytics and insight metadata.
+  - name: SharePoint
+    description: Operations relating to SharePoint Online tenant settings proxied through Purview.
+
+x-tagGroups:
+  - name: Data Security
+    tags:
+      - DataInfrastructure
+      - DataGovernance
+  - name: Compliance
+    tags:
+      - ComplianceManager
+      - Audit
+      - GovernanceServices
+  - name: Information Protection
+    tags:
+      - DLPDevices
+      - InsiderRisk
+      - SharePoint
+  - name: eDiscovery
+    tags:
+      - eDiscovery
+  - name: AI & Copilot
+    tags:
+      - Copilot
+  - name: Platform
+    tags:
+      - PlatformServices
+      - GraphProxy
+      - Billing
+
+paths:
+  # Data Infrastructure
+  /di/find/DlpAlertAgentPolicyInsights:
+    $ref: 'data_infrastructure.yml#/paths/~1di~1find~1DlpAlertAgentPolicyInsights'
+  /di/Find/TrialOffer:
+    $ref: 'data_infrastructure.yml#/paths/~1di~1Find~1TrialOffer'
+  /di/find/ProtectionCompliancePolicy:
+    $ref: 'data_infrastructure.yml#/paths/~1di~1find~1ProtectionCompliancePolicy'
+  /di/find/MIPSavedQuery:
+    $ref: 'data_infrastructure.yml#/paths/~1di~1find~1MIPSavedQuery'
+  /di/find/Alert:
+    $ref: 'data_infrastructure.yml#/paths/~1di~1find~1Alert'
+  /di/find/PolicyConfig:
+    $ref: 'data_infrastructure.yml#/paths/~1di~1find~1PolicyConfig'
+  /di/find/DlpComplianceRule:
+    $ref: 'data_infrastructure.yml#/paths/~1di~1find~1DlpComplianceRule'
+  /di/find/DlpCompliancePolicy:
+    $ref: 'data_infrastructure.yml#/paths/~1di~1find~1DlpCompliancePolicy'
+  /di/find/LabelPolicy:
+    $ref: 'data_infrastructure.yml#/paths/~1di~1find~1LabelPolicy'
+  /di/find/AutoSensitivityLabelPolicy:
+    $ref: 'data_infrastructure.yml#/paths/~1di~1find~1AutoSensitivityLabelPolicy'
+  /di/find/DlpSensitiveInformationType:
+    $ref: 'data_infrastructure.yml#/paths/~1di~1find~1DlpSensitiveInformationType'
+  /di/find/Label:
+    $ref: 'data_infrastructure.yml#/paths/~1di~1find~1Label'
+  /di/find/DlpEdmSchema:
+    $ref: 'data_infrastructure.yml#/paths/~1di~1find~1DlpEdmSchema'
+  /di/find/ComplianceTag:
+    $ref: 'data_infrastructure.yml#/paths/~1di~1find~1ComplianceTag'
+  /di/find/FeatureConfiguration:
+    $ref: 'data_infrastructure.yml#/paths/~1di~1find~1FeatureConfiguration'
+  /di/find/MipAnalyticsTenantSettings:
+    $ref: 'data_infrastructure.yml#/paths/~1di~1find~1MipAnalyticsTenantSettings'
+  /di/find/InsiderRiskPolicy:
+    $ref: 'data_infrastructure.yml#/paths/~1di~1find~1InsiderRiskPolicy'
+  /di/find/RiskSpotlightingInsight:
+    $ref: 'data_infrastructure.yml#/paths/~1di~1find~1RiskSpotlightingInsight'
+  /di/find/RetentionEvent:
+    $ref: 'data_infrastructure.yml#/paths/~1di~1find~1RetentionEvent'
+  /di/find/CustomTag:
+    $ref: 'data_infrastructure.yml#/paths/~1di~1find~1CustomTag'
+  /di/find/ProtectionAlert:
+    $ref: 'data_infrastructure.yml#/paths/~1di~1find~1ProtectionAlert'
+  /di/search/LabelAnalyticsActivityData:
+    $ref: 'data_infrastructure.yml#/paths/~1di~1search~1LabelAnalyticsActivityData'
+
+  # eDiscovery
+  /aedmcc/ediscovery/v1/getViewState:
+    $ref: 'ediscovery.yml#/paths/~1aedmcc~1ediscovery~1v1~1getViewState'
+  /aedmcc/ediscovery/v1/getFavorites:
+    $ref: 'ediscovery.yml#/paths/~1aedmcc~1ediscovery~1v1~1getFavorites'
+  /aedmcc/ediscovery/v1/purviewcases:
+    $ref: 'ediscovery.yml#/paths/~1aedmcc~1ediscovery~1v1~1purviewcases'
+  "/aedmcc/ediscovery/v1/purviewcases('{caseId}')":
+    $ref: "ediscovery.yml#/paths/~1aedmcc~1ediscovery~1v1~1purviewcases('{caseId}')"
+  "/aedmcc/ediscovery/v1/cases('{caseId}')/setting":
+    $ref: "ediscovery.yml#/paths/~1aedmcc~1ediscovery~1v1~1cases('{caseId}')~1setting"
+  /aedmcc/ediscovery/v1/setViewState:
+    $ref: 'ediscovery.yml#/paths/~1aedmcc~1ediscovery~1v1~1setViewState'
+  /aedmcc/ediscovery/v1/getEDiscoveryRolesMapping:
+    $ref: 'ediscovery.yml#/paths/~1aedmcc~1ediscovery~1v1~1getEDiscoveryRolesMapping'
+
+  # Compliance Manager
+  /cpm/v1.0/Tenant/CompliancePostureSummary:
+    $ref: 'compliance_manager.yml#/paths/~1cpm~1v1.0~1Tenant~1CompliancePostureSummary'
+  /cpm/v1.0/ApplicationUserContext:
+    $ref: 'compliance_manager.yml#/paths/~1cpm~1v1.0~1ApplicationUserContext'
+  /cpm/v1.0/Assessments/List:
+    $ref: 'compliance_manager.yml#/paths/~1cpm~1v1.0~1Assessments~1List'
+  /cpm/v1.0/Users/Profile:
+    $ref: 'compliance_manager.yml#/paths/~1cpm~1v1.0~1Users~1Profile'
+  /cpm/v1.0/Tenant/Filters:
+    $ref: 'compliance_manager.yml#/paths/~1cpm~1v1.0~1Tenant~1Filters'
+  /Ingestion/NativeConnectorJob:
+    $ref: 'compliance_manager.yml#/paths/~1Ingestion~1NativeConnectorJob'
+
+  # Audit
+  /adtsch/AuditLogSearch:
+    $ref: 'audit.yml#/paths/~1adtsch~1AuditLogSearch'
+  /adtsch/AuditEnabled:
+    $ref: 'audit.yml#/paths/~1adtsch~1AuditEnabled'
+
+  # Governance Services
+  /gws/ComplianceAuthServer/v1.0/IsAllowedPermissionWithScopes:
+    $ref: 'governance_services.yml#/paths/~1gws~1ComplianceAuthServer~1v1.0~1IsAllowedPermissionWithScopes'
+  /gws/ComplianceAuthServer/v1.0/GetUserRolesWithScopeInfo:
+    $ref: 'governance_services.yml#/paths/~1gws~1ComplianceAuthServer~1v1.0~1GetUserRolesWithScopeInfo'
+  /gws/DlmServices/api/v1.0/disposition/DispositionStatistics:
+    $ref: 'governance_services.yml#/paths/~1gws~1DlmServices~1api~1v1.0~1disposition~1DispositionStatistics'
+  "/gws/ipmlservice/CategoryTrainingModel//ModelMetadata":
+    $ref: "governance_services.yml#/paths/~1gws~1ipmlservice~1CategoryTrainingModel~1~1ModelMetadata"
+
+  # Data Governance
+  /dgs/Item/GetTenantLicense:
+    $ref: 'data_governance.yml#/paths/~1dgs~1Item~1GetTenantLicense'
+  /dgs/aggregate/GetTypeAggregates:
+    $ref: 'data_governance.yml#/paths/~1dgs~1aggregate~1GetTypeAggregates'
+  /dgs/item/GetTypesV2:
+    $ref: 'data_governance.yml#/paths/~1dgs~1item~1GetTypesV2'
+
+  # Copilot
+  /medeina/auth:
+    $ref: 'copilot.yml#/paths/~1medeina~1auth'
+  /medeina/auth/expiryDate:
+    $ref: 'copilot.yml#/paths/~1medeina~1auth~1expiryDate'
+  /medeina/settings/datashare:
+    $ref: 'copilot.yml#/paths/~1medeina~1settings~1datashare'
+  /medeina/agents:
+    $ref: 'copilot.yml#/paths/~1medeina~1agents'
+  /cdssecuritycopilot/trial:
+    $ref: 'copilot.yml#/paths/~1cdssecuritycopilot~1trial'
+
+  # Graph Proxy
+  /msgraph/v1.0/subscribedSkus:
+    $ref: 'graph_proxy.yml#/paths/~1msgraph~1v1.0~1subscribedSkus'
+  /msgraph/v1.0/roleManagement/directory/roleAssignments:
+    $ref: 'graph_proxy.yml#/paths/~1msgraph~1v1.0~1roleManagement~1directory~1roleAssignments'
+  /msgraph/beta/roleManagement/directory/transitiveRoleAssignments:
+    $ref: 'graph_proxy.yml#/paths/~1msgraph~1beta~1roleManagement~1directory~1transitiveRoleAssignments'
+  /msgraph/beta/identity/conditionalAccess/policies:
+    $ref: 'graph_proxy.yml#/paths/~1msgraph~1beta~1identity~1conditionalAccess~1policies'
+  /msgraph/v1.0/directory/administrativeUnits:
+    $ref: 'graph_proxy.yml#/paths/~1msgraph~1v1.0~1directory~1administrativeUnits'
+  /msgraph/v1.0/admin/serviceAnnouncement/messages:
+    $ref: 'graph_proxy.yml#/paths/~1msgraph~1v1.0~1admin~1serviceAnnouncement~1messages'
+
+  # Platform Services
+  /purviewplatform/api/v1/insight/GetTypeAggregates:
+    $ref: 'platform_services.yml#/paths/~1purviewplatform~1api~1v1~1insight~1GetTypeAggregates'
+  /purviewplatform/api/v1/insight/GetOverallProtectionStatus:
+    $ref: 'platform_services.yml#/paths/~1purviewplatform~1api~1v1~1insight~1GetOverallProtectionStatus'
+  /purviewplatform/api/v1/insight/GetTypeAggregatesByWorkload:
+    $ref: 'platform_services.yml#/paths/~1purviewplatform~1api~1v1~1insight~1GetTypeAggregatesByWorkload'
+  /shell/api/shell/shellinfo:
+    $ref: 'platform_services.yml#/paths/~1shell~1api~1shell~1shellinfo'
+  /iris/v4/api/selection:
+    $ref: 'platform_services.yml#/paths/~1iris~1v4~1api~1selection'
+  /azurepurview/account:
+    $ref: 'platform_services.yml#/paths/~1azurepurview~1account'
+  /ocps/user/v1.0/web/policies:
+    $ref: 'platform_services.yml#/paths/~1ocps~1user~1v1.0~1web~1policies'
+
+  # Billing
+  /cbill/purview/offer/freetrial:
+    $ref: 'billing.yml#/paths/~1cbill~1purview~1offer~1freetrial'
+  /cbill/PurviewAccount:
+    $ref: 'billing.yml#/paths/~1cbill~1PurviewAccount'
+  /cbill/PurviewAccount/billing-config-details:
+    $ref: 'billing.yml#/paths/~1cbill~1PurviewAccount~1billing-config-details'
+
+  # DLP Devices
+  /mtp/ndr/dlpmachines/count:
+    $ref: 'dlp_devices.yml#/paths/~1mtp~1ndr~1dlpmachines~1count'
+  /mtp/ndr/dlpmachines:
+    $ref: 'dlp_devices.yml#/paths/~1mtp~1ndr~1dlpmachines'
+  /mtp/ndr/dlpmachines/summaryStatus:
+    $ref: 'dlp_devices.yml#/paths/~1mtp~1ndr~1dlpmachines~1summaryStatus'
+  /mtp/incidentQueue/incidents/alerts:
+    $ref: 'dlp_devices.yml#/paths/~1mtp~1incidentQueue~1incidents~1alerts'
+
+  # Insider Risk
+  "/insiderrisk/insiderrisk/api/v1.0/{tenantId}/InsiderRiskAnalyticsInsightMetadata('{date}')":
+    $ref: "insider_risk.yml#/paths/~1insiderrisk~1insiderrisk~1api~1v1.0~1{tenantId}~1InsiderRiskAnalyticsInsightMetadata('{date}')"
+
+  # SharePoint
+  /spo/admin/_api/SPO.Tenant/EnableAIPIntegration:
+    $ref: 'sharepoint.yml#/paths/~1spo~1admin~1_api~1SPO.Tenant~1EnableAIPIntegration'
+  /spo/admin/_api/SPO.Tenant/EnableSensitivityLabelForPDF:
+    $ref: 'sharepoint.yml#/paths/~1spo~1admin~1_api~1SPO.Tenant~1EnableSensitivityLabelForPDF'

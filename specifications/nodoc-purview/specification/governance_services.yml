@@ -1,0 +1,95 @@
+paths:
+  /gws/ComplianceAuthServer/v1.0/IsAllowedPermissionWithScopes:
+    post:
+      operationId: checkPermissionWithScopes
+      summary: Check if user has permission with scopes
+      description: >-
+        Check whether the current user has a specific permission with the given scopes.
+        Used for authorization decisions within the Governance Web Services.
+      tags: [GovernanceServices]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /gws/ComplianceAuthServer/v1.0/GetUserRolesWithScopeInfo:
+    post:
+      operationId: getUserRolesWithScopeInfo
+      summary: Get user roles with scope information
+      description: >-
+        Retrieve the current user's roles along with their associated scope information.
+        Returns detailed role assignments including administrative unit scoping.
+      tags: [GovernanceServices]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /gws/DlmServices/api/v1.0/disposition/DispositionStatistics:
+    get:
+      operationId: getDispositionStatistics
+      summary: Get records disposition statistics
+      description: >-
+        Retrieve records disposition statistics from the Data Lifecycle Management service.
+        Returns counts and status of items pending disposition review.
+      tags: [GovernanceServices]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  "/gws/ipmlservice/CategoryTrainingModel//ModelMetadata":
+    get:
+      operationId: getTrainableClassifierModelMetadata
+      summary: Get trainable classifier model metadata
+      description: >-
+        Retrieve metadata for trainable classifier models. Returns information about
+        available classification models including their training status and accuracy.
+      tags: [GovernanceServices]
+      parameters:
+        - name: type
+          in: query
+          required: false
+          description: The type of classifier model to retrieve metadata for.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

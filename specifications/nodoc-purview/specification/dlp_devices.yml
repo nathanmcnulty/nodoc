@@ -1,0 +1,155 @@
+paths:
+  /mtp/ndr/dlpmachines/count:
+    get:
+      operationId: getDlpMachineCount
+      summary: Get DLP machine count
+      description: >-
+        Retrieve the total count of DLP-managed machines. Supports filtering by
+        lookback period, policy update time, and configuration status.
+      tags: [DLPDevices]
+      parameters:
+        - name: lookingBackInDays
+          in: query
+          required: false
+          description: Number of days to look back for machine activity.
+          schema:
+            type: integer
+        - name: lastPolicyUpdateTime
+          in: query
+          required: false
+          description: Filter by the last time a policy was updated on the machine.
+          schema:
+            type: string
+            format: date-time
+        - name: configurationStatus
+          in: query
+          required: false
+          description: Filter by the DLP configuration status of machines.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/ndr/dlpmachines:
+    get:
+      operationId: listDlpMachines
+      summary: List DLP machines
+      description: >-
+        Retrieve a paginated list of DLP-managed machines. Supports filtering by
+        policy update time, lookback period, configuration status, and tenant.
+      tags: [DLPDevices]
+      parameters:
+        - name: lastPolicyUpdateTime
+          in: query
+          required: false
+          description: Filter by the last time a policy was updated on the machine.
+          schema:
+            type: string
+            format: date-time
+        - name: lookingBackInDays
+          in: query
+          required: false
+          description: Number of days to look back for machine activity.
+          schema:
+            type: integer
+        - name: pageSize
+          in: query
+          required: false
+          description: The number of results to return per page.
+          schema:
+            type: integer
+        - name: pageIndex
+          in: query
+          required: false
+          description: The page index for pagination (zero-based).
+          schema:
+            type: integer
+        - name: configurationStatus
+          in: query
+          required: false
+          description: Filter by the DLP configuration status of machines.
+          schema:
+            type: string
+        - name: tenantId
+          in: query
+          required: false
+          description: The unique identifier (GUID) of the tenant.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/ndr/dlpmachines/summaryStatus:
+    get:
+      operationId: getDlpMachinesSummaryStatus
+      summary: Get DLP machines summary status
+      description: >-
+        Retrieve a summary of DLP machine statuses. Returns aggregated counts
+        of machines grouped by their configuration and health status.
+      tags: [DLPDevices]
+      parameters:
+        - name: lookingBackInDays
+          in: query
+          required: false
+          description: Number of days to look back for machine activity.
+          schema:
+            type: integer
+        - name: lastPolicyUpdateTime
+          in: query
+          required: false
+          description: Filter by the last time a policy was updated on the machine.
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/incidentQueue/incidents/alerts:
+    post:
+      operationId: queryIncidentAlerts
+      summary: Query incident alerts
+      description: >-
+        Query incident alerts from the Microsoft Threat Protection incident queue.
+        Returns alerts matching the specified query criteria.
+      tags: [DLPDevices]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

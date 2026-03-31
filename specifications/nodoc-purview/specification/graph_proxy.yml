@@ -1,0 +1,154 @@
+paths:
+  /msgraph/v1.0/subscribedSkus:
+    get:
+      operationId: getSubscribedSkus
+      summary: Get subscribed SKUs (license info)
+      description: >-
+        Retrieve the list of subscribed SKUs (license information) via the Microsoft Graph proxy.
+        Returns all commercial subscriptions that the tenant has acquired.
+      tags: [GraphProxy]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /msgraph/v1.0/roleManagement/directory/roleAssignments:
+    get:
+      operationId: getDirectoryRoleAssignments
+      summary: Get directory role assignments
+      description: >-
+        Retrieve directory role assignments via the Microsoft Graph proxy.
+        Returns role assignments for Microsoft Entra ID directory roles.
+      tags: [GraphProxy]
+      parameters:
+        - name: $filter
+          in: query
+          required: false
+          description: OData filter expression to narrow role assignments.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /msgraph/beta/roleManagement/directory/transitiveRoleAssignments:
+    get:
+      operationId: getTransitiveRoleAssignments
+      summary: Get transitive role assignments
+      description: >-
+        Retrieve transitive role assignments via the Microsoft Graph beta proxy.
+        Returns all role assignments including those inherited through group membership.
+      tags: [GraphProxy]
+      parameters:
+        - name: $filter
+          in: query
+          required: false
+          description: OData filter expression to narrow role assignments.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /msgraph/beta/identity/conditionalAccess/policies:
+    get:
+      operationId: getConditionalAccessPolicies
+      summary: Get conditional access policies
+      description: >-
+        Retrieve conditional access policies via the Microsoft Graph beta proxy.
+        Returns the tenant's conditional access policy configurations.
+      tags: [GraphProxy]
+      parameters:
+        - name: $filter
+          in: query
+          required: false
+          description: OData filter expression to narrow policies.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /msgraph/v1.0/directory/administrativeUnits:
+    get:
+      operationId: getAdministrativeUnits
+      summary: Get administrative units
+      description: >-
+        Retrieve administrative units via the Microsoft Graph proxy.
+        Returns the tenant's administrative unit definitions for delegated administration.
+      tags: [GraphProxy]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /msgraph/v1.0/admin/serviceAnnouncement/messages:
+    get:
+      operationId: getServiceAnnouncementMessages
+      summary: Get service announcement messages
+      description: >-
+        Retrieve service announcement messages via the Microsoft Graph proxy.
+        Returns service health and change notification messages from Microsoft 365.
+      tags: [GraphProxy]
+      parameters:
+        - name: $filter
+          in: query
+          required: false
+          description: OData filter expression to narrow messages.
+          schema:
+            type: string
+        - name: $orderby
+          in: query
+          required: false
+          description: OData order by expression for sorting results.
+          schema:
+            type: string
+        - name: $top
+          in: query
+          required: false
+          description: The maximum number of results to return.
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

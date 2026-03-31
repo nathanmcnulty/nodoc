@@ -1,0 +1,114 @@
+paths:
+  /medeina/auth:
+    get:
+      operationId: checkCopilotAuth
+      summary: Check Copilot authentication status
+      description: >-
+        Check the authentication status for Security Copilot (Medeina).
+        Returns whether the current user has a valid authentication session.
+      tags: [Copilot]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /medeina/auth/expiryDate:
+    get:
+      operationId: getCopilotAuthExpiryDate
+      summary: Get Copilot auth token expiry date
+      description: >-
+        Retrieve the expiry date of the current Security Copilot authentication token.
+        Used to determine when re-authentication is required.
+      tags: [Copilot]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /medeina/settings/datashare:
+    get:
+      operationId: getCopilotDataShareSettings
+      summary: Get Copilot data sharing settings
+      description: >-
+        Retrieve the data sharing settings for Security Copilot.
+        Controls how data is shared between Copilot and other Microsoft services.
+      tags: [Copilot]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /medeina/agents:
+    get:
+      operationId: listCopilotAgents
+      summary: List Copilot agents
+      description: >-
+        Retrieve a list of available Security Copilot agents.
+        Supports filtering by scope and agent definition name, with optional expansion of related data.
+      tags: [Copilot]
+      parameters:
+        - name: scope
+          in: query
+          required: false
+          description: The scope to filter agents by.
+          schema:
+            type: string
+        - name: agentDefinitionName
+          in: query
+          required: false
+          description: The agent definition name to filter by.
+          schema:
+            type: string
+        - name: expand
+          in: query
+          required: false
+          description: Related entities to expand in the response.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /cdssecuritycopilot/trial:
+    get:
+      operationId: getSecurityCopilotTrialStatus
+      summary: Get Security Copilot trial status
+      description: >-
+        Retrieve the trial status for Security Copilot (CDS).
+        Returns whether a trial is available, active, or expired for the tenant.
+      tags: [Copilot]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

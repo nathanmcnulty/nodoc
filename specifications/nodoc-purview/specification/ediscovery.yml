@@ -1,0 +1,180 @@
+paths:
+  /aedmcc/ediscovery/v1/getViewState:
+    get:
+      operationId: getEdiscoveryViewState
+      summary: Get eDiscovery view state
+      description: >-
+        Retrieve the current view state for eDiscovery. Used to persist and restore
+        the user's UI state across sessions for a specific feature or case.
+      tags: [eDiscovery]
+      parameters:
+        - name: feature
+          in: query
+          required: false
+          description: The eDiscovery feature to retrieve view state for.
+          schema:
+            type: string
+        - name: caseId
+          in: query
+          required: false
+          description: The unique identifier of the eDiscovery case.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /aedmcc/ediscovery/v1/getFavorites:
+    get:
+      operationId: getEdiscoveryFavorites
+      summary: Get eDiscovery favorites
+      description: >-
+        Retrieve the user's favorite eDiscovery items for a specific feature.
+        Favorites allow quick access to frequently used cases or searches.
+      tags: [eDiscovery]
+      parameters:
+        - name: feature
+          in: query
+          required: false
+          description: The eDiscovery feature to retrieve favorites for.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /aedmcc/ediscovery/v1/purviewcases:
+    get:
+      operationId: listPurviewEdiscoveryCases
+      summary: List all Purview eDiscovery cases
+      description: >-
+        Retrieve a list of all Purview eDiscovery cases accessible to the current user.
+        Returns case metadata including status, creation date, and members.
+      tags: [eDiscovery]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  "/aedmcc/ediscovery/v1/purviewcases('{caseId}')":
+    get:
+      operationId: getPurviewEdiscoveryCase
+      summary: Get a specific Purview eDiscovery case
+      description: >-
+        Retrieve details of a specific Purview eDiscovery case by its case ID.
+        Returns full case metadata and configuration.
+      tags: [eDiscovery]
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          description: The unique identifier of the eDiscovery case.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  "/aedmcc/ediscovery/v1/cases('{caseId}')/setting":
+    get:
+      operationId: getEdiscoveryCaseSettings
+      summary: Get case settings
+      description: >-
+        Retrieve the settings for a specific eDiscovery case.
+        Includes configuration options such as analytics, OCR, and notification settings.
+      tags: [eDiscovery]
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          description: The unique identifier of the eDiscovery case.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /aedmcc/ediscovery/v1/setViewState:
+    post:
+      operationId: setEdiscoveryViewState
+      summary: Set eDiscovery view state
+      description: >-
+        Save the current view state for eDiscovery. Persists the user's UI state
+        for a specific case so it can be restored in future sessions.
+      tags: [eDiscovery]
+      parameters:
+        - name: caseId
+          in: query
+          required: false
+          description: The unique identifier of the eDiscovery case.
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /aedmcc/ediscovery/v1/getEDiscoveryRolesMapping:
+    get:
+      operationId: getEdiscoveryRolesMapping
+      summary: Get eDiscovery roles mapping
+      description: >-
+        Retrieve the eDiscovery roles mapping. Returns the mapping between
+        role groups and their associated eDiscovery permissions.
+      tags: [eDiscovery]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

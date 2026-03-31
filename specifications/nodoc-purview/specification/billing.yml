@@ -1,0 +1,57 @@
+paths:
+  /cbill/purview/offer/freetrial:
+    get:
+      operationId: checkFreeTrialAvailability
+      summary: Check Purview free trial offer availability
+      description: >-
+        Check whether the Purview free trial offer is available for the tenant.
+        Returns the availability status and trial offer details.
+      tags: [Billing]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /cbill/PurviewAccount:
+    get:
+      operationId: getPurviewBillingAccount
+      summary: Get Purview billing account info
+      description: >-
+        Retrieve Purview billing account information.
+        Returns the billing account details and subscription status.
+      tags: [Billing]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /cbill/PurviewAccount/billing-config-details:
+    get:
+      operationId: getPurviewBillingConfigDetails
+      summary: Get Purview billing configuration details
+      description: >-
+        Retrieve detailed billing configuration for the Purview account.
+        Returns meter usage, capacity units, and billing tier information.
+      tags: [Billing]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

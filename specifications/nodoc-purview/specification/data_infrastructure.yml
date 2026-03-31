@@ -1,0 +1,700 @@
+paths:
+  /di/find/DlpAlertAgentPolicyInsights:
+    get:
+      operationId: getDlpAlertAgentPolicyInsights
+      summary: Get DLP alert agent policy insights
+      description: >-
+        Retrieve DLP alert agent policy insights from the Data Infrastructure service.
+        Returns policy insight data used for DLP alert analysis.
+      tags: [DataInfrastructure]
+      parameters:
+        - name: tenantId
+          in: query
+          required: true
+          description: The unique identifier (GUID) of the tenant.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /di/Find/TrialOffer:
+    get:
+      operationId: getTrialOffer
+      summary: Get available trial offers
+      description: >-
+        Retrieve available trial offers for the tenant from the Data Infrastructure service.
+        Used to determine which Purview features are available for trial.
+      tags: [DataInfrastructure]
+      parameters:
+        - name: tenantid
+          in: query
+          required: true
+          description: The unique identifier (GUID) of the tenant.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /di/find/ProtectionCompliancePolicy:
+    get:
+      operationId: getProtectionCompliancePolicies
+      summary: Get protection compliance policies
+      description: >-
+        Retrieve protection compliance policies from the Data Infrastructure service.
+        These policies govern data protection and compliance enforcement across the tenant.
+      tags: [DataInfrastructure]
+      parameters:
+        - name: tenantid
+          in: query
+          required: true
+          description: The unique identifier (GUID) of the tenant.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /di/find/MIPSavedQuery:
+    get:
+      operationId: getMipSavedQueries
+      summary: Get MIP saved queries
+      description: >-
+        Retrieve saved queries for Content Explorer from the Microsoft Information Protection service.
+        Supports pagination and filtering of saved query results.
+      tags: [DataInfrastructure]
+      parameters:
+        - name: tenantId
+          in: query
+          required: true
+          description: The unique identifier (GUID) of the tenant.
+          schema:
+            type: string
+            format: uuid
+        - name: PageSize
+          in: query
+          required: false
+          description: The number of results to return per page.
+          schema:
+            type: integer
+        - name: Filter
+          in: query
+          required: false
+          description: OData-style filter expression to narrow results.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /di/find/Alert:
+    get:
+      operationId: getComplianceAlerts
+      summary: Get compliance alerts
+      description: >-
+        Retrieve compliance alerts from the Data Infrastructure service.
+        Supports filtering by alert properties and pagination.
+      tags: [DataInfrastructure]
+      parameters:
+        - name: tenantid
+          in: query
+          required: true
+          description: The unique identifier (GUID) of the tenant.
+          schema:
+            type: string
+            format: uuid
+        - name: Filter
+          in: query
+          required: false
+          description: OData-style filter expression to narrow results.
+          schema:
+            type: string
+        - name: pagesize
+          in: query
+          required: false
+          description: The number of results to return per page.
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /di/find/PolicyConfig:
+    get:
+      operationId: getPolicyConfig
+      summary: Get policy configuration
+      description: >-
+        Retrieve policy configuration from the Data Infrastructure service.
+        Returns the current policy settings for the tenant.
+      tags: [DataInfrastructure]
+      parameters:
+        - name: tenantId
+          in: query
+          required: true
+          description: The unique identifier (GUID) of the tenant.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /di/find/DlpComplianceRule:
+    get:
+      operationId: getDlpComplianceRules
+      summary: Get DLP compliance rules
+      description: >-
+        Retrieve DLP compliance rules from the Data Infrastructure service.
+        These rules define the conditions and actions for Data Loss Prevention enforcement.
+      tags: [DataInfrastructure]
+      parameters:
+        - name: tenantId
+          in: query
+          required: true
+          description: The unique identifier (GUID) of the tenant.
+          schema:
+            type: string
+            format: uuid
+        - name: filter
+          in: query
+          required: false
+          description: OData-style filter expression to narrow results.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /di/find/DlpCompliancePolicy:
+    get:
+      operationId: getDlpCompliancePolicies
+      summary: Get DLP compliance policies
+      description: >-
+        Retrieve DLP compliance policies from the Data Infrastructure service.
+        These policies define the overall DLP strategy for the tenant.
+      tags: [DataInfrastructure]
+      parameters:
+        - name: tenantId
+          in: query
+          required: true
+          description: The unique identifier (GUID) of the tenant.
+          schema:
+            type: string
+            format: uuid
+        - name: filter
+          in: query
+          required: false
+          description: OData-style filter expression to narrow results.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /di/find/LabelPolicy:
+    get:
+      operationId: getLabelPolicies
+      summary: Get label policies
+      description: >-
+        Retrieve sensitivity label policies from the Data Infrastructure service.
+        Label policies control how sensitivity labels are published and applied to content.
+      tags: [DataInfrastructure]
+      parameters:
+        - name: tenantId
+          in: query
+          required: true
+          description: The unique identifier (GUID) of the tenant.
+          schema:
+            type: string
+            format: uuid
+        - name: filter
+          in: query
+          required: false
+          description: OData-style filter expression to narrow results.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /di/find/AutoSensitivityLabelPolicy:
+    get:
+      operationId: getAutoSensitivityLabelPolicies
+      summary: Get auto-sensitivity label policies
+      description: >-
+        Retrieve auto-sensitivity label policies from the Data Infrastructure service.
+        These policies define rules for automatically applying sensitivity labels to content.
+      tags: [DataInfrastructure]
+      parameters:
+        - name: tenantId
+          in: query
+          required: true
+          description: The unique identifier (GUID) of the tenant.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /di/find/DlpSensitiveInformationType:
+    get:
+      operationId: getDlpSensitiveInformationTypes
+      summary: Get DLP sensitive information types
+      description: >-
+        Retrieve DLP sensitive information type definitions from the Data Infrastructure service.
+        These define the patterns and rules used to detect sensitive data.
+      tags: [DataInfrastructure]
+      parameters:
+        - name: tenantId
+          in: query
+          required: true
+          description: The unique identifier (GUID) of the tenant.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /di/find/Label:
+    get:
+      operationId: getSensitivityLabels
+      summary: Get sensitivity labels
+      description: >-
+        Retrieve sensitivity labels from the Data Infrastructure service.
+        Returns the label definitions configured for the tenant.
+      tags: [DataInfrastructure]
+      parameters:
+        - name: tenantId
+          in: query
+          required: true
+          description: The unique identifier (GUID) of the tenant.
+          schema:
+            type: string
+            format: uuid
+        - name: filter
+          in: query
+          required: false
+          description: OData-style filter expression to narrow results.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /di/find/DlpEdmSchema:
+    get:
+      operationId: getDlpEdmSchemas
+      summary: Get DLP Exact Data Match schemas
+      description: >-
+        Retrieve DLP Exact Data Match (EDM) schemas from the Data Infrastructure service.
+        EDM schemas define structured data patterns for precise sensitive data detection.
+      tags: [DataInfrastructure]
+      parameters:
+        - name: tenantId
+          in: query
+          required: true
+          description: The unique identifier (GUID) of the tenant.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /di/find/ComplianceTag:
+    get:
+      operationId: getComplianceTags
+      summary: Get retention/compliance tags
+      description: >-
+        Retrieve retention and compliance tags from the Data Infrastructure service.
+        These tags are used for records management and data lifecycle governance.
+      tags: [DataInfrastructure]
+      parameters:
+        - name: tenantId
+          in: query
+          required: true
+          description: The unique identifier (GUID) of the tenant.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /di/find/FeatureConfiguration:
+    get:
+      operationId: getFeatureConfiguration
+      summary: Get feature configuration flags
+      description: >-
+        Retrieve feature configuration flags from the Data Infrastructure service.
+        Used to determine which features are enabled or disabled for the tenant.
+      tags: [DataInfrastructure]
+      parameters:
+        - name: tenantId
+          in: query
+          required: true
+          description: The unique identifier (GUID) of the tenant.
+          schema:
+            type: string
+            format: uuid
+        - name: filter
+          in: query
+          required: false
+          description: OData-style filter expression, typically filtering by FeatureScenario.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /di/find/MipAnalyticsTenantSettings:
+    get:
+      operationId: getMipAnalyticsTenantSettings
+      summary: Get MIP analytics tenant settings
+      description: >-
+        Retrieve Microsoft Information Protection analytics settings for the tenant.
+        Controls how MIP analytics data is collected and reported.
+      tags: [DataInfrastructure]
+      parameters:
+        - name: tenantid
+          in: query
+          required: true
+          description: The unique identifier (GUID) of the tenant.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /di/find/InsiderRiskPolicy:
+    get:
+      operationId: getInsiderRiskPolicies
+      summary: Get insider risk management policies
+      description: >-
+        Retrieve insider risk management policies from the Data Infrastructure service.
+        These policies define the indicators and thresholds for insider risk detection.
+      tags: [DataInfrastructure]
+      parameters:
+        - name: tenantId
+          in: query
+          required: true
+          description: The unique identifier (GUID) of the tenant.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /di/find/RiskSpotlightingInsight:
+    get:
+      operationId: getRiskSpotlightingInsights
+      summary: Get risk spotlighting insights
+      description: >-
+        Retrieve risk spotlighting insights from the Data Infrastructure service.
+        Provides time-bounded risk insights for users and activities within the tenant.
+      tags: [DataInfrastructure]
+      parameters:
+        - name: tenantid
+          in: query
+          required: true
+          description: The unique identifier (GUID) of the tenant.
+          schema:
+            type: string
+            format: uuid
+        - name: startTime
+          in: query
+          required: false
+          description: The start of the time range for insights (ISO 8601 format).
+          schema:
+            type: string
+            format: date-time
+        - name: endTime
+          in: query
+          required: false
+          description: The end of the time range for insights (ISO 8601 format).
+          schema:
+            type: string
+            format: date-time
+        - name: Filter
+          in: query
+          required: false
+          description: OData-style filter expression to narrow results.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /di/find/RetentionEvent:
+    get:
+      operationId: getRetentionEvents
+      summary: Get retention events
+      description: >-
+        Retrieve retention events from the Data Infrastructure service.
+        Retention events trigger the start of retention periods for event-based retention labels.
+      tags: [DataInfrastructure]
+      parameters:
+        - name: tenantId
+          in: query
+          required: true
+          description: The unique identifier (GUID) of the tenant.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /di/find/CustomTag:
+    get:
+      operationId: getCustomTags
+      summary: Get custom alert tags
+      description: >-
+        Retrieve custom alert tags from the Data Infrastructure service.
+        Supports filtering to include or exclude deleted tags.
+      tags: [DataInfrastructure]
+      parameters:
+        - name: tenantid
+          in: query
+          required: true
+          description: The unique identifier (GUID) of the tenant.
+          schema:
+            type: string
+            format: uuid
+        - name: filter
+          in: query
+          required: false
+          description: OData-style filter expression, typically filtering by IncludeDeleted.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /di/find/ProtectionAlert:
+    get:
+      operationId: getProtectionAlertDefinitions
+      summary: Get protection alert definitions
+      description: >-
+        Retrieve protection alert definitions from the Data Infrastructure service.
+        These define the conditions under which protection alerts are generated.
+      tags: [DataInfrastructure]
+      parameters:
+        - name: tenantId
+          in: query
+          required: true
+          description: The unique identifier (GUID) of the tenant.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /di/search/LabelAnalyticsActivityData:
+    post:
+      operationId: searchLabelAnalyticsActivityData
+      summary: Search label analytics activity data
+      description: >-
+        Search label analytics activity data from the Data Infrastructure service.
+        Returns activity data for sensitivity label usage within a time range and store type.
+      tags: [DataInfrastructure]
+      parameters:
+        - name: tenantid
+          in: query
+          required: true
+          description: The unique identifier (GUID) of the tenant.
+          schema:
+            type: string
+            format: uuid
+        - name: startTime
+          in: query
+          required: false
+          description: The start of the time range for activity data (ISO 8601 format).
+          schema:
+            type: string
+            format: date-time
+        - name: endTime
+          in: query
+          required: false
+          description: The end of the time range for activity data (ISO 8601 format).
+          schema:
+            type: string
+            format: date-time
+        - name: StoreType
+          in: query
+          required: false
+          description: The store type to filter activity data by.
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
