@@ -309,6 +309,24 @@ paths:
         4XX:
           $ref: common.yml#/components/responses/ClientException
 
+  /msgraph/v1.0/subscribedSkus:
+    get:
+      summary: Get subscribed SKUs via Graph proxy
+      description: >-
+        Retrieve a list of subscribed SKUs (licenses) via the Microsoft Graph API proxy endpoint in the Defender XDR portal. Discovered on Identity Settings > About page.
+      operationId: PortalServices.GetSubscribedSkusGraph
+      tags: [Portal Services]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
   /m365appprotection/mapg-glsservice/compliance/istenantonboarded:
     get:
       summary: Check App Governance onboarding

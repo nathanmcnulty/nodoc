@@ -456,6 +456,258 @@ paths:
         4XX:
           $ref: common.yml#/components/responses/ClientException
 
+  /aatp/api/alertthresholds/withExpiry/recommendedTestMode:
+    get:
+      summary: Get recommended test mode alert thresholds
+      description: >-
+        Retrieve recommended test mode alert thresholds with expiry. Returned 404 during capture - may require Defender for Identity licensing. Discovered on Identity Settings > Adjust alerts thresholds page.
+      operationId: Identity.GetAlertThresholdsRecommendedTestMode
+      tags: [Identity]
+      responses:
+        '404':
+          description: Not Found - may require additional licensing
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /aatp/api/mtp/applicationData:
+    get:
+      summary: Get AATP application data
+      description: >-
+        Retrieve application data for the Defender for Identity (AATP) service. Discovered on Identity Settings > About page.
+      operationId: Identity.GetAatpApplicationData
+      tags: [Identity]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /aatp/api/mtp/vpnConfiguration:
+    get:
+      summary: Get VPN configuration
+      description: >-
+        Retrieve the VPN configuration for Defender for Identity. Discovered on Identity Settings > VPN page.
+      operationId: Identity.GetVpnConfiguration
+      tags: [Identity]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /aatp/api/unifiedrbac/scopes:
+    get:
+      summary: Get unified RBAC scopes
+      description: >-
+        Retrieve unified RBAC scopes for Defender for Identity. Discovered on Identity Settings > Health issues notifications page.
+      operationId: Identity.GetUnifiedRbacScopes
+      tags: [Identity]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /aatp/api/unifiedrbac/usedScopes:
+    get:
+      summary: Get used unified RBAC scopes
+      description: >-
+        Retrieve the unified RBAC scopes currently in use. Discovered on Identity Settings > Health issues notifications page.
+      operationId: Identity.GetUsedUnifiedRbacScopes
+      tags: [Identity]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /aatp/api/workspace/configuration/scopedHealthNotifications:
+    get:
+      summary: Get scoped health notifications
+      description: >-
+        Retrieve scoped health notification configuration for the workspace. Discovered on Identity Settings > Health issues notifications page.
+      operationId: Identity.GetScopedHealthNotifications
+      tags: [Identity]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /aatp/api/workspace/configuration/syslog:
+    get:
+      summary: Get syslog configuration
+      description: >-
+        Retrieve the syslog notification configuration for Defender for Identity. Discovered on Identity Settings > Syslog notifications page.
+      operationId: Identity.GetSyslogConfiguration
+      tags: [Identity]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /aatp/api/workspace/isActive:
+    get:
+      summary: Check workspace active status
+      description: >-
+        Check whether the Defender for Identity workspace is active. Discovered on Identity Settings > Health issues page.
+      operationId: Identity.CheckWorkspaceActive
+      tags: [Identity]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /aatp/api/workspaces/isWorkspaceExists:
+    get:
+      summary: Check if workspace exists (no trailing slash)
+      description: >-
+        Check whether a Defender for Identity workspace exists for the tenant. Discovered on Identity Settings page.
+      operationId: Identity.CheckWorkspaceExistsNoSlash
+      tags: [Identity]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /aatp/odata/ExclusionEntityDatas/Global:
+    get:
+      summary: Get global excluded entities
+      description: >-
+        Retrieve globally excluded entities for Defender for Identity using the OData endpoint. Discovered on Identity Settings > Global excluded entities page.
+      operationId: Identity.GetGlobalExclusionEntities
+      tags: [Identity]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /aatp/odata/SecurityAlertExclusionDatas:
+    get:
+      summary: Get security alert exclusions by detection rule
+      description: >-
+        Retrieve security alert exclusion data organized by detection rule using the OData endpoint. Discovered on Identity Settings > Exclusions by detection rule page.
+      operationId: Identity.GetSecurityAlertExclusions
+      tags: [Identity]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /aatp/odata/TaggedSecurityPrincipals:
+    get:
+      summary: Get tagged security principals (sensitive)
+      description: >-
+        Retrieve security principals tagged as sensitive using the OData endpoint. Discovered on Identity Settings > Sensitive page.
+      operationId: Identity.GetTaggedSecurityPrincipals
+      tags: [Identity]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /aatp/odata/directoryServices:
+    get:
+      summary: Get directory services accounts
+      description: >-
+        Retrieve directory services account configurations using the OData endpoint. Discovered on Identity Settings > Directory services accounts page.
+      operationId: Identity.GetDirectoryServicesOdata
+      tags: [Identity]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /aatp/odata/workspaceMonitoringAlerts:
+    get:
+      summary: Get workspace monitoring alerts
+      description: >-
+        Retrieve workspace monitoring alerts (health issues) using the OData endpoint. Discovered on Identity Settings > Health issues page.
+      operationId: Identity.GetWorkspaceMonitoringAlerts
+      tags: [Identity]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
 components:
   schemas:
     IdentityUser:

@@ -1,0 +1,641 @@
+paths:
+  /mcas/api/v1/autocomplete/app-permission-names:
+    get:
+      summary: Autocomplete app permission names
+      description: >-
+        Retrieve autocomplete suggestions for app permission names. Discovered on OAuth Apps page.
+      operationId: CloudApps.AutocompleteAppPermissionNames
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mcas/api/v1/autocomplete/app-permission-permissions:
+    get:
+      summary: Autocomplete app permission permissions
+      description: >-
+        Retrieve autocomplete suggestions for app permission permissions. Discovered on OAuth Apps page.
+      operationId: CloudApps.AutocompleteAppPermissionPermissions
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mcas/cas/api/services:
+    get:
+      summary: List cloud app services
+      description: >-
+        Retrieve a list of cloud app services. Discovered on Activity Log page.
+      operationId: CloudApps.ListServices
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mcas/cas/api/v1/activities:
+    post:
+      summary: List activities
+      description: >-
+        Retrieve a list of cloud app activities with filtering. Discovered on Activity Log page.
+      operationId: CloudApps.ListActivities
+      tags: [CloudApps]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mcas/cas/api/v1/activities/count:
+    post:
+      summary: Get activities count
+      description: >-
+        Retrieve the count of cloud app activities matching filter criteria. Discovered on Activity Log page.
+      operationId: CloudApps.GetActivitiesCount
+      tags: [CloudApps]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mcas/cas/api/v1/activities/get_activities_threat_scores:
+    post:
+      summary: Get activity threat scores
+      description: >-
+        Retrieve threat scores for cloud app activities. Discovered on Activity Log page.
+      operationId: CloudApps.GetActivitiesThreatScores
+      tags: [CloudApps]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mcas/cas/api/v1/activities/metadata:
+    get:
+      summary: Get activities metadata
+      description: >-
+        Retrieve metadata for the activities endpoint including filter definitions. Discovered on Activity Log page.
+      operationId: CloudApps.GetActivitiesMetadata
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mcas/cas/api/v1/app_connectors:
+    post:
+      summary: List app connectors
+      description: >-
+        Retrieve a list of cloud app connectors. POST method is used for
+        listing with filter parameters. Discovered on Cloud Apps Dashboard page.
+      operationId: CloudApps.ListAppConnectors
+      tags: [CloudApps]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    get:
+      summary: Get app connectors
+      description: >-
+        Retrieve app connectors information. Discovered on App Governance page.
+      operationId: CloudApps.GetAppConnectors
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mcas/cas/api/v1/app_connectors/count:
+    post:
+      summary: Get app connectors count
+      description: >-
+        Retrieve the count of app connectors matching filter criteria. Discovered on OAuth Apps page.
+      operationId: CloudApps.GetAppConnectorsCount
+      tags: [CloudApps]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mcas/cas/api/v1/app_connectors/dashboard/get_apps_count_by_status:
+    get:
+      summary: Get apps count by status (dashboard)
+      description: >-
+        Retrieve the count of connected cloud apps grouped by their connection status for the dashboard.
+      operationId: CloudApps.GetAppsCountByStatus
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mcas/cas/api/v1/app_connectors/last_activity:
+    get:
+      summary: Get app connectors last activity
+      description: >-
+        Retrieve last activity timestamps for app connectors. Discovered on Identity Settings > SaaS page.
+      operationId: CloudApps.GetAppConnectorsLastActivity
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mcas/cas/api/v1/app_connectors/metadata:
+    get:
+      summary: Get app connectors metadata
+      description: >-
+        Retrieve metadata for app connectors including filter definitions. Discovered on Identity Settings > SaaS page.
+      operationId: CloudApps.GetAppConnectorsMetadata
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mcas/cas/api/v1/app_connectors/table_config_values:
+    get:
+      summary: Get app connectors table config values
+      description: >-
+        Retrieve table configuration values for the app connectors view. Discovered on Identity Settings > SaaS page.
+      operationId: CloudApps.GetAppConnectorsTableConfigValues
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mcas/cas/api/v1/app_permissions:
+    post:
+      summary: List app permissions
+      description: >-
+        Retrieve a list of OAuth app permissions with filtering. Discovered on OAuth Apps page.
+      operationId: CloudApps.ListAppPermissions
+      tags: [CloudApps]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mcas/cas/api/v1/app_permissions/count:
+    post:
+      summary: Get app permissions count
+      description: >-
+        Retrieve the count of OAuth app permissions matching filter criteria. Discovered on OAuth Apps page.
+      operationId: CloudApps.GetAppPermissionsCount
+      tags: [CloudApps]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mcas/cas/api/v1/app_permissions/metadata:
+    get:
+      summary: Get app permissions metadata
+      description: >-
+        Retrieve metadata for the app permissions endpoint including filter definitions. Discovered on OAuth Apps page.
+      operationId: CloudApps.GetAppPermissionsMetadata
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mcas/cas/api/v1/autocomplete/entities:
+    get:
+      summary: Autocomplete entities
+      description: >-
+        Retrieve autocomplete suggestions for entities. Discovered on OAuth Apps page.
+      operationId: CloudApps.AutocompleteEntities
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mcas/cas/api/v1/connected_services/apps:
+    get:
+      summary: List connected service apps
+      description: >-
+        Retrieve a list of connected service applications. Discovered on Activity Log page.
+      operationId: CloudApps.ListConnectedServiceApps
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mcas/cas/api/v1/connected_services/instances:
+    get:
+      summary: List connected service instances
+      description: >-
+        Retrieve a list of connected service instances. Discovered on Identity Settings > SaaS page.
+      operationId: CloudApps.ListConnectedServiceInstances
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mcas/cas/api/v1/discovery/categories:
+    get:
+      summary: List discovery categories
+      description: >-
+        Retrieve a list of cloud app discovery categories. Discovered on Identity Settings > SaaS page.
+      operationId: CloudApps.ListDiscoveryCategories
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mcas/cas/api/v1/entities/metadata:
+    get:
+      summary: Get entities metadata
+      description: >-
+        Retrieve metadata for the entities endpoint. Discovered on Activity Log page.
+      operationId: CloudApps.GetEntitiesMetadata
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mcas/cas/api/v1/governance:
+    post:
+      summary: List governance actions
+      description: >-
+        Retrieve a list of governance actions with filtering. Discovered on Governance Log page.
+      operationId: CloudApps.ListGovernanceActions
+      tags: [CloudApps]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mcas/cas/api/v1/governance/count:
+    post:
+      summary: Get governance actions count
+      description: >-
+        Retrieve the count of governance actions matching filter criteria. Discovered on Governance Log page.
+      operationId: CloudApps.GetGovernanceCount
+      tags: [CloudApps]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mcas/cas/api/v1/governance/metadata:
+    get:
+      summary: Get governance metadata
+      description: >-
+        Retrieve metadata for the governance endpoint including filter definitions. Discovered on Governance Log page.
+      operationId: CloudApps.GetGovernanceMetadata
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mcas/cas/api/v1/policies:
+    get:
+      summary: List policies
+      description: >-
+        Retrieve a list of Cloud Apps policies. Discovered on Governance Log page.
+      operationId: CloudApps.ListPolicies
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mcas/cas/api/v1/standalone_entities/metadata:
+    get:
+      summary: Get standalone entities metadata
+      description: >-
+        Retrieve metadata for standalone entities. Discovered on Activity Log page.
+      operationId: CloudApps.GetStandaloneEntitiesMetadata
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mcas/cas/api/v1/translation/log-error:
+    post:
+      summary: Log translation error
+      description: >-
+        Log a translation error in the Cloud Apps service. Discovered on OAuth Apps page.
+      operationId: CloudApps.LogTranslationError
+      tags: [CloudApps]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mcas/cas/api/v1/user_queries:
+    get:
+      summary: List user queries
+      description: >-
+        Retrieve saved user queries for Cloud Apps. Discovered on OAuth Apps page.
+      operationId: CloudApps.ListUserQueries
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mcas/cas/boot_constants:
+    get:
+      summary: Get boot constants
+      description: >-
+        Retrieve boot constants for the Cloud Apps service. Discovered on OAuth Apps page.
+      operationId: CloudApps.GetBootConstants
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mcas/cas/update_usage_info:
+    post:
+      summary: Update usage info
+      description: >-
+        Update Cloud Apps usage information. Discovered on App Governance page.
+      operationId: CloudApps.UpdateUsageInfo
+      tags: [CloudApps]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /m365appprotection/mapg-glsservice/compliance/getUserProfile:
+    get:
+      summary: Get App Governance user profile
+      description: >-
+        Retrieve the current user's App Governance profile. Discovered on App Governance page.
+      operationId: AppGovernance.GetUserProfile
+      tags: [AppGovernance]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

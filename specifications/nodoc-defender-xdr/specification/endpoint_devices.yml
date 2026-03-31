@@ -779,6 +779,24 @@ paths:
         4XX:
           $ref: common.yml#/components/responses/ClientException
 
+  /mtp/ndr/machines/deviceTypeDistribution:
+    get:
+      summary: Get device type distribution
+      description: >-
+        Retrieve the distribution of device types across the organization. Discovered on Cloud Apps Dashboard page.
+      operationId: EndpointDevices.GetDeviceTypeDistribution
+      tags: [Endpoint Devices]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
   /mtp/wdatpApi/machines:
     get:
       summary: Get machines via WDATP API
