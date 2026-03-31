@@ -19,6 +19,27 @@ paths:
         4XX:
           $ref: common.yml#/components/responses/ClientException
 
+  /mtoapi/recentItems:
+    get:
+      summary: Get recent items
+      description: >-
+        Retrieve recently accessed items in the Defender XDR portal for the current user.
+        Used to populate the recent items list in the portal navigation.
+      operationId: MultiTenant.GetRecentItems
+      tags: [Multi-Tenant]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  description: pending - recent item details
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
   /mtoapi/tenants/{TenantId}/workloadStatus:
     get:
       summary: Get tenant workload status
