@@ -7,6 +7,17 @@ paths:
         These control metered billing for SharePoint services.
       operationId: SharePoint.GetBillingPolicies
       tags: [SharePoint]
+      parameters:
+        - name: feature
+          in: query
+          description: Filter billing policies by feature (e.g., M365CopilotChat).
+          schema:
+            type: string
+        - name: budgets
+          in: query
+          description: Include budget information in the response.
+          schema:
+            type: boolean
       responses:
         '200':
           description: OK
@@ -14,7 +25,7 @@ paths:
             application/json:
               schema:
                 type: object
-                description: pending - billing policies
+                description: Billing policies. Exact schema pending.
         4XX:
           $ref: common.yml#/components/responses/ClientException
 
@@ -32,7 +43,7 @@ paths:
             application/json:
               schema:
                 type: object
-                description: pending - billing features
+                description: Billing features. Exact schema pending.
         4XX:
           $ref: common.yml#/components/responses/ClientException
 
@@ -51,7 +62,7 @@ paths:
             application/json:
               schema:
                 type: object
-                description: pending - capacity usage details
+                description: Capacity usage details. Exact schema pending.
         4XX:
           $ref: common.yml#/components/responses/ClientException
 
@@ -91,6 +102,6 @@ paths:
             application/json:
               schema:
                 type: object
-                description: pending - Brand Center configuration
+                description: Brand Center configuration. Exact schema pending.
         4XX:
           $ref: common.yml#/components/responses/ClientException

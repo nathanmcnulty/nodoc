@@ -15,7 +15,7 @@ paths:
             application/json:
               schema:
                 type: object
-                description: pending - shell bootstrap information
+                description: Shell bootstrap information. Exact schema pending.
         4XX:
           $ref: common.yml#/components/responses/ClientException
 
@@ -27,6 +27,13 @@ paths:
         including service health, message center items, and quick actions.
       operationId: Misc.GetHomeDataStream
       tags: [Miscellaneous]
+      parameters:
+        - name: ref
+          in: query
+          description: The referring page path.
+          schema:
+            type: string
+            default: /homepage
       responses:
         '200':
           description: OK
@@ -34,12 +41,12 @@ paths:
             application/json:
               schema:
                 type: object
-                description: pending - home data stream
+                description: Home data stream. Exact schema pending.
         4XX:
           $ref: common.yml#/components/responses/ClientException
 
   /admin/api/dirsyncerrors/listdirsyncerrors:
-    get:
+    post:
       summary: Get directory sync errors
       description: >-
         Retrieve the list of directory synchronization errors for Entra Connect
@@ -53,7 +60,7 @@ paths:
             application/json:
               schema:
                 type: object
-                description: pending - directory sync errors
+                description: Directory sync errors. Exact schema pending.
         4XX:
           $ref: common.yml#/components/responses/ClientException
 
@@ -72,7 +79,7 @@ paths:
             application/json:
               schema:
                 type: object
-                description: pending - M365 recommendations
+                description: M365 recommendations. Exact schema pending.
         4XX:
           $ref: common.yml#/components/responses/ClientException
 
@@ -88,7 +95,7 @@ paths:
         - name: id
           in: path
           required: true
-          description: The offer recommendation identifier.
+          description: The offer recommendation identifier (e.g., 48, 49).
           schema:
             type: string
       responses:
@@ -98,7 +105,7 @@ paths:
             application/json:
               schema:
                 type: object
-                description: pending - offer recommendation details
+                description: Offer recommendation details. Exact schema pending.
         4XX:
           $ref: common.yml#/components/responses/ClientException
 
@@ -117,7 +124,7 @@ paths:
             application/json:
               schema:
                 type: object
-                description: pending - restore feature settings
+                description: Restore feature settings. Exact schema pending.
         4XX:
           $ref: common.yml#/components/responses/ClientException
 
@@ -126,9 +133,16 @@ paths:
       summary: Get ARM billing accounts
       description: >-
         Retrieve billing accounts via the Azure Resource Manager (ARM) proxy,
-        providing access to the tenant's billing account details.
+        providing access to the tenant billing account details.
       operationId: Misc.GetARMBillingAccounts
       tags: [Miscellaneous]
+      parameters:
+        - name: api-version
+          in: query
+          description: ARM API version.
+          schema:
+            type: string
+            default: '2020-05-01'
       responses:
         '200':
           description: OK
@@ -136,6 +150,6 @@ paths:
             application/json:
               schema:
                 type: object
-                description: pending - ARM billing accounts
+                description: ARM billing accounts. Exact schema pending.
         4XX:
           $ref: common.yml#/components/responses/ClientException

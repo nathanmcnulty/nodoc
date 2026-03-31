@@ -13,17 +13,33 @@ paths:
             application/json:
               schema:
                 type: object
-                description: pending - search configurations
+                description: Search configurations. Exact schema pending.
         4XX:
           $ref: common.yml#/components/responses/ClientException
 
   /admin/api/searchadminapi/Qnas:
-    get:
-      summary: Get Q&A answers
+    post:
+      summary: Get search Q&A answers
       description: >-
-        Retrieve the Q&A bookmark answers configured for Microsoft Search.
+        Retrieve the search Q&A (Questions and Answers) bookmarks configured for
+        the tenant. Supports filtering by service type and status.
       operationId: Search.GetQnas
       tags: [Search]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ServiceType:
+                  type: string
+                  description: The service type to filter Q&As for.
+                  default: Bing
+                Filter:
+                  type: string
+                  description: Filter for Q&A status (e.g., Published, Draft).
+                  default: Published
       responses:
         '200':
           description: OK
@@ -33,7 +49,7 @@ paths:
                 type: array
                 items:
                   type: object
-                  description: pending - Q&A answer details
+                  description: Q&A answer details. Exact schema pending.
         4XX:
           $ref: common.yml#/components/responses/ClientException
 
@@ -51,7 +67,7 @@ paths:
             application/json:
               schema:
                 type: object
-                description: pending - Bing news options
+                description: Bing news options. Exact schema pending.
         4XX:
           $ref: common.yml#/components/responses/ClientException
 
@@ -69,7 +85,7 @@ paths:
             application/json:
               schema:
                 type: object
-                description: pending - connectors summary
+                description: UDT connectors summary. Exact schema pending.
         4XX:
           $ref: common.yml#/components/responses/ClientException
 
@@ -88,6 +104,6 @@ paths:
             application/json:
               schema:
                 type: object
-                description: pending - connection statistics
+                description: Connection statistics. Exact schema pending.
         4XX:
           $ref: common.yml#/components/responses/ClientException

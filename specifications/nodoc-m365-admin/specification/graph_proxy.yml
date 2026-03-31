@@ -30,6 +30,25 @@ paths:
         proxied through the M365 Admin Center to Microsoft Graph.
       operationId: GraphProxy.GetDevices
       tags: [GraphProxy]
+      parameters:
+        - name: $count
+          in: query
+          description: Include a count of the total number of items.
+          schema:
+            type: boolean
+            default: true
+        - name: $top
+          in: query
+          description: Maximum number of items to return.
+          schema:
+            type: integer
+            default: 1
+        - name: ConsistencyLevel
+          in: header
+          description: Consistency level for the request. Required for count queries.
+          schema:
+            type: string
+            default: eventual
       responses:
         '200':
           description: OK
@@ -38,11 +57,14 @@ paths:
               schema:
                 type: object
                 properties:
+                  '@odata.count':
+                    type: integer
+                    description: Total count of devices.
                   value:
                     type: array
                     items:
                       type: object
-                      description: pending - device details
+                      description: Device details. Exact schema pending.
         4XX:
           $ref: common.yml#/components/responses/ClientException
 
@@ -56,6 +78,7 @@ paths:
       operationId: GraphProxy.Batch
       tags: [GraphProxy]
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -68,10 +91,13 @@ paths:
                     properties:
                       id:
                         type: string
+                        description: Unique identifier for the request in the batch.
                       method:
                         type: string
+                        description: HTTP method (GET, POST, PUT, PATCH, DELETE).
                       url:
                         type: string
+                        description: Relative Graph API URL.
       responses:
         '200':
           description: OK

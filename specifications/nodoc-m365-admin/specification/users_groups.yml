@@ -1,11 +1,27 @@
 paths:
   /admin/api/users/getuserroles:
-    get:
+    post:
       summary: Get user roles
       description: >-
-        Retrieve the admin roles assigned to the current user.
-      operationId: Users.GetUserRoles
+        Retrieve the admin roles assigned to a user. Accepts a principal ID and
+        security group memberships to resolve role assignments.
+      operationId: UsersGroups.GetUserRoles
       tags: [UsersGroups]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                PrincipalId:
+                  type: string
+                  description: The principal (user) ID to look up roles for.
+                UserSecurityGroups:
+                  type: array
+                  description: List of security group IDs the user belongs to.
+                  items:
+                    type: string
       responses:
         '200':
           description: OK
@@ -13,17 +29,56 @@ paths:
             application/json:
               schema:
                 type: object
-                description: pending - user roles
+                description: User role assignments. Exact schema pending.
         4XX:
           $ref: common.yml#/components/responses/ClientException
 
   /admin/api/Users/ListUsers:
-    get:
+    post:
       summary: List users
       description: >-
-        Retrieve a list of users in the tenant with support for filtering and pagination.
-      operationId: Users.ListUsers
+        Retrieve a paginated list of users in the tenant with sorting and filtering options.
+      operationId: UsersGroups.ListUsers
       tags: [UsersGroups]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ListAction:
+                  type: integer
+                  description: The list action type. Use -1 for initial load.
+                  default: -1
+                SortDirection:
+                  type: integer
+                  description: Sort direction (0 = ascending, 1 = descending).
+                  default: 0
+                SortPropertyName:
+                  type: string
+                  description: Property name to sort by.
+                  default: DisplayName
+                ListContext:
+                  type: string
+                  nullable: true
+                  description: Continuation context for pagination.
+                SearchText:
+                  type: string
+                  description: Search text to filter users.
+                  default: ''
+                SelectedView:
+                  type: string
+                  nullable: true
+                  description: Selected view filter.
+                SelectedViewType:
+                  type: string
+                  nullable: true
+                  description: Selected view type filter.
+                ServerContext:
+                  type: string
+                  nullable: true
+                  description: Server-side continuation context.
       responses:
         '200':
           description: OK
@@ -31,17 +86,24 @@ paths:
             application/json:
               schema:
                 type: object
-                description: pending - user list
+                description: Paginated user list. Exact schema pending.
         4XX:
           $ref: common.yml#/components/responses/ClientException
 
   /admin/api/users/contextualalerts:
-    get:
-      summary: Get user contextual alerts
+    post:
+      summary: Get contextual alerts
       description: >-
-        Retrieve contextual alerts for users, such as risk indicators and security recommendations.
-      operationId: Users.GetContextualAlerts
+        Retrieve contextual alerts for the current admin user session.
+      operationId: UsersGroups.GetContextualAlerts
       tags: [UsersGroups]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Empty object. No properties required.
       responses:
         '200':
           description: OK
@@ -49,17 +111,44 @@ paths:
             application/json:
               schema:
                 type: object
-                description: pending - contextual alerts
+                description: Contextual alerts. Exact schema pending.
         4XX:
           $ref: common.yml#/components/responses/ClientException
 
   /admin/api/groups/GetGroups:
-    get:
+    post:
       summary: Get groups
       description: >-
-        Retrieve a list of groups in the tenant with support for filtering.
-      operationId: Groups.GetGroups
+        Retrieve a paginated list of groups in the tenant with sorting and filtering options.
+      operationId: UsersGroups.GetGroups
       tags: [UsersGroups]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                PageToken:
+                  type: string
+                  nullable: true
+                  description: Pagination token for subsequent pages.
+                GroupTypes:
+                  type: string
+                  nullable: true
+                  description: Filter by group types.
+                SearchString:
+                  type: string
+                  description: Search string to filter groups.
+                  default: ''
+                SortDirection:
+                  type: integer
+                  description: Sort direction (0 = ascending, 1 = descending).
+                  default: 0
+                SortField:
+                  type: string
+                  description: Field name to sort by.
+                  default: GroupName
       responses:
         '200':
           description: OK
@@ -67,6 +156,6 @@ paths:
             application/json:
               schema:
                 type: object
-                description: pending - group list
+                description: Paginated group list. Exact schema pending.
         4XX:
           $ref: common.yml#/components/responses/ClientException

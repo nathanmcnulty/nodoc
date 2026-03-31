@@ -6,6 +6,15 @@ paths:
         Retrieve the list of integrated apps (add-ins) deployed in the tenant.
       operationId: IntegratedApps.GetApps
       tags: [IntegratedApps]
+      parameters:
+        - name: workloads
+          in: query
+          description: >-
+            Comma-separated list of workloads to filter apps by.
+            Known values: AzureActiveDirectory, WXPO, MetaOS, SharePoint.
+          schema:
+            type: string
+            default: AzureActiveDirectory,WXPO,MetaOS,SharePoint
       responses:
         '200':
           description: OK
@@ -13,7 +22,7 @@ paths:
             application/json:
               schema:
                 type: object
-                description: pending - integrated apps list
+                description: Integrated apps list. Exact schema pending.
         4XX:
           $ref: common.yml#/components/responses/ClientException
 
@@ -24,6 +33,31 @@ paths:
         Retrieve the list of agents deployed through the integrated apps platform.
       operationId: IntegratedApps.GetAgents
       tags: [IntegratedApps]
+      parameters:
+        - name: workloads
+          in: query
+          description: Workload filter for agents.
+          schema:
+            type: string
+            default: SharedAgent
+        - name: scopes
+          in: query
+          description: Scope filter for agents.
+          schema:
+            type: string
+            default: Shared
+        - name: limit
+          in: query
+          description: Maximum number of agents to return.
+          schema:
+            type: integer
+            default: 200
+        - name: creatorId
+          in: query
+          description: Filter by creator ID. Use 'none' for all creators.
+          schema:
+            type: string
+            default: none
       responses:
         '200':
           description: OK
@@ -31,7 +65,7 @@ paths:
             application/json:
               schema:
                 type: object
-                description: pending - agents list
+                description: Agents list. Exact schema pending.
         4XX:
           $ref: common.yml#/components/responses/ClientException
 
@@ -42,6 +76,19 @@ paths:
         Retrieve integrated apps that have actionable items requiring admin attention.
       operationId: IntegratedApps.GetActionableApps
       tags: [IntegratedApps]
+      parameters:
+        - name: workloads
+          in: query
+          description: Comma-separated workload filter.
+          schema:
+            type: string
+            default: MetaOS,SharedAgent
+        - name: limit
+          in: query
+          description: Maximum number of apps to return.
+          schema:
+            type: integer
+            default: 200
       responses:
         '200':
           description: OK
@@ -49,7 +96,7 @@ paths:
             application/json:
               schema:
                 type: object
-                description: pending - actionable apps
+                description: Actionable apps list. Exact schema pending.
         4XX:
           $ref: common.yml#/components/responses/ClientException
 
@@ -60,6 +107,13 @@ paths:
         Retrieve the list of apps available for deployment from the marketplace.
       operationId: IntegratedApps.GetAvailableApps
       tags: [IntegratedApps]
+      parameters:
+        - name: workloads
+          in: query
+          description: Workload filter.
+          schema:
+            type: string
+            default: MetaOS
       responses:
         '200':
           description: OK
@@ -67,7 +121,7 @@ paths:
             application/json:
               schema:
                 type: object
-                description: pending - available apps
+                description: Available apps list. Exact schema pending.
         4XX:
           $ref: common.yml#/components/responses/ClientException
 
@@ -78,6 +132,13 @@ paths:
         Retrieve recommended apps based on tenant usage patterns and configuration.
       operationId: IntegratedApps.GetRecommendations
       tags: [IntegratedApps]
+      parameters:
+        - name: appRecommendationType
+          in: query
+          description: Type of recommendation to retrieve.
+          schema:
+            type: string
+            default: PopularApps
       responses:
         '200':
           description: OK
@@ -85,7 +146,7 @@ paths:
             application/json:
               schema:
                 type: object
-                description: pending - app recommendations
+                description: App recommendations. Exact schema pending.
         4XX:
           $ref: common.yml#/components/responses/ClientException
 
@@ -94,9 +155,19 @@ paths:
       summary: Get integrated apps settings
       description: >-
         Retrieve the integrated apps platform settings including deployment
-        preferences and policies.
+        preferences, policies, and feature flags.
       operationId: IntegratedApps.GetSettings
       tags: [IntegratedApps]
+      parameters:
+        - name: keys
+          in: query
+          description: >-
+            Comma-separated list of setting keys to retrieve.
+            Known keys: IsTenantEligibleForEntireOrgEmail, AreFirstPartyAppsAllowed,
+            AreThirdPartyAppsAllowed, AreLOBAppsAllowed, AreMicrosoftCertified3PAppsAllowed,
+            MetaOSCopilotExtensibilitySettings, AdminRoles, AllowOrgWideSharing.
+          schema:
+            type: string
       responses:
         '200':
           description: OK
@@ -104,6 +175,6 @@ paths:
             application/json:
               schema:
                 type: object
-                description: pending - integrated apps settings
+                description: Integrated apps settings. Exact schema pending.
         4XX:
           $ref: common.yml#/components/responses/ClientException

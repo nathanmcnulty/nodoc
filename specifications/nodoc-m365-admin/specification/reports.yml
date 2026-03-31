@@ -3,33 +3,50 @@ paths:
     get:
       summary: Get report data
       description: >-
-        Retrieve report data for various entity types. Supports multiple report
-        types including Copilot adoption, usage analytics, message consumption,
-        agent metrics, and more through the entity parameter.
+        Retrieve report data for various entity types. The entityName parameter determines
+        which report is returned. Supports Copilot adoption, search metrics, agent usage,
+        and other reporting dimensions.
       operationId: Reports.GetReportData
       tags: [Reports]
       parameters:
-        - name: entity
+        - name: entityName
           in: query
-          required: true
-          description: |
-            The report entity type. Supported values include:
-            CopilotAdoption, CopilotUsage, MessageConsumption, AgentMetrics,
-            ActiveUsers, EmailActivity, M365AppUsage, TeamsActivity, and more.
+          description: >-
+            The report entity type to retrieve (camelCase variant). Known values include:
+            getCopilotAdoptionByProductsV2, getCopilotAdoptionByDateV2,
+            getCopilotEDPAdoptionByPeriodV2, getCopilotEDPAdoptionByDateV2,
+            getCopilotThumbsUpRateByDate, getCopilotEDPThumbsUpRateByDate,
+            getCopilotAgentActiveUserRL30DailyMetrics, getCopilotAgentActiveAgentRL30Metrics,
+            getCopilotAgentActiveUserRL30Metrics, getCopilotAgentActiveUserRL30WoWMetrics,
+            getCopilotTenantTopAgentsByDAU.
           schema:
             type: string
-        - name: startDate
+        - name: entityname
           in: query
-          description: Start date for the report period.
+          description: >-
+            The report entity type to retrieve (lowercase variant). Known values include:
+            getTenantSearchMetric, getMessageConsumptionSummary,
+            getDeclarativeAgentConsumptionSummary.
           schema:
             type: string
-            format: date
-        - name: endDate
+        - name: pagesize
           in: query
-          description: End date for the report period.
+          description: Number of results per page.
+          schema:
+            type: integer
+            default: 100
+        - name: period
+          in: query
+          description: Time period in days for the report.
+          schema:
+            type: integer
+            example: 30
+        - name: locale
+          in: query
+          description: Locale for the report data.
           schema:
             type: string
-            format: date
+            default: en-US
       responses:
         '200':
           description: OK
@@ -37,7 +54,7 @@ paths:
             application/json:
               schema:
                 type: object
-                description: pending - report data varies by entity type
+                description: Report data. Schema varies by entityName.
         4XX:
           $ref: common.yml#/components/responses/ClientException
 
@@ -45,10 +62,38 @@ paths:
     get:
       summary: Get summary report data
       description: >-
-        Retrieve summary report data (V3) for the tenant including aggregated
-        usage metrics across Microsoft 365 services.
-      operationId: Reports.GetSummaryData
+        Retrieve summary report data for Microsoft 365 services. Supports Copilot activity
+        reports and other service-level summaries.
+      operationId: Reports.GetSummaryDataV3
       tags: [Reports]
+      parameters:
+        - name: ServiceId
+          in: query
+          required: true
+          description: The service identifier (e.g., MicrosoftOffice).
+          schema:
+            type: string
+        - name: CategoryId
+          in: query
+          required: true
+          description: The report category (e.g., MicrosoftCopilot, MicrosoftCopilotBCE).
+          schema:
+            type: string
+        - name: Report
+          in: query
+          required: true
+          description: The report name (e.g., CopilotActivityReport, CopilotBCEActivityReport).
+          schema:
+            type: string
+        - name: active_view
+          in: query
+          description: >-
+            The active view within the report. Known values include:
+            CopilotAdoptionByProductsV2, CopilotAdoptionByDateV2,
+            CopilotEDPAdoptionSummaryByPeriodV2, CopilotBCEAdoptionByPeriodV2,
+            CopilotBCEAdoptionByDateV2.
+          schema:
+            type: string
       responses:
         '200':
           description: OK
@@ -56,7 +101,7 @@ paths:
             application/json:
               schema:
                 type: object
-                description: pending - summary report data
+                description: Summary report data. Schema varies by report type.
         4XX:
           $ref: common.yml#/components/responses/ClientException
 
@@ -64,7 +109,7 @@ paths:
     get:
       summary: Get Productivity Score configuration
       description: >-
-        Retrieve the Productivity Score configuration and settings for the tenant.
+        Retrieve the Productivity Score (Adoption Score) configuration for the tenant.
       operationId: Reports.GetProductivityScoreConfig
       tags: [Reports]
       responses:
@@ -74,6 +119,6 @@ paths:
             application/json:
               schema:
                 type: object
-                description: pending - productivity score configuration
+                description: Productivity Score configuration. Exact schema pending.
         4XX:
           $ref: common.yml#/components/responses/ClientException
