@@ -400,6 +400,25 @@ paths:
         4XX:
           $ref: common.yml#/components/responses/ClientException
 
+  /mtp/liveResponseApi/get_properties:
+    get:
+      summary: Get live response properties
+      description: >-
+        Retrieve the Live Response properties and configuration settings
+        for the current tenant.
+      operationId: LiveResponse.GetProperties
+      tags: [Live Response]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - live response properties
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
 components:
   schemas:
     LiveResponseSession:

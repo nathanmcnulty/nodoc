@@ -310,6 +310,152 @@ paths:
         4XX:
           $ref: common.yml#/components/responses/ClientException
 
+  /aatp/api/sensors/domainControllerCoverage:
+    get:
+      summary: Get domain controller coverage (AATP)
+      description: >-
+        Retrieve domain controller sensor coverage information from the
+        AATP (Azure ATP) legacy API endpoint.
+      operationId: Identity.GetDomainControllerCoverageAatp
+      tags: [Identity]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - domain controller coverage data
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /aatp/odata/sensors:
+    get:
+      summary: List sensors (OData)
+      description: >-
+        Retrieve a list of Defender for Identity sensors using the OData endpoint.
+      operationId: Identity.ListSensorsOdata
+      tags: [Identity]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - OData sensors list
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /aatp/api/workspaces/isWorkspaceExists/:
+    get:
+      summary: Check if workspace exists
+      description: >-
+        Check whether a Defender for Identity workspace exists for the tenant.
+      operationId: Identity.CheckWorkspaceExists
+      tags: [Identity]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - workspace existence status
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /aatp/api/sensors/sensorsCoverage:
+    get:
+      summary: Get sensors coverage
+      description: >-
+        Retrieve the sensor coverage status across the identity infrastructure.
+      operationId: Identity.GetSensorsCoverage
+      tags: [Identity]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - sensors coverage data
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /aatp/api/alertthresholds/withExpiry:
+    get:
+      summary: Get alert thresholds with expiry
+      description: >-
+        Retrieve the alert threshold configuration including expiry dates
+        for Defender for Identity.
+      operationId: Identity.GetAlertThresholdsWithExpiry
+      tags: [Identity]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - alert thresholds with expiry data
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /aatp/api/remediationActions/configuration:
+    get:
+      summary: Get remediation actions configuration
+      description: >-
+        Retrieve the remediation actions configuration for Defender for Identity.
+      operationId: Identity.GetRemediationActionsConfig
+      tags: [Identity]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - remediation actions configuration
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /aatp/odata/EntityRemediatorCredentials:
+    get:
+      summary: Get entity remediator credentials
+      description: >-
+        Retrieve the entity remediator credentials configuration using the OData endpoint.
+      operationId: Identity.GetEntityRemediatorCredentials
+      tags: [Identity]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - entity remediator credentials
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /aatp/api/defensor/defensorConfiguration:
+    get:
+      summary: Get defensor configuration
+      description: >-
+        Retrieve the Defensor (MDI) configuration settings for the tenant.
+      operationId: Identity.GetDefensorConfiguration
+      tags: [Identity]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - defensor configuration settings
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
 components:
   schemas:
     IdentityUser:

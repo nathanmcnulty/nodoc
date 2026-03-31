@@ -38,6 +38,63 @@ paths:
         4XX:
           $ref: common.yml#/components/responses/ClientException
 
+  /mtp/threatAnalytics/outbreaks/changeCount:
+    get:
+      summary: Get outbreak change count
+      description: >-
+        Retrieve the count of changes to threat analytics outbreaks since
+        the last check, used for notification badges.
+      operationId: ThreatAnalytics.GetOutbreakChangeCount
+      tags: [Threat Analytics]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - outbreak change count
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/threatAnalytics/outbreaks/outbreaksEnrichedDataMtp:
+    get:
+      summary: Get enriched outbreak data
+      description: >-
+        Retrieve enriched threat analytics outbreak data including
+        mitigation status and organizational impact metrics.
+      operationId: ThreatAnalytics.GetEnrichedOutbreakData
+      tags: [Threat Analytics]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - enriched outbreak data
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/threatAnalytics/outbreaks/topthreats:
+    get:
+      summary: Get top threats
+      description: >-
+        Retrieve the top threat analytics threats based on organizational
+        impact and exposure.
+      operationId: ThreatAnalytics.GetTopThreats
+      tags: [Threat Analytics]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - top threats data
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
 components:
   schemas:
     Outbreak:

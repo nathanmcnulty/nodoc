@@ -98,6 +98,80 @@ paths:
         4XX:
           $ref: common.yml#/components/responses/ClientException
 
+  /mtp/actionCenter/actioncenterui/pending-actions/filters:
+    get:
+      summary: Get pending actions filters
+      description: >-
+        Retrieve the available filter options for pending actions in the Action Center.
+      operationId: ActionCenter.GetPendingFilters
+      tags: [Action Center]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - pending actions filter options
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/actionCenter/actioncenterui/history-actions/filters:
+    get:
+      summary: Get history actions filters
+      description: >-
+        Retrieve the available filter options for history actions in the Action Center.
+      operationId: ActionCenter.GetHistoryFilters
+      tags: [Action Center]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - history actions filter options
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/actionCenter/actioncenterui/tile:
+    get:
+      summary: Get action center tile summary
+      description: >-
+        Retrieve the Action Center tile summary data, including counts of
+        pending and completed actions.
+      operationId: ActionCenter.GetTileSummary
+      tags: [Action Center]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - action center tile summary
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/actionCenter/actioncenterui/pending-actions/pending-actions-summary:
+    get:
+      summary: Get pending actions summary
+      description: >-
+        Retrieve a summary of pending actions in the Action Center,
+        including counts by action type and status.
+      operationId: ActionCenter.GetPendingSummary
+      tags: [Action Center]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - pending actions summary data
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
 components:
   schemas:
     ActionCenterItem:

@@ -365,6 +365,122 @@ paths:
         4XX:
           $ref: common.yml#/components/responses/ClientException
 
+  /mtp/autoIr/ui/properties/:
+    get:
+      summary: Get automated investigation properties
+      description: >-
+        Retrieve the automated investigation and response (AIR) UI properties
+        and configuration settings.
+      operationId: Configuration.GetAutoIrProperties
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - automated investigation properties
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/wdatpInternalApi/compliance/alertSharing/status:
+    get:
+      summary: Get alert sharing compliance status
+      description: >-
+        Retrieve the alert sharing compliance status from the WDATP internal API.
+      operationId: Configuration.GetAlertSharingStatus
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - alert sharing compliance status
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/responseApiPortal/onboarding/intune/status:
+    get:
+      summary: Get Intune onboarding status
+      description: >-
+        Retrieve the Intune onboarding status for the response API portal.
+      operationId: Configuration.GetIntuneOnboardingStatus
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - Intune onboarding status
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/responseApiPortal/senseauth/allownonauthsense:
+    get:
+      summary: Get non-auth sense allowed
+      description: >-
+        Retrieve whether non-authenticated sense connections are allowed.
+      operationId: Configuration.GetAllowNonAuthSense
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - non-auth sense configuration
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mcas/cas/api/v1/app_connectors/:
+    post:
+      summary: List cloud app connectors
+      description: >-
+        Retrieve a list of cloud app connectors configured in Microsoft
+        Defender for Cloud Apps (MCAS).
+      operationId: Configuration.ListAppConnectors
+      tags: [Configuration]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending - app connector query parameters
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - app connectors list
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mcas/cas/api/v1/app_connectors/dashboard/get_apps_count_by_status/:
+    get:
+      summary: Get app connectors count by status
+      description: >-
+        Retrieve the count of cloud app connectors grouped by their connection status.
+      operationId: Configuration.GetAppConnectorsCountByStatus
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - app connectors count by status
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
 components:
   schemas:
     SuppressionRule:

@@ -598,6 +598,224 @@ paths:
         4XX:
           $ref: common.yml#/components/responses/ClientException
 
+  /mtp/ndr/machines/devicesWithoutSiteTotals:
+    get:
+      summary: Get device counts without site totals
+      description: >-
+        Retrieve device counts excluding site-level aggregation totals.
+      operationId: EndpointDevices.GetDevicesWithoutSiteTotals
+      tags: [Endpoint Devices]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - device counts without site totals
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/ndr/machines/allMachinesTags:
+    get:
+      summary: Get all machine tags
+      description: >-
+        Retrieve a list of all unique tags assigned to machines in the device inventory.
+      operationId: EndpointDevices.GetAllMachineTags
+      tags: [Endpoint Devices]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - all machine tags
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/ndr/machines/allFirmwareVersions:
+    get:
+      summary: Get all firmware versions
+      description: >-
+        Retrieve a list of all unique firmware versions across devices in the inventory.
+      operationId: EndpointDevices.GetAllFirmwareVersions
+      tags: [Endpoint Devices]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - all firmware versions
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/ndr/machines/allVendors:
+    get:
+      summary: Get all vendors
+      description: >-
+        Retrieve a list of all unique device vendors across the device inventory.
+      operationId: EndpointDevices.GetAllVendors
+      tags: [Endpoint Devices]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - all device vendors
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/ndr/machines/allModels:
+    get:
+      summary: Get all device models
+      description: >-
+        Retrieve a list of all unique device models across the device inventory.
+      operationId: EndpointDevices.GetAllModels
+      tags: [Endpoint Devices]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - all device models
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/ndr/machines/allOsVersionFriendlyNames:
+    get:
+      summary: Get all OS version friendly names
+      description: >-
+        Retrieve a list of all unique OS version friendly names across the device inventory.
+      operationId: EndpointDevices.GetAllOsVersionFriendlyNames
+      tags: [Endpoint Devices]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - all OS version friendly names
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/ndr/machines/allWindowsReleaseVersions:
+    get:
+      summary: Get all Windows release versions
+      description: >-
+        Retrieve a list of all unique Windows release versions across the device inventory.
+      operationId: EndpointDevices.GetAllWindowsReleaseVersions
+      tags: [Endpoint Devices]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - all Windows release versions
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/ndr/machines/deviceTotals/:
+    get:
+      summary: Get device totals
+      description: >-
+        Retrieve the total device counts aggregated by various dimensions
+        such as OS, health status, and risk level.
+      operationId: EndpointDevices.GetDeviceTotals
+      tags: [Endpoint Devices]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - device totals data
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/rbacManagementApi/rbac/machine_groups:
+    get:
+      summary: Get machine groups (RBAC)
+      description: >-
+        Retrieve the list of RBAC machine groups configured in the tenant.
+      operationId: EndpointDevices.GetMachineGroups
+      tags: [Endpoint Devices]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - RBAC machine groups
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/ndr/machines/deviceTypeDistribution/:
+    get:
+      summary: Get device type distribution
+      description: >-
+        Retrieve the distribution of devices by device type in the inventory.
+      operationId: EndpointDevices.GetDeviceTypeDistribution
+      tags: [Endpoint Devices]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - device type distribution data
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/wdatpApi/machines:
+    get:
+      summary: Get machines via WDATP API
+      description: >-
+        Retrieve the list of machines using the Windows Defender ATP API endpoint.
+      operationId: EndpointDevices.GetMachinesWdatp
+      tags: [Endpoint Devices]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - WDATP machines list
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/mdi/tri/defensor/onboarding/devices/sensor_compatible_machines:
+    get:
+      summary: Get MDI sensor-compatible machines
+      description: >-
+        Retrieve the list of machines compatible with MDI sensor deployment
+        for identity protection onboarding.
+      operationId: EndpointDevices.GetSensorCompatibleMachines
+      tags: [Endpoint Devices]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - sensor compatible machines list
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
 components:
   schemas:
     Device:

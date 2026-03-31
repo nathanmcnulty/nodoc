@@ -1,0 +1,95 @@
+paths:
+  /mtp/secureScore/security/secureScoresV2:
+    get:
+      summary: Get secure scores V2
+      description: >-
+        Retrieve the current secure scores for the organization using the V2 endpoint,
+        including overall score and category breakdowns.
+      operationId: SecureScore.GetSecureScoresV2
+      tags: [Secure Score]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - secure scores V2 data
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/secureScore/security/secureScoreControlProfilesV2:
+    get:
+      summary: Get secure score control profiles V2
+      description: >-
+        Retrieve the secure score control profiles using the V2 endpoint,
+        including improvement actions and their status.
+      operationId: SecureScore.GetControlProfilesV2
+      tags: [Secure Score]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - secure score control profiles V2 data
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/secureScore/security/secureScoreSecurityInitiativesV2:
+    get:
+      summary: Get security initiatives V2
+      description: >-
+        Retrieve the security initiatives from the secure score V2 endpoint,
+        including initiative progress and recommended actions.
+      operationId: SecureScore.GetSecurityInitiativesV2
+      tags: [Secure Score]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - security initiatives V2 data
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/secureScore/security/secureScoreTenantProfile:
+    get:
+      summary: Get tenant secure score profile
+      description: >-
+        Retrieve the tenant's secure score profile, including configuration
+        and benchmark comparisons.
+      operationId: SecureScore.GetTenantProfile
+      tags: [Secure Score]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - tenant secure score profile
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/secureScore/security/secureScoreInsights:
+    get:
+      summary: Get secure score insights
+      description: >-
+        Retrieve insights and recommendations for improving the organization's
+        secure score.
+      operationId: SecureScore.GetInsights
+      tags: [Secure Score]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - secure score insights data
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

@@ -105,6 +105,12 @@ tags:
       workload status, and cross-tenant advanced hunting.
   - name: Streaming API
     description: Operations relating to the Streaming API configuration for event export.
+  - name: Secure Score
+    description: Operations relating to Microsoft Secure Score, including score retrieval, control profiles, security initiatives, and insights.
+  - name: Portal Services
+    description: |
+      Operations relating to miscellaneous Defender XDR portal services, including user preferences,
+      shell info, Security Copilot, compliance checks, attack simulation, and app governance.
 
 x-tagGroups:
   - name: Alerts & Incidents
@@ -135,11 +141,17 @@ x-tagGroups:
     tags:
       - Data Lake
       - Threat Analytics
+  - name: Secure Score
+    tags:
+      - Secure Score
   - name: Operations
     tags:
       - Action Center
       - Multi-Tenant
       - Streaming API
+  - name: Portal Services
+    tags:
+      - Portal Services
 
 paths:
   # Alerts & Incidents
@@ -153,6 +165,15 @@ paths:
     $ref: alerts_incidents.yml#/paths/~1mtp~1incidentQueue~1incidents~1update
   /mtp/incidentQueue/incidents/merge:
     $ref: alerts_incidents.yml#/paths/~1mtp~1incidentQueue~1incidents~1merge
+
+  /mtp/suppressionRulesService/RulesCount:
+    $ref: alerts_incidents.yml#/paths/~1mtp~1suppressionRulesService~1RulesCount
+  /mtp/incidentQueue/incidents/count:
+    $ref: alerts_incidents.yml#/paths/~1mtp~1incidentQueue~1incidents~1count
+  /mtp/alertsApiService/alerts/count:
+    $ref: alerts_incidents.yml#/paths/~1mtp~1alertsApiService~1alerts~1count
+  /mtp/incidentDashboard/Dashboard/ActiveIncidentsSummary:
+    $ref: alerts_incidents.yml#/paths/~1mtp~1incidentDashboard~1Dashboard~1ActiveIncidentsSummary
 
   # Advanced Hunting
   /mtp/huntingService/schema:
@@ -173,6 +194,29 @@ paths:
     $ref: advanced_hunting.yml#/paths/~1mtp~1huntingService~1functions~1defender~1updateFunction
   /mtp/huntingService/functions/{Id}:
     $ref: advanced_hunting.yml#/paths/~1mtp~1huntingService~1functions~1{Id}
+
+  /mtp/huntingService/documentation/GuidedHuntingGettingStarted:
+    $ref: advanced_hunting.yml#/paths/~1mtp~1huntingService~1documentation~1GuidedHuntingGettingStarted
+  /mtp/userPreferences/api/mgmt/userpreferencesservice/userPreference/advanced_hunting:
+    $ref: advanced_hunting.yml#/paths/~1mtp~1userPreferences~1api~1mgmt~1userpreferencesservice~1userPreference~1advanced_hunting
+  /mtp/userExposedRbacGroups/UserExposedRbacGroups:
+    $ref: advanced_hunting.yml#/paths/~1mtp~1userExposedRbacGroups~1UserExposedRbacGroups
+  /mtp/huntingService/favorites:
+    $ref: advanced_hunting.yml#/paths/~1mtp~1huntingService~1favorites
+  /mtp/huntingService/schema/functions:
+    $ref: advanced_hunting.yml#/paths/~1mtp~1huntingService~1schema~1functions
+  /mtp/huntingService/queries/:
+    $ref: advanced_hunting.yml#/paths/~1mtp~1huntingService~1queries~1
+  /mtp/huntingService/communityQueries:
+    $ref: advanced_hunting.yml#/paths/~1mtp~1huntingService~1communityQueries
+  /mtp/huntingService/documentation/GettingStarted:
+    $ref: advanced_hunting.yml#/paths/~1mtp~1huntingService~1documentation~1GettingStarted
+  /mtp/huntingService/guidedQueries/filterSchema:
+    $ref: advanced_hunting.yml#/paths/~1mtp~1huntingService~1guidedQueries~1filterSchema
+  /mtp/huntingService/queries/defender/savedqueries/{id}:
+    $ref: advanced_hunting.yml#/paths/~1mtp~1huntingService~1queries~1defender~1savedqueries~1{id}
+  /mtp/huntingService/queries/defender/communityqueries/{id}:
+    $ref: advanced_hunting.yml#/paths/~1mtp~1huntingService~1queries~1defender~1communityqueries~1{id}
 
   # Endpoint Devices
   /mtp/ndr/machines:
@@ -214,6 +258,31 @@ paths:
   /mtp/deviceManagement/deviceLicenseReport:
     $ref: endpoint_devices.yml#/paths/~1mtp~1deviceManagement~1deviceLicenseReport
 
+  /mtp/ndr/machines/devicesWithoutSiteTotals:
+    $ref: endpoint_devices.yml#/paths/~1mtp~1ndr~1machines~1devicesWithoutSiteTotals
+  /mtp/ndr/machines/allMachinesTags:
+    $ref: endpoint_devices.yml#/paths/~1mtp~1ndr~1machines~1allMachinesTags
+  /mtp/ndr/machines/allFirmwareVersions:
+    $ref: endpoint_devices.yml#/paths/~1mtp~1ndr~1machines~1allFirmwareVersions
+  /mtp/ndr/machines/allVendors:
+    $ref: endpoint_devices.yml#/paths/~1mtp~1ndr~1machines~1allVendors
+  /mtp/ndr/machines/allModels:
+    $ref: endpoint_devices.yml#/paths/~1mtp~1ndr~1machines~1allModels
+  /mtp/ndr/machines/allOsVersionFriendlyNames:
+    $ref: endpoint_devices.yml#/paths/~1mtp~1ndr~1machines~1allOsVersionFriendlyNames
+  /mtp/ndr/machines/allWindowsReleaseVersions:
+    $ref: endpoint_devices.yml#/paths/~1mtp~1ndr~1machines~1allWindowsReleaseVersions
+  /mtp/ndr/machines/deviceTotals/:
+    $ref: endpoint_devices.yml#/paths/~1mtp~1ndr~1machines~1deviceTotals~1
+  /mtp/rbacManagementApi/rbac/machine_groups:
+    $ref: endpoint_devices.yml#/paths/~1mtp~1rbacManagementApi~1rbac~1machine_groups
+  /mtp/ndr/machines/deviceTypeDistribution/:
+    $ref: endpoint_devices.yml#/paths/~1mtp~1ndr~1machines~1deviceTypeDistribution~1
+  /mtp/wdatpApi/machines:
+    $ref: endpoint_devices.yml#/paths/~1mtp~1wdatpApi~1machines
+  /mtp/mdi/tri/defensor/onboarding/devices/sensor_compatible_machines:
+    $ref: endpoint_devices.yml#/paths/~1mtp~1mdi~1tri~1defensor~1onboarding~1devices~1sensor_compatible_machines
+
   # Live Response
   /mtp/liveResponseApi/create_session:
     $ref: live_response.yml#/paths/~1mtp~1liveResponseApi~1create_session
@@ -231,6 +300,9 @@ paths:
     $ref: live_response.yml#/paths/~1mtp~1liveResponseApi~1library
   /mtp/liveResponseApi/library/{FileId}:
     $ref: live_response.yml#/paths/~1mtp~1liveResponseApi~1library~1{FileId}
+
+  /mtp/liveResponseApi/get_properties:
+    $ref: live_response.yml#/paths/~1mtp~1liveResponseApi~1get_properties
 
   # Endpoint Configuration
   /mtp/settings/GetAdvancedFeaturesSetting:
@@ -274,6 +346,21 @@ paths:
   /mtp/tvm/analytics/vulnerabilities/baseline:
     $ref: vulnerability_management.yml#/paths/~1mtp~1tvm~1analytics~1vulnerabilities~1baseline
 
+  /mtp/tvm/analytics/recommendations/sca-_-scid-{scid}/assetsStatistics:
+    $ref: vulnerability_management.yml#/paths/~1mtp~1tvm~1analytics~1recommendations~1sca-_-scid-{scid}~1assetsStatistics
+  /mtp/tvm/orgsettings/provision/isEligible:
+    $ref: vulnerability_management.yml#/paths/~1mtp~1tvm~1orgsettings~1provision~1isEligible
+  /mtp/tvm/analytics/recommendations/filters:
+    $ref: vulnerability_management.yml#/paths/~1mtp~1tvm~1analytics~1recommendations~1filters
+  /mtp/tvm/analytics/vulnerabilities/{cveId}/assets:
+    $ref: vulnerability_management.yml#/paths/~1mtp~1tvm~1analytics~1vulnerabilities~1{cveId}~1assets
+  /mtp/tvm/analytics/recommendations:
+    $ref: vulnerability_management.yml#/paths/~1mtp~1tvm~1analytics~1recommendations
+  /mtp/tvm/orgsettings/vulnerability-notification-rules/metadata:
+    $ref: vulnerability_management.yml#/paths/~1mtp~1tvm~1orgsettings~1vulnerability-notification-rules~1metadata
+  /mtp/posture/oversight/tenants:
+    $ref: vulnerability_management.yml#/paths/~1mtp~1posture~1oversight~1tenants
+
   # Identity (MDI)
   /mdi/identity/userapiservice/user/resolve:
     $ref: identity.yml#/paths/~1mdi~1identity~1userapiservice~1user~1resolve
@@ -295,6 +382,23 @@ paths:
     $ref: identity.yml#/paths/~1mdi~1identity~1userapiservice~1directoryServiceAccount
   /mdi/identity/identitiesapiservice/remediationAccount:
     $ref: identity.yml#/paths/~1mdi~1identity~1identitiesapiservice~1remediationAccount
+
+  /aatp/api/sensors/domainControllerCoverage:
+    $ref: identity.yml#/paths/~1aatp~1api~1sensors~1domainControllerCoverage
+  /aatp/odata/sensors:
+    $ref: identity.yml#/paths/~1aatp~1odata~1sensors
+  /aatp/api/workspaces/isWorkspaceExists/:
+    $ref: identity.yml#/paths/~1aatp~1api~1workspaces~1isWorkspaceExists~1
+  /aatp/api/sensors/sensorsCoverage:
+    $ref: identity.yml#/paths/~1aatp~1api~1sensors~1sensorsCoverage
+  /aatp/api/alertthresholds/withExpiry:
+    $ref: identity.yml#/paths/~1aatp~1api~1alertthresholds~1withExpiry
+  /aatp/api/remediationActions/configuration:
+    $ref: identity.yml#/paths/~1aatp~1api~1remediationActions~1configuration
+  /aatp/odata/EntityRemediatorCredentials:
+    $ref: identity.yml#/paths/~1aatp~1odata~1EntityRemediatorCredentials
+  /aatp/api/defensor/defensorConfiguration:
+    $ref: identity.yml#/paths/~1aatp~1api~1defensor~1defensorConfiguration
 
   # Configuration
   /mtp/suppressionRulesService/suppressionRules:
@@ -326,6 +430,19 @@ paths:
   /mcas/cas/api/v1/settings/:
     $ref: configuration.yml#/paths/~1mcas~1cas~1api~1v1~1settings~1
 
+  /mtp/autoIr/ui/properties/:
+    $ref: configuration.yml#/paths/~1mtp~1autoIr~1ui~1properties~1
+  /mtp/wdatpInternalApi/compliance/alertSharing/status:
+    $ref: configuration.yml#/paths/~1mtp~1wdatpInternalApi~1compliance~1alertSharing~1status
+  /mtp/responseApiPortal/onboarding/intune/status:
+    $ref: configuration.yml#/paths/~1mtp~1responseApiPortal~1onboarding~1intune~1status
+  /mtp/responseApiPortal/senseauth/allownonauthsense:
+    $ref: configuration.yml#/paths/~1mtp~1responseApiPortal~1senseauth~1allownonauthsense
+  /mcas/cas/api/v1/app_connectors/:
+    $ref: configuration.yml#/paths/~1mcas~1cas~1api~1v1~1app_connectors~1
+  /mcas/cas/api/v1/app_connectors/dashboard/get_apps_count_by_status/:
+    $ref: configuration.yml#/paths/~1mcas~1cas~1api~1v1~1app_connectors~1dashboard~1get_apps_count_by_status~1
+
   # Exposure Management
   /mtp/xspm/attackpaths:
     $ref: exposure_management.yml#/paths/~1mtp~1xspm~1attackpaths
@@ -346,15 +463,34 @@ paths:
   /securityplatform/lake/kql/v1/rest/mgmt:
     $ref: data_lake.yml#/paths/~1securityplatform~1lake~1kql~1v1~1rest~1mgmt
 
+  /securityplatform/sentinelgraph/provisioning/checkTenant:
+    $ref: data_lake.yml#/paths/~1securityplatform~1sentinelgraph~1provisioning~1checkTenant
+
   # Threat Analytics
   /mtp/threatAnalyticsAPI/outbreaks:
     $ref: threat_analytics.yml#/paths/~1mtp~1threatAnalyticsAPI~1outbreaks
+
+  /mtp/threatAnalytics/outbreaks/changeCount:
+    $ref: threat_analytics.yml#/paths/~1mtp~1threatAnalytics~1outbreaks~1changeCount
+  /mtp/threatAnalytics/outbreaks/outbreaksEnrichedDataMtp:
+    $ref: threat_analytics.yml#/paths/~1mtp~1threatAnalytics~1outbreaks~1outbreaksEnrichedDataMtp
+  /mtp/threatAnalytics/outbreaks/topthreats:
+    $ref: threat_analytics.yml#/paths/~1mtp~1threatAnalytics~1outbreaks~1topthreats
 
   # Action Center
   /mtp/actionCenter/actioncenterui/history-actions/:
     $ref: action_center.yml#/paths/~1mtp~1actionCenter~1actioncenterui~1history-actions~1
   /mtp/actionCenter/actioncenterui/pending-actions/:
     $ref: action_center.yml#/paths/~1mtp~1actionCenter~1actioncenterui~1pending-actions~1
+
+  /mtp/actionCenter/actioncenterui/pending-actions/filters:
+    $ref: action_center.yml#/paths/~1mtp~1actionCenter~1actioncenterui~1pending-actions~1filters
+  /mtp/actionCenter/actioncenterui/history-actions/filters:
+    $ref: action_center.yml#/paths/~1mtp~1actionCenter~1actioncenterui~1history-actions~1filters
+  /mtp/actionCenter/actioncenterui/tile:
+    $ref: action_center.yml#/paths/~1mtp~1actionCenter~1actioncenterui~1tile
+  /mtp/actionCenter/actioncenterui/pending-actions/pending-actions-summary:
+    $ref: action_center.yml#/paths/~1mtp~1actionCenter~1actioncenterui~1pending-actions~1pending-actions-summary
 
   # Multi-Tenant
   /mtoapi/tenants/TenantPicker:
@@ -367,3 +503,49 @@ paths:
   # Streaming API
   /mtp/streamingapi/streamingApiConfiguration:
     $ref: streaming.yml#/paths/~1mtp~1streamingapi~1streamingApiConfiguration
+
+  # Secure Score
+  /mtp/secureScore/security/secureScoresV2:
+    $ref: secure_score.yml#/paths/~1mtp~1secureScore~1security~1secureScoresV2
+  /mtp/secureScore/security/secureScoreControlProfilesV2:
+    $ref: secure_score.yml#/paths/~1mtp~1secureScore~1security~1secureScoreControlProfilesV2
+  /mtp/secureScore/security/secureScoreSecurityInitiativesV2:
+    $ref: secure_score.yml#/paths/~1mtp~1secureScore~1security~1secureScoreSecurityInitiativesV2
+  /mtp/secureScore/security/secureScoreTenantProfile:
+    $ref: secure_score.yml#/paths/~1mtp~1secureScore~1security~1secureScoreTenantProfile
+  /mtp/secureScore/security/secureScoreInsights:
+    $ref: secure_score.yml#/paths/~1mtp~1secureScore~1security~1secureScoreInsights
+
+  # Portal Services
+  /mtp/userPreferences/api/mgmt/userpreferencesservice/userPreference:
+    $ref: portal_services.yml#/paths/~1mtp~1userPreferences~1api~1mgmt~1userpreferencesservice~1userPreference
+  /mtp/userPreferences/api/mgmt/userpreferencesservice/userPreference/alwaysUseUtc:
+    $ref: portal_services.yml#/paths/~1mtp~1userPreferences~1api~1mgmt~1userpreferencesservice~1userPreference~1alwaysUseUtc
+  /mtp/mdepDnH/reports/machineHealth/healthStatus:
+    $ref: portal_services.yml#/paths/~1mtp~1mdepDnH~1reports~1machineHealth~1healthStatus
+  /shell/api/shell/shellinfo:
+    $ref: portal_services.yml#/paths/~1shell~1api~1shell~1shellinfo
+  /medeina/auth:
+    $ref: portal_services.yml#/paths/~1medeina~1auth
+  /cdssecuritycopilot/trial:
+    $ref: portal_services.yml#/paths/~1cdssecuritycopilot~1trial
+  /msgraph/v1.0/users:
+    $ref: portal_services.yml#/paths/~1msgraph~1v1.0~1users
+  /di/Find/TrialOffer:
+    $ref: portal_services.yml#/paths/~1di~1Find~1TrialOffer
+  /di/Find/CustomTag:
+    $ref: portal_services.yml#/paths/~1di~1Find~1CustomTag
+  /di/Aggregate/ThreatInstanceList:
+    $ref: portal_services.yml#/paths/~1di~1Aggregate~1ThreatInstanceList
+  /di/Aggregate/ThreatProfileDetails:
+    $ref: portal_services.yml#/paths/~1di~1Aggregate~1ThreatProfileDetails
+  /gws/ComplianceAuthServer/v1.0/IsAllowedPermissionWithScopes:
+    $ref: portal_services.yml#/paths/~1gws~1ComplianceAuthServer~1v1.0~1IsAllowedPermissionWithScopes
+  /astgws/AttackSimulator/api/v1/AdvanceReporting/chart/UserCoverage:
+    $ref: portal_services.yml#/paths/~1astgws~1AttackSimulator~1api~1v1~1AdvanceReporting~1chart~1UserCoverage
+  /admin/Beta/{tenantId}/InvokeCommand:
+    $ref: portal_services.yml#/paths/~1admin~1Beta~1{tenantId}~1InvokeCommand
+  /m365appprotection/mapg-glsservice/compliance/istenantonboarded:
+    $ref: portal_services.yml#/paths/~1m365appprotection~1mapg-glsservice~1compliance~1istenantonboarded
+  /m365appprotection/mapg-glsservice/compliance/istenantinsightsready:
+    $ref: portal_services.yml#/paths/~1m365appprotection~1mapg-glsservice~1compliance~1istenantinsightsready

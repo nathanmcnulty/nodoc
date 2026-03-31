@@ -1,0 +1,347 @@
+paths:
+  /mtp/userPreferences/api/mgmt/userpreferencesservice/userPreference:
+    get:
+      summary: Get user preferences
+      description: >-
+        Retrieve the current user's preferences for the Defender XDR portal.
+      operationId: PortalServices.GetUserPreferences
+      tags: [Portal Services]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - user preferences data
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    patch:
+      summary: Update user preference
+      description: >-
+        Update a specific user preference setting in the Defender XDR portal.
+      operationId: PortalServices.UpdateUserPreference
+      tags: [Portal Services]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending - user preference update data
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - updated user preference
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/userPreferences/api/mgmt/userpreferencesservice/userPreference/alwaysUseUtc:
+    get:
+      summary: Get UTC preference
+      description: >-
+        Retrieve the user's preference for always displaying times in UTC.
+      operationId: PortalServices.GetUtcPreference
+      tags: [Portal Services]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - UTC preference setting
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/mdepDnH/reports/machineHealth/healthStatus:
+    get:
+      summary: Get machine health status report
+      description: >-
+        Retrieve the machine health status report including device health
+        distribution and trends.
+      operationId: PortalServices.GetMachineHealthStatus
+      tags: [Portal Services]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - machine health status report data
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /shell/api/shell/shellinfo:
+    get:
+      summary: Get shell info
+      description: >-
+        Retrieve shell information for the Defender XDR portal session.
+      operationId: PortalServices.GetShellInfo
+      tags: [Portal Services]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - shell info data
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /medeina/auth:
+    get:
+      summary: Get Medeina (Copilot) auth
+      description: >-
+        Retrieve authentication status for the Medeina (Security Copilot) service.
+      operationId: PortalServices.GetMedeinaAuth
+      tags: [Portal Services]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - Medeina authentication data
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /cdssecuritycopilot/trial:
+    get:
+      summary: Get Security Copilot trial status
+      description: >-
+        Retrieve the Security Copilot trial status for the tenant.
+      operationId: PortalServices.GetSecurityCopilotTrial
+      tags: [Portal Services]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - Security Copilot trial status
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /msgraph/v1.0/users:
+    get:
+      summary: List users via Graph proxy
+      description: >-
+        Retrieve a list of users via the Microsoft Graph API proxy endpoint
+        in the Defender XDR portal.
+      operationId: PortalServices.ListUsersGraph
+      tags: [Portal Services]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - Graph users list
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /di/Find/TrialOffer:
+    get:
+      summary: Find trial offers
+      description: >-
+        Find available trial offers for Defender services.
+      operationId: PortalServices.FindTrialOffer
+      tags: [Portal Services]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - trial offers data
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /di/Find/CustomTag:
+    get:
+      summary: Find custom tags
+      description: >-
+        Find custom tags configured in the Defender portal.
+      operationId: PortalServices.FindCustomTag
+      tags: [Portal Services]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - custom tags data
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /di/Aggregate/ThreatInstanceList:
+    post:
+      summary: Aggregate threat instances
+      description: >-
+        Aggregate and retrieve a list of threat instances with filtering criteria.
+      operationId: PortalServices.AggregateThreatInstances
+      tags: [Portal Services]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending - threat instance aggregation request
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - aggregated threat instances
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /di/Aggregate/ThreatProfileDetails:
+    post:
+      summary: Aggregate threat profile details
+      description: >-
+        Aggregate and retrieve threat profile details with filtering criteria.
+      operationId: PortalServices.AggregateThreatProfileDetails
+      tags: [Portal Services]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending - threat profile aggregation request
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - aggregated threat profile details
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /gws/ComplianceAuthServer/v1.0/IsAllowedPermissionWithScopes:
+    post:
+      summary: Check compliance permissions
+      description: >-
+        Check whether the specified permissions with scopes are allowed
+        by the compliance authorization server.
+      operationId: PortalServices.CheckCompliancePermissions
+      tags: [Portal Services]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending - permission check request
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - permission check result
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /astgws/AttackSimulator/api/v1/AdvanceReporting/chart/UserCoverage:
+    get:
+      summary: Get attack simulator user coverage
+      description: >-
+        Retrieve the attack simulation user coverage chart data for
+        advance reporting.
+      operationId: PortalServices.GetAttackSimUserCoverage
+      tags: [Portal Services]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - attack simulator user coverage data
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/Beta/{tenantId}/InvokeCommand:
+    post:
+      summary: Invoke admin command
+      description: >-
+        Invoke an administrative command for the specified tenant.
+      operationId: PortalServices.InvokeAdminCommand
+      tags: [Portal Services]
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          description: The tenant GUID to invoke the command against.
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending - admin command request
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - admin command result
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /m365appprotection/mapg-glsservice/compliance/istenantonboarded:
+    get:
+      summary: Check App Governance onboarding
+      description: >-
+        Check whether the tenant is onboarded to Microsoft 365 App Governance
+        (App Protection).
+      operationId: PortalServices.CheckAppGovernanceOnboarding
+      tags: [Portal Services]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - App Governance onboarding status
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /m365appprotection/mapg-glsservice/compliance/istenantinsightsready:
+    get:
+      summary: Check App Governance insights ready
+      description: >-
+        Check whether App Governance insights are ready for the tenant.
+      operationId: PortalServices.CheckAppGovernanceInsightsReady
+      tags: [Portal Services]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - App Governance insights readiness
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

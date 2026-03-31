@@ -140,6 +140,28 @@ paths:
                       format: date-time
         4XX:
           $ref: common.yml#/components/responses/ClientException
+    post:
+      summary: Get user hunting history report
+      description: >-
+        Retrieve the user hunting history report with detailed execution data.
+      operationId: AdvancedHunting.GetUserHistoryReport
+      tags: [Advanced Hunting]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending - user history report request
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - user history report data
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
 
   /mtp/huntingService/queries/encode:
     get:
@@ -227,6 +249,220 @@ paths:
       responses:
         '200':
           description: OK
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/huntingService/documentation/GuidedHuntingGettingStarted:
+    get:
+      summary: Get guided hunting getting started docs
+      description: >-
+        Retrieve the guided hunting getting started documentation content.
+      operationId: AdvancedHunting.GetGuidedHuntingGettingStarted
+      tags: [Advanced Hunting]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - guided hunting getting started documentation
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/userPreferences/api/mgmt/userpreferencesservice/userPreference/advanced_hunting:
+    get:
+      summary: Get advanced hunting user preferences
+      description: >-
+        Retrieve the current user's preferences for the advanced hunting experience.
+      operationId: AdvancedHunting.GetUserPreferences
+      tags: [Advanced Hunting]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - advanced hunting user preferences
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/userExposedRbacGroups/UserExposedRbacGroups:
+    get:
+      summary: Get user RBAC groups
+      description: >-
+        Retrieve the RBAC groups exposed to the current user, used to scope
+        advanced hunting queries and results.
+      operationId: AdvancedHunting.GetUserRbacGroups
+      tags: [Advanced Hunting]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - user RBAC groups
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/huntingService/favorites:
+    get:
+      summary: Get hunting favorites
+      description: >-
+        Retrieve the list of favorited advanced hunting queries for the current user.
+      operationId: AdvancedHunting.GetFavorites
+      tags: [Advanced Hunting]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - hunting favorites list
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/huntingService/schema/functions:
+    get:
+      summary: Get hunting schema functions
+      description: >-
+        Retrieve the list of available functions in the advanced hunting schema.
+      operationId: AdvancedHunting.GetSchemaFunctions
+      tags: [Advanced Hunting]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - schema functions list
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/huntingService/queries/:
+    get:
+      summary: List hunting queries
+      description: >-
+        Retrieve a list of saved advanced hunting queries available to the user.
+      operationId: AdvancedHunting.ListQueries
+      tags: [Advanced Hunting]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - hunting queries list
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/huntingService/communityQueries:
+    get:
+      summary: Get community queries
+      description: >-
+        Retrieve a list of community-contributed advanced hunting queries.
+      operationId: AdvancedHunting.GetCommunityQueries
+      tags: [Advanced Hunting]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - community queries list
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/huntingService/documentation/GettingStarted:
+    get:
+      summary: Get getting started docs
+      description: >-
+        Retrieve the advanced hunting getting started documentation content.
+      operationId: AdvancedHunting.GetGettingStarted
+      tags: [Advanced Hunting]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - getting started documentation
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/huntingService/guidedQueries/filterSchema:
+    get:
+      summary: Get guided queries filter schema
+      description: >-
+        Retrieve the filter schema for guided hunting queries, including available
+        filter fields and value types.
+      operationId: AdvancedHunting.GetGuidedQueriesFilterSchema
+      tags: [Advanced Hunting]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - guided queries filter schema
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/huntingService/queries/defender/savedqueries/{id}:
+    get:
+      summary: Get saved query by ID
+      description: >-
+        Retrieve a specific saved advanced hunting query by its unique identifier.
+      operationId: AdvancedHunting.GetSavedQuery
+      tags: [Advanced Hunting]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The unique identifier of the saved query.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - saved query details
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/huntingService/queries/defender/communityqueries/{id}:
+    get:
+      summary: Get community query by ID
+      description: >-
+        Retrieve a specific community-contributed hunting query by its unique identifier.
+      operationId: AdvancedHunting.GetCommunityQuery
+      tags: [Advanced Hunting]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The unique identifier of the community query.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - community query details
         4XX:
           $ref: common.yml#/components/responses/ClientException
 

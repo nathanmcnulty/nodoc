@@ -184,6 +184,91 @@ paths:
         4XX:
           $ref: common.yml#/components/responses/ClientException
 
+  /mtp/suppressionRulesService/RulesCount:
+    get:
+      summary: Get alert suppression rules count
+      description: >-
+        Retrieve the total count of alert suppression rules configured in the tenant.
+      operationId: Alerts.GetSuppressionRulesCount
+      tags: [Alerts]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - suppression rules count
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/incidentQueue/incidents/count:
+    post:
+      summary: Get incidents count
+      description: >-
+        Retrieve the total count of incidents matching the specified filter criteria.
+      operationId: Incidents.GetCount
+      tags: [Incidents]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending - incident count filter criteria
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - incident count result
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/alertsApiService/alerts/count:
+    post:
+      summary: Get alerts count
+      description: >-
+        Retrieve the total count of alerts matching the specified filter criteria.
+      operationId: Alerts.GetCount
+      tags: [Alerts]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending - alert count filter criteria
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - alert count result
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/incidentDashboard/Dashboard/ActiveIncidentsSummary:
+    get:
+      summary: Get active incidents summary
+      description: >-
+        Retrieve a summary of active incidents for the incident dashboard,
+        including counts by severity and status.
+      operationId: Incidents.GetActiveIncidentsSummary
+      tags: [Incidents]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - active incidents summary data
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
 components:
   schemas:
     Alert:

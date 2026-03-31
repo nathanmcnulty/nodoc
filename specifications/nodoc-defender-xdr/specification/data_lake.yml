@@ -46,6 +46,31 @@ paths:
         4XX:
           $ref: common.yml#/components/responses/ClientException
 
+  /securityplatform/sentinelgraph/provisioning/checkTenant:
+    post:
+      summary: Check Sentinel provisioning
+      description: >-
+        Check whether the tenant has Sentinel provisioning configured
+        for the security platform data lake.
+      operationId: DataLake.CheckSentinelProvisioning
+      tags: [Data Lake]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending - tenant provisioning check request
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - Sentinel provisioning status
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
 components:
   schemas:
     Database:

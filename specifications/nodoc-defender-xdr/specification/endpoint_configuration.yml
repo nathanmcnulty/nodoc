@@ -1,5 +1,21 @@
 paths:
   /mtp/settings/GetAdvancedFeaturesSetting:
+    get:
+      summary: Get advanced features setting
+      description: >-
+        Retrieve the current advanced features settings for Microsoft Defender
+        for Endpoint via GET request.
+      operationId: EndpointConfiguration.GetAdvancedFeaturesGet
+      tags: [Endpoint Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdvancedFeaturesSettings'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
     post:
       summary: Get advanced features settings
       description: >-
