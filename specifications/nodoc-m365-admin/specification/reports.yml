@@ -140,3 +140,75 @@ paths:
                 description: Admin dashboard preferences. Exact schema pending.
         4XX:
           $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/reports/GetReportCategoryDetails:
+    get:
+      summary: Get report category details
+      description: >-
+        Retrieve report category details and metadata for the usage reports dashboard (Reports > Usage).
+      operationId: Reports.GetReportCategoryDetails
+      tags: [Reports]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/reports/GetReportTileData:
+    get:
+      summary: Get report tile data
+      description: >-
+        Retrieve tile data for the usage reports dashboard including summary metrics (Reports > Usage).
+      operationId: Reports.GetReportTileData
+      tags: [Reports]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/reports/GetReportsWidgetConfig:
+    get:
+      summary: Get reports widget configuration
+      description: >-
+        Retrieve widget configuration for the usage reports dashboard layout (Reports > Usage).
+      operationId: Reports.GetReportsWidgetConfig
+      tags: [Reports]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/reports/config/GetTenantConfiguration:
+    get:
+      summary: Get reports tenant configuration
+      description: >-
+        Retrieve the tenant-level reporting configuration settings (Org Settings > Reports).
+      operationId: Reports.GetTenantConfiguration
+      tags: [Reports]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

@@ -384,3 +384,315 @@ paths:
                 description: Group permissions. Exact schema pending.
         4XX:
           $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/contact/Customization:
+    get:
+      summary: Get contact customization
+      description: >-
+        Retrieve contact list customization settings for the admin portal (Users > Contacts).
+      operationId: UsersGroups.GetContactCustomization
+      tags: [UsersGroups]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/contact/GetContacts:
+    post:
+      summary: Get contacts
+      description: >-
+        Retrieve a list of contacts in the tenant (Users > Contacts).
+      operationId: UsersGroups.GetContacts
+      tags: [UsersGroups]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/guestuserlist/Customization:
+    get:
+      summary: Get guest user list customization
+      description: >-
+        Retrieve guest user list customization settings for the admin portal (Users > Guest).
+      operationId: UsersGroups.GetGuestUserListCustomization
+      tags: [UsersGroups]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/users/ListExternalGuestUsers:
+    post:
+      summary: List external guest users
+      description: >-
+        Retrieve a list of external guest users in the tenant (Users > Guest).
+      operationId: UsersGroups.ListExternalGuestUsers
+      tags: [UsersGroups]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/userlist/Customization:
+    get:
+      summary: Get user list customization
+      description: >-
+        Retrieve active user list customization settings for the admin portal (Users > Active).
+      operationId: UsersGroups.GetUserListCustomization
+      tags: [UsersGroups]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/users/administrativeunits:
+    get:
+      summary: Get administrative units
+      description: >-
+        Retrieve the list of administrative units for user management (Org Settings > Services).
+      operationId: UsersGroups.GetAdministrativeUnits
+      tags: [UsersGroups]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/users/deviceupdatechanneleligibility:
+    get:
+      summary: Get device update channel eligibility
+      description: >-
+        Retrieve device update channel eligibility information for users (Users > Active).
+      operationId: UsersGroups.GetDeviceUpdateChannelEligibility
+      tags: [UsersGroups]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/users/getavailableroles:
+    get:
+      summary: Get available roles
+      description: >-
+        Retrieve the list of available admin roles that can be assigned to users (Users > Active).
+      operationId: UsersGroups.GetAvailableRoles
+      tags: [UsersGroups]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/users/new/options:
+    get:
+      summary: Get new user options
+      description: >-
+        Retrieve options and configuration for creating new users or contacts (Users > Contacts).
+      operationId: UsersGroups.GetNewUserOptions
+      tags: [UsersGroups]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/users/{userId}:
+    get:
+      summary: Get user by ID
+      description: >-
+        Retrieve detailed information for a specific user by their user ID (Reports > Usage).
+      operationId: UsersGroups.GetUserById
+      tags: [UsersGroups]
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: The unique identifier of the user.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/grouplist/Customization:
+    get:
+      summary: Get group list customization
+      description: >-
+        Retrieve group list customization settings for the admin portal (Groups > Active).
+      operationId: UsersGroups.GetGroupListCustomization
+      tags: [UsersGroups]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/groups/GetGroupCount:
+    get:
+      summary: Get group count
+      description: >-
+        Retrieve the total count of groups in the tenant (Groups > Active).
+      operationId: UsersGroups.GetGroupCount
+      tags: [UsersGroups]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/groups/getgroupsbyids:
+    post:
+      summary: Get groups by IDs
+      description: >-
+        Retrieve specific groups by their IDs, used for group lookups in settings like custom themes (Org Settings > Custom themes).
+      operationId: UsersGroups.GetGroupsByIds
+      tags: [UsersGroups]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/groups/new/options:
+    get:
+      summary: Get new group options
+      description: >-
+        Retrieve options and configuration for creating new groups (Groups > Active).
+      operationId: UsersGroups.GetNewGroupOptions
+      tags: [UsersGroups]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/localizedvideo/getbyfeature/{locale}:
+    post:
+      summary: Get localized video by feature
+      description: >-
+        Retrieve localized help videos by feature for the specified locale (Groups > Active).
+      operationId: UsersGroups.GetLocalizedVideoByFeature
+      tags: [UsersGroups]
+      parameters:
+        - name: locale
+          in: path
+          required: true
+          description: The locale code (e.g., en-US).
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

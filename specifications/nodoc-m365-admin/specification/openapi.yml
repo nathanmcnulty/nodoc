@@ -98,6 +98,13 @@ tags:
   - name: Partners
     description: Operations relating to partner management and AOBO.
 
+  - name: Domains
+    description: Operations relating to domain management and configuration.
+  - name: MessageCenter
+    description: Operations relating to message center messages and preferences.
+  - name: ServiceHealth
+    description: Operations relating to service health monitoring and status.
+
 x-tagGroups:
   - name: Copilot
     tags: [Copilot]
@@ -133,6 +140,12 @@ x-tagGroups:
     tags: [ContentUnderstanding]
   - name: Viva
     tags: [Viva]
+  - name: Domains
+    tags: [Domains]
+  - name: Message Center
+    tags: [MessageCenter]
+  - name: Service Health
+    tags: [ServiceHealth]
   - name: Miscellaneous
     tags: [Miscellaneous]
   - name: Navigation
@@ -442,3 +455,151 @@ paths:
   # Partners
   /admin/api/partners/AOBOClients:
     $ref: partners.yml#/paths/~1admin~1api~1partners~1AOBOClients
+
+  # Contacts & User Management (new)
+  /admin/api/contact/Customization:
+    $ref: users_groups.yml#/paths/~1admin~1api~1contact~1Customization
+  /admin/api/contact/GetContacts:
+    $ref: users_groups.yml#/paths/~1admin~1api~1contact~1GetContacts
+  /admin/api/guestuserlist/Customization:
+    $ref: users_groups.yml#/paths/~1admin~1api~1guestuserlist~1Customization
+  /admin/api/users/ListExternalGuestUsers:
+    $ref: users_groups.yml#/paths/~1admin~1api~1users~1ListExternalGuestUsers
+  /admin/api/userlist/Customization:
+    $ref: users_groups.yml#/paths/~1admin~1api~1userlist~1Customization
+  /admin/api/users/administrativeunits:
+    $ref: users_groups.yml#/paths/~1admin~1api~1users~1administrativeunits
+  /admin/api/users/deviceupdatechanneleligibility:
+    $ref: users_groups.yml#/paths/~1admin~1api~1users~1deviceupdatechanneleligibility
+  /admin/api/users/getavailableroles:
+    $ref: users_groups.yml#/paths/~1admin~1api~1users~1getavailableroles
+  /admin/api/users/new/options:
+    $ref: users_groups.yml#/paths/~1admin~1api~1users~1new~1options
+  /admin/api/users/{userId}:
+    $ref: users_groups.yml#/paths/~1admin~1api~1users~1{userId}
+  /admin/api/grouplist/Customization:
+    $ref: users_groups.yml#/paths/~1admin~1api~1grouplist~1Customization
+  /admin/api/groups/GetGroupCount:
+    $ref: users_groups.yml#/paths/~1admin~1api~1groups~1GetGroupCount
+  /admin/api/groups/getgroupsbyids:
+    $ref: users_groups.yml#/paths/~1admin~1api~1groups~1getgroupsbyids
+  /admin/api/groups/new/options:
+    $ref: users_groups.yml#/paths/~1admin~1api~1groups~1new~1options
+  /admin/api/localizedvideo/getbyfeature/{locale}:
+    $ref: users_groups.yml#/paths/~1admin~1api~1localizedvideo~1getbyfeature~1{locale}
+
+  # Tenant (new)
+  /admin/api/tenant/SACProvisioning:
+    $ref: tenant.yml#/paths/~1admin~1api~1tenant~1SACProvisioning
+  /admin/api/tenant/customviewfilterdefaults:
+    $ref: tenant.yml#/paths/~1admin~1api~1tenant~1customviewfilterdefaults
+  /admin/api/tenant/userviews:
+    $ref: tenant.yml#/paths/~1admin~1api~1tenant~1userviews
+  /admin/api/tenant/isTenantEligibleToRemoveSAC:
+    $ref: tenant.yml#/paths/~1admin~1api~1tenant~1isTenantEligibleToRemoveSAC
+  /admin/api/tenant/seatSize:
+    $ref: tenant.yml#/paths/~1admin~1api~1tenant~1seatSize
+
+  # Domains (new)
+  /admin/api/domainlist/Customization:
+    $ref: domains.yml#/paths/~1admin~1api~1domainlist~1Customization
+  /admin/api/domains/GetDomainBuyModel:
+    $ref: domains.yml#/paths/~1admin~1api~1domains~1GetDomainBuyModel
+  /admin/api/domains/List:
+    $ref: domains.yml#/paths/~1admin~1api~1domains~1List
+  /admin/api/domains/Verified:
+    $ref: domains.yml#/paths/~1admin~1api~1domains~1Verified
+
+  # Service Settings (new)
+  /admin/api/services/apps/cortana:
+    $ref: app_settings.yml#/paths/~1admin~1api~1services~1apps~1cortana
+  /admin/api/services/apps/m365lighthouse:
+    $ref: app_settings.yml#/paths/~1admin~1api~1services~1apps~1m365lighthouse
+  /admin/api/services/apps/modernAuth:
+    $ref: app_settings.yml#/paths/~1admin~1api~1services~1apps~1modernAuth
+  /admin/api/services/apps/myanalytics:
+    $ref: app_settings.yml#/paths/~1admin~1api~1services~1apps~1myanalytics
+  /admin/api/services/apps/planner:
+    $ref: app_settings.yml#/paths/~1admin~1api~1services~1apps~1planner
+  /admin/api/services/apps/todo:
+    $ref: app_settings.yml#/paths/~1admin~1api~1services~1apps~1todo
+  /admin/api/services/apps/vivainsights:
+    $ref: app_settings.yml#/paths/~1admin~1api~1services~1apps~1vivainsights
+
+  # App Settings (new)
+  /admin/api/settings/apps/EndUserCommunications:
+    $ref: app_settings.yml#/paths/~1admin~1api~1settings~1apps~1EndUserCommunications
+  /admin/api/settings/apps/o365dataplan:
+    $ref: app_settings.yml#/paths/~1admin~1api~1settings~1apps~1o365dataplan
+  /admin/api/settings/apps/officeonline:
+    $ref: app_settings.yml#/paths/~1admin~1api~1settings~1apps~1officeonline
+  /admin/api/settings/apps/sitessharing:
+    $ref: app_settings.yml#/paths/~1admin~1api~1settings~1apps~1sitessharing
+  /admin/api/settings/apps/usersoftware:
+    $ref: app_settings.yml#/paths/~1admin~1api~1settings~1apps~1usersoftware
+
+  # Security Settings (new)
+  /admin/api/settings/security/passwordpolicy:
+    $ref: security_settings.yml#/paths/~1admin~1api~1settings~1security~1passwordpolicy
+  /admin/api/settings/security/privacypolicy:
+    $ref: security_settings.yml#/paths/~1admin~1api~1settings~1security~1privacypolicy
+  /admin/api/settings/security/tenantLockbox:
+    $ref: security_settings.yml#/paths/~1admin~1api~1settings~1security~1tenantLockbox
+  /admin/api/settings/security/dataaccess:
+    $ref: security_settings.yml#/paths/~1admin~1api~1settings~1security~1dataaccess
+
+  # Message Center & Service Health (new)
+  /admin/api/messagecenter:
+    $ref: health.yml#/paths/~1admin~1api~1messagecenter
+  /admin/api/messagecenter/GetDisplayPreferences:
+    $ref: health.yml#/paths/~1admin~1api~1messagecenter~1GetDisplayPreferences
+  /admin/api/messagecenter/GetPlannerIntegrationPreferences:
+    $ref: health.yml#/paths/~1admin~1api~1messagecenter~1GetPlannerIntegrationPreferences
+  /admin/api/messagecenter/GetPlannerIntegrationTaskSet:
+    $ref: health.yml#/paths/~1admin~1api~1messagecenter~1GetPlannerIntegrationTaskSet
+  /admin/api/messagecenter/activities:
+    $ref: health.yml#/paths/~1admin~1api~1messagecenter~1activities
+  /admin/api/messagecenter/configuration:
+    $ref: health.yml#/paths/~1admin~1api~1messagecenter~1configuration
+  /admin/api/servicehealth/getDisplayPreferences:
+    $ref: health.yml#/paths/~1admin~1api~1servicehealth~1getDisplayPreferences
+  /admin/api/servicehealth/status/activeCM:
+    $ref: health.yml#/paths/~1admin~1api~1servicehealth~1status~1activeCM
+
+  # Reports (new)
+  /admin/api/reports/GetReportCategoryDetails:
+    $ref: reports.yml#/paths/~1admin~1api~1reports~1GetReportCategoryDetails
+  /admin/api/reports/GetReportTileData:
+    $ref: reports.yml#/paths/~1admin~1api~1reports~1GetReportTileData
+  /admin/api/reports/GetReportsWidgetConfig:
+    $ref: reports.yml#/paths/~1admin~1api~1reports~1GetReportsWidgetConfig
+  /admin/api/reports/config/GetTenantConfiguration:
+    $ref: reports.yml#/paths/~1admin~1api~1reports~1config~1GetTenantConfiguration
+
+  # Copilot (new)
+  /admin/api/copilotsettings/settings/dismissed:
+    $ref: copilot.yml#/paths/~1admin~1api~1copilotsettings~1settings~1dismissed
+
+  # Agents (new)
+  /admin/api/agentusers/metrics/agents/entitiesAtRisk:
+    $ref: agents.yml#/paths/~1admin~1api~1agentusers~1metrics~1agents~1entitiesAtRisk
+
+  # Directory Sync & Recommendations (new)
+  /admin/api/dirsyncmanagement/hasobjectswithdirsyncerrors:
+    $ref: miscellaneous.yml#/paths/~1admin~1api~1dirsyncmanagement~1hasobjectswithdirsyncerrors
+  /admin/api/dirsyncmanagement/manage:
+    $ref: miscellaneous.yml#/paths/~1admin~1api~1dirsyncmanagement~1manage
+  /admin/api/irisrecommendations/v1:
+    $ref: miscellaneous.yml#/paths/~1admin~1api~1irisrecommendations~1v1
+  /admin/api/recommendations/m365:
+    $ref: miscellaneous.yml#/paths/~1admin~1api~1recommendations~1m365
+  /admin/api/recommendations/m365/BlockGenAIRecommendation/view:
+    $ref: miscellaneous.yml#/paths/~1admin~1api~1recommendations~1m365~1BlockGenAIRecommendation~1view
+
+  # Billing (new)
+  /admin/api/syntexbilling/azureSubscriptions/{subscriptionId}/permissions:
+    $ref: billing.yml#/paths/~1admin~1api~1syntexbilling~1azureSubscriptions~1{subscriptionId}~1permissions
+
+  # Integrated Apps (new)
+  /admin/api/privatecatalog/GetAddInDetails:
+    $ref: integrated_apps.yml#/paths/~1admin~1api~1privatecatalog~1GetAddInDetails

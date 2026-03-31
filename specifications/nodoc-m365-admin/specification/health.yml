@@ -1,0 +1,152 @@
+paths:
+
+  /admin/api/messagecenter:
+    get:
+      summary: Get message center messages
+      description: >-
+        Retrieve message center messages for the tenant including service updates and advisories (Health > Message center).
+      operationId: MessageCenter.GetMessages
+      tags: [MessageCenter]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/messagecenter/GetDisplayPreferences:
+    get:
+      summary: Get message center display preferences
+      description: >-
+        Retrieve display preferences for the message center view (Health > Message center).
+      operationId: MessageCenter.GetDisplayPreferences
+      tags: [MessageCenter]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/messagecenter/GetPlannerIntegrationPreferences:
+    get:
+      summary: Get Planner integration preferences
+      description: >-
+        Retrieve Planner integration preferences for message center. Note: returns 404 if Planner integration has not been set up for the tenant (Health > Message center).
+      operationId: MessageCenter.GetPlannerIntegrationPreferences
+      tags: [MessageCenter]
+      responses:
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/messagecenter/GetPlannerIntegrationTaskSet:
+    get:
+      summary: Get Planner integration task set
+      description: >-
+        Retrieve the Planner integration task set configuration for message center items (Health > Message center).
+      operationId: MessageCenter.GetPlannerIntegrationTaskSet
+      tags: [MessageCenter]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/messagecenter/activities:
+    put:
+      summary: Update message center activities
+      description: >-
+        Update message center activity tracking such as read/unread status and preferences (Health > Message center).
+      operationId: MessageCenter.UpdateActivities
+      tags: [MessageCenter]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/messagecenter/configuration:
+    get:
+      summary: Get message center configuration
+      description: >-
+        Retrieve the message center configuration settings for the tenant (Health > Message center).
+      operationId: MessageCenter.GetConfiguration
+      tags: [MessageCenter]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/servicehealth/getDisplayPreferences:
+    get:
+      summary: Get service health display preferences
+      description: >-
+        Retrieve display preferences for the service health dashboard (Health > Service health).
+      operationId: ServiceHealth.GetDisplayPreferences
+      tags: [ServiceHealth]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/servicehealth/status/activeCM:
+    get:
+      summary: Get active change management status
+      description: >-
+        Retrieve active change management incidents and service health status (Org Settings > Briefing email).
+      operationId: ServiceHealth.GetActiveCM
+      tags: [ServiceHealth]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

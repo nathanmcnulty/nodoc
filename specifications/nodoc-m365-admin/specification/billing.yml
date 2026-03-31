@@ -16,3 +16,29 @@ paths:
                 description: Billing model information. Exact schema pending.
         4XX:
           $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/syntexbilling/azureSubscriptions/{subscriptionId}/permissions:
+    get:
+      summary: Get Syntex billing subscription permissions
+      description: >-
+        Retrieve permissions for a specific Azure subscription used for Syntex/content
+        understanding billing (Copilot > Settings).
+      operationId: Billing.GetSyntexSubscriptionPermissions
+      tags: [Billing]
+      parameters:
+        - name: subscriptionId
+          in: path
+          required: true
+          description: The Azure subscription identifier.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

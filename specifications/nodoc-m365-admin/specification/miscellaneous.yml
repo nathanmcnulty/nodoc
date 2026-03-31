@@ -261,3 +261,100 @@ paths:
                 description: M365 recommendation alerts. Exact schema pending.
         4XX:
           $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/dirsyncmanagement/hasobjectswithdirsyncerrors:
+    get:
+      summary: Check for directory sync errors
+      description: >-
+        Check if the tenant has objects with directory sync errors from Entra Connect (Org Settings > Dynamics 365 Customer Voice).
+      operationId: Misc.HasObjectsWithDirSyncErrors
+      tags: [Miscellaneous]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/dirsyncmanagement/manage:
+    get:
+      summary: Get directory sync management
+      description: >-
+        Retrieve directory sync management settings and status for Entra Connect (Org Settings > Dynamics 365 Customer Voice).
+      operationId: Misc.GetDirSyncManagement
+      tags: [Miscellaneous]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/irisrecommendations/v1:
+    get:
+      summary: Get IRIS recommendations
+      description: >-
+        Retrieve IRIS (Intelligent Recommendations and Insights Service) recommendations for the tenant (Org Settings > Briefing email).
+      operationId: Misc.GetIrisRecommendations
+      tags: [Miscellaneous]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/recommendations/m365:
+    get:
+      summary: Get M365 recommendations
+      description: >-
+        Retrieve Microsoft 365 recommendations for the tenant including feature adoption suggestions (Org Settings > Briefing email).
+      operationId: Misc.GetM365Recommendations
+      tags: [Miscellaneous]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/recommendations/m365/BlockGenAIRecommendation/view:
+    post:
+      summary: Block GenAI recommendation view
+      description: >-
+        Record a view or block action for a GenAI recommendation in the M365 admin center (Org Settings > Briefing email).
+      operationId: Misc.BlockGenAIRecommendationView
+      tags: [Miscellaneous]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

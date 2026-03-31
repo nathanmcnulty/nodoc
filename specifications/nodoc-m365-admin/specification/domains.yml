@@ -1,0 +1,73 @@
+paths:
+
+  /admin/api/domainlist/Customization:
+    get:
+      summary: Get domain list customization
+      description: >-
+        Retrieve domain list customization settings for the admin portal (Domains).
+      operationId: Domains.GetDomainListCustomization
+      tags: [Domains]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/domains/GetDomainBuyModel:
+    get:
+      summary: Get domain buy model
+      description: >-
+        Retrieve the domain purchase model information for buying domains (Domains).
+      operationId: Domains.GetDomainBuyModel
+      tags: [Domains]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/domains/List:
+    get:
+      summary: List domains
+      description: >-
+        Retrieve the list of domains configured for the tenant (Org Settings > Privacy profile).
+      operationId: Domains.ListDomains
+      tags: [Domains]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/domains/Verified:
+    get:
+      summary: Get verified domains
+      description: >-
+        Retrieve the list of verified domains for the tenant (Users > Active).
+      operationId: Domains.GetVerifiedDomains
+      tags: [Domains]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

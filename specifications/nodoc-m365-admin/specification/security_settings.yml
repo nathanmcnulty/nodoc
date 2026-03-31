@@ -68,3 +68,75 @@ paths:
           description: OK
         4XX:
           $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/settings/security/passwordpolicy:
+    get:
+      summary: Get password expiration policy
+      description: >-
+        Retrieve the password expiration policy settings for the tenant (Org Settings > Password expiration).
+      operationId: SecuritySettings.GetPasswordPolicy
+      tags: [SecuritySettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/settings/security/privacypolicy:
+    get:
+      summary: Get privacy policy settings
+      description: >-
+        Retrieve the privacy profile and policy settings for the tenant (Org Settings > Privacy profile).
+      operationId: SecuritySettings.GetPrivacyPolicy
+      tags: [SecuritySettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/settings/security/tenantLockbox:
+    get:
+      summary: Get tenant lockbox settings
+      description: >-
+        Retrieve the tenant lockbox (privileged access) settings for the tenant (Org Settings > Privileged access).
+      operationId: SecuritySettings.GetTenantLockbox
+      tags: [SecuritySettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/settings/security/dataaccess:
+    get:
+      summary: Get customer lockbox data access settings
+      description: >-
+        Retrieve the customer lockbox data access settings for the tenant (Org Settings > Customer lockbox).
+      operationId: SecuritySettings.GetDataAccess
+      tags: [SecuritySettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

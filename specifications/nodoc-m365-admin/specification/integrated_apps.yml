@@ -178,3 +178,28 @@ paths:
                 description: Integrated apps settings. Exact schema pending.
         4XX:
           $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/privatecatalog/GetAddInDetails:
+    post:
+      summary: Get add-in details
+      description: >-
+        Retrieve detailed information about a specific add-in from the private catalog (Add-ins > Add-ins).
+      operationId: IntegratedApps.GetAddInDetails
+      tags: [IntegratedApps]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

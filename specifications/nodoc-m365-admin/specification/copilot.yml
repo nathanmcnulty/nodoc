@@ -117,3 +117,21 @@ paths:
                 description: Copilot color icon setting. Exact schema pending.
         4XX:
           $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/copilotsettings/settings/dismissed:
+    get:
+      summary: Get dismissed Copilot settings
+      description: >-
+        Retrieve the list of dismissed Copilot settings notifications and prompts (Copilot > Settings).
+      operationId: Copilot.GetDismissedSettings
+      tags: [Copilot]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

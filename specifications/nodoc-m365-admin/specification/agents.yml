@@ -132,3 +132,28 @@ paths:
           description: OK
         4XX:
           $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/agentusers/metrics/agents/entitiesAtRisk:
+    post:
+      summary: Get agent entities at risk
+      description: >-
+        Retrieve metrics about agent entities at risk including security and compliance concerns (Copilot > Agents).
+      operationId: Agents.GetEntitiesAtRisk
+      tags: [Agents]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

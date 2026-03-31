@@ -166,3 +166,100 @@ paths:
                 description: Reports privacy enabled status. Exact schema pending.
         4XX:
           $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/tenant/SACProvisioning:
+    post:
+      summary: SAC provisioning
+      description: >-
+        Trigger Self-service Account Creation (SAC) provisioning for the tenant (Users > Active).
+      operationId: Tenant.SACProvisioning
+      tags: [Tenant]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/tenant/customviewfilterdefaults:
+    get:
+      summary: Get custom view filter defaults
+      description: >-
+        Retrieve default filter settings for custom user list views (Users > Active).
+      operationId: Tenant.GetCustomViewFilterDefaults
+      tags: [Tenant]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/tenant/userviews:
+    get:
+      summary: Get user views
+      description: >-
+        Retrieve the configured user views for the tenant admin portal (Users > Active).
+      operationId: Tenant.GetUserViews
+      tags: [Tenant]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/tenant/isTenantEligibleToRemoveSAC:
+    get:
+      summary: Check SAC removal eligibility
+      description: >-
+        Check if the tenant is eligible to remove Self-service Account Creation (SAC) (Org Settings > M365 installation options).
+      operationId: Tenant.IsTenantEligibleToRemoveSAC
+      tags: [Tenant]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/tenant/seatSize:
+    get:
+      summary: Get tenant seat size
+      description: >-
+        Retrieve the tenant seat size information (Copilot > Data).
+      operationId: Tenant.GetSeatSize
+      tags: [Tenant]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
