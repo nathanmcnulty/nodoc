@@ -153,3 +153,111 @@ paths:
                 description: ARM billing accounts. Exact schema pending.
         4XX:
           $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/notifications:
+    get:
+      summary: Get admin notifications
+      description: >-
+        Retrieve admin notifications for the current user.
+      operationId: Misc.GetNotifications
+      tags: [Miscellaneous]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Admin notifications. Exact schema pending.
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/rememberpreferences:
+    get:
+      summary: Get remembered preferences
+      description: >-
+        Retrieve remembered user preferences for the admin portal.
+      operationId: Misc.GetRememberPreferences
+      tags: [Miscellaneous]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Remembered preferences. Exact schema pending.
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/setupwizard/setupbanner:
+    get:
+      summary: Get setup wizard banner
+      description: >-
+        Retrieve the setup wizard banner status for the admin portal.
+      operationId: Misc.GetSetupBanner
+      tags: [Miscellaneous]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Setup wizard banner status. Exact schema pending.
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/uxversion:
+    get:
+      summary: Get UX version
+      description: >-
+        Retrieve the current UX version of the admin portal.
+      operationId: Misc.GetUxVersion
+      tags: [Miscellaneous]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: UX version information. Exact schema pending.
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/a365conversion:
+    get:
+      summary: Get A365 conversion status
+      description: >-
+        Retrieve the A365 conversion status for the tenant.
+      operationId: Misc.GetA365Conversion
+      tags: [Miscellaneous]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: A365 conversion status. Exact schema pending.
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/recommendations/m365alerts:
+    get:
+      summary: Get M365 recommendation alerts
+      description: >-
+        Retrieve Microsoft 365 recommendation alerts for the tenant.
+      operationId: Misc.GetM365Alerts
+      tags: [Miscellaneous]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: M365 recommendation alerts. Exact schema pending.
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

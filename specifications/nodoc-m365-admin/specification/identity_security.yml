@@ -1,0 +1,19 @@
+paths:
+  /admin/api/identitysecurity/securitydefaults:
+    get:
+      summary: Get security defaults status
+      description: >-
+        Retrieve the security defaults status for the tenant, indicating whether
+        security defaults are enabled or disabled.
+      operationId: IdentitySecurity.GetSecurityDefaults
+      tags: [IdentitySecurity]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Security defaults status. Exact schema pending.
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

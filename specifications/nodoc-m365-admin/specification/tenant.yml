@@ -112,3 +112,57 @@ paths:
                   description: pending - self-service purchase product details
         4XX:
           $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/Tenant/StartOfflineProcesses:
+    get:
+      summary: Start offline processes
+      description: >-
+        Start tenant offline processes for background data processing.
+      operationId: Tenant.StartOfflineProcesses
+      tags: [Tenant]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Offline processes status. Exact schema pending.
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/tenant/o365activationusercounts:
+    get:
+      summary: Get O365 activation user counts
+      description: >-
+        Retrieve Office 365 activation user counts for the tenant.
+      operationId: Tenant.GetO365ActivationUserCounts
+      tags: [Tenant]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: O365 activation user counts. Exact schema pending.
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/tenant/isReportsPrivacyEnabled:
+    get:
+      summary: Check reports privacy enabled
+      description: >-
+        Check if reports privacy is enabled for the tenant.
+      operationId: Tenant.IsReportsPrivacyEnabled
+      tags: [Tenant]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Reports privacy enabled status. Exact schema pending.
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

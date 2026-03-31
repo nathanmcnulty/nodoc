@@ -159,3 +159,228 @@ paths:
                 description: Paginated group list. Exact schema pending.
         4XX:
           $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/users/currentUser:
+    get:
+      summary: Get current user info
+      description: >-
+        Retrieve information about the currently authenticated admin user.
+      operationId: UsersGroups.GetCurrentUser
+      tags: [UsersGroups]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Current user information. Exact schema pending.
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/users/svinfo:
+    get:
+      summary: Get server version info
+      description: >-
+        Retrieve server version information for the admin portal.
+      operationId: UsersGroups.GetServerVersionInfo
+      tags: [UsersGroups]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Server version information. Exact schema pending.
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/users/getcommondvpreferences:
+    get:
+      summary: Get common DV preferences
+      description: >-
+        Retrieve common data visualization preferences for the current user.
+      operationId: UsersGroups.GetCommonDVPreferences
+      tags: [UsersGroups]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Common data visualization preferences. Exact schema pending.
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/users/products:
+    get:
+      summary: Get user products
+      description: >-
+        Retrieve the products and licenses associated with the current user.
+      operationId: UsersGroups.GetUserProducts
+      tags: [UsersGroups]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: User products and licenses. Exact schema pending.
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/users/dashboardlayout:
+    get:
+      summary: Get dashboard layout
+      description: >-
+        Retrieve the dashboard layout preferences for the current user.
+      operationId: UsersGroups.GetDashboardLayout
+      tags: [UsersGroups]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Dashboard layout preferences. Exact schema pending.
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/users/getuseraccesstoken:
+    get:
+      summary: Get user access token
+      description: >-
+        Retrieve an access token for the current authenticated user.
+      operationId: UsersGroups.GetUserAccessToken
+      tags: [UsersGroups]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: User access token. Exact schema pending.
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/users/teamssettingsinfo:
+    get:
+      summary: Get Teams settings info
+      description: >-
+        Retrieve Teams settings information for the current user.
+      operationId: UsersGroups.GetTeamsSettingsInfo
+      tags: [UsersGroups]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Teams settings information. Exact schema pending.
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/users/surveysInfo/:
+    get:
+      summary: Get survey information
+      description: >-
+        Retrieve survey information for the current admin user.
+      operationId: UsersGroups.GetSurveysInfo
+      tags: [UsersGroups]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Survey information. Exact schema pending.
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/users/savecommondvpreferences:
+    post:
+      summary: Save common DV preferences
+      description: >-
+        Save common data visualization preferences for the current user.
+      operationId: UsersGroups.SaveCommonDVPreferences
+      tags: [UsersGroups]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Common data visualization preferences to save. Exact schema pending.
+      responses:
+        '200':
+          description: OK
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/users/tokenWithExpiry:
+    post:
+      summary: Get token with expiry
+      description: >-
+        Retrieve a token with expiry information for the current user.
+      operationId: UsersGroups.GetTokenWithExpiry
+      tags: [UsersGroups]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Token request payload. Exact schema pending.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Token with expiry information. Exact schema pending.
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/groups/labels:
+    get:
+      summary: Get group labels
+      description: >-
+        Retrieve the available labels for groups in the tenant.
+      operationId: UsersGroups.GetGroupLabels
+      tags: [UsersGroups]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Group labels. Exact schema pending.
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/groups/permissions:
+    get:
+      summary: Get group permissions
+      description: >-
+        Retrieve the group permissions configuration for the tenant.
+      operationId: UsersGroups.GetGroupPermissions
+      tags: [UsersGroups]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Group permissions. Exact schema pending.
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

@@ -1,0 +1,72 @@
+paths:
+  /admin/api/features/initialload:
+    get:
+      summary: Get initial load feature flags
+      description: >-
+        Retrieve the feature flags loaded during the initial portal bootstrap.
+      operationId: Features.GetInitialLoad
+      tags: [Features]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Initial load feature flags. Exact schema pending.
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/features/admincontentcdnimagepath:
+    get:
+      summary: Get admin content CDN image path
+      description: >-
+        Retrieve the CDN image path used for admin portal content and assets.
+      operationId: Features.GetAdminContentCdnImagePath
+      tags: [Features]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Admin content CDN image path. Exact schema pending.
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/features/config:
+    get:
+      summary: Get features configuration
+      description: >-
+        Retrieve the features configuration for the admin portal.
+      operationId: Features.GetConfig
+      tags: [Features]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Features configuration. Exact schema pending.
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/features/all:
+    get:
+      summary: Get all feature flags
+      description: >-
+        Retrieve all feature flags available for the admin portal.
+      operationId: Features.GetAll
+      tags: [Features]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: All feature flags. Exact schema pending.
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

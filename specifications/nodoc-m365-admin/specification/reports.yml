@@ -122,3 +122,21 @@ paths:
                 description: Productivity Score configuration. Exact schema pending.
         4XX:
           $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/admindashboard/preferences:
+    get:
+      summary: Get admin dashboard preferences
+      description: >-
+        Retrieve admin dashboard preferences for the current user.
+      operationId: Reports.GetAdminDashboardPreferences
+      tags: [Reports]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Admin dashboard preferences. Exact schema pending.
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

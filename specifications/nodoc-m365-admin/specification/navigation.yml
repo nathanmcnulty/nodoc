@@ -1,0 +1,55 @@
+paths:
+  /admin/api/navigation/darkmode:
+    get:
+      summary: Get dark mode preference
+      description: >-
+        Retrieve the current user's dark mode preference for the admin portal.
+      operationId: Navigation.GetDarkMode
+      tags: [Navigation]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Dark mode preference. Exact schema pending.
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/navigation:
+    get:
+      summary: Get navigation configuration
+      description: >-
+        Retrieve the navigation configuration for the admin portal, including
+        menu items and structure.
+      operationId: Navigation.GetNavigation
+      tags: [Navigation]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Navigation configuration. Exact schema pending.
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/navigation/async:
+    get:
+      summary: Get async navigation items
+      description: >-
+        Retrieve asynchronously loaded navigation items for the admin portal.
+      operationId: Navigation.GetAsyncNavigation
+      tags: [Navigation]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Async navigation items. Exact schema pending.
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

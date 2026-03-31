@@ -99,3 +99,21 @@ paths:
                 description: License assignment date information. Exact schema pending.
         4XX:
           $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/m365copilot/ShowColorCopilotIcon:
+    get:
+      summary: Get Copilot color icon setting
+      description: >-
+        Retrieve the setting for whether to show the color Copilot icon in the admin portal.
+      operationId: Copilot.GetShowColorCopilotIcon
+      tags: [Copilot]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Copilot color icon setting. Exact schema pending.
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

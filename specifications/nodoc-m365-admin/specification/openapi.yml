@@ -87,6 +87,16 @@ tags:
     description: Operations relating to Microsoft Viva settings.
   - name: Miscellaneous
     description: Miscellaneous operations (bootstrap, recommendations, sync errors, etc.).
+  - name: Navigation
+    description: Operations relating to portal navigation and UI preferences.
+  - name: Features
+    description: Operations relating to feature flags and configuration.
+  - name: Billing
+    description: Operations relating to billing models and payments.
+  - name: IdentitySecurity
+    description: Operations relating to identity and security configuration.
+  - name: Partners
+    description: Operations relating to partner management and AOBO.
 
 x-tagGroups:
   - name: Copilot
@@ -125,6 +135,16 @@ x-tagGroups:
     tags: [Viva]
   - name: Miscellaneous
     tags: [Miscellaneous]
+  - name: Navigation
+    tags: [Navigation]
+  - name: Features
+    tags: [Features]
+  - name: Billing
+    tags: [Billing]
+  - name: Identity & Security
+    tags: [IdentitySecurity]
+  - name: Partners
+    tags: [Partners]
 
 paths:
   # Copilot
@@ -136,6 +156,8 @@ paths:
     $ref: copilot.yml#/paths/~1admin~1api~1copilotsettings~1securitycopilot~1auth
   /admin/api/Copilot/getcopilotlicenseassignmentdate:
     $ref: copilot.yml#/paths/~1admin~1api~1Copilot~1getcopilotlicenseassignmentdate
+  /admin/api/m365copilot/ShowColorCopilotIcon:
+    $ref: copilot.yml#/paths/~1admin~1api~1m365copilot~1ShowColorCopilotIcon
 
   # Agents
   /admin/api/agentusers/metrics/agents/risky:
@@ -212,6 +234,8 @@ paths:
     $ref: reports.yml#/paths/~1admin~1api~1reports~1GetSummaryDataV3
   /admin/api/reports/productivityScoreConfig/GetProductivityScoreConfig:
     $ref: reports.yml#/paths/~1admin~1api~1reports~1productivityScoreConfig~1GetProductivityScoreConfig
+  /admin/api/admindashboard/preferences:
+    $ref: reports.yml#/paths/~1admin~1api~1admindashboard~1preferences
 
   # Search
   /admin/api/searchadminapi/configurations:
@@ -234,6 +258,30 @@ paths:
     $ref: users_groups.yml#/paths/~1admin~1api~1users~1contextualalerts
   /admin/api/groups/GetGroups:
     $ref: users_groups.yml#/paths/~1admin~1api~1groups~1GetGroups
+  /admin/api/users/currentUser:
+    $ref: users_groups.yml#/paths/~1admin~1api~1users~1currentUser
+  /admin/api/users/svinfo:
+    $ref: users_groups.yml#/paths/~1admin~1api~1users~1svinfo
+  /admin/api/users/getcommondvpreferences:
+    $ref: users_groups.yml#/paths/~1admin~1api~1users~1getcommondvpreferences
+  /admin/api/users/products:
+    $ref: users_groups.yml#/paths/~1admin~1api~1users~1products
+  /admin/api/users/dashboardlayout:
+    $ref: users_groups.yml#/paths/~1admin~1api~1users~1dashboardlayout
+  /admin/api/users/getuseraccesstoken:
+    $ref: users_groups.yml#/paths/~1admin~1api~1users~1getuseraccesstoken
+  /admin/api/users/teamssettingsinfo:
+    $ref: users_groups.yml#/paths/~1admin~1api~1users~1teamssettingsinfo
+  /admin/api/users/surveysInfo/:
+    $ref: users_groups.yml#/paths/~1admin~1api~1users~1surveysInfo~1
+  /admin/api/users/savecommondvpreferences:
+    $ref: users_groups.yml#/paths/~1admin~1api~1users~1savecommondvpreferences
+  /admin/api/users/tokenWithExpiry:
+    $ref: users_groups.yml#/paths/~1admin~1api~1users~1tokenWithExpiry
+  /admin/api/groups/labels:
+    $ref: users_groups.yml#/paths/~1admin~1api~1groups~1labels
+  /admin/api/groups/permissions:
+    $ref: users_groups.yml#/paths/~1admin~1api~1groups~1permissions
 
   # Tenant
   /admin/api/tenant/datalocationandcommitments:
@@ -248,6 +296,12 @@ paths:
     $ref: tenant.yml#/paths/~1admin~1api~1tenant~1marketplaceSeatSize
   /admin/api/selfServicePurchasePolicy/products:
     $ref: tenant.yml#/paths/~1admin~1api~1selfServicePurchasePolicy~1products
+  /admin/api/Tenant/StartOfflineProcesses:
+    $ref: tenant.yml#/paths/~1admin~1api~1Tenant~1StartOfflineProcesses
+  /admin/api/tenant/o365activationusercounts:
+    $ref: tenant.yml#/paths/~1admin~1api~1tenant~1o365activationusercounts
+  /admin/api/tenant/isReportsPrivacyEnabled:
+    $ref: tenant.yml#/paths/~1admin~1api~1tenant~1isReportsPrivacyEnabled
 
   # Graph Proxy
   /fd/msgraph/v1.0/subscribedSkus:
@@ -346,3 +400,45 @@ paths:
     $ref: miscellaneous.yml#/paths/~1fd~1enhancedRestorev2~1v1~1featureSetting
   /fd/arm/providers/Microsoft.Billing/billingAccounts:
     $ref: miscellaneous.yml#/paths/~1fd~1arm~1providers~1Microsoft.Billing~1billingAccounts
+  /admin/api/notifications:
+    $ref: miscellaneous.yml#/paths/~1admin~1api~1notifications
+  /admin/api/rememberpreferences:
+    $ref: miscellaneous.yml#/paths/~1admin~1api~1rememberpreferences
+  /admin/api/setupwizard/setupbanner:
+    $ref: miscellaneous.yml#/paths/~1admin~1api~1setupwizard~1setupbanner
+  /admin/api/uxversion:
+    $ref: miscellaneous.yml#/paths/~1admin~1api~1uxversion
+  /admin/api/a365conversion:
+    $ref: miscellaneous.yml#/paths/~1admin~1api~1a365conversion
+  /admin/api/recommendations/m365alerts:
+    $ref: miscellaneous.yml#/paths/~1admin~1api~1recommendations~1m365alerts
+
+  # Navigation
+  /admin/api/navigation/darkmode:
+    $ref: navigation.yml#/paths/~1admin~1api~1navigation~1darkmode
+  /admin/api/navigation:
+    $ref: navigation.yml#/paths/~1admin~1api~1navigation
+  /admin/api/navigation/async:
+    $ref: navigation.yml#/paths/~1admin~1api~1navigation~1async
+
+  # Features
+  /admin/api/features/initialload:
+    $ref: features.yml#/paths/~1admin~1api~1features~1initialload
+  /admin/api/features/admincontentcdnimagepath:
+    $ref: features.yml#/paths/~1admin~1api~1features~1admincontentcdnimagepath
+  /admin/api/features/config:
+    $ref: features.yml#/paths/~1admin~1api~1features~1config
+  /admin/api/features/all:
+    $ref: features.yml#/paths/~1admin~1api~1features~1all
+
+  # Billing
+  /admin/api/billing/BillingModel:
+    $ref: billing.yml#/paths/~1admin~1api~1billing~1BillingModel
+
+  # Identity & Security
+  /admin/api/identitysecurity/securitydefaults:
+    $ref: identity_security.yml#/paths/~1admin~1api~1identitysecurity~1securitydefaults
+
+  # Partners
+  /admin/api/partners/AOBOClients:
+    $ref: partners.yml#/paths/~1admin~1api~1partners~1AOBOClients

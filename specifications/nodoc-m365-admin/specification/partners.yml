@@ -1,0 +1,19 @@
+paths:
+  /admin/api/partners/AOBOClients:
+    get:
+      summary: Get AOBO partner clients
+      description: >-
+        Retrieve the list of Admin on Behalf Of (AOBO) partner clients
+        associated with the tenant.
+      operationId: Partners.GetAOBOClients
+      tags: [Partners]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: AOBO partner clients. Exact schema pending.
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

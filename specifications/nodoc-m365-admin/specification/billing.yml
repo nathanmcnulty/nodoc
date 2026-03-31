@@ -1,0 +1,18 @@
+paths:
+  /admin/api/billing/BillingModel:
+    get:
+      summary: Get billing model
+      description: >-
+        Retrieve the billing model information for the tenant.
+      operationId: Billing.GetBillingModel
+      tags: [Billing]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Billing model information. Exact schema pending.
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
