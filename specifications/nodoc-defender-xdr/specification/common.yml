@@ -1,0 +1,97 @@
+components:
+  parameters:
+    XMsCorrelationId:
+      name: x-ms-correlation-id
+      description: A unique identifier for correlating requests across services.
+      in: header
+      schema:
+        type: string
+        format: uuid
+      required: false
+  headers:
+    Cache-Control:
+      description: Directives for caching mechanisms.
+      schema:
+        type: string
+        example: no-cache, no-store
+    Content-Type:
+      description: The media type of the response body.
+      schema:
+        type: string
+        example: application/json; charset=utf-8
+    X-Content-Type-Options:
+      description: Prevents MIME-sniffing.
+      schema:
+        type: string
+        example: nosniff
+    X-XSS-Protection:
+      description: Cross-site scripting filter.
+      schema:
+        type: string
+        example: 1; mode=block
+    Strict-Transport-Security:
+      description: HTTP Strict Transport Security header.
+      schema:
+        type: string
+        example: max-age=31536000; includeSubDomains
+    x-ms-correlation-id:
+      description: A correlation identifier for the request.
+      schema:
+        type: string
+        format: uuid
+    Date:
+      description: The date and time at which the response was generated.
+      schema:
+        type: string
+        format: date-time
+    Content-Length:
+      description: The length of the response body in bytes.
+      schema:
+        type: integer
+  schemas:
+    ErrorResponse:
+      type: object
+      description: A standard error response from the Defender XDR API.
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              description: The error code.
+              type: string
+              example: BadRequest
+            message:
+              description: A human-readable error message.
+              type: string
+              example: The request is invalid.
+  responses:
+    BadRequest:
+      description: Bad Request - The request was malformed or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: Unauthorized - Authentication is required or has failed.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Forbidden:
+      description: Forbidden - The authenticated user does not have sufficient permissions.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Not Found - The requested resource was not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    ClientException:
+      description: Client Error - An error occurred processing the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'

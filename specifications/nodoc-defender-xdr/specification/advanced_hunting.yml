@@ -1,0 +1,355 @@
+paths:
+  /mtp/huntingService/schema:
+    get:
+      summary: Get advanced hunting table schema
+      description: >-
+        Retrieve the schema for all advanced hunting tables, including column names,
+        types, and descriptions. Used to power the schema browser in the hunting interface.
+      operationId: AdvancedHunting.GetTableSchema
+      tags: [Advanced Hunting]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TableSchema'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/huntingService/savedFunctions:
+    get:
+      summary: List saved functions
+      description: >-
+        Retrieve a list of all saved advanced hunting functions (custom functions)
+        available to the user.
+      operationId: AdvancedHunting.ListFunctions
+      tags: [Advanced Hunting]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SavedFunction'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/huntingService/functions/defender/savedfunctions/{Id}:
+    get:
+      summary: Get saved function
+      description: >-
+        Retrieve a specific saved advanced hunting function by its unique identifier.
+      operationId: AdvancedHunting.GetFunction
+      tags: [Advanced Hunting]
+      parameters:
+        - name: Id
+          in: path
+          required: true
+          description: The unique identifier of the saved function.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SavedFunction'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/huntingService/rules/unified:
+    get:
+      summary: List unified custom detection rules
+      description: >-
+        Retrieve a list of all unified custom detection rules configured in the tenant.
+        Supports pagination and sorting.
+      operationId: AdvancedHunting.ListUnifiedDetectionRules
+      tags: [Advanced Hunting]
+      parameters:
+        - name: pageIndex
+          in: query
+          description: The page index for pagination.
+          schema:
+            type: integer
+            default: 1
+        - name: pageSize
+          in: query
+          description: The number of results per page.
+          schema:
+            type: integer
+            default: 10000
+        - name: sortOrder
+          in: query
+          description: The sort order.
+          schema:
+            type: string
+            enum: [Ascending, Descending]
+            default: Ascending
+        - name: isUnifiedRulesListEnabled
+          in: query
+          description: Whether to include unified rules.
+          schema:
+            type: boolean
+            default: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  rules:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DetectionRule'
+                  totalCount:
+                    type: integer
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/huntingService/reports/userHistory:
+    get:
+      summary: Get user hunting query history
+      description: >-
+        Retrieve the advanced hunting query execution history for the current user.
+      operationId: AdvancedHunting.GetUserHistory
+      tags: [Advanced Hunting]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    query:
+                      description: The KQL query text.
+                      type: string
+                    timestamp:
+                      description: When the query was executed.
+                      type: string
+                      format: date-time
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/huntingService/queries/encode:
+    get:
+      summary: Encode hunting query
+      description: >-
+        Encode an advanced hunting KQL query string for use in deep links
+        and URL-safe sharing.
+      operationId: AdvancedHunting.EncodeQuery
+      tags: [Advanced Hunting]
+      parameters:
+        - name: query
+          in: query
+          required: true
+          description: The KQL query text to encode.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  encodedQuery:
+                    description: The encoded query string.
+                    type: string
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/huntingService/savedfunctions:
+    post:
+      summary: Create saved function
+      description: >-
+        Create a new saved advanced hunting function (custom function).
+      operationId: AdvancedHunting.CreateFunction
+      tags: [Advanced Hunting]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SavedFunctionCreate'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SavedFunction'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/huntingService/functions/defender/updateFunction:
+    put:
+      summary: Update saved function
+      description: >-
+        Update an existing saved advanced hunting function.
+      operationId: AdvancedHunting.UpdateFunction
+      tags: [Advanced Hunting]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SavedFunctionUpdate'
+      responses:
+        '200':
+          description: OK
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/huntingService/functions/{Id}:
+    delete:
+      summary: Delete saved function
+      description: >-
+        Delete a saved advanced hunting function by its unique identifier.
+      operationId: AdvancedHunting.DeleteFunction
+      tags: [Advanced Hunting]
+      parameters:
+        - name: Id
+          in: path
+          required: true
+          description: The unique identifier of the saved function to delete.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+components:
+  schemas:
+    TableSchema:
+      type: object
+      description: Schema definition for an advanced hunting table.
+      properties:
+        name:
+          description: The table name.
+          type: string
+          example: DeviceEvents
+        columns:
+          description: The columns in the table.
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                description: The column name.
+                type: string
+              type:
+                description: The data type of the column.
+                type: string
+              description:
+                description: A description of the column.
+                type: string
+    SavedFunction:
+      type: object
+      description: A saved advanced hunting function.
+      properties:
+        id:
+          description: The unique identifier of the function.
+          type: string
+        displayName:
+          description: The display name of the function.
+          type: string
+        body:
+          description: The KQL function body.
+          type: string
+        description:
+          description: A description of the function.
+          type: string
+        inputParameters:
+          description: Input parameters for the function.
+          type: string
+        createdBy:
+          description: The user who created the function.
+          type: string
+        lastModifiedDateTime:
+          description: When the function was last modified.
+          type: string
+          format: date-time
+    SavedFunctionCreate:
+      type: object
+      description: Request body for creating a saved function.
+      properties:
+        displayName:
+          description: The display name of the function.
+          type: string
+        body:
+          description: The KQL function body.
+          type: string
+        description:
+          description: A description of the function.
+          type: string
+        inputParameters:
+          description: Input parameters for the function.
+          type: string
+      required:
+        - displayName
+        - body
+    SavedFunctionUpdate:
+      type: object
+      description: Request body for updating a saved function.
+      properties:
+        id:
+          description: The unique identifier of the function to update.
+          type: string
+        displayName:
+          description: The display name of the function.
+          type: string
+        body:
+          description: The KQL function body.
+          type: string
+        description:
+          description: A description of the function.
+          type: string
+        inputParameters:
+          description: Input parameters for the function.
+          type: string
+      required:
+        - id
+        - displayName
+        - body
+    DetectionRule:
+      type: object
+      description: A custom detection rule.
+      properties:
+        id:
+          description: The unique identifier of the rule.
+          type: string
+        ruleName:
+          description: The name of the detection rule.
+          type: string
+        severity:
+          description: The severity of alerts generated by this rule.
+          type: string
+          enum: [Informational, Low, Medium, High]
+        isEnabled:
+          description: Whether the rule is enabled.
+          type: boolean
+        query:
+          description: The KQL query for the detection.
+          type: string
+        frequency:
+          description: How often the rule runs.
+          type: string
+        lastRunTime:
+          description: The last time the rule was executed.
+          type: string
+          format: date-time
+        createdBy:
+          description: The user who created the rule.
+          type: string

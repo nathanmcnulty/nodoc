@@ -1,0 +1,369 @@
+openapi: 3.0.1
+info:
+  title: Defender XDR
+  description: |
+    The Defender XDR API is used by the Microsoft Defender XDR portal (security.microsoft.com) for managing security operations, including:
+
+      - Alerts and Incidents
+      - Advanced Hunting
+      - Endpoint Device Management (MDE)
+      - Live Response
+      - Endpoint Configuration
+      - Vulnerability Management (TVM)
+      - Identity Protection (MDI)
+      - Configuration and Settings
+      - Exposure Management and XSPM
+      - Data Lake and Analytics
+      - Threat Analytics
+      - Action Center
+      - Multi-Tenant Operations
+      - Streaming API
+
+    These APIs are accessed through the portal's API proxy layer at `security.microsoft.com/apiproxy` and support delegated authentication flows.
+    They are used internally by the Defender XDR portal and are not officially documented by Microsoft.
+
+    The proxy layer routes requests to various backend services using path prefixes:
+
+    | Prefix | Service |
+    | --- | --- |
+    | `/mtp/` | Microsoft Threat Protection |
+    | `/mdi/` | Microsoft Defender for Identity |
+    | `/mcas/` | Microsoft Cloud App Security (Defender for Cloud Apps) |
+    | `/mdc/` | Microsoft Defender for Cloud |
+    | `/mtoapi/` | Multi-Tenant Operations |
+    | `/securityplatform/` | Security Platform (Data Lake) |
+    | `/radius/` | RADIUS Identity Services |
+
+    Documentation and specifications have been provided on a best efforts basis and may not be 100% accurate.
+
+  version: '1.0'
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+servers:
+  - url: https://security.microsoft.com/apiproxy
+
+security:
+  - PortalSession: []
+
+components:
+  securitySchemes:
+    PortalSession:
+      type: apiKey
+      in: cookie
+      name: sccauth
+      description: >-
+        Session-based authentication via the Microsoft Defender XDR portal.
+        Requires an authenticated browser session at security.microsoft.com.
+
+tags:
+  - name: Alerts
+    description: Operations relating to alert management and retrieval.
+  - name: Incidents
+    description: Operations relating to incident management, merging, and alert correlation.
+  - name: Advanced Hunting
+    description: |
+      Operations relating to Advanced Hunting, including schema discovery, saved functions,
+      custom detection rules, and query encoding.
+  - name: Endpoint Devices
+    description: |
+      Operations relating to endpoint device management in Microsoft Defender for Endpoint (MDE),
+      including device inventory, tags, asset values, RBAC groups, and device actions.
+  - name: Live Response
+    description: |
+      Operations relating to Live Response sessions on endpoint devices,
+      including session management, command execution, file operations, and the script library.
+  - name: Endpoint Configuration
+    description: |
+      Operations relating to endpoint configuration settings, including advanced features,
+      preview features, custom collection rules, and workload-specific configurations.
+  - name: Vulnerability Management
+    description: |
+      Operations relating to Threat and Vulnerability Management (TVM), including vulnerability
+      listings, remediation tasks, product inventory, security advisories, and baselines.
+  - name: Identity
+    description: |
+      Operations relating to Microsoft Defender for Identity (MDI), including user resolution,
+      identity entities, service accounts, domain controller coverage, and configuration.
+  - name: Configuration
+    description: |
+      Operations relating to Defender XDR platform configuration, including suppression rules,
+      alert tuning, preview features, critical asset management, unified RBAC, and Cloud Apps settings.
+  - name: Exposure Management
+    description: |
+      Operations relating to Exposure Management and Cross-Workload Security Posture Management (XSPM),
+      including attack paths, choke points, entry points, targets, and recommendations.
+  - name: Data Lake
+    description: Operations relating to the security data lake, including database and table schema discovery.
+  - name: Threat Analytics
+    description: Operations relating to Threat Analytics reports and outbreak tracking.
+  - name: Action Center
+    description: Operations relating to the Action Center, including history and pending actions.
+  - name: Multi-Tenant
+    description: |
+      Operations relating to multi-tenant management, including tenant listing,
+      workload status, and cross-tenant advanced hunting.
+  - name: Streaming API
+    description: Operations relating to the Streaming API configuration for event export.
+
+x-tagGroups:
+  - name: Alerts & Incidents
+    tags:
+      - Alerts
+      - Incidents
+  - name: Advanced Hunting
+    tags:
+      - Advanced Hunting
+  - name: Endpoint Management
+    tags:
+      - Endpoint Devices
+      - Live Response
+      - Endpoint Configuration
+  - name: Vulnerability Management
+    tags:
+      - Vulnerability Management
+  - name: Identity
+    tags:
+      - Identity
+  - name: Configuration
+    tags:
+      - Configuration
+  - name: Exposure Management
+    tags:
+      - Exposure Management
+  - name: Analytics & Data
+    tags:
+      - Data Lake
+      - Threat Analytics
+  - name: Operations
+    tags:
+      - Action Center
+      - Multi-Tenant
+      - Streaming API
+
+paths:
+  # Alerts & Incidents
+  /mtp/alertsApiService/alerts:
+    $ref: alerts_incidents.yml#/paths/~1mtp~1alertsApiService~1alerts
+  /mtp/incidentQueue/incidents/{IncidentId}:
+    $ref: alerts_incidents.yml#/paths/~1mtp~1incidentQueue~1incidents~1{IncidentId}
+  /mtp/incidentQueue/incidents/alerts:
+    $ref: alerts_incidents.yml#/paths/~1mtp~1incidentQueue~1incidents~1alerts
+  /mtp/incidentQueue/incidents/update:
+    $ref: alerts_incidents.yml#/paths/~1mtp~1incidentQueue~1incidents~1update
+  /mtp/incidentQueue/incidents/merge:
+    $ref: alerts_incidents.yml#/paths/~1mtp~1incidentQueue~1incidents~1merge
+
+  # Advanced Hunting
+  /mtp/huntingService/schema:
+    $ref: advanced_hunting.yml#/paths/~1mtp~1huntingService~1schema
+  /mtp/huntingService/savedFunctions:
+    $ref: advanced_hunting.yml#/paths/~1mtp~1huntingService~1savedFunctions
+  /mtp/huntingService/functions/defender/savedfunctions/{Id}:
+    $ref: advanced_hunting.yml#/paths/~1mtp~1huntingService~1functions~1defender~1savedfunctions~1{Id}
+  /mtp/huntingService/rules/unified:
+    $ref: advanced_hunting.yml#/paths/~1mtp~1huntingService~1rules~1unified
+  /mtp/huntingService/reports/userHistory:
+    $ref: advanced_hunting.yml#/paths/~1mtp~1huntingService~1reports~1userHistory
+  /mtp/huntingService/queries/encode:
+    $ref: advanced_hunting.yml#/paths/~1mtp~1huntingService~1queries~1encode
+  /mtp/huntingService/savedfunctions:
+    $ref: advanced_hunting.yml#/paths/~1mtp~1huntingService~1savedfunctions
+  /mtp/huntingService/functions/defender/updateFunction:
+    $ref: advanced_hunting.yml#/paths/~1mtp~1huntingService~1functions~1defender~1updateFunction
+  /mtp/huntingService/functions/{Id}:
+    $ref: advanced_hunting.yml#/paths/~1mtp~1huntingService~1functions~1{Id}
+
+  # Endpoint Devices
+  /mtp/ndr/machines:
+    $ref: endpoint_devices.yml#/paths/~1mtp~1ndr~1machines
+  /mtp/getMachine/machines:
+    $ref: endpoint_devices.yml#/paths/~1mtp~1getMachine~1machines
+  /mtp/machineTag/machineTags/{DeviceId}:
+    $ref: endpoint_devices.yml#/paths/~1mtp~1machineTag~1machineTags~1{DeviceId}
+  /mtp/machineTag/machineTag:
+    $ref: endpoint_devices.yml#/paths/~1mtp~1machineTag~1machineTag
+  /mtp/assetvalue/machineAssetValue:
+    $ref: endpoint_devices.yml#/paths/~1mtp~1assetvalue~1machineAssetValue
+  /mtp/assetvalue/setCriticalityLevel:
+    $ref: endpoint_devices.yml#/paths/~1mtp~1assetvalue~1setCriticalityLevel
+  /mtp/rbacGroupAssignment/updateMachineRbacGroupAssignments:
+    $ref: endpoint_devices.yml#/paths/~1mtp~1rbacGroupAssignment~1updateMachineRbacGroupAssignments
+  /mtp/rbacGroupAssignment/machineRbacGroupAssignments/{DeviceId}:
+    $ref: endpoint_devices.yml#/paths/~1mtp~1rbacGroupAssignment~1machineRbacGroupAssignments~1{DeviceId}
+  /mtp/rbacGroupAssignment/rbacGroupsScopes/{DeviceId}:
+    $ref: endpoint_devices.yml#/paths/~1mtp~1rbacGroupAssignment~1rbacGroupsScopes~1{DeviceId}
+  /mtp/machineExclusionState/updateMachineExclusionState:
+    $ref: endpoint_devices.yml#/paths/~1mtp~1machineExclusionState~1updateMachineExclusionState
+  /mtp/responseApiPortal/requests/create:
+    $ref: endpoint_devices.yml#/paths/~1mtp~1responseApiPortal~1requests~1create
+  /mtp/responseApiPortal/requests/{ActionId}:
+    $ref: endpoint_devices.yml#/paths/~1mtp~1responseApiPortal~1requests~1{ActionId}
+  /mtp/deviceTimeline/timeline/{DeviceId}:
+    $ref: endpoint_devices.yml#/paths/~1mtp~1deviceTimeline~1timeline~1{DeviceId}
+  /mtp/deviceManagement/deviceModels:
+    $ref: endpoint_devices.yml#/paths/~1mtp~1deviceManagement~1deviceModels
+  /mtp/deviceManagement/deviceVendors:
+    $ref: endpoint_devices.yml#/paths/~1mtp~1deviceManagement~1deviceVendors
+  /mtp/deviceManagement/osVersions:
+    $ref: endpoint_devices.yml#/paths/~1mtp~1deviceManagement~1osVersions
+  /mtp/deviceManagement/deviceTotals:
+    $ref: endpoint_devices.yml#/paths/~1mtp~1deviceManagement~1deviceTotals
+  /mtp/deviceManagement/windowsReleaseVersions:
+    $ref: endpoint_devices.yml#/paths/~1mtp~1deviceManagement~1windowsReleaseVersions
+  /mtp/deviceManagement/deviceLicenseReport:
+    $ref: endpoint_devices.yml#/paths/~1mtp~1deviceManagement~1deviceLicenseReport
+
+  # Live Response
+  /mtp/liveResponseApi/create_session:
+    $ref: live_response.yml#/paths/~1mtp~1liveResponseApi~1create_session
+  /mtp/liveResponseApi/sessions/{sessionId}:
+    $ref: live_response.yml#/paths/~1mtp~1liveResponseApi~1sessions~1{sessionId}
+  /mtp/liveResponseApi/commands/{autoCommandId}:
+    $ref: live_response.yml#/paths/~1mtp~1liveResponseApi~1commands~1{autoCommandId}
+  /mtp/liveResponseApi/get_command_definitions:
+    $ref: live_response.yml#/paths/~1mtp~1liveResponseApi~1get_command_definitions
+  /mtp/liveResponseApi/download_file:
+    $ref: live_response.yml#/paths/~1mtp~1liveResponseApi~1download_file
+  /mtp/liveResponseApi/close_session:
+    $ref: live_response.yml#/paths/~1mtp~1liveResponseApi~1close_session
+  /mtp/liveResponseApi/library:
+    $ref: live_response.yml#/paths/~1mtp~1liveResponseApi~1library
+  /mtp/liveResponseApi/library/{FileId}:
+    $ref: live_response.yml#/paths/~1mtp~1liveResponseApi~1library~1{FileId}
+
+  # Endpoint Configuration
+  /mtp/settings/GetAdvancedFeaturesSetting:
+    $ref: endpoint_configuration.yml#/paths/~1mtp~1settings~1GetAdvancedFeaturesSetting
+  /mtp/settings/SaveAdvancedFeaturesSetting:
+    $ref: endpoint_configuration.yml#/paths/~1mtp~1settings~1SaveAdvancedFeaturesSetting
+  /mtp/settings/GetPreviewExperienceSetting:
+    $ref: endpoint_configuration.yml#/paths/~1mtp~1settings~1GetPreviewExperienceSetting
+  /mtp/customDataCollection/rules:
+    $ref: endpoint_configuration.yml#/paths/~1mtp~1customDataCollection~1rules
+  /mtp/customDataCollection/rules/{RuleId}:
+    $ref: endpoint_configuration.yml#/paths/~1mtp~1customDataCollection~1rules~1{RuleId}
+  /mtp/deviceManagement/configuration/AuthenticatedTelemetry:
+    $ref: endpoint_configuration.yml#/paths/~1mtp~1deviceManagement~1configuration~1AuthenticatedTelemetry
+  /mtp/deviceManagement/configuration/PotentiallyUnwantedApplications:
+    $ref: endpoint_configuration.yml#/paths/~1mtp~1deviceManagement~1configuration~1PotentiallyUnwantedApplications
+  /mtp/deviceManagement/configuration/IntuneConnection:
+    $ref: endpoint_configuration.yml#/paths/~1mtp~1deviceManagement~1configuration~1IntuneConnection
+  /mtp/deviceManagement/configuration/PurviewSharing:
+    $ref: endpoint_configuration.yml#/paths/~1mtp~1deviceManagement~1configuration~1PurviewSharing
+
+  # Vulnerability Management
+  /mtp/tvm/analytics/vulnerabilities:
+    $ref: vulnerability_management.yml#/paths/~1mtp~1tvm~1analytics~1vulnerabilities
+  /mtp/tvm/analytics/vulnerabilities/summary:
+    $ref: vulnerability_management.yml#/paths/~1mtp~1tvm~1analytics~1vulnerabilities~1summary
+  /mtp/tvm/analytics/dashboard:
+    $ref: vulnerability_management.yml#/paths/~1mtp~1tvm~1analytics~1dashboard
+  /mtp/tvm/analytics/remediations:
+    $ref: vulnerability_management.yml#/paths/~1mtp~1tvm~1analytics~1remediations
+  /mtp/tvm/analytics/products:
+    $ref: vulnerability_management.yml#/paths/~1mtp~1tvm~1analytics~1products
+  /mtp/tvm/analytics/extensions:
+    $ref: vulnerability_management.yml#/paths/~1mtp~1tvm~1analytics~1extensions
+  /mtp/tvm/analytics/certificates:
+    $ref: vulnerability_management.yml#/paths/~1mtp~1tvm~1analytics~1certificates
+  /mtp/tvm/analytics/changeevents:
+    $ref: vulnerability_management.yml#/paths/~1mtp~1tvm~1analytics~1changeevents
+  /mtp/tvm/analytics/advisories:
+    $ref: vulnerability_management.yml#/paths/~1mtp~1tvm~1analytics~1advisories
+  /mtp/tvm/analytics/vulnerabilities/baseline:
+    $ref: vulnerability_management.yml#/paths/~1mtp~1tvm~1analytics~1vulnerabilities~1baseline
+
+  # Identity (MDI)
+  /mdi/identity/userapiservice/user/resolve:
+    $ref: identity.yml#/paths/~1mdi~1identity~1userapiservice~1user~1resolve
+  /mdi/identity/userapiservice/user/timeline:
+    $ref: identity.yml#/paths/~1mdi~1identity~1userapiservice~1user~1timeline
+  /mdi/identity/identitiesapiservice/identity/entities:
+    $ref: identity.yml#/paths/~1mdi~1identity~1identitiesapiservice~1identity~1entities
+  /mdi/identity/userapiservice/serviceaccount/entities:
+    $ref: identity.yml#/paths/~1mdi~1identity~1userapiservice~1serviceaccount~1entities
+  /mdi/identity/userapiservice/statistics:
+    $ref: identity.yml#/paths/~1mdi~1identity~1userapiservice~1statistics
+  /mdi/identity/identitiesapiservice/domainController/coverage:
+    $ref: identity.yml#/paths/~1mdi~1identity~1identitiesapiservice~1domainController~1coverage
+  /mdi/identity/userapiservice/status:
+    $ref: identity.yml#/paths/~1mdi~1identity~1userapiservice~1status
+  /mdi/identity/userapiservice/alertThreshold:
+    $ref: identity.yml#/paths/~1mdi~1identity~1userapiservice~1alertThreshold
+  /mdi/identity/userapiservice/directoryServiceAccount:
+    $ref: identity.yml#/paths/~1mdi~1identity~1userapiservice~1directoryServiceAccount
+  /mdi/identity/identitiesapiservice/remediationAccount:
+    $ref: identity.yml#/paths/~1mdi~1identity~1identitiesapiservice~1remediationAccount
+
+  # Configuration
+  /mtp/suppressionRulesService/suppressionRules:
+    $ref: configuration.yml#/paths/~1mtp~1suppressionRulesService~1suppressionRules
+  /mtp/alertsApiService/workloads/disabled:
+    $ref: configuration.yml#/paths/~1mtp~1alertsApiService~1workloads~1disabled
+  /mtp/ndr/rulesengine/rules:
+    $ref: configuration.yml#/paths/~1mtp~1ndr~1rulesengine~1rules
+  /mcas/cas/api/v1/preview_features/get/:
+    $ref: configuration.yml#/paths/~1mcas~1cas~1api~1v1~1preview_features~1get~1
+  /mdc/management/optin:
+    $ref: configuration.yml#/paths/~1mdc~1management~1optin
+  /mtp/settings/SavePreviewExperienceSetting:
+    $ref: configuration.yml#/paths/~1mtp~1settings~1SavePreviewExperienceSetting
+  /mcas/cas/api/v1/preview_features/update/:
+    $ref: configuration.yml#/paths/~1mcas~1cas~1api~1v1~1preview_features~1update~1
+  /mtp/sccManagement/mgmt/TenantContext:
+    $ref: configuration.yml#/paths/~1mtp~1sccManagement~1mgmt~1TenantContext
+  /mtp/xspmatlas/assetrules:
+    $ref: configuration.yml#/paths/~1mtp~1xspmatlas~1assetrules
+  /mtp/xspmatlas/assetrules/querybuilder/assets/{encodedRuleName}:
+    $ref: configuration.yml#/paths/~1mtp~1xspmatlas~1assetrules~1querybuilder~1assets~1{encodedRuleName}
+  /mtp/xspmatlas/assetrules/querybuilder/schema:
+    $ref: configuration.yml#/paths/~1mtp~1xspmatlas~1assetrules~1querybuilder~1schema
+  /radius/api/radius/serviceaccounts/classificationrule/getall:
+    $ref: configuration.yml#/paths/~1radius~1api~1radius~1serviceaccounts~1classificationrule~1getall
+  /mtp/urbacConfiguration/gw/unifiedrbac/configuration/tenantinfo/:
+    $ref: configuration.yml#/paths/~1mtp~1urbacConfiguration~1gw~1unifiedrbac~1configuration~1tenantinfo~1
+  /mcas/cas/api/v1/settings/:
+    $ref: configuration.yml#/paths/~1mcas~1cas~1api~1v1~1settings~1
+
+  # Exposure Management
+  /mtp/xspm/attackpaths:
+    $ref: exposure_management.yml#/paths/~1mtp~1xspm~1attackpaths
+  /mtp/xspm/chokepoints:
+    $ref: exposure_management.yml#/paths/~1mtp~1xspm~1chokepoints
+  /mtp/xspm/topentrypoints:
+    $ref: exposure_management.yml#/paths/~1mtp~1xspm~1topentrypoints
+  /mtp/xspm/toptargets:
+    $ref: exposure_management.yml#/paths/~1mtp~1xspm~1toptargets
+  /mtp/xspm/hunting:
+    $ref: exposure_management.yml#/paths/~1mtp~1xspm~1hunting
+  /mtp/exposureManagement/recommendations:
+    $ref: exposure_management.yml#/paths/~1mtp~1exposureManagement~1recommendations
+
+  # Data Lake
+  /securityplatform/lake/databases:
+    $ref: data_lake.yml#/paths/~1securityplatform~1lake~1databases
+  /securityplatform/lake/kql/v1/rest/mgmt:
+    $ref: data_lake.yml#/paths/~1securityplatform~1lake~1kql~1v1~1rest~1mgmt
+
+  # Threat Analytics
+  /mtp/threatAnalyticsAPI/outbreaks:
+    $ref: threat_analytics.yml#/paths/~1mtp~1threatAnalyticsAPI~1outbreaks
+
+  # Action Center
+  /mtp/actionCenter/actioncenterui/history-actions/:
+    $ref: action_center.yml#/paths/~1mtp~1actionCenter~1actioncenterui~1history-actions~1
+  /mtp/actionCenter/actioncenterui/pending-actions/:
+    $ref: action_center.yml#/paths/~1mtp~1actionCenter~1actioncenterui~1pending-actions~1
+
+  # Multi-Tenant
+  /mtoapi/tenants/TenantPicker:
+    $ref: multi_tenant.yml#/paths/~1mtoapi~1tenants~1TenantPicker
+  /mtoapi/tenants/{TenantId}/workloadStatus:
+    $ref: multi_tenant.yml#/paths/~1mtoapi~1tenants~1{TenantId}~1workloadStatus
+  /mtoapi/tenants/{TenantId}/huntingQueries/run:
+    $ref: multi_tenant.yml#/paths/~1mtoapi~1tenants~1{TenantId}~1huntingQueries~1run
+
+  # Streaming API
+  /mtp/streamingapi/streamingApiConfiguration:
+    $ref: streaming.yml#/paths/~1mtp~1streamingapi~1streamingApiConfiguration

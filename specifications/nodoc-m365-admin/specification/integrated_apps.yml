@@ -1,0 +1,109 @@
+paths:
+  /fd/addins/api/apps:
+    get:
+      summary: Get integrated apps
+      description: >-
+        Retrieve the list of integrated apps (add-ins) deployed in the tenant.
+      operationId: IntegratedApps.GetApps
+      tags: [IntegratedApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - integrated apps list
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /fd/addins/api/agents:
+    get:
+      summary: Get deployed agents
+      description: >-
+        Retrieve the list of agents deployed through the integrated apps platform.
+      operationId: IntegratedApps.GetAgents
+      tags: [IntegratedApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - agents list
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /fd/addins/api/actionableApps:
+    get:
+      summary: Get actionable apps
+      description: >-
+        Retrieve integrated apps that have actionable items requiring admin attention.
+      operationId: IntegratedApps.GetActionableApps
+      tags: [IntegratedApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - actionable apps
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /fd/addins/api/availableApps:
+    get:
+      summary: Get available apps
+      description: >-
+        Retrieve the list of apps available for deployment from the marketplace.
+      operationId: IntegratedApps.GetAvailableApps
+      tags: [IntegratedApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - available apps
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /fd/addins/api/recommendations/appRecommendations:
+    get:
+      summary: Get app recommendations
+      description: >-
+        Retrieve recommended apps based on tenant usage patterns and configuration.
+      operationId: IntegratedApps.GetRecommendations
+      tags: [IntegratedApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - app recommendations
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /fd/addins/api/v2/settings:
+    get:
+      summary: Get integrated apps settings
+      description: >-
+        Retrieve the integrated apps platform settings including deployment
+        preferences and policies.
+      operationId: IntegratedApps.GetSettings
+      tags: [IntegratedApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - integrated apps settings
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

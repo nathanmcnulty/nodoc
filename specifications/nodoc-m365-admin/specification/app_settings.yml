@@ -1,0 +1,613 @@
+paths:
+  /admin/api/settings/apps/bookings:
+    get:
+      summary: Get Bookings settings
+      description: >-
+        Retrieve the Microsoft Bookings application settings for the tenant.
+      operationId: AppSettings.GetBookings
+      tags: [AppSettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Bookings application settings. Exact schema pending.
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    post:
+      summary: Set Bookings settings
+      description: >-
+        Update the Microsoft Bookings application settings for the tenant.
+      operationId: AppSettings.SetBookings
+      tags: [AppSettings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Merged Bookings settings payload.
+      responses:
+        '200':
+          description: OK
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/settings/apps/mail:
+    get:
+      summary: Get Mail settings
+      description: >-
+        Retrieve the Mail application settings for the tenant.
+      operationId: AppSettings.GetMail
+      tags: [AppSettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Mail application settings. Exact schema pending.
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    post:
+      summary: Set Mail settings
+      description: >-
+        Update the Mail application settings for the tenant.
+      operationId: AppSettings.SetMail
+      tags: [AppSettings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Merged Mail settings payload.
+      responses:
+        '200':
+          description: OK
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/settings/apps/skypeteams:
+    get:
+      summary: Get Microsoft Teams settings
+      description: >-
+        Retrieve the Microsoft Teams application settings for the tenant.
+      operationId: AppSettings.GetTeams
+      tags: [AppSettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Microsoft Teams application settings. Exact schema pending.
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    post:
+      summary: Set Microsoft Teams settings
+      description: >-
+        Update the Microsoft Teams application settings for the tenant.
+      operationId: AppSettings.SetTeams
+      tags: [AppSettings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Merged Teams settings payload.
+      responses:
+        '200':
+          description: OK
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/settings/apps/calendarsharing:
+    get:
+      summary: Get Calendar Sharing settings
+      description: >-
+        Retrieve the Calendar Sharing application settings for the tenant.
+      operationId: AppSettings.GetCalendarSharing
+      tags: [AppSettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Calendar Sharing settings. Exact schema pending.
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    post:
+      summary: Set Calendar Sharing settings
+      description: >-
+        Update the Calendar Sharing application settings for the tenant.
+      operationId: AppSettings.SetCalendarSharing
+      tags: [AppSettings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Merged Calendar Sharing settings payload.
+      responses:
+        '200':
+          description: OK
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/settings/apps/learning:
+    get:
+      summary: Get Viva Learning settings
+      description: >-
+        Retrieve the Viva Learning application settings for the tenant.
+      operationId: AppSettings.GetLearning
+      tags: [AppSettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Viva Learning settings. Exact schema pending.
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    post:
+      summary: Set Viva Learning settings
+      description: >-
+        Update the Viva Learning application settings for the tenant.
+      operationId: AppSettings.SetLearning
+      tags: [AppSettings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Merged Learning settings payload.
+      responses:
+        '200':
+          description: OK
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/settings/apps/store:
+    get:
+      summary: Get Store settings
+      description: >-
+        Retrieve the Microsoft Store (user-owned apps and services) settings for the tenant.
+      operationId: AppSettings.GetStore
+      tags: [AppSettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Store settings. Exact schema pending.
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    post:
+      summary: Set Store settings
+      description: >-
+        Update the Microsoft Store settings for the tenant.
+      operationId: AppSettings.SetStore
+      tags: [AppSettings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Merged Store settings payload.
+      responses:
+        '200':
+          description: OK
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/settings/apps/cortana:
+    get:
+      summary: Get Cortana settings
+      description: >-
+        Retrieve the Cortana application settings for the tenant.
+      operationId: AppSettings.GetCortana
+      tags: [AppSettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Cortana application settings. Exact schema pending.
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    post:
+      summary: Set Cortana settings
+      description: >-
+        Update the Cortana application settings for the tenant.
+      operationId: AppSettings.SetCortana
+      tags: [AppSettings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Merged Cortana settings payload.
+      responses:
+        '200':
+          description: OK
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/settings/apps/officeforms:
+    get:
+      summary: Get Microsoft Forms settings
+      description: >-
+        Retrieve the Microsoft Forms (Office Forms) application settings for the tenant.
+      operationId: AppSettings.GetOfficeForms
+      tags: [AppSettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Microsoft Forms settings. Exact schema pending.
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    post:
+      summary: Set Microsoft Forms settings
+      description: >-
+        Update the Microsoft Forms application settings for the tenant.
+      operationId: AppSettings.SetOfficeForms
+      tags: [AppSettings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Merged Forms settings payload.
+      responses:
+        '200':
+          description: OK
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/settings/apps/officeontheweb:
+    get:
+      summary: Get Office on the Web settings
+      description: >-
+        Retrieve the Office on the Web (Office Online) application settings for the tenant.
+      operationId: AppSettings.GetOfficeOnTheWeb
+      tags: [AppSettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Office on the Web settings. Exact schema pending.
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    post:
+      summary: Set Office on the Web settings
+      description: >-
+        Update the Office on the Web application settings for the tenant.
+      operationId: AppSettings.SetOfficeOnTheWeb
+      tags: [AppSettings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Merged Office on the Web settings payload.
+      responses:
+        '200':
+          description: OK
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/settings/apps/planner:
+    get:
+      summary: Get Planner settings
+      description: >-
+        Retrieve the Microsoft Planner application settings for the tenant.
+      operationId: AppSettings.GetPlanner
+      tags: [AppSettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Planner application settings. Exact schema pending.
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    post:
+      summary: Set Planner settings
+      description: >-
+        Update the Microsoft Planner application settings for the tenant.
+      operationId: AppSettings.SetPlanner
+      tags: [AppSettings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Merged Planner settings payload.
+      responses:
+        '200':
+          description: OK
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/settings/apps/sway:
+    get:
+      summary: Get Sway settings
+      description: >-
+        Retrieve the Microsoft Sway application settings for the tenant.
+      operationId: AppSettings.GetSway
+      tags: [AppSettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Sway application settings. Exact schema pending.
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    post:
+      summary: Set Sway settings
+      description: >-
+        Update the Microsoft Sway application settings for the tenant.
+      operationId: AppSettings.SetSway
+      tags: [AppSettings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Merged Sway settings payload.
+      responses:
+        '200':
+          description: OK
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/settings/apps/todo:
+    get:
+      summary: Get To Do settings
+      description: >-
+        Retrieve the Microsoft To Do application settings for the tenant.
+      operationId: AppSettings.GetToDo
+      tags: [AppSettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: To Do application settings. Exact schema pending.
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    post:
+      summary: Set To Do settings
+      description: >-
+        Update the Microsoft To Do application settings for the tenant.
+      operationId: AppSettings.SetToDo
+      tags: [AppSettings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Merged To Do settings payload.
+      responses:
+        '200':
+          description: OK
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/settings/apps/whiteboard:
+    get:
+      summary: Get Whiteboard settings
+      description: >-
+        Retrieve the Microsoft Whiteboard application settings for the tenant.
+      operationId: AppSettings.GetWhiteboard
+      tags: [AppSettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Whiteboard application settings. Exact schema pending.
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    post:
+      summary: Set Whiteboard settings
+      description: >-
+        Update the Microsoft Whiteboard application settings for the tenant.
+      operationId: AppSettings.SetWhiteboard
+      tags: [AppSettings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Merged Whiteboard settings payload.
+      responses:
+        '200':
+          description: OK
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/settings/apps/m365groups:
+    get:
+      summary: Get Microsoft 365 Groups settings
+      description: >-
+        Retrieve the Microsoft 365 Groups application settings for the tenant.
+      operationId: AppSettings.GetM365Groups
+      tags: [AppSettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Microsoft 365 Groups settings. Exact schema pending.
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    post:
+      summary: Set Microsoft 365 Groups settings
+      description: >-
+        Update the Microsoft 365 Groups application settings for the tenant.
+      operationId: AppSettings.SetM365Groups
+      tags: [AppSettings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Merged M365 Groups settings payload.
+      responses:
+        '200':
+          description: OK
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/settings/apps/MicrosoftLoop:
+    get:
+      summary: Get Microsoft Loop settings
+      description: >-
+        Retrieve the Microsoft Loop application settings for the tenant.
+        Also accessible via the looppolicy endpoint alias.
+      operationId: AppSettings.GetMicrosoftLoop
+      tags: [AppSettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Microsoft Loop settings. Exact schema pending.
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    post:
+      summary: Set Microsoft Loop settings
+      description: >-
+        Update the Microsoft Loop application settings for the tenant.
+      operationId: AppSettings.SetMicrosoftLoop
+      tags: [AppSettings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Merged Loop settings payload.
+      responses:
+        '200':
+          description: OK
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/settings/apps/briefing:
+    get:
+      summary: Get Briefing email settings
+      description: >-
+        Retrieve the Briefing email application settings for the tenant.
+      operationId: AppSettings.GetBriefing
+      tags: [AppSettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Briefing email settings. Exact schema pending.
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    post:
+      summary: Set Briefing email settings
+      description: >-
+        Update the Briefing email application settings for the tenant.
+      operationId: AppSettings.SetBriefing
+      tags: [AppSettings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Merged Briefing settings payload.
+      responses:
+        '200':
+          description: OK
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/settings/apps/userownedapps:
+    get:
+      summary: Get user-owned apps settings
+      description: >-
+        Retrieve the user-owned apps and services settings for the tenant.
+      operationId: AppSettings.GetUserOwnedApps
+      tags: [AppSettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: User-owned apps settings. Exact schema pending.
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    post:
+      summary: Set user-owned apps settings
+      description: >-
+        Update the user-owned apps and services settings for the tenant.
+      operationId: AppSettings.SetUserOwnedApps
+      tags: [AppSettings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Merged user-owned apps settings payload.
+      responses:
+        '200':
+          description: OK
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

@@ -1,0 +1,101 @@
+paths:
+  /admin/api/settings/company/copilotpolicy/pin:
+    get:
+      summary: Get Copilot pin policy
+      description: >-
+        Retrieve the current Copilot pin policy settings for the tenant. Controls which Copilot
+        experiences are pinned in the app launcher for users.
+      operationId: Copilot.GetPinPolicy
+      tags: [Copilot]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Copilot pin policy settings. Exact schema pending.
+                properties:
+                  CopilotPinningPolicy:
+                    type: object
+                    description: The pinning policy configuration for Copilot apps.
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    post:
+      summary: Set Copilot pin policy
+      description: >-
+        Update the Copilot pin policy settings for the tenant. Merges provided settings
+        into the existing policy configuration.
+      operationId: Copilot.SetPinPolicy
+      tags: [Copilot]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Merged pin policy payload. Properties are merged with current settings.
+              properties:
+                CopilotPinningPolicy:
+                  type: object
+                  description: The pinning policy configuration to update.
+      responses:
+        '200':
+          description: OK
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/copilotsettings/settings:
+    get:
+      summary: Get Copilot settings
+      description: >-
+        Retrieve the general Copilot settings for the tenant including feature enablement
+        and configuration options.
+      operationId: Copilot.GetSettings
+      tags: [Copilot]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: General Copilot settings. Exact schema pending.
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/copilotsettings/securitycopilot/auth:
+    get:
+      summary: Get Security Copilot auth settings
+      description: >-
+        Retrieve the Security Copilot authentication configuration for the tenant.
+      operationId: Copilot.GetSecurityCopilotAuth
+      tags: [Copilot]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Security Copilot authentication settings. Exact schema pending.
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/Copilot/getcopilotlicenseassignmentdate:
+    get:
+      summary: Get Copilot license assignment date
+      description: >-
+        Retrieve the date when Copilot licenses were first assigned in the tenant.
+      operationId: Copilot.GetLicenseAssignmentDate
+      tags: [Copilot]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: License assignment date information. Exact schema pending.
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

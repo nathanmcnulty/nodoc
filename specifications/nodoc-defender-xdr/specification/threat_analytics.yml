@@ -1,0 +1,81 @@
+paths:
+  /mtp/threatAnalyticsAPI/outbreaks:
+    get:
+      summary: List threat analytics outbreaks
+      description: >-
+        Retrieve a paginated list of threat analytics reports and outbreaks.
+        Threat analytics provides expert analysis of emerging threats and
+        their potential impact on the organization.
+      operationId: ThreatAnalytics.ListOutbreaks
+      tags: [Threat Analytics]
+      parameters:
+        - name: pageIndex
+          in: query
+          description: The page index for pagination.
+          schema:
+            type: integer
+            default: 0
+        - name: pageSize
+          in: query
+          description: The number of results per page.
+          schema:
+            type: integer
+            default: 50
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  outbreaks:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Outbreak'
+                  totalCount:
+                    type: integer
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+components:
+  schemas:
+    Outbreak:
+      type: object
+      description: A threat analytics outbreak report.
+      properties:
+        id:
+          description: The unique identifier of the outbreak.
+          type: string
+        title:
+          description: The title of the outbreak report.
+          type: string
+        description:
+          description: A description of the threat.
+          type: string
+        severity:
+          description: The severity level.
+          type: string
+          enum: [Informational, Low, Medium, High, Critical]
+        publishedDate:
+          description: When the report was published.
+          type: string
+          format: date-time
+        lastUpdatedDate:
+          description: When the report was last updated.
+          type: string
+          format: date-time
+        impactedDevices:
+          description: Number of impacted devices in the organization.
+          type: integer
+        exposedDevices:
+          description: Number of exposed devices.
+          type: integer
+        mitigatedDevices:
+          description: Number of mitigated devices.
+          type: integer
+        tags:
+          description: Tags associated with the outbreak.
+          type: array
+          items:
+            type: string

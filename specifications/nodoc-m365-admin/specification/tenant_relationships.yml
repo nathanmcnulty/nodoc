@@ -1,0 +1,59 @@
+paths:
+  /admin/api/tenantRelationships/multiTenantOrganization:
+    get:
+      summary: Get multi-tenant organization
+      description: >-
+        Retrieve the multi-tenant organization configuration and status,
+        including the MTO identifier and membership state.
+      operationId: TenantRelationships.GetMTO
+      tags: [TenantRelationships]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - multi-tenant organization details
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/tenantRelationships/multiTenantOrganization/tenants:
+    get:
+      summary: Get MTO tenants
+      description: >-
+        Retrieve the list of tenants that are members of the multi-tenant
+        organization, including their display names and join status.
+      operationId: TenantRelationships.GetMTOTenants
+      tags: [TenantRelationships]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  description: pending - MTO tenant details
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/tenantRelationships/userSyncApps/outboundDetails:
+    get:
+      summary: Get user sync outbound details
+      description: >-
+        Retrieve the outbound user synchronization details for cross-tenant
+        provisioning apps.
+      operationId: TenantRelationships.GetUserSyncOutbound
+      tags: [TenantRelationships]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - outbound sync details
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

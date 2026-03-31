@@ -1,0 +1,59 @@
+paths:
+  /admin/api/viva/roles:
+    get:
+      summary: Get Viva roles
+      description: >-
+        Retrieve the Viva roles and role assignments for the tenant,
+        including feature access managers.
+      operationId: Viva.GetRoles
+      tags: [Viva]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - Viva roles
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/viva/modules:
+    get:
+      summary: Get Viva modules
+      description: >-
+        Retrieve the list of available Viva modules and their configuration
+        status (Connections, Engage, Goals, Insights, Learning, Pulse, etc.).
+      operationId: Viva.GetModules
+      tags: [Viva]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  description: pending - Viva module details
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/viva/glint/lookupClient:
+    get:
+      summary: Get Viva Glint client
+      description: >-
+        Look up the Viva Glint client information for the tenant, including
+        the Glint organization association status.
+      operationId: Viva.GetGlintClient
+      tags: [Viva]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - Glint client info
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

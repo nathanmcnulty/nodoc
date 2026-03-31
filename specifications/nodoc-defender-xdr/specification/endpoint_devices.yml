@@ -1,0 +1,705 @@
+paths:
+  /mtp/ndr/machines:
+    get:
+      summary: List endpoint devices
+      description: >-
+        Retrieve a paginated list of endpoint devices from the device inventory.
+        Supports filtering by low-fidelity devices and configurable lookback period.
+      operationId: EndpointDevices.List
+      tags: [Endpoint Devices]
+      parameters:
+        - name: hideLowFidelityDevices
+          in: query
+          description: Whether to hide low-fidelity (incomplete data) devices.
+          schema:
+            type: boolean
+            default: true
+        - name: lookingBackIndays
+          in: query
+          description: Number of days to look back for device activity.
+          schema:
+            type: integer
+            default: 30
+        - name: pageIndex
+          in: query
+          description: The page index for pagination.
+          schema:
+            type: integer
+            default: 1
+        - name: pageSize
+          in: query
+          description: The number of results per page.
+          schema:
+            type: integer
+            default: 100
+        - name: sortByField
+          in: query
+          description: Field to sort results by.
+          schema:
+            type: string
+            example: lastSeen
+        - name: sortOrder
+          in: query
+          description: Sort order.
+          schema:
+            type: string
+            enum: [Ascending, Descending]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  machines:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Device'
+                  totalCount:
+                    type: integer
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/getMachine/machines:
+    get:
+      summary: Get endpoint device details
+      description: >-
+        Retrieve detailed information about a specific endpoint device
+        by its machine ID.
+      operationId: EndpointDevices.Get
+      tags: [Endpoint Devices]
+      parameters:
+        - name: machineId
+          in: query
+          required: true
+          description: The unique identifier of the device.
+          schema:
+            type: string
+        - name: idType
+          in: query
+          description: The type of the machine identifier.
+          schema:
+            type: string
+            default: SenseMachineId
+        - name: readFromCache
+          in: query
+          description: Whether to read from cache.
+          schema:
+            type: boolean
+            default: false
+        - name: lookingBackIndays
+          in: query
+          description: Number of days to look back.
+          schema:
+            type: integer
+            default: 180
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceDetail'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/machineTag/machineTags/{DeviceId}:
+    get:
+      summary: Get device tags
+      description: >-
+        Retrieve all tags assigned to a specific endpoint device.
+      operationId: EndpointDevices.GetTags
+      tags: [Endpoint Devices]
+      parameters:
+        - name: DeviceId
+          in: path
+          required: true
+          description: The unique identifier of the device.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DeviceTag'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/machineTag/machineTag:
+    patch:
+      summary: Set device tag
+      description: >-
+        Add or remove a tag on an endpoint device.
+      operationId: EndpointDevices.SetTag
+      tags: [Endpoint Devices]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                machineId:
+                  description: The unique identifier of the device.
+                  type: string
+                tag:
+                  description: The tag value to set.
+                  type: string
+                action:
+                  description: The action to perform.
+                  type: string
+                  enum: [Add, Remove]
+              required:
+                - machineId
+                - tag
+                - action
+      responses:
+        '200':
+          description: OK
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/assetvalue/machineAssetValue:
+    post:
+      summary: Set device asset value
+      description: >-
+        Set the asset value classification for an endpoint device.
+        Asset values are used to prioritize security operations.
+      operationId: EndpointDevices.SetAssetValue
+      tags: [Endpoint Devices]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                machineId:
+                  description: The unique identifier of the device.
+                  type: string
+                assetValue:
+                  description: The asset value classification.
+                  type: string
+                  enum: [Normal, High, VeryHigh]
+              required:
+                - machineId
+                - assetValue
+      responses:
+        '200':
+          description: OK
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/assetvalue/setCriticalityLevel:
+    post:
+      summary: Set device criticality level
+      description: >-
+        Set the criticality level for an endpoint device.
+      operationId: EndpointDevices.SetCriticalityLevel
+      tags: [Endpoint Devices]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                machineId:
+                  description: The unique identifier of the device.
+                  type: string
+                criticalityLevel:
+                  description: The criticality level.
+                  type: integer
+              required:
+                - machineId
+                - criticalityLevel
+      responses:
+        '200':
+          description: OK
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/rbacGroupAssignment/updateMachineRbacGroupAssignments:
+    post:
+      summary: Set device RBAC group
+      description: >-
+        Update the RBAC (Role-Based Access Control) group assignment for an endpoint device.
+      operationId: EndpointDevices.SetRbacGroup
+      tags: [Endpoint Devices]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                machineId:
+                  description: The unique identifier of the device.
+                  type: string
+                rbacGroupId:
+                  description: The RBAC group ID to assign.
+                  type: string
+              required:
+                - machineId
+                - rbacGroupId
+      responses:
+        '200':
+          description: OK
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/rbacGroupAssignment/machineRbacGroupAssignments/{DeviceId}:
+    get:
+      summary: Get device RBAC group assignments
+      description: >-
+        Retrieve the RBAC group assignments for a specific endpoint device.
+      operationId: EndpointDevices.GetRbacGroups
+      tags: [Endpoint Devices]
+      parameters:
+        - name: DeviceId
+          in: path
+          required: true
+          description: The unique identifier of the device.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    rbacGroupId:
+                      description: The RBAC group identifier.
+                      type: string
+                    rbacGroupName:
+                      description: The RBAC group name.
+                      type: string
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/rbacGroupAssignment/rbacGroupsScopes/{DeviceId}:
+    get:
+      summary: Get device RBAC group scopes
+      description: >-
+        Retrieve the RBAC group scopes applicable to a specific endpoint device.
+      operationId: EndpointDevices.GetRbacGroupScopes
+      tags: [Endpoint Devices]
+      parameters:
+        - name: DeviceId
+          in: path
+          required: true
+          description: The unique identifier of the device.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/machineExclusionState/updateMachineExclusionState:
+    post:
+      summary: Set device exclusion state
+      description: >-
+        Update the exclusion state for an endpoint device. Excluded devices
+        are not included in certain security assessments.
+      operationId: EndpointDevices.SetExclusionState
+      tags: [Endpoint Devices]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                machineId:
+                  description: The unique identifier of the device.
+                  type: string
+                isExcluded:
+                  description: Whether to exclude the device.
+                  type: boolean
+              required:
+                - machineId
+                - isExcluded
+      responses:
+        '200':
+          description: OK
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/responseApiPortal/requests/create:
+    post:
+      summary: Invoke device action
+      description: >-
+        Create a response action request for an endpoint device. Supports actions such as
+        full scan, quick scan, antivirus scan, network isolation, execution restriction,
+        automated investigation, policy sync, and collect investigation package.
+      operationId: EndpointDevices.InvokeAction
+      tags: [Endpoint Devices]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                machineId:
+                  description: The unique identifier of the device.
+                  type: string
+                type:
+                  description: The action type.
+                  type: string
+                  enum:
+                    - FullScan
+                    - QuickScan
+                    - AntiVirusScan
+                    - Isolate
+                    - Unisolate
+                    - RestrictExecution
+                    - UnrestrictExecution
+                    - AutomatedInvestigation
+                    - PolicySync
+                    - CollectInvestigationPackage
+                comment:
+                  description: An optional comment for the action.
+                  type: string
+              required:
+                - machineId
+                - type
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  actionId:
+                    description: The unique identifier of the created action.
+                    type: string
+                  status:
+                    description: The status of the action.
+                    type: string
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/responseApiPortal/requests/{ActionId}:
+    get:
+      summary: Get device action result
+      description: >-
+        Retrieve the status and result of a previously submitted device action.
+      operationId: EndpointDevices.GetActionResult
+      tags: [Endpoint Devices]
+      parameters:
+        - name: ActionId
+          in: path
+          required: true
+          description: The unique identifier of the action.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  actionId:
+                    description: The action identifier.
+                    type: string
+                  status:
+                    description: The current status of the action.
+                    type: string
+                  machineId:
+                    description: The device the action targets.
+                    type: string
+                  type:
+                    description: The action type.
+                    type: string
+                  createdDateTime:
+                    description: When the action was created.
+                    type: string
+                    format: date-time
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    delete:
+      summary: Stop device action
+      description: >-
+        Cancel a pending or running device action.
+      operationId: EndpointDevices.StopAction
+      tags: [Endpoint Devices]
+      parameters:
+        - name: ActionId
+          in: path
+          required: true
+          description: The unique identifier of the action to stop.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/deviceTimeline/timeline/{DeviceId}:
+    get:
+      summary: Get device timeline
+      description: >-
+        Retrieve the timeline of events for a specific endpoint device,
+        including security events, alerts, and other activities.
+      operationId: EndpointDevices.GetTimeline
+      tags: [Endpoint Devices]
+      parameters:
+        - name: DeviceId
+          in: path
+          required: true
+          description: The unique identifier of the device.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - timeline event data
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/deviceManagement/deviceModels:
+    get:
+      summary: List device models
+      description: >-
+        Retrieve a list of all device models found across the endpoint device inventory.
+      operationId: EndpointDevices.ListModels
+      tags: [Endpoint Devices]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/deviceManagement/deviceVendors:
+    get:
+      summary: List device vendors
+      description: >-
+        Retrieve a list of all device vendors found across the endpoint device inventory.
+      operationId: EndpointDevices.ListVendors
+      tags: [Endpoint Devices]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/deviceManagement/osVersions:
+    get:
+      summary: List OS version friendly names
+      description: >-
+        Retrieve a list of operating system versions with their friendly names
+        as found across the endpoint device inventory.
+      operationId: EndpointDevices.ListOsVersions
+      tags: [Endpoint Devices]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    osVersion:
+                      description: The OS version string.
+                      type: string
+                    friendlyName:
+                      description: The friendly display name.
+                      type: string
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/deviceManagement/deviceTotals:
+    get:
+      summary: Get device totals
+      description: >-
+        Retrieve summary totals for the endpoint device inventory,
+        including counts by platform, health status, and onboarding status.
+      operationId: EndpointDevices.GetTotals
+      tags: [Endpoint Devices]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - device total statistics
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/deviceManagement/windowsReleaseVersions:
+    get:
+      summary: List Windows release versions
+      description: >-
+        Retrieve a list of Windows release versions found across the endpoint device inventory.
+      operationId: EndpointDevices.ListWindowsReleaseVersions
+      tags: [Endpoint Devices]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/deviceManagement/deviceLicenseReport:
+    get:
+      summary: Get endpoint license report
+      description: >-
+        Retrieve a license usage report for endpoint devices, showing
+        the distribution of device licenses across the tenant.
+      operationId: EndpointDevices.GetLicenseReport
+      tags: [Endpoint Devices]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - license report data
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+components:
+  schemas:
+    Device:
+      type: object
+      description: An endpoint device summary from the device inventory.
+      properties:
+        machineId:
+          description: The unique identifier of the device.
+          type: string
+        computerDnsName:
+          description: The DNS name of the device.
+          type: string
+        osPlatform:
+          description: The operating system platform.
+          type: string
+        osVersion:
+          description: The operating system version.
+          type: string
+        healthStatus:
+          description: The health status of the device.
+          type: string
+        riskScore:
+          description: The risk score of the device.
+          type: string
+        exposureLevel:
+          description: The exposure level of the device.
+          type: string
+        lastSeen:
+          description: The last time the device was seen.
+          type: string
+          format: date-time
+        tags:
+          description: Tags assigned to the device.
+          type: array
+          items:
+            type: string
+    DeviceDetail:
+      type: object
+      description: Detailed information about an endpoint device.
+      properties:
+        machineId:
+          description: The unique identifier of the device.
+          type: string
+        computerDnsName:
+          description: The DNS name of the device.
+          type: string
+        osPlatform:
+          description: The operating system platform.
+          type: string
+        osVersion:
+          description: The operating system version.
+          type: string
+        osProcessor:
+          description: The processor type.
+          type: string
+        healthStatus:
+          description: The health status of the device.
+          type: string
+        riskScore:
+          description: The risk score of the device.
+          type: string
+        exposureLevel:
+          description: The exposure level of the device.
+          type: string
+        isAadJoined:
+          description: Whether the device is Azure AD joined.
+          type: boolean
+        aadDeviceId:
+          description: The Azure AD device ID.
+          type: string
+        lastSeen:
+          description: The last time the device was seen.
+          type: string
+          format: date-time
+        firstSeen:
+          description: The first time the device was seen.
+          type: string
+          format: date-time
+        lastIpAddress:
+          description: The last known IP address.
+          type: string
+        lastExternalIpAddress:
+          description: The last known external IP address.
+          type: string
+        tags:
+          description: Tags assigned to the device.
+          type: array
+          items:
+            type: string
+        rbacGroupId:
+          description: The RBAC group ID.
+          type: string
+        rbacGroupName:
+          description: The RBAC group name.
+          type: string
+    DeviceTag:
+      type: object
+      description: A tag assigned to an endpoint device.
+      properties:
+        tag:
+          description: The tag value.
+          type: string
+        tagType:
+          description: The type of the tag.
+          type: string

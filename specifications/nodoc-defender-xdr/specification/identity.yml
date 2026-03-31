@@ -1,0 +1,411 @@
+paths:
+  /mdi/identity/userapiservice/user/resolve:
+    post:
+      summary: Resolve identity user
+      description: >-
+        Resolve a user identity from Microsoft Defender for Identity (MDI).
+        Returns detailed user information including lateral movement paths
+        and risk assessment data.
+      operationId: Identity.ResolveUser
+      tags: [Identity]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                accountName:
+                  description: The user account name to resolve.
+                  type: string
+                accountDomain:
+                  description: The domain of the user account.
+                  type: string
+              required:
+                - accountName
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentityUser'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mdi/identity/userapiservice/user/timeline:
+    get:
+      summary: Get user timeline
+      description: >-
+        Retrieve the activity timeline for a specific user from Defender for Identity,
+        including sign-in events, lateral movement, and suspicious activities.
+      operationId: Identity.GetUserTimeline
+      tags: [Identity]
+      parameters:
+        - name: accountName
+          in: query
+          description: The user account name.
+          schema:
+            type: string
+        - name: accountDomain
+          in: query
+          description: The account domain.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - timeline event data
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mdi/identity/identitiesapiservice/identity/entities:
+    post:
+      summary: List identity entities
+      description: >-
+        Retrieve a list of identity entities from Defender for Identity.
+        Supports filtering and pagination.
+      operationId: Identity.ListEntities
+      tags: [Identity]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                filters:
+                  description: Filter criteria for identity entities.
+                  type: object
+                pageIndex:
+                  description: The page index for pagination.
+                  type: integer
+                pageSize:
+                  description: The number of results per page.
+                  type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  entities:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/IdentityEntity'
+                  totalCount:
+                    type: integer
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mdi/identity/userapiservice/serviceaccount/entities:
+    post:
+      summary: List service accounts
+      description: >-
+        Retrieve a list of service account entities from Defender for Identity.
+        Service accounts are automatically identified based on usage patterns.
+      operationId: Identity.ListServiceAccounts
+      tags: [Identity]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                filters:
+                  description: Filter criteria for service accounts.
+                  type: object
+                pageIndex:
+                  description: The page index for pagination.
+                  type: integer
+                pageSize:
+                  description: The number of results per page.
+                  type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  entities:
+                    type: array
+                    items:
+                      type: object
+                      description: pending - service account details
+                  totalCount:
+                    type: integer
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mdi/identity/userapiservice/statistics:
+    get:
+      summary: Get identity statistics
+      description: >-
+        Retrieve identity-related statistics from Defender for Identity,
+        including user counts, risk distributions, and coverage metrics.
+      operationId: Identity.GetStatistics
+      tags: [Identity]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - identity statistics
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mdi/identity/identitiesapiservice/domainController/coverage:
+    get:
+      summary: Get domain controller coverage
+      description: >-
+        Retrieve the Defender for Identity sensor coverage status for
+        domain controllers in the environment.
+      operationId: Identity.GetDomainControllerCoverage
+      tags: [Identity]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DomainControllerCoverage'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mdi/identity/userapiservice/status:
+    get:
+      summary: Get onboarding status
+      description: >-
+        Retrieve the Defender for Identity onboarding and deployment status
+        for the tenant.
+      operationId: Identity.GetOnboardingStatus
+      tags: [Identity]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  isOnboarded:
+                    description: Whether MDI is onboarded.
+                    type: boolean
+                  sensorCount:
+                    description: Number of deployed sensors.
+                    type: integer
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mdi/identity/userapiservice/alertThreshold:
+    get:
+      summary: Get alert threshold
+      description: >-
+        Retrieve the alert threshold configuration for Defender for Identity.
+      operationId: Identity.GetAlertThreshold
+      tags: [Identity]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - alert threshold configuration
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mdi/identity/userapiservice/directoryServiceAccount:
+    get:
+      summary: Get directory service account
+      description: >-
+        Retrieve the directory service account configuration used by
+        Defender for Identity sensors for Active Directory connectivity.
+      operationId: Identity.GetDirectoryServiceAccount
+      tags: [Identity]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - directory service account configuration
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mdi/identity/identitiesapiservice/remediationAccount:
+    get:
+      summary: Get remediation action account
+      description: >-
+        Retrieve the remediation action account configuration used by
+        Defender for Identity to perform automated remediation actions
+        such as disabling compromised accounts.
+      operationId: Identity.GetRemediationAccount
+      tags: [Identity]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RemediationAccount'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    post:
+      summary: Create remediation action account
+      description: >-
+        Configure a new remediation action account for Defender for Identity.
+      operationId: Identity.CreateRemediationAccount
+      tags: [Identity]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RemediationAccountCreate'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RemediationAccount'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    put:
+      summary: Update remediation action account
+      description: >-
+        Update the remediation action account configuration.
+      operationId: Identity.UpdateRemediationAccount
+      tags: [Identity]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RemediationAccountCreate'
+      responses:
+        '200':
+          description: OK
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    delete:
+      summary: Delete remediation action account
+      description: >-
+        Remove the remediation action account configuration.
+      operationId: Identity.DeleteRemediationAccount
+      tags: [Identity]
+      responses:
+        '200':
+          description: OK
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+components:
+  schemas:
+    IdentityUser:
+      type: object
+      description: A user identity from Defender for Identity.
+      properties:
+        accountName:
+          description: The user account name.
+          type: string
+        accountDomain:
+          description: The account domain.
+          type: string
+        displayName:
+          description: The display name.
+          type: string
+        riskScore:
+          description: The identity risk score.
+          type: string
+          enum: [Low, Medium, High]
+        isAdmin:
+          description: Whether the user has admin privileges.
+          type: boolean
+        isSensitive:
+          description: Whether the user is marked as sensitive.
+          type: boolean
+        lateralMovementPaths:
+          description: Number of lateral movement paths.
+          type: integer
+    IdentityEntity:
+      type: object
+      description: An identity entity from Defender for Identity.
+      properties:
+        id:
+          description: The entity identifier.
+          type: string
+        displayName:
+          description: The display name.
+          type: string
+        entityType:
+          description: The type of entity.
+          type: string
+          enum: [User, Group, Computer, ServiceAccount]
+        riskScore:
+          description: The risk score.
+          type: string
+    DomainControllerCoverage:
+      type: object
+      description: Sensor coverage status for a domain controller.
+      properties:
+        domainControllerName:
+          description: The domain controller name.
+          type: string
+        domainName:
+          description: The domain name.
+          type: string
+        sensorStatus:
+          description: The sensor deployment status.
+          type: string
+          enum: [Running, Stopped, NotInstalled, Updating]
+        sensorVersion:
+          description: The sensor version.
+          type: string
+        lastCommunication:
+          description: The last communication time.
+          type: string
+          format: date-time
+    RemediationAccount:
+      type: object
+      description: A remediation action account configuration.
+      properties:
+        id:
+          description: The account identifier.
+          type: string
+        accountName:
+          description: The account name.
+          type: string
+        domainName:
+          description: The domain name.
+          type: string
+        isConfigured:
+          description: Whether the account is fully configured.
+          type: boolean
+    RemediationAccountCreate:
+      type: object
+      description: Request body for creating or updating a remediation account.
+      properties:
+        accountName:
+          description: The account name.
+          type: string
+        domainName:
+          description: The domain name.
+          type: string
+        password:
+          description: The account password.
+          type: string
+          format: password
+      required:
+        - accountName
+        - domainName

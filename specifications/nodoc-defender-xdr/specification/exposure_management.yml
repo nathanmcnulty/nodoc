@@ -1,0 +1,269 @@
+paths:
+  /mtp/xspm/attackpaths:
+    post:
+      summary: Get attack paths
+      description: >-
+        Retrieve attack paths identified by the Exposure Management engine.
+        Attack paths show how an attacker could potentially traverse the environment
+        from entry points to critical assets.
+      operationId: ExposureManagement.GetAttackPaths
+      tags: [Exposure Management]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                filters:
+                  description: Filter criteria for attack paths.
+                  type: object
+                pageIndex:
+                  description: The page index for pagination.
+                  type: integer
+                pageSize:
+                  description: The number of results per page.
+                  type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AttackPath'
+                  totalCount:
+                    type: integer
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/xspm/chokepoints:
+    post:
+      summary: Get choke points
+      description: >-
+        Retrieve choke points identified by the Exposure Management engine.
+        Choke points are assets that appear in multiple attack paths, making
+        them high-value targets for remediation.
+      operationId: ExposureManagement.GetChokePoints
+      tags: [Exposure Management]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                filters:
+                  description: Filter criteria for choke points.
+                  type: object
+                pageIndex:
+                  type: integer
+                pageSize:
+                  type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ChokePoint'
+                  totalCount:
+                    type: integer
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/xspm/topentrypoints:
+    post:
+      summary: Get top entry points
+      description: >-
+        Retrieve the top entry points identified by the Exposure Management engine.
+        Entry points are external-facing assets that could be used to gain initial access.
+      operationId: ExposureManagement.GetTopEntryPoints
+      tags: [Exposure Management]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                filters:
+                  description: Filter criteria.
+                  type: object
+                pageIndex:
+                  type: integer
+                pageSize:
+                  type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      description: pending - entry point details
+                  totalCount:
+                    type: integer
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/xspm/toptargets:
+    post:
+      summary: Get top targets
+      description: >-
+        Retrieve the top target assets identified by the Exposure Management engine.
+        Top targets are critical assets that are reachable through multiple attack paths.
+      operationId: ExposureManagement.GetTopTargets
+      tags: [Exposure Management]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                filters:
+                  description: Filter criteria.
+                  type: object
+                pageIndex:
+                  type: integer
+                pageSize:
+                  type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      description: pending - target asset details
+                  totalCount:
+                    type: integer
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/xspm/hunting:
+    post:
+      summary: Run XSPM hunting query
+      description: >-
+        Execute an exposure management hunting query to search for specific
+        attack paths or exposure scenarios.
+      operationId: ExposureManagement.RunHuntingQuery
+      tags: [Exposure Management]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                query:
+                  description: The hunting query to execute.
+                  type: string
+              required:
+                - query
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - hunting query results
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/exposureManagement/recommendations:
+    get:
+      summary: Get exposure recommendations
+      description: >-
+        Retrieve a paginated list of security recommendations from the
+        Exposure Management engine.
+      operationId: ExposureManagement.GetRecommendations
+      tags: [Exposure Management]
+      parameters:
+        - name: pageIndex
+          in: query
+          description: The page index for pagination.
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      description: pending - recommendation details
+                  totalCount:
+                    type: integer
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+components:
+  schemas:
+    AttackPath:
+      type: object
+      description: An attack path identified by the Exposure Management engine.
+      properties:
+        id:
+          description: The unique identifier of the attack path.
+          type: string
+        name:
+          description: The name of the attack path.
+          type: string
+        description:
+          description: A description of the attack path.
+          type: string
+        riskLevel:
+          description: The risk level of the attack path.
+          type: string
+          enum: [Low, Medium, High, Critical]
+        entryPointCount:
+          description: Number of entry points.
+          type: integer
+        targetCount:
+          description: Number of target assets.
+          type: integer
+        nodeCount:
+          description: Total nodes in the path.
+          type: integer
+    ChokePoint:
+      type: object
+      description: A choke point in the attack path graph.
+      properties:
+        id:
+          description: The asset identifier.
+          type: string
+        name:
+          description: The asset name.
+          type: string
+        assetType:
+          description: The type of asset.
+          type: string
+        attackPathCount:
+          description: Number of attack paths passing through this point.
+          type: integer
+        riskLevel:
+          description: The risk level.
+          type: string

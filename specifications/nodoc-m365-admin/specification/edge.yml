@@ -1,0 +1,59 @@
+paths:
+  /fd/edgeenterprisesitemanagement/api/v2/emiesitelists:
+    get:
+      summary: Get Edge IE mode site lists
+      description: >-
+        Retrieve the Enterprise Mode IE site lists configured for Microsoft Edge,
+        including sites that require IE mode compatibility.
+      operationId: Edge.GetIEModeSiteLists
+      tags: [Edge]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - IE mode site lists
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /fd/edgeenterpriseextensionsmanagement/api/policies:
+    get:
+      summary: Get Edge extension policies
+      description: >-
+        Retrieve the Microsoft Edge extension management policies, including
+        allowed/blocked extensions and installation policies.
+      operationId: Edge.GetExtensionPolicies
+      tags: [Edge]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  description: pending - extension policy details
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /fd/OfficePolicyAdmin/v1.0/edge/policies:
+    get:
+      summary: Get Edge browser policies
+      description: >-
+        Retrieve the Microsoft Edge browser policies managed through the
+        Office Policy Admin service.
+      operationId: Edge.GetBrowserPolicies
+      tags: [Edge]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - Edge browser policies
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

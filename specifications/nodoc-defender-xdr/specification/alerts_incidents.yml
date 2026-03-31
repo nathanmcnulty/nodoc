@@ -1,0 +1,263 @@
+paths:
+  /mtp/alertsApiService/alerts:
+    post:
+      summary: List alerts
+      description: >-
+        Retrieve a filtered list of alerts from the Defender XDR alert service.
+        Supports filtering by severity, status, service source, and time range.
+      operationId: Alerts.List
+      tags: [Alerts]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                filters:
+                  description: Filter criteria for alerts.
+                  type: object
+                  properties:
+                    severity:
+                      description: Filter by alert severity.
+                      type: array
+                      items:
+                        type: string
+                        enum: [Informational, Low, Medium, High]
+                    status:
+                      description: Filter by alert status.
+                      type: array
+                      items:
+                        type: string
+                        enum: [New, InProgress, Resolved]
+                    serviceSource:
+                      description: Filter by service source.
+                      type: array
+                      items:
+                        type: string
+                sortByField:
+                  description: Field to sort results by.
+                  type: string
+                  example: alertCreationTime
+                sortOrder:
+                  description: Sort order.
+                  type: string
+                  enum: [Ascending, Descending]
+                pageIndex:
+                  description: The page index for pagination.
+                  type: integer
+                  minimum: 0
+                  example: 0
+                pageSize:
+                  description: The number of results per page.
+                  type: integer
+                  minimum: 1
+                  maximum: 10000
+                  example: 100
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  alerts:
+                    description: The list of alerts.
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Alert'
+                  totalCount:
+                    description: Total number of alerts matching the filter.
+                    type: integer
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/incidentQueue/incidents/{IncidentId}:
+    get:
+      summary: Get incident
+      description: >-
+        Retrieve details of a specific incident by its incident ID.
+      operationId: Incidents.Get
+      tags: [Incidents]
+      parameters:
+        - name: IncidentId
+          in: path
+          required: true
+          description: The unique identifier of the incident.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Incident'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/incidentQueue/incidents/alerts:
+    get:
+      summary: Get incident associated alerts
+      description: >-
+        Retrieve all alerts associated with a specific incident.
+      operationId: Incidents.GetAssociatedAlerts
+      tags: [Incidents]
+      parameters:
+        - name: incidentId
+          in: query
+          required: true
+          description: The incident ID to retrieve associated alerts for.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Alert'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/incidentQueue/incidents/update:
+    post:
+      summary: Move alert to incident
+      description: >-
+        Move one or more alerts to a different incident. This operation updates
+        the incident association for the specified alerts.
+      operationId: Incidents.MoveAlert
+      tags: [Incidents]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                incidentId:
+                  description: The target incident ID to move alerts to.
+                  type: string
+                alertIds:
+                  description: List of alert IDs to move.
+                  type: array
+                  items:
+                    type: string
+              required:
+                - incidentId
+                - alertIds
+      responses:
+        '200':
+          description: OK
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/incidentQueue/incidents/merge:
+    post:
+      summary: Merge incidents
+      description: >-
+        Merge multiple incidents into a single incident. All alerts from the
+        source incidents are moved to the target incident.
+      operationId: Incidents.Merge
+      tags: [Incidents]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                targetIncidentId:
+                  description: The incident ID that will remain after the merge.
+                  type: string
+                sourceIncidentIds:
+                  description: List of incident IDs to merge into the target.
+                  type: array
+                  items:
+                    type: string
+              required:
+                - targetIncidentId
+                - sourceIncidentIds
+      responses:
+        '200':
+          description: OK
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+components:
+  schemas:
+    Alert:
+      type: object
+      description: A Defender XDR alert.
+      properties:
+        alertId:
+          description: The unique identifier of the alert.
+          type: string
+        incidentId:
+          description: The incident ID the alert is associated with.
+          type: string
+        title:
+          description: The title of the alert.
+          type: string
+        severity:
+          description: The severity level of the alert.
+          type: string
+          enum: [Informational, Low, Medium, High]
+        status:
+          description: The current status of the alert.
+          type: string
+          enum: [New, InProgress, Resolved]
+        category:
+          description: The alert category.
+          type: string
+        serviceSource:
+          description: The service that generated the alert.
+          type: string
+        detectionSource:
+          description: The detection source.
+          type: string
+        alertCreationTime:
+          description: The time the alert was created.
+          type: string
+          format: date-time
+        lastUpdatedTime:
+          description: The time the alert was last updated.
+          type: string
+          format: date-time
+    Incident:
+      type: object
+      description: A Defender XDR incident.
+      properties:
+        incidentId:
+          description: The unique identifier of the incident.
+          type: string
+        incidentName:
+          description: The name of the incident.
+          type: string
+        severity:
+          description: The severity level of the incident.
+          type: string
+          enum: [Informational, Low, Medium, High]
+        status:
+          description: The current status of the incident.
+          type: string
+        assignedTo:
+          description: The user assigned to the incident.
+          type: string
+        classification:
+          description: The classification of the incident.
+          type: string
+        determination:
+          description: The determination of the incident.
+          type: string
+        alertCount:
+          description: The number of alerts in the incident.
+          type: integer
+        createdTime:
+          description: The time the incident was created.
+          type: string
+          format: date-time
+        lastUpdatedTime:
+          description: The time the incident was last updated.
+          type: string
+          format: date-time

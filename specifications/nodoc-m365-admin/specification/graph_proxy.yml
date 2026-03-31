@@ -1,0 +1,137 @@
+paths:
+  /fd/msgraph/v1.0/subscribedSkus:
+    get:
+      summary: Get subscribed SKUs
+      description: >-
+        Retrieve the list of commercial subscriptions (SKUs) that the tenant has acquired,
+        proxied through the M365 Admin Center to Microsoft Graph.
+      operationId: GraphProxy.GetSubscribedSkus
+      tags: [GraphProxy]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  value:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SubscribedSku'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /fd/msgraph/v1.0/devices:
+    get:
+      summary: Get devices
+      description: >-
+        Retrieve the list of Entra ID registered devices for the tenant,
+        proxied through the M365 Admin Center to Microsoft Graph.
+      operationId: GraphProxy.GetDevices
+      tags: [GraphProxy]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  value:
+                    type: array
+                    items:
+                      type: object
+                      description: pending - device details
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /fd/msgraph/beta/$batch:
+    post:
+      summary: Graph batch request
+      description: >-
+        Submit a batch of Microsoft Graph API requests in a single call,
+        proxied through the M365 Admin Center. Supports combining multiple
+        Graph API calls for efficiency.
+      operationId: GraphProxy.Batch
+      tags: [GraphProxy]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                requests:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      method:
+                        type: string
+                      url:
+                        type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  responses:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        status:
+                          type: integer
+                        body:
+                          type: object
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+components:
+  schemas:
+    SubscribedSku:
+      type: object
+      properties:
+        id:
+          type: string
+        skuId:
+          type: string
+          format: uuid
+        skuPartNumber:
+          type: string
+        appliesTo:
+          type: string
+        capabilityStatus:
+          type: string
+        consumedUnits:
+          type: integer
+        prepaidUnits:
+          type: object
+          properties:
+            enabled:
+              type: integer
+            suspended:
+              type: integer
+            warning:
+              type: integer
+        servicePlans:
+          type: array
+          items:
+            type: object
+            properties:
+              servicePlanId:
+                type: string
+                format: uuid
+              servicePlanName:
+                type: string
+              provisioningStatus:
+                type: string
+              appliesTo:
+                type: string

@@ -1,0 +1,96 @@
+paths:
+  /admin/api/contentunderstanding/playbacktranscripttranslationsettings:
+    get:
+      summary: Get transcript translation settings
+      description: >-
+        Retrieve the playback transcript translation settings for content
+        understanding services.
+      operationId: ContentUnderstanding.GetTranscriptTranslation
+      tags: [ContentUnderstanding]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - transcript translation settings
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/contentunderstanding/taxonomytaggingsetting:
+    get:
+      summary: Get taxonomy tagging settings
+      description: >-
+        Retrieve the taxonomy tagging settings for automatic content classification.
+      operationId: ContentUnderstanding.GetTaxonomyTagging
+      tags: [ContentUnderstanding]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - taxonomy tagging settings
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/contentunderstanding/esignaturesettings:
+    get:
+      summary: Get e-signature settings
+      description: >-
+        Retrieve the electronic signature (e-signature) settings for content
+        understanding services.
+      operationId: ContentUnderstanding.GetESignature
+      tags: [ContentUnderstanding]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - e-signature settings
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/contentunderstanding/licensing:
+    get:
+      summary: Get content understanding licensing
+      description: >-
+        Retrieve the licensing information for content understanding (Syntex)
+        services including available capacity and consumption.
+      operationId: ContentUnderstanding.GetLicensing
+      tags: [ContentUnderstanding]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - licensing information
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/syntexbilling/azureSubscriptions:
+    get:
+      summary: Get Syntex billing subscriptions
+      description: >-
+        Retrieve the Azure subscriptions configured for Syntex
+        (content understanding) pay-as-you-go billing.
+      operationId: ContentUnderstanding.GetSyntexBillingSubscriptions
+      tags: [ContentUnderstanding]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  description: pending - Syntex billing subscription details
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

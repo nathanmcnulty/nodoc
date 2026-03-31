@@ -1,0 +1,96 @@
+paths:
+  /_api/v2.1/billingPolicies:
+    get:
+      summary: Get SharePoint billing policies
+      description: >-
+        Retrieve the SharePoint pay-as-you-go billing policies for the tenant.
+        These control metered billing for SharePoint services.
+      operationId: SharePoint.GetBillingPolicies
+      tags: [SharePoint]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - billing policies
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /_api/v2.1/billingFeatures:
+    get:
+      summary: Get SharePoint billing features
+      description: >-
+        Retrieve the available billing features for SharePoint pay-as-you-go services.
+      operationId: SharePoint.GetBillingFeatures
+      tags: [SharePoint]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - billing features
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /_api/v2.1/copilot/capacitypack/checkUsage:
+    get:
+      summary: Check Copilot capacity pack usage
+      description: >-
+        Check the Copilot capacity pack usage for SharePoint, including
+        consumed and available capacity units.
+      operationId: SharePoint.CheckCopilotCapacityUsage
+      tags: [SharePoint]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - capacity usage details
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /_api/SPOInternalUseOnly.TenantAdminSettings/AutoQuotaEnabled:
+    get:
+      summary: Get auto quota setting
+      description: >-
+        Retrieve whether automatic storage quota management is enabled for
+        SharePoint Online sites.
+      operationId: SharePoint.GetAutoQuotaEnabled
+      tags: [SharePoint]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  value:
+                    type: boolean
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /_api/spo.tenant/GetBrandCenterConfiguration:
+    get:
+      summary: Get Brand Center configuration
+      description: >-
+        Retrieve the SharePoint Brand Center configuration, including
+        brand assets and organization-level branding settings.
+      operationId: SharePoint.GetBrandCenterConfig
+      tags: [SharePoint]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - Brand Center configuration
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

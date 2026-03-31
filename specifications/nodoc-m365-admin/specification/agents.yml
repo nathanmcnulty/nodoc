@@ -1,0 +1,134 @@
+paths:
+  /admin/api/agentusers/metrics/agents/risky:
+    get:
+      summary: Get risky agents
+      description: >-
+        Retrieve a list of agents flagged as risky based on usage metrics and security analysis.
+      operationId: Agents.GetRiskyAgents
+      tags: [Agents]
+      parameters:
+        - name: maxCount
+          in: query
+          description: Maximum number of risky agents to return. Use 0 for no limit.
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: List of risky agents. Exact schema pending.
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/agenttemplates/getpolicies:
+    get:
+      summary: Get agent template policies
+      description: >-
+        Retrieve policies governing agent templates in the tenant, including creation
+        and deployment permissions.
+      operationId: Agents.GetTemplatePolicies
+      tags: [Agents]
+      parameters:
+        - name: expand
+          in: query
+          description: Whether to expand policy details.
+          schema:
+            type: boolean
+            default: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Agent template policies. Exact schema pending.
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/agenttemplates/getagenttemplates:
+    get:
+      summary: Get agent templates
+      description: >-
+        Retrieve the list of available agent templates for the tenant.
+      operationId: Agents.GetAgentTemplates
+      tags: [Agents]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Agent templates list. Exact schema pending.
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/agentssettings/mcpservers:
+    get:
+      summary: Get MCP servers
+      description: >-
+        Retrieve the list of Model Context Protocol (MCP) servers configured for agent tools
+        in the tenant.
+      operationId: Agents.GetMcpServers
+      tags: [Agents]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: MCP server configurations. Exact schema pending.
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/settings/company/frontier/access:
+    get:
+      summary: Get Frontier access policy
+      description: >-
+        Retrieve the Frontier (agent) access policy for the tenant, controlling which
+        users and groups can access agent capabilities.
+      operationId: Agents.GetFrontierAccess
+      tags: [Agents]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Frontier access policy settings. Exact schema pending.
+                properties:
+                  FrontierPolicy:
+                    type: object
+                    description: The Frontier access policy configuration.
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    post:
+      summary: Set Frontier access policy
+      description: >-
+        Update the Frontier (agent) access policy for the tenant. Merges provided settings
+        into the existing policy configuration.
+      operationId: Agents.SetFrontierAccess
+      tags: [Agents]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Merged Frontier policy payload. Properties are merged with current settings.
+              properties:
+                FrontierPolicy:
+                  type: object
+                  description: The Frontier access policy configuration to update.
+      responses:
+        '200':
+          description: OK
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

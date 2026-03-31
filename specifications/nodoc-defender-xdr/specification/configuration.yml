@@ -1,0 +1,439 @@
+paths:
+  /mtp/suppressionRulesService/suppressionRules:
+    get:
+      summary: List suppression rules
+      description: >-
+        Retrieve all alert suppression (tuning) rules configured in the tenant.
+        Suppression rules automatically suppress alerts matching specified conditions.
+      operationId: Configuration.ListSuppressionRules
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SuppressionRule'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/alertsApiService/workloads/disabled:
+    get:
+      summary: Get disabled alert service settings
+      description: >-
+        Retrieve the list of disabled alert service workloads, showing which
+        alert sources have been disabled in the tenant configuration.
+      operationId: Configuration.GetDisabledAlertServices
+      tags: [Configuration]
+      parameters:
+        - name: includeDetails
+          in: query
+          description: Whether to include detailed workload information.
+          schema:
+            type: boolean
+            default: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - disabled workload configuration
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/ndr/rulesengine/rules:
+    get:
+      summary: Get asset rule management rules
+      description: >-
+        Retrieve the device asset rule management rules used for automatic
+        device tagging and classification.
+      operationId: Configuration.GetAssetRules
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  description: pending - asset rule details
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mcas/cas/api/v1/preview_features/get/:
+    get:
+      summary: Get Cloud Apps preview features
+      description: >-
+        Retrieve the preview features opt-in status for Microsoft Defender
+        for Cloud Apps (MCAS).
+      operationId: Configuration.GetMcasPreviewFeatures
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - MCAS preview feature settings
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mdc/management/optin:
+    get:
+      summary: Get Defender for Cloud preview features
+      description: >-
+        Retrieve the preview features opt-in status for Microsoft Defender for Cloud (MDC).
+      operationId: Configuration.GetMdcPreviewFeatures
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - MDC preview feature settings
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/settings/SavePreviewExperienceSetting:
+    post:
+      summary: Set preview features
+      description: >-
+        Update the preview features opt-in status. Supports multiple contexts
+        including MTP and MDA.
+      operationId: Configuration.SetPreviewFeatures
+      tags: [Configuration]
+      parameters:
+        - name: context
+          in: query
+          required: true
+          description: The context to update preview settings for.
+          schema:
+            type: string
+            enum: [MtpContext, MdatpContext]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                isOptedIn:
+                  description: Whether to opt in to preview features.
+                  type: boolean
+              required:
+                - isOptedIn
+      responses:
+        '200':
+          description: OK
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mcas/cas/api/v1/preview_features/update/:
+    post:
+      summary: Set Cloud Apps preview features
+      description: >-
+        Update the preview features opt-in status for Microsoft Defender
+        for Cloud Apps (MCAS).
+      operationId: Configuration.SetMcasPreviewFeatures
+      tags: [Configuration]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending - MCAS preview feature update body
+      responses:
+        '200':
+          description: OK
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/sccManagement/mgmt/TenantContext:
+    get:
+      summary: Get tenant context
+      description: >-
+        Retrieve the tenant context information including tenant ID,
+        region, and configured workload status. Used for portal initialization.
+      operationId: Configuration.GetTenantContext
+      tags: [Configuration]
+      parameters:
+        - name: realTime
+          in: query
+          description: Whether to fetch real-time data instead of cached.
+          schema:
+            type: boolean
+            default: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - tenant context data
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/xspmatlas/assetrules:
+    get:
+      summary: List critical asset classifications
+      description: >-
+        Retrieve all critical asset management classification rules configured
+        in the tenant.
+      operationId: Configuration.ListCriticalAssetClassifications
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CriticalAssetClassification'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    post:
+      summary: Create critical asset classification
+      description: >-
+        Create a new critical asset classification rule.
+      operationId: Configuration.CreateCriticalAssetClassification
+      tags: [Configuration]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CriticalAssetClassificationCreate'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CriticalAssetClassification'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    put:
+      summary: Update critical asset classification
+      description: >-
+        Update an existing critical asset classification rule.
+      operationId: Configuration.UpdateCriticalAssetClassification
+      tags: [Configuration]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CriticalAssetClassificationCreate'
+      responses:
+        '200':
+          description: OK
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    delete:
+      summary: Delete critical asset classification
+      description: >-
+        Delete a critical asset classification rule.
+      operationId: Configuration.DeleteCriticalAssetClassification
+      tags: [Configuration]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ruleName:
+                  description: The name of the rule to delete.
+                  type: string
+              required:
+                - ruleName
+      responses:
+        '200':
+          description: OK
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/xspmatlas/assetrules/querybuilder/assets/{encodedRuleName}:
+    get:
+      summary: Query critical asset classification
+      description: >-
+        Execute a critical asset classification rule query to preview
+        which assets would be classified.
+      operationId: Configuration.QueryCriticalAssetClassification
+      tags: [Configuration]
+      parameters:
+        - name: encodedRuleName
+          in: path
+          required: true
+          description: The URL-encoded rule name to query.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - matched assets
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/xspmatlas/assetrules/querybuilder/schema:
+    get:
+      summary: Get critical asset classification schema
+      description: >-
+        Retrieve the query builder schema for critical asset classification rules,
+        including available fields, operators, and value types.
+      operationId: Configuration.GetCriticalAssetClassificationSchema
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - query builder schema
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /radius/api/radius/serviceaccounts/classificationrule/getall:
+    get:
+      summary: Get service account classification rules
+      description: >-
+        Retrieve all service account classification rules from the RADIUS
+        identity service. These rules define how service accounts are
+        automatically identified and classified.
+      operationId: Configuration.GetServiceAccountClassifications
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  description: pending - service account classification rule
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/urbacConfiguration/gw/unifiedrbac/configuration/tenantinfo/:
+    get:
+      summary: Get unified RBAC workload configuration
+      description: >-
+        Retrieve the unified RBAC (Role-Based Access Control) configuration
+        for the tenant, including enabled workloads and permission scopes.
+      operationId: Configuration.GetUnifiedRbacWorkload
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - unified RBAC configuration
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mcas/cas/api/v1/settings/:
+    get:
+      summary: Get Cloud Apps general settings
+      description: >-
+        Retrieve the general settings for Microsoft Defender for Cloud Apps (MCAS),
+        including organization details and feature configuration.
+      operationId: Configuration.GetCloudAppsSettings
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - MCAS general settings
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+components:
+  schemas:
+    SuppressionRule:
+      type: object
+      description: An alert suppression (tuning) rule.
+      properties:
+        id:
+          description: The unique identifier of the rule.
+          type: string
+        name:
+          description: The name of the suppression rule.
+          type: string
+        isEnabled:
+          description: Whether the rule is enabled.
+          type: boolean
+        conditions:
+          description: The conditions for suppressing alerts.
+          type: object
+        createdBy:
+          description: The user who created the rule.
+          type: string
+        createdDateTime:
+          description: When the rule was created.
+          type: string
+          format: date-time
+        expirationDateTime:
+          description: When the rule expires.
+          type: string
+          format: date-time
+          nullable: true
+    CriticalAssetClassification:
+      type: object
+      description: A critical asset classification rule.
+      properties:
+        ruleName:
+          description: The name of the classification rule.
+          type: string
+        description:
+          description: A description of the rule.
+          type: string
+        query:
+          description: The classification query.
+          type: string
+        criticalityLevel:
+          description: The criticality level assigned by this rule.
+          type: integer
+        isBuiltIn:
+          description: Whether this is a built-in rule.
+          type: boolean
+        matchedAssetCount:
+          description: Number of assets matching this rule.
+          type: integer
+    CriticalAssetClassificationCreate:
+      type: object
+      description: Request body for creating or updating a critical asset classification.
+      properties:
+        ruleName:
+          description: The name of the classification rule.
+          type: string
+        description:
+          description: A description of the rule.
+          type: string
+        query:
+          description: The classification query.
+          type: string
+        criticalityLevel:
+          description: The criticality level to assign.
+          type: integer
+      required:
+        - ruleName
+        - query
+        - criticalityLevel

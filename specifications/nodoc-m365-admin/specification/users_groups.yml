@@ -1,0 +1,72 @@
+paths:
+  /admin/api/users/getuserroles:
+    get:
+      summary: Get user roles
+      description: >-
+        Retrieve the admin roles assigned to the current user.
+      operationId: Users.GetUserRoles
+      tags: [UsersGroups]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - user roles
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/Users/ListUsers:
+    get:
+      summary: List users
+      description: >-
+        Retrieve a list of users in the tenant with support for filtering and pagination.
+      operationId: Users.ListUsers
+      tags: [UsersGroups]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - user list
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/users/contextualalerts:
+    get:
+      summary: Get user contextual alerts
+      description: >-
+        Retrieve contextual alerts for users, such as risk indicators and security recommendations.
+      operationId: Users.GetContextualAlerts
+      tags: [UsersGroups]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - contextual alerts
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/groups/GetGroups:
+    get:
+      summary: Get groups
+      description: >-
+        Retrieve a list of groups in the tenant with support for filtering.
+      operationId: Groups.GetGroups
+      tags: [UsersGroups]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - group list
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

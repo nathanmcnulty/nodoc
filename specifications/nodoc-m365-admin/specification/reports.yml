@@ -1,0 +1,79 @@
+paths:
+  /admin/api/reports/GetReportData:
+    get:
+      summary: Get report data
+      description: >-
+        Retrieve report data for various entity types. Supports multiple report
+        types including Copilot adoption, usage analytics, message consumption,
+        agent metrics, and more through the entity parameter.
+      operationId: Reports.GetReportData
+      tags: [Reports]
+      parameters:
+        - name: entity
+          in: query
+          required: true
+          description: |
+            The report entity type. Supported values include:
+            CopilotAdoption, CopilotUsage, MessageConsumption, AgentMetrics,
+            ActiveUsers, EmailActivity, M365AppUsage, TeamsActivity, and more.
+          schema:
+            type: string
+        - name: startDate
+          in: query
+          description: Start date for the report period.
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          description: End date for the report period.
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - report data varies by entity type
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/reports/GetSummaryDataV3:
+    get:
+      summary: Get summary report data
+      description: >-
+        Retrieve summary report data (V3) for the tenant including aggregated
+        usage metrics across Microsoft 365 services.
+      operationId: Reports.GetSummaryData
+      tags: [Reports]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - summary report data
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/reports/productivityScoreConfig/GetProductivityScoreConfig:
+    get:
+      summary: Get Productivity Score configuration
+      description: >-
+        Retrieve the Productivity Score configuration and settings for the tenant.
+      operationId: Reports.GetProductivityScoreConfig
+      tags: [Reports]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - productivity score configuration
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

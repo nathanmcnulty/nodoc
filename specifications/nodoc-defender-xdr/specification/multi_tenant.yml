@@ -1,0 +1,131 @@
+paths:
+  /mtoapi/tenants/TenantPicker:
+    get:
+      summary: List managed tenants
+      description: >-
+        Retrieve a list of tenants available in the multi-tenant management view.
+        Used by the tenant picker in the Defender XDR portal for multi-tenant operations.
+      operationId: MultiTenant.ListTenants
+      tags: [Multi-Tenant]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ManagedTenant'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtoapi/tenants/{TenantId}/workloadStatus:
+    get:
+      summary: Get tenant workload status
+      description: >-
+        Retrieve the workload status for a specific managed tenant,
+        including the activation status of each Defender XDR workload.
+      operationId: MultiTenant.GetWorkloadStatus
+      tags: [Multi-Tenant]
+      parameters:
+        - name: TenantId
+          in: path
+          required: true
+          description: The unique identifier of the tenant.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tenantId:
+                    description: The tenant identifier.
+                    type: string
+                    format: uuid
+                  workloads:
+                    description: Status of each workload.
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/WorkloadStatus'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtoapi/tenants/{TenantId}/huntingQueries/run:
+    post:
+      summary: Run cross-tenant hunting query
+      description: >-
+        Execute an advanced hunting query against a specific managed tenant.
+        Allows cross-tenant threat hunting from the multi-tenant management view.
+      operationId: MultiTenant.RunHuntingQuery
+      tags: [Multi-Tenant]
+      parameters:
+        - name: TenantId
+          in: path
+          required: true
+          description: The unique identifier of the target tenant.
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                query:
+                  description: The KQL query to execute.
+                  type: string
+                timespan:
+                  description: The time span for the query.
+                  type: string
+              required:
+                - query
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - hunting query results
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+components:
+  schemas:
+    ManagedTenant:
+      type: object
+      description: A tenant in the multi-tenant management view.
+      properties:
+        tenantId:
+          description: The unique identifier of the tenant.
+          type: string
+          format: uuid
+        tenantName:
+          description: The display name of the tenant.
+          type: string
+        tenantDomain:
+          description: The primary domain of the tenant.
+          type: string
+        status:
+          description: The tenant status.
+          type: string
+    WorkloadStatus:
+      type: object
+      description: The activation status of a Defender XDR workload.
+      properties:
+        workloadName:
+          description: The name of the workload.
+          type: string
+        isActivated:
+          description: Whether the workload is activated.
+          type: boolean
+        lastUpdated:
+          description: When the status was last updated.
+          type: string
+          format: date-time

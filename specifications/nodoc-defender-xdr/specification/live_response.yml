@@ -1,0 +1,448 @@
+paths:
+  /mtp/liveResponseApi/create_session:
+    post:
+      summary: Create Live Response session
+      description: >-
+        Create a new Live Response session on an endpoint device. This establishes
+        a remote connection to the device for interactive investigation and remediation.
+      operationId: LiveResponse.CreateSession
+      tags: [Live Response]
+      parameters:
+        - name: useV3Api
+          in: query
+          description: Whether to use the V3 API.
+          schema:
+            type: boolean
+            default: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                machineId:
+                  description: The unique identifier of the target device.
+                  type: string
+              required:
+                - machineId
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LiveResponseSession'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/liveResponseApi/sessions/{sessionId}:
+    get:
+      summary: Get Live Response session
+      description: >-
+        Retrieve the status and details of an existing Live Response session.
+      operationId: LiveResponse.GetSession
+      tags: [Live Response]
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          description: The unique identifier of the Live Response session.
+          schema:
+            type: string
+        - name: useV3Api
+          in: query
+          description: Whether to use the V3 API.
+          schema:
+            type: boolean
+            default: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LiveResponseSession'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/liveResponseApi/commands/{autoCommandId}:
+    post:
+      summary: Run Live Response command
+      description: >-
+        Execute a command in an active Live Response session. Supports built-in
+        commands as well as custom scripts from the library.
+      operationId: LiveResponse.RunCommand
+      tags: [Live Response]
+      parameters:
+        - name: autoCommandId
+          in: path
+          required: true
+          description: The auto-generated command ID.
+          schema:
+            type: string
+        - name: session_id
+          in: query
+          required: true
+          description: The Live Response session ID.
+          schema:
+            type: string
+        - name: useV2Api
+          in: query
+          schema:
+            type: boolean
+            default: false
+        - name: useV3Api
+          in: query
+          schema:
+            type: boolean
+            default: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                command:
+                  description: The command to execute.
+                  type: string
+                parameters:
+                  description: Parameters for the command.
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  commandId:
+                    description: The command execution ID.
+                    type: string
+                  status:
+                    description: The status of the command execution.
+                    type: string
+                  output:
+                    description: The command output.
+                    type: string
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    get:
+      summary: Get Live Response command result
+      description: >-
+        Retrieve the result of a previously executed Live Response command.
+      operationId: LiveResponse.GetCommandResult
+      tags: [Live Response]
+      parameters:
+        - name: autoCommandId
+          in: path
+          required: true
+          description: The auto-generated command ID.
+          schema:
+            type: string
+        - name: session_id
+          in: query
+          required: true
+          description: The Live Response session ID.
+          schema:
+            type: string
+        - name: useV2Api
+          in: query
+          schema:
+            type: boolean
+            default: false
+        - name: useV3Api
+          in: query
+          schema:
+            type: boolean
+            default: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  commandId:
+                    description: The command execution ID.
+                    type: string
+                  status:
+                    description: The status of the command execution.
+                    type: string
+                  output:
+                    description: The command output.
+                    type: string
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/liveResponseApi/get_command_definitions:
+    get:
+      summary: Get command definitions
+      description: >-
+        Retrieve the list of available Live Response command definitions
+        for the current session, including built-in and custom commands.
+      operationId: LiveResponse.GetCommandDefinitions
+      tags: [Live Response]
+      parameters:
+        - name: session_id
+          in: query
+          required: true
+          description: The Live Response session ID.
+          schema:
+            type: string
+        - name: useV2Api
+          in: query
+          schema:
+            type: boolean
+            default: false
+        - name: useV3Api
+          in: query
+          schema:
+            type: boolean
+            default: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    name:
+                      description: The command name.
+                      type: string
+                    description:
+                      description: A description of the command.
+                      type: string
+                    parameters:
+                      description: The command parameters.
+                      type: array
+                      items:
+                        type: object
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/liveResponseApi/download_file:
+    get:
+      summary: Download file from Live Response
+      description: >-
+        Download a file that was collected during a Live Response session.
+      operationId: LiveResponse.DownloadFile
+      tags: [Live Response]
+      parameters:
+        - name: token
+          in: query
+          required: true
+          description: The file download token.
+          schema:
+            type: string
+        - name: session_id
+          in: query
+          required: true
+          description: The Live Response session ID.
+          schema:
+            type: string
+        - name: useV2Api
+          in: query
+          schema:
+            type: boolean
+            default: false
+        - name: useV3Api
+          in: query
+          schema:
+            type: boolean
+            default: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/liveResponseApi/close_session:
+    post:
+      summary: Close Live Response session
+      description: >-
+        Close an active Live Response session and release the connection to the device.
+      operationId: LiveResponse.CloseSession
+      tags: [Live Response]
+      parameters:
+        - name: useV2Api
+          in: query
+          schema:
+            type: boolean
+            default: false
+        - name: useV3Api
+          in: query
+          schema:
+            type: boolean
+            default: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                sessionId:
+                  description: The session ID to close.
+                  type: string
+              required:
+                - sessionId
+      responses:
+        '200':
+          description: OK
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/liveResponseApi/library:
+    get:
+      summary: List Live Response library files
+      description: >-
+        Retrieve a list of all files in the Live Response script library.
+        The library contains scripts and tools that can be executed during
+        Live Response sessions.
+      operationId: LiveResponse.ListLibraryFiles
+      tags: [Live Response]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LibraryFile'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    post:
+      summary: Upload Live Response library file
+      description: >-
+        Upload a new file to the Live Response script library.
+      operationId: LiveResponse.UploadLibraryFile
+      tags: [Live Response]
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  description: The file to upload.
+                  type: string
+                  format: binary
+                description:
+                  description: A description of the file.
+                  type: string
+                hasParameters:
+                  description: Whether the script accepts parameters.
+                  type: boolean
+                overrideIfExists:
+                  description: Whether to overwrite an existing file with the same name.
+                  type: boolean
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LibraryFile'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/liveResponseApi/library/{FileId}:
+    get:
+      summary: Get Live Response library file
+      description: >-
+        Retrieve details of a specific file in the Live Response script library.
+      operationId: LiveResponse.GetLibraryFile
+      tags: [Live Response]
+      parameters:
+        - name: FileId
+          in: path
+          required: true
+          description: The unique identifier of the library file.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LibraryFile'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    delete:
+      summary: Delete Live Response library file
+      description: >-
+        Delete a file from the Live Response script library.
+      operationId: LiveResponse.DeleteLibraryFile
+      tags: [Live Response]
+      parameters:
+        - name: FileId
+          in: path
+          required: true
+          description: The unique identifier of the library file to delete.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+components:
+  schemas:
+    LiveResponseSession:
+      type: object
+      description: A Live Response session.
+      properties:
+        sessionId:
+          description: The unique identifier of the session.
+          type: string
+        machineId:
+          description: The device the session is connected to.
+          type: string
+        status:
+          description: The session status.
+          type: string
+          enum: [Active, Expired, Failed]
+        createdDateTime:
+          description: When the session was created.
+          type: string
+          format: date-time
+    LibraryFile:
+      type: object
+      description: A file in the Live Response script library.
+      properties:
+        id:
+          description: The unique identifier of the file.
+          type: string
+        fileName:
+          description: The name of the file.
+          type: string
+        description:
+          description: A description of the file.
+          type: string
+        fileSize:
+          description: The file size in bytes.
+          type: integer
+        hasParameters:
+          description: Whether the script accepts parameters.
+          type: boolean
+        createdBy:
+          description: The user who uploaded the file.
+          type: string
+        createdDateTime:
+          description: When the file was uploaded.
+          type: string
+          format: date-time

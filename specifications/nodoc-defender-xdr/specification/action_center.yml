@@ -1,0 +1,137 @@
+paths:
+  /mtp/actionCenter/actioncenterui/history-actions/:
+    get:
+      summary: Get action center history
+      description: >-
+        Retrieve the history of completed actions from the Defender XDR Action Center.
+        Includes automated investigation actions, manual response actions, and
+        remediation activities.
+      operationId: ActionCenter.GetHistory
+      tags: [Action Center]
+      parameters:
+        - name: pageSize
+          in: query
+          description: The number of results per page.
+          schema:
+            type: integer
+            default: 50
+        - name: pageIndex
+          in: query
+          description: The page index for pagination.
+          schema:
+            type: integer
+            default: 0
+        - name: sortByField
+          in: query
+          description: Field to sort results by.
+          schema:
+            type: string
+        - name: sortOrder
+          in: query
+          description: Sort order.
+          schema:
+            type: string
+            enum: [Ascending, Descending]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  actions:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ActionCenterItem'
+                  totalCount:
+                    type: integer
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/actionCenter/actioncenterui/pending-actions/:
+    get:
+      summary: Get pending actions
+      description: >-
+        Retrieve the list of pending actions from the Defender XDR Action Center
+        that are awaiting approval or execution.
+      operationId: ActionCenter.GetPending
+      tags: [Action Center]
+      parameters:
+        - name: pageSize
+          in: query
+          description: The number of results per page.
+          schema:
+            type: integer
+            default: 50
+        - name: pageIndex
+          in: query
+          description: The page index for pagination.
+          schema:
+            type: integer
+            default: 0
+        - name: sortByField
+          in: query
+          description: Field to sort results by.
+          schema:
+            type: string
+        - name: sortOrder
+          in: query
+          description: Sort order.
+          schema:
+            type: string
+            enum: [Ascending, Descending]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  actions:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ActionCenterItem'
+                  totalCount:
+                    type: integer
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+components:
+  schemas:
+    ActionCenterItem:
+      type: object
+      description: An item in the Action Center.
+      properties:
+        actionId:
+          description: The unique identifier of the action.
+          type: string
+        actionType:
+          description: The type of action.
+          type: string
+        status:
+          description: The current status.
+          type: string
+          enum: [Pending, Running, Completed, Failed, Cancelled]
+        entityType:
+          description: The type of entity the action targets.
+          type: string
+        entityName:
+          description: The name of the target entity.
+          type: string
+        investigationId:
+          description: The associated investigation ID, if applicable.
+          type: string
+        createdBy:
+          description: Who initiated the action.
+          type: string
+        createdDateTime:
+          description: When the action was created.
+          type: string
+          format: date-time
+        completedDateTime:
+          description: When the action completed.
+          type: string
+          format: date-time
+          nullable: true

@@ -1,0 +1,114 @@
+paths:
+  /admin/api/tenant/datalocationandcommitments:
+    get:
+      summary: Get data location and commitments
+      description: >-
+        Retrieve the data residency location and commitment information for the tenant.
+      operationId: Tenant.GetDataLocation
+      tags: [Tenant]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - data location and commitments
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/tenant/localdatalocation:
+    get:
+      summary: Get local data location
+      description: >-
+        Retrieve the local data location information for the tenant.
+      operationId: Tenant.GetLocalDataLocation
+      tags: [Tenant]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - local data location
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/tenant/azureSubscriptions:
+    get:
+      summary: Get Azure subscriptions
+      description: >-
+        Retrieve the Azure subscriptions associated with the tenant.
+      operationId: Tenant.GetAzureSubscriptions
+      tags: [Tenant]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  description: pending - Azure subscription details
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/tenant/billingAccountsWithShell:
+    get:
+      summary: Get billing accounts
+      description: >-
+        Retrieve billing accounts associated with the tenant, integrated
+        with the admin portal shell.
+      operationId: Tenant.GetBillingAccounts
+      tags: [Tenant]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - billing accounts
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/tenant/marketplaceSeatSize:
+    get:
+      summary: Get marketplace seat size
+      description: >-
+        Retrieve the marketplace seat size information for the tenant.
+      operationId: Tenant.GetMarketplaceSeatSize
+      tags: [Tenant]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - marketplace seat size
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/selfServicePurchasePolicy/products:
+    get:
+      summary: Get self-service purchase products
+      description: >-
+        Retrieve the list of products available for self-service purchase
+        and their policy settings (enabled/disabled).
+      operationId: Tenant.GetSelfServicePurchaseProducts
+      tags: [Tenant]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  description: pending - self-service purchase product details
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

@@ -1,0 +1,41 @@
+paths:
+  /mtp/streamingapi/streamingApiConfiguration:
+    get:
+      summary: Get streaming API configuration
+      description: >-
+        Retrieve the Streaming API configuration for the tenant. The Streaming API
+        enables real-time export of security events to Azure Event Hubs or
+        Azure Storage accounts for external processing and SIEM integration.
+      operationId: StreamingApi.GetConfiguration
+      tags: [Streaming API]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  isEnabled:
+                    description: Whether the Streaming API is enabled.
+                    type: boolean
+                  destinations:
+                    description: Configured export destinations.
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        destinationType:
+                          description: The type of destination.
+                          type: string
+                          enum: [EventHub, StorageAccount]
+                        resourceId:
+                          description: The Azure resource ID.
+                          type: string
+                        eventTypes:
+                          description: The event types being exported.
+                          type: array
+                          items:
+                            type: string
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

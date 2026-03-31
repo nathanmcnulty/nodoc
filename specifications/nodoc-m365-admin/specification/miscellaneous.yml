@@ -1,0 +1,141 @@
+paths:
+  /admin/api/coordinatedbootstrap/shellinfo:
+    get:
+      summary: Get shell info
+      description: >-
+        Retrieve the coordinated bootstrap shell information used to initialize
+        the M365 Admin Center portal, including feature flags, user context,
+        and available services.
+      operationId: Misc.GetShellInfo
+      tags: [Miscellaneous]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - shell bootstrap information
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /adminportal/home/ClassicModernAdminDataStream:
+    get:
+      summary: Get admin home data stream
+      description: >-
+        Retrieve the admin home page data stream, providing dashboard information
+        including service health, message center items, and quick actions.
+      operationId: Misc.GetHomeDataStream
+      tags: [Miscellaneous]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - home data stream
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/dirsyncerrors/listdirsyncerrors:
+    get:
+      summary: Get directory sync errors
+      description: >-
+        Retrieve the list of directory synchronization errors for Entra Connect
+        (AAD Connect) sync.
+      operationId: Misc.GetDirSyncErrors
+      tags: [Miscellaneous]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - directory sync errors
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/recommendations/m365/ccs:
+    get:
+      summary: Get M365 recommendations
+      description: >-
+        Retrieve Microsoft 365 recommendations from the Central Configuration
+        Service (CCS) for improving tenant security and productivity.
+      operationId: Misc.GetRecommendations
+      tags: [Miscellaneous]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - M365 recommendations
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/offerrec/offer/{id}:
+    get:
+      summary: Get offer recommendation
+      description: >-
+        Retrieve a specific offer recommendation by ID, including upgrade
+        and cross-sell recommendations from Microsoft.
+      operationId: Misc.GetOfferRecommendation
+      tags: [Miscellaneous]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The offer recommendation identifier.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - offer recommendation details
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /fd/enhancedRestorev2/v1/featureSetting:
+    get:
+      summary: Get enhanced restore settings
+      description: >-
+        Retrieve the enhanced restore (v2) feature settings for the tenant,
+        including backup and recovery configurations.
+      operationId: Misc.GetEnhancedRestoreSettings
+      tags: [Miscellaneous]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - restore feature settings
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /fd/arm/providers/Microsoft.Billing/billingAccounts:
+    get:
+      summary: Get ARM billing accounts
+      description: >-
+        Retrieve billing accounts via the Azure Resource Manager (ARM) proxy,
+        providing access to the tenant's billing account details.
+      operationId: Misc.GetARMBillingAccounts
+      tags: [Miscellaneous]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - ARM billing accounts
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

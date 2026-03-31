@@ -1,0 +1,93 @@
+paths:
+  /admin/api/searchadminapi/configurations:
+    get:
+      summary: Get search configurations
+      description: >-
+        Retrieve the Microsoft Search admin configurations for the tenant.
+      operationId: Search.GetConfigurations
+      tags: [Search]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - search configurations
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/searchadminapi/Qnas:
+    get:
+      summary: Get Q&A answers
+      description: >-
+        Retrieve the Q&A bookmark answers configured for Microsoft Search.
+      operationId: Search.GetQnas
+      tags: [Search]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  description: pending - Q&A answer details
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/searchadminapi/news/options/Bing:
+    get:
+      summary: Get Bing news options
+      description: >-
+        Retrieve the Bing news integration options for Microsoft Search.
+      operationId: Search.GetBingNewsOptions
+      tags: [Search]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - Bing news options
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/searchadminapi/UDTConnectorsSummary:
+    get:
+      summary: Get connectors summary
+      description: >-
+        Retrieve a summary of User-Defined Type (UDT) data connectors for Microsoft Search.
+      operationId: Search.GetConnectorsSummary
+      tags: [Search]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - connectors summary
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /fd/mssearchconnectors/v1.0/admin/connections/getStatistics:
+    get:
+      summary: Get connection statistics
+      description: >-
+        Retrieve statistics for Microsoft Search data connections including
+        item counts, crawl status, and connection health.
+      operationId: Search.GetConnectionStatistics
+      tags: [Search]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - connection statistics
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

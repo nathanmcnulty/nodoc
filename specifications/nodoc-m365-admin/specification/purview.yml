@@ -1,0 +1,99 @@
+paths:
+  /fd/purview/apiproxy/di/find/PurviewForAI:
+    get:
+      summary: Get Purview for AI settings
+      description: >-
+        Retrieve Purview for AI configuration and status. Used by the admin
+        center to display AI compliance and governance settings.
+      operationId: Purview.GetPurviewForAI
+      tags: [Purview]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - Purview for AI settings
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /fd/purview/apiproxy/di/find/DlpCompliancePolicy:
+    get:
+      summary: Get DLP compliance policies
+      description: >-
+        Retrieve Data Loss Prevention (DLP) compliance policies configured
+        in Microsoft Purview.
+      operationId: Purview.GetDlpPolicies
+      tags: [Purview]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  description: pending - DLP policy details
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /fd/purview/apiproxy/di/find/DlpSensitiveInformationType:
+    get:
+      summary: Get DLP sensitive information types
+      description: >-
+        Retrieve the list of sensitive information types configured in
+        Microsoft Purview DLP.
+      operationId: Purview.GetSensitiveInfoTypes
+      tags: [Purview]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  description: pending - sensitive information type details
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /fd/purview/apiproxy/cpm/v1.0/Tenant/AIBaselineSummary:
+    get:
+      summary: Get AI baseline summary
+      description: >-
+        Retrieve the AI baseline summary from Purview Compliance Policy Manager,
+        showing the tenant's compliance posture for AI workloads.
+      operationId: Purview.GetAIBaselineSummary
+      tags: [Purview]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - AI baseline summary
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /fd/purview/api/boot/getNexusBootInfo:
+    get:
+      summary: Get Nexus boot info
+      description: >-
+        Retrieve the Purview Nexus portal bootstrap information, including
+        available features and service endpoints.
+      operationId: Purview.GetNexusBootInfo
+      tags: [Purview]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - Nexus boot information
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

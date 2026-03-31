@@ -1,0 +1,69 @@
+paths:
+  /securityplatform/lake/databases:
+    get:
+      summary: List data lake databases
+      description: >-
+        Retrieve a list of databases available in the security data lake.
+        The data lake provides unified access to security data across
+        Defender XDR workloads.
+      operationId: DataLake.ListDatabases
+      tags: [Data Lake]
+      parameters:
+        - name: api-version
+          in: query
+          description: The API version.
+          schema:
+            type: string
+            default: '2024-07-01'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Database'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /securityplatform/lake/kql/v1/rest/mgmt:
+    get:
+      summary: Get data lake table schema
+      description: >-
+        Retrieve the table schema for the security data lake using a KQL
+        management command. Returns detailed column information for each table.
+      operationId: DataLake.GetTableSchema
+      tags: [Data Lake]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - KQL management query results with table schemas
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+components:
+  schemas:
+    Database:
+      type: object
+      description: A security data lake database.
+      properties:
+        name:
+          description: The database name.
+          type: string
+        tables:
+          description: Tables in the database.
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                description: The table name.
+                type: string
+              description:
+                description: A description of the table.
+                type: string

@@ -1,0 +1,212 @@
+paths:
+  /admin/api/Settings/company/theme/v2:
+    get:
+      summary: Get company theme
+      description: >-
+        Retrieve the company branding theme settings including logos, colors, and banner text.
+      operationId: CompanySettings.GetTheme
+      tags: [CompanySettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - theme settings
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    put:
+      summary: Set company theme
+      description: >-
+        Update the company branding theme settings.
+      operationId: CompanySettings.SetTheme
+      tags: [CompanySettings]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending - theme update body
+      responses:
+        '200':
+          description: OK
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/Settings/company/profile:
+    get:
+      summary: Get company profile
+      description: >-
+        Retrieve the company profile including organization name, address,
+        phone number, and technical contact information.
+      operationId: CompanySettings.GetProfile
+      tags: [CompanySettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - company profile
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    post:
+      summary: Set company profile
+      description: >-
+        Update the company profile information.
+      operationId: CompanySettings.SetProfile
+      tags: [CompanySettings]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending - profile update body
+      responses:
+        '200':
+          description: OK
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/Settings/company/helpdesk:
+    get:
+      summary: Get helpdesk settings
+      description: >-
+        Retrieve the custom helpdesk contact information displayed to users.
+      operationId: CompanySettings.GetHelpdesk
+      tags: [CompanySettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - helpdesk settings
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    post:
+      summary: Set helpdesk settings
+      description: >-
+        Update the custom helpdesk contact information.
+      operationId: CompanySettings.SetHelpdesk
+      tags: [CompanySettings]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending - helpdesk update body
+      responses:
+        '200':
+          description: OK
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/Settings/company/releasetrack:
+    get:
+      summary: Get release track settings
+      description: >-
+        Retrieve the release preferences (targeted release, standard release)
+        for the tenant.
+      operationId: CompanySettings.GetReleaseTrack
+      tags: [CompanySettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - release track settings
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    post:
+      summary: Set release track settings
+      description: >-
+        Update the release preferences for the tenant.
+      operationId: CompanySettings.SetReleaseTrack
+      tags: [CompanySettings]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending - release track update body
+      responses:
+        '200':
+          description: OK
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/Settings/company/sendfromaddress:
+    get:
+      summary: Get send-from address settings
+      description: >-
+        Retrieve the custom send-from email address settings for system notifications.
+      operationId: CompanySettings.GetSendFromAddress
+      tags: [CompanySettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - send-from address settings
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    post:
+      summary: Set send-from address settings
+      description: >-
+        Update the custom send-from email address for system notifications.
+      operationId: CompanySettings.SetSendFromAddress
+      tags: [CompanySettings]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending - send-from address update body
+      responses:
+        '200':
+          description: OK
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/Settings/company/tile:
+    get:
+      summary: Get custom tile settings
+      description: >-
+        Retrieve custom tiles configured for the app launcher.
+      operationId: CompanySettings.GetTile
+      tags: [CompanySettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - custom tile settings
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    post:
+      summary: Set custom tile settings
+      description: >-
+        Create or update custom tiles in the app launcher.
+      operationId: CompanySettings.SetTile
+      tags: [CompanySettings]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending - custom tile update body
+      responses:
+        '200':
+          description: OK
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

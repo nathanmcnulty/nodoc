@@ -1,0 +1,70 @@
+paths:
+  /admin/api/Settings/security/o365guestuser:
+    get:
+      summary: Get O365 guest user settings
+      description: >-
+        Retrieve the Office 365 guest user sharing and access settings.
+      operationId: SecuritySettings.GetO365GuestUser
+      tags: [SecuritySettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - O365 guest user settings
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    post:
+      summary: Set O365 guest user settings
+      description: >-
+        Update the Office 365 guest user sharing and access settings.
+      operationId: SecuritySettings.SetO365GuestUser
+      tags: [SecuritySettings]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending - O365 guest user settings update body
+      responses:
+        '200':
+          description: OK
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /admin/api/Settings/security/guestUserPolicy:
+    get:
+      summary: Get guest user policy
+      description: >-
+        Retrieve the guest user policy settings for the tenant.
+      operationId: SecuritySettings.GetGuestUserPolicy
+      tags: [SecuritySettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - guest user policy settings
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    post:
+      summary: Set guest user policy
+      description: >-
+        Update the guest user policy settings.
+      operationId: SecuritySettings.SetGuestUserPolicy
+      tags: [SecuritySettings]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending - guest user policy update body
+      responses:
+        '200':
+          description: OK
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

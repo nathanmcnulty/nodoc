@@ -1,0 +1,302 @@
+paths:
+  /mtp/settings/GetAdvancedFeaturesSetting:
+    post:
+      summary: Get advanced features settings
+      description: >-
+        Retrieve the current advanced features settings for Microsoft Defender
+        for Endpoint. This includes toggles for features like automated investigation,
+        live response, custom network indicators, and more.
+      operationId: EndpointConfiguration.GetAdvancedFeatures
+      tags: [Endpoint Configuration]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdvancedFeaturesSettings'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/settings/SaveAdvancedFeaturesSetting:
+    post:
+      summary: Set advanced features settings
+      description: >-
+        Update the advanced features settings for Microsoft Defender for Endpoint.
+        Warning - this modifies tenant-wide security configuration.
+      operationId: EndpointConfiguration.SetAdvancedFeatures
+      tags: [Endpoint Configuration]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdvancedFeaturesSettings'
+      responses:
+        '200':
+          description: OK
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/settings/GetPreviewExperienceSetting:
+    get:
+      summary: Get preview features setting
+      description: >-
+        Retrieve the preview features opt-in status. Supports multiple contexts
+        including Microsoft Threat Protection (MtpContext) and Microsoft Defender
+        for Endpoint (MdatpContext).
+      operationId: EndpointConfiguration.GetPreviewFeatures
+      tags: [Endpoint Configuration]
+      parameters:
+        - name: context
+          in: query
+          required: true
+          description: The context to retrieve preview settings for.
+          schema:
+            type: string
+            enum: [MtpContext, MdatpContext]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  isOptedIn:
+                    description: Whether preview features are enabled.
+                    type: boolean
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/customDataCollection/rules:
+    get:
+      summary: List custom data collection rules
+      description: >-
+        Retrieve a list of all custom data collection rules configured for endpoints.
+      operationId: EndpointConfiguration.ListCustomCollectionRules
+      tags: [Endpoint Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CustomCollectionRule'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    post:
+      summary: Create custom data collection rule
+      description: >-
+        Create a new custom data collection rule for endpoint telemetry.
+      operationId: EndpointConfiguration.CreateCustomCollectionRule
+      tags: [Endpoint Configuration]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomCollectionRule'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomCollectionRule'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/customDataCollection/rules/{RuleId}:
+    put:
+      summary: Update custom data collection rule
+      description: >-
+        Update an existing custom data collection rule.
+      operationId: EndpointConfiguration.UpdateCustomCollectionRule
+      tags: [Endpoint Configuration]
+      parameters:
+        - name: RuleId
+          in: path
+          required: true
+          description: The unique identifier of the rule to update.
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomCollectionRule'
+      responses:
+        '200':
+          description: OK
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/deviceManagement/configuration/AuthenticatedTelemetry:
+    get:
+      summary: Get authenticated telemetry configuration
+      description: >-
+        Retrieve the authenticated telemetry configuration setting for endpoints.
+      operationId: EndpointConfiguration.GetAuthenticatedTelemetry
+      tags: [Endpoint Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  isEnabled:
+                    description: Whether authenticated telemetry is enabled.
+                    type: boolean
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/deviceManagement/configuration/PotentiallyUnwantedApplications:
+    get:
+      summary: Get PUA configuration
+      description: >-
+        Retrieve the Potentially Unwanted Applications (PUA) protection
+        configuration for endpoints.
+      operationId: EndpointConfiguration.GetPuaConfiguration
+      tags: [Endpoint Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  isEnabled:
+                    description: Whether PUA protection is enabled.
+                    type: boolean
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/deviceManagement/configuration/IntuneConnection:
+    get:
+      summary: Get Intune connection configuration
+      description: >-
+        Retrieve the Microsoft Intune connection configuration for Defender for Endpoint.
+      operationId: EndpointConfiguration.GetIntuneConnection
+      tags: [Endpoint Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  isEnabled:
+                    description: Whether the Intune connection is enabled.
+                    type: boolean
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /mtp/deviceManagement/configuration/PurviewSharing:
+    get:
+      summary: Get Purview sharing configuration
+      description: >-
+        Retrieve the Microsoft Purview data sharing configuration for Defender for Endpoint.
+      operationId: EndpointConfiguration.GetPurviewSharing
+      tags: [Endpoint Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  isEnabled:
+                    description: Whether Purview sharing is enabled.
+                    type: boolean
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+components:
+  schemas:
+    AdvancedFeaturesSettings:
+      type: object
+      description: >-
+        Advanced features settings for Microsoft Defender for Endpoint.
+        Each property represents a feature toggle.
+      properties:
+        automatedInvestigation:
+          description: Whether automated investigation is enabled.
+          type: boolean
+        liveResponse:
+          description: Whether Live Response is enabled.
+          type: boolean
+        liveResponseUnsignedScriptExecution:
+          description: Whether unsigned script execution in Live Response is enabled.
+          type: boolean
+        liveResponseForServers:
+          description: Whether Live Response for servers is enabled.
+          type: boolean
+        customNetworkIndicators:
+          description: Whether custom network indicators are enabled.
+          type: boolean
+        tamperProtection:
+          description: Whether tamper protection is enabled.
+          type: boolean
+        showUserDetails:
+          description: Whether to show user details in alerts.
+          type: boolean
+        skypeForBusinessIntegration:
+          description: Whether Skype for Business integration is enabled.
+          type: boolean
+        officeIntegration:
+          description: Whether Office 365 integration is enabled.
+          type: boolean
+        microsoftThreatExperts:
+          description: Whether Microsoft Threat Experts is enabled.
+          type: boolean
+        webContentFiltering:
+          description: Whether web content filtering is enabled.
+          type: boolean
+        deviceDiscovery:
+          description: Whether device discovery is enabled.
+          type: boolean
+        previewExperience:
+          description: Whether preview experience is enabled.
+          type: boolean
+        microsoftIntunConnection:
+          description: Whether Microsoft Intune connection is enabled.
+          type: boolean
+        endpointDlpEnabled:
+          description: Whether endpoint DLP is enabled.
+          type: boolean
+        authenticatedTelemetry:
+          description: Whether authenticated telemetry is enabled.
+          type: boolean
+    CustomCollectionRule:
+      type: object
+      description: A custom data collection rule for endpoint telemetry.
+      properties:
+        id:
+          description: The unique identifier of the rule.
+          type: string
+        name:
+          description: The name of the rule.
+          type: string
+        description:
+          description: A description of the rule.
+          type: string
+        isEnabled:
+          description: Whether the rule is enabled.
+          type: boolean
+        query:
+          description: The data collection query.
+          type: string
+        frequency:
+          description: How often data is collected.
+          type: string
