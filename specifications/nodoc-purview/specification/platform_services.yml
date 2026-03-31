@@ -173,6 +173,46 @@ paths:
         4XX:
           $ref: common.yml#/components/responses/ClientException
 
+  /purviewplatform/api/v1/insight/GetStartedTasks:
+    get:
+      operationId: getStartedTasks
+      summary: Get getting-started tasks
+      description: >-
+        Retrieve the list of getting-started tasks from the Purview Platform.
+        Returns onboarding tasks and their completion status for Information Protection
+        setup. Discovered on Information Protection > Default Labels page.
+      tags: [PlatformServices]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /purviewplatform/api/v1/insight/RecommendedTasks:
+    get:
+      operationId: getRecommendedTasks
+      summary: Get recommended tasks
+      description: >-
+        Retrieve recommended tasks from the Purview Platform. Returns a list of
+        recommended configuration tasks for the tenant based on current protection
+        status. Discovered on Information Protection > Default Labels page.
+      tags: [PlatformServices]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
   /ocps/user/v1.0/web/policies:
     get:
       operationId: getOfficeConfigPolicies
