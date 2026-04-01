@@ -28,11 +28,25 @@ info:
     | --- | --- |
     | `/mtp/` | Microsoft Threat Protection |
     | `/mdi/` | Microsoft Defender for Identity |
+    | `/aatp/` | Azure Advanced Threat Protection (MDI legacy) |
     | `/mcas/` | Microsoft Cloud App Security (Defender for Cloud Apps) |
     | `/mdc/` | Microsoft Defender for Cloud |
     | `/mtoapi/` | Multi-Tenant Operations |
     | `/securityplatform/` | Security Platform (Data Lake) |
     | `/radius/` | RADIUS Identity Services |
+    | `/di/` | Data Infrastructure (shared with Purview) |
+    | `/gws/` | Governance Web Services (shared with Purview) |
+    | `/medeina/` | Security Copilot (shared with Purview) |
+    | `/cdssecuritycopilot/` | CDS Security Copilot (legacy, see /medeina/) |
+    | `/msgraph/` | Microsoft Graph Proxy (shared with Purview) |
+    | `/shell/` | Portal Shell (shared with Purview) |
+    | `/astgws/` | Attack Simulator Gateway |
+    | `/m365appprotection/` | App Governance |
+    | `/ndr/` | Network Detection & Response |
+
+    **Cross-portal shared services:** Several backend services are shared with the Microsoft Purview portal (purview.microsoft.com).
+    The `/di/`, `/gws/`, `/medeina/`, `/msgraph/`, and `/shell/` prefixes route to the same backend services in both portals,
+    though each portal may expose different subsets of endpoints.
 
     Documentation and specifications have been provided on a best efforts basis and may not be 100% accurate.
 

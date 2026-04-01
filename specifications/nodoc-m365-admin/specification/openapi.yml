@@ -20,6 +20,11 @@ info:
     These APIs are accessed through the admin portal and use session-based authentication with portal-specific headers.
     They are used internally by the M365 Admin Center and are not officially documented by Microsoft.
 
+    **Architecture note:** Unlike the Defender XDR and Purview portals which share several backend services
+    (e.g., `/di/`, `/gws/`, `/medeina/`, `/msgraph/`), the M365 Admin Center uses its own isolated API layer
+    under `/admin/api/`. Some Microsoft Graph operations are proxied through `/fd/msgraph/` endpoints but
+    these use a separate federated proxy rather than the shared `/apiproxy/` layer used by XDR and Purview.
+
     The following custom headers are required for most requests:
 
     | Header | Description | Example |
@@ -70,7 +75,7 @@ tags:
   - name: Tenant
     description: Operations relating to tenant configuration and billing.
   - name: GraphProxy
-    description: Operations proxied through to Microsoft Graph.
+    description: Operations proxied through to Microsoft Graph for directory, identity, and license management. Uses the /fd/msgraph/ federated proxy (separate from the /apiproxy/msgraph/ used by Defender XDR and Purview).
   - name: Purview
     description: Operations relating to Microsoft Purview and compliance.
   - name: Edge
@@ -86,7 +91,7 @@ tags:
   - name: Viva
     description: Operations relating to Microsoft Viva settings.
   - name: Miscellaneous
-    description: Miscellaneous operations (bootstrap, recommendations, sync errors, etc.).
+    description: Portal bootstrap, recommendations, directory sync errors, and other utility operations that support the admin portal infrastructure.
   - name: Navigation
     description: Operations relating to portal navigation and UI preferences.
   - name: Features

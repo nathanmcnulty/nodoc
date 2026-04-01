@@ -25,25 +25,30 @@ info:
 
     | Prefix | Service |
     | --- | --- |
-    | `/di/` | Data Infrastructure (entity discovery/search) |
+    | `/di/` | Data Infrastructure (entity discovery/search) — shared with Defender XDR |
     | `/aedmcc/` | Advanced eDiscovery & Content Search |
     | `/cpm/` | Compliance Manager |
     | `/adtsch/` | Audit Search |
-    | `/gws/` | Governance Web Services |
+    | `/gws/` | Governance Web Services (authorization/DLM) — shared with Defender XDR |
     | `/dgs/` | Data Governance Services |
-    | `/medeina/` | Security Copilot (Medeina) |
-    | `/cdssecuritycopilot/` | CDS Security Copilot |
-    | `/msgraph/` | Microsoft Graph Proxy |
+    | `/medeina/` | Security Copilot (Medeina) — shared with Defender XDR |
+    | `/cdssecuritycopilot/` | CDS Security Copilot (legacy, see /medeina/) |
+    | `/msgraph/` | Microsoft Graph Proxy — shared with Defender XDR |
     | `/purviewplatform/` | Purview Platform |
     | `/cbill/` | Purview Billing |
-    | `/mtp/` | Microsoft Threat Protection (DLP devices) |
+    | `/mtp/` | Microsoft Threat Protection (DLP devices) — shared with Defender XDR |
     | `/insiderrisk/` | Insider Risk Management |
     | `/spo/` | SharePoint Online |
-    | `/shell/` | Portal Shell |
+    | `/shell/` | Portal Shell — shared with Defender XDR |
     | `/iris/` | IRIS Feature Selection |
     | `/azurepurview/` | Azure Purview |
     | `/ocps/` | Office Configuration |
     | `/Ingestion/` | Compliance Ingestion |
+
+    **Cross-portal shared services:** Several backend services are shared with the Microsoft Defender XDR portal (security.microsoft.com).
+    The `/di/`, `/gws/`, `/medeina/`, `/msgraph/`, `/mtp/`, and `/shell/` prefixes route to the same backend services in both portals.
+    Purview is the primary consumer of `/di/` (Data Infrastructure) with 21+ endpoints for entity discovery and search.
+    The `/gws/` (Governance Web Services) prefix provides shared authorization and permission validation across both portals.
 
     Documentation and specifications have been provided on a best efforts basis and may not be 100% accurate.
 
