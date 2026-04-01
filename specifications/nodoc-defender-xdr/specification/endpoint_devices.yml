@@ -10,7 +10,7 @@ paths:
       parameters:
         - name: hideLowFidelityDevices
           in: query
-          description: Whether to hide low-fidelity (incomplete data) devices.
+          description: Exclude low-fidelity (unmanaged) devices from results.
           schema:
             type: boolean
             default: true
@@ -22,28 +22,33 @@ paths:
             default: 30
         - name: pageIndex
           in: query
-          description: The page index for pagination.
+          description: Page number (1-based).
           schema:
             type: integer
             default: 1
         - name: pageSize
           in: query
-          description: The number of results per page.
+          description: Number of devices per page.
           schema:
             type: integer
-            default: 100
+            default: 25
         - name: sortByField
           in: query
           description: Field to sort results by.
           schema:
             type: string
-            example: lastSeen
+            default: riskscore
         - name: sortOrder
           in: query
-          description: Sort order.
+          description: Sort direction.
           schema:
             type: string
             enum: [Ascending, Descending]
+        - name: machineSearchPrefix
+          in: query
+          description: Filter devices by name prefix.
+          schema:
+            type: string
       responses:
         '200':
           description: OK
@@ -84,16 +89,18 @@ paths:
             type: string
         - name: idType
           in: query
-          description: The type of the machine identifier.
+          required: true
+          description: The type of identifier used.
           schema:
             type: string
+            enum: [SenseMachineId]
             default: SenseMachineId
         - name: readFromCache
           in: query
           description: Whether to read from cache.
           schema:
             type: boolean
-            default: false
+            default: true
         - name: lookingBackIndays
           in: query
           description: Number of days to look back.
@@ -894,6 +901,19 @@ paths:
         such as OS, health status, and risk level.
       operationId: EndpointDevices.GetDeviceTotals
       tags: [Endpoint Devices]
+      parameters:
+        - name: hideLowFidelityDevices
+          in: query
+          description: Exclude low-fidelity (unmanaged) devices.
+          schema:
+            type: boolean
+            default: true
+        - name: lookingBackIndays
+          in: query
+          description: Number of days to look back for device activity.
+          schema:
+            type: integer
+            default: 30
       responses:
         '200':
           description: OK
@@ -918,6 +938,17 @@ paths:
         Retrieve the list of RBAC machine groups configured in the tenant.
       operationId: EndpointDevices.GetMachineGroups
       tags: [Endpoint Devices]
+      parameters:
+        - name: addAadGroupNames
+          in: query
+          description: Include Azure AD group names in results.
+          schema:
+            type: boolean
+        - name: addMachineGroupCount
+          in: query
+          description: Include machine count per group.
+          schema:
+            type: boolean
       responses:
         '200':
           description: OK

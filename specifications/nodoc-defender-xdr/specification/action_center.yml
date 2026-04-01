@@ -9,6 +9,16 @@ paths:
       operationId: ActionCenter.GetHistory
       tags: [Action Center]
       parameters:
+        - name: $skip
+          in: query
+          description: Number of records to skip.
+          schema:
+            type: integer
+        - name: $top
+          in: query
+          description: Maximum number of records to return.
+          schema:
+            type: integer
         - name: pageSize
           in: query
           description: The number of results per page.
@@ -64,6 +74,16 @@ paths:
       operationId: ActionCenter.GetPending
       tags: [Action Center]
       parameters:
+        - name: $skip
+          in: query
+          description: Number of records to skip.
+          schema:
+            type: integer
+        - name: $top
+          in: query
+          description: Maximum number of records to return.
+          schema:
+            type: integer
         - name: pageSize
           in: query
           description: The number of results per page.

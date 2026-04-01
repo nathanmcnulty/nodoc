@@ -474,6 +474,17 @@ paths:
         for the current tenant.
       operationId: LiveResponse.GetProperties
       tags: [Live Response]
+      parameters:
+        - name: useV2Api
+          in: query
+          description: Use version 2 of the Live Response API.
+          schema:
+            type: boolean
+        - name: useV3Api
+          in: query
+          description: Use version 3 of the Live Response API.
+          schema:
+            type: boolean
       responses:
         '200':
           description: OK

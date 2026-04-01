@@ -92,26 +92,25 @@ paths:
       parameters:
         - name: pageIndex
           in: query
-          description: The page index for pagination.
+          description: Current page number (1-based).
           schema:
             type: integer
             default: 1
         - name: pageSize
           in: query
-          description: The number of results per page.
+          description: Number of results per page.
           schema:
             type: integer
             default: 10000
         - name: sortOrder
           in: query
-          description: The sort order.
+          description: Sort direction for results.
           schema:
             type: string
             enum: [Ascending, Descending]
-            default: Ascending
         - name: isUnifiedRulesListEnabled
           in: query
-          description: Whether to include unified rules.
+          description: Whether to return the unified rules list.
           schema:
             type: boolean
             default: true
