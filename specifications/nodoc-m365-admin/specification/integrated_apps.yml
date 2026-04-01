@@ -23,8 +23,14 @@ paths:
               schema:
                 type: object
                 description: Integrated apps list. Exact schema pending.
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /fd/addins/api/agents:
     get:
@@ -66,8 +72,14 @@ paths:
               schema:
                 type: object
                 description: Agents list. Exact schema pending.
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /fd/addins/api/actionableApps:
     get:
@@ -97,8 +109,14 @@ paths:
               schema:
                 type: object
                 description: Actionable apps list. Exact schema pending.
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /fd/addins/api/availableApps:
     get:
@@ -122,8 +140,14 @@ paths:
               schema:
                 type: object
                 description: Available apps list. Exact schema pending.
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /fd/addins/api/recommendations/appRecommendations:
     get:
@@ -147,8 +171,14 @@ paths:
               schema:
                 type: object
                 description: App recommendations. Exact schema pending.
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /fd/addins/api/v2/settings:
     get:
@@ -176,8 +206,14 @@ paths:
               schema:
                 type: object
                 description: Integrated apps settings. Exact schema pending.
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /admin/api/privatecatalog/GetAddInDetails:
     post:
@@ -201,5 +237,11 @@ paths:
               schema:
                 type: object
                 description: pending
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

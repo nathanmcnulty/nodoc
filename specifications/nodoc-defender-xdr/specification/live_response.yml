@@ -32,8 +32,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/LiveResponseSession'
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/liveResponseApi/sessions/{sessionId}:
     get:
@@ -62,8 +68,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/LiveResponseSession'
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/liveResponseApi/commands/{autoCommandId}:
     post:
@@ -127,8 +139,14 @@ paths:
                   output:
                     description: The command output.
                     type: string
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
     get:
       summary: Get Live Response command result
       description: >-
@@ -175,8 +193,14 @@ paths:
                   output:
                     description: The command output.
                     type: string
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/liveResponseApi/get_command_definitions:
     get:
@@ -224,8 +248,14 @@ paths:
                       type: array
                       items:
                         type: object
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/liveResponseApi/download_file:
     get:
@@ -265,8 +295,14 @@ paths:
               schema:
                 type: string
                 format: binary
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/liveResponseApi/close_session:
     post:
@@ -300,8 +336,14 @@ paths:
       responses:
         '200':
           description: OK
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/liveResponseApi/library:
     get:
@@ -321,8 +363,14 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/LibraryFile'
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
     post:
       summary: Upload Live Response library file
       description: >-
@@ -355,8 +403,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/LibraryFile'
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/liveResponseApi/library/{FileId}:
     get:
@@ -379,8 +433,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/LibraryFile'
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
     delete:
       summary: Delete Live Response library file
       description: >-
@@ -397,8 +457,14 @@ paths:
       responses:
         '200':
           description: OK
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/liveResponseApi/get_properties:
     get:
@@ -416,8 +482,14 @@ paths:
               schema:
                 type: object
                 description: pending - live response properties
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
 components:
   schemas:

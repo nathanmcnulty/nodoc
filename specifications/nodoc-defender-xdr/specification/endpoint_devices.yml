@@ -58,8 +58,14 @@ paths:
                       $ref: '#/components/schemas/Device'
                   totalCount:
                     type: integer
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/getMachine/machines:
     get:
@@ -101,8 +107,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DeviceDetail'
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/machineTag/machineTags/{DeviceId}:
     get:
@@ -127,8 +139,14 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/DeviceTag'
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/machineTag/machineTag:
     patch:
@@ -160,8 +178,14 @@ paths:
       responses:
         '200':
           description: OK
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/assetvalue/machineAssetValue:
     post:
@@ -190,8 +214,14 @@ paths:
       responses:
         '200':
           description: OK
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/assetvalue/setCriticalityLevel:
     post:
@@ -218,8 +248,14 @@ paths:
       responses:
         '200':
           description: OK
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/rbacGroupAssignment/updateMachineRbacGroupAssignments:
     post:
@@ -246,8 +282,14 @@ paths:
       responses:
         '200':
           description: OK
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/rbacGroupAssignment/machineRbacGroupAssignments/{DeviceId}:
     get:
@@ -279,8 +321,14 @@ paths:
                     rbacGroupName:
                       description: The RBAC group name.
                       type: string
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/rbacGroupAssignment/rbacGroupsScopes/{DeviceId}:
     get:
@@ -304,8 +352,14 @@ paths:
               schema:
                 type: object
                 description: pending
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/machineExclusionState/updateMachineExclusionState:
     post:
@@ -333,8 +387,14 @@ paths:
       responses:
         '200':
           description: OK
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/responseApiPortal/requests/create:
     post:
@@ -388,8 +448,14 @@ paths:
                   status:
                     description: The status of the action.
                     type: string
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/responseApiPortal/requests/{ActionId}:
     get:
@@ -429,8 +495,14 @@ paths:
                     description: When the action was created.
                     type: string
                     format: date-time
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
     delete:
       summary: Stop device action
       description: >-
@@ -447,8 +519,14 @@ paths:
       responses:
         '200':
           description: OK
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/deviceTimeline/timeline/{DeviceId}:
     get:
@@ -473,8 +551,14 @@ paths:
               schema:
                 type: object
                 description: pending - timeline event data
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/deviceManagement/deviceModels:
     get:
@@ -492,8 +576,14 @@ paths:
                 type: array
                 items:
                   type: string
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/deviceManagement/deviceVendors:
     get:
@@ -511,8 +601,14 @@ paths:
                 type: array
                 items:
                   type: string
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/deviceManagement/osVersions:
     get:
@@ -538,8 +634,14 @@ paths:
                     friendlyName:
                       description: The friendly display name.
                       type: string
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/deviceManagement/deviceTotals:
     get:
@@ -557,8 +659,14 @@ paths:
               schema:
                 type: object
                 description: pending - device total statistics
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/deviceManagement/windowsReleaseVersions:
     get:
@@ -576,8 +684,14 @@ paths:
                 type: array
                 items:
                   type: string
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/deviceManagement/deviceLicenseReport:
     get:
@@ -595,8 +709,14 @@ paths:
               schema:
                 type: object
                 description: pending - license report data
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/ndr/machines/devicesWithoutSiteTotals:
     get:
@@ -613,8 +733,14 @@ paths:
               schema:
                 type: object
                 description: pending - device counts without site totals
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/ndr/machines/allMachinesTags:
     get:
@@ -631,8 +757,14 @@ paths:
               schema:
                 type: object
                 description: pending - all machine tags
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/ndr/machines/allFirmwareVersions:
     get:
@@ -649,8 +781,14 @@ paths:
               schema:
                 type: object
                 description: pending - all firmware versions
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/ndr/machines/allVendors:
     get:
@@ -667,8 +805,14 @@ paths:
               schema:
                 type: object
                 description: pending - all device vendors
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/ndr/machines/allModels:
     get:
@@ -685,8 +829,14 @@ paths:
               schema:
                 type: object
                 description: pending - all device models
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/ndr/machines/allOsVersionFriendlyNames:
     get:
@@ -703,8 +853,14 @@ paths:
               schema:
                 type: object
                 description: pending - all OS version friendly names
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/ndr/machines/allWindowsReleaseVersions:
     get:
@@ -721,8 +877,14 @@ paths:
               schema:
                 type: object
                 description: pending - all Windows release versions
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/ndr/machines/deviceTotals:
     get:
@@ -740,8 +902,14 @@ paths:
               schema:
                 type: object
                 description: pending - device totals data
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/rbacManagementApi/rbac/machine_groups:
     get:
@@ -758,8 +926,14 @@ paths:
               schema:
                 type: object
                 description: pending - RBAC machine groups
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/ndr/machines/deviceTypeDistribution:
     get:
@@ -776,8 +950,14 @@ paths:
               schema:
                 type: object
                 description: pending
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/wdatpApi/machines:
     get:
@@ -794,8 +974,14 @@ paths:
               schema:
                 type: object
                 description: pending - WDATP machines list
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/mdi/tri/defensor/onboarding/devices/sensor_compatible_machines:
     get:
@@ -813,8 +999,14 @@ paths:
               schema:
                 type: object
                 description: pending - sensor compatible machines list
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
 components:
   schemas:

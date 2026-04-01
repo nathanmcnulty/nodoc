@@ -21,8 +21,14 @@ paths:
               schema:
                 type: object
                 description: List of risky agents. Exact schema pending.
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /admin/api/agenttemplates/getpolicies:
     get:
@@ -47,8 +53,14 @@ paths:
               schema:
                 type: object
                 description: Agent template policies. Exact schema pending.
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /admin/api/agenttemplates/getagenttemplates:
     get:
@@ -65,8 +77,14 @@ paths:
               schema:
                 type: object
                 description: Agent templates list. Exact schema pending.
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /admin/api/agentssettings/mcpservers:
     get:
@@ -84,8 +102,14 @@ paths:
               schema:
                 type: object
                 description: MCP server configurations. Exact schema pending.
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /admin/api/settings/company/frontier/access:
     get:
@@ -107,8 +131,14 @@ paths:
                   FrontierPolicy:
                     type: object
                     description: The Frontier access policy configuration.
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
     post:
       summary: Set Frontier access policy
       description: >-
@@ -130,8 +160,14 @@ paths:
       responses:
         '200':
           description: OK
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /admin/api/agentusers/metrics/agents/entitiesAtRisk:
     post:
@@ -155,5 +191,11 @@ paths:
               schema:
                 type: object
                 description: pending
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

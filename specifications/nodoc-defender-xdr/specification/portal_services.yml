@@ -14,8 +14,14 @@ paths:
               schema:
                 type: object
                 description: pending - user preferences data
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
     patch:
       summary: Update user preference
       description: >-
@@ -36,8 +42,14 @@ paths:
               schema:
                 type: object
                 description: pending - updated user preference
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/userPreferences/api/mgmt/userpreferencesservice/userPreference/alwaysUseUtc:
     get:
@@ -54,8 +66,14 @@ paths:
               schema:
                 type: object
                 description: pending - UTC preference setting
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/mdepDnH/reports/machineHealth/healthStatus:
     get:
@@ -73,8 +91,14 @@ paths:
               schema:
                 type: object
                 description: pending - machine health status report data
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /shell/api/shell/shellinfo:
     get:
@@ -91,8 +115,14 @@ paths:
               schema:
                 type: object
                 description: pending - shell info data
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /medeina/auth:
     get:
@@ -109,8 +139,14 @@ paths:
               schema:
                 type: object
                 description: pending - Medeina authentication data
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /cdssecuritycopilot/trial:
     get:
@@ -127,8 +163,14 @@ paths:
               schema:
                 type: object
                 description: pending - Security Copilot trial status
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /msgraph/v1.0/users:
     get:
@@ -146,8 +188,14 @@ paths:
               schema:
                 type: object
                 description: pending - Graph users list
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /di/Find/TrialOffer:
     get:
@@ -164,8 +212,14 @@ paths:
               schema:
                 type: object
                 description: pending - trial offers data
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /di/Find/CustomTag:
     get:
@@ -182,8 +236,14 @@ paths:
               schema:
                 type: object
                 description: pending - custom tags data
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /di/Aggregate/ThreatInstanceList:
     post:
@@ -206,8 +266,14 @@ paths:
               schema:
                 type: object
                 description: pending - aggregated threat instances
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /di/Aggregate/ThreatProfileDetails:
     post:
@@ -230,8 +296,14 @@ paths:
               schema:
                 type: object
                 description: pending - aggregated threat profile details
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /gws/ComplianceAuthServer/v1.0/IsAllowedPermissionWithScopes:
     post:
@@ -255,8 +327,14 @@ paths:
               schema:
                 type: object
                 description: pending - permission check result
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /astgws/AttackSimulator/api/v1/AdvanceReporting/chart/UserCoverage:
     get:
@@ -274,8 +352,14 @@ paths:
               schema:
                 type: object
                 description: pending - attack simulator user coverage data
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /admin/Beta/{tenantId}/InvokeCommand:
     post:
@@ -306,8 +390,14 @@ paths:
               schema:
                 type: object
                 description: pending - admin command result
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /msgraph/v1.0/subscribedSkus:
     get:
@@ -324,8 +414,14 @@ paths:
               schema:
                 type: object
                 description: pending
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /m365appprotection/mapg-glsservice/compliance/istenantonboarded:
     get:
@@ -343,8 +439,14 @@ paths:
               schema:
                 type: object
                 description: pending - App Governance onboarding status
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /m365appprotection/mapg-glsservice/compliance/istenantinsightsready:
     get:
@@ -361,5 +463,11 @@ paths:
               schema:
                 type: object
                 description: pending - App Governance insights readiness
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

@@ -15,8 +15,14 @@ paths:
               schema:
                 type: object
                 description: pending - IE mode site lists
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /fd/edgeenterpriseextensionsmanagement/api/policies:
     get:
@@ -36,8 +42,14 @@ paths:
                 items:
                   type: object
                   description: pending - extension policy details
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /fd/OfficePolicyAdmin/v1.0/edge/policies:
     get:
@@ -55,5 +67,11 @@ paths:
               schema:
                 type: object
                 description: pending - Edge browser policies
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

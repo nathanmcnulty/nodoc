@@ -55,8 +55,14 @@ paths:
               schema:
                 type: object
                 description: Report data. Schema varies by entityName.
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /admin/api/reports/GetSummaryDataV3:
     get:
@@ -102,8 +108,14 @@ paths:
               schema:
                 type: object
                 description: Summary report data. Schema varies by report type.
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /admin/api/reports/productivityScoreConfig/GetProductivityScoreConfig:
     get:
@@ -120,8 +132,14 @@ paths:
               schema:
                 type: object
                 description: Productivity Score configuration. Exact schema pending.
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /admin/api/admindashboard/preferences:
     get:
@@ -138,8 +156,14 @@ paths:
               schema:
                 type: object
                 description: Admin dashboard preferences. Exact schema pending.
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /admin/api/reports/GetReportCategoryDetails:
     get:
@@ -156,8 +180,14 @@ paths:
               schema:
                 type: object
                 description: pending
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /admin/api/reports/GetReportTileData:
     get:
@@ -174,8 +204,14 @@ paths:
               schema:
                 type: object
                 description: pending
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /admin/api/reports/GetReportsWidgetConfig:
     get:
@@ -192,8 +228,14 @@ paths:
               schema:
                 type: object
                 description: pending
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /admin/api/reports/config/GetTenantConfiguration:
     get:
@@ -210,5 +252,11 @@ paths:
               schema:
                 type: object
                 description: pending
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

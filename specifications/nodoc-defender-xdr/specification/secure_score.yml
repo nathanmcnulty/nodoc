@@ -15,8 +15,14 @@ paths:
               schema:
                 type: object
                 description: pending - secure scores V2 data
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/secureScore/security/secureScoreControlProfilesV2:
     get:
@@ -34,8 +40,14 @@ paths:
               schema:
                 type: object
                 description: pending - secure score control profiles V2 data
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/secureScore/security/secureScoreSecurityInitiativesV2:
     get:
@@ -53,8 +65,14 @@ paths:
               schema:
                 type: object
                 description: pending - security initiatives V2 data
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/secureScore/security/secureScoreTenantProfile:
     get:
@@ -72,8 +90,14 @@ paths:
               schema:
                 type: object
                 description: pending - tenant secure score profile
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/secureScore/security/secureScoreInsights:
     get:
@@ -91,5 +115,11 @@ paths:
               schema:
                 type: object
                 description: pending - secure score insights data
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

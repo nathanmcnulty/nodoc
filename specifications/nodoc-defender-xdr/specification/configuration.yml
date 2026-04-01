@@ -16,8 +16,14 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/SuppressionRule'
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/alertsApiService/workloads/disabled:
     get:
@@ -42,8 +48,14 @@ paths:
               schema:
                 type: object
                 description: pending - disabled workload configuration
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/ndr/rulesengine/rules:
     get:
@@ -63,8 +75,14 @@ paths:
                 items:
                   type: object
                   description: pending - asset rule details
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mcas/cas/api/v1/preview_features/get:
     get:
@@ -82,8 +100,14 @@ paths:
               schema:
                 type: object
                 description: pending - MCAS preview feature settings
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mdc/management/optin:
     get:
@@ -100,8 +124,14 @@ paths:
               schema:
                 type: object
                 description: pending - MDC preview feature settings
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/settings/SavePreviewExperienceSetting:
     post:
@@ -133,8 +163,14 @@ paths:
       responses:
         '200':
           description: OK
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mcas/cas/api/v1/preview_features/update:
     post:
@@ -153,8 +189,14 @@ paths:
       responses:
         '200':
           description: OK
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/sccManagement/mgmt/TenantContext:
     get:
@@ -179,8 +221,14 @@ paths:
               schema:
                 type: object
                 description: pending - tenant context data
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/xspmatlas/assetrules:
     get:
@@ -199,8 +247,14 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/CriticalAssetClassification'
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
     post:
       summary: Create critical asset classification
       description: >-
@@ -219,8 +273,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CriticalAssetClassification'
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
     put:
       summary: Update critical asset classification
       description: >-
@@ -235,8 +295,14 @@ paths:
       responses:
         '200':
           description: OK
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
     delete:
       summary: Delete critical asset classification
       description: >-
@@ -257,8 +323,14 @@ paths:
       responses:
         '200':
           description: OK
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/xspmatlas/assetrules/querybuilder/assets/{encodedRuleName}:
     get:
@@ -283,8 +355,14 @@ paths:
               schema:
                 type: object
                 description: pending - matched assets
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/xspmatlas/assetrules/querybuilder/schema:
     get:
@@ -302,8 +380,14 @@ paths:
               schema:
                 type: object
                 description: pending - query builder schema
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /radius/api/radius/serviceaccounts/classificationrule/getall:
     get:
@@ -324,8 +408,14 @@ paths:
                 items:
                   type: object
                   description: pending - service account classification rule
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/urbacConfiguration/gw/unifiedrbac/configuration/tenantinfo:
     get:
@@ -343,8 +433,14 @@ paths:
               schema:
                 type: object
                 description: pending - unified RBAC configuration
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mcas/cas/api/v1/settings:
     get:
@@ -362,8 +458,14 @@ paths:
               schema:
                 type: object
                 description: pending - MCAS general settings
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/autoIr/ui/properties:
     get:
@@ -381,8 +483,14 @@ paths:
               schema:
                 type: object
                 description: pending - automated investigation properties
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/wdatpInternalApi/compliance/alertSharing/status:
     get:
@@ -399,8 +507,14 @@ paths:
               schema:
                 type: object
                 description: pending - alert sharing compliance status
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/responseApiPortal/onboarding/intune/status:
     get:
@@ -417,8 +531,14 @@ paths:
               schema:
                 type: object
                 description: pending - Intune onboarding status
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/responseApiPortal/senseauth/allownonauthsense:
     get:
@@ -435,8 +555,14 @@ paths:
               schema:
                 type: object
                 description: pending - non-auth sense configuration
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
 components:
   schemas:

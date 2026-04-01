@@ -14,8 +14,14 @@ paths:
               schema:
                 type: object
                 description: Initial load feature flags. Exact schema pending.
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /admin/api/features/admincontentcdnimagepath:
     get:
@@ -32,8 +38,14 @@ paths:
               schema:
                 type: object
                 description: Admin content CDN image path. Exact schema pending.
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /admin/api/features/config:
     get:
@@ -50,8 +62,14 @@ paths:
               schema:
                 type: object
                 description: Features configuration. Exact schema pending.
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /admin/api/features/all:
     get:
@@ -68,5 +86,11 @@ paths:
               schema:
                 type: object
                 description: All feature flags. Exact schema pending.
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

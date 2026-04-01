@@ -16,8 +16,14 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/TableSchema'
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/huntingService/savedFunctions:
     get:
@@ -36,8 +42,14 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/SavedFunction'
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/huntingService/functions/defender/savedfunctions/{Id}:
     get:
@@ -60,8 +72,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SavedFunction'
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/huntingService/rules/unified:
     get:
@@ -111,8 +129,14 @@ paths:
                       $ref: '#/components/schemas/DetectionRule'
                   totalCount:
                     type: integer
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/huntingService/reports/userHistory:
     get:
@@ -138,8 +162,14 @@ paths:
                       description: When the query was executed.
                       type: string
                       format: date-time
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
     post:
       summary: Get user hunting history report
       description: >-
@@ -160,8 +190,14 @@ paths:
               schema:
                 type: object
                 description: pending - user history report data
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/huntingService/queries/encode:
     get:
@@ -189,8 +225,14 @@ paths:
                   encodedQuery:
                     description: The encoded query string.
                     type: string
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/huntingService/savedfunctions:
     post:
@@ -211,8 +253,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SavedFunction'
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/huntingService/functions/defender/updateFunction:
     put:
@@ -229,8 +277,14 @@ paths:
       responses:
         '200':
           description: OK
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/huntingService/functions/{Id}:
     delete:
@@ -249,8 +303,14 @@ paths:
       responses:
         '200':
           description: OK
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/huntingService/documentation/GuidedHuntingGettingStarted:
     get:
@@ -267,8 +327,14 @@ paths:
               schema:
                 type: object
                 description: pending - guided hunting getting started documentation
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/userPreferences/api/mgmt/userpreferencesservice/userPreference/advanced_hunting:
     get:
@@ -285,8 +351,14 @@ paths:
               schema:
                 type: object
                 description: pending - advanced hunting user preferences
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/userExposedRbacGroups/UserExposedRbacGroups:
     get:
@@ -304,8 +376,14 @@ paths:
               schema:
                 type: object
                 description: pending - user RBAC groups
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/huntingService/favorites:
     get:
@@ -322,8 +400,14 @@ paths:
               schema:
                 type: object
                 description: pending - hunting favorites list
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/huntingService/schema/functions:
     get:
@@ -340,8 +424,14 @@ paths:
               schema:
                 type: object
                 description: pending - schema functions list
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/huntingService/queries:
     get:
@@ -358,8 +448,14 @@ paths:
               schema:
                 type: object
                 description: pending - hunting queries list
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/huntingService/communityQueries:
     get:
@@ -376,8 +472,14 @@ paths:
               schema:
                 type: object
                 description: pending - community queries list
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/huntingService/documentation/GettingStarted:
     get:
@@ -394,8 +496,14 @@ paths:
               schema:
                 type: object
                 description: pending - getting started documentation
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/huntingService/guidedQueries/filterSchema:
     get:
@@ -413,8 +521,14 @@ paths:
               schema:
                 type: object
                 description: pending - guided queries filter schema
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/huntingService/queries/defender/savedqueries/{id}:
     get:
@@ -438,8 +552,14 @@ paths:
               schema:
                 type: object
                 description: pending - saved query details
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/huntingService/queries/defender/communityqueries/{id}:
     get:
@@ -463,8 +583,14 @@ paths:
               schema:
                 type: object
                 description: pending - community query details
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
 components:
   schemas:

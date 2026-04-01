@@ -19,8 +19,14 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/SubscribedSku'
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /fd/msgraph/v1.0/devices:
     get:
@@ -65,8 +71,14 @@ paths:
                     items:
                       type: object
                       description: Device details. Exact schema pending.
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /fd/msgraph/beta/$batch:
     post:
@@ -117,8 +129,14 @@ paths:
                           type: integer
                         body:
                           type: object
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
 components:
   schemas:

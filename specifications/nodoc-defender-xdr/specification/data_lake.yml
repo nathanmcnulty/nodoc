@@ -24,8 +24,14 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Database'
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /securityplatform/lake/kql/v1/rest/mgmt:
     get:
@@ -43,8 +49,14 @@ paths:
               schema:
                 type: object
                 description: pending - KQL management query results with table schemas
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /securityplatform/sentinelgraph/provisioning/checkTenant:
     post:
@@ -68,8 +80,14 @@ paths:
               schema:
                 type: object
                 description: pending - Sentinel provisioning status
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
 components:
   schemas:

@@ -26,8 +26,14 @@ paths:
               schema:
                 type: object
                 description: Billing policies. Exact schema pending.
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /_api/v2.1/billingFeatures:
     get:
@@ -44,8 +50,14 @@ paths:
               schema:
                 type: object
                 description: Billing features. Exact schema pending.
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /_api/v2.1/copilot/capacitypack/checkUsage:
     get:
@@ -63,8 +75,14 @@ paths:
               schema:
                 type: object
                 description: Capacity usage details. Exact schema pending.
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /_api/SPOInternalUseOnly.TenantAdminSettings/AutoQuotaEnabled:
     get:
@@ -84,8 +102,14 @@ paths:
                 properties:
                   value:
                     type: boolean
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /_api/spo.tenant/GetBrandCenterConfiguration:
     get:
@@ -103,5 +127,11 @@ paths:
               schema:
                 type: object
                 description: Brand Center configuration. Exact schema pending.
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

@@ -14,8 +14,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AdvancedFeaturesSettings'
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
     post:
       summary: Get advanced features settings
       description: >-
@@ -36,8 +42,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AdvancedFeaturesSettings'
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/settings/SaveAdvancedFeaturesSetting:
     post:
@@ -55,8 +67,14 @@ paths:
       responses:
         '200':
           description: OK
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/settings/GetPreviewExperienceSetting:
     get:
@@ -86,8 +104,14 @@ paths:
                   isOptedIn:
                     description: Whether preview features are enabled.
                     type: boolean
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/customDataCollection/rules:
     get:
@@ -105,8 +129,14 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/CustomCollectionRule'
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
     post:
       summary: Create custom data collection rule
       description: >-
@@ -125,8 +155,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CustomCollectionRule'
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/customDataCollection/rules/{RuleId}:
     put:
@@ -150,8 +186,14 @@ paths:
       responses:
         '200':
           description: OK
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/deviceManagement/configuration/AuthenticatedTelemetry:
     get:
@@ -171,8 +213,14 @@ paths:
                   isEnabled:
                     description: Whether authenticated telemetry is enabled.
                     type: boolean
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/deviceManagement/configuration/PotentiallyUnwantedApplications:
     get:
@@ -193,8 +241,14 @@ paths:
                   isEnabled:
                     description: Whether PUA protection is enabled.
                     type: boolean
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/deviceManagement/configuration/IntuneConnection:
     get:
@@ -214,8 +268,14 @@ paths:
                   isEnabled:
                     description: Whether the Intune connection is enabled.
                     type: boolean
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/deviceManagement/configuration/PurviewSharing:
     get:
@@ -235,8 +295,14 @@ paths:
                   isEnabled:
                     description: Whether Purview sharing is enabled.
                     type: boolean
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
 components:
   schemas:

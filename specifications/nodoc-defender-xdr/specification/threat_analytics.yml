@@ -35,8 +35,14 @@ paths:
                       $ref: '#/components/schemas/Outbreak'
                   totalCount:
                     type: integer
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/threatAnalytics/outbreaks/changeCount:
     get:
@@ -54,8 +60,14 @@ paths:
               schema:
                 type: object
                 description: pending - outbreak change count
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/threatAnalytics/outbreaks/outbreaksEnrichedDataMtp:
     get:
@@ -73,8 +85,14 @@ paths:
               schema:
                 type: object
                 description: pending - enriched outbreak data
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/threatAnalytics/outbreaks/topthreats:
     get:
@@ -92,8 +110,14 @@ paths:
               schema:
                 type: object
                 description: pending - top threats data
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
 components:
   schemas:

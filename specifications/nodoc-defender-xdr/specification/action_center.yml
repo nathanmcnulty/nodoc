@@ -46,8 +46,14 @@ paths:
                       $ref: '#/components/schemas/ActionCenterItem'
                   totalCount:
                     type: integer
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/actionCenter/actioncenterui/pending-actions:
     get:
@@ -95,8 +101,14 @@ paths:
                       $ref: '#/components/schemas/ActionCenterItem'
                   totalCount:
                     type: integer
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/actionCenter/actioncenterui/pending-actions/filters:
     get:
@@ -113,8 +125,14 @@ paths:
               schema:
                 type: object
                 description: pending - pending actions filter options
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/actionCenter/actioncenterui/history-actions/filters:
     get:
@@ -131,8 +149,14 @@ paths:
               schema:
                 type: object
                 description: pending - history actions filter options
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/actionCenter/actioncenterui/tile:
     get:
@@ -150,8 +174,14 @@ paths:
               schema:
                 type: object
                 description: pending - action center tile summary
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/actionCenter/actioncenterui/pending-actions/pending-actions-summary:
     get:
@@ -169,8 +199,14 @@ paths:
               schema:
                 type: object
                 description: pending - pending actions summary data
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
 components:
   schemas:
