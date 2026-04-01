@@ -724,7 +724,7 @@ paths:
         4XX:
           $ref: common.yml#/components/responses/ClientException
 
-  /mtp/ndr/machines/deviceTotals/:
+  /mtp/ndr/machines/deviceTotals:
     get:
       summary: Get device totals
       description: >-
@@ -761,30 +761,12 @@ paths:
         4XX:
           $ref: common.yml#/components/responses/ClientException
 
-  /mtp/ndr/machines/deviceTypeDistribution/:
-    get:
-      summary: Get device type distribution
-      description: >-
-        Retrieve the distribution of devices by device type in the inventory.
-      operationId: EndpointDevices.GetDeviceTypeDistribution
-      tags: [Endpoint Devices]
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                description: pending - device type distribution data
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
-
   /mtp/ndr/machines/deviceTypeDistribution:
     get:
-      summary: Get device type distribution
+      summary: Get NDR device type distribution
       description: >-
         Retrieve the distribution of device types across the organization. Discovered on Cloud Apps Dashboard page.
-      operationId: EndpointDevices.GetDeviceTypeDistribution
+      operationId: EndpointDevices.GetNdrDeviceTypeDistribution
       tags: [Endpoint Devices]
       responses:
         '200':

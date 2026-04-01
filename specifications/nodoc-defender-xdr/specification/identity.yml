@@ -347,7 +347,7 @@ paths:
         4XX:
           $ref: common.yml#/components/responses/ClientException
 
-  /aatp/api/workspaces/isWorkspaceExists/:
+  /aatp/api/workspaces/isWorkspaceExists:
     get:
       summary: Check if workspace exists
       description: >-
@@ -588,24 +588,6 @@ paths:
       description: >-
         Check whether the Defender for Identity workspace is active. Discovered on Identity Settings > Health issues page.
       operationId: Identity.CheckWorkspaceActive
-      tags: [Identity]
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                description: pending
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
-
-  /aatp/api/workspaces/isWorkspaceExists:
-    get:
-      summary: Check if workspace exists (no trailing slash)
-      description: >-
-        Check whether a Defender for Identity workspace exists for the tenant. Discovered on Identity Settings page.
-      operationId: Identity.CheckWorkspaceExistsNoSlash
       tags: [Identity]
       responses:
         '200':

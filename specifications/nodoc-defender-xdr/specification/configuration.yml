@@ -66,7 +66,7 @@ paths:
         4XX:
           $ref: common.yml#/components/responses/ClientException
 
-  /mcas/cas/api/v1/preview_features/get/:
+  /mcas/cas/api/v1/preview_features/get:
     get:
       summary: Get Cloud Apps preview features
       description: >-
@@ -136,7 +136,7 @@ paths:
         4XX:
           $ref: common.yml#/components/responses/ClientException
 
-  /mcas/cas/api/v1/preview_features/update/:
+  /mcas/cas/api/v1/preview_features/update:
     post:
       summary: Set Cloud Apps preview features
       description: >-
@@ -327,7 +327,7 @@ paths:
         4XX:
           $ref: common.yml#/components/responses/ClientException
 
-  /mtp/urbacConfiguration/gw/unifiedrbac/configuration/tenantinfo/:
+  /mtp/urbacConfiguration/gw/unifiedrbac/configuration/tenantinfo:
     get:
       summary: Get unified RBAC workload configuration
       description: >-
@@ -346,7 +346,7 @@ paths:
         4XX:
           $ref: common.yml#/components/responses/ClientException
 
-  /mcas/cas/api/v1/settings/:
+  /mcas/cas/api/v1/settings:
     get:
       summary: Get Cloud Apps general settings
       description: >-
@@ -365,7 +365,7 @@ paths:
         4XX:
           $ref: common.yml#/components/responses/ClientException
 
-  /mtp/autoIr/ui/properties/:
+  /mtp/autoIr/ui/properties:
     get:
       summary: Get automated investigation properties
       description: >-
@@ -435,49 +435,6 @@ paths:
               schema:
                 type: object
                 description: pending - non-auth sense configuration
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
-
-  /mcas/cas/api/v1/app_connectors/:
-    post:
-      summary: List cloud app connectors
-      description: >-
-        Retrieve a list of cloud app connectors configured in Microsoft
-        Defender for Cloud Apps (MCAS).
-      operationId: Configuration.ListAppConnectors
-      tags: [Configuration]
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              description: pending - app connector query parameters
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                description: pending - app connectors list
-        4XX:
-          $ref: common.yml#/components/responses/ClientException
-
-  /mcas/cas/api/v1/app_connectors/dashboard/get_apps_count_by_status/:
-    get:
-      summary: Get app connectors count by status
-      description: >-
-        Retrieve the count of cloud app connectors grouped by their connection status.
-      operationId: Configuration.GetAppConnectorsCountByStatus
-      tags: [Configuration]
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                description: pending - app connectors count by status
         4XX:
           $ref: common.yml#/components/responses/ClientException
 
