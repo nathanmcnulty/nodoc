@@ -1,0 +1,29 @@
+{
+  "manifest_version": 3,
+  "name": "nodoc-recorder - API Traffic Recorder",
+  "version": "1.0.0",
+  "description": "Records API traffic from Microsoft portals for OpenAPI specification generation.",
+  "permissions": [
+    "cookies",
+    "storage",
+    "clipboardWrite",
+    "webRequest"
+  ],
+  "host_permissions": [
+    "https://security.microsoft.com/apiproxy/*",
+    "https://admin.cloud.microsoft/admin/api/*",
+    "https://purview.microsoft.com/apiproxy/*",
+    "https://main.iam.ad.ext.azure.com/api/*",
+    "https://elm.iga.azure.com/api/*",
+    "https://api.accessreviews.identitygovernance.azure.com/*"
+  ],
+  "devtools_page": "devtools.html",
+  "background": {
+    "service_worker": "background.js"
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}

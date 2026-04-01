@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>nodoc-recorder</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, monospace;
+    background: #1e1e1e;
+    color: #d4d4d4;
+    font-size: 12px;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* Toolbar */
+  .toolbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    background: #2d2d2d;
+    border-bottom: 1px solid #3e3e3e;
+    flex-shrink: 0;
+  }
+  .toolbar button, .toolbar select {
+    background: #3c3c3c;
+    color: #d4d4d4;
+    border: 1px solid #555;
+    border-radius: 3px;
+    padding: 4px 10px;
+    font-size: 11px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .toolbar button:hover, .toolbar select:hover {
+    background: #4a4a4a;
+  }
+  .toolbar button.active {
+    background: #0e639c;
+    border-color: #1177bb;
+  }
+  .toolbar button.danger {
+    background: #5a1d1d;
+    border-color: #822;
+  }
+  .toolbar button.danger:hover {
+    background: #6e2222;
+  }
+  .badge {
+    background: #0e639c;
+    color: #fff;
+    border-radius: 8px;
+    padding: 2px 7px;
+    font-size: 10px;
+    font-weight: bold;
+    min-width: 18px;
+    text-align: center;
+  }
+  .spacer { flex: 1; }
+
+  /* Main content: split pane */
+  .main {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  /* Request list */
+  .request-list {
+    width: 55%;
+    min-width: 300px;
+    overflow-y: auto;
+    border-right: 1px solid #3e3e3e;
+  }
+  .request-list table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .request-list th {
+    background: #2d2d2d;
+    padding: 5px 8px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 11px;
+    color: #999;
+    border-bottom: 1px solid #3e3e3e;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
+  .request-list td {
+    padding: 4px 8px;
+    border-bottom: 1px solid #2a2a2a;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 0;
+    cursor: pointer;
+  }
+  .request-list tr:hover td {
+    background: #2a2d2e;
+  }
+  .request-list tr.selected td {
+    background: #094771;
+  }
+
+  /* Method badges */
+  .method {
+    display: inline-block;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 10px;
+    font-weight: bold;
+    min-width: 42px;
+    text-align: center;
+  }
+  .method-GET    { background: #1a3a5c; color: #4fc1ff; }
+  .method-POST   { background: #1a3c1a; color: #6a9955; }
+  .method-PUT    { background: #3c2e1a; color: #ce9178; }
+  .method-PATCH  { background: #2e1a3c; color: #c586c0; }
+  .method-DELETE { background: #3c1a1a; color: #f48771; }
+
+  /* Portal tags */
+  .portal-tag {
+    display: inline-block;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 10px;
+    background: #333;
+    color: #aaa;
+  }
+
+  /* Status codes */
+  .status-2xx { color: #6a9955; }
+  .status-3xx { color: #dcdcaa; }
+  .status-4xx { color: #ce9178; }
+  .status-5xx { color: #f48771; }
+
+  .occurrence-count {
+    display: inline-block;
+    font-size: 9px;
+    color: #888;
+    margin-left: 4px;
+  }
+
+  /* Detail pane */
+  .detail-pane {
+    width: 45%;
+    overflow-y: auto;
+    padding: 10px;
+    font-size: 11px;
+  }
+  .detail-pane.empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #666;
+    font-size: 13px;
+  }
+  .detail-section {
+    margin-bottom: 14px;
+  }
+  .detail-section h3 {
+    color: #569cd6;
+    font-size: 11px;
+    margin-bottom: 4px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .detail-section .url {
+    color: #4ec9b0;
+    word-break: break-all;
+    font-family: monospace;
+  }
+  .detail-section pre {
+    background: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 3px;
+    padding: 8px;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-all;
+    max-height: 300px;
+    overflow-y: auto;
+    font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+    font-size: 11px;
+    line-height: 1.4;
+  }
+  .detail-actions {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+  .detail-actions button {
+    background: #3c3c3c;
+    color: #d4d4d4;
+    border: 1px solid #555;
+    border-radius: 3px;
+    padding: 3px 8px;
+    font-size: 10px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .detail-actions button:hover {
+    background: #4a4a4a;
+  }
+  .header-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .header-table td {
+    padding: 2px 6px;
+    border-bottom: 1px solid #2a2a2a;
+    font-family: monospace;
+    font-size: 11px;
+    vertical-align: top;
+  }
+  .header-table td:first-child {
+    color: #9cdcfe;
+    white-space: nowrap;
+    width: 1%;
+  }
+  .header-table td:last-child {
+    color: #ce9178;
+    word-break: break-all;
+  }
+
+  /* Toast notification */
+  .toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #0e639c;
+    color: #fff;
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-size: 12px;
+    z-index: 999;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+  }
+  .toast.show {
+    opacity: 1;
+  }
+
+  /* Group headers */
+  .group-header td {
+    background: #252525 !important;
+    color: #569cd6;
+    font-weight: 600;
+    font-size: 11px;
+    padding: 6px 8px;
+    cursor: default;
+  }
+</style>
+</head>
+<body>
+  <div class="toolbar">
+    <button id="btn-record" class="active" title="Toggle recording">&#9679; Record</button>
+    <select id="filter-portal">
+      <option value="all">All Portals</option>
+    </select>
+    <span class="badge" id="request-count">0</span>
+    <span class="spacer"></span>
+    <button id="btn-export-yaml" title="Export as OpenAPI YAML">Export YAML</button>
+    <button id="btn-export-json" title="Export as JSON">Export JSON</button>
+    <button id="btn-clear" class="danger" title="Clear all captured requests">Clear</button>
+  </div>
+
+  <div class="main">
+    <div class="request-list">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:60px">Method</th>
+            <th style="width:100px">Portal</th>
+            <th>Path</th>
+            <th style="width:50px">Status</th>
+            <th style="width:70px">Time</th>
+          </tr>
+        </thead>
+        <tbody id="request-tbody"></tbody>
+      </table>
+    </div>
+    <div class="detail-pane empty" id="detail-pane">
+      Select a request to view details
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="panel.js"></script>
+</body>
+</html>
