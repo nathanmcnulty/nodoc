@@ -54,6 +54,10 @@ paths:
         Retrieve the Azure subscriptions associated with the tenant.
       operationId: Tenant.GetAzureSubscriptions
       tags: [Tenant]
+      parameters:
+        - $ref: common.yml#/components/parameters/ODataFilter
+        - $ref: common.yml#/components/parameters/ODataTop
+        - $ref: common.yml#/components/parameters/ODataSkip
       responses:
         '200':
           description: OK
@@ -130,6 +134,10 @@ paths:
         and their policy settings (enabled/disabled).
       operationId: Tenant.GetSelfServicePurchaseProducts
       tags: [Tenant]
+      parameters:
+        - $ref: common.yml#/components/parameters/ODataFilter
+        - $ref: common.yml#/components/parameters/ODataTop
+        - $ref: common.yml#/components/parameters/ODataSkip
       responses:
         '200':
           description: OK
@@ -283,6 +291,10 @@ paths:
         Retrieve the configured user views for the tenant admin portal (Users > Active).
       operationId: Tenant.GetUserViews
       tags: [Tenant]
+      parameters:
+        - $ref: common.yml#/components/parameters/ODataFilter
+        - $ref: common.yml#/components/parameters/ODataTop
+        - $ref: common.yml#/components/parameters/ODataSkip
       responses:
         '200':
           description: OK

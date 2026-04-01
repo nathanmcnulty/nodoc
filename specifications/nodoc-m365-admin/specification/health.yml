@@ -7,6 +7,10 @@ paths:
         Retrieve message center messages for the tenant including service updates and advisories (Health > Message center).
       operationId: MessageCenter.GetMessages
       tags: [MessageCenter]
+      parameters:
+        - $ref: common.yml#/components/parameters/ODataFilter
+        - $ref: common.yml#/components/parameters/ODataTop
+        - $ref: common.yml#/components/parameters/ODataSkip
       responses:
         '200':
           description: OK
@@ -182,6 +186,10 @@ paths:
         Retrieve active change management incidents and service health status (Org Settings > Briefing email).
       operationId: ServiceHealth.GetActiveCM
       tags: [ServiceHealth]
+      parameters:
+        - $ref: common.yml#/components/parameters/ODataFilter
+        - $ref: common.yml#/components/parameters/ODataTop
+        - $ref: common.yml#/components/parameters/ODataSkip
       responses:
         '200':
           description: OK

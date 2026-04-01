@@ -6,6 +6,12 @@ paths:
         Retrieve the Microsoft Search admin configurations for the tenant.
       operationId: Search.GetConfigurations
       tags: [Search]
+      parameters:
+        - name: query
+          in: query
+          description: Search query string.
+          schema:
+            type: string
       responses:
         '200':
           description: OK
@@ -72,6 +78,12 @@ paths:
         Retrieve the Bing news integration options for Microsoft Search.
       operationId: Search.GetBingNewsOptions
       tags: [Search]
+      parameters:
+        - name: query
+          in: query
+          description: Search query string.
+          schema:
+            type: string
       responses:
         '200':
           description: OK
@@ -96,6 +108,12 @@ paths:
         Retrieve a summary of User-Defined Type (UDT) data connectors for Microsoft Search.
       operationId: Search.GetConnectorsSummary
       tags: [Search]
+      parameters:
+        - name: query
+          in: query
+          description: Search query string.
+          schema:
+            type: string
       responses:
         '200':
           description: OK
@@ -121,6 +139,12 @@ paths:
         item counts, crawl status, and connection health.
       operationId: Search.GetConnectionStatistics
       tags: [Search]
+      parameters:
+        - name: query
+          in: query
+          description: Search query string.
+          schema:
+            type: string
       responses:
         '200':
           description: OK

@@ -172,6 +172,13 @@ paths:
         Retrieve report category details and metadata for the usage reports dashboard (Reports > Usage).
       operationId: Reports.GetReportCategoryDetails
       tags: [Reports]
+      parameters:
+        - name: period
+          in: query
+          description: Reporting period (e.g., D7, D30, D90, D180).
+          schema:
+            type: string
+            enum: [D7, D30, D90, D180]
       responses:
         '200':
           description: OK
@@ -196,6 +203,13 @@ paths:
         Retrieve tile data for the usage reports dashboard including summary metrics (Reports > Usage).
       operationId: Reports.GetReportTileData
       tags: [Reports]
+      parameters:
+        - name: period
+          in: query
+          description: Reporting period (e.g., D7, D30, D90, D180).
+          schema:
+            type: string
+            enum: [D7, D30, D90, D180]
       responses:
         '200':
           description: OK

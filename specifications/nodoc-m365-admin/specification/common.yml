@@ -8,6 +8,48 @@ components:
         type: string
         format: uuid
       required: false
+    ODataFilter:
+      name: $filter
+      in: query
+      description: OData filter expression to narrow results.
+      schema:
+        type: string
+      required: false
+    ODataSelect:
+      name: $select
+      in: query
+      description: Comma-separated list of properties to include in the response.
+      schema:
+        type: string
+      required: false
+    ODataTop:
+      name: $top
+      in: query
+      description: Maximum number of results to return.
+      schema:
+        type: integer
+      required: false
+    ODataSkip:
+      name: $skip
+      in: query
+      description: Number of results to skip for pagination.
+      schema:
+        type: integer
+      required: false
+    ODataOrderBy:
+      name: $orderby
+      in: query
+      description: OData expression to sort results.
+      schema:
+        type: string
+      required: false
+    ODataCount:
+      name: $count
+      in: query
+      description: Include total count of matching resources in the response.
+      schema:
+        type: boolean
+      required: false
   headers:
     Cache-Control:
       description: Directives for caching mechanisms.
