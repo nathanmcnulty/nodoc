@@ -41,7 +41,6 @@ async function getScalarParserModules() {
       import("@scalar/openapi-parser/plugins/fetch-urls"),
     ]).then(([parser, readFiles, fetchUrls]) => ({
       load: parser.load,
-      dereference: parser.dereference,
       validate: parser.validate,
       readFilesPlugin: readFiles.readFiles,
       fetchUrlsPlugin: fetchUrls.fetchUrls,
@@ -53,6 +52,146 @@ async function getScalarParserModules() {
 
 function splitPathSegments(value) {
   return (value || "").split(/[\\/]/).filter(Boolean);
+}
+
+function cloneObject(value) {
+  return value === undefined ? undefined : JSON.parse(JSON.stringify(value));
+}
+
+function decodePointerToken(token) {
+  return token.replace(/~1/g, "/").replace(/~0/g, "~");
+}
+
+function getByPointer(root, pointer) {
+  if (!pointer || pointer === "#") {
+    return root;
+  }
+
+  const normalized = pointer.startsWith("#") ? pointer.slice(1) : pointer;
+  if (!normalized) {
+    return root;
+  }
+
+  return normalized.split("/").slice(1).reduce((current, part) => {
+    if (current === undefined || current === null) {
+      return undefined;
+    }
+
+    return current[decodePointerToken(part)];
+  }, root);
+}
+
+function splitReference(value) {
+  const [filePart, fragmentPart] = value.split("#");
+  return {
+    filePart: filePart || "",
+    fragment: fragmentPart ? `#${fragmentPart}` : "#",
+  };
+}
+
+function isHttpUrl(value) {
+  return /^https?:\/\//i.test(value || "");
+}
+
+function resolveReferenceFile(currentFile, refFile) {
+  if (!refFile) {
+    return currentFile;
+  }
+
+  if (isHttpUrl(refFile)) {
+    return refFile;
+  }
+
+  if (isHttpUrl(currentFile)) {
+    return new URL(refFile, currentFile).toString();
+  }
+
+  const currentDir =
+    currentFile && currentFile.includes("/")
+      ? currentFile.slice(0, currentFile.lastIndexOf("/"))
+      : ".";
+
+  return path.posix.normalize(path.posix.join(currentDir, refFile));
+}
+
+function createSpecificationMap(fileSystem) {
+  return new Map(
+    fileSystem.filesystem
+      .filter((entry) => entry.isEntrypoint || entry.filename)
+      .map((entry) => [entry.filename || ".", entry.specification])
+  );
+}
+
+function bundleSpecification(fileSystem) {
+  const entry =
+    fileSystem.filesystem.find((item) => item.isEntrypoint) || fileSystem;
+  const specificationMap = createSpecificationMap(fileSystem);
+  const cache = new Map();
+
+  function expandNode(node, currentFile, stack = []) {
+    if (Array.isArray(node)) {
+      return node.map((item) => expandNode(item, currentFile, stack));
+    }
+
+    if (!node || typeof node !== "object") {
+      return node;
+    }
+
+    if (typeof node.$ref === "string") {
+      const { filePart, fragment } = splitReference(node.$ref);
+      const targetFile = resolveReferenceFile(currentFile, filePart);
+      const cacheKey = `${targetFile}|${fragment}`;
+
+      if (stack.includes(cacheKey)) {
+        return cloneObject(node);
+      }
+
+      if (cache.has(cacheKey)) {
+        const siblings = Object.fromEntries(
+          Object.entries(node).filter(([key]) => key !== "$ref")
+        );
+        return Object.keys(siblings).length > 0
+          ? {
+              ...cloneObject(cache.get(cacheKey)),
+              ...expandNode(siblings, currentFile, stack),
+            }
+          : cloneObject(cache.get(cacheKey));
+      }
+
+      const root = specificationMap.get(targetFile);
+      if (!root) {
+        throw new Error(
+          `Unable to resolve external reference "${node.$ref}" from "${currentFile}"`
+        );
+      }
+
+      const target = getByPointer(root, fragment);
+      if (typeof target === "undefined") {
+        throw new Error(
+          `Unable to resolve pointer "${fragment}" in "${targetFile}"`
+        );
+      }
+
+      const expanded = expandNode(target, targetFile, [...stack, cacheKey]);
+      cache.set(cacheKey, cloneObject(expanded));
+
+      const siblings = Object.fromEntries(
+        Object.entries(node).filter(([key]) => key !== "$ref")
+      );
+      return Object.keys(siblings).length > 0
+        ? { ...cloneObject(expanded), ...expandNode(siblings, currentFile, stack) }
+        : cloneObject(expanded);
+    }
+
+    return Object.fromEntries(
+      Object.entries(node).map(([key, value]) => [
+        key,
+        expandNode(value, currentFile, stack),
+      ])
+    );
+  }
+
+  return expandNode(entry.specification, ".");
 }
 
 async function loadSpecsFromPath(paths, baseConfig) {
@@ -100,13 +239,11 @@ function mergeConfig(source, base) {
 }
 
 async function loadSpecContent(specPath) {
-  const { load, dereference, readFilesPlugin, fetchUrlsPlugin } =
-    await getScalarParserModules();
+  const { load, readFilesPlugin, fetchUrlsPlugin } = await getScalarParserModules();
   const fileSystem = await load(specPath, {
     plugins: [readFilesPlugin(), fetchUrlsPlugin()],
   });
-  const dereferencedSchema = (await dereference(fileSystem)).schema;
-  return dereferencedSchema.specification || dereferencedSchema;
+  return bundleSpecification(fileSystem);
 }
 
 async function loadSpecFromFile(source, file) {
@@ -115,9 +252,7 @@ async function loadSpecFromFile(source, file) {
   const dirSegments = splitPathSegments(dir);
   const config = {
     ...source,
-    spec: {
-      content: await loadSpecContent(path.join(source.path, file)),
-    },
+    content: await loadSpecContent(path.join(source.path, file)),
     nav: {
       ...source.nav,
       label: source?.nav?.labelFromFilename ? name : undefined,
@@ -142,15 +277,35 @@ async function loadSpecFromFile(source, file) {
   return await loadSpecFromContent(config);
 }
 
+function buildScalarConfiguration(config) {
+  const {
+    nav,
+    route,
+    paths,
+    configurations,
+    include,
+    exclude,
+    path: configPath,
+    url,
+    spec,
+    scalarConfiguration,
+    ...scalarConfig
+  } = config;
+
+  return {
+    ...scalarConfig,
+    _integration: "docusaurus",
+  };
+}
+
 async function loadSpecFromContent(config) {
-  if (config.spec?.content) {
+  if (config.content) {
     const { validate } = await getScalarParserModules();
-    const validated = await validate(config.spec.content);
+    const validated = await validate(config.content);
     // Support x-nodoc-category extension field for dropdown nav grouping
     const specCategory =
       validated.specification?.info?.["x-nodoc-category"] || undefined;
     return {
-      ...config,
       nav: config.nav
         ? {
             label: config.nav.labelFromSpec
@@ -167,10 +322,14 @@ async function loadSpecFromContent(config) {
             config?.route?.routeFromSpec
               ? validated.specification?.info?.title || ""
               : "",
-          ].flatMap((seg) => seg.split("/").map((s) => _.kebabCase(s)))
+           ].flatMap((seg) => seg.split("/").map((s) => _.kebabCase(s)))
         ),
       },
-      };
+      scalarConfiguration: {
+        ...buildScalarConfiguration(config),
+        content: validated.specification || config.content,
+      },
+    };
   } else {
     throw new Error("Specification content has not been loaded");
   }
@@ -179,15 +338,18 @@ async function loadSpecFromContent(config) {
 async function loadSpecsFromConfig(configs, baseConfig) {
   return await Promise.all(
     configs.map(async (config) => {
+      const mergedConfig = mergeConfig(config, baseConfig);
+      const { spec, ...mergedBase } = mergedConfig;
       const merged = {
-        ...mergeConfig(config, baseConfig),
-        spec: {
-          content: config.spec?.content
-            ? config.spec.content
-            : config.spec?.url
-            ? await loadSpecContent(config.spec.url)
-            : undefined,
-        },
+        ...mergedBase,
+        content:
+          mergedConfig.content ||
+          spec?.content ||
+          (spec?.url
+            ? await loadSpecContent(spec.url)
+            : mergedConfig.url
+            ? await loadSpecContent(mergedConfig.url)
+            : undefined),
       };
       return await loadSpecFromContent(merged);
     })
@@ -211,7 +373,7 @@ async function loadSpecs(options) {
     configs = configs.concat(await loadSpecsFromPath(paths, baseConfig));
   }
   const specs = [
-    ...(specConfig.spec ? [specConfig] : []),
+    ...(specConfig.spec || specConfig.content || specConfig.url ? [specConfig] : []),
     ...(configurations || []),
   ];
   if (specs.length > 0) {
@@ -293,7 +455,7 @@ const ScalarDocusaurus = (context, userOptions) => {
             path: routePath,
             component: path.resolve(__dirname, "./ScalarDocusaurus"),
             exact: true,
-            configuration: contentItem,
+            configuration: contentItem.scalarConfiguration,
           });
           if (contentItem.nav?.label) {
             addToNav(context, contentItem);
