@@ -1,0 +1,504 @@
+openapi: 3.0.1
+info:
+  title: Entra PIM
+  x-nodoc-category: Entra
+  description: |
+    The Entra PIM API is used by the Microsoft Entra Privileged Identity Management portal
+    (entra.microsoft.com → Identity Governance → Privileged Identity Management) for managing
+    just-in-time privileged access, including:
+
+      - Entra Role Assignments (eligible, active, expired)
+      - Entra Role Assignment Requests (activation, assignment, removal)
+      - Entra Role Definitions and Settings
+      - Azure Resource Role Assignments
+      - Group-based PIM Assignments
+      - PIM Alerts and Audit History
+      - Discovery of Unmanaged Resources
+
+    All endpoints are served from `api.azrbac.mspim.azure.com` and require a valid
+    Azure AD bearer token with PIM-related permissions.
+
+    **Note:** This specification was generated through browser traffic analysis of the
+    Entra portal. Some endpoints may require specific PIM licensing (Entra ID P2/Governance).
+    Endpoints returning 403 indicate insufficient permissions; 404 may indicate the feature
+    is not enabled for the tenant.
+  version: 0.1.0
+  contact:
+    name: nodoc
+    url: https://github.com/nathanmcnulty/nodoc
+servers:
+  - url: https://api.azrbac.mspim.azure.com
+    description: Entra PIM API
+security:
+  - bearerAuth: []
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Azure AD bearer token with PIM permissions
+  parameters:
+    resourceId:
+      name: resourceId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: The tenant or resource ID (typically the Azure AD tenant ID)
+    provider:
+      name: provider
+      in: path
+      required: true
+      schema:
+        type: string
+        enum: [aadroles, azureResources, aadgroup]
+      description: The PIM provider type
+    $filter:
+      name: $filter
+      in: query
+      schema:
+        type: string
+      description: OData filter expression
+    $top:
+      name: $top
+      in: query
+      schema:
+        type: integer
+      description: Maximum number of results to return
+    $skip:
+      name: $skip
+      in: query
+      schema:
+        type: integer
+      description: Number of results to skip
+    $orderby:
+      name: $orderby
+      in: query
+      schema:
+        type: string
+      description: OData order by expression
+    $expand:
+      name: $expand
+      in: query
+      schema:
+        type: string
+      description: OData expand expression (e.g., linkedEligibleRoleAssignment,subject,roleDefinition)
+tags:
+  - name: Role Assignments
+    description: Manage Entra role assignments (eligible, active, expired)
+  - name: Role Assignment Requests
+    description: Create and manage role activation/assignment requests
+  - name: Role Definitions
+    description: View role definitions and their settings
+  - name: Role Settings
+    description: Manage PIM role settings (activation requirements, notifications, etc.)
+  - name: Alerts
+    description: PIM security alerts and recommendations
+  - name: Audit
+    description: PIM activity logs and audit history
+  - name: Resources
+    description: Manage PIM-enabled resources
+  - name: Permissions
+    description: Check PIM permissions for the current user
+  - name: Groups
+    description: PIM for Groups (eligible membership/ownership)
+paths:
+  /api/v2/privilegedAccess/{provider}/roleAssignments:
+    get:
+      tags: [Role Assignments]
+      summary: List role assignments
+      description: |
+        Retrieves role assignments for the specified provider. Supports OData filtering
+        to query eligible, active, or specific role assignments.
+
+        Common filters:
+        - `status eq 'Active'` - Active assignments only
+        - `status eq 'Eligible'` - Eligible assignments only
+        - `roleDefinitionId eq '{id}'` - Assignments for a specific role
+        - `subjectId eq '{id}'` - Assignments for a specific user
+      parameters:
+        - $ref: '#/components/parameters/provider'
+        - $ref: '#/components/parameters/$filter'
+        - $ref: '#/components/parameters/$top'
+        - $ref: '#/components/parameters/$skip'
+        - $ref: '#/components/parameters/$orderby'
+        - $ref: '#/components/parameters/$expand'
+      responses:
+        '200':
+          description: List of role assignments
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  value:
+                    type: array
+                    items:
+                      type: object
+  /api/v2/privilegedAccess/{provider}/roleAssignmentRequests:
+    get:
+      tags: [Role Assignment Requests]
+      summary: List role assignment requests
+      description: |
+        Retrieves role assignment requests (activations, assignments, removals)
+        for the specified provider. Includes pending, approved, denied, and
+        completed requests.
+      parameters:
+        - $ref: '#/components/parameters/provider'
+        - $ref: '#/components/parameters/$filter'
+        - $ref: '#/components/parameters/$top'
+        - $ref: '#/components/parameters/$skip'
+        - $ref: '#/components/parameters/$orderby'
+      responses:
+        '200':
+          description: List of role assignment requests
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  value:
+                    type: array
+                    items:
+                      type: object
+    post:
+      tags: [Role Assignment Requests]
+      summary: Create a role assignment request
+      description: |
+        Creates a new role assignment request. This is used for:
+        - Activating an eligible role assignment
+        - Creating a new eligible or active role assignment
+        - Removing or deactivating a role assignment
+
+        **Warning:** This endpoint performs write operations.
+      parameters:
+        - $ref: '#/components/parameters/provider'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                roleDefinitionId:
+                  type: string
+                  format: uuid
+                resourceId:
+                  type: string
+                  format: uuid
+                subjectId:
+                  type: string
+                  format: uuid
+                assignmentState:
+                  type: string
+                  enum: [Eligible, Active]
+                type:
+                  type: string
+                  enum: [AdminAdd, AdminUpdate, AdminRemove, UserAdd, UserRemove, UserExtend, UserRenew]
+                reason:
+                  type: string
+                schedule:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                    startDateTime:
+                      type: string
+                      format: date-time
+                    endDateTime:
+                      type: string
+                      format: date-time
+                    duration:
+                      type: string
+      responses:
+        '201':
+          description: Role assignment request created
+        '400':
+          description: Invalid request parameters
+        '403':
+          description: Insufficient permissions
+  /api/v2/privilegedAccess/{provider}/roleAssignmentRequests/{requestId}/cancel:
+    post:
+      tags: [Role Assignment Requests]
+      summary: Cancel a pending role assignment request
+      parameters:
+        - $ref: '#/components/parameters/provider'
+        - name: requestId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Request cancelled successfully
+        '404':
+          description: Request not found
+  /api/v2/privilegedAccess/{provider}/resources:
+    get:
+      tags: [Resources]
+      summary: List PIM-managed resources
+      description: |
+        Retrieves resources that are managed by PIM for the specified provider.
+        For aadroles, this returns the tenant. For azureResources, this returns
+        discovered Azure subscriptions/resource groups. For aadgroup, this returns
+        PIM-enabled groups.
+      parameters:
+        - $ref: '#/components/parameters/provider'
+        - $ref: '#/components/parameters/$filter'
+        - $ref: '#/components/parameters/$top'
+      responses:
+        '200':
+          description: List of PIM-managed resources
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  value:
+                    type: array
+                    items:
+                      type: object
+  /api/v2/privilegedAccess/{provider}/resources/{resourceId}/roleDefinitions:
+    get:
+      tags: [Role Definitions]
+      summary: List role definitions for a resource
+      description: |
+        Retrieves all role definitions available for the specified resource.
+        For Entra roles, this returns all directory roles. For Azure resources,
+        this returns Azure RBAC roles applicable to the resource.
+      parameters:
+        - $ref: '#/components/parameters/provider'
+        - $ref: '#/components/parameters/resourceId'
+        - $ref: '#/components/parameters/$filter'
+        - $ref: '#/components/parameters/$top'
+        - $ref: '#/components/parameters/$expand'
+      responses:
+        '200':
+          description: List of role definitions
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  value:
+                    type: array
+                    items:
+                      type: object
+  /api/v2/privilegedAccess/{provider}/resources/{resourceId}/roleDefinitions/{roleDefinitionId}:
+    get:
+      tags: [Role Definitions]
+      summary: Get a specific role definition
+      parameters:
+        - $ref: '#/components/parameters/provider'
+        - $ref: '#/components/parameters/resourceId'
+        - name: roleDefinitionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Role definition details
+  /api/v2/privilegedAccess/{provider}/resources/{resourceId}/roleSettings:
+    get:
+      tags: [Role Settings]
+      summary: List role settings for a resource
+      description: |
+        Retrieves PIM settings for all roles on the specified resource. Settings
+        include activation requirements (MFA, justification, ticket info),
+        assignment rules (max duration, permanent eligibility), and notification
+        configuration.
+      parameters:
+        - $ref: '#/components/parameters/provider'
+        - $ref: '#/components/parameters/resourceId'
+        - $ref: '#/components/parameters/$filter'
+        - $ref: '#/components/parameters/$top'
+        - $ref: '#/components/parameters/$expand'
+      responses:
+        '200':
+          description: List of role settings
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  value:
+                    type: array
+                    items:
+                      type: object
+  /api/v2/privilegedAccess/{provider}/resources/{resourceId}/roleSettings/{roleSettingId}:
+    get:
+      tags: [Role Settings]
+      summary: Get settings for a specific role
+      parameters:
+        - $ref: '#/components/parameters/provider'
+        - $ref: '#/components/parameters/resourceId'
+        - name: roleSettingId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Role setting details
+    patch:
+      tags: [Role Settings]
+      summary: Update role settings
+      description: |
+        Updates PIM settings for a specific role. Controls activation requirements,
+        assignment rules, and notification settings.
+
+        **Warning:** This endpoint modifies PIM role configuration.
+      parameters:
+        - $ref: '#/components/parameters/provider'
+        - $ref: '#/components/parameters/resourceId'
+        - name: roleSettingId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Role settings updated
+  /api/v2/privilegedAccess/{provider}/resources/{resourceId}/permissions:
+    get:
+      tags: [Permissions]
+      summary: Get current user's PIM permissions for a resource
+      description: |
+        Returns the PIM permissions the current user has for the specified resource.
+        Used by the portal to determine what actions are available in the UI.
+      parameters:
+        - $ref: '#/components/parameters/provider'
+        - $ref: '#/components/parameters/resourceId'
+      responses:
+        '200':
+          description: PIM permissions for the current user
+          content:
+            application/json:
+              schema:
+                type: object
+  /api/v2/privilegedAccess/{provider}/resources/{resourceId}/alerts:
+    get:
+      tags: [Alerts]
+      summary: List PIM alerts for a resource
+      description: |
+        Retrieves security alerts generated by PIM for the specified resource.
+        Alerts include issues like roles with too many permanent assignments,
+        unused eligible roles, and potential security risks.
+      parameters:
+        - $ref: '#/components/parameters/provider'
+        - $ref: '#/components/parameters/resourceId'
+        - $ref: '#/components/parameters/$filter'
+      responses:
+        '200':
+          description: List of PIM alerts
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  value:
+                    type: array
+                    items:
+                      type: object
+  /api/v2/privilegedAccess/{provider}/resources/{resourceId}/alerts/{alertId}:
+    get:
+      tags: [Alerts]
+      summary: Get a specific PIM alert
+      parameters:
+        - $ref: '#/components/parameters/provider'
+        - $ref: '#/components/parameters/resourceId'
+        - name: alertId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Alert details
+  /api/v2/privilegedAccess/{provider}/resources/{resourceId}/alerts/{alertId}/alertIncidents:
+    get:
+      tags: [Alerts]
+      summary: List incidents for a PIM alert
+      description: |
+        Retrieves the individual incidents that triggered a specific alert.
+        For example, for a "too many permanent admins" alert, each incident
+        represents one permanent admin assignment.
+      parameters:
+        - $ref: '#/components/parameters/provider'
+        - $ref: '#/components/parameters/resourceId'
+        - name: alertId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of alert incidents
+  /api/v2/privilegedAccess/{provider}/activities:
+    get:
+      tags: [Audit]
+      summary: List PIM activities (audit log)
+      description: |
+        Retrieves the PIM activity/audit log for the specified provider.
+        Includes role activations, assignments, removals, and setting changes.
+      parameters:
+        - $ref: '#/components/parameters/provider'
+        - $ref: '#/components/parameters/$filter'
+        - $ref: '#/components/parameters/$top'
+        - $ref: '#/components/parameters/$skip'
+        - $ref: '#/components/parameters/$orderby'
+      responses:
+        '200':
+          description: List of PIM activities
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  value:
+                    type: array
+                    items:
+                      type: object
+  /api/v2/privilegedAccess/{provider}/activities/getExpiredAssignmentAudits(roleAssignmentLevel='{level}',resourceId='{resourceId}',subjectId='{subjectId}'):
+    get:
+      tags: [Audit]
+      summary: Get expired assignment audit records
+      description: |
+        Retrieves audit records for expired role assignments. Used by the portal
+        to show expired assignments in the PIM Expired Assignments tab.
+      parameters:
+        - $ref: '#/components/parameters/provider'
+        - name: level
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [Eligible, Active]
+        - name: resourceId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: subjectId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: User ID or empty string for all users
+      responses:
+        '200':
+          description: Expired assignment audit records

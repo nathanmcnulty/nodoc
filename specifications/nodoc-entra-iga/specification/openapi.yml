@@ -1,0 +1,359 @@
+openapi: 3.0.1
+info:
+  title: Entra IGA
+  x-nodoc-category: Entra
+  description: |
+    The Entra IGA (Identity Governance and Administration) API is used by the Microsoft
+    Entra portal (entra.microsoft.com → Identity Governance) for managing entitlement
+    management, lifecycle workflows, and governance administration, including:
+
+      - Entitlement Management (Access Packages, Catalogs, Policies)
+      - Connected Organizations
+      - Billing Configuration (Guest User Billing)
+      - Governance Settings and Administration
+
+    All endpoints are served from `elm.iga.azure.com` and require a valid
+    Azure AD bearer token with Identity Governance permissions.
+
+    **Note:** This specification was generated through browser traffic analysis of the
+    Entra portal. Many Identity Governance features use Microsoft Graph APIs directly
+    rather than this dedicated ELM API. This spec covers the non-Graph endpoints
+    observed during portal interaction.
+
+    Some endpoints may return 404 if the corresponding Entra ID Governance license
+    feature has not been enabled for the tenant.
+  version: 0.1.0
+  contact:
+    name: nodoc
+    url: https://github.com/nathanmcnulty/nodoc
+servers:
+  - url: https://elm.iga.azure.com
+    description: Entra Identity Governance Administration API
+security:
+  - bearerAuth: []
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Azure AD bearer token with Identity Governance permissions
+  parameters:
+    $filter:
+      name: $filter
+      in: query
+      schema:
+        type: string
+      description: OData filter expression
+    $top:
+      name: $top
+      in: query
+      schema:
+        type: integer
+      description: Maximum number of results to return
+    $skip:
+      name: $skip
+      in: query
+      schema:
+        type: integer
+      description: Number of results to skip
+tags:
+  - name: Billing
+    description: Guest user billing configuration
+  - name: Entitlement Management
+    description: Access package and catalog management
+  - name: Connected Organizations
+    description: External organization connections
+  - name: Settings
+    description: Identity Governance administration settings
+  - name: Lifecycle Workflows
+    description: Joiner/mover/leaver workflow automation
+paths:
+  /api/v1/billingConfigurations/guestBilling:
+    get:
+      tags: [Billing]
+      summary: Get guest billing configuration
+      description: |
+        Retrieves the guest user billing configuration for the tenant.
+        Controls whether the tenant pays for guest user access to
+        entitlement management resources.
+
+        **Note:** Returns 404 if the guest billing feature has not been
+        configured for the tenant.
+      responses:
+        '200':
+          description: Guest billing configuration
+          content:
+            application/json:
+              schema:
+                type: object
+        '404':
+          description: Guest billing not configured for this tenant
+    put:
+      tags: [Billing]
+      summary: Update guest billing configuration
+      description: |
+        Updates the guest billing configuration for the tenant.
+
+        **Warning:** This endpoint modifies billing configuration.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Guest billing configuration updated
+  /api/v1/accessPackages:
+    get:
+      tags: [Entitlement Management]
+      summary: List access packages
+      description: |
+        Retrieves access packages managed through the ELM service.
+        Access packages bundle resources with policies that govern
+        who can request access and for how long.
+      parameters:
+        - $ref: '#/components/parameters/$filter'
+        - $ref: '#/components/parameters/$top'
+        - $ref: '#/components/parameters/$skip'
+      responses:
+        '200':
+          description: List of access packages
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  value:
+                    type: array
+                    items:
+                      type: object
+  /api/v1/accessPackages/{accessPackageId}:
+    get:
+      tags: [Entitlement Management]
+      summary: Get a specific access package
+      parameters:
+        - name: accessPackageId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Access package details
+  /api/v1/catalogs:
+    get:
+      tags: [Entitlement Management]
+      summary: List catalogs
+      description: |
+        Retrieves entitlement management catalogs. Catalogs are containers
+        for access packages and their associated resources and policies.
+      parameters:
+        - $ref: '#/components/parameters/$filter'
+        - $ref: '#/components/parameters/$top'
+      responses:
+        '200':
+          description: List of catalogs
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  value:
+                    type: array
+                    items:
+                      type: object
+  /api/v1/catalogs/{catalogId}:
+    get:
+      tags: [Entitlement Management]
+      summary: Get a specific catalog
+      parameters:
+        - name: catalogId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Catalog details
+  /api/v1/catalogs/{catalogId}/resources:
+    get:
+      tags: [Entitlement Management]
+      summary: List resources in a catalog
+      description: |
+        Retrieves the resources (groups, applications, SharePoint sites)
+        contained in a specific catalog.
+      parameters:
+        - name: catalogId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - $ref: '#/components/parameters/$filter'
+        - $ref: '#/components/parameters/$top'
+      responses:
+        '200':
+          description: List of catalog resources
+  /api/v1/connectedOrganizations:
+    get:
+      tags: [Connected Organizations]
+      summary: List connected organizations
+      description: |
+        Retrieves the list of connected organizations. Connected organizations
+        represent external organizations whose users can request access to
+        your entitlement management resources.
+      parameters:
+        - $ref: '#/components/parameters/$filter'
+        - $ref: '#/components/parameters/$top'
+      responses:
+        '200':
+          description: List of connected organizations
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  value:
+                    type: array
+                    items:
+                      type: object
+  /api/v1/connectedOrganizations/{connectedOrganizationId}:
+    get:
+      tags: [Connected Organizations]
+      summary: Get a specific connected organization
+      parameters:
+        - name: connectedOrganizationId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Connected organization details
+  /api/v1/settings:
+    get:
+      tags: [Settings]
+      summary: Get Identity Governance settings
+      description: |
+        Retrieves the global Identity Governance settings for the tenant,
+        including entitlement management configuration and default policies.
+      responses:
+        '200':
+          description: Identity Governance settings
+          content:
+            application/json:
+              schema:
+                type: object
+    patch:
+      tags: [Settings]
+      summary: Update Identity Governance settings
+      description: |
+        Updates the global Identity Governance settings.
+
+        **Warning:** This endpoint modifies tenant-level governance settings.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Settings updated
+  /api/v1/lifecycleWorkflows/workflows:
+    get:
+      tags: [Lifecycle Workflows]
+      summary: List lifecycle workflows
+      description: |
+        Retrieves lifecycle workflows configured for the tenant.
+        Workflows automate joiner, mover, and leaver processes.
+      parameters:
+        - $ref: '#/components/parameters/$filter'
+        - $ref: '#/components/parameters/$top'
+      responses:
+        '200':
+          description: List of lifecycle workflows
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  value:
+                    type: array
+                    items:
+                      type: object
+  /api/v1/lifecycleWorkflows/workflows/{workflowId}:
+    get:
+      tags: [Lifecycle Workflows]
+      summary: Get a specific lifecycle workflow
+      parameters:
+        - name: workflowId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Workflow details
+  /api/v1/lifecycleWorkflows/taskDefinitions:
+    get:
+      tags: [Lifecycle Workflows]
+      summary: List available task definitions
+      description: |
+        Retrieves the built-in task definitions available for use in
+        lifecycle workflows. Tasks include actions like sending email,
+        adding to groups, enabling accounts, etc.
+      responses:
+        '200':
+          description: List of task definitions
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  value:
+                    type: array
+                    items:
+                      type: object
+  /api/v1/lifecycleWorkflows/customTaskExtensions:
+    get:
+      tags: [Lifecycle Workflows]
+      summary: List custom task extensions
+      description: |
+        Retrieves custom task extensions (Logic App integrations)
+        that can be used in lifecycle workflows.
+      responses:
+        '200':
+          description: List of custom task extensions
+  /api/v1/lifecycleWorkflows/settings:
+    get:
+      tags: [Lifecycle Workflows]
+      summary: Get lifecycle workflow settings
+      description: |
+        Retrieves the lifecycle workflow settings including
+        email notification configuration and processing schedule.
+      responses:
+        '200':
+          description: Lifecycle workflow settings
+    patch:
+      tags: [Lifecycle Workflows]
+      summary: Update lifecycle workflow settings
+      description: |
+        Updates lifecycle workflow settings.
+
+        **Warning:** This endpoint modifies workflow configuration.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Settings updated

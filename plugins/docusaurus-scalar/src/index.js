@@ -123,6 +123,9 @@ async function loadSpecFromFile(source, file) {
 async function loadSpecFromContent(config) {
   if (config.spec?.content) {
     const validated = await validate(config.spec.content);
+    // Support x-nodoc-category extension field for dropdown nav grouping
+    const specCategory =
+      validated.specification?.info?.["x-nodoc-category"] || undefined;
     return {
       ...config,
       nav: config.nav
@@ -130,7 +133,7 @@ async function loadSpecFromContent(config) {
             label: config.nav.labelFromSpec
               ? validated.specification?.info?.title
               : config.nav.label,
-            category: config.nav.category,
+            category: specCategory || config.nav.category,
           }
         : undefined,
       route: {

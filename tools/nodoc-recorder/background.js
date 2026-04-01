@@ -1,7 +1,7 @@
 const portalConfig = [
   {
-    id: 'defender-xdr',
-    name: 'Defender XDR',
+    id: 'defender',
+    name: 'Defender',
     hostname: 'security.microsoft.com',
     pathPrefixes: ['/apiproxy/'],
     urlPatterns: ['https://security.microsoft.com/apiproxy/*']
@@ -15,7 +15,7 @@ const portalConfig = [
   },
   {
     id: 'purview',
-    name: 'Microsoft Purview',
+    name: 'Purview',
     hostname: 'purview.microsoft.com',
     pathPrefixes: ['/apiproxy/'],
     urlPatterns: ['https://purview.microsoft.com/apiproxy/*']
@@ -30,13 +30,23 @@ const portalConfig = [
   {
     id: 'entra-iga',
     name: 'Entra IGA',
-    hostname: null,
-    hostnames: ['elm.iga.azure.com', 'api.accessreviews.identitygovernance.azure.com'],
+    hostname: 'elm.iga.azure.com',
     pathPrefixes: ['/api/'],
-    urlPatterns: [
-      'https://elm.iga.azure.com/api/*',
-      'https://api.accessreviews.identitygovernance.azure.com/*'
-    ]
+    urlPatterns: ['https://elm.iga.azure.com/api/*']
+  },
+  {
+    id: 'entra-pim',
+    name: 'Entra PIM',
+    hostname: 'api.azrbac.mspim.azure.com',
+    pathPrefixes: ['/api/'],
+    urlPatterns: ['https://api.azrbac.mspim.azure.com/api/*']
+  },
+  {
+    id: 'entra-idgov',
+    name: 'Entra IDGov',
+    hostname: 'api.accessreviews.identitygovernance.azure.com',
+    pathPrefixes: ['/accessReviews/'],
+    urlPatterns: ['https://api.accessreviews.identitygovernance.azure.com/*']
   }
 ];
 

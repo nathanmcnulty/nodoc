@@ -1,0 +1,357 @@
+openapi: 3.0.1
+info:
+  title: Entra IDGov
+  x-nodoc-category: Entra
+  description: |
+    The Entra IDGov (Identity Governance) API is used by the Microsoft Entra portal
+    (entra.microsoft.com → Identity Governance → Access Reviews) for managing access
+    review campaigns and approval workflows, including:
+
+      - Access Review Definitions and Instances
+      - Approval Workflow Providers
+      - Access Review Requests and Decisions
+      - Feature Flags and Partner Tenant Settings
+      - Consent and Terms of Use Approvals
+
+    All endpoints are served from `api.accessreviews.identitygovernance.azure.com`
+    and require a valid Azure AD bearer token.
+
+    **Note:** This specification was generated through browser traffic analysis of the
+    Entra portal. The access reviews service uses provider-based routing where different
+    providers (identified by GUID) handle different review types:
+    - `F40AE6A6-7BFC-4ABF-9E2A-63120C21A538` — Feature flags and configuration
+    - `D5EC9F3B-324E-4F8A-AF55-B69EDD48ECBE` — Access review requests
+  version: 0.1.0
+  contact:
+    name: nodoc
+    url: https://github.com/nathanmcnulty/nodoc
+servers:
+  - url: https://api.accessreviews.identitygovernance.azure.com
+    description: Entra Access Reviews API
+security:
+  - bearerAuth: []
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Azure AD bearer token with access review permissions
+  parameters:
+    providerId:
+      name: providerId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: |
+        The approval workflow provider ID. Known providers:
+        - `F40AE6A6-7BFC-4ABF-9E2A-63120C21A538` — Feature flags / configuration
+        - `D5EC9F3B-324E-4F8A-AF55-B69EDD48ECBE` — Access review requests
+    requestId:
+      name: requestId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: The access review request ID
+    $filter:
+      name: $filter
+      in: query
+      schema:
+        type: string
+      description: OData filter expression
+    $top:
+      name: $top
+      in: query
+      schema:
+        type: integer
+      description: Maximum number of results to return
+    $skip:
+      name: $skip
+      in: query
+      schema:
+        type: integer
+      description: Number of results to skip
+tags:
+  - name: Providers
+    description: Approval workflow provider operations
+  - name: Requests
+    description: Access review request management
+  - name: Instances
+    description: Access review instances (individual review cycles)
+  - name: Decisions
+    description: Access review decisions
+  - name: Configuration
+    description: Feature flags and tenant settings
+paths:
+  /accessReviews/v2.0/approvalWorkflowProviders:
+    get:
+      tags: [Providers]
+      summary: List approval workflow providers
+      description: |
+        Retrieves all registered approval workflow providers. Each provider
+        handles a specific type of access review or approval workflow.
+      responses:
+        '200':
+          description: List of approval workflow providers
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  value:
+                    type: array
+                    items:
+                      type: object
+  /accessReviews/v2.0/approvalWorkflowProviders/{providerId}/featureFlags:
+    get:
+      tags: [Configuration]
+      summary: Get feature flags for a provider
+      description: |
+        Retrieves the feature flags configuration for the specified provider.
+        Used by the portal to determine which UI features are enabled.
+      parameters:
+        - $ref: '#/components/parameters/providerId'
+      responses:
+        '200':
+          description: Feature flags configuration
+          content:
+            application/json:
+              schema:
+                type: object
+  /accessReviews/v2.0/approvalWorkflowProviders/{providerId}/partnerTenantSettings:
+    get:
+      tags: [Configuration]
+      summary: Get partner tenant settings
+      description: |
+        Retrieves partner/tenant-specific settings for the access reviews provider.
+        Includes configuration like default review duration, notification settings,
+        and auto-apply behavior.
+      parameters:
+        - $ref: '#/components/parameters/providerId'
+      responses:
+        '200':
+          description: Partner tenant settings
+          content:
+            application/json:
+              schema:
+                type: object
+  /accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests:
+    get:
+      tags: [Requests]
+      summary: List access review requests
+      description: |
+        Retrieves access review requests (campaigns/definitions) for the specified
+        provider. Each request represents an access review definition that may have
+        multiple instances (recurrence cycles).
+      parameters:
+        - $ref: '#/components/parameters/providerId'
+        - $ref: '#/components/parameters/$filter'
+        - $ref: '#/components/parameters/$top'
+        - $ref: '#/components/parameters/$skip'
+      responses:
+        '200':
+          description: List of access review requests
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  value:
+                    type: array
+                    items:
+                      type: object
+    post:
+      tags: [Requests]
+      summary: Create an access review request
+      description: |
+        Creates a new access review definition/campaign.
+
+        **Warning:** This endpoint creates access review campaigns.
+      parameters:
+        - $ref: '#/components/parameters/providerId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '201':
+          description: Access review request created
+        '400':
+          description: Invalid request
+  /accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests/{requestId}:
+    get:
+      tags: [Requests]
+      summary: Get a specific access review request
+      parameters:
+        - $ref: '#/components/parameters/providerId'
+        - $ref: '#/components/parameters/requestId'
+      responses:
+        '200':
+          description: Access review request details
+    patch:
+      tags: [Requests]
+      summary: Update an access review request
+      description: |
+        Updates an existing access review definition.
+
+        **Warning:** This endpoint modifies access review configuration.
+      parameters:
+        - $ref: '#/components/parameters/providerId'
+        - $ref: '#/components/parameters/requestId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Access review request updated
+    delete:
+      tags: [Requests]
+      summary: Delete an access review request
+      description: |
+        Deletes an access review definition and all its instances.
+
+        **Warning:** This endpoint permanently deletes access review data.
+      parameters:
+        - $ref: '#/components/parameters/providerId'
+        - $ref: '#/components/parameters/requestId'
+      responses:
+        '204':
+          description: Access review request deleted
+  /accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests/{requestId}/instances:
+    get:
+      tags: [Instances]
+      summary: List instances of an access review
+      description: |
+        Retrieves all instances (review cycles) for a specific access review request.
+        For recurring reviews, each recurrence creates a new instance.
+      parameters:
+        - $ref: '#/components/parameters/providerId'
+        - $ref: '#/components/parameters/requestId'
+      responses:
+        '200':
+          description: List of access review instances
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  value:
+                    type: array
+                    items:
+                      type: object
+  /accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests/{requestId}/instances/{instanceId}:
+    get:
+      tags: [Instances]
+      summary: Get a specific access review instance
+      parameters:
+        - $ref: '#/components/parameters/providerId'
+        - $ref: '#/components/parameters/requestId'
+        - name: instanceId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Access review instance details
+  /accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests/{requestId}/instances/{instanceId}/decisions:
+    get:
+      tags: [Decisions]
+      summary: List decisions for an access review instance
+      description: |
+        Retrieves all review decisions for a specific instance. Each decision
+        represents one reviewer's determination for one reviewed access.
+      parameters:
+        - $ref: '#/components/parameters/providerId'
+        - $ref: '#/components/parameters/requestId'
+        - name: instanceId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - $ref: '#/components/parameters/$filter'
+        - $ref: '#/components/parameters/$top'
+      responses:
+        '200':
+          description: List of access review decisions
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  value:
+                    type: array
+                    items:
+                      type: object
+  /accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests/{requestId}/instances/{instanceId}/stop:
+    post:
+      tags: [Instances]
+      summary: Stop an access review instance
+      description: |
+        Stops a currently active access review instance.
+
+        **Warning:** This endpoint terminates an active review.
+      parameters:
+        - $ref: '#/components/parameters/providerId'
+        - $ref: '#/components/parameters/requestId'
+        - name: instanceId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Review instance stopped
+  /accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests/{requestId}/instances/{instanceId}/applyDecisions:
+    post:
+      tags: [Instances]
+      summary: Apply decisions for an access review instance
+      description: |
+        Applies the review decisions for a completed instance. This triggers
+        the actual access changes (removal, approval, etc.) based on the decisions.
+
+        **Warning:** This endpoint applies access changes.
+      parameters:
+        - $ref: '#/components/parameters/providerId'
+        - $ref: '#/components/parameters/requestId'
+        - name: instanceId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Decisions applied
+  /accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests/{requestId}/instances/{instanceId}/resetDecisions:
+    post:
+      tags: [Instances]
+      summary: Reset decisions for an access review instance
+      description: |
+        Resets all decisions for an active review instance back to NotReviewed.
+
+        **Warning:** This endpoint clears all review progress.
+      parameters:
+        - $ref: '#/components/parameters/providerId'
+        - $ref: '#/components/parameters/requestId'
+        - name: instanceId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Decisions reset
