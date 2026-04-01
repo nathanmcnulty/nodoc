@@ -29,14 +29,14 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  data:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/AttackPath'
-                  totalCount:
-                    type: integer
+                allOf:
+                  - $ref: common.yml#/components/schemas/PaginatedListResponse
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/AttackPath'
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -74,14 +74,14 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  data:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/ChokePoint'
-                  totalCount:
-                    type: integer
+                allOf:
+                  - $ref: common.yml#/components/schemas/PaginatedListResponse
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/ChokePoint'
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -118,15 +118,15 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  data:
-                    type: array
-                    items:
-                      type: object
-                      description: pending - entry point details
-                  totalCount:
-                    type: integer
+                allOf:
+                  - $ref: common.yml#/components/schemas/PaginatedListResponse
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          type: object
+                          description: pending - entry point details
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -163,15 +163,15 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  data:
-                    type: array
-                    items:
-                      type: object
-                      description: pending - target asset details
-                  totalCount:
-                    type: integer
+                allOf:
+                  - $ref: common.yml#/components/schemas/PaginatedListResponse
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          type: object
+                          description: pending - target asset details
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -238,15 +238,15 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  data:
-                    type: array
-                    items:
-                      type: object
-                      description: pending - recommendation details
-                  totalCount:
-                    type: integer
+                allOf:
+                  - $ref: common.yml#/components/schemas/PaginatedListResponse
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          type: object
+                          description: pending - recommendation details
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 

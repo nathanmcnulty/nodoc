@@ -103,14 +103,14 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  entities:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/IdentityEntity'
-                  totalCount:
-                    type: integer
+                allOf:
+                  - $ref: common.yml#/components/schemas/PaginatedListResponse
+                  - type: object
+                    properties:
+                      entities:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/IdentityEntity'
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -149,15 +149,15 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  entities:
-                    type: array
-                    items:
-                      type: object
-                      description: pending - service account details
-                  totalCount:
-                    type: integer
+                allOf:
+                  - $ref: common.yml#/components/schemas/PaginatedListResponse
+                  - type: object
+                    properties:
+                      entities:
+                        type: array
+                        items:
+                          type: object
+                          description: pending - service account details
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 

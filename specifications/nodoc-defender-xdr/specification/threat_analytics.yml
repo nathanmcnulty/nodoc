@@ -27,14 +27,14 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  outbreaks:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Outbreak'
-                  totalCount:
-                    type: integer
+                allOf:
+                  - $ref: common.yml#/components/schemas/PaginatedListResponse
+                  - type: object
+                    properties:
+                      outbreaks:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Outbreak'
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 

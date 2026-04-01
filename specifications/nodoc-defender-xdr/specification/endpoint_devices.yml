@@ -55,14 +55,14 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  machines:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Device'
-                  totalCount:
-                    type: integer
+                allOf:
+                  - $ref: common.yml#/components/schemas/PaginatedListResponse
+                  - type: object
+                    properties:
+                      machines:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Device'
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 

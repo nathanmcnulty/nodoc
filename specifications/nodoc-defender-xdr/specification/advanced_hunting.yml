@@ -120,14 +120,14 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  rules:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/DetectionRule'
-                  totalCount:
-                    type: integer
+                allOf:
+                  - $ref: common.yml#/components/schemas/PaginatedListResponse
+                  - type: object
+                    properties:
+                      rules:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/DetectionRule'
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 

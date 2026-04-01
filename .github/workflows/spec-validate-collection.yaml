@@ -45,12 +45,28 @@ jobs:
           node-version: "24"
 
       - name: Install OpenAPI-to-Postman
-        run: npm install -g openapi-to-postmanv2@latest
+        run: npm install -g openapi-to-postmanv2@6.0.0
 
       - name: Build postman collection
-        run: >-
-          openapi2postmanv2 -c postman_to_openapi.json
-          -s ${{steps.download-spec.outputs.download-path}}/${{inputs.spec-artifact-name}} -o ${{github.workspace}}/${{inputs.temp-collection-filename}}
+        run: |
+          INPUT_SPEC="${{steps.download-spec.outputs.download-path}}/${{inputs.spec-artifact-name}}"
+          OUTPUT_COLLECTION="${{github.workspace}}/${{inputs.temp-collection-filename}}"
+
+          if [ -f "${{inputs.postman-collection-path}}" ]; then
+            openapi2postmanv2 \
+              -c postman_to_openapi.json \
+              --sync "${{inputs.postman-collection-path}}" \
+              --sync-options-config postman_sync_options.json \
+              -s "$INPUT_SPEC" \
+              -o "$OUTPUT_COLLECTION" \
+              -p
+          else
+            openapi2postmanv2 \
+              -c postman_to_openapi.json \
+              -s "$INPUT_SPEC" \
+              -o "$OUTPUT_COLLECTION" \
+              -p
+          fi
 
       - name: Patch postman collection
         if: ${{ inputs.postman-collection-patch-path }}
@@ -59,9 +75,13 @@ jobs:
           mv ${{github.workspace}}/${{inputs.temp-collection-filename}}_tmp ${{github.workspace}}/${{inputs.temp-collection-filename}}
 
       - name: Compare collection files
-        run: >-
-          diff
-          <(jq --sort-keys . ${{github.workspace}}/${{inputs.temp-collection-filename}})
-          <(jq --sort-keys . ${{inputs.postman-collection-path}})
+        run: |
+          if [ -f "${{inputs.postman-collection-path}}" ]; then
+            diff \
+              <(jq --sort-keys . ${{github.workspace}}/${{inputs.temp-collection-filename}}) \
+              <(jq --sort-keys . ${{inputs.postman-collection-path}})
+          else
+            echo "No checked-in Postman collection found at ${{inputs.postman-collection-path}}; generation completed successfully."
+          fi
 
 

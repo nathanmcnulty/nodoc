@@ -59,16 +59,15 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  alerts:
-                    description: The list of alerts.
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Alert'
-                  totalCount:
-                    description: Total number of alerts matching the filter.
-                    type: integer
+                allOf:
+                  - $ref: common.yml#/components/schemas/PaginatedListResponse
+                  - type: object
+                    properties:
+                      alerts:
+                        description: The list of alerts.
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Alert'
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 

@@ -64,6 +64,14 @@ components:
               description: A human-readable error message.
               type: string
               example: The request is invalid.
+    PaginatedListResponse:
+      type: object
+      description: Common paginated list wrapper returned by Defender XDR list endpoints.
+      properties:
+        totalCount:
+          description: Total number of matching items.
+          type: integer
+          example: 1
     ShellInfoResponse:
       type: object
       description: Bootstrap asset locations for rendering the Microsoft 365 shell inside Defender.
