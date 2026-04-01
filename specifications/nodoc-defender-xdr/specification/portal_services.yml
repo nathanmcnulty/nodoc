@@ -12,8 +12,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                description: pending - user preferences data
+                $ref: common.yml#/components/schemas/UserPreferenceBlobResponse
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -113,8 +112,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                description: pending - shell info data
+                $ref: common.yml#/components/schemas/ShellInfoResponse
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -186,8 +184,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                description: pending - Graph users list
+                $ref: common.yml#/components/schemas/GraphUsersResponse
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 

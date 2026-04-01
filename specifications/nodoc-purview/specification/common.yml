@@ -75,6 +75,283 @@ components:
               description: A human-readable error message.
               type: string
               example: The request is invalid.
+    ComplianceSummaryItem:
+      type: object
+      description: Score summary row used by Compliance Manager posture responses.
+      properties:
+        id:
+          description: Identifier for the score summary bucket.
+          type: string
+          example: Overall
+        title:
+          description: Display title for the score summary bucket.
+          type: string
+          example: Overall
+        description:
+          description: Optional description of the score bucket.
+          type: string
+          example: ''
+        aggregatedAchievedScore:
+          description: Achieved compliance score for the bucket.
+          type: number
+          example: 14534.3
+        aggregatedMaxScore:
+          description: Maximum possible compliance score for the bucket.
+          type: number
+          example: 26509
+        aggregatedScorePercentage:
+          description: Percentage of achieved score versus maximum score.
+          type: number
+          example: 54.82
+        passedActionsCount:
+          description: Number of actions marked as passed.
+          type: integer
+          example: 805
+        pendingActionsCount:
+          description: Number of actions still pending.
+          type: integer
+          example: 908
+        notInScopeActionsCount:
+          description: Number of actions excluded from scope.
+          type: integer
+          example: 25
+    ComplianceApplicationUserContext:
+      type: object
+      description: Compliance Manager bootstrap payload describing current user, tenant, permissions, and flighting.
+      properties:
+        userInfo:
+          type: object
+          properties:
+            id:
+              description: Entra object ID of the signed-in user.
+              type: string
+              format: uuid
+              example: a2307c5a-76df-4513-b575-0537842c1d8b
+            userPrincipalName:
+              description: User principal name of the signed-in user.
+              type: string
+              example: ''
+            anonymousId:
+              description: Anonymous analytics identifier used by the Compliance Manager UI.
+              type: string
+              example: 1,C231A8620D4553316F3F96B03BC0A7C1E53D381A8A16019C1B9642A9D25C918A
+            primaryText:
+              description: Optional primary label shown for the user in the UI.
+              type: string
+              example: ''
+        tenantInfo:
+          type: object
+          properties:
+            hasEnrolledForTrial:
+              type: boolean
+              example: false
+            isInitialSetupCreated:
+              type: boolean
+              example: true
+            hasCopilotLicense:
+              type: boolean
+              example: true
+            isAIBaselineCreated:
+              type: boolean
+              example: true
+            license:
+              type: string
+              example: E5
+            isTenantLicenseSuccess:
+              type: boolean
+              example: true
+            isLicenseCheckDisabled:
+              type: boolean
+              example: false
+            isTrialActive:
+              type: boolean
+              example: false
+            trialEnrollmentLink:
+              type: string
+              format: uri
+              example: https://admin.microsoft.com/Adminportal/Home?#/catalog/offer-details/compliance-manager-premium-assessment-add-on/00000000-0000-0000-0000-000000000000
+            maxTotalEvidenceFileUploadSizeInBytes:
+              type: integer
+              example: 1073741824
+            tenantContentUpdateState:
+              type: string
+              example: None
+        scopedAuthorizationRights:
+          description: Permission map keyed by Compliance Manager scope.
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+        entityScopedAuthorizationRights:
+          description: Entity-scoped permission overrides.
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+        flights:
+          description: Feature flags enabled for the current tenant or user.
+          type: array
+          items:
+            type: string
+        hasComplianceManagerAdministrationRights:
+          description: Whether the current user can administer Compliance Manager.
+          type: boolean
+          example: true
+        entityIdToScopeTypeMap:
+          description: Mapping of entity IDs to scope types.
+          type: object
+          additionalProperties:
+            type: string
+    CompliancePostureSummaryResponse:
+      type: object
+      description: Aggregate scoring summary returned by Compliance Manager posture APIs.
+      properties:
+        overallScore:
+          $ref: '#/components/schemas/ComplianceSummaryItem'
+        serviceSummary:
+          type: array
+          items:
+            $ref: '#/components/schemas/ComplianceSummaryItem'
+        regulationSummary:
+          type: array
+          items:
+            $ref: '#/components/schemas/ComplianceSummaryItem'
+        solutionCategorySummary:
+          type: array
+          items:
+            $ref: '#/components/schemas/ComplianceSummaryItem'
+        solutionSummaryMap:
+          type: array
+          items:
+            $ref: '#/components/schemas/ComplianceSummaryItem'
+        aggregatedScorePerActionTypeMap:
+          description: Score summaries keyed by action type.
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/ComplianceSummaryItem'
+        topImprovementActions:
+          description: Highest-priority actions that would improve the overall score.
+          type: array
+          items:
+            type: object
+    EdiscoveryViewStateResponse:
+      type: object
+      description: Persisted eDiscovery grid or page state for the current user.
+      properties:
+        id:
+          description: Composite identifier for the saved view state.
+          type: string
+          example: a2307c5a-76df-4513-b575-0537842c1d8b-undefined-PurviewCases
+        viewState:
+          description: JSON-serialized client view state including sort, group, and filter settings.
+          type: string
+          example: '{"groupBy":"","sortBy":{"property":"favorite","order":"asc"},"filter":{}}'
+        tenantId:
+          description: Tenant ID associated with the saved view state.
+          type: string
+          format: uuid
+          example: 847b5907-ca15-40f4-b171-eb18619dbfab
+        caseId:
+          description: eDiscovery case identifier associated with the view state.
+          type: string
+          example: undefined
+        userId:
+          description: User ID associated with the saved view state.
+          type: string
+          format: uuid
+          example: a2307c5a-76df-4513-b575-0537842c1d8b
+        feature:
+          description: eDiscovery feature name the view state applies to.
+          type: string
+          example: PurviewCases
+    PurviewCase:
+      type: object
+      description: Purview eDiscovery case summary.
+      properties:
+        id:
+          description: Unique identifier of the eDiscovery case.
+          type: string
+          format: uuid
+          example: 2fffc0b2-a860-445e-bea3-db586d2b812b
+        displayName:
+          description: Display name of the case.
+          type: string
+          example: Test
+        description:
+          description: Case description entered by administrators.
+          type: string
+          example: ''
+        createdBy:
+          description: User who created the case.
+          type: string
+          nullable: true
+          example: null
+        createdDateTime:
+          description: Human-readable timestamp when the case was created.
+          type: string
+          example: 5/8/2025 9:44:22 PM +00:00
+        lastModifiedBy:
+          description: User who last modified the case.
+          type: string
+          example: Nathan McNulty
+        lastModifiedDateTime:
+          description: Human-readable timestamp when the case was last modified.
+          type: string
+          example: 5/8/2025 9:44:22 PM +00:00
+        status:
+          description: Current lifecycle state of the case.
+          type: string
+          example: Active
+        caseType:
+          description: Type of eDiscovery case.
+          type: string
+          example: AdvancedEdiscovery
+        closedBy:
+          description: User who closed the case, if closed.
+          type: string
+          example: ''
+        closedDateTime:
+          description: Timestamp when the case was closed.
+          type: string
+          nullable: true
+          example: null
+        externalId:
+          description: External tracking identifier for the case.
+          type: string
+          example: ''
+        isPrioritized:
+          description: Whether the case is prioritized in the UI.
+          type: boolean
+          nullable: true
+          example: null
+        loadSetsCount:
+          description: Number of load sets attached to the case.
+          type: integer
+          example: 0
+        isExodiaEnabled:
+          description: Whether advanced Exodia capabilities are enabled for the case.
+          type: boolean
+          example: true
+    PurviewCasesResponse:
+      type: object
+      description: OData list response containing Purview eDiscovery cases.
+      properties:
+        '@odata.context':
+          description: OData metadata URI describing the Purview case entity set.
+          type: string
+          format: uri
+          example: https://nam1.mccservice.ediscovery.svc.cloud.microsoft/ediscovery/v1/$metadata#purviewcases
+        '@odata.count':
+          description: Number of cases returned by the current query.
+          type: integer
+          example: 2
+        value:
+          description: Case summaries returned by the query.
+          type: array
+          items:
+            $ref: '#/components/schemas/PurviewCase'
   responses:
     Unauthorized:
       description: Unauthorized - Authentication is required or has failed.

@@ -233,8 +233,9 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                description: Remembered preferences. Exact schema pending.
+                type: array
+                items:
+                  $ref: common.yml#/components/schemas/PreferenceGroup
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 

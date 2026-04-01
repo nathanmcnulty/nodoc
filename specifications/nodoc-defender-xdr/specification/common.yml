@@ -64,6 +64,121 @@ components:
               description: A human-readable error message.
               type: string
               example: The request is invalid.
+    ShellInfoResponse:
+      type: object
+      description: Bootstrap asset locations for rendering the Microsoft 365 shell inside Defender.
+      properties:
+        SharedJSTouchWideUrl:
+          description: URL of the wide-layout shell bootstrap JavaScript bundle.
+          type: string
+          format: uri
+          example: https://res-1.cdn.office.net/shellux/suiteux.shell.bootstrapper.js
+        SharedJSTouchWideResourceKey:
+          description: Resource key associated with the wide-layout shell JavaScript bundle.
+          type: string
+          example: bootstrapper
+        SharedJSTouchNarrowUrl:
+          description: URL of the narrow-layout shell bootstrap JavaScript bundle.
+          type: string
+          format: uri
+          example: https://res-1.cdn.office.net/shellux/suiteux.shell.bootstrapper.js
+        SharedJSTouchNarrowResourceKey:
+          description: Resource key associated with the narrow-layout shell JavaScript bundle.
+          type: string
+          example: bootstrapper
+        SharedJSTouchDeviceUrl:
+          description: URL of the device-layout shell bootstrap JavaScript bundle.
+          type: string
+          format: uri
+          example: https://res-1.cdn.office.net/shellux/suiteux.shell.bootstrapper.js
+        SharedJSTouchDeviceResourceKey:
+          description: Resource key associated with the device-layout shell JavaScript bundle.
+          type: string
+          example: bootstrapper
+        SharedCSSTouchWideUrl:
+          description: URL of the wide-layout shell CSS bundle.
+          type: string
+          format: uri
+          example: https://res-1.cdn.office.net/shellux/suiteux.shell.css
+        SharedCSSTouchWideResourceKey:
+          description: Resource key associated with the wide-layout shell CSS bundle.
+          type: string
+          example: bootstrapper
+        SharedCSSTouchNarrowUrl:
+          description: URL of the narrow-layout shell CSS bundle.
+          type: string
+          format: uri
+          example: https://res-1.cdn.office.net/shellux/suiteux.shell.css
+        SharedCSSTouchNarrowResourceKey:
+          description: Resource key associated with the narrow-layout shell CSS bundle.
+          type: string
+          example: bootstrapper
+        SharedCSSTouchDeviceUrl:
+          description: URL of the device-layout shell CSS bundle.
+          type: string
+          format: uri
+          example: https://res-1.cdn.office.net/shellux/suiteux.shell.css
+        SharedCSSTouchDeviceResourceKey:
+          description: Resource key associated with the device-layout shell CSS bundle.
+          type: string
+          example: bootstrapper
+    GraphUser:
+      type: object
+      description: Lightweight Graph user projected through the Defender Graph proxy.
+      properties:
+        displayName:
+          description: Display name of the user.
+          type: string
+          example: On-Premises Directory Synchronization Service Account
+        id:
+          description: Entra object ID of the user.
+          type: string
+          format: uuid
+          example: 047abaaa-1111-2222-3333-444444444444
+        onPremisesSyncEnabled:
+          description: Whether the user is synchronized from on-premises Active Directory.
+          type: boolean
+          nullable: true
+          example: true
+    GraphUsersResponse:
+      type: object
+      description: OData list response returned by the Defender Graph users proxy.
+      properties:
+        '@odata.context':
+          description: OData metadata URI describing the selected Graph projection.
+          type: string
+          format: uri
+          example: https://graph.microsoft.com/v1.0/$metadata#users(displayName,id,onPremisesSyncEnabled)
+        '@odata.nextLink':
+          description: Pagination URL for retrieving the next page of users.
+          type: string
+          format: uri
+          example: https://graph.microsoft.com/v1.0/users?$skiptoken=...
+        value:
+          description: Users returned by the current page.
+          type: array
+          items:
+            $ref: '#/components/schemas/GraphUser'
+    UserPreferenceBlobResponse:
+      type: object
+      description: Serialized portal preference blobs returned for the signed-in Defender user.
+      properties:
+        advanced_hunting:
+          description: JSON-serialized preferences for advanced hunting tabs, query text, layout, and time range.
+          type: string
+          example: '{"tabs":{"queryTabs":[{"modifiedQueryText":"..."}]}}'
+        advanced_hunting_mto:
+          description: JSON-serialized preferences for multi-tenant advanced hunting experiences.
+          type: string
+          example: '{"tabs":{"queryTabs":[]}}'
+        defender_boxed:
+          description: JSON-serialized preferences for boxed Defender experiences and layout state.
+          type: string
+          example: '{"dismissedCards":[]}'
+        user_preferences:
+          description: JSON-serialized general user preferences for the portal shell.
+          type: string
+          example: '{"theme":"default"}'
   responses:
     BadRequest:
       description: Bad Request - The request was malformed or invalid.

@@ -12,15 +12,14 @@ paths:
           application/json:
             schema:
               type: object
-              description: pending
+              description: Compliance posture summary query options. No request body fields were required in the captured portal sample.
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                type: object
-                description: pending
+                $ref: common.yml#/components/schemas/CompliancePostureSummaryResponse
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -44,8 +43,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                description: pending
+                $ref: common.yml#/components/schemas/ComplianceApplicationUserContext
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 

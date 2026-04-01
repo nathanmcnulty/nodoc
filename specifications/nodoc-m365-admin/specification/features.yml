@@ -36,8 +36,9 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                description: Admin content CDN image path. Exact schema pending.
+                type: string
+                format: uri
+                example: https://res.cdn.office.net/admincenter/admin-content
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 

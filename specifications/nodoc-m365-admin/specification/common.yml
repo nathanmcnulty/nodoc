@@ -106,6 +106,308 @@ components:
               description: A human-readable error message.
               type: string
               example: The request is invalid.
+    DarkModePreference:
+      type: object
+      description: Dark mode preference for the current admin user.
+      properties:
+        IsDarkModeOn:
+          description: Whether the M365 Admin portal should render in dark mode.
+          type: boolean
+          example: false
+    PreferenceSetting:
+      type: object
+      description: A single stored preference value within a preference group.
+      properties:
+        Key:
+          description: The preference name within the group.
+          type: string
+          example: ShouldSendPasswordMail
+        Value:
+          description: The preference value. The portal stores mixed primitive types here.
+          oneOf:
+            - type: string
+            - type: integer
+            - type: boolean
+          example: false
+    PreferenceGroup:
+      type: object
+      description: A group of remembered user preferences for a portal feature.
+      properties:
+        Key:
+          description: The feature or experience area the preferences apply to.
+          type: string
+          example: resetpassword
+        Value:
+          description: Stored settings for the preference group.
+          type: array
+          items:
+            $ref: '#/components/schemas/PreferenceSetting'
+    CurrentUserInfo:
+      type: object
+      description: Core identity and capability information for the signed-in admin user.
+      properties:
+        DisplayName:
+          description: Full display name of the current admin.
+          type: string
+          example: Nathan McNulty
+        SyncType:
+          description: Directory synchronization type for the user, if applicable.
+          type: string
+          nullable: true
+          example: null
+        DirSyncEnabled:
+          description: Whether directory synchronization is enabled for the user.
+          type: boolean
+          example: false
+        UserPrincipalName:
+          description: Sign-in name of the current admin user.
+          type: string
+          format: email
+          example: nathan@contoso.com
+        PUID:
+          description: Passport Unique ID associated with the account.
+          type: string
+          example: 100320026F564BE5
+        ObjectId:
+          description: Entra object ID of the current admin user.
+          type: string
+          format: uuid
+          example: a2307c5a-76df-4513-b575-0537842c1d8b
+        FirstName:
+          description: First name of the current admin user.
+          type: string
+          example: Nathan
+        LastName:
+          description: Last name of the current admin user.
+          type: string
+          example: McNulty
+        CreatedTime:
+          description: Legacy creation timestamp for the user account, when available.
+          type: string
+          format: date-time
+          nullable: true
+          example: null
+        DeletedTime:
+          description: Deletion timestamp for soft-deleted users, when applicable.
+          type: string
+          format: date-time
+          nullable: true
+          example: null
+        AgeGroup:
+          description: Age group classification assigned to the user, if configured.
+          type: string
+          nullable: true
+          example: null
+        Initials:
+          description: Initials shown in the admin portal avatar.
+          type: string
+          example: NM
+        InitialsColor:
+          description: Hex color used for the initials avatar tile.
+          type: string
+          example: '#008272'
+        UserStatus:
+          description: User lifecycle or account status, if surfaced by the portal.
+          type: string
+          nullable: true
+          example: null
+        HasExchange:
+          description: Whether the user has Exchange-related capabilities enabled.
+          type: boolean
+          example: true
+        HasTeams:
+          description: Whether the user has Teams-related capabilities enabled.
+          type: boolean
+          example: true
+        EmployeeId:
+          description: Employee ID assigned to the user.
+          type: string
+          nullable: true
+          example: null
+        JobTitle:
+          description: Job title of the user.
+          type: string
+          nullable: true
+          example: null
+        Department:
+          description: Department assigned to the user.
+          type: string
+          nullable: true
+          example: null
+        IsGuestUser:
+          description: Whether the current user is a guest user.
+          type: boolean
+          example: false
+        CreationDateTime:
+          description: The timestamp when the account was created.
+          type: string
+          format: date-time
+          example: '2023-02-02T02:34:56Z'
+        HasOfficeUICapability:
+          description: Whether the user has Office UI capability flags enabled.
+          type: boolean
+          example: false
+        PreferredDataLocation:
+          description: Preferred data residency location for the user.
+          type: string
+          nullable: true
+          example: null
+        City:
+          description: City associated with the user profile.
+          type: string
+          nullable: true
+          example: null
+        CountryOrRegion:
+          description: Country or region associated with the user profile.
+          type: string
+          nullable: true
+          example: null
+        Office:
+          description: Office location associated with the user profile.
+          type: string
+          nullable: true
+          example: null
+        StateOrProvince:
+          description: State or province associated with the user profile.
+          type: string
+          nullable: true
+          example: null
+        UsageLocation:
+          description: Licensing usage location for the user.
+          type: string
+          nullable: true
+          example: null
+        LastDirSyncTime:
+          description: Most recent directory sync timestamp for synchronized users.
+          type: string
+          format: date-time
+          nullable: true
+          example: null
+        SigninStatus:
+          description: Portal sign-in status label for the user, when available.
+          type: string
+          nullable: true
+          example: null
+        SigninStatusBoolean:
+          description: Boolean sign-in state used by the portal UI.
+          type: boolean
+          example: false
+        Licenses:
+          description: License summary objects assigned to the user.
+          type: array
+          nullable: true
+          items:
+            type: object
+          example: null
+        AssignedProductSkus:
+          description: Product SKU assignments associated with the user.
+          type: array
+          nullable: true
+          items:
+            type: object
+          example: null
+        HasLicense:
+          description: Whether the user has at least one assigned license.
+          type: boolean
+          example: false
+    CurrentUserResponse:
+      type: object
+      description: Admin portal bootstrap information for the signed-in administrator.
+      properties:
+        UserInfo:
+          $ref: '#/components/schemas/CurrentUserInfo'
+        AdminPageTitle:
+          description: The localized title shown for the admin portal.
+          type: string
+          example: Microsoft 365 admin center
+        IsRightToLeft:
+          description: Whether the current UI culture renders right-to-left.
+          type: boolean
+          example: false
+        DatePattern:
+          description: Preferred short date pattern for the current culture.
+          type: string
+          example: M/d/yyyy
+        CultureInfo:
+          description: Current UI culture code.
+          type: string
+          example: en-US
+        CompanyName:
+          description: Display name of the tenant organization.
+          type: string
+          example: Contoso Ltd.
+        TourEnabled:
+          description: Whether guided-tour experiences are enabled in the portal.
+          type: boolean
+          example: true
+        TenantUICapability:
+          description: Capability level controlling tenant-specific UI behavior.
+          type: integer
+          example: 0
+        ReportingEnabled:
+          description: Whether reporting features are enabled for the tenant.
+          type: boolean
+          example: true
+        DirSyncEnabled:
+          description: Whether tenant-wide directory synchronization is enabled.
+          type: boolean
+          example: false
+        ManageUserExchangeEnabled:
+          description: Whether user-level Exchange management actions are enabled.
+          type: boolean
+          example: true
+        ManageExchangeEnabled:
+          description: Whether Exchange management is enabled for the tenant.
+          type: boolean
+          example: true
+        CanManageGroups:
+          description: Whether the user can manage groups in the admin center.
+          type: boolean
+          example: true
+        IsExchangeAdmin:
+          description: Whether the user is an Exchange administrator.
+          type: boolean
+          example: true
+        IsSharePointEmbeddedAdmin:
+          description: Whether the user has SharePoint Embedded admin rights.
+          type: boolean
+          example: false
+        CanManageSharePoint:
+          description: Whether the user can manage SharePoint settings.
+          type: boolean
+          example: true
+        CanManageExchange:
+          description: Whether the user can manage Exchange settings.
+          type: boolean
+          example: true
+        IsPasswordAdminInTenant:
+          description: Whether the user has password admin rights in the tenant.
+          type: boolean
+          example: false
+        SetUserEnabled:
+          description: Whether the portal allows this user to set user-level configuration.
+          type: boolean
+          example: true
+        EnterpriseAgreementUser:
+          description: Whether the user belongs to an Enterprise Agreement billing context.
+          type: boolean
+          example: false
+        IsAdmin:
+          description: Whether the signed-in user is recognized as an admin by the portal.
+          type: boolean
+          example: true
+        IsGlobalAdmin:
+          description: Whether the user is a Global Administrator.
+          type: boolean
+          example: true
+        IsAIAdmin:
+          description: Whether the user has AI administration privileges.
+          type: boolean
+          example: false
+        HasExchangeLicense:
+          description: Whether the user has an Exchange workload license.
+          type: boolean
+          example: true
   responses:
     BadRequest:
       description: Bad Request - The request was malformed or invalid.
