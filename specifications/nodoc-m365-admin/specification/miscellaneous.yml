@@ -14,8 +14,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                description: Shell bootstrap information. Exact schema pending.
+                $ref: common.yml#/components/schemas/CoordinatedBootstrapResponse
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -209,8 +208,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                description: Admin notifications. Exact schema pending.
+                $ref: common.yml#/components/schemas/NotificationPollResponse
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 

@@ -26,10 +26,11 @@ paths:
         '200':
           description: OK
           content:
-            application/json:
+            text/plain:
               schema:
-                type: object
-                description: pending
+                type: string
+                description: Plain-text message returned when no analytics insight metadata exists for the requested date.
+                example: 'Could not find tenant analytics insight: InsightsMetadata, query date: 2026-04-01.'
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 

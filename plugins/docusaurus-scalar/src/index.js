@@ -38,6 +38,10 @@ const DEFAULT_SCALAR_CONFIG = {
   configurations: [],
 };
 
+function splitPathSegments(value) {
+  return (value || "").split(/[\\/]/).filter(Boolean);
+}
+
 async function loadSpecsFromPath(paths, baseConfig) {
   return (
     await Promise.all(
@@ -91,6 +95,8 @@ async function loadSpecContent(specPath) {
 
 async function loadSpecFromFile(source, file) {
   const { dir, name } = path.parse(file);
+  const fileSegments = splitPathSegments(file);
+  const dirSegments = splitPathSegments(dir);
   const config = {
     ...source,
     spec: {
@@ -101,17 +107,17 @@ async function loadSpecFromFile(source, file) {
       label: source?.nav?.labelFromFilename ? name : undefined,
       category:
         source?.nav?.category || source?.nav?.categoryFromPath
-          ? file.split(path.sep)[0]
+          ? fileSegments[0]
           : undefined,
     },
     route: {
       ...source.route,
-      route: path.join(
+      route: path.posix.join(
         "/",
         ...[
           source?.route?.route || "",
           ...(source?.route?.routeFromPath
-            ? [...dir.split(path.sep), name]
+            ? [...dirSegments, name]
             : []),
         ]
       ),
@@ -137,7 +143,7 @@ async function loadSpecFromContent(config) {
           }
         : undefined,
       route: {
-        route: path.join(
+        route: path.posix.join(
           "/",
           ...[
             config?.route?.route || "",
@@ -148,9 +154,9 @@ async function loadSpecFromContent(config) {
         ),
       },
     };
-  } else {
-    throw "Specification content has not been loaded";
-  }
+      } else {
+        throw "Specification content has not been loaded";
+      }
 }
 
 async function loadSpecsFromConfig(configs, baseConfig) {

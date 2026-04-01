@@ -179,6 +179,906 @@ components:
           description: JSON-serialized general user preferences for the portal shell.
           type: string
           example: '{"theme":"default"}'
+    CloudAppsAboutInfoResponse:
+      type: object
+      description: Basic tenant and region metadata returned by Defender for Cloud Apps.
+      properties:
+        locale:
+          type: string
+          example: en
+        dataCenterName:
+          type: string
+          example: US2
+        regionName:
+          type: string
+          example: East US 2
+        tenantId:
+          type: integer
+          example: 79819259
+    CloudAppsFileMonitoringState:
+      type: object
+      description: File monitoring configuration state for the MCAS tenant.
+      properties:
+        lastModified:
+          type: integer
+          example: 1769542538676
+        lastModifiedBy:
+          type: integer
+          example: 0
+        shouldEnableAfterDeletion:
+          type: boolean
+          example: false
+        status:
+          type: integer
+          example: 0
+        enabledFilePolicyExists:
+          type: boolean
+          example: true
+    CloudAppsQuarantineSite:
+      type: object
+      description: SharePoint target used for Cloud Apps quarantine operations.
+      properties:
+        text:
+          type: string
+          format: uri
+          example: https://sharemylabs.sharepoint.com/sites/Quarantine
+        id:
+          type: string
+          example: 64f8e4e9210b40482c53f315
+        dstDriveId:
+          type: string
+          example: d9edd63b-740b-4774-9399-9064606f11d2|6ebe27a0-1447-4f37-8505-0570adab445f
+        dstDriveAppId:
+          type: integer
+          example: 20892
+    CloudAppsProxyCustomization:
+      type: object
+      description: Customization state for the session-control landing page.
+      properties:
+        body:
+          type: string
+          example: ''
+        enableCustomizedLandingPage:
+          type: boolean
+          example: false
+        markdownBody:
+          type: string
+          example: ''
+        title:
+          type: string
+          example: ''
+    CloudAppsSettingsResponse:
+      type: object
+      description: Tenant-wide Defender for Cloud Apps settings shown in the Settings experience.
+      properties:
+        environmentName:
+          type: string
+          example: Share My Labs
+        orgDisplayName:
+          type: string
+          example: Share My Labs
+        domains:
+          type: array
+          items:
+            type: string
+          example:
+            - sharemylabs.onmicrosoft.com
+            - sharemylabs.com
+        logoFilePath:
+          type: string
+          nullable: true
+          example: null
+        emailMaskPolicy:
+          type: string
+          example: MASKED_SUBJECT
+        emailMaskPolicyOptions:
+          type: object
+          additionalProperties:
+            type: string
+          example:
+            FULL_CONTENT: CONSOLE2_GENERAL_SETTINGS_EMAIL_MASK_POLICIES_NAME_FULL_CONTENT
+            MASKED_SUBJECT: CONSOLE2_GENERAL_SETTINGS_EMAIL_MASK_POLICIES_NAME_MASKED_SUBJECT
+            ONLY_ID: CONSOLE2_GENERAL_SETTINGS_EMAIL_MASK_POLICIES_NAME_ONLY_ID
+        allowAzIP:
+          type: boolean
+          example: true
+        fileMonitoringEnabled:
+          type: boolean
+          example: true
+        fileMonitoring:
+          $ref: '#/components/schemas/CloudAppsFileMonitoringState'
+        rmsDecryptAllConsented:
+          type: boolean
+          example: true
+        ignoreExternalAzIP:
+          type: boolean
+          example: false
+        appControlEnabled:
+          type: boolean
+          example: true
+        showSuffixDisclaimer:
+          type: boolean
+          example: true
+        enforceSessionProxy:
+          type: boolean
+          example: false
+        mdatpGlobalSeverityLevel:
+          type: integer
+          example: 3
+        blockAppsURL:
+          type: string
+          format: uri
+          example: https://notification.sharemylabs.com/block
+        adminViewUsers:
+          type: array
+          items:
+            type: string
+            format: email
+          example:
+            - nathan@sharemylabs.com
+        managedDevicesCrl:
+          type: boolean
+          example: false
+        mdatpGlobalBypassDurationHours:
+          type: string
+          example: '8'
+        signOutTime:
+          type: integer
+          nullable: true
+          example: null
+        quarantineSite:
+          $ref: '#/components/schemas/CloudAppsQuarantineSite'
+        ProxywebPagesCustomization:
+          $ref: '#/components/schemas/CloudAppsProxyCustomization'
+        allowAzureSecurityIntegration:
+          type: boolean
+          example: true
+        allowScopedAdminsInMTP:
+          type: boolean
+          example: false
+        customWarnURL:
+          type: string
+          format: uri
+          example: https://notification.sharemylabs.com/warn
+        quarantineSiteId:
+          type: string
+          example: 64f8e4e9210b40482c53f315
+        quarantineUserNotification:
+          type: string
+        enableBypassSuffix:
+          type: boolean
+          example: true
+    CloudAppsMailSettingsResponse:
+      type: object
+      description: Mail settings envelope used by the Defender for Cloud Apps settings UI.
+      properties:
+        tenantEmail:
+          type: object
+          additionalProperties: true
+          example: {}
+    CloudAppsMetadataOperator:
+      type: object
+      description: Supported operator for a Cloud Apps grid filter.
+      properties:
+        id:
+          type: string
+          example: eq
+        displayText:
+          type: string
+          example: GRID_OPERATOR_EQUALS
+        group:
+          type: string
+          example: equality
+        inputType:
+          type: object
+          nullable: true
+          additionalProperties: true
+          example: null
+        inputProperties:
+          type: object
+          nullable: true
+          additionalProperties: true
+          example: null
+        visibility:
+          type: integer
+          example: 2
+        isDefault:
+          type: boolean
+          example: false
+    CloudAppsMetadataInputType:
+      type: object
+      description: Input definition for a Cloud Apps grid filter.
+      properties:
+        multiple:
+          type: boolean
+          example: true
+        placeholder:
+          type: string
+          nullable: true
+          example: null
+        autocomplete:
+          type: boolean
+          example: true
+        autofocus:
+          type: boolean
+          example: false
+        sortProperty:
+          type: string
+          nullable: true
+          example: null
+        sortDirection:
+          type: string
+          nullable: true
+          example: null
+        inputProperties:
+          type: object
+          nullable: true
+          additionalProperties: true
+          example: null
+        deprecationFlags:
+          type: object
+          nullable: true
+          additionalProperties: true
+          example: null
+        type:
+          type: string
+          example: token
+      additionalProperties: true
+    CloudAppsMetadataFilter:
+      type: object
+      description: Filter metadata definition returned by MCAS metadata endpoints.
+      properties:
+        name:
+          type: string
+          example: category
+        visibility:
+          type: integer
+          example: 2
+        translationTemplate:
+          type: string
+          nullable: true
+          example: null
+        translationParams:
+          type: object
+          nullable: true
+          additionalProperties: true
+          example: null
+        group:
+          type: string
+          nullable: true
+          example: null
+        priorityInGroup:
+          type: integer
+          nullable: true
+          example: null
+        processor:
+          type: object
+          nullable: true
+          additionalProperties: true
+          example: null
+        operators:
+          type: array
+          items:
+            $ref: '#/components/schemas/CloudAppsMetadataOperator'
+        inputType:
+          $ref: '#/components/schemas/CloudAppsMetadataInputType'
+        deprecated:
+          type: boolean
+          example: false
+      additionalProperties: true
+    CloudAppsMetadataCatalogResponse:
+      type: object
+      description: Filter and sorting metadata for Defender for Cloud Apps grid endpoints.
+      properties:
+        name:
+          type: string
+          example: tokens
+        filters:
+          type: array
+          items:
+            $ref: '#/components/schemas/CloudAppsMetadataFilter'
+        sorting:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+    CloudAppsConnectorApiStatus:
+      type: object
+      description: API connector state for a Cloud Apps connected service.
+      properties:
+        hasWarnings:
+          type: boolean
+          nullable: true
+          example: true
+        statusTemplateMessage:
+          type: string
+          nullable: true
+          example: CONSOLE2_APP_CONNECTORS_STATUS_WARNING
+        isConnected:
+          type: boolean
+          example: true
+        usersCount:
+          type: integer
+          example: 898
+        creator:
+          type: string
+          nullable: true
+          example: nathan@sharemylabs.com
+        isEnabled:
+          type: boolean
+          nullable: true
+          example: true
+        lastConnected:
+          type: integer
+          nullable: true
+          example: 1773702127907
+        disabledBy:
+          type: string
+          nullable: true
+          example: console
+        isSSPMEnabled:
+          type: boolean
+          nullable: true
+          example: true
+    CloudAppsConnectorProxyStatus:
+      type: object
+      description: Session control and proxy status for a connected Cloud Apps service.
+      properties:
+        status:
+          type: integer
+          example: 0
+        inDeployment:
+          type: boolean
+          example: false
+        isConnected:
+          type: boolean
+          example: false
+        isInProxyPolicy:
+          type: boolean
+          nullable: true
+          example: null
+        isSuspended:
+          type: boolean
+          example: false
+        isConfigured:
+          type: boolean
+          example: false
+        isConfiguredInAAD:
+          type: boolean
+          example: false
+        isSessionProxySupported:
+          type: boolean
+          example: false
+        isAppStatusEnabled:
+          type: boolean
+          example: false
+        isSessionProxyDisabled:
+          type: boolean
+          nullable: true
+          example: true
+        lastConnected:
+          type: string
+          nullable: true
+          example: '2023-02-16T20:21:54.192Z'
+        proxySettings:
+          type: object
+          nullable: true
+          additionalProperties: true
+          example: null
+        isOIDCBasedProtocol:
+          type: boolean
+          example: true
+    CloudAppsConnectorDiscoveryStatus:
+      type: object
+      description: Cloud Discovery connection state for a connected service.
+      properties:
+        isConnected:
+          type: boolean
+          example: false
+    CloudAppsConnectedService:
+      type: object
+      description: A connected service or app instance surfaced by Defender for Cloud Apps.
+      properties:
+        appId:
+          type: integer
+          example: 11161
+        name:
+          type: string
+          example: Microsoft 365
+        _id:
+          type: string
+          example: 63dd5f272b9cbba7bb29d703
+        instanceName:
+          type: string
+          nullable: true
+          example: null
+        category:
+          type: string
+          example: SAASDB_CATEGORY_COLLABORATION
+        api:
+          $ref: '#/components/schemas/CloudAppsConnectorApiStatus'
+        proxy:
+          $ref: '#/components/schemas/CloudAppsConnectorProxyStatus'
+        discovery:
+          $ref: '#/components/schemas/CloudAppsConnectorDiscoveryStatus'
+        isOfficeApp:
+          type: boolean
+          example: true
+        isApiConnectable:
+          type: boolean
+          example: true
+        aadInfo:
+          type: object
+          nullable: true
+          additionalProperties: true
+          example: null
+        lastUsed:
+          type: string
+          nullable: true
+          example: null
+        customData:
+          type: object
+          additionalProperties: true
+        isCustomApp:
+          type: boolean
+          example: false
+        securityConfiguration:
+          type: object
+          additionalProperties: true
+        appIdentityRealm:
+          type: integer
+          nullable: true
+          example: 11394
+        appName:
+          type: string
+          example: Microsoft 365
+        apiConnected:
+          type: boolean
+          nullable: true
+          example: null
+        proxied:
+          type: boolean
+          nullable: true
+          example: null
+        protected:
+          type: boolean
+          nullable: true
+          example: null
+        childSaasIds:
+          type: array
+          items:
+            type: integer
+    CloudAppsConnectedServiceListResponse:
+      type: object
+      description: Paginated connected-service list used by Defender for Cloud Apps settings pages.
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/CloudAppsConnectedService'
+        hasNext:
+          type: boolean
+          example: false
+        total:
+          type: integer
+          example: 2
+    CloudAppsStatusCountResponse:
+      type: object
+      description: Count of apps grouped by protection state.
+      properties:
+        data:
+          type: object
+          properties:
+            protected:
+              type: integer
+              example: 2
+            needAttention:
+              type: integer
+              example: 0
+            notProtected:
+              type: integer
+              example: 2
+    CloudAppsVersionResponse:
+      type: object
+      description: Version identifiers for the Defender for Cloud Apps front-end bundles.
+      properties:
+        console-version:
+          type: string
+          example: 0.328.145
+        weballom-version:
+          type: string
+          example: 0.328.145
+        adalibpy-version:
+          type: string
+          example: 0.0.0
+        i18n-version:
+          type: string
+          example: 0.328.3
+    CloudAppsServiceAccessControl:
+      type: object
+      description: Access-control state for a Cloud Apps service.
+      properties:
+        lastEnabled:
+          type: string
+          format: date-time
+          example: '2023-12-01T01:36:56.255Z'
+        protocolType:
+          type: integer
+          example: 1
+        status:
+          type: integer
+          example: 3
+    CloudAppsServiceCatalogItem:
+      type: object
+      description: Service catalog item surfaced in the Defender for Cloud Apps activity experience.
+      properties:
+        _id:
+          type: string
+          example: 656938b8c9325a5a1eeafb1a
+        _tid:
+          type: integer
+          example: 79819259
+        appId:
+          type: integer
+          example: 2146486212
+        aadInfo:
+          type: object
+          additionalProperties: true
+        accessControl:
+          $ref: '#/components/schemas/CloudAppsServiceAccessControl'
+        category:
+          type: string
+          example: SAASDB_CATEGORY_DATA_ANALYTICS
+        config:
+          type: object
+          additionalProperties: true
+        name:
+          type: string
+          example: Azure Data Explorer - General
+        saasId:
+          type: integer
+          example: 51140
+        customData:
+          type: object
+          additionalProperties: true
+        saasdbVersion:
+          type: string
+          example: '1774941059'
+        last_viewed:
+          type: number
+          nullable: true
+          example: 1764918010214.14
+        app:
+          $ref: '#/components/schemas/CloudAppsConnectedService'
+        appName:
+          type: string
+          example: Azure Data Explorer
+        apiConnected:
+          type: boolean
+          nullable: true
+          example: null
+        proxied:
+          type: boolean
+          example: true
+        protected:
+          type: boolean
+          example: true
+    CloudAppsServiceCatalogResponse:
+      type: object
+      description: Cloud app service catalog returned by the MCAS activity-log experience.
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/CloudAppsServiceCatalogItem'
+    CloudAppsTemplateReference:
+      type: object
+      description: Localization/template reference attached to built-in Cloud Apps records.
+      properties:
+        template:
+          type: string
+          example: SAGE_BUILTIN_TAG_EXTERNAL_USER_NAME
+        parameters:
+          type: object
+          nullable: true
+          additionalProperties: true
+          example: null
+    CloudAppsTagSource:
+      type: object
+      description: Source application or group association for a Cloud Apps tag.
+      properties:
+        appId:
+          type: integer
+          example: 11161
+        type:
+          type: integer
+          example: 0
+        groupType:
+          type: integer
+          nullable: true
+          example: 0
+        groupId:
+          type: string
+          nullable: true
+          format: uuid
+          example: 62463dca-3025-4a93-b444-000b3eaa35e8
+    CloudAppsTagRecord:
+      type: object
+      description: Built-in or custom tag used by Cloud Apps discovery and governance filters.
+      properties:
+        _id:
+          type: string
+          example: 63db26067e008a733a79613d
+        id:
+          type: string
+          example: '000000200000000000000000'
+        target:
+          type: integer
+          example: 0
+        type:
+          type: integer
+          example: 2
+        name:
+          type: string
+          example: External users
+        nameTemplate:
+          $ref: '#/components/schemas/CloudAppsTemplateReference'
+        description:
+          type: string
+          nullable: true
+          example: Either a user who is not a member of any of the managed domains you configured in General settings or a third-party app
+        descriptionTemplate:
+          allOf:
+            - $ref: '#/components/schemas/CloudAppsTemplateReference'
+          nullable: true
+        visibility:
+          type: integer
+          example: 0
+        status:
+          type: integer
+          example: 0
+        usersCount:
+          type: integer
+          nullable: true
+          example: 862
+        lastScannedBySage:
+          type: integer
+          nullable: true
+          example: 1775067898835
+        lastUpdatedTimestamp:
+          type: number
+          nullable: true
+          example: 1769885561135.0696
+        shouldNotify:
+          type: boolean
+          nullable: true
+          example: true
+        createdBy:
+          type: string
+          nullable: true
+          format: email
+          example: nathan@sharemylabs.com
+        deletionStatus:
+          type: integer
+          nullable: true
+          example: 0
+        appId:
+          type: integer
+          nullable: true
+          example: 11161
+        source:
+          allOf:
+            - $ref: '#/components/schemas/CloudAppsTagSource'
+          nullable: true
+        _tid:
+          type: integer
+          example: 79819259
+        successfullyImportedBySage:
+          type: boolean
+          nullable: true
+          example: true
+    CloudAppsTagListResponse:
+      type: object
+      description: Tag catalog returned by Defender for Cloud Apps.
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/CloudAppsTagRecord'
+    CloudAppsAutocompleteRecord:
+      type: object
+      description: Autocomplete record returned for entity, user, token, or tag suggestion lookups.
+      properties:
+        _id:
+          type: string
+          example: 69221ea6dba2f60e59ac7aa8
+        id:
+          type: string
+          nullable: true
+          example: f1fa286e-213e-40b2-af24-77ea529a0ad9
+        i:
+          type: string
+          nullable: true
+          example: f1fa286e-213e-40b2-af24-77ea529a0ad9
+        ii:
+          type: string
+          nullable: true
+          example: 11161|0|f1fa286e-213e-40b2-af24-77ea529a0ad9
+        inst:
+          type: integer
+          nullable: true
+          example: 0
+        saas:
+          type: integer
+          nullable: true
+          example: 11161
+        dn:
+          type: string
+          nullable: true
+          example: Aaron
+        dnlc:
+          type: string
+          nullable: true
+          example: aaron
+        pa:
+          type: string
+          nullable: true
+          example: aaron@sharemylabs.com
+        name:
+          type: string
+          nullable: true
+          example: External users
+        source:
+          allOf:
+            - $ref: '#/components/schemas/CloudAppsTagSource'
+          nullable: true
+        appId:
+          type: integer
+          nullable: true
+          example: 11161
+        visibility:
+          type: integer
+          nullable: true
+          example: 0
+        usersCount:
+          type: integer
+          nullable: true
+          example: 0
+        lastScannedBySage:
+          type: integer
+          nullable: true
+          example: 1775067898835
+        lastUpdatedTimestamp:
+          type: number
+          nullable: true
+          example: 1769885561135.0696
+        shouldNotify:
+          type: boolean
+          nullable: true
+          example: false
+        createdBy:
+          type: string
+          nullable: true
+          format: email
+          example: nathan@sharemylabs.com
+        deletionStatus:
+          type: integer
+          nullable: true
+          example: 0
+        status:
+          type: integer
+          nullable: true
+          example: 0
+        type:
+          type: integer
+          nullable: true
+          example: 1
+        target:
+          type: integer
+          nullable: true
+          example: 0
+        _tid:
+          type: integer
+          nullable: true
+          example: 79819259
+        successfullyImportedBySage:
+          type: boolean
+          nullable: true
+          example: true
+      additionalProperties: true
+    CloudAppsAutocompleteResponse:
+      type: object
+      description: Generic autocomplete response used by multiple Defender for Cloud Apps suggestion endpoints.
+      properties:
+        records:
+          type: array
+          items:
+            $ref: '#/components/schemas/CloudAppsAutocompleteRecord'
+    CloudAppsDataEncryptionSettingsResponse:
+      type: object
+      description: Data-at-rest encryption toggle state for Defender for Cloud Apps.
+      properties:
+        encryptDataAtRest:
+          type: boolean
+          example: false
+    CloudAppsSavedQuery:
+      type: object
+      description: Saved built-in or custom query used by Cloud Apps grid views.
+      properties:
+        _id:
+          type: string
+          example: 5a53410867a58f2d1714c4b4
+        filterType:
+          type: integer
+          example: 2
+        nameTemplate:
+          type: string
+          nullable: true
+          example: CONSOLE2_QUERIES_DISCOVERED_APPS_WEAK_AUTHENTICATION
+        queryType:
+          type: integer
+          example: 0
+        createdBy:
+          type: string
+          example: adallom
+        consoleFilters:
+          type: object
+          additionalProperties: true
+        name:
+          type: string
+          example: Enterprise cloud apps that have weak authentication
+    CloudAppsSavedQueryListResponse:
+      type: object
+      description: Saved query collection for the current Cloud Apps experience.
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/CloudAppsSavedQuery'
+    CloudAppsInvitedGroupAdminListResponse:
+      type: object
+      description: Pending or existing invited group administrators for Cloud Apps tenant administration.
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+    SiemAgentsResponse:
+      type: object
+      description: Paginated SIEM agent list for Defender for Cloud Apps.
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        hasNext:
+          type: boolean
+          example: false
+        performAsyncTotal:
+          type: boolean
+          example: true
+    SiemAgentCountResponse:
+      type: object
+      description: Count summary for configured SIEM agents.
+      properties:
+        total:
+          type: integer
+          example: 0
+        moreThanTotal:
+          type: boolean
+          example: false
+    DomainControllerCoverageResponse:
+      type: object
+      description: Legacy AATP domain controller coverage summary.
+      properties:
+        DomainControllerCount:
+          type: integer
+          example: 2
+        MonitoredDomainControllerCount:
+          type: integer
+          example: 2
   responses:
     BadRequest:
       description: Bad Request - The request was malformed or invalid.

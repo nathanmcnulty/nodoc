@@ -408,6 +408,1573 @@ components:
           description: Whether the user has an Exchange workload license.
           type: boolean
           example: true
+    PortalFeatureFlagMap:
+      type: object
+      description: A flat map of portal capability flags exposed as 0/1 integers.
+      properties:
+        GlobalAdmin:
+          type: integer
+          example: 1
+        GlobalReader:
+          type: integer
+          example: 1
+        AddUser:
+          type: integer
+          example: 1
+        ListUsers:
+          type: integer
+          example: 1
+        ResetUserPassword:
+          type: integer
+          example: 1
+        EnableReactUsersV2:
+          type: integer
+          example: 1
+        EnableReactDarkMode:
+          type: integer
+          example: 1
+        EnableM365Recommendations:
+          type: integer
+          example: 1
+        BillingAdminPortalAccess:
+          type: integer
+          example: 1
+        EnableActionFlowV2:
+          type: integer
+          example: 1
+        ViewDataLocation:
+          type: integer
+          example: 1
+        EnableSignInHistory:
+          type: integer
+          example: 1
+      additionalProperties:
+        type: integer
+      example:
+        GlobalAdmin: 1
+        ListUsers: 1
+        ResetUserPassword: 1
+        EnableReactUsersV2: 1
+        EnableReactDarkMode: 1
+        BillingAdminPortalAccess: 1
+        ViewDataLocation: 1
+    FeatureConfigResponse:
+      type: object
+      description: String-encoded portal configuration switches, limits, and deep links used during admin center bootstrap.
+      properties:
+        EnableModalFeedbackOnLeavePreviewMode:
+          type: string
+          example: 'true'
+        EnableCustomizeNavigation:
+          type: string
+          example: 'true'
+        TurnOnDiagnostics:
+          type: string
+          example: 'false'
+        CxgLicensingUrl:
+          type: string
+          format: uri
+          example: https://licensing.m365.microsoft.com
+        CxgLicensingDbsProductIds:
+          type: string
+          example: CFQ7TTC0KCRG
+        PartnerCenterDashboardUrl:
+          type: string
+          nullable: true
+          example: ''
+        MicrosoftTeamsAdminCenterDeepLink:
+          type: string
+          format: uri
+          example: https://admin.teams.microsoft.com/
+        MicrosoftTeamsDetailsDeepLink:
+          type: string
+          example: https://admin.teams.microsoft.com/teams/manage/{groupId}
+        EnableNavIntelligence:
+          type: string
+          example: 'false'
+        NewPasswordLength:
+          type: string
+          example: 'true'
+        NewPasswordBulkUserLimit:
+          type: string
+          example: 'true'
+        NewPasswordManagement:
+          type: string
+          example: 'false'
+        NewPasswordEmailOption:
+          type: string
+          example: 'true'
+        NavNodeClickHistorySessionCap:
+          type: string
+          example: '5'
+        MostUsedNavNodeCap:
+          type: string
+          example: '4'
+        LitigationHoldHelpUrl:
+          type: string
+          format: uri
+          example: https://go.microsoft.com/fwlink/?linkid=841243
+        EnableUpnUniqueness:
+          type: string
+          example: 'true'
+        HideLastSignInInfo:
+          type: string
+          example: 'false'
+      additionalProperties:
+        type: string
+    SetupPivotBasicActionDetails:
+      type: object
+      description: Timing and action metadata tracked for the simplified setup experience.
+      properties:
+        Actions:
+          type: array
+          nullable: true
+          items:
+            type: object
+            additionalProperties: true
+          example: null
+        StartTime:
+          type: string
+          format: date-time
+          nullable: true
+          example: null
+        EndTime:
+          type: string
+          format: date-time
+          nullable: true
+          example: null
+    SussexPreferences:
+      type: object
+      description: Preferences related to the experimental Sussex dashboard experience.
+      properties:
+        ShowSussexView:
+          type: boolean
+          nullable: true
+          example: null
+        DismissAdoptionViewTeachingBubble:
+          type: boolean
+          nullable: true
+          example: null
+        DismissWelcomeExperienceTeachingBubble:
+          type: boolean
+          nullable: true
+          example: null
+    ServerViewPreferences:
+      type: object
+      description: Simplified-view and setup experience state stored for the current admin.
+      properties:
+        ShowSimplifiedView:
+          type: boolean
+          example: false
+        ShowSimplifiedViewLastUpdate:
+          type: integer
+          example: 1742496314
+        DismissToggleToDashboardViewCallout:
+          type: boolean
+          example: false
+        DismissToggleToSimplifiedViewCallout:
+          type: boolean
+          example: false
+        DismissUsersPageSimplifiedViewCallout:
+          type: integer
+          example: 0
+        DismissSimplifiedViewButtonCallout:
+          type: boolean
+          example: false
+        DismissSimplifiedViewCallout:
+          type: boolean
+          example: false
+        DismissUserIntentWindow:
+          type: string
+          nullable: true
+          example: null
+        RenderedSignupTransition:
+          type: boolean
+          example: false
+        DismissedActions:
+          type: array
+          nullable: true
+          items:
+            type: string
+          example: null
+        ActionsInfo:
+          type: object
+          nullable: true
+          additionalProperties: true
+          example: null
+        DismissSimplifiedViewOptIn:
+          type: integer
+          example: 0
+        ShowOptOutSurvey:
+          type: boolean
+          example: false
+        OrgRelevantProducts:
+          type: array
+          nullable: true
+          items:
+            type: string
+          example: null
+        UserExperienceLevel:
+          type: string
+          nullable: true
+          example: null
+        SetupPivotFirstVisitedOn:
+          type: string
+          nullable: true
+          example: null
+        DismissedSetupPivotTeachingBubble:
+          type: boolean
+          nullable: true
+          example: null
+        SetupPivotBasicActionDetails:
+          $ref: '#/components/schemas/SetupPivotBasicActionDetails'
+        BasicSetupActionStatus:
+          type: string
+          nullable: true
+          example: null
+        BasicSetupCompletedOn:
+          type: string
+          format: date-time
+          nullable: true
+          example: null
+        PivotsToIncludeByEligibility:
+          type: array
+          nullable: true
+          items:
+            type: string
+          example: null
+        SussexPreferences:
+          $ref: '#/components/schemas/SussexPreferences'
+        ShowGatherIntentWindow:
+          type: boolean
+          example: false
+        DismissedGatherIntentWindowOn:
+          type: string
+          nullable: true
+          example: null
+        ClickedIntentRemindLaterOn:
+          type: string
+          nullable: true
+          example: null
+        SetupActionCardStatus:
+          type: string
+          nullable: true
+          example: null
+        SetupPopUpDisabled:
+          type: boolean
+          example: false
+    ServerViewInfoResponse:
+      type: object
+      description: Current-user UX state for the simplified M365 admin experience.
+      properties:
+        Show:
+          type: boolean
+          example: false
+        ShowToggle:
+          type: boolean
+          example: true
+        ShowSimplifiedViewOptInWindow:
+          type: boolean
+          example: false
+        ShowSimplifiedViewOptInCallout:
+          type: boolean
+          example: false
+        ShowToggleToDashboardViewCallout:
+          type: boolean
+          example: false
+        ShowToggleToSimplifiedViewCallout:
+          type: boolean
+          example: false
+        ShowUsersPageSimplifiedViewCallout:
+          type: boolean
+          example: false
+        ShowSimplifiedViewCallout:
+          type: boolean
+          example: false
+        ShowSignupTransition:
+          type: boolean
+          example: false
+        SignupEmail:
+          type: string
+          format: email
+          nullable: true
+          example: null
+        ShowUserIntentWindow:
+          type: boolean
+          example: false
+        GetValueGuidance:
+          type: boolean
+          example: false
+        Preferences:
+          $ref: '#/components/schemas/ServerViewPreferences'
+        Pivots:
+          type: array
+          items:
+            type: string
+          example: [Users, Groups, Billing, MessageCenter, Learn]
+        HasEligibleSkus:
+          type: boolean
+          example: true
+        eligibilityType:
+          type: string
+          nullable: true
+          example: null
+        IsUserEligibleForGreenRoomPanel:
+          type: boolean
+          example: false
+        DefaultPivot:
+          type: string
+          example: Users
+        HideTopActions:
+          type: boolean
+          example: false
+        EnableSussexDashboard:
+          type: boolean
+          example: false
+        EnableSussexPrivatePreview:
+          type: boolean
+          example: false
+        EnableTopActionsFromMessageServices:
+          type: boolean
+          example: false
+        MaxResponseWaitTimeForTopActionInMsgService:
+          type: integer
+          example: 0
+        TenantPreferences:
+          type: object
+          nullable: true
+          additionalProperties: true
+          example: null
+        SurfaceGatherIntentRemindMeLaterAfter:
+          type: integer
+          nullable: true
+          example: null
+    SecurityDefaultsResponse:
+      type: object
+      description: Security Defaults enrollment state for the tenant.
+      properties:
+        isEnabled:
+          type: boolean
+          example: false
+    NavigationNode:
+      type: object
+      description: A navigation node rendered in the M365 admin left rail.
+      properties:
+        text:
+          type: string
+          example: Home
+        id:
+          type: string
+          example: homepage
+        sref:
+          type: string
+          example: /homepage
+        icon:
+          type: string
+          nullable: true
+          example: ms-Icon-FabricMDL2 ms-Icon-FabricMDL2--Home
+        fabricIcon:
+          type: string
+          nullable: true
+          example: Home
+        isPinned:
+          type: boolean
+          nullable: true
+          example: true
+        position:
+          type: integer
+          nullable: true
+          example: 3
+        serviceId:
+          type: string
+          nullable: true
+          example: null
+        previewType:
+          type: string
+          nullable: true
+          example: null
+        submenu:
+          type: array
+          nullable: true
+          items:
+            type: object
+            properties:
+              text:
+                type: string
+                example: Overview
+              id:
+                type: string
+                example: CopilotOverviewNode
+              sref:
+                type: string
+                example: /copilot/overview
+              position:
+                type: integer
+                nullable: true
+                example: 1
+              serviceId:
+                type: string
+                nullable: true
+                example: null
+              previewType:
+                type: string
+                nullable: true
+                example: null
+            additionalProperties: true
+    NavigationResponse:
+      type: object
+      description: Left-navigation structure and customization state for the admin portal shell.
+      properties:
+        Navigation:
+          type: array
+          items:
+            $ref: '#/components/schemas/NavigationNode'
+        AdminConsoles:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/NavigationNode'
+          example: null
+        IsCustomOn:
+          type: boolean
+          example: false
+        IsM365LeftNavExperience:
+          type: boolean
+          example: true
+        IsM365LeftNavEditExperience:
+          type: boolean
+          example: true
+        FocusedAdminUX:
+          type: boolean
+          example: false
+        IsSelectAllOn:
+          type: boolean
+          example: false
+        ShowAll:
+          type: boolean
+          example: true
+        ShowCustomize:
+          type: boolean
+          example: true
+        IsNavCollapsed:
+          type: boolean
+          example: false
+        IsMarketplaceEnabled:
+          type: boolean
+          example: true
+        HideFreqVisitedNodes:
+          type: boolean
+          example: false
+        HideFreqVisitedInfoTooltip:
+          type: boolean
+          example: false
+        ShowCollapsedLeftNavInSimplified:
+          type: boolean
+          example: false
+    AsyncNavigationResponse:
+      nullable: true
+      oneOf:
+        - type: object
+          additionalProperties: true
+        - type: array
+          items:
+            $ref: '#/components/schemas/NavigationNode'
+      example: null
+    EmptyObjectResponse:
+      type: object
+      description: An empty JSON object.
+      additionalProperties: false
+      example: {}
+    SecuritySettingDefinition:
+      type: object
+      description: A single secure-by-default control surfaced in Org Settings.
+      properties:
+        name:
+          type: string
+          example: blocklegacyauth
+        service:
+          type: string
+          example: Identity
+        viewOnly:
+          type: boolean
+          example: false
+        version:
+          type: string
+          nullable: true
+          example: null
+    SecuritySettingSection:
+      type: object
+      description: A group of secure-by-default controls shown in the org settings UI.
+      properties:
+        name:
+          type: string
+          example: authandprotocols
+        settings:
+          type: array
+          items:
+            $ref: '#/components/schemas/SecuritySettingDefinition'
+    SecuritySettingsCatalogResponse:
+      type: object
+      description: Catalog of security controls exposed by the secure-by-default settings experience.
+      properties:
+        sections:
+          type: array
+          items:
+            $ref: '#/components/schemas/SecuritySettingSection'
+    SecuritySettingStatusItem:
+      type: object
+      description: Evaluation result for a single secure-by-default control.
+      properties:
+        Id:
+          type: string
+          example: phishingresistant
+        Status:
+          type: string
+          example: AtRisk
+        AdditionalProperties:
+          type: object
+          nullable: true
+          properties:
+            excludedUsers:
+              type: array
+              items:
+                type: string
+                format: uuid
+            excludedGroups:
+              type: array
+              items:
+                type: string
+                format: uuid
+            excludedApps:
+              type: array
+              items:
+                type: string
+            excludedServices:
+              type: array
+              items:
+                type: string
+            policyId:
+              type: string
+              format: uuid
+              nullable: true
+              example: null
+            customizePolicyUrl:
+              type: string
+              format: uri
+              nullable: true
+              example: null
+            hasRequiredAuth:
+              type: boolean
+              example: true
+            hasCustomizedPolicy:
+              type: boolean
+              example: true
+            HardDeprecationRPSEnabled:
+              type: boolean
+              example: true
+          additionalProperties: true
+    SecuritySettingsStatusResponse:
+      type: array
+      items:
+        $ref: '#/components/schemas/SecuritySettingStatusItem'
+    LocalDataLocationResponse:
+      type: object
+      description: Local data location opt-in state for the tenant.
+      properties:
+        TagID:
+          type: integer
+          example: 432180
+        LocalDataLocation:
+          type: string
+          nullable: true
+          example: null
+        LocalDataLocationCode:
+          type: string
+          nullable: true
+          example: null
+        LocalDataLocationDisplayName:
+          type: string
+          nullable: true
+          example: null
+        AlreadyOptedIn:
+          type: boolean
+          example: false
+        OptInEnabled:
+          type: boolean
+          example: false
+        IsWhitelisted:
+          type: boolean
+          example: false
+        OptinDate:
+          type: string
+          format: date-time
+          nullable: true
+          example: null
+        OptinSLADate:
+          type: string
+          format: date-time
+          nullable: true
+          example: null
+        OptinWindowStartDate:
+          type: string
+          format: date-time
+          nullable: true
+          example: null
+        OptinWindowEndDate:
+          type: string
+          format: date-time
+          nullable: true
+          example: null
+        OptinWindowMoveLength:
+          type: integer
+          nullable: true
+          example: null
+    DataLocationCommitmentsResponse:
+      type: object
+      description: Data residency and contractual commitment summary for major Microsoft 365 workloads.
+      properties:
+        IsDataLocationPartial:
+          type: boolean
+          example: false
+        IsDataLocationEmpty:
+          type: boolean
+          example: false
+        OmsTenantId:
+          type: string
+          format: uuid
+          example: 847b5907-ca15-40f4-b171-eb18619dbfab
+        IsADR:
+          type: boolean
+          example: false
+        IsADREDU:
+          type: boolean
+          example: false
+        IsEUDB:
+          type: boolean
+          example: false
+        IsMNC:
+          type: boolean
+          example: false
+        IsProductTermEligibleWithoutOptin:
+          type: boolean
+          example: true
+        ADRTotalSeats:
+          type: integer
+          example: 0
+        ADRTotalEligibleSeats:
+          type: integer
+          example: 0
+        ADRExpiryDateTime:
+          type: string
+          format: date-time
+          example: '0001-01-01T00:00:00'
+        ADRShowAboutExpiryWarning:
+          type: boolean
+          example: false
+        ADRShowExpiryWarning:
+          type: boolean
+          example: false
+        ADRShowCoverageWarning:
+          type: boolean
+          example: false
+        CopilotDisplayName:
+          type: string
+          example: Copilot
+        CopilotDataLocation:
+          type: string
+          example: '-'
+        CopilotCommittedRegionName:
+          type: string
+          example: '-'
+        CopilotCommitmentType:
+          type: array
+          items:
+            type: string
+        EXODisplayName:
+          type: string
+          example: Exchange
+        EXODataLocation:
+          type: string
+          example: USA
+        EXOCommittedRegionName:
+          type: string
+          example: USA
+        EXOCommitmentType:
+          type: array
+          items:
+            type: string
+          example: [ProductTerms]
+        EOPDisplayName:
+          type: string
+          example: Exchange Online Protection
+        EOPDataLocation:
+          type: string
+          example: USA
+        EOPCommittedRegionName:
+          type: string
+          example: No Commitment
+        EOPCommitmentType:
+          type: array
+          items:
+            type: string
+        TeamsDisplayName:
+          type: string
+          example: Teams
+        TeamsDataLocation:
+          type: string
+          example: USA
+        TeamsCommittedRegionName:
+          type: string
+          example: USA
+        TeamsCommitmentType:
+          type: array
+          items:
+            type: string
+          example: [ProductTerms]
+        OneDriveDisplayName:
+          type: string
+          example: OneDrive for Business
+        OneDriveDataLocation:
+          type: string
+          example: USA
+        OneDriveCommittedRegionName:
+          type: string
+          example: USA
+        OneDriveCommitmentType:
+          type: array
+          items:
+            type: string
+          example: [ProductTerms]
+        SPODisplayName:
+          type: string
+          example: SharePoint
+        SPODataLocation:
+          type: string
+          example: USA
+        SPOCommittedRegionName:
+          type: string
+          example: USA
+        SPOCommitmentType:
+          type: array
+          items:
+            type: string
+          example: [ProductTerms]
+        VivaConnDisplayName:
+          type: string
+          example: Viva Connections
+        VivaConnDataLocation:
+          type: string
+          example: USA
+        VivaConnCommittedRegionName:
+          type: string
+          example: No Commitment
+        VivaConnCommitmentType:
+          type: array
+          items:
+            type: string
+        Commitments:
+          type: array
+          nullable: true
+          items:
+            type: object
+            additionalProperties: true
+          example: null
+    BillingSubscriptionOffer:
+      type: object
+      description: Commercial offer metadata attached to a billing subscription.
+      properties:
+        Id:
+          type: string
+          example: CFQ7TTC0P4WT/0005/Direct
+        IsTrial:
+          type: boolean
+          example: false
+        IsPrepaid:
+          type: boolean
+          example: false
+        Name:
+          type: string
+          example: Microsoft Cloud PKI
+    BillingSubscription:
+      type: object
+      description: A subscription surfaced in the M365 admin billing overview.
+      properties:
+        Id:
+          type: string
+          format: uuid
+          example: 245af74a-eb6b-4d36-c46d-9dc1d57f9d6b
+        Name:
+          type: string
+          nullable: true
+          example: null
+        NextSubscriptionState:
+          type: string
+          example: Other
+        OfferId:
+          type: string
+          example: CFQ7TTC0P4WT/0005/Direct
+        Offer:
+          $ref: '#/components/schemas/BillingSubscriptionOffer'
+        AssignedQuantity:
+          type: integer
+          example: 0
+        TotalLicenseQuantity:
+          type: integer
+          example: 1
+        SubscriptionStartDate:
+          type: string
+          format: date-time
+          example: '2026-03-22T00:00:00+00:00'
+        SubscriptionEndDate:
+          type: string
+          format: date-time
+          example: '2026-04-21T00:00:00+00:00'
+        StatusText:
+          type: string
+          example: Expires April 21, 2026
+        StateText:
+          type: string
+          example: Active
+        Channel:
+          type: string
+          example: Direct
+        AutoRenew:
+          type: boolean
+          example: true
+        IsInGracePeriod:
+          type: boolean
+          example: false
+        IsPaymentReceived:
+          type: boolean
+          example: true
+        IsLifecycleExpired:
+          type: boolean
+          example: false
+        SubscriptionState:
+          type: integer
+          example: 1
+        ProductSkuId:
+          type: string
+          format: uuid
+          example: c215c5ea-c90e-47c9-8c21-e95be7cbb5aa
+    BillingModelResponse:
+      type: object
+      description: Subscription, billing, and payment summary shown in the billing overview.
+      properties:
+        Subscriptions:
+          type: array
+          items:
+            $ref: '#/components/schemas/BillingSubscription'
+        OtherSubscriptions:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        NceSubscriptions:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        BillingRpNceSubscriptions:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        ModernBillingAccounts:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        TrialSubscriptionID:
+          type: string
+          nullable: true
+          example: null
+        TotalAmountDue:
+          type: number
+          nullable: true
+          example: null
+        HasAmountDue:
+          type: boolean
+          example: false
+        DueDate:
+          type: string
+          format: date-time
+          nullable: true
+          example: null
+        PastDue:
+          type: boolean
+          example: false
+        HasPastDue:
+          type: boolean
+          example: false
+        HasDueDate:
+          type: boolean
+          example: false
+        IsPendingDomainVerification:
+          type: boolean
+          example: false
+        HasExpiringCC:
+          type: boolean
+          example: false
+        HasExpiredSub:
+          type: boolean
+          example: false
+        HasPrepaidSub:
+          type: boolean
+          example: false
+        CCExpired:
+          type: boolean
+          example: false
+        ExpiringText:
+          type: string
+          nullable: true
+          example: null
+        ExpiringCCOrderID:
+          type: string
+          nullable: true
+          example: null
+        ExpiringCCSubID:
+          type: string
+          nullable: true
+          example: null
+        ExpiringCCSubscriptionIDs:
+          type: array
+          items:
+            type: string
+        HasPaidSubscription:
+          type: boolean
+          example: true
+        HasNceSub:
+          type: boolean
+          example: false
+    NotificationPollResponse:
+      type: object
+      description: Notification polling envelope used by the admin portal header.
+      properties:
+        Notifications:
+          type: array
+          description: Notification items. The observed tenant returned an empty list.
+          items:
+            type: object
+            additionalProperties: true
+        ContinuePolling:
+          type: boolean
+          example: false
+        PollingFreqInSecs:
+          type: integer
+          nullable: true
+          example: null
+        MaxPollCount:
+          type: integer
+          nullable: true
+          example: null
+    BookingsSettingsResponse:
+      type: object
+      description: Tenant-wide Microsoft Bookings controls and related UX toggles.
+      properties:
+        Enabled:
+          type: boolean
+          example: true
+        ShowPaymentsToggle:
+          type: boolean
+          example: false
+        PaymentsEnabled:
+          type: boolean
+          example: false
+        ShowSocialSharingToggle:
+          type: boolean
+          example: true
+        SocialSharingRestricted:
+          type: boolean
+          example: false
+        ShowBookingsAddressEntryRestrictedToggle:
+          type: boolean
+          example: true
+        BookingsAddressEntryRestricted:
+          type: boolean
+          example: false
+        ShowBookingsAuthEnabledToggle:
+          type: boolean
+          example: true
+        BookingsAuthEnabled:
+          type: boolean
+          example: false
+        ShowBookingsCreationOfCustomQuestionsRestrictedToggle:
+          type: boolean
+          example: true
+        BookingsCreationOfCustomQuestionsRestricted:
+          type: boolean
+          example: false
+        ShowBookingsExposureOfStaffDetailsRestrictedToggle:
+          type: boolean
+          example: true
+        BookingsExposureOfStaffDetailsRestricted:
+          type: boolean
+          example: false
+        ShowBookingsNotesEntryRestrictedToggle:
+          type: boolean
+          example: true
+        BookingsNotesEntryRestricted:
+          type: boolean
+          example: false
+        ShowBookingsPhoneNumberEntryRestrictedToggle:
+          type: boolean
+          example: true
+        BookingsPhoneNumberEntryRestricted:
+          type: boolean
+          example: false
+        ShowBookingsSmsMicrosoftEnabledToggle:
+          type: boolean
+          example: true
+        BookingsSmsMicrosoftEnabled:
+          type: boolean
+          example: true
+        ShowBookingsNamingPolicyEnabledToggle:
+          type: boolean
+          example: true
+        BookingsNamingPolicyEnabled:
+          type: boolean
+          example: false
+        ShowBookingsBlockedWordsEnabledToggle:
+          type: boolean
+          example: true
+        BookingsBlockedWordsEnabled:
+          type: boolean
+          example: false
+        ShowBookingsNamingPolicyPrefixEnabledToggle:
+          type: boolean
+          example: true
+        BookingsNamingPolicyPrefixEnabled:
+          type: boolean
+          example: false
+        BookingsNamingPolicyPrefix:
+          type: string
+          example: ''
+        ShowBookingsNamingPolicySuffixEnabledToggle:
+          type: boolean
+          example: true
+        BookingsNamingPolicySuffixEnabled:
+          type: boolean
+          example: false
+        BookingsNamingPolicySuffix:
+          type: string
+          example: ''
+        ShowBookingsSearchEngineIndexDisabledToggle:
+          type: boolean
+          example: true
+        BookingsSearchEngineIndexDisabled:
+          type: boolean
+          example: false
+        ShowStaffApprovalsToggle:
+          type: boolean
+          example: true
+        StaffMembershipApprovalRequired:
+          type: boolean
+          example: false
+        ProductUrl:
+          type: string
+          format: uri
+          example: https://go.microsoft.com/fwlink/?linkid=856716
+        LearnMoreUrl:
+          type: string
+          format: uri
+          example: https://go.microsoft.com/fwlink/?linkid=856717
+        PaymentsLearnMoreUrl:
+          type: string
+          format: uri
+          example: https://go.microsoft.com/fwlink/?linkid=856718
+      additionalProperties:
+        oneOf:
+          - type: boolean
+          - type: string
+          - type: integer
+    ProductivityScoreConfigResponse:
+      type: object
+      description: Cmdlet-style wrapper returned by the Productivity Score configuration endpoint.
+      properties:
+        ErrorRecords:
+          type: array
+          nullable: true
+          items:
+            type: object
+            additionalProperties: true
+          example: null
+        Informations:
+          type: array
+          nullable: true
+          items:
+            type: object
+            additionalProperties: true
+          example: null
+        Warnings:
+          type: array
+          nullable: true
+          items:
+            type: object
+            additionalProperties: true
+          example: null
+        Output:
+          type: array
+          description: JSON-serialized productivity score records returned as strings by the backend.
+          items:
+            type: string
+          example:
+            - '{"TenantId":"847B5907CA1540F4B171EB18619DBFAB","ProductivityScoreSignedup":true,"SignupUserPuid":null,"SignupTime":"0001-01-01T00:00:00","ReadyTime":"0001-01-01T00:00:00","AdoptionScorePreOptedOut":false,"PreOptedOutUserPuid":null,"PreOptedOutTime":"0001-01-01T00:00:00"}'
+    CoordinatedBootstrapShellInfo:
+      type: object
+      description: OneShell bootstrap settings returned by the coordinated bootstrap endpoint.
+      properties:
+        clientShellCDNUrl:
+          type: string
+          format: uri
+          example: https://res-1.cdn.office.net/shellux/api/shellbootstrapper/business/oneshell
+        showNotificationBell:
+          type: boolean
+          example: true
+        showAppIcon:
+          type: boolean
+          example: true
+        showCloudShell:
+          type: boolean
+          example: true
+        showStoreShortcut:
+          type: boolean
+          example: false
+        showCopilot:
+          type: boolean
+          example: false
+        enableGallatinShellHelp:
+          type: boolean
+          example: false
+        enableMeControlSwitchOrganization:
+          type: boolean
+          example: false
+        enableDownloadApp:
+          type: boolean
+          example: true
+        enableAccountSwitching:
+          type: boolean
+          example: true
+        enableGlobalSearch:
+          type: boolean
+          example: true
+        portalAppID:
+          type: string
+          format: uuid
+          example: 618dd325-23f6-4b6f-8380-4df78026e39b
+        portalRootUrl:
+          type: string
+          format: uri
+          example: https://admin.cloud.microsoft
+        navBarJson:
+          type: string
+          description: JSON-serialized top-nav configuration returned by the shell service.
+      additionalProperties: true
+    CoordinatedBootstrapResponse:
+      type: object
+      description: Coordinated shell bootstrap payload used to initialize the M365 admin experience.
+      properties:
+        shellInfo:
+          $ref: '#/components/schemas/CoordinatedBootstrapShellInfo'
+        type:
+          type: string
+          example: NodeWithChildren
+        children:
+          type: array
+          nullable: true
+          items:
+            type: object
+            additionalProperties: true
+          example: null
+    AdminDashboardPreferencesResponse:
+      type: object
+      description: Miscellaneous per-user preference flags for admin-center onboarding and coachmarks.
+      properties:
+        DismissPersonalizationCallout:
+          type: integer
+          example: 0
+        ClickedMarketplaceLeftNav:
+          type: integer
+          example: 0
+        ClickedMarketplaceLeftNavCoachmark:
+          type: integer
+          example: 0
+        ClickedAdminCopilotCoachmark:
+          type: integer
+          example: 0
+        ClickedAgent365Modal:
+          type: integer
+          example: 1768291662
+        ClickedTeamsTabCoachmark:
+          type: integer
+          example: 0
+        ClickedTeamsCommandBarCoachmark:
+          type: integer
+          example: 0
+        LastShownAdminAppCoachmark:
+          type: integer
+          example: 0
+        AdminAppPromoOpenedFromCoachMarkCount:
+          type: integer
+          example: 1
+        CopilotQuickstartGuideBannerDismissed:
+          type: boolean
+          example: false
+      additionalProperties:
+        oneOf:
+          - type: integer
+          - type: boolean
+    GroupLabelsPolicySettings:
+      type: object
+      description: Sensitivity-label policy settings returned for group labeling.
+      properties:
+        Id:
+          type: string
+          format: uuid
+          example: 00000000-0000-0000-0000-000000000000
+        IsMandatory:
+          type: boolean
+          example: false
+        HelpWebUrl:
+          type: string
+          nullable: true
+          example: null
+        ApplicableTo:
+          type: string
+          example: site,unifiedGroup
+    GroupLabelsResponse:
+      type: object
+      description: Available Microsoft 365 group labels and related policy settings.
+      properties:
+        PolicySettings:
+          $ref: '#/components/schemas/GroupLabelsPolicySettings'
+        Labels:
+          type: array
+          nullable: true
+          items:
+            type: object
+            additionalProperties: true
+          example: null
+        NextLink:
+          type: string
+          nullable: true
+          example: null
+    BillingAccountSystemData:
+      type: object
+      description: ARM system metadata for a billing account record.
+      properties:
+        createdAt:
+          type: string
+          format: date-time
+          example: '2023-06-01T00:10:22.4727616Z'
+        lastModifiedAt:
+          type: string
+          format: date-time
+          example: '2024-05-05T19:41:45.1579372Z'
+    BillingProfilesSummary:
+      type: object
+      description: Summary information about child billing profiles.
+      properties:
+        hasMoreResults:
+          type: boolean
+          example: false
+    RegistrationNumberRequirement:
+      type: object
+      description: Registration-number requirement metadata for a billing account.
+      properties:
+        required:
+          type: boolean
+          example: false
+        type:
+          type: array
+          items:
+            type: string
+          example: [RegistrationNumber]
+    BillingSoldToAddress:
+      type: object
+      description: Sold-to contact and address block for a billing account.
+      properties:
+        addressLine1:
+          type: string
+          example: 265 W Corral Ave
+        city:
+          type: string
+          example: Soldotna
+        companyName:
+          type: string
+          example: Share My Labs
+        country:
+          type: string
+          example: US
+        email:
+          type: string
+          format: email
+          example: nathan@sharemylabs.com
+        firstName:
+          type: string
+          example: Nathan
+        isValidAddress:
+          type: boolean
+          example: true
+        lastName:
+          type: string
+          example: McNulty
+        postalCode:
+          type: string
+          example: 99669-7408
+        region:
+          type: string
+          example: ak
+    BillingAccountProperties:
+      type: object
+      description: Billing-account properties returned by the shell-integrated ARM proxy.
+      properties:
+        accountStatus:
+          type: string
+          example: Active
+        accountSubType:
+          type: string
+          example: Individual
+        accountType:
+          type: string
+          example: Individual
+        agreementType:
+          type: string
+          example: MicrosoftCustomerAgreement
+        billingProfiles:
+          $ref: '#/components/schemas/BillingProfilesSummary'
+        billingRelationshipTypes:
+          type: array
+          items:
+            type: string
+          example: [Direct]
+        displayName:
+          type: string
+          example: Share My Labs
+        hasReadAccess:
+          type: boolean
+          example: true
+        primaryBillingTenantId:
+          type: string
+          format: uuid
+          example: 847b5907-ca15-40f4-b171-eb18619dbfab
+        qualifications:
+          type: array
+          items:
+            type: string
+          example: [Commercial]
+        registrationNumber:
+          $ref: '#/components/schemas/RegistrationNumberRequirement'
+        soldTo:
+          $ref: '#/components/schemas/BillingSoldToAddress'
+      additionalProperties: true
+    BillingAccountWithShell:
+      type: object
+      description: ARM billing-account record returned by the admin shell proxy.
+      properties:
+        systemData:
+          $ref: '#/components/schemas/BillingAccountSystemData'
+        id:
+          type: string
+          example: /providers/Microsoft.Billing/billingAccounts/af84a921-c3a3-5541-75f9-fa3a98851dc5:a6488574-1157-4397-ae3d-310b62e6af92_2019-05-31
+        name:
+          type: string
+          example: af84a921-c3a3-5541-75f9-fa3a98851dc5:a6488574-1157-4397-ae3d-310b62e6af92_2019-05-31
+        type:
+          type: string
+          example: Microsoft.Billing/billingAccounts
+        properties:
+          $ref: '#/components/schemas/BillingAccountProperties'
+    TeamsEditableSetting:
+      type: object
+      description: A value/editability pair used throughout the Teams settings payload.
+      properties:
+        Value:
+          oneOf:
+            - type: boolean
+            - type: string
+            - type: integer
+          example: true
+        EnableEditing:
+          type: boolean
+          example: true
+    TeamsCategorySettings:
+      type: object
+      description: Teams policy settings for a specific tenant SKU category.
+      properties:
+        TenantSkuCategory:
+          type: string
+          example: BusinessEnterprise
+        IsSkypeTeamsEnabled:
+          $ref: '#/components/schemas/TeamsEditableSetting'
+        Meetups:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/TeamsEditableSetting'
+        FunControl:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/TeamsEditableSetting'
+        Messaging:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/TeamsEditableSetting'
+      additionalProperties: true
+    TeamsSettingsResponse:
+      type: object
+      description: Tenant-wide Microsoft Teams and Skype provisioning settings.
+      properties:
+        IsSkypeTeamsLicensed:
+          type: boolean
+          example: true
+        TenantCategorySettings:
+          type: array
+          items:
+            $ref: '#/components/schemas/TeamsCategorySettings'
+        Bots:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/TeamsEditableSetting'
+        Miscellaneous:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/TeamsEditableSetting'
+        Email:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/TeamsEditableSetting'
+        CloudStorage:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/TeamsEditableSetting'
+        TeamsOwnedApps:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/TeamsEditableSetting'
+        TenantOwnedApps:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/TeamsEditableSetting'
+        MigrationStates:
+          type: object
+          additionalProperties: true
+    ServiceHealthAdvisory:
+      type: object
+      description: Advisory or incident item returned in the active change-management feed.
+      properties:
+        Id:
+          type: string
+          example: EX1213792
+        Feature:
+          type: string
+          example: signin
+        FeatureDisplayName:
+          type: string
+          example: Sign-in
+        Classification:
+          type: integer
+          example: 0
+        ImpactDescription:
+          type: string
+        IsDismissed:
+          type: boolean
+          example: false
+        IsRead:
+          type: boolean
+          example: false
+        LastUpdatedTime:
+          type: string
+          format: date-time
+        Messages:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+      additionalProperties: true
+    ServiceHealthMessageGroup:
+      type: object
+      description: Incident/advisory grouping for a single service.
+      properties:
+        Incidents:
+          type: array
+          items:
+            $ref: '#/components/schemas/ServiceHealthAdvisory'
+        Advisories:
+          type: array
+          items:
+            $ref: '#/components/schemas/ServiceHealthAdvisory'
+    ServiceHealthStatusItem:
+      type: object
+      description: Service-specific status row in the active change-management feed.
+      properties:
+        Name:
+          type: string
+          example: Exchange Online
+        ServiceId:
+          type: string
+          example: Exchange
+        MessagesByClassification:
+          $ref: '#/components/schemas/ServiceHealthMessageGroup'
+        ServicePotentialProblemCategories:
+          type: array
+          items:
+            type: string
+    ActiveChangeManagementResponse:
+      type: object
+      description: Active change-management and advisory summary shown in the admin center shell.
+      properties:
+        StatusText:
+          type: string
+          example: Some services have posted advisories
+        Timestamp:
+          type: string
+          format: date-time
+          example: '2026-04-01T18:49:08.9149307+00:00'
+        ServiceStatus:
+          type: array
+          items:
+            $ref: '#/components/schemas/ServiceHealthStatusItem'
+    ContentUnderstandingLicensingResponse:
+      type: object
+      description: Content Understanding (Syntex) license availability and ring state.
+      properties:
+        TenantHasSyntexLicense:
+          type: boolean
+          example: false
+        IsGCCTenant:
+          type: boolean
+          example: false
+        InAllowList:
+          type: boolean
+          example: false
+    AOBOClientsEnvelope:
+      type: object
+      description: Partner AOBO client list wrapper.
+      properties:
+        PartnerContracts:
+          type: array
+          nullable: true
+          items:
+            type: object
+            additionalProperties: true
+          example: null
+        NextLink:
+          type: string
+          nullable: true
+          example: null
+    AOBOClientsResponse:
+      type: object
+      description: Result wrapper returned for AOBO partner clients.
+      properties:
+        Succeeded:
+          type: boolean
+          example: true
+        Message:
+          type: string
+          nullable: true
+          example: null
+        Data:
+          $ref: '#/components/schemas/AOBOClientsEnvelope'
   responses:
     BadRequest:
       description: Bad Request - The request was malformed or invalid.

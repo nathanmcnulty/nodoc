@@ -188,3 +188,75 @@ paths:
 
         '404':
           $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/securitysettings/settings:
+    get:
+      summary: Get secure-by-default settings catalog
+      description: >-
+        Retrieve the catalog of secure-by-default controls shown in Org Settings >
+        Security & privacy.
+      operationId: SecuritySettings.GetSecurityControlsCatalog
+      tags: [SecuritySettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/SecuritySettingsCatalogResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/securitysettings/optIn:
+    get:
+      summary: Get secure-by-default opt-in status
+      description: >-
+        Retrieve the opt-in envelope used by the secure-by-default experience. The
+        observed response body was an empty JSON object.
+      operationId: SecuritySettings.GetSecurityControlsOptIn
+      tags: [SecuritySettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/EmptyObjectResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/securitysettings/settings/status:
+    get:
+      summary: Get secure-by-default control status
+      description: >-
+        Retrieve per-control status results, including links and exclusion metadata
+        for settings that are at risk or customized.
+      operationId: SecuritySettings.GetSecurityControlsStatus
+      tags: [SecuritySettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/SecuritySettingsStatusResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

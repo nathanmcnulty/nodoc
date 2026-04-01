@@ -220,8 +220,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                description: Server version information. Exact schema pending.
+                $ref: common.yml#/components/schemas/ServerViewInfoResponse
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -453,8 +452,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                description: Group labels. Exact schema pending.
+                $ref: common.yml#/components/schemas/GroupLabelsResponse
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 

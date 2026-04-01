@@ -114,7 +114,7 @@ components:
           description: |
             Array of enabled B2C features for this tenant. Examples include:
             `Basic`, `AppV2`, `Msa`, `EnableResourceCreation`, `PasswordReset`,
-            `CustomPolicies`, `CustomIdp`, `UserJourneys`, `EnableIEFPoliciesGraphApi`,
+            `CustomPolicies`, `CustomIdp`, `UserJourneys`, `EnableIEFPoliciesGraphApis`,
             `EnableTwitterIdp`, `EnableGitHubIdp`, `EnablePasswordComplexity`, etc.
           type: array
           items:
@@ -128,6 +128,40 @@ components:
             - PasswordReset
             - CustomPolicies
             - UserJourneys
+            - EnableUserFlowsGraphApis
+            - EnableMsGraphApiConnectors
+        featuresCIAM:
+          description: |
+            CIAM-specific feature flags returned separately from legacy B2C features.
+            This array was empty in the observed tenant but appears to be reserved for
+            Entra External ID / CIAM capabilities.
+          type: array
+          items:
+            type: string
+          example: []
+        clientFeatures:
+          description: |
+            Front-end feature flags that shape which External ID experiences and controls
+            the portal enables for the tenant.
+          type: array
+          items:
+            type: string
+          example:
+            - EnablePageContract
+            - EnableUserFlowExperience
+            - EnableConditionalAccess
+            - EnableUserJourneyV3
+            - EnableApiConnector
+            - EnableUserAttributeV2
+            - EnableKMSI
+            - EnablePasswordReset
+            - EnablePaginationInCustomPolicies
+            - EnableClientPolicyMetadata
+            - PkceForSpaEnabled
+        isCiamTenant:
+          description: Whether the tenant is an Entra External ID (CIAM) tenant.
+          type: boolean
+          example: false
     TenantResource:
       type: object
       description: Azure resource and subscription details for the B2C tenant.

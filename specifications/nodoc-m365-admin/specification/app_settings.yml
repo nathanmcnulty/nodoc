@@ -12,8 +12,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                description: Bookings application settings. Exact schema pending.
+                $ref: common.yml#/components/schemas/BookingsSettingsResponse
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -108,8 +107,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                description: Microsoft Teams application settings. Exact schema pending.
+                $ref: common.yml#/components/schemas/TeamsSettingsResponse
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -134,6 +132,31 @@ paths:
       responses:
         '200':
           description: OK
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/TeamsProvisioning/Customization:
+    get:
+      summary: Get Teams provisioning customization flag
+      description: >-
+        Retrieve the boolean customization flag used by the Teams provisioning
+        experience in the admin center.
+      operationId: AppSettings.GetTeamsProvisioningCustomization
+      tags: [AppSettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: boolean
+                example: false
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 

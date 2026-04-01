@@ -12,8 +12,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                description: Initial load feature flags. Exact schema pending.
+                $ref: common.yml#/components/schemas/PortalFeatureFlagMap
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -61,8 +60,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                description: Features configuration. Exact schema pending.
+                $ref: common.yml#/components/schemas/FeatureConfigResponse
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -85,8 +83,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                description: All feature flags. Exact schema pending.
+                $ref: common.yml#/components/schemas/PortalFeatureFlagMap
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 

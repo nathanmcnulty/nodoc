@@ -38,6 +38,141 @@ components:
       scheme: bearer
       bearerFormat: JWT
       description: Azure AD bearer token with PIM permissions
+  schemas:
+    GovernancePermission:
+      type: object
+      description: Current-user permission level for a PIM-managed resource.
+      properties:
+        accessLevel:
+          type: string
+          example: AdminRead
+        isActive:
+          type: boolean
+          example: true
+        isEligible:
+          type: boolean
+          example: false
+    GovernancePermissionsResponse:
+      type: object
+      description: OData response listing the current user's effective PIM permissions.
+      properties:
+        '@odata.context':
+          type: string
+          format: uri
+          example: https://api.azrbac.mspim.azure.com/api/v2/$metadata#Collection(Microsoft.Identity.Governance.Common.Data.ExternalModels.V1.governancePermission)
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/GovernancePermission'
+    GovernanceRoleDefinitionSummary:
+      type: object
+      description: Expanded role definition included with a PIM role assignment.
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 62e90394-69f5-4237-9190-012177145e10
+        resourceId:
+          type: string
+          format: uuid
+          example: 847b5907-ca15-40f4-b171-eb18619dbfab
+        externalId:
+          type: string
+          format: uuid
+          example: 62e90394-69f5-4237-9190-012177145e10
+      additionalProperties: true
+    GovernanceSubjectSummary:
+      type: object
+      description: Expanded subject reference included with a PIM role assignment.
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: ab69ffc3-e508-4f8e-af8b-8d626d6764c9
+      additionalProperties: true
+    GovernanceRoleAssignment:
+      type: object
+      description: PIM role assignment with expanded role definition and subject details.
+      properties:
+        '@odata.id':
+          type: string
+          format: uri
+          example: https://api.azrbac.mspim.azure.com/api/v2/privilegedAccess('aadRoles')/roleAssignments('lAPpYvVpN0KRkAEhdxReEMP_aasI5Y5Pr4uNYm1nZMk-1')
+        id:
+          type: string
+          example: lAPpYvVpN0KRkAEhdxReEMP_aasI5Y5Pr4uNYm1nZMk-1
+        resourceId:
+          type: string
+          format: uuid
+          example: 847b5907-ca15-40f4-b171-eb18619dbfab
+        roleDefinitionId:
+          type: string
+          format: uuid
+          example: 62e90394-69f5-4237-9190-012177145e10
+        subjectId:
+          type: string
+          format: uuid
+          example: ab69ffc3-e508-4f8e-af8b-8d626d6764c9
+        scopedResourceId:
+          type: string
+          nullable: true
+          example: null
+        linkedEligibleRoleAssignmentId:
+          type: string
+          nullable: true
+          example: null
+        externalId:
+          type: string
+          example: lAPpYvVpN0KRkAEhdxReEMP_aasI5Y5Pr4uNYm1nZMk-1
+        isPermanent:
+          type: boolean
+          example: true
+        startDateTime:
+          type: string
+          format: date-time
+          example: '2023-11-13T04:42:16.297Z'
+        endDateTime:
+          type: string
+          nullable: true
+          format: date-time
+          example: null
+        memberType:
+          type: string
+          example: Direct
+        assignmentState:
+          type: string
+          example: Active
+        status:
+          type: string
+          example: Provisioned
+        condition:
+          type: string
+          nullable: true
+          example: null
+        conditionVersion:
+          type: string
+          nullable: true
+          example: null
+        conditionDescription:
+          type: string
+          nullable: true
+          example: null
+        roleDefinition:
+          $ref: '#/components/schemas/GovernanceRoleDefinitionSummary'
+        subject:
+          $ref: '#/components/schemas/GovernanceSubjectSummary'
+    GovernanceRoleAssignmentListResponse:
+      type: object
+      description: OData response containing PIM role assignments.
+      properties:
+        '@odata.context':
+          type: string
+          format: uri
+          example: https://api.azrbac.mspim.azure.com/api/v2/$metadata#governanceRoleAssignments(roleDefinition(),subject())
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/GovernanceRoleAssignment'
   parameters:
     resourceId:
       name: resourceId
@@ -131,12 +266,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  value:
-                    type: array
-                    items:
-                      type: object
+                $ref: '#/components/schemas/GovernanceRoleAssignmentListResponse'
   /api/v2/privilegedAccess/{provider}/roleAssignmentRequests:
     get:
       tags: [Role Assignment Requests]
@@ -388,7 +518,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
+                $ref: '#/components/schemas/GovernancePermissionsResponse'
   /api/v2/privilegedAccess/{provider}/resources/{resourceId}/alerts:
     get:
       tags: [Alerts]

@@ -60,8 +60,224 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                description: pending
+                $ref: common.yml#/components/schemas/CloudAppsServiceCatalogResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/version:
+    get:
+      summary: Get Cloud Apps bundle versions
+      description: >-
+        Retrieve the current console, i18n, and supporting bundle versions used by
+        Defender for Cloud Apps.
+      operationId: CloudApps.GetVersion
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/CloudAppsVersionResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/tags:
+    get:
+      summary: List Cloud Apps tags
+      description: >-
+        Retrieve built-in and custom tags used by Defender for Cloud Apps for
+        discovery, entity labeling, and governance filters.
+      operationId: CloudApps.ListTags
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/CloudAppsTagListResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/about/info:
+    get:
+      summary: Get Cloud Apps tenant info
+      description: >-
+        Retrieve the Defender for Cloud Apps locale, region, and tenant metadata from
+        the About experience.
+      operationId: CloudApps.GetAboutInfo
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/CloudAppsAboutInfoResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/about/server_url:
+    get:
+      summary: Get Cloud Apps portal URL
+      description: >-
+        Retrieve the tenant-specific Defender for Cloud Apps portal URL used by the
+        current environment.
+      operationId: CloudApps.GetAboutServerUrl
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: string
+                format: uri
+                example: https://sharemylabs.us2.portal.cloudappsecurity.com
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/settings:
+    get:
+      summary: Get Cloud Apps settings
+      description: >-
+        Retrieve tenant-wide Defender for Cloud Apps settings, including quarantine,
+        masking, integration, and session-control options.
+      operationId: CloudApps.GetSettings
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/CloudAppsSettingsResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/mail_settings/get:
+    get:
+      summary: Get Cloud Apps mail settings
+      description: >-
+        Retrieve the mail notification settings envelope used by Defender for Cloud Apps.
+      operationId: CloudApps.GetMailSettings
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/CloudAppsMailSettingsResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/subnet/metadata:
+    get:
+      summary: Get subnet metadata
+      description: >-
+        Retrieve filter and sorting metadata for the IP address ranges grid in Defender
+        for Cloud Apps.
+      operationId: CloudApps.GetSubnetMetadata
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/CloudAppsMetadataCatalogResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/user_tags/metadata:
+    get:
+      summary: Get user tag metadata
+      description: >-
+        Retrieve filter and sorting metadata for the user groups grid in Defender for
+        Cloud Apps.
+      operationId: CloudApps.GetUserTagsMetadata
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/CloudAppsMetadataCatalogResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/tokens/metadata:
+    get:
+      summary: Get API token metadata
+      description: >-
+        Retrieve filter and sorting metadata for the API tokens grid in Defender for
+        Cloud Apps.
+      operationId: CloudApps.GetTokensMetadata
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/CloudAppsMetadataCatalogResponse
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -281,8 +497,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                description: pending
+                $ref: common.yml#/components/schemas/CloudAppsStatusCountResponse
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -461,8 +676,78 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                description: pending
+                $ref: common.yml#/components/schemas/CloudAppsAutocompleteResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/autocomplete/tags:
+    get:
+      summary: Autocomplete tags
+      description: >-
+        Retrieve autocomplete suggestions for tag records in Defender for Cloud Apps.
+      operationId: CloudApps.AutocompleteTags
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/CloudAppsAutocompleteResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/autocomplete/tokens:
+    get:
+      summary: Autocomplete API tokens
+      description: >-
+        Retrieve autocomplete suggestions for token-like records. The observed tenant
+        returned an empty record set.
+      operationId: CloudApps.AutocompleteTokens
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/CloudAppsAutocompleteResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/autocomplete/users:
+    get:
+      summary: Autocomplete users
+      description: >-
+        Retrieve autocomplete suggestions for users and user-like entities. The
+        observed tenant returned an empty record set.
+      operationId: CloudApps.AutocompleteUsers
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/CloudAppsAutocompleteResponse
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -485,8 +770,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                description: pending
+                $ref: common.yml#/components/schemas/CloudAppsConnectedServiceListResponse
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -509,8 +793,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                description: pending
+                $ref: common.yml#/components/schemas/CloudAppsConnectedServiceListResponse
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -743,8 +1026,105 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                description: pending
+                $ref: common.yml#/components/schemas/CloudAppsSavedQueryListResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/manage_admins/is_external_user:
+    get:
+      summary: Check whether current user is external
+      description: >-
+        Retrieve a boolean indicating whether the current Defender for Cloud Apps
+        administrator is considered external to the tenant.
+      operationId: CloudApps.IsExternalAdminUser
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: boolean
+                example: false
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/data_encryption_settings/get:
+    get:
+      summary: Get data encryption settings
+      description: >-
+        Retrieve the tenant setting that controls Defender for Cloud Apps encryption
+        of data at rest.
+      operationId: CloudApps.GetDataEncryptionSettings
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/CloudAppsDataEncryptionSettingsResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/user_config/get_should_display_sync_bar:
+    get:
+      summary: Get sync bar visibility
+      description: >-
+        Retrieve whether the Cloud Apps UI should show the synchronization status bar
+        for the current user.
+      operationId: CloudApps.GetShouldDisplaySyncBar
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: boolean
+                example: false
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/invited_group_admins:
+    get:
+      summary: List invited group admins
+      description: >-
+        Retrieve invited group-admin records for tenant administration. The observed
+        tenant returned an empty list.
+      operationId: CloudApps.ListInvitedGroupAdmins
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/CloudAppsInvitedGroupAdminListResponse
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -769,6 +1149,52 @@ paths:
               schema:
                 type: object
                 description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/api/v1/agents/siem:
+    get:
+      summary: List SIEM agents
+      description: >-
+        Retrieve configured SIEM agents and pagination state for Defender for Cloud Apps.
+      operationId: CloudApps.ListSiemAgents
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/SiemAgentsResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/api/v1/agents/siem/count:
+    get:
+      summary: Count SIEM agents
+      description: >-
+        Retrieve the SIEM agent count summary for Defender for Cloud Apps.
+      operationId: CloudApps.CountSiemAgents
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/SiemAgentCountResponse
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 

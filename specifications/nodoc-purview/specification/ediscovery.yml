@@ -57,7 +57,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: common.yml#/components/schemas/PurviewCasesResponse
+                $ref: common.yml#/components/schemas/EdiscoveryFavoritesResponse
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -81,8 +81,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                description: pending
+                $ref: common.yml#/components/schemas/PurviewCasesResponse
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 

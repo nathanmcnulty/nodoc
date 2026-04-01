@@ -37,6 +37,226 @@ components:
       scheme: bearer
       bearerFormat: JWT
       description: Azure AD bearer token with access review permissions
+  schemas:
+    AccessReviewFeatureFlagsResponse:
+      type: object
+      description: Feature flags returned by the IDGov configuration provider.
+      properties:
+        '@odata.context':
+          type: string
+          format: uri
+          example: https://api.accessreviews.identitygovernance.azure.com/accessReviews/v2.0/$metadata#approvalWorkflowProviders('F40AE6A6-7BFC-4ABF-9E2A-63120C21A538')/featureFlags/$entity
+        sqlOutage:
+          type: boolean
+          example: false
+        emergencyRAE:
+          type: string
+          example: none
+        isArFusionAuthorative:
+          type: boolean
+          example: false
+    AccessReviewSettings:
+      type: object
+      description: Access review behavior settings returned with a request definition.
+      properties:
+        mailNotificationsEnabled:
+          type: boolean
+          example: true
+        remindersEnabled:
+          type: boolean
+          example: true
+        justificationRequiredOnApproval:
+          type: boolean
+          example: true
+        autoReviewEnabled:
+          type: boolean
+          example: false
+        activityDurationInDays:
+          type: integer
+          example: 0
+        autoApplyReviewResultsEnabled:
+          type: boolean
+          example: false
+        selfApprovalAllowed:
+          type: boolean
+          example: false
+        accessRecommendationsEnabled:
+          type: boolean
+          example: true
+        escalationEnabled:
+          type: boolean
+          example: false
+        timeSpanToEscalation:
+          type: string
+          example: PT0S
+      additionalProperties: true
+    AccessReviewRequestItem:
+      type: object
+      description: Access review campaign/definition returned by the IDGov requests endpoint.
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 52a2c256-9a91-4f56-9edc-06969fdcc298
+        displayName:
+          type: string
+          example: czvbxcvb
+        status:
+          type: string
+          example: InProgress
+        businessFlowId:
+          type: string
+          format: uuid
+          example: 4dec5ff3-622d-48da-8ff0-755f2ef0c9a8
+        businessFlowTemplateId:
+          type: string
+          format: uuid
+          example: 00000000-0000-0000-0000-000000000000
+        createdDateTime:
+          type: string
+          format: date-time
+          example: '2026-01-27T18:09:30.2847107Z'
+        decisionsCriteria:
+          type: object
+          nullable: true
+          additionalProperties: true
+          example: null
+        reviewedEntity:
+          type: object
+          nullable: true
+          additionalProperties: true
+          example: null
+        policy:
+          type: object
+          nullable: true
+          additionalProperties: true
+          example: null
+        settings:
+          $ref: '#/components/schemas/AccessReviewSettings'
+        errors:
+          type: array
+          nullable: true
+          items:
+            type: object
+            additionalProperties: true
+          example: null
+      additionalProperties: true
+    AccessReviewRequestListResponse:
+      type: object
+      description: OData response containing access review requests.
+      properties:
+        '@odata.context':
+          type: string
+          format: uri
+          example: https://api.accessreviews.identitygovernance.azure.com/accessReviews/v2.0/$metadata#approvalWorkflowProviders('D5EC9F3B-324E-4F8A-AF55-B69EDD48ECBE')/requests/Microsoft.Azure.ActiveDirectory.AccessReviews.Api.Models.V2.AccessReview(id,businessFlowId,decisionsCriteria,reviewedEntity,businessFlowTemplateId,policy,settings,errors,displayName,status,createdDateTime)
+        '@odata.count':
+          type: integer
+          example: 5
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/AccessReviewRequestItem'
+    AccessReviewInstanceItem:
+      type: object
+      description: A concrete review-cycle instance of an access review definition.
+      properties:
+        '@odata.type':
+          type: string
+          example: '#Microsoft.Azure.ActiveDirectory.AccessReviews.Api.Models.V2.Request'
+        id:
+          type: string
+          format: uuid
+          example: acd75ae2-ec75-4345-9388-3dd2b57e3e02
+        parentReviewId:
+          type: string
+          format: uuid
+          example: 00000000-0000-0000-0000-000000000000
+        stage:
+          type: integer
+          example: 0
+        displayName:
+          type: string
+          example: czvbxcvb
+        startDateTime:
+          type: string
+          format: date-time
+          example: '2026-01-27T18:09:30.283Z'
+        endDateTime:
+          type: string
+          format: date-time
+          example: '2026-02-10T18:09:30.283Z'
+        status:
+          type: string
+          example: Completed
+        state:
+          type: string
+          nullable: true
+          example: null
+        businessFlowId:
+          type: string
+          format: uuid
+          example: 4dec5ff3-622d-48da-8ff0-755f2ef0c9a8
+        partnerId:
+          type: string
+          format: uuid
+          example: d5ec9f3b-324e-4f8a-af55-b69edd48ecbe
+        reviewerType:
+          type: string
+          example: ''
+        description:
+          type: string
+          example: ''
+        emailFriendlyDescription:
+          type: string
+          example: ''
+        deDuplicationId:
+          type: string
+          nullable: true
+          example: null
+        customData:
+          type: object
+          nullable: true
+          additionalProperties: true
+          example: null
+        businessFlowTemplateId:
+          type: string
+          format: uuid
+          example: 00000000-0000-0000-0000-000000000000
+        policyTemplateId:
+          type: string
+          nullable: true
+          example: null
+        schemaId:
+          type: string
+          nullable: true
+          example: null
+        createdDateTime:
+          type: string
+          format: date-time
+          example: '2026-01-27T18:09:30.2857108Z'
+        recordVersion:
+          type: string
+          nullable: true
+          example: null
+        version:
+          type: integer
+          example: 0
+      additionalProperties: true
+    AccessReviewInstanceListResponse:
+      type: object
+      description: OData response containing access review instances for a request.
+      properties:
+        '@odata.context':
+          type: string
+          format: uri
+          example: https://api.accessreviews.identitygovernance.azure.com/accessReviews/v2.0/$metadata#approvalWorkflowProviders('D5EC9F3B-324E-4F8A-AF55-B69EDD48ECBE')/requests('52a2c256-9a91-4f56-9edc-06969fdcc298')/instances
+        '@odata.count':
+          type: integer
+          example: 1
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/AccessReviewInstanceItem'
   parameters:
     providerId:
       name: providerId
@@ -121,7 +341,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
+                $ref: '#/components/schemas/AccessReviewFeatureFlagsResponse'
   /accessReviews/v2.0/approvalWorkflowProviders/{providerId}/partnerTenantSettings:
     get:
       tags: [Configuration]
@@ -158,12 +378,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  value:
-                    type: array
-                    items:
-                      type: object
+                $ref: '#/components/schemas/AccessReviewRequestListResponse'
     post:
       tags: [Requests]
       summary: Create an access review request
@@ -242,12 +457,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  value:
-                    type: array
-                    items:
-                      type: object
+                $ref: '#/components/schemas/AccessReviewInstanceListResponse'
   /accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests/{requestId}/instances/{instanceId}:
     get:
       tags: [Instances]

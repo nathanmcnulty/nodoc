@@ -130,8 +130,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                description: Productivity Score configuration. Exact schema pending.
+                $ref: common.yml#/components/schemas/ProductivityScoreConfigResponse
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -154,8 +153,31 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                description: Admin dashboard preferences. Exact schema pending.
+                $ref: common.yml#/components/schemas/AdminDashboardPreferencesResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/reports/productivityScoreCustomerOption:
+    get:
+      summary: Get Productivity Score customer options
+      description: >-
+        Retrieve customer opt-in and privacy options for Productivity Score and
+        related cohort insights.
+      operationId: Reports.GetProductivityScoreCustomerOption
+      tags: [Reports]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/ProductivityScoreConfigResponse
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 

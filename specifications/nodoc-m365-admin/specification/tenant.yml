@@ -12,8 +12,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                description: pending - data location and commitments
+                $ref: common.yml#/components/schemas/DataLocationCommitmentsResponse
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -36,8 +35,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                description: pending - local data location
+                $ref: common.yml#/components/schemas/LocalDataLocationResponse
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -91,8 +89,9 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                description: pending - billing accounts
+                type: array
+                items:
+                  $ref: common.yml#/components/schemas/BillingAccountWithShell
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
