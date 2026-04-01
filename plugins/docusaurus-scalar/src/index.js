@@ -258,10 +258,13 @@ const ScalarDocusaurus = (context, userOptions) => {
 
     async contentLoaded({ content, actions }) {
       const { addRoute } = actions;
+      const baseUrl = context.baseUrl || "/";
       content.forEach((contentItem) => {
         if (contentItem.route?.route) {
+          // Docusaurus expects route paths to include baseUrl
+          const routePath = path.posix.join(baseUrl, contentItem.route.route);
           addRoute({
-            path: contentItem.route.route,
+            path: routePath,
             component: path.resolve(__dirname, "./ScalarDocusaurus"),
             exact: true,
             configuration: contentItem,
