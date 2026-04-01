@@ -1,0 +1,359 @@
+openapi: 3.0.1
+info:
+  title: Entra B2C
+  x-nodoc-category: Entra
+  description: |
+    The Entra B2C Admin API is used by the Microsoft Entra portal
+    (entra.microsoft.com → External Identities) for managing Azure AD B2C
+    tenant configuration, user flows, and identity experience framework, including:
+
+      - Admin User Flows (sign-up, sign-in, profile editing, password reset)
+      - Admin User Journeys (custom policies / IEF)
+      - Tenant Information and Feature Configuration
+      - Tenant Resource and Subscription Management
+      - Tenant Policy Initialization
+
+    All endpoints are served from `main.b2cadmin.ext.azure.com` and require a valid
+    Azure AD bearer token.
+
+    **Note:** This specification was generated through browser traffic analysis of the
+    Entra portal. Many endpoints return 400 if the tenant does not have B2C/External
+    Identities (self-service sign-up) features enabled. The `tenantId` query parameter
+    is required on most endpoints and accepts either the tenant GUID or domain name.
+  version: 0.1.0
+  contact:
+    name: nodoc
+    url: https://github.com/nathanmcnulty/nodoc
+servers:
+  - url: https://main.b2cadmin.ext.azure.com
+    description: Entra B2C Admin API
+security:
+  - bearerAuth: []
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Azure AD bearer token with B2C administration permissions
+  parameters:
+    tenantId:
+      name: tenantId
+      in: query
+      required: true
+      schema:
+        type: string
+      description: |
+        The tenant identifier. Accepts either the tenant object ID (GUID)
+        or the tenant domain name (e.g., `contoso.onmicrosoft.com`).
+      example: 847b5907-ca15-40f4-b171-eb18619dbfab
+    tenantDomain:
+      name: tenantId
+      in: query
+      required: true
+      schema:
+        type: string
+      description: The tenant domain name.
+      example: contoso.com
+  schemas:
+    AdminFlow:
+      type: object
+      description: A B2C user flow (admin-managed sign-up/sign-in experience).
+      properties:
+        id:
+          description: Unique identifier for the user flow template.
+          type: string
+          example: AADSignupOrSignIn
+        displayName:
+          description: Human-readable name of the user flow.
+          type: string
+          example: Sign up and sign in (Recommended)
+        description:
+          description: Description of what the user flow does.
+          type: string
+          example: Lets the user register for or log into their account
+        tags:
+          description: |
+            Tags classifying the user flow. Common tags include:
+            - `TagAAD` / `TagAADWillamette` — AAD-backed flow type
+            - `TagType:SignUpOrSignIn` — Flow behavior type
+            - `TagUJ:AADRecommended` — Recommended flow indicator
+          type: array
+          items:
+            type: string
+          example: ["TagAAD", "TagType:SignUpOrSignIn", "TagUJ:AADRecommended"]
+        enabled:
+          description: Whether the user flow template is currently enabled.
+          type: boolean
+          example: true
+        availableTemplates:
+          description: Available sub-templates for this flow, if any.
+          type: array
+          items:
+            type: object
+          nullable: true
+    TenantInfo:
+      type: object
+      description: B2C tenant configuration and feature flags.
+      properties:
+        id:
+          description: The tenant's primary domain name.
+          type: string
+          example: contoso.onmicrosoft.com
+        isB2CTenant:
+          description: Whether this is a dedicated B2C tenant.
+          type: boolean
+          example: false
+        tenantScaleType:
+          description: |
+            The tenant's scale tier. Known values:
+            - `3` — Standard production tenant
+          type: integer
+          example: 3
+        features:
+          description: |
+            Array of enabled B2C features for this tenant. Examples include:
+            `Basic`, `AppV2`, `Msa`, `EnableResourceCreation`, `PasswordReset`,
+            `CustomPolicies`, `CustomIdp`, `UserJourneys`, `EnableIEFPoliciesGraphApi`,
+            `EnableTwitterIdp`, `EnableGitHubIdp`, `EnablePasswordComplexity`, etc.
+          type: array
+          items:
+            type: string
+          example:
+            - None
+            - Basic
+            - AppV2
+            - Msa
+            - EnableResourceCreation
+            - PasswordReset
+            - CustomPolicies
+            - UserJourneys
+    TenantResource:
+      type: object
+      description: Azure resource and subscription details for the B2C tenant.
+      properties:
+        tenantObjectId:
+          description: The Azure AD tenant object ID.
+          type: string
+          format: uuid
+          example: 847b5907-ca15-40f4-b171-eb18619dbfab
+        tenantCountryCode:
+          description: Two-letter country code for the tenant's data residency.
+          type: string
+          example: US
+        subscriptionState:
+          description: |
+            State of the linked Azure subscription. Known values:
+            - `0` — Active
+          type: integer
+          example: 0
+        subscriptionId:
+          description: The linked Azure subscription ID.
+          type: string
+          format: uuid
+          example: 43babb60-9e73-4dc8-b769-4401c01aad73
+        resourceGroupName:
+          description: The Azure resource group containing the B2C resource.
+          type: string
+          example: rg-contoso-b2c
+        resourceName:
+          description: The B2C resource name (typically the tenant domain).
+          type: string
+          example: contoso.onmicrosoft.com
+        subscriptionTenantId:
+          description: The tenant ID that owns the Azure subscription (may differ from B2C tenant).
+          type: string
+          format: uuid
+          example: 847b5907-ca15-40f4-b171-eb18619dbfab
+        billingType:
+          description: |
+            Billing model for the B2C tenant.
+            - `MAU` — Monthly Active Users billing
+          type: string
+          example: MAU
+        location:
+          description: Geographic location of the B2C resource.
+          type: string
+          example: United States
+        isGoLocalEnabled:
+          description: Whether data residency (Go-Local) is enabled.
+          type: boolean
+          example: false
+    B2CError:
+      type: object
+      description: Error response from the B2C Admin API.
+      properties:
+        message:
+          description: General error message.
+          type: string
+          example: An error has occurred.
+        exceptionMessage:
+          description: Detailed exception message explaining the failure.
+          type: string
+          example: "The feature self service sign up is not enabled for the tenant 'contoso.onmicrosoft.com'"
+        correlationId:
+          description: Correlation ID for troubleshooting with Microsoft support.
+          type: string
+          format: uuid
+          example: 95927db1-9de2-4b3d-a32a-06b689dc3550
+        code:
+          description: |
+            B2C-specific error code. Known codes:
+            - `AADB2C99039` — Feature not enabled for tenant
+          type: string
+          example: AADB2C99039
+        stackTrace:
+          description: Server-side stack trace (typically null in production).
+          type: string
+          nullable: true
+          example: null
+tags:
+  - name: User Flows
+    description: Manage B2C user flows (sign-up, sign-in, profile editing, password reset templates)
+  - name: User Journeys
+    description: Custom policy / Identity Experience Framework user journeys
+  - name: Tenant
+    description: B2C tenant information, features, and configuration
+  - name: Resources
+    description: Azure resource and subscription management for B2C tenants
+paths:
+  /api/adminflows:
+    get:
+      tags: [User Flows]
+      summary: List admin user flows
+      description: |
+        Retrieves all available user flow templates for the B2C tenant. Each flow
+        represents a pre-built authentication experience (sign-up, sign-in, profile
+        editing, or password reset).
+
+        Returns flow definitions with their display names, descriptions, tags, and
+        enabled status. The `tags` array classifies each flow by type and provider.
+      operationId: AdminFlows.List
+      parameters:
+        - $ref: '#/components/parameters/tenantId'
+      responses:
+        '200':
+          description: List of admin user flows
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AdminFlow'
+        '400':
+          description: B2C features not enabled for tenant
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/B2CError'
+  /api/adminuserjourneys:
+    get:
+      tags: [User Journeys]
+      summary: List admin user journeys
+      description: |
+        Retrieves custom user journeys (Identity Experience Framework policies)
+        configured for the B2C tenant.
+
+        **Note:** Returns 400 if self-service sign-up is not enabled for the tenant.
+        Requires B2C Premium licensing with custom policy support.
+      operationId: AdminUserJourneys.List
+      parameters:
+        - $ref: '#/components/parameters/tenantId'
+      responses:
+        '200':
+          description: List of custom user journeys
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+        '400':
+          description: Self-service sign-up not enabled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/B2CError'
+              example:
+                message: An error has occurred.
+                exceptionMessage: "The feature self service sign up is not enabled for the tenant"
+                code: AADB2C99039
+  /api/tenants/GetTenantInfo:
+    get:
+      tags: [Tenant]
+      summary: Get tenant info and feature flags
+      description: |
+        Retrieves detailed tenant information including whether it's a B2C tenant,
+        the scale type, and an extensive list of enabled B2C features.
+
+        The `features` array is particularly valuable for understanding what
+        capabilities are available: custom policies, identity providers (Twitter,
+        GitHub, WeChat, QQ, Weibo), password complexity rules, MFA settings, etc.
+      operationId: Tenants.GetTenantInfo
+      parameters:
+        - $ref: '#/components/parameters/tenantId'
+      responses:
+        '200':
+          description: Tenant information with feature flags
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantInfo'
+  /api/tenants/GetAndInitializeTenantPolicy:
+    get:
+      tags: [Tenant]
+      summary: Get and initialize tenant policy
+      description: |
+        Retrieves and optionally initializes the B2C tenant policy configuration.
+        The `skipInitialization` parameter controls whether to trigger first-time
+        setup of B2C policies.
+
+        **Note:** Returns 400 if self-service sign-up is not enabled.
+
+        **Warning:** Setting `skipInitialization=false` may perform write operations
+        to initialize tenant policies.
+      operationId: Tenants.GetAndInitializeTenantPolicy
+      parameters:
+        - $ref: '#/components/parameters/tenantDomain'
+        - name: skipInitialization
+          in: query
+          schema:
+            type: boolean
+            default: false
+          description: |
+            If `true`, skips initialization and only reads existing policy.
+            If `false`, may create default policies if none exist.
+      responses:
+        '200':
+          description: Tenant policy configuration
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          description: Self-service sign-up not enabled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/B2CError'
+  /api/tenantResource/GetARpDataWithTenantId:
+    get:
+      tags: [Resources]
+      summary: Get Azure resource provider data for tenant
+      description: |
+        Retrieves the Azure Resource Provider (ARP) data associated with the B2C
+        tenant, including subscription details, resource group, billing type, and
+        data residency location.
+
+        This is used by the portal to display subscription and billing information
+        on the B2C tenant overview page.
+      operationId: TenantResource.GetARpDataWithTenantId
+      parameters:
+        - $ref: '#/components/parameters/tenantDomain'
+      responses:
+        '200':
+          description: Tenant resource and subscription data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantResource'

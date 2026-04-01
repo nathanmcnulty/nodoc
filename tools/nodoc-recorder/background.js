@@ -47,6 +47,13 @@ const portalConfig = [
     hostname: 'api.accessreviews.identitygovernance.azure.com',
     pathPrefixes: ['/accessReviews/'],
     urlPatterns: ['https://api.accessreviews.identitygovernance.azure.com/*']
+  },
+  {
+    id: 'entra-b2c',
+    name: 'Entra B2C',
+    hostname: 'main.b2cadmin.ext.azure.com',
+    pathPrefixes: ['/api/'],
+    urlPatterns: ['https://main.b2cadmin.ext.azure.com/api/*']
   }
 ];
 
