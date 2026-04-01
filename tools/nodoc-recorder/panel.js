@@ -188,6 +188,229 @@ function tryFormatJson(str) {
   }
 }
 
+function yamlIndent(level) {
+  return '  '.repeat(level);
+}
+
+function yamlKey(key) {
+  return /^[A-Za-z_][A-Za-z0-9_.-]*$/.test(key) ? key : JSON.stringify(key);
+}
+
+function yamlScalar(value) {
+  if (value === null) return 'null';
+  if (typeof value === 'number' || typeof value === 'boolean') return String(value);
+  return JSON.stringify(String(value));
+}
+
+function parseMaybeJson(value) {
+  if (value === null || typeof value === 'undefined') return null;
+  if (typeof value !== 'string') return value;
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  if (!trimmed.startsWith('{') && !trimmed.startsWith('[')) return null;
+  try {
+    return JSON.parse(trimmed);
+  } catch {
+    return null;
+  }
+}
+
+function detectStringFormat(value) {
+  if (typeof value !== 'string') return undefined;
+  if (/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value)) {
+    return 'uuid';
+  }
+  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z$/i.test(value)) {
+    return 'date-time';
+  }
+  if (/^https?:\/\//i.test(value)) {
+    return 'uri';
+  }
+  if (/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(value)) {
+    return 'email';
+  }
+  return undefined;
+}
+
+function inferPrimitiveSchema(value) {
+  if (value === null) {
+    return {
+      type: 'string',
+      nullable: true,
+      example: null,
+    };
+  }
+  if (typeof value === 'boolean') {
+    return { type: 'boolean', example: value };
+  }
+  if (typeof value === 'number') {
+    return {
+      type: Number.isInteger(value) ? 'integer' : 'number',
+      example: value,
+    };
+  }
+  if (typeof value === 'string') {
+    const schema = {
+      type: 'string',
+      example: value.length > 160 ? `${value.slice(0, 157)}...` : value,
+    };
+    const format = detectStringFormat(value);
+    if (format) {
+      schema.format = format;
+    }
+    return schema;
+  }
+  return { type: 'string' };
+}
+
+function mergeSchemas(base, next) {
+  if (!base) return next;
+  if (!next) return base;
+
+  const merged = { ...base };
+  if (base.nullable || next.nullable) {
+    merged.nullable = true;
+  }
+
+  if (base.type !== next.type) {
+    if (
+      (base.type === 'integer' && next.type === 'number') ||
+      (base.type === 'number' && next.type === 'integer')
+    ) {
+      return { ...merged, type: 'number' };
+    }
+    return merged;
+  }
+
+  if (base.type === 'object') {
+    merged.properties = { ...(base.properties || {}) };
+    for (const [key, value] of Object.entries(next.properties || {})) {
+      merged.properties[key] = mergeSchemas(merged.properties[key], value);
+    }
+    return merged;
+  }
+
+  if (base.type === 'array') {
+    return {
+      ...merged,
+      items: mergeSchemas(base.items, next.items),
+    };
+  }
+
+  if (base.type === 'string' && base.format !== next.format) {
+    delete merged.format;
+  }
+
+  return merged;
+}
+
+function inferSchema(value) {
+  if (Array.isArray(value)) {
+    let itemSchema = null;
+    for (const item of value.slice(0, 10)) {
+      itemSchema = mergeSchemas(itemSchema, inferSchema(item));
+    }
+    return {
+      type: 'array',
+      items: itemSchema || { type: 'object' },
+    };
+  }
+
+  if (value && typeof value === 'object') {
+    const properties = {};
+    for (const [key, nestedValue] of Object.entries(value)) {
+      properties[key] = inferSchema(nestedValue);
+    }
+    return {
+      type: 'object',
+      properties,
+    };
+  }
+
+  return inferPrimitiveSchema(value);
+}
+
+function appendSchemaLines(lines, indent, schema) {
+  const prefix = yamlIndent(indent);
+  if (!schema) {
+    lines.push(`${prefix}type: object`);
+    return;
+  }
+
+  if (schema.type) {
+    lines.push(`${prefix}type: ${schema.type}`);
+  }
+  if (schema.format) {
+    lines.push(`${prefix}format: ${schema.format}`);
+  }
+  if (schema.nullable) {
+    lines.push(`${prefix}nullable: true`);
+  }
+  if (
+    Object.prototype.hasOwnProperty.call(schema, 'example') &&
+    (typeof schema.example !== 'object' || schema.example === null)
+  ) {
+    lines.push(`${prefix}example: ${yamlScalar(schema.example)}`);
+  }
+  if (schema.properties && Object.keys(schema.properties).length > 0) {
+    lines.push(`${prefix}properties:`);
+    for (const [key, value] of Object.entries(schema.properties)) {
+      lines.push(`${yamlIndent(indent + 1)}${yamlKey(key)}:`);
+      appendSchemaLines(lines, indent + 2, value);
+    }
+  }
+  if (schema.items) {
+    lines.push(`${prefix}items:`);
+    appendSchemaLines(lines, indent + 1, schema.items);
+  }
+}
+
+function inferQueryParamSchema(value) {
+  if (value === 'true' || value === 'false') {
+    return { type: 'boolean', example: value === 'true' };
+  }
+  if (/^-?\d+$/.test(value)) {
+    return { type: 'integer', example: Number(value) };
+  }
+  if (/^-?\d+\.\d+$/.test(value)) {
+    return { type: 'number', example: Number(value) };
+  }
+  return inferPrimitiveSchema(value);
+}
+
+function appendQueryParameters(lines, entry, indent) {
+  try {
+    const parsed = new URL(entry.url);
+    const params = Array.from(parsed.searchParams.entries());
+    if (params.length === 0) return;
+
+    lines.push(`${yamlIndent(indent)}parameters:`);
+    for (const [name, value] of params) {
+      const schema = inferQueryParamSchema(value);
+      lines.push(`${yamlIndent(indent + 1)}- name: ${yamlScalar(name)}`);
+      lines.push(`${yamlIndent(indent + 2)}in: query`);
+      lines.push(`${yamlIndent(indent + 2)}required: false`);
+      lines.push(`${yamlIndent(indent + 2)}schema:`);
+      appendSchemaLines(lines, indent + 3, schema);
+    }
+  } catch {
+    // Ignore invalid URLs during export.
+  }
+}
+
+function getMediaType(headers, fallback) {
+  const headerValue = headers['content-type'] || headers['Content-Type'] || fallback;
+  return (headerValue || fallback || 'application/json').split(';')[0].trim();
+}
+
+function buildOperationId(entry, apiPath) {
+  const raw = `${entry.portal}_${entry.method.toLowerCase()}_${apiPath}`
+    .replace(/^\//, '')
+    .replace(/[^A-Za-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '');
+  return raw || `${entry.portal}_${entry.method.toLowerCase()}`;
+}
+
 // ── Build cURL command ────────────────────────────────────────────────
 function buildCurl(entry) {
   const parts = [`curl '${entry.url}'`];
@@ -503,11 +726,13 @@ function exportOpenApiYaml() {
 
   // Group by deduplicated path
   const pathMap = new Map();
+  const servers = new Set();
   for (const entry of entries) {
     let apiPath;
     try {
       const parsed = new URL(entry.url);
       apiPath = parsed.pathname;
+      servers.add(`${parsed.protocol}//${parsed.host}`);
     } catch {
       apiPath = entry.path;
     }
@@ -524,10 +749,18 @@ function exportOpenApiYaml() {
     'openapi: "3.0.3"',
     'info:',
     '  title: nodoc-recorder Captured APIs',
-    `  description: API traffic captured from Microsoft portals on ${new Date().toISOString().split('T')[0]}`,
+    `  description: ${yamlScalar(`API traffic captured from Microsoft portals on ${new Date().toISOString().split('T')[0]}`)}`,
     '  version: "0.0.1"',
-    'paths:'
   ];
+
+  if (servers.size > 0) {
+    lines.push('servers:');
+    Array.from(servers).sort().forEach((server) => {
+      lines.push(`  - url: ${yamlScalar(server)}`);
+    });
+  }
+
+  lines.push('paths:');
 
   // Sort paths alphabetically
   const sortedPaths = Array.from(pathMap.keys()).sort();
@@ -541,39 +774,42 @@ function exportOpenApiYaml() {
       const entry = methods.get(method);
       const st = entry.statusCode;
       const stText = statusText(st) || 'Response';
+      const responseMediaType = getMediaType(entry.responseHeaders || {}, 'application/json');
+      const requestMediaType = getMediaType(entry.requestHeaders || {}, 'application/json');
+      const parsedResponseBody = parseMaybeJson(entry.responseBody);
+      const parsedRequestBody = parseMaybeJson(entry.requestBody);
+      const responseSchema = parsedResponseBody ? inferSchema(parsedResponseBody) : { type: 'object' };
+      const requestSchema = parsedRequestBody ? inferSchema(parsedRequestBody) : { type: 'object' };
 
       lines.push(`    ${method}:`);
-      lines.push(`      summary: "${entry.method} ${apiPath}"`);
-      lines.push(`      description: "Captured from ${entry.portalName}"`);
+      lines.push(`      operationId: ${buildOperationId(entry, apiPath)}`);
+      lines.push(`      summary: ${yamlScalar(`${entry.method} ${apiPath}`)}`);
+      lines.push(`      description: ${yamlScalar(`Captured from ${entry.portalName}`)}`);
 
       // Tags
       lines.push(`      tags:`);
-      lines.push(`        - ${entry.portalName}`);
+      lines.push(`        - ${yamlScalar(entry.portalName)}`);
+
+      appendQueryParameters(lines, entry, 3);
 
       lines.push(`      responses:`);
       lines.push(`        '${st}':`);
-      lines.push(`          description: "${st} ${stText}"`);
+      lines.push(`          description: ${yamlScalar(`${st} ${stText}`)}`);
 
-      // If we have a response body, try to infer content type
-      const contentType = (entry.responseHeaders || {})['content-type'] || '';
-      if (entry.responseBody && contentType) {
-        const mediaType = contentType.split(';')[0].trim();
+      if (entry.responseBody) {
         lines.push(`          content:`);
-        lines.push(`            ${mediaType}:`);
+        lines.push(`            ${responseMediaType}:`);
         lines.push(`              schema:`);
-        lines.push(`                type: object`);
+        appendSchemaLines(lines, 8, responseSchema);
       }
 
-      // If the method takes a body, indicate it
       if (['post', 'put', 'patch'].includes(method) && entry.requestBody) {
-        const reqContentType = (entry.requestHeaders || {})['content-type'] ||
-                               (entry.requestHeaders || {})['Content-Type'] || 'application/json';
-        const reqMediaType = reqContentType.split(';')[0].trim();
         lines.push(`      requestBody:`);
+        lines.push(`        required: true`);
         lines.push(`        content:`);
-        lines.push(`          ${reqMediaType}:`);
+        lines.push(`          ${requestMediaType}:`);
         lines.push(`            schema:`);
-        lines.push(`              type: object`);
+        appendSchemaLines(lines, 7, requestSchema);
       }
     }
   }

@@ -6,11 +6,14 @@ A Chrome/Edge DevTools extension that captures API traffic from Microsoft portal
 
 | Portal | Domain | API Path |
 |--------|--------|----------|
-| Defender XDR | `security.microsoft.com` | `/apiproxy/*` |
+| Defender | `security.microsoft.com` | `/apiproxy/*` |
 | M365 Admin | `admin.cloud.microsoft` | `/admin/api/*` |
-| Microsoft Purview | `purview.microsoft.com` | `/apiproxy/*` |
+| Purview | `purview.microsoft.com` | `/apiproxy/*` |
 | Entra IAM | `main.iam.ad.ext.azure.com` | `/api/*` |
-| Entra IGA | `elm.iga.azure.com`, `api.accessreviews.identitygovernance.azure.com` | `/api/*` |
+| Entra IGA | `elm.iga.azure.com` | `/api/*` |
+| Entra PIM | `api.azrbac.mspim.azure.com` | `/api/*` |
+| Entra IDGov | `api.accessreviews.identitygovernance.azure.com` | `/accessReviews/*` |
+| Entra B2C | `main.b2cadmin.ext.azure.com` | `/api/*` |
 
 ## Installation
 
@@ -31,7 +34,7 @@ A Chrome/Edge DevTools extension that captures API traffic from Microsoft portal
 
 ### Export Options
 
-- **Export YAML** — Generates an OpenAPI 3.0.3 spec fragment with all captured endpoints grouped by path and method.
+- **Export YAML** — Generates an OpenAPI 3.0.3 spec fragment with inferred server URLs, query parameters, request/response schemas, primitive formats, and scalar examples.
 - **Export JSON** — Exports the full captured request/response data for further processing or scripting.
 - **Copy cURL** — Copies a cURL command for the selected request (sensitive headers are redacted).
 
