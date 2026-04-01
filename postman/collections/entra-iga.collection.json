@@ -1,0 +1,1683 @@
+{
+    "item": [
+        {
+            "name": "api",
+            "description": "",
+            "item": [
+                {
+                    "name": "v1",
+                    "description": "",
+                    "item": [
+                        {
+                            "name": "billingConfigurations",
+                            "description": "",
+                            "item": [
+                                {
+                                    "name": "guestBilling",
+                                    "description": "",
+                                    "item": [
+                                        {
+                                            "id": "4777cc69-702c-4104-b615-369d3d30a735",
+                                            "name": "Get guest billing configuration",
+                                            "request": {
+                                                "name": "Get guest billing configuration",
+                                                "description": {
+                                                    "content": "Retrieves the guest user billing configuration for the tenant.\nControls whether the tenant pays for guest user access to\nentitlement management resources.\n\n**Note:** Returns 404 if the guest billing feature has not been\nconfigured for the tenant.\n",
+                                                    "type": "text/plain"
+                                                },
+                                                "url": {
+                                                    "path": [
+                                                        "api",
+                                                        "v1",
+                                                        "billingConfigurations",
+                                                        "guestBilling"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [],
+                                                    "variable": []
+                                                },
+                                                "header": [
+                                                    {
+                                                        "key": "Accept",
+                                                        "value": "application/json"
+                                                    }
+                                                ],
+                                                "method": "GET",
+                                                "body": {},
+                                                "auth": null
+                                            },
+                                            "response": [
+                                                {
+                                                    "id": "4f4c74e6-97ad-4cc2-9742-71e16a7c98bc",
+                                                    "name": "Guest billing configuration",
+                                                    "originalRequest": {
+                                                        "url": {
+                                                            "path": [
+                                                                "api",
+                                                                "v1",
+                                                                "billingConfigurations",
+                                                                "guestBilling"
+                                                            ],
+                                                            "host": [
+                                                                "{{baseUrl}}"
+                                                            ],
+                                                            "query": [],
+                                                            "variable": []
+                                                        },
+                                                        "header": [
+                                                            {
+                                                                "key": "Accept",
+                                                                "value": "application/json"
+                                                            }
+                                                        ],
+                                                        "method": "GET",
+                                                        "body": {}
+                                                    },
+                                                    "status": "OK",
+                                                    "code": 200,
+                                                    "header": [
+                                                        {
+                                                            "key": "Content-Type",
+                                                            "value": "application/json"
+                                                        }
+                                                    ],
+                                                    "body": "{}",
+                                                    "cookie": [],
+                                                    "_postman_previewlanguage": "json"
+                                                },
+                                                {
+                                                    "id": "c101a186-3427-4fdf-8edd-7b28557cebb5",
+                                                    "name": "Guest billing not configured for this tenant",
+                                                    "originalRequest": {
+                                                        "url": {
+                                                            "path": [
+                                                                "api",
+                                                                "v1",
+                                                                "billingConfigurations",
+                                                                "guestBilling"
+                                                            ],
+                                                            "host": [
+                                                                "{{baseUrl}}"
+                                                            ],
+                                                            "query": [],
+                                                            "variable": []
+                                                        },
+                                                        "method": "GET",
+                                                        "body": {}
+                                                    },
+                                                    "status": "Not Found",
+                                                    "code": 404,
+                                                    "header": [],
+                                                    "cookie": [],
+                                                    "_postman_previewlanguage": "text"
+                                                }
+                                            ],
+                                            "event": [],
+                                            "protocolProfileBehavior": {
+                                                "disableBodyPruning": true
+                                            }
+                                        },
+                                        {
+                                            "id": "1b6a9c71-bae9-41f2-920f-975f6d46e91a",
+                                            "name": "Update guest billing configuration",
+                                            "request": {
+                                                "name": "Update guest billing configuration",
+                                                "description": {
+                                                    "content": "Updates the guest billing configuration for the tenant.\n\n**Warning:** This endpoint modifies billing configuration.\n",
+                                                    "type": "text/plain"
+                                                },
+                                                "url": {
+                                                    "path": [
+                                                        "api",
+                                                        "v1",
+                                                        "billingConfigurations",
+                                                        "guestBilling"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [],
+                                                    "variable": []
+                                                },
+                                                "header": [
+                                                    {
+                                                        "key": "Content-Type",
+                                                        "value": "application/json"
+                                                    }
+                                                ],
+                                                "method": "PUT",
+                                                "body": {
+                                                    "mode": "raw",
+                                                    "raw": "{}",
+                                                    "options": {
+                                                        "raw": {
+                                                            "headerFamily": "json",
+                                                            "language": "json"
+                                                        }
+                                                    }
+                                                },
+                                                "auth": null
+                                            },
+                                            "response": [
+                                                {
+                                                    "id": "54827622-2c4d-48f2-958a-5162df009408",
+                                                    "name": "Guest billing configuration updated",
+                                                    "originalRequest": {
+                                                        "url": {
+                                                            "path": [
+                                                                "api",
+                                                                "v1",
+                                                                "billingConfigurations",
+                                                                "guestBilling"
+                                                            ],
+                                                            "host": [
+                                                                "{{baseUrl}}"
+                                                            ],
+                                                            "query": [],
+                                                            "variable": []
+                                                        },
+                                                        "header": [
+                                                            {
+                                                                "key": "Content-Type",
+                                                                "value": "application/json"
+                                                            }
+                                                        ],
+                                                        "method": "PUT",
+                                                        "body": {
+                                                            "mode": "raw",
+                                                            "raw": "{}",
+                                                            "options": {
+                                                                "raw": {
+                                                                    "headerFamily": "json",
+                                                                    "language": "json"
+                                                                }
+                                                            }
+                                                        }
+                                                    },
+                                                    "status": "OK",
+                                                    "code": 200,
+                                                    "header": [],
+                                                    "cookie": [],
+                                                    "_postman_previewlanguage": "text"
+                                                }
+                                            ],
+                                            "event": [],
+                                            "protocolProfileBehavior": {
+                                                "disableBodyPruning": true
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "name": "accessPackages",
+                            "description": "",
+                            "item": [
+                                {
+                                    "id": "3bcc9f15-2340-4346-98b0-90de7bc0df76",
+                                    "name": "List access packages",
+                                    "request": {
+                                        "name": "List access packages",
+                                        "description": {
+                                            "content": "Retrieves access packages managed through the ELM service.\nAccess packages bundle resources with policies that govern\nwho can request access and for how long.\n",
+                                            "type": "text/plain"
+                                        },
+                                        "url": {
+                                            "path": [
+                                                "api",
+                                                "v1",
+                                                "accessPackages"
+                                            ],
+                                            "host": [
+                                                "{{baseUrl}}"
+                                            ],
+                                            "query": [
+                                                {
+                                                    "disabled": false,
+                                                    "description": {
+                                                        "content": "OData filter expression",
+                                                        "type": "text/plain"
+                                                    },
+                                                    "key": "$filter",
+                                                    "value": "string"
+                                                },
+                                                {
+                                                    "disabled": false,
+                                                    "description": {
+                                                        "content": "Maximum number of results to return",
+                                                        "type": "text/plain"
+                                                    },
+                                                    "key": "$top",
+                                                    "value": "8711"
+                                                },
+                                                {
+                                                    "disabled": false,
+                                                    "description": {
+                                                        "content": "Number of results to skip",
+                                                        "type": "text/plain"
+                                                    },
+                                                    "key": "$skip",
+                                                    "value": "8711"
+                                                }
+                                            ],
+                                            "variable": []
+                                        },
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            }
+                                        ],
+                                        "method": "GET",
+                                        "body": {},
+                                        "auth": null
+                                    },
+                                    "response": [
+                                        {
+                                            "id": "1898073e-b49f-4db1-a9fc-8db84f4c7793",
+                                            "name": "List of access packages",
+                                            "originalRequest": {
+                                                "url": {
+                                                    "path": [
+                                                        "api",
+                                                        "v1",
+                                                        "accessPackages"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [
+                                                        {
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "OData filter expression",
+                                                                "type": "text/plain"
+                                                            },
+                                                            "key": "$filter",
+                                                            "value": "string"
+                                                        },
+                                                        {
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "Maximum number of results to return",
+                                                                "type": "text/plain"
+                                                            },
+                                                            "key": "$top",
+                                                            "value": "8711"
+                                                        },
+                                                        {
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "Number of results to skip",
+                                                                "type": "text/plain"
+                                                            },
+                                                            "key": "$skip",
+                                                            "value": "8711"
+                                                        }
+                                                    ],
+                                                    "variable": []
+                                                },
+                                                "header": [
+                                                    {
+                                                        "key": "Accept",
+                                                        "value": "application/json"
+                                                    }
+                                                ],
+                                                "method": "GET",
+                                                "body": {}
+                                            },
+                                            "status": "OK",
+                                            "code": 200,
+                                            "header": [
+                                                {
+                                                    "key": "Content-Type",
+                                                    "value": "application/json"
+                                                }
+                                            ],
+                                            "body": "{}",
+                                            "cookie": [],
+                                            "_postman_previewlanguage": "json"
+                                        }
+                                    ],
+                                    "event": [],
+                                    "protocolProfileBehavior": {
+                                        "disableBodyPruning": true
+                                    }
+                                },
+                                {
+                                    "name": "{accessPackageId}",
+                                    "description": "",
+                                    "item": [
+                                        {
+                                            "id": "1dafb9d6-c8eb-4cae-876a-38c471248c21",
+                                            "name": "Get a specific access package",
+                                            "request": {
+                                                "name": "Get a specific access package",
+                                                "description": {},
+                                                "url": {
+                                                    "path": [
+                                                        "api",
+                                                        "v1",
+                                                        "accessPackages",
+                                                        ":accessPackageId"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [],
+                                                    "variable": [
+                                                        {
+                                                            "type": "any",
+                                                            "value": "a00dc4fa-fabd-73bc-7cd1-c6120cf654fc",
+                                                            "key": "accessPackageId",
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "(Required) ",
+                                                                "type": "text/plain"
+                                                            }
+                                                        }
+                                                    ]
+                                                },
+                                                "method": "GET",
+                                                "body": {},
+                                                "auth": null
+                                            },
+                                            "response": [
+                                                {
+                                                    "id": "db58d6f6-309a-46a8-9d2f-41adc600f017",
+                                                    "name": "Access package details",
+                                                    "originalRequest": {
+                                                        "url": {
+                                                            "path": [
+                                                                "api",
+                                                                "v1",
+                                                                "accessPackages",
+                                                                ":accessPackageId"
+                                                            ],
+                                                            "host": [
+                                                                "{{baseUrl}}"
+                                                            ],
+                                                            "query": [],
+                                                            "variable": [
+                                                                {
+                                                                    "disabled": false,
+                                                                    "description": {
+                                                                        "content": "(Required) ",
+                                                                        "type": "text/plain"
+                                                                    },
+                                                                    "type": "any",
+                                                                    "value": "a00dc4fa-fabd-73bc-7cd1-c6120cf654fc",
+                                                                    "key": "accessPackageId"
+                                                                }
+                                                            ]
+                                                        },
+                                                        "method": "GET",
+                                                        "body": {}
+                                                    },
+                                                    "status": "OK",
+                                                    "code": 200,
+                                                    "header": [],
+                                                    "cookie": [],
+                                                    "_postman_previewlanguage": "text"
+                                                }
+                                            ],
+                                            "event": [],
+                                            "protocolProfileBehavior": {
+                                                "disableBodyPruning": true
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "name": "catalogs",
+                            "description": "",
+                            "item": [
+                                {
+                                    "id": "004b6662-240f-4f94-bbc7-21a56f307a01",
+                                    "name": "List catalogs",
+                                    "request": {
+                                        "name": "List catalogs",
+                                        "description": {
+                                            "content": "Retrieves entitlement management catalogs. Catalogs are containers\nfor access packages and their associated resources and policies.\n",
+                                            "type": "text/plain"
+                                        },
+                                        "url": {
+                                            "path": [
+                                                "api",
+                                                "v1",
+                                                "catalogs"
+                                            ],
+                                            "host": [
+                                                "{{baseUrl}}"
+                                            ],
+                                            "query": [
+                                                {
+                                                    "disabled": false,
+                                                    "description": {
+                                                        "content": "OData filter expression",
+                                                        "type": "text/plain"
+                                                    },
+                                                    "key": "$filter",
+                                                    "value": "string"
+                                                },
+                                                {
+                                                    "disabled": false,
+                                                    "description": {
+                                                        "content": "Maximum number of results to return",
+                                                        "type": "text/plain"
+                                                    },
+                                                    "key": "$top",
+                                                    "value": "8711"
+                                                }
+                                            ],
+                                            "variable": []
+                                        },
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            }
+                                        ],
+                                        "method": "GET",
+                                        "body": {},
+                                        "auth": null
+                                    },
+                                    "response": [
+                                        {
+                                            "id": "2d3b99de-631c-41e9-8e69-7222430fcac3",
+                                            "name": "List of catalogs",
+                                            "originalRequest": {
+                                                "url": {
+                                                    "path": [
+                                                        "api",
+                                                        "v1",
+                                                        "catalogs"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [
+                                                        {
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "OData filter expression",
+                                                                "type": "text/plain"
+                                                            },
+                                                            "key": "$filter",
+                                                            "value": "string"
+                                                        },
+                                                        {
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "Maximum number of results to return",
+                                                                "type": "text/plain"
+                                                            },
+                                                            "key": "$top",
+                                                            "value": "8711"
+                                                        }
+                                                    ],
+                                                    "variable": []
+                                                },
+                                                "header": [
+                                                    {
+                                                        "key": "Accept",
+                                                        "value": "application/json"
+                                                    }
+                                                ],
+                                                "method": "GET",
+                                                "body": {}
+                                            },
+                                            "status": "OK",
+                                            "code": 200,
+                                            "header": [
+                                                {
+                                                    "key": "Content-Type",
+                                                    "value": "application/json"
+                                                }
+                                            ],
+                                            "body": "{}",
+                                            "cookie": [],
+                                            "_postman_previewlanguage": "json"
+                                        }
+                                    ],
+                                    "event": [],
+                                    "protocolProfileBehavior": {
+                                        "disableBodyPruning": true
+                                    }
+                                },
+                                {
+                                    "name": "{catalogId}",
+                                    "description": "",
+                                    "item": [
+                                        {
+                                            "id": "6b535248-11d9-40a0-a25d-667cdeeb4579",
+                                            "name": "Get a specific catalog",
+                                            "request": {
+                                                "name": "Get a specific catalog",
+                                                "description": {},
+                                                "url": {
+                                                    "path": [
+                                                        "api",
+                                                        "v1",
+                                                        "catalogs",
+                                                        ":catalogId"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [],
+                                                    "variable": [
+                                                        {
+                                                            "type": "any",
+                                                            "value": "a00dc4fa-fabd-73bc-7cd1-c6120cf654fc",
+                                                            "key": "catalogId",
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "(Required) ",
+                                                                "type": "text/plain"
+                                                            }
+                                                        }
+                                                    ]
+                                                },
+                                                "method": "GET",
+                                                "body": {},
+                                                "auth": null
+                                            },
+                                            "response": [
+                                                {
+                                                    "id": "8c9f5d07-23a8-49e2-a431-225722a3483b",
+                                                    "name": "Catalog details",
+                                                    "originalRequest": {
+                                                        "url": {
+                                                            "path": [
+                                                                "api",
+                                                                "v1",
+                                                                "catalogs",
+                                                                ":catalogId"
+                                                            ],
+                                                            "host": [
+                                                                "{{baseUrl}}"
+                                                            ],
+                                                            "query": [],
+                                                            "variable": [
+                                                                {
+                                                                    "disabled": false,
+                                                                    "description": {
+                                                                        "content": "(Required) ",
+                                                                        "type": "text/plain"
+                                                                    },
+                                                                    "type": "any",
+                                                                    "value": "a00dc4fa-fabd-73bc-7cd1-c6120cf654fc",
+                                                                    "key": "catalogId"
+                                                                }
+                                                            ]
+                                                        },
+                                                        "method": "GET",
+                                                        "body": {}
+                                                    },
+                                                    "status": "OK",
+                                                    "code": 200,
+                                                    "header": [],
+                                                    "cookie": [],
+                                                    "_postman_previewlanguage": "text"
+                                                }
+                                            ],
+                                            "event": [],
+                                            "protocolProfileBehavior": {
+                                                "disableBodyPruning": true
+                                            }
+                                        },
+                                        {
+                                            "name": "resources",
+                                            "description": "",
+                                            "item": [
+                                                {
+                                                    "id": "f84dba85-cac7-4117-8d0d-0d5796765068",
+                                                    "name": "List resources in a catalog",
+                                                    "request": {
+                                                        "name": "List resources in a catalog",
+                                                        "description": {
+                                                            "content": "Retrieves the resources (groups, applications, SharePoint sites)\ncontained in a specific catalog.\n",
+                                                            "type": "text/plain"
+                                                        },
+                                                        "url": {
+                                                            "path": [
+                                                                "api",
+                                                                "v1",
+                                                                "catalogs",
+                                                                ":catalogId",
+                                                                "resources"
+                                                            ],
+                                                            "host": [
+                                                                "{{baseUrl}}"
+                                                            ],
+                                                            "query": [
+                                                                {
+                                                                    "disabled": false,
+                                                                    "description": {
+                                                                        "content": "OData filter expression",
+                                                                        "type": "text/plain"
+                                                                    },
+                                                                    "key": "$filter",
+                                                                    "value": "string"
+                                                                },
+                                                                {
+                                                                    "disabled": false,
+                                                                    "description": {
+                                                                        "content": "Maximum number of results to return",
+                                                                        "type": "text/plain"
+                                                                    },
+                                                                    "key": "$top",
+                                                                    "value": "8711"
+                                                                }
+                                                            ],
+                                                            "variable": [
+                                                                {
+                                                                    "type": "any",
+                                                                    "value": "a00dc4fa-fabd-73bc-7cd1-c6120cf654fc",
+                                                                    "key": "catalogId",
+                                                                    "disabled": false,
+                                                                    "description": {
+                                                                        "content": "(Required) ",
+                                                                        "type": "text/plain"
+                                                                    }
+                                                                }
+                                                            ]
+                                                        },
+                                                        "method": "GET",
+                                                        "body": {},
+                                                        "auth": null
+                                                    },
+                                                    "response": [
+                                                        {
+                                                            "id": "3e558b71-edec-472e-90f4-53b996b897e2",
+                                                            "name": "List of catalog resources",
+                                                            "originalRequest": {
+                                                                "url": {
+                                                                    "path": [
+                                                                        "api",
+                                                                        "v1",
+                                                                        "catalogs",
+                                                                        ":catalogId",
+                                                                        "resources"
+                                                                    ],
+                                                                    "host": [
+                                                                        "{{baseUrl}}"
+                                                                    ],
+                                                                    "query": [
+                                                                        {
+                                                                            "disabled": false,
+                                                                            "description": {
+                                                                                "content": "OData filter expression",
+                                                                                "type": "text/plain"
+                                                                            },
+                                                                            "key": "$filter",
+                                                                            "value": "string"
+                                                                        },
+                                                                        {
+                                                                            "disabled": false,
+                                                                            "description": {
+                                                                                "content": "Maximum number of results to return",
+                                                                                "type": "text/plain"
+                                                                            },
+                                                                            "key": "$top",
+                                                                            "value": "8711"
+                                                                        }
+                                                                    ],
+                                                                    "variable": [
+                                                                        {
+                                                                            "disabled": false,
+                                                                            "description": {
+                                                                                "content": "(Required) ",
+                                                                                "type": "text/plain"
+                                                                            },
+                                                                            "type": "any",
+                                                                            "value": "a00dc4fa-fabd-73bc-7cd1-c6120cf654fc",
+                                                                            "key": "catalogId"
+                                                                        }
+                                                                    ]
+                                                                },
+                                                                "method": "GET",
+                                                                "body": {}
+                                                            },
+                                                            "status": "OK",
+                                                            "code": 200,
+                                                            "header": [],
+                                                            "cookie": [],
+                                                            "_postman_previewlanguage": "text"
+                                                        }
+                                                    ],
+                                                    "event": [],
+                                                    "protocolProfileBehavior": {
+                                                        "disableBodyPruning": true
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "name": "connectedOrganizations",
+                            "description": "",
+                            "item": [
+                                {
+                                    "id": "660c6ded-9d9c-4fa6-8670-2bc7010a6c6c",
+                                    "name": "List connected organizations",
+                                    "request": {
+                                        "name": "List connected organizations",
+                                        "description": {
+                                            "content": "Retrieves the list of connected organizations. Connected organizations\nrepresent external organizations whose users can request access to\nyour entitlement management resources.\n",
+                                            "type": "text/plain"
+                                        },
+                                        "url": {
+                                            "path": [
+                                                "api",
+                                                "v1",
+                                                "connectedOrganizations"
+                                            ],
+                                            "host": [
+                                                "{{baseUrl}}"
+                                            ],
+                                            "query": [
+                                                {
+                                                    "disabled": false,
+                                                    "description": {
+                                                        "content": "OData filter expression",
+                                                        "type": "text/plain"
+                                                    },
+                                                    "key": "$filter",
+                                                    "value": "string"
+                                                },
+                                                {
+                                                    "disabled": false,
+                                                    "description": {
+                                                        "content": "Maximum number of results to return",
+                                                        "type": "text/plain"
+                                                    },
+                                                    "key": "$top",
+                                                    "value": "8711"
+                                                }
+                                            ],
+                                            "variable": []
+                                        },
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            }
+                                        ],
+                                        "method": "GET",
+                                        "body": {},
+                                        "auth": null
+                                    },
+                                    "response": [
+                                        {
+                                            "id": "d865d28a-b9d4-4692-bcd0-31709a22ec1c",
+                                            "name": "List of connected organizations",
+                                            "originalRequest": {
+                                                "url": {
+                                                    "path": [
+                                                        "api",
+                                                        "v1",
+                                                        "connectedOrganizations"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [
+                                                        {
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "OData filter expression",
+                                                                "type": "text/plain"
+                                                            },
+                                                            "key": "$filter",
+                                                            "value": "string"
+                                                        },
+                                                        {
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "Maximum number of results to return",
+                                                                "type": "text/plain"
+                                                            },
+                                                            "key": "$top",
+                                                            "value": "8711"
+                                                        }
+                                                    ],
+                                                    "variable": []
+                                                },
+                                                "header": [
+                                                    {
+                                                        "key": "Accept",
+                                                        "value": "application/json"
+                                                    }
+                                                ],
+                                                "method": "GET",
+                                                "body": {}
+                                            },
+                                            "status": "OK",
+                                            "code": 200,
+                                            "header": [
+                                                {
+                                                    "key": "Content-Type",
+                                                    "value": "application/json"
+                                                }
+                                            ],
+                                            "body": "{}",
+                                            "cookie": [],
+                                            "_postman_previewlanguage": "json"
+                                        }
+                                    ],
+                                    "event": [],
+                                    "protocolProfileBehavior": {
+                                        "disableBodyPruning": true
+                                    }
+                                },
+                                {
+                                    "name": "{connectedOrganizationId}",
+                                    "description": "",
+                                    "item": [
+                                        {
+                                            "id": "4248dc65-f19f-4fe2-a2c5-b9743773fa4b",
+                                            "name": "Get a specific connected organization",
+                                            "request": {
+                                                "name": "Get a specific connected organization",
+                                                "description": {},
+                                                "url": {
+                                                    "path": [
+                                                        "api",
+                                                        "v1",
+                                                        "connectedOrganizations",
+                                                        ":connectedOrganizationId"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [],
+                                                    "variable": [
+                                                        {
+                                                            "type": "any",
+                                                            "value": "a00dc4fa-fabd-73bc-7cd1-c6120cf654fc",
+                                                            "key": "connectedOrganizationId",
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "(Required) ",
+                                                                "type": "text/plain"
+                                                            }
+                                                        }
+                                                    ]
+                                                },
+                                                "method": "GET",
+                                                "body": {},
+                                                "auth": null
+                                            },
+                                            "response": [
+                                                {
+                                                    "id": "7fc97ce1-c16c-480e-ae68-0b9d73a6d711",
+                                                    "name": "Connected organization details",
+                                                    "originalRequest": {
+                                                        "url": {
+                                                            "path": [
+                                                                "api",
+                                                                "v1",
+                                                                "connectedOrganizations",
+                                                                ":connectedOrganizationId"
+                                                            ],
+                                                            "host": [
+                                                                "{{baseUrl}}"
+                                                            ],
+                                                            "query": [],
+                                                            "variable": [
+                                                                {
+                                                                    "disabled": false,
+                                                                    "description": {
+                                                                        "content": "(Required) ",
+                                                                        "type": "text/plain"
+                                                                    },
+                                                                    "type": "any",
+                                                                    "value": "a00dc4fa-fabd-73bc-7cd1-c6120cf654fc",
+                                                                    "key": "connectedOrganizationId"
+                                                                }
+                                                            ]
+                                                        },
+                                                        "method": "GET",
+                                                        "body": {}
+                                                    },
+                                                    "status": "OK",
+                                                    "code": 200,
+                                                    "header": [],
+                                                    "cookie": [],
+                                                    "_postman_previewlanguage": "text"
+                                                }
+                                            ],
+                                            "event": [],
+                                            "protocolProfileBehavior": {
+                                                "disableBodyPruning": true
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "name": "settings",
+                            "description": "",
+                            "item": [
+                                {
+                                    "id": "2a589c2c-dae7-4974-8875-3fd66724558c",
+                                    "name": "Get Identity Governance settings",
+                                    "request": {
+                                        "name": "Get Identity Governance settings",
+                                        "description": {
+                                            "content": "Retrieves the global Identity Governance settings for the tenant,\nincluding entitlement management configuration and default policies.\n",
+                                            "type": "text/plain"
+                                        },
+                                        "url": {
+                                            "path": [
+                                                "api",
+                                                "v1",
+                                                "settings"
+                                            ],
+                                            "host": [
+                                                "{{baseUrl}}"
+                                            ],
+                                            "query": [],
+                                            "variable": []
+                                        },
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            }
+                                        ],
+                                        "method": "GET",
+                                        "body": {},
+                                        "auth": null
+                                    },
+                                    "response": [
+                                        {
+                                            "id": "8de5048d-6332-4fa6-9c24-ef2f0e5e2ff1",
+                                            "name": "Identity Governance settings",
+                                            "originalRequest": {
+                                                "url": {
+                                                    "path": [
+                                                        "api",
+                                                        "v1",
+                                                        "settings"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [],
+                                                    "variable": []
+                                                },
+                                                "header": [
+                                                    {
+                                                        "key": "Accept",
+                                                        "value": "application/json"
+                                                    }
+                                                ],
+                                                "method": "GET",
+                                                "body": {}
+                                            },
+                                            "status": "OK",
+                                            "code": 200,
+                                            "header": [
+                                                {
+                                                    "key": "Content-Type",
+                                                    "value": "application/json"
+                                                }
+                                            ],
+                                            "body": "{}",
+                                            "cookie": [],
+                                            "_postman_previewlanguage": "json"
+                                        }
+                                    ],
+                                    "event": [],
+                                    "protocolProfileBehavior": {
+                                        "disableBodyPruning": true
+                                    }
+                                },
+                                {
+                                    "id": "7baf4e5a-7c2e-42d5-b625-582c769ef546",
+                                    "name": "Update Identity Governance settings",
+                                    "request": {
+                                        "name": "Update Identity Governance settings",
+                                        "description": {
+                                            "content": "Updates the global Identity Governance settings.\n\n**Warning:** This endpoint modifies tenant-level governance settings.\n",
+                                            "type": "text/plain"
+                                        },
+                                        "url": {
+                                            "path": [
+                                                "api",
+                                                "v1",
+                                                "settings"
+                                            ],
+                                            "host": [
+                                                "{{baseUrl}}"
+                                            ],
+                                            "query": [],
+                                            "variable": []
+                                        },
+                                        "header": [
+                                            {
+                                                "key": "Content-Type",
+                                                "value": "application/json"
+                                            }
+                                        ],
+                                        "method": "PATCH",
+                                        "body": {
+                                            "mode": "raw",
+                                            "raw": "{}",
+                                            "options": {
+                                                "raw": {
+                                                    "headerFamily": "json",
+                                                    "language": "json"
+                                                }
+                                            }
+                                        },
+                                        "auth": null
+                                    },
+                                    "response": [
+                                        {
+                                            "id": "8c9e6331-c07e-40ac-bedf-674120e884ba",
+                                            "name": "Settings updated",
+                                            "originalRequest": {
+                                                "url": {
+                                                    "path": [
+                                                        "api",
+                                                        "v1",
+                                                        "settings"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [],
+                                                    "variable": []
+                                                },
+                                                "header": [
+                                                    {
+                                                        "key": "Content-Type",
+                                                        "value": "application/json"
+                                                    }
+                                                ],
+                                                "method": "PATCH",
+                                                "body": {
+                                                    "mode": "raw",
+                                                    "raw": "{}",
+                                                    "options": {
+                                                        "raw": {
+                                                            "headerFamily": "json",
+                                                            "language": "json"
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            "status": "OK",
+                                            "code": 200,
+                                            "header": [],
+                                            "cookie": [],
+                                            "_postman_previewlanguage": "text"
+                                        }
+                                    ],
+                                    "event": [],
+                                    "protocolProfileBehavior": {
+                                        "disableBodyPruning": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "lifecycleWorkflows",
+                            "description": "",
+                            "item": [
+                                {
+                                    "name": "workflows",
+                                    "description": "",
+                                    "item": [
+                                        {
+                                            "id": "a2c0f7e0-8f98-4ba8-89ed-bc27cbfdfacc",
+                                            "name": "List lifecycle workflows",
+                                            "request": {
+                                                "name": "List lifecycle workflows",
+                                                "description": {
+                                                    "content": "Retrieves lifecycle workflows configured for the tenant.\nWorkflows automate joiner, mover, and leaver processes.\n",
+                                                    "type": "text/plain"
+                                                },
+                                                "url": {
+                                                    "path": [
+                                                        "api",
+                                                        "v1",
+                                                        "lifecycleWorkflows",
+                                                        "workflows"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [
+                                                        {
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "OData filter expression",
+                                                                "type": "text/plain"
+                                                            },
+                                                            "key": "$filter",
+                                                            "value": "string"
+                                                        },
+                                                        {
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "Maximum number of results to return",
+                                                                "type": "text/plain"
+                                                            },
+                                                            "key": "$top",
+                                                            "value": "8711"
+                                                        }
+                                                    ],
+                                                    "variable": []
+                                                },
+                                                "header": [
+                                                    {
+                                                        "key": "Accept",
+                                                        "value": "application/json"
+                                                    }
+                                                ],
+                                                "method": "GET",
+                                                "body": {},
+                                                "auth": null
+                                            },
+                                            "response": [
+                                                {
+                                                    "id": "d9823eee-92bb-41f7-acb3-bb9f67e57faf",
+                                                    "name": "List of lifecycle workflows",
+                                                    "originalRequest": {
+                                                        "url": {
+                                                            "path": [
+                                                                "api",
+                                                                "v1",
+                                                                "lifecycleWorkflows",
+                                                                "workflows"
+                                                            ],
+                                                            "host": [
+                                                                "{{baseUrl}}"
+                                                            ],
+                                                            "query": [
+                                                                {
+                                                                    "disabled": false,
+                                                                    "description": {
+                                                                        "content": "OData filter expression",
+                                                                        "type": "text/plain"
+                                                                    },
+                                                                    "key": "$filter",
+                                                                    "value": "string"
+                                                                },
+                                                                {
+                                                                    "disabled": false,
+                                                                    "description": {
+                                                                        "content": "Maximum number of results to return",
+                                                                        "type": "text/plain"
+                                                                    },
+                                                                    "key": "$top",
+                                                                    "value": "8711"
+                                                                }
+                                                            ],
+                                                            "variable": []
+                                                        },
+                                                        "header": [
+                                                            {
+                                                                "key": "Accept",
+                                                                "value": "application/json"
+                                                            }
+                                                        ],
+                                                        "method": "GET",
+                                                        "body": {}
+                                                    },
+                                                    "status": "OK",
+                                                    "code": 200,
+                                                    "header": [
+                                                        {
+                                                            "key": "Content-Type",
+                                                            "value": "application/json"
+                                                        }
+                                                    ],
+                                                    "body": "{}",
+                                                    "cookie": [],
+                                                    "_postman_previewlanguage": "json"
+                                                }
+                                            ],
+                                            "event": [],
+                                            "protocolProfileBehavior": {
+                                                "disableBodyPruning": true
+                                            }
+                                        },
+                                        {
+                                            "name": "{workflowId}",
+                                            "description": "",
+                                            "item": [
+                                                {
+                                                    "id": "91ed9456-1515-4390-905e-9d59cf5d6c2e",
+                                                    "name": "Get a specific lifecycle workflow",
+                                                    "request": {
+                                                        "name": "Get a specific lifecycle workflow",
+                                                        "description": {},
+                                                        "url": {
+                                                            "path": [
+                                                                "api",
+                                                                "v1",
+                                                                "lifecycleWorkflows",
+                                                                "workflows",
+                                                                ":workflowId"
+                                                            ],
+                                                            "host": [
+                                                                "{{baseUrl}}"
+                                                            ],
+                                                            "query": [],
+                                                            "variable": [
+                                                                {
+                                                                    "type": "any",
+                                                                    "value": "a00dc4fa-fabd-73bc-7cd1-c6120cf654fc",
+                                                                    "key": "workflowId",
+                                                                    "disabled": false,
+                                                                    "description": {
+                                                                        "content": "(Required) ",
+                                                                        "type": "text/plain"
+                                                                    }
+                                                                }
+                                                            ]
+                                                        },
+                                                        "method": "GET",
+                                                        "body": {},
+                                                        "auth": null
+                                                    },
+                                                    "response": [
+                                                        {
+                                                            "id": "df1fd873-71e7-427e-804d-726245a80cd6",
+                                                            "name": "Workflow details",
+                                                            "originalRequest": {
+                                                                "url": {
+                                                                    "path": [
+                                                                        "api",
+                                                                        "v1",
+                                                                        "lifecycleWorkflows",
+                                                                        "workflows",
+                                                                        ":workflowId"
+                                                                    ],
+                                                                    "host": [
+                                                                        "{{baseUrl}}"
+                                                                    ],
+                                                                    "query": [],
+                                                                    "variable": [
+                                                                        {
+                                                                            "disabled": false,
+                                                                            "description": {
+                                                                                "content": "(Required) ",
+                                                                                "type": "text/plain"
+                                                                            },
+                                                                            "type": "any",
+                                                                            "value": "a00dc4fa-fabd-73bc-7cd1-c6120cf654fc",
+                                                                            "key": "workflowId"
+                                                                        }
+                                                                    ]
+                                                                },
+                                                                "method": "GET",
+                                                                "body": {}
+                                                            },
+                                                            "status": "OK",
+                                                            "code": 200,
+                                                            "header": [],
+                                                            "cookie": [],
+                                                            "_postman_previewlanguage": "text"
+                                                        }
+                                                    ],
+                                                    "event": [],
+                                                    "protocolProfileBehavior": {
+                                                        "disableBodyPruning": true
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    "name": "taskDefinitions",
+                                    "description": "",
+                                    "item": [
+                                        {
+                                            "id": "12952be1-d1f0-4269-a3a6-343bc1e62434",
+                                            "name": "List available task definitions",
+                                            "request": {
+                                                "name": "List available task definitions",
+                                                "description": {
+                                                    "content": "Retrieves the built-in task definitions available for use in\nlifecycle workflows. Tasks include actions like sending email,\nadding to groups, enabling accounts, etc.\n",
+                                                    "type": "text/plain"
+                                                },
+                                                "url": {
+                                                    "path": [
+                                                        "api",
+                                                        "v1",
+                                                        "lifecycleWorkflows",
+                                                        "taskDefinitions"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [],
+                                                    "variable": []
+                                                },
+                                                "header": [
+                                                    {
+                                                        "key": "Accept",
+                                                        "value": "application/json"
+                                                    }
+                                                ],
+                                                "method": "GET",
+                                                "body": {},
+                                                "auth": null
+                                            },
+                                            "response": [
+                                                {
+                                                    "id": "2d17f31c-7acf-4500-8fd6-dcbd840a6831",
+                                                    "name": "List of task definitions",
+                                                    "originalRequest": {
+                                                        "url": {
+                                                            "path": [
+                                                                "api",
+                                                                "v1",
+                                                                "lifecycleWorkflows",
+                                                                "taskDefinitions"
+                                                            ],
+                                                            "host": [
+                                                                "{{baseUrl}}"
+                                                            ],
+                                                            "query": [],
+                                                            "variable": []
+                                                        },
+                                                        "header": [
+                                                            {
+                                                                "key": "Accept",
+                                                                "value": "application/json"
+                                                            }
+                                                        ],
+                                                        "method": "GET",
+                                                        "body": {}
+                                                    },
+                                                    "status": "OK",
+                                                    "code": 200,
+                                                    "header": [
+                                                        {
+                                                            "key": "Content-Type",
+                                                            "value": "application/json"
+                                                        }
+                                                    ],
+                                                    "body": "{}",
+                                                    "cookie": [],
+                                                    "_postman_previewlanguage": "json"
+                                                }
+                                            ],
+                                            "event": [],
+                                            "protocolProfileBehavior": {
+                                                "disableBodyPruning": true
+                                            }
+                                        }
+                                    ]
+                                },
+                                {
+                                    "name": "customTaskExtensions",
+                                    "description": "",
+                                    "item": [
+                                        {
+                                            "id": "f1a7d08e-b9bb-47c7-8b60-92675583f140",
+                                            "name": "List custom task extensions",
+                                            "request": {
+                                                "name": "List custom task extensions",
+                                                "description": {
+                                                    "content": "Retrieves custom task extensions (Logic App integrations)\nthat can be used in lifecycle workflows.\n",
+                                                    "type": "text/plain"
+                                                },
+                                                "url": {
+                                                    "path": [
+                                                        "api",
+                                                        "v1",
+                                                        "lifecycleWorkflows",
+                                                        "customTaskExtensions"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [],
+                                                    "variable": []
+                                                },
+                                                "method": "GET",
+                                                "body": {},
+                                                "auth": null
+                                            },
+                                            "response": [
+                                                {
+                                                    "id": "3604f724-a9d5-4c5f-b659-91d97af555a6",
+                                                    "name": "List of custom task extensions",
+                                                    "originalRequest": {
+                                                        "url": {
+                                                            "path": [
+                                                                "api",
+                                                                "v1",
+                                                                "lifecycleWorkflows",
+                                                                "customTaskExtensions"
+                                                            ],
+                                                            "host": [
+                                                                "{{baseUrl}}"
+                                                            ],
+                                                            "query": [],
+                                                            "variable": []
+                                                        },
+                                                        "method": "GET",
+                                                        "body": {}
+                                                    },
+                                                    "status": "OK",
+                                                    "code": 200,
+                                                    "header": [],
+                                                    "cookie": [],
+                                                    "_postman_previewlanguage": "text"
+                                                }
+                                            ],
+                                            "event": [],
+                                            "protocolProfileBehavior": {
+                                                "disableBodyPruning": true
+                                            }
+                                        }
+                                    ]
+                                },
+                                {
+                                    "name": "settings",
+                                    "description": "",
+                                    "item": [
+                                        {
+                                            "id": "b6e792a9-4351-4337-a471-aa4c8a7ec95b",
+                                            "name": "Get lifecycle workflow settings",
+                                            "request": {
+                                                "name": "Get lifecycle workflow settings",
+                                                "description": {
+                                                    "content": "Retrieves the lifecycle workflow settings including\nemail notification configuration and processing schedule.\n",
+                                                    "type": "text/plain"
+                                                },
+                                                "url": {
+                                                    "path": [
+                                                        "api",
+                                                        "v1",
+                                                        "lifecycleWorkflows",
+                                                        "settings"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [],
+                                                    "variable": []
+                                                },
+                                                "method": "GET",
+                                                "body": {},
+                                                "auth": null
+                                            },
+                                            "response": [
+                                                {
+                                                    "id": "81062fd3-e2d0-41b3-91d9-45cb62a4b8bb",
+                                                    "name": "Lifecycle workflow settings",
+                                                    "originalRequest": {
+                                                        "url": {
+                                                            "path": [
+                                                                "api",
+                                                                "v1",
+                                                                "lifecycleWorkflows",
+                                                                "settings"
+                                                            ],
+                                                            "host": [
+                                                                "{{baseUrl}}"
+                                                            ],
+                                                            "query": [],
+                                                            "variable": []
+                                                        },
+                                                        "method": "GET",
+                                                        "body": {}
+                                                    },
+                                                    "status": "OK",
+                                                    "code": 200,
+                                                    "header": [],
+                                                    "cookie": [],
+                                                    "_postman_previewlanguage": "text"
+                                                }
+                                            ],
+                                            "event": [],
+                                            "protocolProfileBehavior": {
+                                                "disableBodyPruning": true
+                                            }
+                                        },
+                                        {
+                                            "id": "88e4008d-8471-4233-8ade-8e409882c1c6",
+                                            "name": "Update lifecycle workflow settings",
+                                            "request": {
+                                                "name": "Update lifecycle workflow settings",
+                                                "description": {
+                                                    "content": "Updates lifecycle workflow settings.\n\n**Warning:** This endpoint modifies workflow configuration.\n",
+                                                    "type": "text/plain"
+                                                },
+                                                "url": {
+                                                    "path": [
+                                                        "api",
+                                                        "v1",
+                                                        "lifecycleWorkflows",
+                                                        "settings"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [],
+                                                    "variable": []
+                                                },
+                                                "header": [
+                                                    {
+                                                        "key": "Content-Type",
+                                                        "value": "application/json"
+                                                    }
+                                                ],
+                                                "method": "PATCH",
+                                                "body": {
+                                                    "mode": "raw",
+                                                    "raw": "{}",
+                                                    "options": {
+                                                        "raw": {
+                                                            "headerFamily": "json",
+                                                            "language": "json"
+                                                        }
+                                                    }
+                                                },
+                                                "auth": null
+                                            },
+                                            "response": [
+                                                {
+                                                    "id": "71e092c6-5fd8-4de5-bf6f-99e2b03b357f",
+                                                    "name": "Settings updated",
+                                                    "originalRequest": {
+                                                        "url": {
+                                                            "path": [
+                                                                "api",
+                                                                "v1",
+                                                                "lifecycleWorkflows",
+                                                                "settings"
+                                                            ],
+                                                            "host": [
+                                                                "{{baseUrl}}"
+                                                            ],
+                                                            "query": [],
+                                                            "variable": []
+                                                        },
+                                                        "header": [
+                                                            {
+                                                                "key": "Content-Type",
+                                                                "value": "application/json"
+                                                            }
+                                                        ],
+                                                        "method": "PATCH",
+                                                        "body": {
+                                                            "mode": "raw",
+                                                            "raw": "{}",
+                                                            "options": {
+                                                                "raw": {
+                                                                    "headerFamily": "json",
+                                                                    "language": "json"
+                                                                }
+                                                            }
+                                                        }
+                                                    },
+                                                    "status": "OK",
+                                                    "code": 200,
+                                                    "header": [],
+                                                    "cookie": [],
+                                                    "_postman_previewlanguage": "text"
+                                                }
+                                            ],
+                                            "event": [],
+                                            "protocolProfileBehavior": {
+                                                "disableBodyPruning": true
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "auth": {
+        "type": "bearer",
+        "bearer": [
+            {
+                "type": "any",
+                "value": "{{bearerToken}}",
+                "key": "token"
+            }
+        ]
+    },
+    "event": [],
+    "variable": [
+        {
+            "key": "baseUrl",
+            "value": "https://elm.iga.azure.com"
+        }
+    ],
+    "info": {
+        "_postman_id": "57c13ff9-af3a-4cb5-b806-db53a97f6b4a",
+        "name": "Entra IGA",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+        "description": {
+            "content": "The Entra IGA (Identity Governance and Administration) API is used by the Microsoft\nEntra portal (entra.microsoft.com → Identity Governance) for managing entitlement\nmanagement, lifecycle workflows, and governance administration, including:\n\n  - Entitlement Management (Access Packages, Catalogs, Policies)\n  - Connected Organizations\n  - Billing Configuration (Guest User Billing)\n  - Governance Settings and Administration\n\nAll endpoints are served from `elm.iga.azure.com` and require a valid\nAzure AD bearer token with Identity Governance permissions.\n\n**Note:** This specification was generated through browser traffic analysis of the\nEntra portal. Many Identity Governance features use Microsoft Graph APIs directly\nrather than this dedicated ELM API. This spec covers the non-Graph endpoints\nobserved during portal interaction.\n\nSome endpoints may return 404 if the corresponding Entra ID Governance license\nfeature has not been enabled for the tenant.\n\n\nContact Support:\n Name: nodoc",
+            "type": "text/plain"
+        }
+    }
+}

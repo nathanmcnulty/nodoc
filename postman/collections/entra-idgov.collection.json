@@ -1,0 +1,1887 @@
+{
+    "item": [
+        {
+            "name": "accessReviews",
+            "description": "",
+            "item": [
+                {
+                    "name": "v2.0",
+                    "description": "",
+                    "item": [
+                        {
+                            "name": "approvalWorkflowProviders",
+                            "description": "",
+                            "item": [
+                                {
+                                    "id": "f8cc5d6b-c70f-44d6-aed9-e820917469d7",
+                                    "name": "List approval workflow providers",
+                                    "request": {
+                                        "name": "List approval workflow providers",
+                                        "description": {
+                                            "content": "Retrieves all registered approval workflow providers. Each provider\nhandles a specific type of access review or approval workflow.\n",
+                                            "type": "text/plain"
+                                        },
+                                        "url": {
+                                            "path": [
+                                                "accessReviews",
+                                                "v2.0",
+                                                "approvalWorkflowProviders"
+                                            ],
+                                            "host": [
+                                                "{{baseUrl}}"
+                                            ],
+                                            "query": [],
+                                            "variable": []
+                                        },
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            }
+                                        ],
+                                        "method": "GET",
+                                        "body": {},
+                                        "auth": null
+                                    },
+                                    "response": [
+                                        {
+                                            "id": "7d97381e-882a-4b25-b9c0-b630b5619966",
+                                            "name": "List of approval workflow providers",
+                                            "originalRequest": {
+                                                "url": {
+                                                    "path": [
+                                                        "accessReviews",
+                                                        "v2.0",
+                                                        "approvalWorkflowProviders"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [],
+                                                    "variable": []
+                                                },
+                                                "header": [
+                                                    {
+                                                        "key": "Accept",
+                                                        "value": "application/json"
+                                                    }
+                                                ],
+                                                "method": "GET",
+                                                "body": {}
+                                            },
+                                            "status": "OK",
+                                            "code": 200,
+                                            "header": [
+                                                {
+                                                    "key": "Content-Type",
+                                                    "value": "application/json"
+                                                }
+                                            ],
+                                            "body": "{}",
+                                            "cookie": [],
+                                            "_postman_previewlanguage": "json"
+                                        }
+                                    ],
+                                    "event": [],
+                                    "protocolProfileBehavior": {
+                                        "disableBodyPruning": true
+                                    }
+                                },
+                                {
+                                    "name": "{providerId}",
+                                    "description": "",
+                                    "item": [
+                                        {
+                                            "name": "featureFlags",
+                                            "description": "",
+                                            "item": [
+                                                {
+                                                    "id": "1e356403-f5c5-480d-9232-b3441547de0e",
+                                                    "name": "Get feature flags for a provider",
+                                                    "request": {
+                                                        "name": "Get feature flags for a provider",
+                                                        "description": {
+                                                            "content": "Retrieves the feature flags configuration for the specified provider.\nUsed by the portal to determine which UI features are enabled.\n",
+                                                            "type": "text/plain"
+                                                        },
+                                                        "url": {
+                                                            "path": [
+                                                                "accessReviews",
+                                                                "v2.0",
+                                                                "approvalWorkflowProviders",
+                                                                ":providerId",
+                                                                "featureFlags"
+                                                            ],
+                                                            "host": [
+                                                                "{{baseUrl}}"
+                                                            ],
+                                                            "query": [],
+                                                            "variable": [
+                                                                {
+                                                                    "type": "any",
+                                                                    "value": "66477418-c29b-8fc4-182e-12c4a29daf29",
+                                                                    "key": "providerId",
+                                                                    "disabled": false,
+                                                                    "description": {
+                                                                        "content": "(Required) The approval workflow provider ID. Known providers:\n- `F40AE6A6-7BFC-4ABF-9E2A-63120C21A538` — Feature flags / configuration\n- `D5EC9F3B-324E-4F8A-AF55-B69EDD48ECBE` — Access review requests\n",
+                                                                        "type": "text/plain"
+                                                                    }
+                                                                }
+                                                            ]
+                                                        },
+                                                        "header": [
+                                                            {
+                                                                "key": "Accept",
+                                                                "value": "application/json"
+                                                            }
+                                                        ],
+                                                        "method": "GET",
+                                                        "body": {},
+                                                        "auth": null
+                                                    },
+                                                    "response": [
+                                                        {
+                                                            "id": "5e36d598-8df3-401f-8f01-7937332cdd89",
+                                                            "name": "Feature flags configuration",
+                                                            "originalRequest": {
+                                                                "url": {
+                                                                    "path": [
+                                                                        "accessReviews",
+                                                                        "v2.0",
+                                                                        "approvalWorkflowProviders",
+                                                                        ":providerId",
+                                                                        "featureFlags"
+                                                                    ],
+                                                                    "host": [
+                                                                        "{{baseUrl}}"
+                                                                    ],
+                                                                    "query": [],
+                                                                    "variable": [
+                                                                        {
+                                                                            "disabled": false,
+                                                                            "description": {
+                                                                                "content": "(Required) The approval workflow provider ID. Known providers:\n- `F40AE6A6-7BFC-4ABF-9E2A-63120C21A538` — Feature flags / configuration\n- `D5EC9F3B-324E-4F8A-AF55-B69EDD48ECBE` — Access review requests\n",
+                                                                                "type": "text/plain"
+                                                                            },
+                                                                            "type": "any",
+                                                                            "value": "66477418-c29b-8fc4-182e-12c4a29daf29",
+                                                                            "key": "providerId"
+                                                                        }
+                                                                    ]
+                                                                },
+                                                                "header": [
+                                                                    {
+                                                                        "key": "Accept",
+                                                                        "value": "application/json"
+                                                                    }
+                                                                ],
+                                                                "method": "GET",
+                                                                "body": {}
+                                                            },
+                                                            "status": "OK",
+                                                            "code": 200,
+                                                            "header": [
+                                                                {
+                                                                    "key": "Content-Type",
+                                                                    "value": "application/json"
+                                                                }
+                                                            ],
+                                                            "body": "{\n  \"@odata.context\": \"https://api.accessreviews.identitygovernance.azure.com/accessReviews/v2.0/$metadata#approvalWorkflowProviders('F40AE6A6-7BFC-4ABF-9E2A-63120C21A538')/featureFlags/$entity\",\n  \"sqlOutage\": false,\n  \"emergencyRAE\": \"none\",\n  \"isArFusionAuthorative\": false\n}",
+                                                            "cookie": [],
+                                                            "_postman_previewlanguage": "json"
+                                                        }
+                                                    ],
+                                                    "event": [],
+                                                    "protocolProfileBehavior": {
+                                                        "disableBodyPruning": true
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "name": "partnerTenantSettings",
+                                            "description": "",
+                                            "item": [
+                                                {
+                                                    "id": "3803df12-d862-4160-ae6b-a0cfa6e68ca3",
+                                                    "name": "Get partner tenant settings",
+                                                    "request": {
+                                                        "name": "Get partner tenant settings",
+                                                        "description": {
+                                                            "content": "Retrieves partner/tenant-specific settings for the access reviews provider.\nIncludes configuration like default review duration, notification settings,\nand auto-apply behavior.\n",
+                                                            "type": "text/plain"
+                                                        },
+                                                        "url": {
+                                                            "path": [
+                                                                "accessReviews",
+                                                                "v2.0",
+                                                                "approvalWorkflowProviders",
+                                                                ":providerId",
+                                                                "partnerTenantSettings"
+                                                            ],
+                                                            "host": [
+                                                                "{{baseUrl}}"
+                                                            ],
+                                                            "query": [],
+                                                            "variable": [
+                                                                {
+                                                                    "type": "any",
+                                                                    "value": "66477418-c29b-8fc4-182e-12c4a29daf29",
+                                                                    "key": "providerId",
+                                                                    "disabled": false,
+                                                                    "description": {
+                                                                        "content": "(Required) The approval workflow provider ID. Known providers:\n- `F40AE6A6-7BFC-4ABF-9E2A-63120C21A538` — Feature flags / configuration\n- `D5EC9F3B-324E-4F8A-AF55-B69EDD48ECBE` — Access review requests\n",
+                                                                        "type": "text/plain"
+                                                                    }
+                                                                }
+                                                            ]
+                                                        },
+                                                        "header": [
+                                                            {
+                                                                "key": "Accept",
+                                                                "value": "application/json"
+                                                            }
+                                                        ],
+                                                        "method": "GET",
+                                                        "body": {},
+                                                        "auth": null
+                                                    },
+                                                    "response": [
+                                                        {
+                                                            "id": "fa0f59d6-193d-48bd-864e-b389fe5ac699",
+                                                            "name": "Partner tenant settings",
+                                                            "originalRequest": {
+                                                                "url": {
+                                                                    "path": [
+                                                                        "accessReviews",
+                                                                        "v2.0",
+                                                                        "approvalWorkflowProviders",
+                                                                        ":providerId",
+                                                                        "partnerTenantSettings"
+                                                                    ],
+                                                                    "host": [
+                                                                        "{{baseUrl}}"
+                                                                    ],
+                                                                    "query": [],
+                                                                    "variable": [
+                                                                        {
+                                                                            "disabled": false,
+                                                                            "description": {
+                                                                                "content": "(Required) The approval workflow provider ID. Known providers:\n- `F40AE6A6-7BFC-4ABF-9E2A-63120C21A538` — Feature flags / configuration\n- `D5EC9F3B-324E-4F8A-AF55-B69EDD48ECBE` — Access review requests\n",
+                                                                                "type": "text/plain"
+                                                                            },
+                                                                            "type": "any",
+                                                                            "value": "66477418-c29b-8fc4-182e-12c4a29daf29",
+                                                                            "key": "providerId"
+                                                                        }
+                                                                    ]
+                                                                },
+                                                                "header": [
+                                                                    {
+                                                                        "key": "Accept",
+                                                                        "value": "application/json"
+                                                                    }
+                                                                ],
+                                                                "method": "GET",
+                                                                "body": {}
+                                                            },
+                                                            "status": "OK",
+                                                            "code": 200,
+                                                            "header": [
+                                                                {
+                                                                    "key": "Content-Type",
+                                                                    "value": "application/json"
+                                                                }
+                                                            ],
+                                                            "body": "{}",
+                                                            "cookie": [],
+                                                            "_postman_previewlanguage": "json"
+                                                        }
+                                                    ],
+                                                    "event": [],
+                                                    "protocolProfileBehavior": {
+                                                        "disableBodyPruning": true
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "name": "requests",
+                                            "description": "",
+                                            "item": [
+                                                {
+                                                    "id": "56a34b6f-0585-4cce-9346-0033d4176100",
+                                                    "name": "List access review requests",
+                                                    "request": {
+                                                        "name": "List access review requests",
+                                                        "description": {
+                                                            "content": "Retrieves access review requests (campaigns/definitions) for the specified\nprovider. Each request represents an access review definition that may have\nmultiple instances (recurrence cycles).\n",
+                                                            "type": "text/plain"
+                                                        },
+                                                        "url": {
+                                                            "path": [
+                                                                "accessReviews",
+                                                                "v2.0",
+                                                                "approvalWorkflowProviders",
+                                                                ":providerId",
+                                                                "requests"
+                                                            ],
+                                                            "host": [
+                                                                "{{baseUrl}}"
+                                                            ],
+                                                            "query": [
+                                                                {
+                                                                    "disabled": false,
+                                                                    "description": {
+                                                                        "content": "OData filter expression",
+                                                                        "type": "text/plain"
+                                                                    },
+                                                                    "key": "$filter",
+                                                                    "value": "string"
+                                                                },
+                                                                {
+                                                                    "disabled": false,
+                                                                    "description": {
+                                                                        "content": "Maximum number of results to return",
+                                                                        "type": "text/plain"
+                                                                    },
+                                                                    "key": "$top",
+                                                                    "value": "7267"
+                                                                },
+                                                                {
+                                                                    "disabled": false,
+                                                                    "description": {
+                                                                        "content": "Number of results to skip",
+                                                                        "type": "text/plain"
+                                                                    },
+                                                                    "key": "$skip",
+                                                                    "value": "7267"
+                                                                }
+                                                            ],
+                                                            "variable": [
+                                                                {
+                                                                    "type": "any",
+                                                                    "value": "66477418-c29b-8fc4-182e-12c4a29daf29",
+                                                                    "key": "providerId",
+                                                                    "disabled": false,
+                                                                    "description": {
+                                                                        "content": "(Required) The approval workflow provider ID. Known providers:\n- `F40AE6A6-7BFC-4ABF-9E2A-63120C21A538` — Feature flags / configuration\n- `D5EC9F3B-324E-4F8A-AF55-B69EDD48ECBE` — Access review requests\n",
+                                                                        "type": "text/plain"
+                                                                    }
+                                                                }
+                                                            ]
+                                                        },
+                                                        "header": [
+                                                            {
+                                                                "key": "Accept",
+                                                                "value": "application/json"
+                                                            }
+                                                        ],
+                                                        "method": "GET",
+                                                        "body": {},
+                                                        "auth": null
+                                                    },
+                                                    "response": [
+                                                        {
+                                                            "id": "53e59b58-c089-4db8-9579-87d53dba917b",
+                                                            "name": "List of access review requests",
+                                                            "originalRequest": {
+                                                                "url": {
+                                                                    "path": [
+                                                                        "accessReviews",
+                                                                        "v2.0",
+                                                                        "approvalWorkflowProviders",
+                                                                        ":providerId",
+                                                                        "requests"
+                                                                    ],
+                                                                    "host": [
+                                                                        "{{baseUrl}}"
+                                                                    ],
+                                                                    "query": [
+                                                                        {
+                                                                            "disabled": false,
+                                                                            "description": {
+                                                                                "content": "OData filter expression",
+                                                                                "type": "text/plain"
+                                                                            },
+                                                                            "key": "$filter",
+                                                                            "value": "string"
+                                                                        },
+                                                                        {
+                                                                            "disabled": false,
+                                                                            "description": {
+                                                                                "content": "Maximum number of results to return",
+                                                                                "type": "text/plain"
+                                                                            },
+                                                                            "key": "$top",
+                                                                            "value": "7267"
+                                                                        },
+                                                                        {
+                                                                            "disabled": false,
+                                                                            "description": {
+                                                                                "content": "Number of results to skip",
+                                                                                "type": "text/plain"
+                                                                            },
+                                                                            "key": "$skip",
+                                                                            "value": "7267"
+                                                                        }
+                                                                    ],
+                                                                    "variable": [
+                                                                        {
+                                                                            "disabled": false,
+                                                                            "description": {
+                                                                                "content": "(Required) The approval workflow provider ID. Known providers:\n- `F40AE6A6-7BFC-4ABF-9E2A-63120C21A538` — Feature flags / configuration\n- `D5EC9F3B-324E-4F8A-AF55-B69EDD48ECBE` — Access review requests\n",
+                                                                                "type": "text/plain"
+                                                                            },
+                                                                            "type": "any",
+                                                                            "value": "66477418-c29b-8fc4-182e-12c4a29daf29",
+                                                                            "key": "providerId"
+                                                                        }
+                                                                    ]
+                                                                },
+                                                                "header": [
+                                                                    {
+                                                                        "key": "Accept",
+                                                                        "value": "application/json"
+                                                                    }
+                                                                ],
+                                                                "method": "GET",
+                                                                "body": {}
+                                                            },
+                                                            "status": "OK",
+                                                            "code": 200,
+                                                            "header": [
+                                                                {
+                                                                    "key": "Content-Type",
+                                                                    "value": "application/json"
+                                                                }
+                                                            ],
+                                                            "body": "{\n  \"@odata.context\": \"https://api.accessreviews.identitygovernance.azure.com/accessReviews/v2.0/$metadata#approvalWorkflowProviders('D5EC9F3B-324E-4F8A-AF55-B69EDD48ECBE')/requests/Microsoft.Azure.ActiveDirectory.AccessReviews.Api.Models.V2.AccessReview(id,businessFlowId,decisionsCriteria,reviewedEntity,businessFlowTemplateId,policy,settings,errors,displayName,status,createdDateTime)\",\n  \"@odata.count\": 5,\n  \"value\": [\n    {\n      \"id\": \"52a2c256-9a91-4f56-9edc-06969fdcc298\",\n      \"displayName\": \"czvbxcvb\",\n      \"status\": \"InProgress\",\n      \"businessFlowId\": \"4dec5ff3-622d-48da-8ff0-755f2ef0c9a8\",\n      \"businessFlowTemplateId\": \"00000000-0000-0000-0000-000000000000\",\n      \"createdDateTime\": \"2026-01-27T18:09:30.2847107Z\",\n      \"decisionsCriteria\": null,\n      \"reviewedEntity\": null,\n      \"policy\": null,\n      \"settings\": {\n        \"mailNotificationsEnabled\": true,\n        \"remindersEnabled\": true,\n        \"justificationRequiredOnApproval\": true,\n        \"autoReviewEnabled\": false,\n        \"activityDurationInDays\": 0,\n        \"autoApplyReviewResultsEnabled\": false,\n        \"selfApprovalAllowed\": false,\n        \"accessRecommendationsEnabled\": true,\n        \"escalationEnabled\": false,\n        \"timeSpanToEscalation\": \"PT0S\"\n      },\n      \"errors\": null\n    },\n    {\n      \"id\": \"52a2c256-9a91-4f56-9edc-06969fdcc298\",\n      \"displayName\": \"czvbxcvb\",\n      \"status\": \"InProgress\",\n      \"businessFlowId\": \"4dec5ff3-622d-48da-8ff0-755f2ef0c9a8\",\n      \"businessFlowTemplateId\": \"00000000-0000-0000-0000-000000000000\",\n      \"createdDateTime\": \"2026-01-27T18:09:30.2847107Z\",\n      \"decisionsCriteria\": null,\n      \"reviewedEntity\": null,\n      \"policy\": null,\n      \"settings\": {\n        \"mailNotificationsEnabled\": true,\n        \"remindersEnabled\": true,\n        \"justificationRequiredOnApproval\": true,\n        \"autoReviewEnabled\": false,\n        \"activityDurationInDays\": 0,\n        \"autoApplyReviewResultsEnabled\": false,\n        \"selfApprovalAllowed\": false,\n        \"accessRecommendationsEnabled\": true,\n        \"escalationEnabled\": false,\n        \"timeSpanToEscalation\": \"PT0S\"\n      },\n      \"errors\": null,\n      \"key_0\": false,\n      \"key_1\": 6101.759237852857\n    }\n  ]\n}",
+                                                            "cookie": [],
+                                                            "_postman_previewlanguage": "json"
+                                                        }
+                                                    ],
+                                                    "event": [],
+                                                    "protocolProfileBehavior": {
+                                                        "disableBodyPruning": true
+                                                    }
+                                                },
+                                                {
+                                                    "id": "31e2ef85-9eb4-4483-8a92-01ef42e52057",
+                                                    "name": "Create an access review request",
+                                                    "request": {
+                                                        "name": "Create an access review request",
+                                                        "description": {
+                                                            "content": "Creates a new access review definition/campaign.\n\n**Warning:** This endpoint creates access review campaigns.\n",
+                                                            "type": "text/plain"
+                                                        },
+                                                        "url": {
+                                                            "path": [
+                                                                "accessReviews",
+                                                                "v2.0",
+                                                                "approvalWorkflowProviders",
+                                                                ":providerId",
+                                                                "requests"
+                                                            ],
+                                                            "host": [
+                                                                "{{baseUrl}}"
+                                                            ],
+                                                            "query": [],
+                                                            "variable": [
+                                                                {
+                                                                    "type": "any",
+                                                                    "value": "66477418-c29b-8fc4-182e-12c4a29daf29",
+                                                                    "key": "providerId",
+                                                                    "disabled": false,
+                                                                    "description": {
+                                                                        "content": "(Required) The approval workflow provider ID. Known providers:\n- `F40AE6A6-7BFC-4ABF-9E2A-63120C21A538` — Feature flags / configuration\n- `D5EC9F3B-324E-4F8A-AF55-B69EDD48ECBE` — Access review requests\n",
+                                                                        "type": "text/plain"
+                                                                    }
+                                                                }
+                                                            ]
+                                                        },
+                                                        "header": [
+                                                            {
+                                                                "key": "Content-Type",
+                                                                "value": "application/json"
+                                                            }
+                                                        ],
+                                                        "method": "POST",
+                                                        "body": {
+                                                            "mode": "raw",
+                                                            "raw": "{}",
+                                                            "options": {
+                                                                "raw": {
+                                                                    "headerFamily": "json",
+                                                                    "language": "json"
+                                                                }
+                                                            }
+                                                        },
+                                                        "auth": null
+                                                    },
+                                                    "response": [
+                                                        {
+                                                            "id": "fbe60220-fd1e-4440-bbc2-80081204e119",
+                                                            "name": "Access review request created",
+                                                            "originalRequest": {
+                                                                "url": {
+                                                                    "path": [
+                                                                        "accessReviews",
+                                                                        "v2.0",
+                                                                        "approvalWorkflowProviders",
+                                                                        ":providerId",
+                                                                        "requests"
+                                                                    ],
+                                                                    "host": [
+                                                                        "{{baseUrl}}"
+                                                                    ],
+                                                                    "query": [],
+                                                                    "variable": [
+                                                                        {
+                                                                            "disabled": false,
+                                                                            "description": {
+                                                                                "content": "(Required) The approval workflow provider ID. Known providers:\n- `F40AE6A6-7BFC-4ABF-9E2A-63120C21A538` — Feature flags / configuration\n- `D5EC9F3B-324E-4F8A-AF55-B69EDD48ECBE` — Access review requests\n",
+                                                                                "type": "text/plain"
+                                                                            },
+                                                                            "type": "any",
+                                                                            "value": "66477418-c29b-8fc4-182e-12c4a29daf29",
+                                                                            "key": "providerId"
+                                                                        }
+                                                                    ]
+                                                                },
+                                                                "header": [
+                                                                    {
+                                                                        "key": "Content-Type",
+                                                                        "value": "application/json"
+                                                                    }
+                                                                ],
+                                                                "method": "POST",
+                                                                "body": {
+                                                                    "mode": "raw",
+                                                                    "raw": "{}",
+                                                                    "options": {
+                                                                        "raw": {
+                                                                            "headerFamily": "json",
+                                                                            "language": "json"
+                                                                        }
+                                                                    }
+                                                                }
+                                                            },
+                                                            "status": "Created",
+                                                            "code": 201,
+                                                            "header": [],
+                                                            "cookie": [],
+                                                            "_postman_previewlanguage": "text"
+                                                        },
+                                                        {
+                                                            "id": "b0cfd350-a3a5-410b-9e28-b7988374a126",
+                                                            "name": "Invalid request",
+                                                            "originalRequest": {
+                                                                "url": {
+                                                                    "path": [
+                                                                        "accessReviews",
+                                                                        "v2.0",
+                                                                        "approvalWorkflowProviders",
+                                                                        ":providerId",
+                                                                        "requests"
+                                                                    ],
+                                                                    "host": [
+                                                                        "{{baseUrl}}"
+                                                                    ],
+                                                                    "query": [],
+                                                                    "variable": [
+                                                                        {
+                                                                            "disabled": false,
+                                                                            "description": {
+                                                                                "content": "(Required) The approval workflow provider ID. Known providers:\n- `F40AE6A6-7BFC-4ABF-9E2A-63120C21A538` — Feature flags / configuration\n- `D5EC9F3B-324E-4F8A-AF55-B69EDD48ECBE` — Access review requests\n",
+                                                                                "type": "text/plain"
+                                                                            },
+                                                                            "type": "any",
+                                                                            "value": "66477418-c29b-8fc4-182e-12c4a29daf29",
+                                                                            "key": "providerId"
+                                                                        }
+                                                                    ]
+                                                                },
+                                                                "header": [
+                                                                    {
+                                                                        "key": "Content-Type",
+                                                                        "value": "application/json"
+                                                                    }
+                                                                ],
+                                                                "method": "POST",
+                                                                "body": {
+                                                                    "mode": "raw",
+                                                                    "raw": "{}",
+                                                                    "options": {
+                                                                        "raw": {
+                                                                            "headerFamily": "json",
+                                                                            "language": "json"
+                                                                        }
+                                                                    }
+                                                                }
+                                                            },
+                                                            "status": "Bad Request",
+                                                            "code": 400,
+                                                            "header": [],
+                                                            "cookie": [],
+                                                            "_postman_previewlanguage": "text"
+                                                        }
+                                                    ],
+                                                    "event": [],
+                                                    "protocolProfileBehavior": {
+                                                        "disableBodyPruning": true
+                                                    }
+                                                },
+                                                {
+                                                    "name": "{requestId}",
+                                                    "description": "",
+                                                    "item": [
+                                                        {
+                                                            "id": "23b277d3-d62c-4e09-8601-aa5be4b72721",
+                                                            "name": "Get a specific access review request",
+                                                            "request": {
+                                                                "name": "Get a specific access review request",
+                                                                "description": {},
+                                                                "url": {
+                                                                    "path": [
+                                                                        "accessReviews",
+                                                                        "v2.0",
+                                                                        "approvalWorkflowProviders",
+                                                                        ":providerId",
+                                                                        "requests",
+                                                                        ":requestId"
+                                                                    ],
+                                                                    "host": [
+                                                                        "{{baseUrl}}"
+                                                                    ],
+                                                                    "query": [],
+                                                                    "variable": [
+                                                                        {
+                                                                            "type": "any",
+                                                                            "value": "66477418-c29b-8fc4-182e-12c4a29daf29",
+                                                                            "key": "providerId",
+                                                                            "disabled": false,
+                                                                            "description": {
+                                                                                "content": "(Required) The approval workflow provider ID. Known providers:\n- `F40AE6A6-7BFC-4ABF-9E2A-63120C21A538` — Feature flags / configuration\n- `D5EC9F3B-324E-4F8A-AF55-B69EDD48ECBE` — Access review requests\n",
+                                                                                "type": "text/plain"
+                                                                            }
+                                                                        },
+                                                                        {
+                                                                            "type": "any",
+                                                                            "value": "66477418-c29b-8fc4-182e-12c4a29daf29",
+                                                                            "key": "requestId",
+                                                                            "disabled": false,
+                                                                            "description": {
+                                                                                "content": "(Required) The access review request ID",
+                                                                                "type": "text/plain"
+                                                                            }
+                                                                        }
+                                                                    ]
+                                                                },
+                                                                "method": "GET",
+                                                                "body": {},
+                                                                "auth": null
+                                                            },
+                                                            "response": [
+                                                                {
+                                                                    "id": "c06375fe-6749-4d06-9c86-e9f9233ae8ab",
+                                                                    "name": "Access review request details",
+                                                                    "originalRequest": {
+                                                                        "url": {
+                                                                            "path": [
+                                                                                "accessReviews",
+                                                                                "v2.0",
+                                                                                "approvalWorkflowProviders",
+                                                                                ":providerId",
+                                                                                "requests",
+                                                                                ":requestId"
+                                                                            ],
+                                                                            "host": [
+                                                                                "{{baseUrl}}"
+                                                                            ],
+                                                                            "query": [],
+                                                                            "variable": [
+                                                                                {
+                                                                                    "disabled": false,
+                                                                                    "description": {
+                                                                                        "content": "(Required) The approval workflow provider ID. Known providers:\n- `F40AE6A6-7BFC-4ABF-9E2A-63120C21A538` — Feature flags / configuration\n- `D5EC9F3B-324E-4F8A-AF55-B69EDD48ECBE` — Access review requests\n",
+                                                                                        "type": "text/plain"
+                                                                                    },
+                                                                                    "type": "any",
+                                                                                    "value": "66477418-c29b-8fc4-182e-12c4a29daf29",
+                                                                                    "key": "providerId"
+                                                                                },
+                                                                                {
+                                                                                    "disabled": false,
+                                                                                    "description": {
+                                                                                        "content": "(Required) The access review request ID",
+                                                                                        "type": "text/plain"
+                                                                                    },
+                                                                                    "type": "any",
+                                                                                    "value": "66477418-c29b-8fc4-182e-12c4a29daf29",
+                                                                                    "key": "requestId"
+                                                                                }
+                                                                            ]
+                                                                        },
+                                                                        "method": "GET",
+                                                                        "body": {}
+                                                                    },
+                                                                    "status": "OK",
+                                                                    "code": 200,
+                                                                    "header": [],
+                                                                    "cookie": [],
+                                                                    "_postman_previewlanguage": "text"
+                                                                }
+                                                            ],
+                                                            "event": [],
+                                                            "protocolProfileBehavior": {
+                                                                "disableBodyPruning": true
+                                                            }
+                                                        },
+                                                        {
+                                                            "id": "79cc9c53-d7c4-4931-a2b8-bbaae5c15871",
+                                                            "name": "Update an access review request",
+                                                            "request": {
+                                                                "name": "Update an access review request",
+                                                                "description": {
+                                                                    "content": "Updates an existing access review definition.\n\n**Warning:** This endpoint modifies access review configuration.\n",
+                                                                    "type": "text/plain"
+                                                                },
+                                                                "url": {
+                                                                    "path": [
+                                                                        "accessReviews",
+                                                                        "v2.0",
+                                                                        "approvalWorkflowProviders",
+                                                                        ":providerId",
+                                                                        "requests",
+                                                                        ":requestId"
+                                                                    ],
+                                                                    "host": [
+                                                                        "{{baseUrl}}"
+                                                                    ],
+                                                                    "query": [],
+                                                                    "variable": [
+                                                                        {
+                                                                            "type": "any",
+                                                                            "value": "66477418-c29b-8fc4-182e-12c4a29daf29",
+                                                                            "key": "providerId",
+                                                                            "disabled": false,
+                                                                            "description": {
+                                                                                "content": "(Required) The approval workflow provider ID. Known providers:\n- `F40AE6A6-7BFC-4ABF-9E2A-63120C21A538` — Feature flags / configuration\n- `D5EC9F3B-324E-4F8A-AF55-B69EDD48ECBE` — Access review requests\n",
+                                                                                "type": "text/plain"
+                                                                            }
+                                                                        },
+                                                                        {
+                                                                            "type": "any",
+                                                                            "value": "66477418-c29b-8fc4-182e-12c4a29daf29",
+                                                                            "key": "requestId",
+                                                                            "disabled": false,
+                                                                            "description": {
+                                                                                "content": "(Required) The access review request ID",
+                                                                                "type": "text/plain"
+                                                                            }
+                                                                        }
+                                                                    ]
+                                                                },
+                                                                "header": [
+                                                                    {
+                                                                        "key": "Content-Type",
+                                                                        "value": "application/json"
+                                                                    }
+                                                                ],
+                                                                "method": "PATCH",
+                                                                "body": {
+                                                                    "mode": "raw",
+                                                                    "raw": "{}",
+                                                                    "options": {
+                                                                        "raw": {
+                                                                            "headerFamily": "json",
+                                                                            "language": "json"
+                                                                        }
+                                                                    }
+                                                                },
+                                                                "auth": null
+                                                            },
+                                                            "response": [
+                                                                {
+                                                                    "id": "0e9b5242-7d1f-4cb8-a81b-e8d1c147a164",
+                                                                    "name": "Access review request updated",
+                                                                    "originalRequest": {
+                                                                        "url": {
+                                                                            "path": [
+                                                                                "accessReviews",
+                                                                                "v2.0",
+                                                                                "approvalWorkflowProviders",
+                                                                                ":providerId",
+                                                                                "requests",
+                                                                                ":requestId"
+                                                                            ],
+                                                                            "host": [
+                                                                                "{{baseUrl}}"
+                                                                            ],
+                                                                            "query": [],
+                                                                            "variable": [
+                                                                                {
+                                                                                    "disabled": false,
+                                                                                    "description": {
+                                                                                        "content": "(Required) The approval workflow provider ID. Known providers:\n- `F40AE6A6-7BFC-4ABF-9E2A-63120C21A538` — Feature flags / configuration\n- `D5EC9F3B-324E-4F8A-AF55-B69EDD48ECBE` — Access review requests\n",
+                                                                                        "type": "text/plain"
+                                                                                    },
+                                                                                    "type": "any",
+                                                                                    "value": "66477418-c29b-8fc4-182e-12c4a29daf29",
+                                                                                    "key": "providerId"
+                                                                                },
+                                                                                {
+                                                                                    "disabled": false,
+                                                                                    "description": {
+                                                                                        "content": "(Required) The access review request ID",
+                                                                                        "type": "text/plain"
+                                                                                    },
+                                                                                    "type": "any",
+                                                                                    "value": "66477418-c29b-8fc4-182e-12c4a29daf29",
+                                                                                    "key": "requestId"
+                                                                                }
+                                                                            ]
+                                                                        },
+                                                                        "header": [
+                                                                            {
+                                                                                "key": "Content-Type",
+                                                                                "value": "application/json"
+                                                                            }
+                                                                        ],
+                                                                        "method": "PATCH",
+                                                                        "body": {
+                                                                            "mode": "raw",
+                                                                            "raw": "{}",
+                                                                            "options": {
+                                                                                "raw": {
+                                                                                    "headerFamily": "json",
+                                                                                    "language": "json"
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    },
+                                                                    "status": "OK",
+                                                                    "code": 200,
+                                                                    "header": [],
+                                                                    "cookie": [],
+                                                                    "_postman_previewlanguage": "text"
+                                                                }
+                                                            ],
+                                                            "event": [],
+                                                            "protocolProfileBehavior": {
+                                                                "disableBodyPruning": true
+                                                            }
+                                                        },
+                                                        {
+                                                            "id": "d70f018f-4cc6-4933-bc00-c9df97dc1ced",
+                                                            "name": "Delete an access review request",
+                                                            "request": {
+                                                                "name": "Delete an access review request",
+                                                                "description": {
+                                                                    "content": "Deletes an access review definition and all its instances.\n\n**Warning:** This endpoint permanently deletes access review data.\n",
+                                                                    "type": "text/plain"
+                                                                },
+                                                                "url": {
+                                                                    "path": [
+                                                                        "accessReviews",
+                                                                        "v2.0",
+                                                                        "approvalWorkflowProviders",
+                                                                        ":providerId",
+                                                                        "requests",
+                                                                        ":requestId"
+                                                                    ],
+                                                                    "host": [
+                                                                        "{{baseUrl}}"
+                                                                    ],
+                                                                    "query": [],
+                                                                    "variable": [
+                                                                        {
+                                                                            "type": "any",
+                                                                            "value": "66477418-c29b-8fc4-182e-12c4a29daf29",
+                                                                            "key": "providerId",
+                                                                            "disabled": false,
+                                                                            "description": {
+                                                                                "content": "(Required) The approval workflow provider ID. Known providers:\n- `F40AE6A6-7BFC-4ABF-9E2A-63120C21A538` — Feature flags / configuration\n- `D5EC9F3B-324E-4F8A-AF55-B69EDD48ECBE` — Access review requests\n",
+                                                                                "type": "text/plain"
+                                                                            }
+                                                                        },
+                                                                        {
+                                                                            "type": "any",
+                                                                            "value": "66477418-c29b-8fc4-182e-12c4a29daf29",
+                                                                            "key": "requestId",
+                                                                            "disabled": false,
+                                                                            "description": {
+                                                                                "content": "(Required) The access review request ID",
+                                                                                "type": "text/plain"
+                                                                            }
+                                                                        }
+                                                                    ]
+                                                                },
+                                                                "method": "DELETE",
+                                                                "body": {},
+                                                                "auth": null
+                                                            },
+                                                            "response": [
+                                                                {
+                                                                    "id": "4d9eb09b-3ff7-455a-b0f0-8ba196dc4e50",
+                                                                    "name": "Access review request deleted",
+                                                                    "originalRequest": {
+                                                                        "url": {
+                                                                            "path": [
+                                                                                "accessReviews",
+                                                                                "v2.0",
+                                                                                "approvalWorkflowProviders",
+                                                                                ":providerId",
+                                                                                "requests",
+                                                                                ":requestId"
+                                                                            ],
+                                                                            "host": [
+                                                                                "{{baseUrl}}"
+                                                                            ],
+                                                                            "query": [],
+                                                                            "variable": [
+                                                                                {
+                                                                                    "disabled": false,
+                                                                                    "description": {
+                                                                                        "content": "(Required) The approval workflow provider ID. Known providers:\n- `F40AE6A6-7BFC-4ABF-9E2A-63120C21A538` — Feature flags / configuration\n- `D5EC9F3B-324E-4F8A-AF55-B69EDD48ECBE` — Access review requests\n",
+                                                                                        "type": "text/plain"
+                                                                                    },
+                                                                                    "type": "any",
+                                                                                    "value": "66477418-c29b-8fc4-182e-12c4a29daf29",
+                                                                                    "key": "providerId"
+                                                                                },
+                                                                                {
+                                                                                    "disabled": false,
+                                                                                    "description": {
+                                                                                        "content": "(Required) The access review request ID",
+                                                                                        "type": "text/plain"
+                                                                                    },
+                                                                                    "type": "any",
+                                                                                    "value": "66477418-c29b-8fc4-182e-12c4a29daf29",
+                                                                                    "key": "requestId"
+                                                                                }
+                                                                            ]
+                                                                        },
+                                                                        "method": "DELETE",
+                                                                        "body": {}
+                                                                    },
+                                                                    "status": "No Content",
+                                                                    "code": 204,
+                                                                    "header": [],
+                                                                    "cookie": [],
+                                                                    "_postman_previewlanguage": "text"
+                                                                }
+                                                            ],
+                                                            "event": [],
+                                                            "protocolProfileBehavior": {
+                                                                "disableBodyPruning": true
+                                                            }
+                                                        },
+                                                        {
+                                                            "name": "instances",
+                                                            "description": "",
+                                                            "item": [
+                                                                {
+                                                                    "id": "ac4bc80c-bad7-4c96-93c8-d88144689590",
+                                                                    "name": "List instances of an access review",
+                                                                    "request": {
+                                                                        "name": "List instances of an access review",
+                                                                        "description": {
+                                                                            "content": "Retrieves all instances (review cycles) for a specific access review request.\nFor recurring reviews, each recurrence creates a new instance.\n",
+                                                                            "type": "text/plain"
+                                                                        },
+                                                                        "url": {
+                                                                            "path": [
+                                                                                "accessReviews",
+                                                                                "v2.0",
+                                                                                "approvalWorkflowProviders",
+                                                                                ":providerId",
+                                                                                "requests",
+                                                                                ":requestId",
+                                                                                "instances"
+                                                                            ],
+                                                                            "host": [
+                                                                                "{{baseUrl}}"
+                                                                            ],
+                                                                            "query": [],
+                                                                            "variable": [
+                                                                                {
+                                                                                    "type": "any",
+                                                                                    "value": "66477418-c29b-8fc4-182e-12c4a29daf29",
+                                                                                    "key": "providerId",
+                                                                                    "disabled": false,
+                                                                                    "description": {
+                                                                                        "content": "(Required) The approval workflow provider ID. Known providers:\n- `F40AE6A6-7BFC-4ABF-9E2A-63120C21A538` — Feature flags / configuration\n- `D5EC9F3B-324E-4F8A-AF55-B69EDD48ECBE` — Access review requests\n",
+                                                                                        "type": "text/plain"
+                                                                                    }
+                                                                                },
+                                                                                {
+                                                                                    "type": "any",
+                                                                                    "value": "66477418-c29b-8fc4-182e-12c4a29daf29",
+                                                                                    "key": "requestId",
+                                                                                    "disabled": false,
+                                                                                    "description": {
+                                                                                        "content": "(Required) The access review request ID",
+                                                                                        "type": "text/plain"
+                                                                                    }
+                                                                                }
+                                                                            ]
+                                                                        },
+                                                                        "header": [
+                                                                            {
+                                                                                "key": "Accept",
+                                                                                "value": "application/json"
+                                                                            }
+                                                                        ],
+                                                                        "method": "GET",
+                                                                        "body": {},
+                                                                        "auth": null
+                                                                    },
+                                                                    "response": [
+                                                                        {
+                                                                            "id": "9e471db8-c2a4-4659-b787-9716dd97a1d9",
+                                                                            "name": "List of access review instances",
+                                                                            "originalRequest": {
+                                                                                "url": {
+                                                                                    "path": [
+                                                                                        "accessReviews",
+                                                                                        "v2.0",
+                                                                                        "approvalWorkflowProviders",
+                                                                                        ":providerId",
+                                                                                        "requests",
+                                                                                        ":requestId",
+                                                                                        "instances"
+                                                                                    ],
+                                                                                    "host": [
+                                                                                        "{{baseUrl}}"
+                                                                                    ],
+                                                                                    "query": [],
+                                                                                    "variable": [
+                                                                                        {
+                                                                                            "disabled": false,
+                                                                                            "description": {
+                                                                                                "content": "(Required) The approval workflow provider ID. Known providers:\n- `F40AE6A6-7BFC-4ABF-9E2A-63120C21A538` — Feature flags / configuration\n- `D5EC9F3B-324E-4F8A-AF55-B69EDD48ECBE` — Access review requests\n",
+                                                                                                "type": "text/plain"
+                                                                                            },
+                                                                                            "type": "any",
+                                                                                            "value": "66477418-c29b-8fc4-182e-12c4a29daf29",
+                                                                                            "key": "providerId"
+                                                                                        },
+                                                                                        {
+                                                                                            "disabled": false,
+                                                                                            "description": {
+                                                                                                "content": "(Required) The access review request ID",
+                                                                                                "type": "text/plain"
+                                                                                            },
+                                                                                            "type": "any",
+                                                                                            "value": "66477418-c29b-8fc4-182e-12c4a29daf29",
+                                                                                            "key": "requestId"
+                                                                                        }
+                                                                                    ]
+                                                                                },
+                                                                                "header": [
+                                                                                    {
+                                                                                        "key": "Accept",
+                                                                                        "value": "application/json"
+                                                                                    }
+                                                                                ],
+                                                                                "method": "GET",
+                                                                                "body": {}
+                                                                            },
+                                                                            "status": "OK",
+                                                                            "code": 200,
+                                                                            "header": [
+                                                                                {
+                                                                                    "key": "Content-Type",
+                                                                                    "value": "application/json"
+                                                                                }
+                                                                            ],
+                                                                            "body": "{\n  \"@odata.context\": \"https://api.accessreviews.identitygovernance.azure.com/accessReviews/v2.0/$metadata#approvalWorkflowProviders('D5EC9F3B-324E-4F8A-AF55-B69EDD48ECBE')/requests('52a2c256-9a91-4f56-9edc-06969fdcc298')/instances\",\n  \"@odata.count\": 1,\n  \"value\": [\n    {\n      \"@odata.type\": \"#Microsoft.Azure.ActiveDirectory.AccessReviews.Api.Models.V2.Request\",\n      \"id\": \"acd75ae2-ec75-4345-9388-3dd2b57e3e02\",\n      \"parentReviewId\": \"00000000-0000-0000-0000-000000000000\",\n      \"stage\": 0,\n      \"displayName\": \"czvbxcvb\",\n      \"startDateTime\": \"2026-01-27T18:09:30.283Z\",\n      \"endDateTime\": \"2026-02-10T18:09:30.283Z\",\n      \"status\": \"Completed\",\n      \"state\": null,\n      \"businessFlowId\": \"4dec5ff3-622d-48da-8ff0-755f2ef0c9a8\",\n      \"partnerId\": \"d5ec9f3b-324e-4f8a-af55-b69edd48ecbe\",\n      \"reviewerType\": \"\",\n      \"description\": \"\",\n      \"emailFriendlyDescription\": \"\",\n      \"deDuplicationId\": null,\n      \"customData\": null,\n      \"businessFlowTemplateId\": \"00000000-0000-0000-0000-000000000000\",\n      \"policyTemplateId\": null,\n      \"schemaId\": null,\n      \"createdDateTime\": \"2026-01-27T18:09:30.2857108Z\",\n      \"recordVersion\": null,\n      \"version\": 0\n    },\n    {\n      \"@odata.type\": \"#Microsoft.Azure.ActiveDirectory.AccessReviews.Api.Models.V2.Request\",\n      \"id\": \"acd75ae2-ec75-4345-9388-3dd2b57e3e02\",\n      \"parentReviewId\": \"00000000-0000-0000-0000-000000000000\",\n      \"stage\": 0,\n      \"displayName\": \"czvbxcvb\",\n      \"startDateTime\": \"2026-01-27T18:09:30.283Z\",\n      \"endDateTime\": \"2026-02-10T18:09:30.283Z\",\n      \"status\": \"Completed\",\n      \"state\": null,\n      \"businessFlowId\": \"4dec5ff3-622d-48da-8ff0-755f2ef0c9a8\",\n      \"partnerId\": \"d5ec9f3b-324e-4f8a-af55-b69edd48ecbe\",\n      \"reviewerType\": \"\",\n      \"description\": \"\",\n      \"emailFriendlyDescription\": \"\",\n      \"deDuplicationId\": null,\n      \"customData\": null,\n      \"businessFlowTemplateId\": \"00000000-0000-0000-0000-000000000000\",\n      \"policyTemplateId\": null,\n      \"schemaId\": null,\n      \"createdDateTime\": \"2026-01-27T18:09:30.2857108Z\",\n      \"recordVersion\": null,\n      \"version\": 0\n    }\n  ]\n}",
+                                                                            "cookie": [],
+                                                                            "_postman_previewlanguage": "json"
+                                                                        }
+                                                                    ],
+                                                                    "event": [],
+                                                                    "protocolProfileBehavior": {
+                                                                        "disableBodyPruning": true
+                                                                    }
+                                                                },
+                                                                {
+                                                                    "name": "{instanceId}",
+                                                                    "description": "",
+                                                                    "item": [
+                                                                        {
+                                                                            "id": "ca3c0443-6803-48d3-87e4-8850dc47909f",
+                                                                            "name": "Get a specific access review instance",
+                                                                            "request": {
+                                                                                "name": "Get a specific access review instance",
+                                                                                "description": {},
+                                                                                "url": {
+                                                                                    "path": [
+                                                                                        "accessReviews",
+                                                                                        "v2.0",
+                                                                                        "approvalWorkflowProviders",
+                                                                                        ":providerId",
+                                                                                        "requests",
+                                                                                        ":requestId",
+                                                                                        "instances",
+                                                                                        ":instanceId"
+                                                                                    ],
+                                                                                    "host": [
+                                                                                        "{{baseUrl}}"
+                                                                                    ],
+                                                                                    "query": [],
+                                                                                    "variable": [
+                                                                                        {
+                                                                                            "type": "any",
+                                                                                            "value": "66477418-c29b-8fc4-182e-12c4a29daf29",
+                                                                                            "key": "providerId",
+                                                                                            "disabled": false,
+                                                                                            "description": {
+                                                                                                "content": "(Required) The approval workflow provider ID. Known providers:\n- `F40AE6A6-7BFC-4ABF-9E2A-63120C21A538` — Feature flags / configuration\n- `D5EC9F3B-324E-4F8A-AF55-B69EDD48ECBE` — Access review requests\n",
+                                                                                                "type": "text/plain"
+                                                                                            }
+                                                                                        },
+                                                                                        {
+                                                                                            "type": "any",
+                                                                                            "value": "66477418-c29b-8fc4-182e-12c4a29daf29",
+                                                                                            "key": "requestId",
+                                                                                            "disabled": false,
+                                                                                            "description": {
+                                                                                                "content": "(Required) The access review request ID",
+                                                                                                "type": "text/plain"
+                                                                                            }
+                                                                                        },
+                                                                                        {
+                                                                                            "type": "any",
+                                                                                            "value": "66477418-c29b-8fc4-182e-12c4a29daf29",
+                                                                                            "key": "instanceId",
+                                                                                            "disabled": false,
+                                                                                            "description": {
+                                                                                                "content": "(Required) ",
+                                                                                                "type": "text/plain"
+                                                                                            }
+                                                                                        }
+                                                                                    ]
+                                                                                },
+                                                                                "method": "GET",
+                                                                                "body": {},
+                                                                                "auth": null
+                                                                            },
+                                                                            "response": [
+                                                                                {
+                                                                                    "id": "4a2d4084-e7ec-4eeb-b56d-bda3ef42b851",
+                                                                                    "name": "Access review instance details",
+                                                                                    "originalRequest": {
+                                                                                        "url": {
+                                                                                            "path": [
+                                                                                                "accessReviews",
+                                                                                                "v2.0",
+                                                                                                "approvalWorkflowProviders",
+                                                                                                ":providerId",
+                                                                                                "requests",
+                                                                                                ":requestId",
+                                                                                                "instances",
+                                                                                                ":instanceId"
+                                                                                            ],
+                                                                                            "host": [
+                                                                                                "{{baseUrl}}"
+                                                                                            ],
+                                                                                            "query": [],
+                                                                                            "variable": [
+                                                                                                {
+                                                                                                    "disabled": false,
+                                                                                                    "description": {
+                                                                                                        "content": "(Required) The approval workflow provider ID. Known providers:\n- `F40AE6A6-7BFC-4ABF-9E2A-63120C21A538` — Feature flags / configuration\n- `D5EC9F3B-324E-4F8A-AF55-B69EDD48ECBE` — Access review requests\n",
+                                                                                                        "type": "text/plain"
+                                                                                                    },
+                                                                                                    "type": "any",
+                                                                                                    "value": "66477418-c29b-8fc4-182e-12c4a29daf29",
+                                                                                                    "key": "providerId"
+                                                                                                },
+                                                                                                {
+                                                                                                    "disabled": false,
+                                                                                                    "description": {
+                                                                                                        "content": "(Required) The access review request ID",
+                                                                                                        "type": "text/plain"
+                                                                                                    },
+                                                                                                    "type": "any",
+                                                                                                    "value": "66477418-c29b-8fc4-182e-12c4a29daf29",
+                                                                                                    "key": "requestId"
+                                                                                                },
+                                                                                                {
+                                                                                                    "disabled": false,
+                                                                                                    "description": {
+                                                                                                        "content": "(Required) ",
+                                                                                                        "type": "text/plain"
+                                                                                                    },
+                                                                                                    "type": "any",
+                                                                                                    "value": "66477418-c29b-8fc4-182e-12c4a29daf29",
+                                                                                                    "key": "instanceId"
+                                                                                                }
+                                                                                            ]
+                                                                                        },
+                                                                                        "method": "GET",
+                                                                                        "body": {}
+                                                                                    },
+                                                                                    "status": "OK",
+                                                                                    "code": 200,
+                                                                                    "header": [],
+                                                                                    "cookie": [],
+                                                                                    "_postman_previewlanguage": "text"
+                                                                                }
+                                                                            ],
+                                                                            "event": [],
+                                                                            "protocolProfileBehavior": {
+                                                                                "disableBodyPruning": true
+                                                                            }
+                                                                        },
+                                                                        {
+                                                                            "name": "decisions",
+                                                                            "description": "",
+                                                                            "item": [
+                                                                                {
+                                                                                    "id": "edefcec9-1461-4fa0-af37-f380c1ee125a",
+                                                                                    "name": "List decisions for an access review instance",
+                                                                                    "request": {
+                                                                                        "name": "List decisions for an access review instance",
+                                                                                        "description": {
+                                                                                            "content": "Retrieves all review decisions for a specific instance. Each decision\nrepresents one reviewer's determination for one reviewed access.\n",
+                                                                                            "type": "text/plain"
+                                                                                        },
+                                                                                        "url": {
+                                                                                            "path": [
+                                                                                                "accessReviews",
+                                                                                                "v2.0",
+                                                                                                "approvalWorkflowProviders",
+                                                                                                ":providerId",
+                                                                                                "requests",
+                                                                                                ":requestId",
+                                                                                                "instances",
+                                                                                                ":instanceId",
+                                                                                                "decisions"
+                                                                                            ],
+                                                                                            "host": [
+                                                                                                "{{baseUrl}}"
+                                                                                            ],
+                                                                                            "query": [
+                                                                                                {
+                                                                                                    "disabled": false,
+                                                                                                    "description": {
+                                                                                                        "content": "OData filter expression",
+                                                                                                        "type": "text/plain"
+                                                                                                    },
+                                                                                                    "key": "$filter",
+                                                                                                    "value": "string"
+                                                                                                },
+                                                                                                {
+                                                                                                    "disabled": false,
+                                                                                                    "description": {
+                                                                                                        "content": "Maximum number of results to return",
+                                                                                                        "type": "text/plain"
+                                                                                                    },
+                                                                                                    "key": "$top",
+                                                                                                    "value": "7267"
+                                                                                                }
+                                                                                            ],
+                                                                                            "variable": [
+                                                                                                {
+                                                                                                    "type": "any",
+                                                                                                    "value": "66477418-c29b-8fc4-182e-12c4a29daf29",
+                                                                                                    "key": "providerId",
+                                                                                                    "disabled": false,
+                                                                                                    "description": {
+                                                                                                        "content": "(Required) The approval workflow provider ID. Known providers:\n- `F40AE6A6-7BFC-4ABF-9E2A-63120C21A538` — Feature flags / configuration\n- `D5EC9F3B-324E-4F8A-AF55-B69EDD48ECBE` — Access review requests\n",
+                                                                                                        "type": "text/plain"
+                                                                                                    }
+                                                                                                },
+                                                                                                {
+                                                                                                    "type": "any",
+                                                                                                    "value": "66477418-c29b-8fc4-182e-12c4a29daf29",
+                                                                                                    "key": "requestId",
+                                                                                                    "disabled": false,
+                                                                                                    "description": {
+                                                                                                        "content": "(Required) The access review request ID",
+                                                                                                        "type": "text/plain"
+                                                                                                    }
+                                                                                                },
+                                                                                                {
+                                                                                                    "type": "any",
+                                                                                                    "value": "66477418-c29b-8fc4-182e-12c4a29daf29",
+                                                                                                    "key": "instanceId",
+                                                                                                    "disabled": false,
+                                                                                                    "description": {
+                                                                                                        "content": "(Required) ",
+                                                                                                        "type": "text/plain"
+                                                                                                    }
+                                                                                                }
+                                                                                            ]
+                                                                                        },
+                                                                                        "header": [
+                                                                                            {
+                                                                                                "key": "Accept",
+                                                                                                "value": "application/json"
+                                                                                            }
+                                                                                        ],
+                                                                                        "method": "GET",
+                                                                                        "body": {},
+                                                                                        "auth": null
+                                                                                    },
+                                                                                    "response": [
+                                                                                        {
+                                                                                            "id": "92f48654-a148-4429-a9fd-379181773a76",
+                                                                                            "name": "List of access review decisions",
+                                                                                            "originalRequest": {
+                                                                                                "url": {
+                                                                                                    "path": [
+                                                                                                        "accessReviews",
+                                                                                                        "v2.0",
+                                                                                                        "approvalWorkflowProviders",
+                                                                                                        ":providerId",
+                                                                                                        "requests",
+                                                                                                        ":requestId",
+                                                                                                        "instances",
+                                                                                                        ":instanceId",
+                                                                                                        "decisions"
+                                                                                                    ],
+                                                                                                    "host": [
+                                                                                                        "{{baseUrl}}"
+                                                                                                    ],
+                                                                                                    "query": [
+                                                                                                        {
+                                                                                                            "disabled": false,
+                                                                                                            "description": {
+                                                                                                                "content": "OData filter expression",
+                                                                                                                "type": "text/plain"
+                                                                                                            },
+                                                                                                            "key": "$filter",
+                                                                                                            "value": "string"
+                                                                                                        },
+                                                                                                        {
+                                                                                                            "disabled": false,
+                                                                                                            "description": {
+                                                                                                                "content": "Maximum number of results to return",
+                                                                                                                "type": "text/plain"
+                                                                                                            },
+                                                                                                            "key": "$top",
+                                                                                                            "value": "7267"
+                                                                                                        }
+                                                                                                    ],
+                                                                                                    "variable": [
+                                                                                                        {
+                                                                                                            "disabled": false,
+                                                                                                            "description": {
+                                                                                                                "content": "(Required) The approval workflow provider ID. Known providers:\n- `F40AE6A6-7BFC-4ABF-9E2A-63120C21A538` — Feature flags / configuration\n- `D5EC9F3B-324E-4F8A-AF55-B69EDD48ECBE` — Access review requests\n",
+                                                                                                                "type": "text/plain"
+                                                                                                            },
+                                                                                                            "type": "any",
+                                                                                                            "value": "66477418-c29b-8fc4-182e-12c4a29daf29",
+                                                                                                            "key": "providerId"
+                                                                                                        },
+                                                                                                        {
+                                                                                                            "disabled": false,
+                                                                                                            "description": {
+                                                                                                                "content": "(Required) The access review request ID",
+                                                                                                                "type": "text/plain"
+                                                                                                            },
+                                                                                                            "type": "any",
+                                                                                                            "value": "66477418-c29b-8fc4-182e-12c4a29daf29",
+                                                                                                            "key": "requestId"
+                                                                                                        },
+                                                                                                        {
+                                                                                                            "disabled": false,
+                                                                                                            "description": {
+                                                                                                                "content": "(Required) ",
+                                                                                                                "type": "text/plain"
+                                                                                                            },
+                                                                                                            "type": "any",
+                                                                                                            "value": "66477418-c29b-8fc4-182e-12c4a29daf29",
+                                                                                                            "key": "instanceId"
+                                                                                                        }
+                                                                                                    ]
+                                                                                                },
+                                                                                                "header": [
+                                                                                                    {
+                                                                                                        "key": "Accept",
+                                                                                                        "value": "application/json"
+                                                                                                    }
+                                                                                                ],
+                                                                                                "method": "GET",
+                                                                                                "body": {}
+                                                                                            },
+                                                                                            "status": "OK",
+                                                                                            "code": 200,
+                                                                                            "header": [
+                                                                                                {
+                                                                                                    "key": "Content-Type",
+                                                                                                    "value": "application/json"
+                                                                                                }
+                                                                                            ],
+                                                                                            "body": "{}",
+                                                                                            "cookie": [],
+                                                                                            "_postman_previewlanguage": "json"
+                                                                                        }
+                                                                                    ],
+                                                                                    "event": [],
+                                                                                    "protocolProfileBehavior": {
+                                                                                        "disableBodyPruning": true
+                                                                                    }
+                                                                                }
+                                                                            ]
+                                                                        },
+                                                                        {
+                                                                            "name": "stop",
+                                                                            "description": "",
+                                                                            "item": [
+                                                                                {
+                                                                                    "id": "984fdba7-da12-4dc9-8da6-c6c3eef563ad",
+                                                                                    "name": "Stop an access review instance",
+                                                                                    "request": {
+                                                                                        "name": "Stop an access review instance",
+                                                                                        "description": {
+                                                                                            "content": "Stops a currently active access review instance.\n\n**Warning:** This endpoint terminates an active review.\n",
+                                                                                            "type": "text/plain"
+                                                                                        },
+                                                                                        "url": {
+                                                                                            "path": [
+                                                                                                "accessReviews",
+                                                                                                "v2.0",
+                                                                                                "approvalWorkflowProviders",
+                                                                                                ":providerId",
+                                                                                                "requests",
+                                                                                                ":requestId",
+                                                                                                "instances",
+                                                                                                ":instanceId",
+                                                                                                "stop"
+                                                                                            ],
+                                                                                            "host": [
+                                                                                                "{{baseUrl}}"
+                                                                                            ],
+                                                                                            "query": [],
+                                                                                            "variable": [
+                                                                                                {
+                                                                                                    "type": "any",
+                                                                                                    "value": "66477418-c29b-8fc4-182e-12c4a29daf29",
+                                                                                                    "key": "providerId",
+                                                                                                    "disabled": false,
+                                                                                                    "description": {
+                                                                                                        "content": "(Required) The approval workflow provider ID. Known providers:\n- `F40AE6A6-7BFC-4ABF-9E2A-63120C21A538` — Feature flags / configuration\n- `D5EC9F3B-324E-4F8A-AF55-B69EDD48ECBE` — Access review requests\n",
+                                                                                                        "type": "text/plain"
+                                                                                                    }
+                                                                                                },
+                                                                                                {
+                                                                                                    "type": "any",
+                                                                                                    "value": "66477418-c29b-8fc4-182e-12c4a29daf29",
+                                                                                                    "key": "requestId",
+                                                                                                    "disabled": false,
+                                                                                                    "description": {
+                                                                                                        "content": "(Required) The access review request ID",
+                                                                                                        "type": "text/plain"
+                                                                                                    }
+                                                                                                },
+                                                                                                {
+                                                                                                    "type": "any",
+                                                                                                    "value": "66477418-c29b-8fc4-182e-12c4a29daf29",
+                                                                                                    "key": "instanceId",
+                                                                                                    "disabled": false,
+                                                                                                    "description": {
+                                                                                                        "content": "(Required) ",
+                                                                                                        "type": "text/plain"
+                                                                                                    }
+                                                                                                }
+                                                                                            ]
+                                                                                        },
+                                                                                        "method": "POST",
+                                                                                        "body": {},
+                                                                                        "auth": null
+                                                                                    },
+                                                                                    "response": [
+                                                                                        {
+                                                                                            "id": "5a864b9c-ae97-4488-a1e1-8d14a9a36a5d",
+                                                                                            "name": "Review instance stopped",
+                                                                                            "originalRequest": {
+                                                                                                "url": {
+                                                                                                    "path": [
+                                                                                                        "accessReviews",
+                                                                                                        "v2.0",
+                                                                                                        "approvalWorkflowProviders",
+                                                                                                        ":providerId",
+                                                                                                        "requests",
+                                                                                                        ":requestId",
+                                                                                                        "instances",
+                                                                                                        ":instanceId",
+                                                                                                        "stop"
+                                                                                                    ],
+                                                                                                    "host": [
+                                                                                                        "{{baseUrl}}"
+                                                                                                    ],
+                                                                                                    "query": [],
+                                                                                                    "variable": [
+                                                                                                        {
+                                                                                                            "disabled": false,
+                                                                                                            "description": {
+                                                                                                                "content": "(Required) The approval workflow provider ID. Known providers:\n- `F40AE6A6-7BFC-4ABF-9E2A-63120C21A538` — Feature flags / configuration\n- `D5EC9F3B-324E-4F8A-AF55-B69EDD48ECBE` — Access review requests\n",
+                                                                                                                "type": "text/plain"
+                                                                                                            },
+                                                                                                            "type": "any",
+                                                                                                            "value": "66477418-c29b-8fc4-182e-12c4a29daf29",
+                                                                                                            "key": "providerId"
+                                                                                                        },
+                                                                                                        {
+                                                                                                            "disabled": false,
+                                                                                                            "description": {
+                                                                                                                "content": "(Required) The access review request ID",
+                                                                                                                "type": "text/plain"
+                                                                                                            },
+                                                                                                            "type": "any",
+                                                                                                            "value": "66477418-c29b-8fc4-182e-12c4a29daf29",
+                                                                                                            "key": "requestId"
+                                                                                                        },
+                                                                                                        {
+                                                                                                            "disabled": false,
+                                                                                                            "description": {
+                                                                                                                "content": "(Required) ",
+                                                                                                                "type": "text/plain"
+                                                                                                            },
+                                                                                                            "type": "any",
+                                                                                                            "value": "66477418-c29b-8fc4-182e-12c4a29daf29",
+                                                                                                            "key": "instanceId"
+                                                                                                        }
+                                                                                                    ]
+                                                                                                },
+                                                                                                "method": "POST",
+                                                                                                "body": {}
+                                                                                            },
+                                                                                            "status": "OK",
+                                                                                            "code": 200,
+                                                                                            "header": [],
+                                                                                            "cookie": [],
+                                                                                            "_postman_previewlanguage": "text"
+                                                                                        }
+                                                                                    ],
+                                                                                    "event": [],
+                                                                                    "protocolProfileBehavior": {
+                                                                                        "disableBodyPruning": true
+                                                                                    }
+                                                                                }
+                                                                            ]
+                                                                        },
+                                                                        {
+                                                                            "name": "applyDecisions",
+                                                                            "description": "",
+                                                                            "item": [
+                                                                                {
+                                                                                    "id": "183d26f7-c8d3-446d-9555-07811f6c0aab",
+                                                                                    "name": "Apply decisions for an access review instance",
+                                                                                    "request": {
+                                                                                        "name": "Apply decisions for an access review instance",
+                                                                                        "description": {
+                                                                                            "content": "Applies the review decisions for a completed instance. This triggers\nthe actual access changes (removal, approval, etc.) based on the decisions.\n\n**Warning:** This endpoint applies access changes.\n",
+                                                                                            "type": "text/plain"
+                                                                                        },
+                                                                                        "url": {
+                                                                                            "path": [
+                                                                                                "accessReviews",
+                                                                                                "v2.0",
+                                                                                                "approvalWorkflowProviders",
+                                                                                                ":providerId",
+                                                                                                "requests",
+                                                                                                ":requestId",
+                                                                                                "instances",
+                                                                                                ":instanceId",
+                                                                                                "applyDecisions"
+                                                                                            ],
+                                                                                            "host": [
+                                                                                                "{{baseUrl}}"
+                                                                                            ],
+                                                                                            "query": [],
+                                                                                            "variable": [
+                                                                                                {
+                                                                                                    "type": "any",
+                                                                                                    "value": "66477418-c29b-8fc4-182e-12c4a29daf29",
+                                                                                                    "key": "providerId",
+                                                                                                    "disabled": false,
+                                                                                                    "description": {
+                                                                                                        "content": "(Required) The approval workflow provider ID. Known providers:\n- `F40AE6A6-7BFC-4ABF-9E2A-63120C21A538` — Feature flags / configuration\n- `D5EC9F3B-324E-4F8A-AF55-B69EDD48ECBE` — Access review requests\n",
+                                                                                                        "type": "text/plain"
+                                                                                                    }
+                                                                                                },
+                                                                                                {
+                                                                                                    "type": "any",
+                                                                                                    "value": "66477418-c29b-8fc4-182e-12c4a29daf29",
+                                                                                                    "key": "requestId",
+                                                                                                    "disabled": false,
+                                                                                                    "description": {
+                                                                                                        "content": "(Required) The access review request ID",
+                                                                                                        "type": "text/plain"
+                                                                                                    }
+                                                                                                },
+                                                                                                {
+                                                                                                    "type": "any",
+                                                                                                    "value": "66477418-c29b-8fc4-182e-12c4a29daf29",
+                                                                                                    "key": "instanceId",
+                                                                                                    "disabled": false,
+                                                                                                    "description": {
+                                                                                                        "content": "(Required) ",
+                                                                                                        "type": "text/plain"
+                                                                                                    }
+                                                                                                }
+                                                                                            ]
+                                                                                        },
+                                                                                        "method": "POST",
+                                                                                        "body": {},
+                                                                                        "auth": null
+                                                                                    },
+                                                                                    "response": [
+                                                                                        {
+                                                                                            "id": "1296c4de-d930-4abc-93a4-ad9dc92760c7",
+                                                                                            "name": "Decisions applied",
+                                                                                            "originalRequest": {
+                                                                                                "url": {
+                                                                                                    "path": [
+                                                                                                        "accessReviews",
+                                                                                                        "v2.0",
+                                                                                                        "approvalWorkflowProviders",
+                                                                                                        ":providerId",
+                                                                                                        "requests",
+                                                                                                        ":requestId",
+                                                                                                        "instances",
+                                                                                                        ":instanceId",
+                                                                                                        "applyDecisions"
+                                                                                                    ],
+                                                                                                    "host": [
+                                                                                                        "{{baseUrl}}"
+                                                                                                    ],
+                                                                                                    "query": [],
+                                                                                                    "variable": [
+                                                                                                        {
+                                                                                                            "disabled": false,
+                                                                                                            "description": {
+                                                                                                                "content": "(Required) The approval workflow provider ID. Known providers:\n- `F40AE6A6-7BFC-4ABF-9E2A-63120C21A538` — Feature flags / configuration\n- `D5EC9F3B-324E-4F8A-AF55-B69EDD48ECBE` — Access review requests\n",
+                                                                                                                "type": "text/plain"
+                                                                                                            },
+                                                                                                            "type": "any",
+                                                                                                            "value": "66477418-c29b-8fc4-182e-12c4a29daf29",
+                                                                                                            "key": "providerId"
+                                                                                                        },
+                                                                                                        {
+                                                                                                            "disabled": false,
+                                                                                                            "description": {
+                                                                                                                "content": "(Required) The access review request ID",
+                                                                                                                "type": "text/plain"
+                                                                                                            },
+                                                                                                            "type": "any",
+                                                                                                            "value": "66477418-c29b-8fc4-182e-12c4a29daf29",
+                                                                                                            "key": "requestId"
+                                                                                                        },
+                                                                                                        {
+                                                                                                            "disabled": false,
+                                                                                                            "description": {
+                                                                                                                "content": "(Required) ",
+                                                                                                                "type": "text/plain"
+                                                                                                            },
+                                                                                                            "type": "any",
+                                                                                                            "value": "66477418-c29b-8fc4-182e-12c4a29daf29",
+                                                                                                            "key": "instanceId"
+                                                                                                        }
+                                                                                                    ]
+                                                                                                },
+                                                                                                "method": "POST",
+                                                                                                "body": {}
+                                                                                            },
+                                                                                            "status": "OK",
+                                                                                            "code": 200,
+                                                                                            "header": [],
+                                                                                            "cookie": [],
+                                                                                            "_postman_previewlanguage": "text"
+                                                                                        }
+                                                                                    ],
+                                                                                    "event": [],
+                                                                                    "protocolProfileBehavior": {
+                                                                                        "disableBodyPruning": true
+                                                                                    }
+                                                                                }
+                                                                            ]
+                                                                        },
+                                                                        {
+                                                                            "name": "resetDecisions",
+                                                                            "description": "",
+                                                                            "item": [
+                                                                                {
+                                                                                    "id": "41087c7a-9274-4403-b7e9-f286c6f17804",
+                                                                                    "name": "Reset decisions for an access review instance",
+                                                                                    "request": {
+                                                                                        "name": "Reset decisions for an access review instance",
+                                                                                        "description": {
+                                                                                            "content": "Resets all decisions for an active review instance back to NotReviewed.\n\n**Warning:** This endpoint clears all review progress.\n",
+                                                                                            "type": "text/plain"
+                                                                                        },
+                                                                                        "url": {
+                                                                                            "path": [
+                                                                                                "accessReviews",
+                                                                                                "v2.0",
+                                                                                                "approvalWorkflowProviders",
+                                                                                                ":providerId",
+                                                                                                "requests",
+                                                                                                ":requestId",
+                                                                                                "instances",
+                                                                                                ":instanceId",
+                                                                                                "resetDecisions"
+                                                                                            ],
+                                                                                            "host": [
+                                                                                                "{{baseUrl}}"
+                                                                                            ],
+                                                                                            "query": [],
+                                                                                            "variable": [
+                                                                                                {
+                                                                                                    "type": "any",
+                                                                                                    "value": "66477418-c29b-8fc4-182e-12c4a29daf29",
+                                                                                                    "key": "providerId",
+                                                                                                    "disabled": false,
+                                                                                                    "description": {
+                                                                                                        "content": "(Required) The approval workflow provider ID. Known providers:\n- `F40AE6A6-7BFC-4ABF-9E2A-63120C21A538` — Feature flags / configuration\n- `D5EC9F3B-324E-4F8A-AF55-B69EDD48ECBE` — Access review requests\n",
+                                                                                                        "type": "text/plain"
+                                                                                                    }
+                                                                                                },
+                                                                                                {
+                                                                                                    "type": "any",
+                                                                                                    "value": "66477418-c29b-8fc4-182e-12c4a29daf29",
+                                                                                                    "key": "requestId",
+                                                                                                    "disabled": false,
+                                                                                                    "description": {
+                                                                                                        "content": "(Required) The access review request ID",
+                                                                                                        "type": "text/plain"
+                                                                                                    }
+                                                                                                },
+                                                                                                {
+                                                                                                    "type": "any",
+                                                                                                    "value": "66477418-c29b-8fc4-182e-12c4a29daf29",
+                                                                                                    "key": "instanceId",
+                                                                                                    "disabled": false,
+                                                                                                    "description": {
+                                                                                                        "content": "(Required) ",
+                                                                                                        "type": "text/plain"
+                                                                                                    }
+                                                                                                }
+                                                                                            ]
+                                                                                        },
+                                                                                        "method": "POST",
+                                                                                        "body": {},
+                                                                                        "auth": null
+                                                                                    },
+                                                                                    "response": [
+                                                                                        {
+                                                                                            "id": "8ead7745-d84c-491f-b841-124bcfad81ae",
+                                                                                            "name": "Decisions reset",
+                                                                                            "originalRequest": {
+                                                                                                "url": {
+                                                                                                    "path": [
+                                                                                                        "accessReviews",
+                                                                                                        "v2.0",
+                                                                                                        "approvalWorkflowProviders",
+                                                                                                        ":providerId",
+                                                                                                        "requests",
+                                                                                                        ":requestId",
+                                                                                                        "instances",
+                                                                                                        ":instanceId",
+                                                                                                        "resetDecisions"
+                                                                                                    ],
+                                                                                                    "host": [
+                                                                                                        "{{baseUrl}}"
+                                                                                                    ],
+                                                                                                    "query": [],
+                                                                                                    "variable": [
+                                                                                                        {
+                                                                                                            "disabled": false,
+                                                                                                            "description": {
+                                                                                                                "content": "(Required) The approval workflow provider ID. Known providers:\n- `F40AE6A6-7BFC-4ABF-9E2A-63120C21A538` — Feature flags / configuration\n- `D5EC9F3B-324E-4F8A-AF55-B69EDD48ECBE` — Access review requests\n",
+                                                                                                                "type": "text/plain"
+                                                                                                            },
+                                                                                                            "type": "any",
+                                                                                                            "value": "66477418-c29b-8fc4-182e-12c4a29daf29",
+                                                                                                            "key": "providerId"
+                                                                                                        },
+                                                                                                        {
+                                                                                                            "disabled": false,
+                                                                                                            "description": {
+                                                                                                                "content": "(Required) The access review request ID",
+                                                                                                                "type": "text/plain"
+                                                                                                            },
+                                                                                                            "type": "any",
+                                                                                                            "value": "66477418-c29b-8fc4-182e-12c4a29daf29",
+                                                                                                            "key": "requestId"
+                                                                                                        },
+                                                                                                        {
+                                                                                                            "disabled": false,
+                                                                                                            "description": {
+                                                                                                                "content": "(Required) ",
+                                                                                                                "type": "text/plain"
+                                                                                                            },
+                                                                                                            "type": "any",
+                                                                                                            "value": "66477418-c29b-8fc4-182e-12c4a29daf29",
+                                                                                                            "key": "instanceId"
+                                                                                                        }
+                                                                                                    ]
+                                                                                                },
+                                                                                                "method": "POST",
+                                                                                                "body": {}
+                                                                                            },
+                                                                                            "status": "OK",
+                                                                                            "code": 200,
+                                                                                            "header": [],
+                                                                                            "cookie": [],
+                                                                                            "_postman_previewlanguage": "text"
+                                                                                        }
+                                                                                    ],
+                                                                                    "event": [],
+                                                                                    "protocolProfileBehavior": {
+                                                                                        "disableBodyPruning": true
+                                                                                    }
+                                                                                }
+                                                                            ]
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "auth": {
+        "type": "bearer",
+        "bearer": [
+            {
+                "type": "any",
+                "value": "{{bearerToken}}",
+                "key": "token"
+            }
+        ]
+    },
+    "event": [],
+    "variable": [
+        {
+            "key": "baseUrl",
+            "value": "https://api.accessreviews.identitygovernance.azure.com"
+        }
+    ],
+    "info": {
+        "_postman_id": "e0044200-c004-4e8e-8fad-4a01e04d3f92",
+        "name": "Entra IDGov",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+        "description": {
+            "content": "The Entra IDGov (Identity Governance) API is used by the Microsoft Entra portal\n(entra.microsoft.com → Identity Governance → Access Reviews) for managing access\nreview campaigns and approval workflows, including:\n\n  - Access Review Definitions and Instances\n  - Approval Workflow Providers\n  - Access Review Requests and Decisions\n  - Feature Flags and Partner Tenant Settings\n  - Consent and Terms of Use Approvals\n\nAll endpoints are served from `api.accessreviews.identitygovernance.azure.com`\nand require a valid Azure AD bearer token.\n\n**Note:** This specification was generated through browser traffic analysis of the\nEntra portal. The access reviews service uses provider-based routing where different\nproviders (identified by GUID) handle different review types:\n- `F40AE6A6-7BFC-4ABF-9E2A-63120C21A538` — Feature flags and configuration\n- `D5EC9F3B-324E-4F8A-AF55-B69EDD48ECBE` — Access review requests\n\n\nContact Support:\n Name: nodoc",
+            "type": "text/plain"
+        }
+    }
+}

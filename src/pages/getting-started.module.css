@@ -1,0 +1,208 @@
+.pageHeader {
+  padding: 4.5rem 0 3rem;
+  background:
+    radial-gradient(circle at top right, rgba(64, 243, 157, 0.18), transparent 30%),
+    linear-gradient(180deg, rgba(1, 42, 45, 0.08), transparent 100%);
+}
+
+.eyebrow {
+  margin-bottom: 0.75rem;
+  color: var(--ifm-color-primary);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.pageTitle {
+  max-width: 16ch;
+  margin-bottom: 1rem;
+  font-size: clamp(2.4rem, 6vw, 4rem);
+  line-height: 1;
+}
+
+.pageIntro {
+  max-width: 56rem;
+  margin-bottom: 1.5rem;
+  font-size: 1.1rem;
+  line-height: 1.65;
+}
+
+.headerActions,
+.cardActions,
+.baseUrlRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.section,
+.sectionAlt {
+  padding: 2.5rem 0 3rem;
+}
+
+.sectionAlt {
+  background: rgba(1, 42, 45, 0.04);
+}
+
+[data-theme="dark"] .sectionAlt {
+  background: rgba(64, 243, 157, 0.05);
+}
+
+.sectionHeader {
+  max-width: 48rem;
+  margin-bottom: 1.5rem;
+}
+
+.sectionHeader h2 {
+  margin-bottom: 0.5rem;
+}
+
+.sectionHeader p {
+  margin-bottom: 0;
+  color: var(--ifm-color-emphasis-700);
+}
+
+.notice,
+.stepCard,
+.modelCard,
+.guideCard,
+.detailCard,
+.principleCard,
+.apiCard {
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 1rem;
+  background: var(--ifm-background-surface-color);
+  box-shadow: 0 18px 40px rgba(1, 42, 45, 0.06);
+}
+
+.notice {
+  padding: 1rem 1.25rem;
+  line-height: 1.7;
+}
+
+.stepsGrid,
+.modelGrid,
+.principlesGrid,
+.apiGrid {
+  display: grid;
+  gap: 1rem;
+}
+
+.stepsGrid,
+.modelGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.principlesGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.apiGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.stepCard,
+.modelCard,
+.guideCard,
+.principleCard,
+.apiCard {
+  padding: 1.25rem;
+}
+
+.stepNumber {
+  display: inline-flex;
+  width: 2.5rem;
+  height: 2.5rem;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.75rem;
+  border-radius: 999px;
+  background: rgba(64, 243, 157, 0.18);
+  color: var(--ifm-color-primary);
+  font-weight: 700;
+}
+
+.cardTitle {
+  margin-bottom: 0.5rem;
+}
+
+.cardMeta {
+  color: var(--ifm-color-emphasis-700);
+}
+
+.guideStack {
+  display: grid;
+  gap: 1rem;
+}
+
+.guideHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.authBadge {
+  flex-shrink: 0;
+  padding: 0.45rem 0.8rem;
+  border-radius: 999px;
+  background: rgba(64, 243, 157, 0.18);
+  color: var(--ifm-color-primary);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.codePill {
+  display: inline-flex;
+  padding: 0.45rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  background: rgba(1, 42, 45, 0.04);
+}
+
+.guideGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.detailCard {
+  padding: 1rem;
+}
+
+.subheading {
+  margin-bottom: 0.75rem;
+}
+
+.list {
+  margin-bottom: 0;
+  padding-left: 1.1rem;
+}
+
+.list li + li {
+  margin-top: 0.5rem;
+}
+
+.principleCard {
+  line-height: 1.65;
+}
+
+@media screen and (max-width: 996px) {
+  .pageHeader {
+    padding: 3.5rem 0 2.5rem;
+  }
+
+  .stepsGrid,
+  .modelGrid,
+  .principlesGrid,
+  .guideGrid,
+  .apiGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .guideHeader {
+    flex-direction: column;
+  }
+}

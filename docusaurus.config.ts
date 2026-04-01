@@ -2,10 +2,31 @@ import { themes as prismThemes } from "prism-react-renderer";
 import type { Config } from "@docusaurus/types";
 import type * as Preset from "@docusaurus/preset-classic";
 
+const siteTitle = "nodoc";
+const siteTagline = "documenting undocumented interfaces";
+const siteDescription =
+  "OpenAPI specs and checked-in Postman collections for undocumented Microsoft portal APIs across Defender XDR, M365 Admin, Purview, and Entra surfaces.";
+
 const config: Config = {
-  title: "nodoc",
-  tagline: "documenting undocumented interfaces",
+  title: siteTitle,
+  tagline: siteTagline,
+  titleDelimiter: "·",
   favicon: "img/favicon.svg",
+  headTags: [
+    {
+      tagName: "script",
+      attributes: {
+        type: "application/ld+json",
+      },
+      innerHTML: JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        name: siteTitle,
+        url: "https://nathanmcnulty.github.io/nodoc/",
+        description: siteDescription,
+      }),
+    },
+  ],
 
   // Set the production url of your site here
   url: "https://nathanmcnulty.github.io",
@@ -60,6 +81,10 @@ const config: Config = {
       {
         docs: false,
         blog: false,
+        sitemap: {
+          changefreq: "weekly",
+          priority: 0.7,
+        },
         theme: {
           customCss: "./src/css/custom.css",
         },
@@ -67,6 +92,18 @@ const config: Config = {
     ],
   ],
   themeConfig: {
+    image: "img/nodoc-social-card.svg",
+    metadata: [
+      {
+        name: "keywords",
+        content:
+          "undocumented APIs, Microsoft portal APIs, Defender XDR API, Microsoft 365 admin API, Purview API, Entra API, OpenAPI, Postman",
+      },
+      {
+        property: "og:type",
+        content: "website",
+      },
+    ],
     colorMode: {
       respectPrefersColorScheme: true
     },
@@ -74,7 +111,12 @@ const config: Config = {
       title: "nodoc",
       items: [
         {
-          href: "https://www.postman.com/dolphinlabs",
+          to: "/getting-started",
+          label: "Getting Started",
+          position: "left",
+        },
+        {
+          href: "https://www.postman.com/dolphinlabs/workspace/nodoc",
           className: "icon--postman navbar--icon-link",
           "aria-label": "Postman collection",
           position: "right",

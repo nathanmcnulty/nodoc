@@ -21,3 +21,11 @@ When contributing, please ensure that submissions conform to the linting configu
 | --------- | ---------- | ------------------ |
 | `yaml`    | `yamllint` | `.yamllint.yaml`   |
 | `OpenAPI` | `redocly`  | `redocly.yaml`     |
+
+## Postman collections
+
+Checked-in Postman collections live under `postman/collections/` and are generated from the OpenAPI specs in this repository.
+
+- Do not edit the checked-in collection JSON by hand.
+- Regenerate them with `npm run generate:postman`.
+- When specs change, commit the updated collections alongside the spec changes so the validation workflow stays green.

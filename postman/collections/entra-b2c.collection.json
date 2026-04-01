@@ -1,0 +1,715 @@
+{
+    "item": [
+        {
+            "name": "api",
+            "description": "",
+            "item": [
+                {
+                    "name": "adminflows",
+                    "description": "",
+                    "item": [
+                        {
+                            "id": "088422de-786e-4853-9e69-b718a4b77841",
+                            "name": "List admin user flows",
+                            "request": {
+                                "name": "List admin user flows",
+                                "description": {
+                                    "content": "Retrieves all available user flow templates for the B2C tenant. Each flow\nrepresents a pre-built authentication experience (sign-up, sign-in, profile\nediting, or password reset).\n\nReturns flow definitions with their display names, descriptions, tags, and\nenabled status. The `tags` array classifies each flow by type and provider.\n",
+                                    "type": "text/plain"
+                                },
+                                "url": {
+                                    "path": [
+                                        "api",
+                                        "adminflows"
+                                    ],
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "query": [
+                                        {
+                                            "disabled": false,
+                                            "description": {
+                                                "content": "(Required) The tenant identifier. Accepts either the tenant object ID (GUID)\nor the tenant domain name (e.g., `contoso.onmicrosoft.com`).\n",
+                                                "type": "text/plain"
+                                            },
+                                            "key": "tenantId",
+                                            "value": "847b5907-ca15-40f4-b171-eb18619dbfab"
+                                        }
+                                    ],
+                                    "variable": []
+                                },
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "method": "GET",
+                                "body": {},
+                                "auth": null
+                            },
+                            "response": [
+                                {
+                                    "id": "f49aeacc-b117-4e6e-9844-cf70b0ac2ca3",
+                                    "name": "List of admin user flows",
+                                    "originalRequest": {
+                                        "url": {
+                                            "path": [
+                                                "api",
+                                                "adminflows"
+                                            ],
+                                            "host": [
+                                                "{{baseUrl}}"
+                                            ],
+                                            "query": [
+                                                {
+                                                    "disabled": false,
+                                                    "description": {
+                                                        "content": "(Required) The tenant identifier. Accepts either the tenant object ID (GUID)\nor the tenant domain name (e.g., `contoso.onmicrosoft.com`).\n",
+                                                        "type": "text/plain"
+                                                    },
+                                                    "key": "tenantId",
+                                                    "value": "847b5907-ca15-40f4-b171-eb18619dbfab"
+                                                }
+                                            ],
+                                            "variable": []
+                                        },
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            }
+                                        ],
+                                        "method": "GET",
+                                        "body": {}
+                                    },
+                                    "status": "OK",
+                                    "code": 200,
+                                    "header": [
+                                        {
+                                            "key": "Content-Type",
+                                            "value": "application/json"
+                                        }
+                                    ],
+                                    "body": "[\n  {\n    \"id\": \"AADSignupOrSignIn\",\n    \"displayName\": \"Sign up and sign in (Recommended)\",\n    \"description\": \"Lets the user register for or log into their account\",\n    \"tags\": [\n      \"TagAAD\",\n      \"TagType:SignUpOrSignIn\",\n      \"TagUJ:AADRecommended\"\n    ],\n    \"enabled\": true\n  },\n  {\n    \"id\": \"AADSignupOrSignIn\",\n    \"displayName\": \"Sign up and sign in (Recommended)\",\n    \"description\": \"Lets the user register for or log into their account\",\n    \"tags\": [\n      \"TagAAD\",\n      \"TagType:SignUpOrSignIn\",\n      \"TagUJ:AADRecommended\"\n    ],\n    \"enabled\": true\n  }\n]",
+                                    "cookie": [],
+                                    "_postman_previewlanguage": "json"
+                                },
+                                {
+                                    "id": "50e79a81-c76d-4da6-b3b9-de6f55659341",
+                                    "name": "B2C features not enabled for tenant",
+                                    "originalRequest": {
+                                        "url": {
+                                            "path": [
+                                                "api",
+                                                "adminflows"
+                                            ],
+                                            "host": [
+                                                "{{baseUrl}}"
+                                            ],
+                                            "query": [
+                                                {
+                                                    "disabled": false,
+                                                    "description": {
+                                                        "content": "(Required) The tenant identifier. Accepts either the tenant object ID (GUID)\nor the tenant domain name (e.g., `contoso.onmicrosoft.com`).\n",
+                                                        "type": "text/plain"
+                                                    },
+                                                    "key": "tenantId",
+                                                    "value": "847b5907-ca15-40f4-b171-eb18619dbfab"
+                                                }
+                                            ],
+                                            "variable": []
+                                        },
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            }
+                                        ],
+                                        "method": "GET",
+                                        "body": {}
+                                    },
+                                    "status": "Bad Request",
+                                    "code": 400,
+                                    "header": [
+                                        {
+                                            "key": "Content-Type",
+                                            "value": "application/json"
+                                        }
+                                    ],
+                                    "body": "{\n  \"message\": \"An error has occurred.\",\n  \"exceptionMessage\": \"The feature self service sign up is not enabled for the tenant 'contoso.onmicrosoft.com'\",\n  \"correlationId\": \"95927db1-9de2-4b3d-a32a-06b689dc3550\",\n  \"code\": \"AADB2C99039\",\n  \"stackTrace\": null\n}",
+                                    "cookie": [],
+                                    "_postman_previewlanguage": "json"
+                                }
+                            ],
+                            "event": [],
+                            "protocolProfileBehavior": {
+                                "disableBodyPruning": true
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "adminuserjourneys",
+                    "description": "",
+                    "item": [
+                        {
+                            "id": "f9b0fd5a-34a9-4e22-a734-446d8f3eaa3b",
+                            "name": "List admin user journeys",
+                            "request": {
+                                "name": "List admin user journeys",
+                                "description": {
+                                    "content": "Retrieves custom user journeys (Identity Experience Framework policies)\nconfigured for the B2C tenant.\n\n**Note:** Returns 400 if self-service sign-up is not enabled for the tenant.\nRequires B2C Premium licensing with custom policy support.\n",
+                                    "type": "text/plain"
+                                },
+                                "url": {
+                                    "path": [
+                                        "api",
+                                        "adminuserjourneys"
+                                    ],
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "query": [
+                                        {
+                                            "disabled": false,
+                                            "description": {
+                                                "content": "(Required) The tenant identifier. Accepts either the tenant object ID (GUID)\nor the tenant domain name (e.g., `contoso.onmicrosoft.com`).\n",
+                                                "type": "text/plain"
+                                            },
+                                            "key": "tenantId",
+                                            "value": "847b5907-ca15-40f4-b171-eb18619dbfab"
+                                        }
+                                    ],
+                                    "variable": []
+                                },
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "method": "GET",
+                                "body": {},
+                                "auth": null
+                            },
+                            "response": [
+                                {
+                                    "id": "8f650b70-d27d-4ad3-9bfa-b0c245ad7bea",
+                                    "name": "List of custom user journeys",
+                                    "originalRequest": {
+                                        "url": {
+                                            "path": [
+                                                "api",
+                                                "adminuserjourneys"
+                                            ],
+                                            "host": [
+                                                "{{baseUrl}}"
+                                            ],
+                                            "query": [
+                                                {
+                                                    "disabled": false,
+                                                    "description": {
+                                                        "content": "(Required) The tenant identifier. Accepts either the tenant object ID (GUID)\nor the tenant domain name (e.g., `contoso.onmicrosoft.com`).\n",
+                                                        "type": "text/plain"
+                                                    },
+                                                    "key": "tenantId",
+                                                    "value": "847b5907-ca15-40f4-b171-eb18619dbfab"
+                                                }
+                                            ],
+                                            "variable": []
+                                        },
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            }
+                                        ],
+                                        "method": "GET",
+                                        "body": {}
+                                    },
+                                    "status": "OK",
+                                    "code": 200,
+                                    "header": [
+                                        {
+                                            "key": "Content-Type",
+                                            "value": "application/json"
+                                        }
+                                    ],
+                                    "body": "[]",
+                                    "cookie": [],
+                                    "_postman_previewlanguage": "json"
+                                },
+                                {
+                                    "id": "5c599008-abd5-4d42-b710-e852b3dd31be",
+                                    "name": "Self-service sign-up not enabled",
+                                    "originalRequest": {
+                                        "url": {
+                                            "path": [
+                                                "api",
+                                                "adminuserjourneys"
+                                            ],
+                                            "host": [
+                                                "{{baseUrl}}"
+                                            ],
+                                            "query": [
+                                                {
+                                                    "disabled": false,
+                                                    "description": {
+                                                        "content": "(Required) The tenant identifier. Accepts either the tenant object ID (GUID)\nor the tenant domain name (e.g., `contoso.onmicrosoft.com`).\n",
+                                                        "type": "text/plain"
+                                                    },
+                                                    "key": "tenantId",
+                                                    "value": "847b5907-ca15-40f4-b171-eb18619dbfab"
+                                                }
+                                            ],
+                                            "variable": []
+                                        },
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            }
+                                        ],
+                                        "method": "GET",
+                                        "body": {}
+                                    },
+                                    "status": "Bad Request",
+                                    "code": 400,
+                                    "header": [
+                                        {
+                                            "key": "Content-Type",
+                                            "value": "application/json"
+                                        }
+                                    ],
+                                    "body": "{\n  \"message\": \"An error has occurred.\",\n  \"exceptionMessage\": \"The feature self service sign up is not enabled for the tenant\",\n  \"code\": \"AADB2C99039\"\n}",
+                                    "cookie": [],
+                                    "_postman_previewlanguage": "json"
+                                }
+                            ],
+                            "event": [],
+                            "protocolProfileBehavior": {
+                                "disableBodyPruning": true
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "tenants",
+                    "description": "",
+                    "item": [
+                        {
+                            "name": "GetTenantInfo",
+                            "description": "",
+                            "item": [
+                                {
+                                    "id": "c8fa6a4a-f3d5-4616-a47d-38e30da60f8e",
+                                    "name": "Get tenant info and feature flags",
+                                    "request": {
+                                        "name": "Get tenant info and feature flags",
+                                        "description": {
+                                            "content": "Retrieves detailed tenant information including whether it's a B2C tenant,\nthe scale type, and an extensive list of enabled B2C features.\n\nThe `features` array is particularly valuable for understanding what\ncapabilities are available: custom policies, identity providers (Twitter,\nGitHub, WeChat, QQ, Weibo), password complexity rules, MFA settings, etc.\n",
+                                            "type": "text/plain"
+                                        },
+                                        "url": {
+                                            "path": [
+                                                "api",
+                                                "tenants",
+                                                "GetTenantInfo"
+                                            ],
+                                            "host": [
+                                                "{{baseUrl}}"
+                                            ],
+                                            "query": [
+                                                {
+                                                    "disabled": false,
+                                                    "description": {
+                                                        "content": "(Required) The tenant identifier. Accepts either the tenant object ID (GUID)\nor the tenant domain name (e.g., `contoso.onmicrosoft.com`).\n",
+                                                        "type": "text/plain"
+                                                    },
+                                                    "key": "tenantId",
+                                                    "value": "847b5907-ca15-40f4-b171-eb18619dbfab"
+                                                }
+                                            ],
+                                            "variable": []
+                                        },
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            }
+                                        ],
+                                        "method": "GET",
+                                        "body": {},
+                                        "auth": null
+                                    },
+                                    "response": [
+                                        {
+                                            "id": "66a5683f-6fb8-4c2c-a9f0-6b0f10e24996",
+                                            "name": "Tenant information with feature flags",
+                                            "originalRequest": {
+                                                "url": {
+                                                    "path": [
+                                                        "api",
+                                                        "tenants",
+                                                        "GetTenantInfo"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [
+                                                        {
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "(Required) The tenant identifier. Accepts either the tenant object ID (GUID)\nor the tenant domain name (e.g., `contoso.onmicrosoft.com`).\n",
+                                                                "type": "text/plain"
+                                                            },
+                                                            "key": "tenantId",
+                                                            "value": "847b5907-ca15-40f4-b171-eb18619dbfab"
+                                                        }
+                                                    ],
+                                                    "variable": []
+                                                },
+                                                "header": [
+                                                    {
+                                                        "key": "Accept",
+                                                        "value": "application/json"
+                                                    }
+                                                ],
+                                                "method": "GET",
+                                                "body": {}
+                                            },
+                                            "status": "OK",
+                                            "code": 200,
+                                            "header": [
+                                                {
+                                                    "key": "Content-Type",
+                                                    "value": "application/json"
+                                                }
+                                            ],
+                                            "body": "{\n  \"id\": \"contoso.onmicrosoft.com\",\n  \"isB2CTenant\": false,\n  \"tenantScaleType\": 3,\n  \"features\": [\n    \"None\",\n    \"Basic\",\n    \"AppV2\",\n    \"Msa\",\n    \"EnableResourceCreation\",\n    \"PasswordReset\",\n    \"CustomPolicies\",\n    \"UserJourneys\",\n    \"EnableUserFlowsGraphApis\",\n    \"EnableMsGraphApiConnectors\"\n  ],\n  \"clientFeatures\": [\n    \"EnablePageContract\",\n    \"EnableUserFlowExperience\",\n    \"EnableConditionalAccess\",\n    \"EnableUserJourneyV3\",\n    \"EnableApiConnector\",\n    \"EnableUserAttributeV2\",\n    \"EnableKMSI\",\n    \"EnablePasswordReset\",\n    \"EnablePaginationInCustomPolicies\",\n    \"EnableClientPolicyMetadata\",\n    \"PkceForSpaEnabled\"\n  ],\n  \"isCiamTenant\": false\n}",
+                                            "cookie": [],
+                                            "_postman_previewlanguage": "json"
+                                        }
+                                    ],
+                                    "event": [],
+                                    "protocolProfileBehavior": {
+                                        "disableBodyPruning": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "GetAndInitializeTenantPolicy",
+                            "description": "",
+                            "item": [
+                                {
+                                    "id": "2ad7fff4-b89d-4230-b02d-085c21a6ff60",
+                                    "name": "Get and initialize tenant policy",
+                                    "request": {
+                                        "name": "Get and initialize tenant policy",
+                                        "description": {
+                                            "content": "Retrieves and optionally initializes the B2C tenant policy configuration.\nThe `skipInitialization` parameter controls whether to trigger first-time\nsetup of B2C policies.\n\n**Note:** Returns 400 if self-service sign-up is not enabled.\n\n**Warning:** Setting `skipInitialization=false` may perform write operations\nto initialize tenant policies.\n",
+                                            "type": "text/plain"
+                                        },
+                                        "url": {
+                                            "path": [
+                                                "api",
+                                                "tenants",
+                                                "GetAndInitializeTenantPolicy"
+                                            ],
+                                            "host": [
+                                                "{{baseUrl}}"
+                                            ],
+                                            "query": [
+                                                {
+                                                    "disabled": false,
+                                                    "description": {
+                                                        "content": "(Required) The tenant domain name.",
+                                                        "type": "text/plain"
+                                                    },
+                                                    "key": "tenantId",
+                                                    "value": "contoso.com"
+                                                },
+                                                {
+                                                    "disabled": false,
+                                                    "description": {
+                                                        "content": "If `true`, skips initialization and only reads existing policy.\nIf `false`, may create default policies if none exist.\n",
+                                                        "type": "text/plain"
+                                                    },
+                                                    "key": "skipInitialization",
+                                                    "value": "false"
+                                                }
+                                            ],
+                                            "variable": []
+                                        },
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            }
+                                        ],
+                                        "method": "GET",
+                                        "body": {},
+                                        "auth": null
+                                    },
+                                    "response": [
+                                        {
+                                            "id": "082afd5f-6aac-4c3e-82b4-18fe21fe42d7",
+                                            "name": "Tenant policy configuration",
+                                            "originalRequest": {
+                                                "url": {
+                                                    "path": [
+                                                        "api",
+                                                        "tenants",
+                                                        "GetAndInitializeTenantPolicy"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [
+                                                        {
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "(Required) The tenant domain name.",
+                                                                "type": "text/plain"
+                                                            },
+                                                            "key": "tenantId",
+                                                            "value": "contoso.com"
+                                                        },
+                                                        {
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "If `true`, skips initialization and only reads existing policy.\nIf `false`, may create default policies if none exist.\n",
+                                                                "type": "text/plain"
+                                                            },
+                                                            "key": "skipInitialization",
+                                                            "value": "false"
+                                                        }
+                                                    ],
+                                                    "variable": []
+                                                },
+                                                "header": [
+                                                    {
+                                                        "key": "Accept",
+                                                        "value": "application/json"
+                                                    }
+                                                ],
+                                                "method": "GET",
+                                                "body": {}
+                                            },
+                                            "status": "OK",
+                                            "code": 200,
+                                            "header": [
+                                                {
+                                                    "key": "Content-Type",
+                                                    "value": "application/json"
+                                                }
+                                            ],
+                                            "body": "{}",
+                                            "cookie": [],
+                                            "_postman_previewlanguage": "json"
+                                        },
+                                        {
+                                            "id": "954395f3-e330-41e0-852e-b901bf52f524",
+                                            "name": "Self-service sign-up not enabled",
+                                            "originalRequest": {
+                                                "url": {
+                                                    "path": [
+                                                        "api",
+                                                        "tenants",
+                                                        "GetAndInitializeTenantPolicy"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [
+                                                        {
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "(Required) The tenant domain name.",
+                                                                "type": "text/plain"
+                                                            },
+                                                            "key": "tenantId",
+                                                            "value": "contoso.com"
+                                                        },
+                                                        {
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "If `true`, skips initialization and only reads existing policy.\nIf `false`, may create default policies if none exist.\n",
+                                                                "type": "text/plain"
+                                                            },
+                                                            "key": "skipInitialization",
+                                                            "value": "false"
+                                                        }
+                                                    ],
+                                                    "variable": []
+                                                },
+                                                "header": [
+                                                    {
+                                                        "key": "Accept",
+                                                        "value": "application/json"
+                                                    }
+                                                ],
+                                                "method": "GET",
+                                                "body": {}
+                                            },
+                                            "status": "Bad Request",
+                                            "code": 400,
+                                            "header": [
+                                                {
+                                                    "key": "Content-Type",
+                                                    "value": "application/json"
+                                                }
+                                            ],
+                                            "body": "{\n  \"message\": \"An error has occurred.\",\n  \"exceptionMessage\": \"The feature self service sign up is not enabled for the tenant 'contoso.onmicrosoft.com'\",\n  \"correlationId\": \"95927db1-9de2-4b3d-a32a-06b689dc3550\",\n  \"code\": \"AADB2C99039\",\n  \"stackTrace\": null\n}",
+                                            "cookie": [],
+                                            "_postman_previewlanguage": "json"
+                                        }
+                                    ],
+                                    "event": [],
+                                    "protocolProfileBehavior": {
+                                        "disableBodyPruning": true
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "tenantResource",
+                    "description": "",
+                    "item": [
+                        {
+                            "name": "GetARpDataWithTenantId",
+                            "description": "",
+                            "item": [
+                                {
+                                    "id": "7e3c9bfd-7128-4186-a1ed-aa8945474f31",
+                                    "name": "Get Azure resource provider data for tenant",
+                                    "request": {
+                                        "name": "Get Azure resource provider data for tenant",
+                                        "description": {
+                                            "content": "Retrieves the Azure Resource Provider (ARP) data associated with the B2C\ntenant, including subscription details, resource group, billing type, and\ndata residency location.\n\nThis is used by the portal to display subscription and billing information\non the B2C tenant overview page.\n",
+                                            "type": "text/plain"
+                                        },
+                                        "url": {
+                                            "path": [
+                                                "api",
+                                                "tenantResource",
+                                                "GetARpDataWithTenantId"
+                                            ],
+                                            "host": [
+                                                "{{baseUrl}}"
+                                            ],
+                                            "query": [
+                                                {
+                                                    "disabled": false,
+                                                    "description": {
+                                                        "content": "(Required) The tenant domain name.",
+                                                        "type": "text/plain"
+                                                    },
+                                                    "key": "tenantId",
+                                                    "value": "contoso.com"
+                                                }
+                                            ],
+                                            "variable": []
+                                        },
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            }
+                                        ],
+                                        "method": "GET",
+                                        "body": {},
+                                        "auth": null
+                                    },
+                                    "response": [
+                                        {
+                                            "id": "347b3171-8c79-4c42-b5b2-625b949d91cb",
+                                            "name": "Tenant resource and subscription data",
+                                            "originalRequest": {
+                                                "url": {
+                                                    "path": [
+                                                        "api",
+                                                        "tenantResource",
+                                                        "GetARpDataWithTenantId"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [
+                                                        {
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "(Required) The tenant domain name.",
+                                                                "type": "text/plain"
+                                                            },
+                                                            "key": "tenantId",
+                                                            "value": "contoso.com"
+                                                        }
+                                                    ],
+                                                    "variable": []
+                                                },
+                                                "header": [
+                                                    {
+                                                        "key": "Accept",
+                                                        "value": "application/json"
+                                                    }
+                                                ],
+                                                "method": "GET",
+                                                "body": {}
+                                            },
+                                            "status": "OK",
+                                            "code": 200,
+                                            "header": [
+                                                {
+                                                    "key": "Content-Type",
+                                                    "value": "application/json"
+                                                }
+                                            ],
+                                            "body": "{\n  \"tenantObjectId\": \"847b5907-ca15-40f4-b171-eb18619dbfab\",\n  \"tenantCountryCode\": \"US\",\n  \"subscriptionState\": 0,\n  \"subscriptionId\": \"43babb60-9e73-4dc8-b769-4401c01aad73\",\n  \"resourceGroupName\": \"rg-contoso-b2c\",\n  \"resourceName\": \"contoso.onmicrosoft.com\",\n  \"subscriptionTenantId\": \"847b5907-ca15-40f4-b171-eb18619dbfab\",\n  \"billingType\": \"MAU\",\n  \"location\": \"United States\",\n  \"isGoLocalEnabled\": false\n}",
+                                            "cookie": [],
+                                            "_postman_previewlanguage": "json"
+                                        }
+                                    ],
+                                    "event": [],
+                                    "protocolProfileBehavior": {
+                                        "disableBodyPruning": true
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "auth": {
+        "type": "bearer",
+        "bearer": [
+            {
+                "type": "any",
+                "value": "{{bearerToken}}",
+                "key": "token"
+            }
+        ]
+    },
+    "event": [],
+    "variable": [
+        {
+            "key": "baseUrl",
+            "value": "https://main.b2cadmin.ext.azure.com"
+        }
+    ],
+    "info": {
+        "_postman_id": "65d3b32a-5c6d-4e21-a334-7950d01ff0c8",
+        "name": "Entra B2C",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+        "description": {
+            "content": "The Entra B2C Admin API is used by the Microsoft Entra portal\n(entra.microsoft.com → External Identities) for managing Azure AD B2C\ntenant configuration, user flows, and identity experience framework, including:\n\n  - Admin User Flows (sign-up, sign-in, profile editing, password reset)\n  - Admin User Journeys (custom policies / IEF)\n  - Tenant Information and Feature Configuration\n  - Tenant Resource and Subscription Management\n  - Tenant Policy Initialization\n\nAll endpoints are served from `main.b2cadmin.ext.azure.com` and require a valid\nAzure AD bearer token.\n\n**Note:** This specification was generated through browser traffic analysis of the\nEntra portal. Many endpoints return 400 if the tenant does not have B2C/External\nIdentities (self-service sign-up) features enabled. The `tenantId` query parameter\nis required on most endpoints and accepts either the tenant GUID or domain name.\n\n\nContact Support:\n Name: nodoc",
+            "type": "text/plain"
+        }
+    }
+}

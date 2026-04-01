@@ -1,30 +1,231 @@
-/**
- * CSS files with the .module.css suffix will be treated as CSS modules
- * and scoped locally.
- */
-
 .heroBanner {
-  padding: 4rem 0;
-  text-align: center;
+  padding: 5rem 0 4rem;
   position: relative;
   overflow: hidden;
-  color: var(--ifm-font-color-base);
-  background: none;
+  background:
+    radial-gradient(circle at top, rgba(64, 243, 157, 0.2), transparent 35%),
+    linear-gradient(180deg, rgba(1, 42, 45, 0.08), transparent 100%);
+}
+
+.eyebrow {
+  margin-bottom: 0.75rem;
+  color: var(--ifm-color-primary);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.heroTitle {
+  max-width: 16ch;
+  margin-bottom: 1rem;
+  font-size: clamp(2.6rem, 7vw, 4.75rem);
+  line-height: 0.98;
+}
+
+.heroSubtitle {
+  max-width: 58rem;
+  margin: 0 0 1.5rem;
+  font-size: 1.15rem;
+  line-height: 1.6;
+}
+
+.heroActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.callout {
+  max-width: 64rem;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(12px);
+}
+
+[data-theme="dark"] .callout {
+  background: rgba(1, 42, 45, 0.7);
+}
+
+.section,
+.sectionAlt {
+  padding: 2.5rem 0 3rem;
+}
+
+.sectionAlt {
+  background: rgba(1, 42, 45, 0.04);
+}
+
+[data-theme="dark"] .sectionAlt {
+  background: rgba(64, 243, 157, 0.05);
+}
+
+.sectionHeader {
+  max-width: 46rem;
+  margin-bottom: 1.5rem;
+}
+
+.sectionHeader h2 {
+  margin-bottom: 0.5rem;
+}
+
+.sectionHeader p {
+  margin-bottom: 0;
+  color: var(--ifm-color-emphasis-700);
+}
+
+.statGrid,
+.cardGrid,
+.modelGrid,
+.principlesGrid {
+  display: grid;
+  gap: 1rem;
+}
+
+.statGrid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.cardGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.modelGrid,
+.principlesGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.statCard,
+.apiCard,
+.modelCard,
+.principleCard {
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 1rem;
+  background: var(--ifm-background-surface-color);
+  box-shadow: 0 18px 40px rgba(1, 42, 45, 0.06);
+}
+
+.statCard {
+  padding: 1.25rem;
+}
+
+.statValue {
+  display: block;
+  margin-bottom: 0.25rem;
+  color: var(--ifm-color-primary);
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.statLabel {
+  color: var(--ifm-color-emphasis-700);
+  font-size: 0.95rem;
+}
+
+.apiCard,
+.modelCard,
+.principleCard {
+  padding: 1.25rem;
+}
+
+.apiCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.apiFamily {
+  display: inline-block;
+  margin-bottom: 0.5rem;
+  color: var(--ifm-color-primary);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.apiTitle,
+.modelTitle {
+  margin-bottom: 0.5rem;
+}
+
+.operationsBadge {
+  flex-shrink: 0;
+  padding: 0.4rem 0.7rem;
+  border-radius: 999px;
+  background: rgba(64, 243, 157, 0.16);
+  color: var(--ifm-color-primary);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.apiSummary {
+  margin-bottom: 1rem;
+}
+
+.detailList {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0 0 1rem;
+}
+
+.detailList div {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.detailList dt {
+  color: var(--ifm-color-emphasis-700);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.detailList dd {
+  margin: 0;
+}
+
+.highlightList {
+  margin: 0 0 1rem;
+  padding-left: 1.1rem;
+}
+
+.highlightList li + li {
+  margin-top: 0.4rem;
+}
+
+.cardActions,
+.resourceRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.modelPortals {
+  margin-bottom: 0;
+  color: var(--ifm-color-emphasis-700);
+}
+
+.principleCard {
+  display: flex;
+  align-items: flex-start;
+  line-height: 1.6;
 }
 
 @media screen and (max-width: 996px) {
   .heroBanner {
-    padding: 2rem;
+    padding: 3.5rem 0 2.5rem;
   }
-}
 
-.buttons {
-  column-gap: 5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-iconify-icon {
-  font-size: 1.5rem;
+  .statGrid,
+  .cardGrid,
+  .modelGrid,
+  .principlesGrid {
+    grid-template-columns: 1fr;
+  }
 }
