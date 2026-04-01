@@ -1,0 +1,125 @@
+paths:
+  /ClassicPolicies:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    get:
+      summary: List classic policies
+      description: >-
+        List classic conditional access policies.
+      operationId: ClassicPolicies.List
+      tags: [Classic Policies]
+      parameters:
+        - $ref: common.yml#/components/parameters/nextLink
+        - $ref: common.yml#/components/parameters/top
+        - name: filter
+          description: A filter string to query classic policies.
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: 'common.yml#/components/responses/UnknownResponse'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /ClassicPolicies/Delete:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    delete:
+      summary: Delete classic policy
+      description: >-
+        Delete classic policy by object ID.
+      operationId: ClassicPolicies.Detail.Delete
+      tags: [Classic Policies]
+      requestBody:
+        $ref: 'common.yml#/components/requestBodies/unknownRequest'
+      responses:
+        '200':
+          $ref: 'common.yml#/components/responses/UnknownResponse'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /ClassicPolicies/Detail:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    post:
+      summary: Get classic policy details
+      description: >-
+        Get classic policy details by object ID.
+      operationId: ClassicPolicies.Detail.Get
+      tags: [Classic Policies]
+      requestBody:
+        $ref: 'common.yml#/components/requestBodies/unknownRequest'
+      responses:
+        '200':
+          $ref: 'common.yml#/components/responses/UnknownResponse'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /ClassicPolicies/Detail2:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    post:
+      summary: Get classic policy details (v2)
+      description: >-
+        Get classic policy details by object ID (version 2).
+      operationId: ClassicPolicies.Detail2.Get
+      tags: [Classic Policies]
+      requestBody:
+        $ref: 'common.yml#/components/requestBodies/unknownRequest'
+      responses:
+        '200':
+          $ref: 'common.yml#/components/responses/UnknownResponse'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /ClassicPolicies/Disable:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    put:
+      summary: Disable classic policy
+      description: >-
+        Disable classic policy by object ID.
+      operationId: ClassicPolicies.Disable
+      tags: [Classic Policies]
+      requestBody:
+        $ref: 'common.yml#/components/requestBodies/unknownRequest'
+      responses:
+        '200':
+          $ref: 'common.yml#/components/responses/UnknownResponse'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /ClassicPolicies/Migrate:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    post:
+      summary: Migrate classic policy
+      description: >-
+        Migrate classic policy by object ID.
+      operationId: ClassicPolicies.Migrate
+      tags: [Classic Policies]
+      requestBody:
+        $ref: 'common.yml#/components/requestBodies/unknownRequest'
+      responses:
+        '200':
+          $ref: 'common.yml#/components/responses/UnknownResponse'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /ClassicPolicies/Save:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    post:
+      summary: Save classic policy
+      description: >-
+        Save classic policy by object ID.
+      operationId: ClassicPolicies.Save
+      tags: [Classic Policies]
+      requestBody:
+        $ref: 'common.yml#/components/requestBodies/unknownRequest'
+      responses:
+        '200':
+          $ref: 'common.yml#/components/responses/UnknownResponse'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

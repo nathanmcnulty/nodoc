@@ -1,0 +1,56 @@
+paths:
+  /Directories/B2C:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    post:
+      summary: Create B2C tenant
+      description: >-
+        Create B2C tenant.
+      operationId: Directories.B2C.Create
+      tags: [B2C]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                companyName:
+                  description: Company name for the B2C tenant.
+                  type: string
+                  example: CompanyABC
+                countryCode:
+                  description: Country code for the B2C tenant.
+                  type: string
+                  example: US
+                initialDomainPrefix:
+                  description: Initial domain prefix for the B2C tenant.
+                  type: string
+                  example: CompanyABC
+      responses:
+        '204':
+          description: No Content
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

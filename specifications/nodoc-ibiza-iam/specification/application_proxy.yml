@@ -1,0 +1,453 @@
+components:
+  schemas:
+    appProxyConfiguration:
+      type: object
+      properties:
+        id:
+          $ref: common.yml#/components/schemas/appObjectId
+        appId:
+          $ref: common.yml#/components/schemas/applicationId
+        displayName:
+          description: The display name of the application.
+          type: string
+          example: Application Name
+        onPremisesPublishing:
+          type: boolean
+          description: Whether on premises publishing is enabled.
+          nullable: true
+          example: null
+        connectorGroupId:
+          description: The ID of the connector group
+          type: string
+          nullable: true
+          example: null
+
+paths:
+  /ApplicationProxy/Applications/{appId}:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - $ref: common.yml#/components/parameters/appId
+      - name: origExternalUrl
+        description: pending
+        in: query
+        schema: {}
+      - name: isFirstApp
+        description: pending
+        in: query
+        schema: {}
+      - name: EnableAppProxy
+        description: pending
+        in: query
+        schema: {}
+    get:
+      summary: Get Application Proxy application
+      description: >-
+        Get Application Proxy Application by application ID (client ID).
+      operationId: ApplicationProxy.Applications.Get
+      tags: [Application Proxy]
+      responses:
+        '200':
+          description: Ok
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/appProxyConfiguration'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /ApplicationProxy/Applications/TestButtonReport:
+    # also supports POST with unknown body
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    get:
+      summary: Get Application Proxy application test button report
+      description: >-
+        Get Application Proxy Application test button report by application ID (client ID).
+      operationId: ApplicationProxy.Applications.TestButtonReport.Get
+      parameters:
+        - name: appId
+          description: The Application ID (client ID) of the application.
+          in: query
+          required: true
+          schema:
+            $ref: common.yml#/components/schemas/applicationId
+      tags: [Application Proxy]
+      responses:
+        '200':
+          description: Ok
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/appProxyConfiguration'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /ApplicationProxy/ConnectorGroups:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    get:
+      summary: List Application Proxy connector groups
+      description: >-
+        List Application Proxy connector groups by application ID (client ID).
+      operationId: ApplicationProxy.ConnectorGroups.List
+      parameters:
+        - name: appId
+          description: The Application ID (client ID) of the application.
+          in: query
+          required: true
+          schema:
+            $ref: common.yml#/components/schemas/applicationId
+      tags: [Application Proxy]
+      responses:
+        '200':
+          description: Ok
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/appProxyConfiguration'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    post:
+      summary: Create Application Proxy connector group
+      description: >-
+        Create Application Proxy connector group by application ID.
+      operationId: ApplicationProxy.ConnectorGroups.Add
+      parameters:
+        - name: appId
+          description: The Application ID (client ID) of the application.
+          in: query
+          required: true
+          schema:
+            $ref: common.yml#/components/schemas/applicationId
+      tags: [Application Proxy]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Connector group configuration (full schema unknown)
+              properties:
+                name:
+                  type: string
+                  description: Name of the new connector group
+                  example: connectorGroup
+      responses:
+        2XX:
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /ApplicationProxy/ConnectorGroups/{groupId}:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - name: groupId
+        description: The ID of the connector group.
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      summary: Get Application Proxy connector group
+      description: >-
+        Get Application Proxy connector group by ID.
+      operationId: ApplicationProxy.ConnectorGroups.Get
+      tags: [Application Proxy]
+      responses:
+        2XX:
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    patch:
+      summary: Update Application Proxy onnector group
+      description: >-
+        Update Application Proxy connector group by group ID.
+      operationId: ApplicationProxy.ConnectorGroups.Update
+      tags: [Application Proxy]
+      responses:
+        2XX:
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    delete:
+      summary: Delete Application Proxy onnector group
+      description: >-
+        Delete Application Proxy connector group by group ID.
+      operationId: ApplicationProxy.ConnectorGroups.Delete
+      tags: [Application Proxy]
+      responses:
+        2XX:
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /ApplicationProxy/ConnectorGroups/{groupId}/Applications:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - name: groupId
+        description: The ID of the connector group.
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      summary: List Application Proxy connector group applications
+      description: >-
+        List Application Proxy connector group applications by group ID.
+      operationId: ApplicationProxy.ConnectorGroups.Applications.List
+      tags: [Application Proxy]
+      responses:
+        2XX:
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /ApplicationProxy/Connectors/{connectorId}:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - name: connectorId
+        description: The ID of the connector.
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      summary: Get Application Proxy connector
+      description: >-
+        Get Application Proxy connector by connector ID.
+      operationId: ApplicationProxy.Connectors.Get
+      tags: [Application Proxy]
+      responses:
+        2XX:
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    patch:
+      summary: Update Application Proxy connector
+      description: >-
+        Update Application Proxy connector by connector ID.
+      operationId: ApplicationProxy.Connectors.Update
+      tags: [Application Proxy]
+      responses:
+        2XX:
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /ApplicationProxy/Directory:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    get:
+      summary: Get Application Proxy directory
+      description: >-
+        Get Application Proxy directory.
+      operationId: ApplicationProxy.Directory.Get
+      tags: [Application Proxy]
+      responses:
+        '200':
+          description: Ok
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  objectId:
+                    $ref: common.yml#/components/schemas/tenantId
+                  displayName:
+                    description: The display name of the directory.
+                    type: string
+                    example: contoso
+                  companyLastDirSyncTime:
+                    description: The timestamp of the last directory sync.
+                    type: string
+                    format: date-time
+                    nullable: true
+                    example: null
+                  dirSyncEnabled:
+                    description: Whether directory sync is enabled.
+                    type: boolean
+                    nullable: true
+                    example: false
+                  replicationScope:
+                    description: The scope of directory replication.
+                    type: string
+                    example: EU
+                  dataCenterLocation:
+                    description: The location of the directory data center.
+                    type: string
+                    nullable: true
+                    example: null
+                  countryLetterCode:
+                    description: The country letter code for the directory.
+                    type: string
+                    example: IE
+                  countryName:
+                    description: The name of the directory country.
+                    type: string
+                    nullable: true
+                    example: null
+                  preferredLanguage:
+                    description: The preferred language for the directory
+                    type: string
+                    example: en
+                  preferredLanguages:
+                    type: array
+                    nullable: true
+                    items:
+                      description: The preferred language for the directory
+                      type: string
+                    example: null
+                  verifiedDomains:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          description: The ID of the verified domain.
+                          type: string
+                          example: 333322221111000F
+                        type:
+                          description: The type of verified domain.
+                          type: string
+                          enum: [Managed, Unmanaged]
+                          example: Managed
+                        name:
+                          description: The name of the verified domain.
+                          type: string
+                          example: contoso.com
+                        initial:
+                          description: Whether this is the initial domain.
+                          type: boolean
+                          example: true
+                        isDirSyncExchangeOnlineDomain:
+                          description: Whether directory sync is enabled on the domain.
+                          type: boolean
+                          example: true
+                  globalAdminCanManageAzureSubscriptions:
+                    description: Whether the global administrator can manage Azure subscriptions.
+                    type: boolean
+                    example: false
+                  privacyProfile:
+                    description: The directory privacy profile
+                  technicalNotificationMails:
+                    description: The email addresses for technical notifications.
+                    type: array
+                    items:
+                      type: string
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

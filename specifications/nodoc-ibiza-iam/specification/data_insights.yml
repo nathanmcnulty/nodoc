@@ -1,0 +1,122 @@
+paths:
+  /DataInsights/GetCredentialUserRegistrationDetails:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    post:
+      summary: List user credential registration details
+      description: >-
+        List user credential registration details.
+      operationId: DataInsights.UserCredentialUserRegistrationDetails.List
+      tags: [Data Insights]
+      parameters:
+        - $ref: common.yml#/components/parameters/nextLink
+      requestBody:
+        $ref: common.yml#/components/requestBodies/unknownRequest
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          $ref: common.yml#/components/schemas/userId
+                        userPrincipalName:
+                          $ref: common.yml#/components/schemas/userPrincipalName
+                        userDisplayName:
+                          type: string
+                          description: User display name.
+                          example: User A
+                        isMfaRegistered:
+                          description: Whether MFA is registered.
+                          type: boolean
+                          example: false
+                        isRegistered:
+                          description: Whether user is registered any methods for SSPR.
+                          type: boolean
+                          example: false
+                        isEnabled:
+                          description: Whether user is enabled to perform SSPR.
+                          type: boolean
+                          example: false
+                        isCapable:
+                          description: Whether user is capable of SSPR or MFA.
+                          type: boolean
+                          example: false
+                        authMethods:
+                          type: array
+                          description: |
+                            The authentication method that the user has registered.
+                            Enum mapping unknown, values:
+                              - email
+                              - mobilePhone
+                              - officePhone
+                              - securityQuestion
+                              - appNotification
+                              - appCode
+                              - alternateMobilePhone
+                              - fido
+                              - appPassword
+                              - unknownFutureValue
+                          items:
+                            type: integer
+                            example: 1
+                            enum: [1, 4, 5]
+                  nextLink:
+                    $ref: common.yml#/components/schemas/nextLink
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /DataInsights/GetUserCredentialUsageDetails:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    post:
+      summary: List user credential usage details
+      description: >-
+        List user credential usage details.
+      operationId: DataInsights.UserCredentialUsageDetails.List
+      tags: [Data Insights]
+      parameters:
+        - $ref: common.yml#/components/parameters/nextLink
+      requestBody:
+        $ref: common.yml#/components/requestBodies/unknownRequest
+      responses:
+        '200':
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

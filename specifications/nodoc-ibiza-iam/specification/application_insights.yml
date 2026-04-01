@@ -1,0 +1,424 @@
+paths:
+  /ApplicationInsights/ApplicationLogos:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    post:
+      tags: [Application Insights]
+      summary: Get Application Insights application logos
+      description: >-
+        Get Application Insights application logos by application ID.
+      operationId: ApplicationInsights.ApplicationLogos.Get
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    $ref: common.yml#/components/schemas/applicationId
+      responses:
+        '200':
+          description: Ok
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: object
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /ApplicationInsights/AppMigration:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    get:
+      summary: List Application Insights app migration tasks
+      description: >-
+        List Application Insights app migration tasks.
+      operationId: ApplicationInsights.AppMigrations.List
+      tags: [Application Insights]
+      parameters:
+        - name: filterPeriod
+          description: The time period to filter results by (days).
+          in: query
+          schema:
+            type: integer
+            enum: [1, 7, 30]
+            example: 7
+        - name: filterText
+          description: A text string to filter results by.
+          in: query
+          schema:
+            type: string
+            example: app
+        - $ref: common.yml#/components/parameters/nextLink
+        - $ref: common.yml#/components/parameters/top
+        - name: sortKey
+          description: The key to sort results by.
+          in: query
+          schema:
+            type: string
+            example: id
+        - name: sortOrder
+          description: The order to sort results by.
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Ok
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  nextLink:
+                    $ref: common.yml#/components/schemas/nextLink
+                  data:
+                    type: array
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /ApplicationInsights/ConsentedPermissionsData:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    get:
+      summary: List Application Insights application consented permissions.
+      description: >-
+        List Application Insights application consented permissions.
+      operationId: ApplicationInsights.ConsentedPermissionsData.List
+      tags: [Application Insights]
+      responses:
+        '200':
+          description: Ok
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    scope:
+                      description: The name of the consented scope.
+                      type: string
+                      example: ChannelMessage.Send
+                    appName:
+                      description: The name of the application accessing the resource.
+                      type: string
+                      example: Miccrosoft Developer Sample Data Packs
+                    resource:
+                      description: The name of the consented resource.
+                      type: string
+                      example: Microsoft Graph
+                    isAdminConsented:
+                      description: Whether the permission is admin consented.
+                      type: boolean
+                      example: true
+                    isDelegated:
+                      description: Whether the permission is delegated.
+                      type: boolean
+                      example: true
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /ApplicationInsights/ConsentedPermissionsDataAppBased:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    get:
+      summary: List Application Insights application consented permissions (app-based)
+      description: >-
+        List Application Insights application consented permissions (app-based).
+      operationId: ApplicationInsights.ConsentedPermissionsDataAppBased.List
+      tags: [Application Insights]
+      parameters:
+        - name: inputText
+          description: A text string to search results by
+          in: query
+          required: true
+          schema:
+            type: string
+            example: graph
+      responses:
+        '200':
+          description: Ok
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    appLogo:
+                      description: URL to application logo.
+                      type: string
+                      example: https://main.iam.ad.ext.azure.com/api/Images/Applications/iUpXTCQjlu5Q-sFbZwEfQ45W0SgSDEZaZOH9p-9PNR0=.jpg?t=638533969331975381
+                    appDisplayName:
+                      description: The display name of the application.
+                      example: Graph Connector Service
+                    appId:
+                      $ref: common.yml#/components/schemas/applicationId
+                    objectId:
+                      $ref: common.yml#/components/schemas/servicePrincipalId
+                    permissionRiskLevel:
+                      type: integer
+                      example: -2
+                    credentialRiskLevel:
+                      type: integer
+                      example: 3
+                    numberOfConsents:
+                      type: integer
+                      example: 0
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /ApplicationInsights/EnterpriseAppSignIns:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    get:
+      summary: List Application Insights enterprise app signins
+      description: >-
+        List Application Insights enterprise app signins.
+      operationId: ApplicationInsights.EnterpriseAppSignIns.List
+      tags: [Application Insights]
+      parameters:
+        - name: appId
+          description: The application ID to retrieve sign ins for
+          in: query
+          schema:
+            $ref: common.yml#/components/schemas/applicationId
+        - name: start
+          description: pending
+          in: query
+          schema:
+            type: integer
+        - name: end
+          description: pending
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Ok
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: array
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /ApplicationInsights/SAMLApps:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    get:
+      summary: List Application Insights SAML Apps
+      description: >-
+        List Application Insights SAML Apps.
+      operationId: ApplicationInsights.SAMLApps.List
+      tags: [Application Insights]
+      responses:
+        '200':
+          description: Ok
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    objectId:
+                      $ref: common.yml#/components/schemas/servicePrincipalId
+                    appId:
+                      $ref: common.yml#/components/schemas/applicationId
+                    imageUri:
+                      description: The URI to the application image.
+                      type: string
+                      example: https://main.iam.ad.ext.azure.com/api/Images/Applications/mcbFyf95gH4Q
+                    displayName:
+                      description: The display name of the application.
+                      type: string
+                      example: Application Name
+                    certificateExpiryInUTC:
+                      description: The expiry time of the application certificate.
+                      type: string
+                      format: date-time
+                      example: 2026-12-02T03:54:48-08:00
+                    emailAddresses:
+                      type: array
+                      items:
+                        type: string
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

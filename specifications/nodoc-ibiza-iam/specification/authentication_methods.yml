@@ -1,0 +1,478 @@
+components:
+  schemas:
+    PasswordPolicy:
+      type: object
+      properties:
+        lockoutThreshold:
+          description: How many failed sign-ins are permitted before a user account is locked out.
+          type: integer
+          minimum: 1
+          maximum: 50
+          example: 10
+        lockoutDurationInSeconds:
+          description: The minimum length in seconds of accounts lockout.
+          type: integer
+          minimum: 5
+          maximum: 18000
+          example: 50
+        enforceCustomBannedPasswords:
+          description: Whether custom banned passwords are enforced.
+          type: boolean
+          example: true
+        customBannedPasswords:
+          type: array
+          uniqueItems: true
+          items:
+            description: Banned password
+            type: string
+            example: Contoso
+        enableBannedPasswordCheckOnPremises:
+          description: Whether to enforce the banned password check on-premises.
+          type: boolean
+          example: true
+        bannedPasswordCheckOnPremisesMode:
+          description: >
+            The on-premises banned password mode:
+              - `0`: Audit
+              - `1`: Enforced
+          type: integer
+          enum: [0, 1]
+          example: 0
+    AuthenticationMethod:
+      type: object
+      properties:
+        id:
+          $ref: common.yml#/components/schemas/objectId
+        type:
+          description: >
+            Authentication method type:
+              - `5`: SMS
+              - `6`: FIDO2 Security Key
+              - `8`: Microsoft Authenticator
+              - `9`: Temporary Access Pass
+          type: integer
+          enum: [5, 6, 8, 9]
+          example: 5
+        state:
+          type: integer
+          description: >
+            State of the method:
+              - `0`: Enabled
+              - `1`: Disabled
+          enum: [0, 1]
+          example: 0
+        includeConditions:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                description: Type of include condition.
+                type: string
+                enum: [group]
+                example: group
+              id:
+                description: ID of group, or `all_users` for all users.
+                type: string
+                example: all_users
+              isRequired:
+                description: Whether the method is required.
+                type: boolean
+                example: false
+              useForSignIn:
+                description: Whether the method can be used for signin.
+                type: boolean
+                example: false
+        voiceSettings:
+          type: object
+          nullable: true
+        fidoSettings:
+          type: object
+          nullable: true
+          properties:
+            allowSelfServiceSetup:
+              description: Whether to allow self service setup.
+              type: boolean
+              example: true
+            enforceAttestation:
+              description: Whether to enforce attestation.
+              type: boolean
+              example: false
+            keyRestrictions:
+              type: object
+              properties:
+                isEnforced:
+                  description: Whether to enforce key restrictions.
+                  type: boolean
+                  example: false
+                enforcementType:
+                  description: The enforcement type.
+                  type: string
+                  enum: [Block, Allow]
+                  example: block
+                aaGuids:
+                  type: array
+                  items:
+                    description: Authenticator Attestation GUID.
+                    type: string
+                    format: uuid
+        accessPassSettings:
+          type: object
+          nullable: true
+          properties:
+            passLifetimeInMinutes:
+              description: >
+                Temporary access pass lifetime (minutes).
+                Must be between `minimumLifetimeInMinutes` and `maximumLifetimeInMinutes`.
+              type: integer
+              minimum: 10
+              example: 60
+            length:
+              description: The length of generated pass string.
+              type: integer
+              minimum: 8
+              maximum: 48
+              example: 8
+            minimumLifetimeInMinutes:
+              description: >
+                The minimum lifetime of the pass (minutes).
+                Must be lower than `maximumLifetimeInMinutes`.
+              type: integer
+              minimum: 10
+              example: 60
+            maximumLifetimeInMinutes:
+              description: >
+                The maximum lifetime of the pass (minutes).
+                Must be higher than `minimumLifetimeInMinutes`.
+              type: integer
+              maximum: 43200
+              example: 480
+            isUsableOnce:
+              description: Whether the access pass is only usable once.
+              type: boolean
+              example: false
+            notificationEmail:
+              description: Notification email for access pass creation.
+              type: string
+              nullable: true
+              example: null
+
+paths:
+  /AuthenticationMethods/AuthenticationMethodsPolicy:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    get:
+      summary: Get authentication methods policy
+      description: >-
+        Get authentication methods policy.
+      operationId: AuthenticationMethods.AuthenticationMethodsPolicy.Get
+      tags: [Authentication Methods]
+      parameters:
+        - $ref: common.yml#/components/parameters/XMsClientRequestId
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  authenticationMethods:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AuthenticationMethod'
+                  policyObjectId:
+                    $ref: common.yml#/components/schemas/objectId
+                  lastModifiedTime:
+                    description: The last modification timestamp of the policy.
+                    type: string
+                    format: date-time
+                    example: 2024-04-22T12:46:50.9622833Z
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    post:
+      summary: Update authentication methods policy
+      description: >-
+        Update authentication methods policy.
+      operationId: AuthenticationMethods.AuthenticationMethodsPolicy.Update
+      tags: [Authentication Methods]
+      parameters:
+        - $ref: common.yml#/components/parameters/XMsClientRequestId
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                authenticationMethods:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/AuthenticationMethod'
+                policyObjectId:
+                  $ref: common.yml#/components/schemas/objectId
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  authenticationMethods:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AuthenticationMethod'
+                  policyObjectId:
+                    $ref: common.yml#/components/schemas/objectId
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    delete:
+      summary: Delete authentication methods policy
+      description: >-
+        Delete authentication methods policy.
+      operationId: AuthenticationMethods.AuthenticationMethodsPolicy.Delete
+      tags: [Authentication Methods]
+      parameters:
+        - $ref: common.yml#/components/parameters/XMsClientRequestId
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                authenticationMethods:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/AuthenticationMethod'
+                policyObjectId:
+                  $ref: common.yml#/components/schemas/objectId
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  authenticationMethods:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AuthenticationMethod'
+                  policyObjectId:
+                    $ref: common.yml#/components/schemas/objectId
+                  lastModifiedTime:
+                    description: The last modification timestamp of the policy.
+                    type: string
+                    format: date-time
+                    example: 2024-04-22T12:46:50.9622833Z
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /AuthenticationMethods/PasswordPolicy:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    get:
+      summary: Get password policy
+      description: >-
+        Get Tenant password policy.
+      operationId: AuthenticationMethods.PasswordPolicy.Get
+      parameters:
+        - $ref: common.yml#/components/parameters/XMsClientRequestId
+      tags: [Authentication Methods]
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PasswordPolicy'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    post:
+      summary: Update password policy
+      description: >-
+        Update Tenant password policy.
+      operationId: AuthenticationMethods.PasswordPolicy.Update
+      tags: [Authentication Methods]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordPolicy'
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: boolean
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /RequireAuthMethodVerification/{0}:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - name: '0'
+        description: pending.
+        in: path
+        required: true
+        schema:
+          type: string
+    put:
+      summary: Require auth method verification
+      description: >-
+        Require auth method verification.
+      operationId: AuthenticationMethods.RequireVerification
+      tags: [Authentication Methods]
+      requestBody:
+        $ref: common.yml#/components/requestBodies/unknownRequest
+      responses:
+        2XX:
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

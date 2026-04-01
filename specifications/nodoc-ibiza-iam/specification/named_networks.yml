@@ -1,0 +1,172 @@
+paths:
+  /NamedNetworks:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    get:
+      summary: List named networks
+      description: List named networks.
+      operationId: NamedNetworks.List
+      tags: [Policies]
+      responses:
+        '200':
+          $ref: common.yml#/components/responses/UnknownResponse
+          description: OK
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /NamedNetworksV2:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    get:
+      summary: List named networks (v2)
+      description: List named networks (version 2).
+      operationId: NamedNetworksV2.List
+      tags: [Policies]
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: array
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    post:
+      summary: Create named network (v2)
+      description: Create named network (version 2).
+      operationId: NamedNetworksV2.Create
+      tags: [Policies]
+      responses:
+        '200':
+          $ref: common.yml#/components/responses/UnknownResponse
+          description: OK
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /NamedNetworksV2/CountryCodes:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    get:
+      summary: List named network country codes (v2)
+      description: List named network country codes (version 2).
+      operationId: NamedNetworksV2.CountryCodes.List
+      tags: [Policies]
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    displayName:
+                      description: Display name of the country code.
+                      type: string
+                      example: Afghanistan
+                    code:
+                      description: Value of the country code.
+                      type: string
+                      example: AF
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /NamedNetworksV2/{id}:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - in: path
+        description: The unique identifier of the network.
+        name: id
+        required: true
+        schema:
+          type: string
+    get:
+      summary: Get named network (v2)
+      description: Get named network (version 2).
+      operationId: NamedNetworksV2.Get
+      tags: [Policies]
+      responses:
+        '200':
+          $ref: common.yml#/components/responses/UnknownResponse
+          description: OK
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /NamedNetworksV2/ValidatePolicySize/{id}:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - in: path
+        description: The unique identifier of the network.
+        name: id
+        required: true
+        schema:
+          type: string
+    get:
+      summary: Validate named network policy size (v2)
+      description: Validate named network policy size (version 2).
+      operationId: NamedNetworksV2.PolicySize.Validate
+      tags: [Policies]
+      responses:
+        '200':
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

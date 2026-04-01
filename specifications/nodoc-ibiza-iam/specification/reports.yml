@@ -1,0 +1,779 @@
+components:
+  schemas:
+    auditActivityType:
+      type: object
+      properties:
+        category:
+          description: The category of the Audit Activity type.
+          type: string
+          example: B2C
+        activityResourceType:
+          description: The resource type for the Audit Activity.
+          type: string
+          example: Authentication
+        activity:
+          description: A description of the Audit Activity.
+          type: string
+          example: A self-service sign up request was completed
+    request:
+      type: string
+  parameters:
+    Request:
+      name: request
+      description: The request query string.
+      in: query
+      schema:
+        $ref: '#/components/schemas/request'
+
+paths:
+  /Reports/AuditActivityTypes:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    get:
+      summary: Get report Audit Activity types
+      description: >-
+        Get all report Audity activity types (version 1).
+      operationId: Reports.AuditActivityTypes.Get
+      tags: [Reports]
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/auditActivityType'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /Reports/AuditActivityTypesV2:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    get:
+      summary: Get report Audit Activity types (V2)
+      description: >-
+        Get all report Audity activity types (version 2).
+      operationId: Reports.AuditActivityTypesV2.Get
+      tags: [Reports]
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/auditActivityType'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /Reports/Groups/{groupId}:
+    parameters:
+      - name: groupId
+        description: The object ID of the group to return.
+        in: path
+        required: true
+        schema:
+          $ref: common.yml#/components/schemas/groupId
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    get:
+      summary: Get basic details about group
+      description: >-
+        Get the group display name and object ID.
+      operationId: Reports.Group.Get
+      tags: [Reports]
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  displayName:
+                    description: The group display name.
+                    type: string
+                    example: ExampleGroup
+                  objectId:
+                    $ref: common.yml#/components/schemas/groupId
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /Reports/GroupsActivitySummary:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    get:
+      summary: Get groups activity summary
+      description: >-
+        Get groups activity summary.
+      operationId: Reports.GroupActivitySummary.Get
+      tags: [Reports]
+      parameters:
+        - $ref: '#/components/parameters/Request'
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                description: unknown response body
+                type: object
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /Reports/ServicePrincipals/{spId}:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - name: spId
+        description: The object ID of the service principal.
+        in: path
+        required: true
+        schema:
+          $ref: common.yml#/components/schemas/servicePrincipalId
+    get:
+      summary: Get basic details about service principal
+      description: >-
+        Get basic details about service principal.
+      operationId: Reports.ServicePrincipal.Get
+      tags: [Reports]
+      responses:
+        2XX:
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /Reports/SignInEventsV2:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    post:
+      summary: Get sign-in events (v2)
+      description: >-
+        Get sign in events for the specified time range (version 2).
+      operationId: Reports.SignInEventsV2.Get
+      tags: [Reports]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                startDateTime:
+                  description: The start datetime to retrieve sign in events from.
+                EndDateTime:
+                  description: The end datetime to retrieve sign in events from.
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      description: The ID of the sign in event.
+                      type: string
+                      example: 6d60bc14-26b7-4ee2-b013-20c4d59cae00
+                    createdDateTime:
+                      description: The timestamp of event creation.
+                      type: string
+                      format: date-time
+                      example: 2024-05-08T16:57:44Z
+                    userDisplayName:
+                      description: The display name of the user.
+                      type: string
+                      example: User123
+                    userPrincipalName:
+                      $ref: common.yml#/components/schemas/userPrincipalName
+                    userId:
+                      $ref: common.yml#/components/schemas/userId
+                    appId:
+                      $ref: common.yml#/components/schemas/applicationId
+                    appDisplayName:
+                      description: The display name of the application.
+                      type: string
+                      example: Azure Portal
+                    resourceId:
+                      description: The unique ID of the resource.
+                      type: string
+                      example: 797f4846-ba00-4fd7-ba43-dac1f8f63013
+                    resourceDisplayName:
+                      description: The display name of the resource.
+                      type: string
+                      example: Windows Azure Service Management API
+                    ipAddress:
+                      description: The IP address of the signin event.
+                      type: string
+                      example: 1.1.x.x
+                    loginSucceeded:
+                      description: Whether the login was successful.
+                      type: boolean
+                      example: true
+                    signInStatus:
+                      description: The status of the signin.
+                      type: integer
+                      enum: [0, 1]
+                      example: 0
+                    errorCode:
+                      description: The error code of the signin event.
+                      type: integer
+                      example: 0
+                    failureReason:
+                      description: The reason for signin failure.
+                      type: string
+                      example: Other.
+                    clientAppUsed:
+                      description: The name of the client application type used.
+                      type: string
+                      example: Browser
+                    deviceId:
+                      description: The unique identified of the device used for the sign-in event.
+                      type: string
+                      example:
+                    deviceBrowser:
+                      description: The browser that was used for the sign-in event.
+                      type: string
+                      example: Firefox 115.0
+                    operatingSystem:
+                      description: The operating system of the host that was used for the sign-in event.
+                      type: string
+                      example: Linux
+                    deviceCompliant:
+                      description: Whether the device being used to sign-in was compliant with compliance policies.
+                      type: boolean
+                      example: false
+                    deviceManaged:
+                      description: Whether the device being used to sign-in was managed.
+                      type: boolean
+                      example: false
+                    deviceTrustType:
+                      description: The trust type for the device being used to sign-in.
+                      type: string
+                      example:
+                    location:
+                      type: object
+                      properties:
+                        city:
+                          description: The city from which the sign-in event was generated.
+                          type: string
+                          example: London
+                        state:
+                          description: The state from which the sign-in event was generated.
+                          type: string
+                          example: London
+                        country:
+                          description: The country from which the sign-in event was generated.
+                          type: string
+                          example: GB
+                    mfaRequired:
+                      description: Whether multifactor authentication was required for the sign-in.
+                      type: boolean
+                      example: false
+                    mfaAuthMethod:
+                      description: The multifactor authentiation method used.
+                      type: string
+                      nullable: true
+                      example: null
+                    mfaAuthDetail:
+                      description: Details regarding the multifactor authentiation method used.
+                      type: string
+                      nullable: true
+                      example: null
+                    mfaResult:
+                      description: The result of the multifactor authentiation.
+                      type: string
+                      nullable: true
+                      example: null
+                    correlationId:
+                      description: The correlation ID for the sign-in.
+                      type: string
+                      example: 48b094e4-cd3e-4195-afab-d1f7c9de7688
+                    conditionalAccessStatus:
+                      description: The status of conditional access policies for the sign-in.
+                      type: integer
+                      enum: [0]
+                      example: 0
+                    conditionalAccessPolicies:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          id:
+                            description: The unique ID of the conditional access policy.
+                            type: string
+                            example: e426398b-38bb-4413-9978-87514f2b6194
+                          displayName:
+                            description: The display name of the conditional access policy.
+                            type: string
+                            example: Require MFA for all users
+                          enforcedAccessControls:
+                            description: The access controls enforced by the policy.
+                            type: array
+                            items:
+                              type: string
+                              example: Mfa
+                          enforcedSessionControls:
+                            description: The session controls enforced by the policy.
+                            type: array
+                            items:
+                              type: string
+                              example: ResiliencyDefaults
+                          result:
+                            type: integer
+                            example: 2
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /Reports/Users/{userId}:
+    parameters:
+      - name: userId
+        description: The object ID of the user to return.
+        in: path
+        required: true
+        schema:
+          $ref: common.yml#/components/schemas/userId
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    get:
+      summary: Get basic details about User
+      description: >-
+        Get the user display name, user principal name, and object ID.
+      operationId: Reports.Users.Get
+      tags: [Reports]
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  userPrincipalName:
+                    $ref: common.yml#/components/schemas/userPrincipalName
+                  displayName:
+                    description: User display name.
+                    type: string
+                    example: User123
+                  objectId:
+                    $ref: common.yml#/components/schemas/userId
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /Reports/UsersActivitySummary:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    get:
+      summary: Get users activity summary
+      description: >-
+        Get users activity summary.
+      operationId: Reports.UserActivitySummary.Get
+      tags: [Reports]
+      parameters:
+        - $ref: '#/components/parameters/Request'
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                description: unknown response body
+                type: object
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /Reports/{reportId}:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - name: reportId
+        description: The ID of the report
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: request
+        description: The request string
+        in: query
+        required: true
+        schema:
+          type: string
+    get:
+      summary: Get report by ID
+      description: >-
+        Get report by ID.
+      operationId: Reports.Get
+      tags: [Reports]
+      responses:
+        '200':
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /Reports/AuditEventsV2:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    post:
+      summary: List audit events (v2)
+      description: List audit events (version 2)
+      operationId: Reports.AuditEventsV2.List
+      tags: [Reports]
+      parameters:
+        - $ref: common.yml#/components/parameters/nextLink
+      requestBody:
+        $ref: common.yml#/components/requestBodies/unknownRequest
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          description: Event ID
+                          example: Directory_2b543b6d-e04b-4503-bcd1-5f2ae3041f43_9MSPE_52276570
+                        category:
+                          type: string
+                          description: The category of the event.
+                          example: RoleManagement
+                        correlationId:
+                          type: string
+                          description: The correlation ID of the event.
+                          format: uuid
+                          example: 2b543b6d-e04b-4503-bcd1-5f2ae3041f43
+                        result:
+                          type: string
+                          description: The event result.
+                          enum: [success, failure]
+                          example: success
+                        resultReason:
+                          type: string
+                          description: The reason for the event result.
+                          example: ''
+                        activityDisplayName:
+                          type: string
+                          description: Display name for the activity.
+                          example: Remove member from role
+                        activityDateTime:
+                          type: string
+                          description: The timestamp of the event.
+                          format: date-time
+                          example: 2024-06-08T15:24:41.4631178+00:00
+                        loggedByService:
+                          type: string
+                          description: The service that logged the event.
+                          example: Core Directory
+                        initiatedBy:
+                          type: object
+                          description: The principal that initiated the event.
+                          properties:
+                            user:
+                              type: object
+                              properties:
+                                id:
+                                  $ref: common.yml#/components/schemas/userId
+                                displayName:
+                                  type: string
+                                  description: The display name of the user.
+                                  nullable: true
+                                  example: null
+                                userPrincipalName:
+                                  $ref: common.yml#/components/schemas/userPrincipalName
+                                ipAddress:
+                                  type: string
+                                  description: The IP address from which the action was performed.
+                                  example: 1.1.1.1
+                                homeTenantId:
+                                  $ref: common.yml#/components/schemas/tenantId
+                                homeTenantName:
+                                  description: The name of the principal's home tenant (if external).
+                                  type: string
+                                  nullable: true
+                                  example: null
+                        userAgent:
+                          type: string
+                          description: The user agent used in the request.
+                          nullable: true
+                          example: true
+                        targetResources:
+                          type: object
+                          properties:
+                            id:
+                              $ref: common.yml#/components/schemas/objectId
+                            displayName:
+                              description: The display name of the resource.
+                              type: string
+                              nullable: true
+                              example: null
+                            type:
+                              description: The type of target.
+                              type: string
+                              enum: [User]
+                              example: User
+                            userPrincipalName:
+                              $ref: common.yml#/components/schemas/userPrincipalName
+                            groupType:
+                              type: string
+                              nullable: true
+                              example: null
+                            modifiedProperties:
+                              type: object
+                              properties:
+                                displayName:
+                                  description: The display name of the property.
+                                  type: string
+                                  example: Role.ObjectID
+                                oldValue:
+                                  description: The old value of the property.
+                                  type: string
+                                  nullable: true
+                                  example: "\"0d143a05-b222-45d6-aefc-faf2669a37c9\""
+                                newValue:
+                                  description: The new value of the property.
+                                  type: string
+                                  nullable: true
+                                  example: null
+                        additionalProperties:
+                          type: array
+                  nextLink:
+                    $ref: common.yml#/components/schemas/nextLink
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

@@ -1,0 +1,548 @@
+paths:
+  /Common/VerifiedDomains:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    get:
+      summary: List verified domains
+      description: List verified domains.
+      operationId: Common.VerifiedDomains.List
+      tags: [General]
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    authenticationType:
+                      description: The authentication type of the domain.
+                      type: string
+                      enum: [Managed]
+                      example: Managed
+                    isDefault:
+                      description: Whether the domain is the default domain.
+                      type: boolean
+                      example: false
+                    isInitial:
+                      description: Whether the domain is the initial domain.
+                      type: boolean
+                      example: true
+                    isVerified:
+                      description: Whether the domain is verified.
+                      type: boolean
+                      example: true
+                    name:
+                      description: The name of the domain.
+                      type: string
+                      example: contoso.com
+
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /Domains('{domainName}')/verify:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - name: domainName
+        description: The domain name to verify
+        in: path
+        required: true
+        example: contoso.com
+        schema:
+          type: string
+    get:
+      summary: Verify domain
+      description: Verify domain.
+      operationId: Domains.Verify
+      tags: [General]
+      responses:
+        '200':
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /Common/GetObjectsByObjectIds:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    post:
+      summary: Get directory objects
+      description: >-
+        Get directory object by object ID.
+      operationId: Common.Object.Get
+      tags: [Directory]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: common.yml#/components/schemas/objectId
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                description: Map from object ID to basic properties.
+                type: object
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /FeatureConfigurations:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    get:
+      summary: Get feature configurations
+      description: >-
+        Get feature configurations.
+      operationId: FeatureConfigurations.Get
+      tags: [General]
+      parameters:
+        - name: SupportAU
+          description: Whether RBACv2 is supported
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: object
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /Security/Overview/ChartCounts:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    post:
+      summary: Get security chart counts
+      description: >-
+        Get security chart counts.
+      operationId: Security.ChartCounts.Get
+      tags: [General]
+      requestBody:
+        $ref: common.yml#/components/requestBodies/unknownRequest
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  usersChart:
+                    type: array
+                  signinsChart:
+                    type: array
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /Security/Overview/TileCounts:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    get:
+      summary: Get security tile counts
+      description: >-
+        Get security tile counts.
+      operationId: Security.TileCounts.Get
+      tags: [General]
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  high:
+                    type: integer
+                    example: 0
+                  medium:
+                    type: integer
+                    example: 0
+                  unprotected:
+                    type: integer
+                    example: 0
+                  total:
+                    type: integer
+                    example: 0
+                  legacy:
+                    type: integer
+                    example: 0
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /Spotlight/enableSSPR:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    post:
+      summary: Enable SSPR
+      description: >-
+        Enable self-service password reset (SSPR).
+      operationId: Spotlight.SSPR.Enable
+      tags: [General]
+      responses:
+        '200':
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /SupportRequestProblemDetails/Document:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    get:
+      summary: Get support request problem details document
+      description: >-
+        Get support request problem details document.
+      operationId: SupportRequestProblemDetails.Document.Get
+      tags: [General]
+      parameters:
+        - name: topicId
+          description: The topid ID
+          in: query
+          required: true
+          example: 1
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+                    example: defaultDataCollectionDoc
+                  uxVersion:
+                    type: string
+                    example: '1'
+                  controls:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          example: whichUser
+                        type:
+                          type: string
+                          example: textEntryBox
+                        propertyMapper:
+                          type: string
+                          nullable: true
+                          example: null
+                        position:
+                          type: string
+                          nullable: true
+                          example: null
+                        displayText:
+                          type: string
+                          example: Which user is experiencing this problem?
+                        displayHeadingText:
+                          type: string
+                          nullable: true
+                          example: null
+                        localizedText:
+                          type: string
+                          example: Which user is experiencing this problem?
+                        displayTextHint:
+                          type: string
+                          example: Enter user name or Object ID of the user in Azure Active Directory
+                        visibility:
+                          type: string
+                          nullable: true
+                          example: null
+                        mustAnswer:
+                          type: string
+                          example: true
+                        lines:
+                          type: string
+                          nullable: true
+                          example: null
+                        link:
+                          type: string
+                          nullable: true
+                          example: null
+                        icon:
+                          type: string
+                          nullable: true
+                          example: null
+                        choices:
+                          type: array
+                        infoBalloon:
+                          type: string
+                          nullable: true
+                          example: null
+                        bold:
+                          type: boolean
+                          nullable: true
+                          example: null
+                        width:
+                          type: string
+                          nullable: true
+                          example: null
+                        height:
+                          type: string
+                          nullable: true
+                          example: null
+                        backendCall:
+                          type: string
+                          nullable: true
+                          example: null
+                        gridColumns:
+                          type: array
+                        card:
+                          type: string
+                          nullable: true
+                          example: null
+                        dialogBoxButtons:
+                          type: string
+                          nullable: true
+                          example: null
+                        bladeName:
+                          type: string
+                          nullable: true
+                          example: null
+                        contextPane:
+                          type: string
+                          nullable: true
+                          example: null
+                        customHtml:
+                          type: string
+                          nullable: true
+                          example: null
+                        copyContent:
+                          type: boolean
+                          nullable: true
+                          example: null
+                        input:
+                          type: string
+                          nullable: true
+                          example: null
+                  hints:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          example: filehint
+                        condition:
+                          type: string
+                          nullable: true
+                          example: null
+                        displayTextFileType:
+                          type: boolean
+                          nullable: true
+                          example: null
+                        title:
+                          type: string
+                          example: Problem with Azure active directory
+                        supportArticleHint:
+                          type: string
+                          example: Azure active directory issue
+                        workflowNotes:
+                          type: string
+                          nullable: true
+                          example: null
+                  backendCall:
+                    type: string
+                    nullable: true
+                    example: null
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /SupportRequestProblemDetails/Document/XMLContent:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    post:
+      summary: Get support request problem details document XML Content
+      description: >-
+        Get support request problem details document XML Content.
+      operationId: SupportRequestProblemDetails.Document.XMLContent.Get
+      tags: [General]
+      responses:
+        '200':
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

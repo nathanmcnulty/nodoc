@@ -1,0 +1,125 @@
+paths:
+  /GDPR/DeleteSelf:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    post:
+      summary: Initiate GDPR self delete
+      description: >-
+        Initiate GDPR self delete.
+      operationId: Gdpr.SelfDelete.Create
+      tags: [GDPR]
+      requestBody:
+        $ref: common.yml#/components/requestBodies/unknownRequest
+      responses:
+        '200':
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    delete:
+      summary: Initiate GDPR self delete
+      description: >-
+        Cancel GDPR self delete.
+      operationId: Gdpr.SelfDelete.Delete
+      tags: [GDPR]
+      responses:
+        '200':
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /GDPR/InitiateExportRequest:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    post:
+      summary: Initiate GDPR export request
+      description: >-
+        Initiate GDPR export request.
+      operationId: Gdpr.ExportRequest.Create
+      tags: [GDPR]
+      parameters:
+        - name: markAsComplete
+          description: Whether to mark the task as complete.
+          in: query
+          required: true
+          schema:
+            type: boolean
+      requestBody:
+        $ref: common.yml#/components/requestBodies/unknownRequest
+      responses:
+        '200':
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /GDPR/IsViralUser:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    get:
+      summary: Check if user is viral user
+      description: >-
+        Check if user is viral user.
+      operationId: Gdpr.IsViralUser.Check
+      tags: [GDPR]
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: boolean
+                example: false
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /GDPR/ListRequests:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    post:
+      summary: List GDPR requests
+      description: >-
+        List GDPR requests.
+      operationId: Gdpr.Requests.List
+      tags: [GDPR]
+      parameters:
+        - name: markAsComplete
+          description: Whether to mark the task as complete.
+          in: query
+          required: true
+          schema:
+            type: boolean
+      requestBody:
+        $ref: common.yml#/components/requestBodies/unknownRequest
+      responses:
+        '200':
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

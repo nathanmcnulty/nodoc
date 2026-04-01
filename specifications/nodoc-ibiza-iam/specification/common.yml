@@ -1,0 +1,527 @@
+components:
+  headers:
+    Cache-Control:
+      schema:
+        type: string
+    Content-Encoding:
+      schema:
+        type: string
+    Vary:
+      schema:
+        type: string
+    Pragma:
+      schema:
+        type: string
+    X-Content-Type-Options:
+      schema:
+        type: string
+    X-XSS-Protection:
+      schema:
+        type: string
+    x-ms-version:
+      schema:
+        type: string
+    Strict-Transport-Security:
+      schema:
+        type: string
+    Access-Control-Expose-Headers:
+      schema:
+        type: string
+    x-ms-correlation-id:
+      schema:
+        type: string
+        format: uuid
+    x-ms-operation-maturity:
+      schema:
+        type: string
+    x-ms-expected-duration:
+      schema:
+        type: integer
+    X-UA-Compatible:
+      schema:
+        type: string
+    Date:
+      schema:
+        type: string
+    Content-Length:
+      schema:
+        type: integer
+    Expires:
+      schema:
+        type: number
+
+  requestBodies:
+    unknownRequest:
+      description: Unknown API request
+      content:
+        application/json:
+          schema:
+            description: Unknown body
+
+  responses:
+    UnknownResponse:
+      description: Unknown API response
+      headers:
+        Cache-Control:
+          $ref: '#/components/headers/Cache-Control'
+        Vary:
+          $ref: '#/components/headers/Vary'
+        X-Content-Type-Options:
+          $ref: '#/components/headers/X-Content-Type-Options'
+        X-XSS-Protection:
+          $ref: '#/components/headers/X-XSS-Protection'
+        x-ms-version:
+          $ref: '#/components/headers/x-ms-version'
+        Strict-Transport-Security:
+          $ref: '#/components/headers/Strict-Transport-Security'
+        Access-Control-Expose-Headers:
+          $ref: '#/components/headers/Access-Control-Expose-Headers'
+        x-ms-correlation-id:
+          $ref: '#/components/headers/x-ms-correlation-id'
+        x-ms-operation-maturity:
+          $ref: '#/components/headers/x-ms-operation-maturity'
+        x-ms-expected-duration:
+          $ref: '#/components/headers/x-ms-expected-duration'
+        X-UA-Compatible:
+          $ref: '#/components/headers/X-UA-Compatible'
+        Date:
+          $ref: '#/components/headers/Date'
+      content:
+        application/json:
+          schema:
+            description: Unknown body
+    4XX:
+      description: Generic 4XX exception
+      content:
+        text/html:
+          description: HTML response page containing error message.
+          type: object
+
+    Unauthorized:
+      description: Unauthorized
+      content:
+        text/html:
+          schema:
+            description: HTML response page containing unauthorized error message.
+            type: object
+
+    NotFound:
+      description: Item not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                description: The item not found error message.
+                type: string
+                example: >-
+                  No HTTP resource was found that matches the request URI
+                  'https://main.iam.ad.ext.azure.com/api/xxx'
+        text/html:
+          schema:
+            description: HTML response page containing item not found error message.
+            type: object
+
+    ClientException:
+      description: A structured client exception
+      headers:
+        Cache-Control:
+          $ref: '#/components/headers/Cache-Control'
+        Pragma:
+          $ref: '#/components/headers/Pragma'
+        X-Content-Type-Options:
+          $ref: '#/components/headers/X-Content-Type-Options'
+        X-XSS-Protection:
+          $ref: '#/components/headers/X-XSS-Protection'
+        x-ms-version:
+          $ref: '#/components/headers/x-ms-version'
+        Strict-Transport-Security:
+          $ref: '#/components/headers/Strict-Transport-Security'
+        Access-Control-Expose-Headers:
+          $ref: '#/components/headers/Access-Control-Expose-Headers'
+        x-ms-correlation-id:
+          $ref: '#/components/headers/x-ms-correlation-id'
+        x-ms-operation-maturity:
+          $ref: '#/components/headers/x-ms-operation-maturity'
+        x-ms-expected-duration:
+          $ref: '#/components/headers/x-ms-expected-duration'
+        X-UA-Compatible:
+          $ref: '#/components/headers/X-UA-Compatible'
+        Date:
+          $ref: '#/components/headers/Date'
+        Content-Length:
+          $ref: '#/components/headers/Content-Length'
+        Expires:
+          $ref: '#/components/headers/Expires'
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              ClassName:
+                description: The class name of the exception object.
+                type: string
+                example: Microsoft.Portal.Framework.Exceptions.ClientException
+              Message:
+                description: The error message.
+                type: string
+                example: One or more errors occurred.
+              Data:
+                description: An object containing data relating to the exception.
+                type: object
+              HResult:
+                description: The completion status of the called function.
+                type: number
+                example: -2146233088
+              XMsServerRequestId:
+                description: Unknown internal value.
+                type: string
+                nullable: true
+                format: uuid
+                minLength: 36
+                maxLength: 36
+                example: c4865529-7684-47dd-8bd0-7224f80657cd
+              Source:
+                description: The source of the exception.
+                type: string
+                nullable: true
+                example: Microsoft.ActiveDirectory.PortalExtension.ADExtension
+              HttpStatusCode:
+                description: The HTTP status code returned with the exception.
+                type: integer
+                example: 400
+              ClientData:
+                description: The data for the client regarding the raised exception.
+                type: object
+                properties:
+                  errorCode:
+                    description: The error code of the exception.
+                    type: string
+                    minLength: 1
+                    example: LicenseAssignmentError
+                  localizedErrorDetails:
+                    description: A localized copy of error details.
+                    type: object
+                    nullable: true
+                  operationResults:
+                    type: array
+                    nullable: true
+                    items:
+                      type: object
+                      properties:
+                        objectId:
+                          $ref: '#/components/schemas/objectId'
+                        displayName:
+                          type: string
+                          nullable: true
+                          minLength: 1
+                          example: null
+                        status:
+                          type: integer
+                          example: 0
+                        details:
+                          type: string
+                          nullable: true
+                          minLength: 1
+                          example: 'AADSTS500133: Assertion is not within its valid time range...'
+                      required:
+                        - objectId
+                        - displayName
+                        - status
+                        - details
+                  timeStampUtc:
+                    description: The UTC timestamp of the raised exception.
+                    type: string
+                    format: date-time
+                    minLength: 20
+                    example: 2024-05-03T09:49:09.8618153Z
+                  clientRequestId:
+                    description: >-
+                      The client request identifier,
+                      as provided in the `X-Ms-Client-Request-Id` request header.
+                    type: string
+                    nullable: true
+                    format: uuid
+                    example: 839a1c0b-5f71-31f5-413f-94d00b06700b
+                  internalTransactionId:
+                    description: An internal tracking identifier.
+                    type: string
+                    format: uuid
+                    minLength: 1
+                    example: 0426f673-d518-471b-a9b7-3a6a012949a5
+                  tenantId:
+                    $ref: '#/components/schemas/tenantId'
+                  userObjectId:
+                    $ref: '#/components/schemas/userId'
+                  exceptionType:
+                    description: The type of the exception.
+                    type: string
+                    minLength: 1
+                    example: AggregateException
+                required:
+                  - errorCode
+                  - localizedErrorDetails
+                  - operationResults
+                  - timeStampUtc
+                  - clientRequestId
+                  - internalTransactionId
+                  - tenantId
+                  - userObjectId
+                  - exceptionType
+            required:
+              - ClassName
+              - Message
+              - Data
+              - HResult
+              - XMsServerRequestId
+              - Source
+              - HttpStatusCode
+              - ClientData
+          examples:
+            LicenseError:
+              value:
+                ClassName: Microsoft.Portal.Framework.Exceptions.ClientException
+                Message: >-
+                  One or more errors occurred.
+                Data: {}
+                HResult: -2146233088
+                XMsServerRequestId: c4865529-7684-47dd-8bd0-7224f80657cd
+                Source: Microsoft.ActiveDirectory.PortalExtension.ADExtension
+                HttpStatusCode: 400
+                ClientData:
+                  errorCode: LicenseAssignmentError
+                  localizedErrorDetails: null
+                  operationResults:
+                    - objectId: null
+                      displayName: null
+                      status: 0
+                      details: null
+                  timeStampUtc: 2024-05-03T10:48:14.097851Z
+                  clientRequestId: d2cca72b-9942-4b80-8343-f88c2332f012
+                  internalTransactionId: 1bb2fcd6-fe22-487e-b82b-28f3e47164a9
+                  tenantId: null
+                  userObjectId: 6934698c-5dcf-4596-809d-bc5b566518e5
+                  exceptionType: AggregateException
+            ExpiredToken:
+              value:
+                ClassName: Microsoft.Portal.Framework.Exceptions.ClientException
+                Message: >-
+                  AADSTS500133: Assertion is not within its valid time range.
+                  Ensure that the access token is not expired before using it for user assertion,
+                  or request a new token.
+                  Current time: 2024-05-03T10:48:14.0106581Z,
+                  expiry time of assertion 2024-05-03T10:46:43.0000000Z.
+                  Trace ID: 559c1294-0605-425e-b43f-e81cb9a65600
+                  Correlation ID: 4e908f90-9762-4be4-b022-98367f6e9964
+                  Timestamp: 2024-05-03 10:48:14Z
+                Data: {}
+                HResult: -2146233088
+                XMsServerRequestId: null
+                Source: null
+                HttpStatusCode: 400
+                ClientData:
+                  errorCode: msalautherror_invalid_grant
+                  localizedErrorDetails:
+                    errorDetail: >-
+                      AADSTS500133: Assertion is not within its valid time range.
+                      Ensure that the access token is not expired before using it
+                      for user assertion, or request a new token.
+                      Current time: 2024-05-03T10:48:14.0106581Z,
+                      expiry time of assertion 2024-05-03T10:46:43.0000000Z.
+                      Trace ID: 559c1294-0605-425e-b43f-e81cb9a65600
+                      Correlation ID: 4e908f90-9762-4be4-b022-98367f6e9964
+                      Timestamp: 2024-05-03 10:48:14Z
+                  operationResults:
+                    - objectId: null
+                      displayName: null
+                      status: 0
+                      details: >-
+                        AADSTS500133: Assertion is not within its valid time range.
+                        Ensure that the access token is not expired before using it
+                        for user assertion, or request a new token.
+                        Current time: 2024-05-03T10:48:14.0106581Z,
+                        expiry time of assertion 2024-05-03T10:46:43.0000000Z.
+                        Trace ID: 559c1294-0605-425e-b43f-e81cb9a65600
+                        Correlation ID: 4e908f90-9762-4be4-b022-98367f6e9964
+                        Timestamp: 2024-05-03 10:48:14Z
+                  timeStampUtc: 2024-05-03T10:48:14.097851Z
+                  clientRequestId: d2cca72b-9942-4b80-8343-f88c2332f012
+                  internalTransactionId: 1bb2fcd6-fe22-487e-b82b-28f3e47164a9
+                  tenantId: null
+                  userObjectId: 6934698c-5dcf-4596-809d-bc5b566518e5
+                  exceptionType: MsalUiRequiredException
+            NoCorrelationID:
+              value:
+                ClassName: Microsoft.Portal.Framework.Exceptions.ClientException
+                Message: 'Value cannot be null.\r\nParameter name: correlationId'
+                Data: {}
+                HResult: -2146233088
+                XMsServerRequestId: null
+                Source: null
+                HttpStatusCode: 400
+                ClientData:
+                  errorCode: ArgumentNull
+                  localizedErrorDetails: null
+                  operationResults: null
+                  timeStampUtc: 2024-05-07T13:50:54.5718173Z
+                  clientRequestId: null
+                  internalTransactionId: 4d985488-68f1-451b-87bf-1c8ab776cd18
+                  tenantId: null
+                  userObjectId: 6934698c-5dcf-4596-809d-bc5b566518e5
+                  exceptionType: ArgumentNullException
+
+  parameters:
+    spId:
+      name: spId
+      in: path
+      description: >-
+        The object ID of the service principal (enterprise application).
+      required: true
+      schema:
+        $ref: '#/components/schemas/servicePrincipalId'
+    appId:
+      name: appId
+      in: path
+      description: >-
+        The application ID of the application.
+      required: true
+      schema:
+        $ref: '#/components/schemas/applicationId'
+    XMsClientRequestId:
+      name: X-Ms-Client-Request-Id
+      description: X-Ms-Client-Request-Id header.
+      in: header
+      required: true
+      schema:
+        type: string
+        format: uuid
+    XMsClientSessionId:
+      name: X-Ms-Client-Session-Id
+      description: X-Ms-Client-Session-Id header.
+      in: header
+      required: true
+      schema:
+        type: string
+        format: uuid
+    nextLink:
+      name: nextLink
+      description: nextLink query parameter for paging.
+      in: query
+      required: false
+      schema:
+        $ref: '#/components/schemas/nextLink'
+    searchText:
+      name: searchText
+      description: pending
+      required: true
+      in: query
+      schema:
+        type: string
+        nullable: true
+    columnName:
+      name: columnName
+      description: pending
+      in: query
+      schema:
+        type: string
+    sortOrder:
+      name: sortOrder
+      description: pending
+      in: query
+      schema:
+        type: string
+    top:
+      name: top
+      description: The number of records to return.
+      in: query
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 999
+    filter:
+      name: $filter
+      description: A filter query to apply to results.
+      in: query
+      schema:
+        type: string
+
+  schemas:
+    nextLink:
+      description: The `nextLink` string to use for paging results.
+      type: string
+      nullable: true
+      example: ''
+    PagedResponse:
+      type: object
+      properties:
+        firstPage:
+          description: Whether this response is the first page.
+          type: boolean
+          example: true
+        lastPage:
+          description: Whether this response is the last page.
+          type: boolean
+          example: true
+        nextLink:
+          $ref: '#/components/schemas/nextLink'
+      required:
+        - firstPage
+        - lastPage
+        - nextLink
+    userPrincipalName:
+      description: The User Principal Name (UPN) for the user.
+      type: string
+      example: User@Contoso.com
+    userId:
+      description: The object ID of the user.
+      type: string
+      format: uuid
+      minLength: 36
+      maxLength: 36
+      example: c822926c-40f7-41c1-b220-21639fe755a7
+    groupId:
+      description: The object ID of the group.
+      type: string
+      format: uuid
+      minLength: 36
+      maxLength: 36
+      example: f8b378b5-152f-4a32-bd1a-bf5ba02cdaa9
+    objectId:
+      description: The ID of the directory object.
+      type: string
+      nullable: true
+      format: uuid
+      minLength: 36
+      maxLength: 36
+      example: 9bfcbcd9-3843-42bc-aec6-70e7815f5757
+    tenantId:
+      description: The unique ID of the tenant.
+      type: string
+      nullable: true
+      format: uuid
+      minLength: 36
+      maxLength: 36
+      example: d2a1929a-5e50-4960-8994-bceecb95c3ff
+    applicationId:
+      description: The application ID (client ID) of the application.
+      type: string
+      format: uuid
+      minLength: 36
+      maxLength: 36
+      example: 693d2d81-7ad4-41ba-a844-070680da77f9
+    appObjectId:
+      description: The object ID of the application registration.
+      type: string
+      format: uuid
+      minLength: 36
+      maxLength: 36
+      example: 693d2d81-7ad4-41ba-a844-070680da77f9
+    servicePrincipalId:
+      description: The object ID of the service principal (enterprise application).
+      type: string
+      format: uuid
+      minLength: 36
+      maxLength: 36
+      example: 9679fc4f-a7b6-40aa-8a45-32e61e30a204

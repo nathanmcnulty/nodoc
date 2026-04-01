@@ -1,0 +1,84 @@
+paths:
+  /DocumentProcessorTasks:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    post:
+      summary: Create document processor task
+      description: Create document processor task.
+      operationId: DocumentProcessorTasks.Create
+      tags: [Document Processor Tasks]
+      requestBody:
+        $ref: common.yml#/components/requestBodies/unknownRequest
+      responses:
+        '200':
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /DocumentProcessorTasks/{id}:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - name: id
+        description: Document processor task download ID
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      summary: Get document processor task
+      description: Get document processor task.
+      operationId: DocumentProcessorTasks.Get
+      tags: [Document Processor Tasks]
+      responses:
+        '200':
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /DocumentProcessorTasks/Download/{id}:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - name: id
+        description: Document processor task download ID
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      summary: Download document processor task
+      description: Download document processor task.
+      operationId: DocumentProcessorTasks.Download
+      tags: [Document Processor Tasks]
+      responses:
+        '200':
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /DocumentProcessorTasks/ListTasks:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    get:
+      summary: List document processor tasks
+      description: List document processor tasks.
+      operationId: DocumentProcessorTasks.List
+      tags: [Document Processor Tasks]
+      responses:
+        '200':
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /DocumentProcessorTasks/UploadTaskFile:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    post:
+      summary: Upload document processor task file
+      description: Upload document processor task file.
+      operationId: DocumentProcessorTasks.TaskFile.Upload
+      tags: [Document Processor Tasks]
+      responses:
+        '200':
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

@@ -1,0 +1,457 @@
+components:
+  schemas:
+    registeredApplication:
+      allOf:
+        - $ref: '#/components/schemas/registeredApplicationBase'
+        - type: object
+          properties:
+            appId:
+              type: string
+              example: 2e6339fd-d0a5-44d0-ba5d-c6525ca4ca7a
+            appRoles:
+              type: array
+            availableToOtherTenants:
+              type: boolean
+              example: false
+            displayName:
+              type: string
+              example: Portals-Site 1
+            errorUrl:
+              type: string
+              format: url
+              nullable: true
+              example: null
+            groupMembershipClaims:
+              type: array
+              nullable: true
+            optionalClaims:
+              type: array
+              nullable: true
+            acceptMappedClaims:
+              type: array
+              nullable: true
+            homepage:
+              type: string
+              nullable: true
+              example: null
+            informationalUrls:
+              type: object
+              properties:
+                privacy:
+                  type: string
+                  format: url
+                  nullable: true
+                  example: null
+                termsOfService:
+                  type: string
+                  format: url
+                  nullable: true
+                  example: null
+            identifierUris:
+              type: array
+            keyCredentials:
+              type: array
+            knownClientApplications:
+              type: array
+            logoutUrl:
+              type: string
+              format: url
+              nullable: true
+              example: null
+            oauth2AllowImplicitFlow:
+              type: boolean
+              example: false
+            oauth2AllowUrlPathMatching:
+              type: boolean
+              example: false
+            oauth2Permissions:
+              type: array
+              items:
+                type: object
+                properties:
+                  adminConsentDescription:
+                    type: string
+                    example: Allow the application to access Portals-Site 1 on behalf of the signed-in user.
+                  adminConsentDisplayName:
+                    type: string
+                    example: Access Portals-Site 1
+                  id:
+                    type: string
+                    example: 37e2e359-45d8-46b0-9720-7d4c752af6ff
+                  isEnabled:
+                    type: boolean
+                    example: true
+                  type:
+                    type: string
+                    example: User
+                  userConsentDescription:
+                    type: string
+                    example: Allow the application to access Portals-Site 1 on your behalf.
+                  userConsentDisplayName:
+                    type: string
+                    example: Access Portals-Site 1
+                  value:
+                    type: string
+                    example: user_impersonation
+            oauth2RequirePostResponse:
+              type: boolean
+              example: false
+            objectId:
+              type: string
+              example: 74e000e4-3a97-45b9-acd8-414bab41e0b6
+            parentalControlSettings":
+              type: object
+              properties:
+                countriesBlockedForMinors:
+                  type: array
+                legalAgeGroupRule:
+                  type: string
+                  example: Allow
+            passwordCredentials:
+              type: array
+            publicClient:
+              type: boolean
+              example: false
+            supportsConvergence:
+              type: boolean
+              example: false
+            replyUrls:
+              type: array
+            requiredResourceAccess:
+              type: array
+              items:
+                type: object
+                properties:
+                  resourceAppId:
+                    type: string
+                    example: 00000002-0000-0000-c000-000000000000
+                  resourceAccess:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          example: 311a71cc-e848-46a1-bdf8-97ff7156d8e6
+                        type:
+                          type: string
+                          example: Scope
+                  resourceApp:
+                    type: object
+                    nullable: true
+            samlMetadataUrl:
+              type: string
+              nullable: true
+              example: null
+
+            logoUrl:
+              type: string
+              example: https://main.iam.ad.ext.azure.com/api/Images/Applications/yytOmm9B92beL3OolH8jyO6M4LAZauiLJwNnU8-2dac=.jpg?t=638508570566299681
+            logoChanged:
+              type: boolean
+              nullable: true
+              example: false
+            defaultIdentifierUri:
+              type: string
+              nullable: true
+              example: null
+            appCategory:
+              type: string
+              nullable: true
+              example: null
+    registeredApplicationBase:
+      type: object
+      properties:
+        objectType:
+          type: string
+          example: Application
+        objectId:
+          type: string
+          example: 6b061bf8-f63b-4567-bcd6-735f35ebce89
+          readOnly: true
+        appId:
+          type: string
+          example: 2305d473-3c0b-4853-af61-94a4389d0ad2
+          readOnly: true
+        displayName:
+          type: string
+          example: Portals-Site 1
+        homepage:
+          type: string
+          nullable: true
+          example: null
+        appCategory:
+          type: string
+          nullable: true
+          example: null
+        publicClient:
+          type: boolean
+          example: false
+        supportsConvergence:
+          type: boolean
+          example: false
+        logoUrl:
+          type: string
+          format: url
+          example: https://main.iam.ad.ext.azure.com/api/Images/Applications/...
+
+paths:
+  /RegisteredApplications:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - $ref: common.yml#/components/parameters/nextLink
+    get:
+      summary: List app registrations
+      description: >-
+        List application registrations.
+      operationId: RegisteredApplication.List
+      tags: [Application Registration]
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/registeredApplicationBase'
+                  nextLink:
+                    $ref: common.yml#/components/schemas/nextLink
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    post:
+      summary: Create app registration
+      description: >-
+        Create application registration.
+      operationId: RegisteredApplication.Create
+      tags: [Application Registration]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/registeredApplication'
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/registeredApplication'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /RegisteredApplications/{appId}:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - in: path
+        name: appId
+        description: The application ID (client ID) of the application registration to manage.
+        required: true
+        schema:
+          $ref: common.yml#/components/schemas/applicationId
+    put:
+      summary: Update app registration
+      description: >-
+        Create application registration.
+      operationId: RegisteredApplication.Update
+      tags: [Application Registration]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/registeredApplication'
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/registeredApplication'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    delete:
+      summary: Delete app registration
+      description: >-
+        Delete application registration by object ID.
+      operationId: RegisteredApplication.Delete
+      tags: [Application Registration]
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: boolean
+                example: true
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /RegisteredApplications/{appId}/Consent:
+    parameters:
+      - in: path
+        name: appId
+        description: The application ID (client ID) of the application registration to consent.
+        required: true
+        schema:
+          $ref: common.yml#/components/schemas/applicationId
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    post:
+      summary: Consent to app registration
+      description: >-
+        Consent to application registration permissions,
+        either for the current user, or on behalf of the organisation (admin consent).
+      operationId: RegisteredApplication.Consent
+      tags: [Application Registration]
+      parameters:
+        - name: onBehalfOfAll
+          description: Whether to consent on behalf of the organisation (admin consent)
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '204':
+          description: No Content
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

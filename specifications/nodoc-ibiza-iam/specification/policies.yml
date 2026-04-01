@@ -1,0 +1,1372 @@
+components:
+  schemas:
+    minUserRisk:
+      type: object
+      properties:
+        lowRisk:
+          description: Whether the policy targets users at `low` user risk level or higher.
+          type: boolean
+          example: false
+        mediumRisk:
+          description: Whether the policy targets users at `medium` user risk level or higher.
+          type: boolean
+          example: false
+        highRisk:
+          description: Whether the policy targets users at `high` user risk level.
+          type: boolean
+          example: false
+        noRisk:
+          description: Whether the policy targets users with no user risk level.
+          type: boolean
+          example: false
+        applyCondition:
+          description: Whether to apply the policy to condition matches.
+          type: boolean
+          example: false
+    minSigninRisk:
+      type: object
+      properties:
+        lowRisk:
+          description: Whether the policy targets signins at `low` signin risk level or higher.
+          type: boolean
+          example: false
+        mediumRisk:
+          description: Whether the policy targets signins at `medium` signin risk level or higher.
+          type: boolean
+          example: false
+        highRisk:
+          description: Whether the policy targets signins at `high` signin risk level.
+          type: boolean
+          example: false
+        noRisk:
+          description: Whether the policy targets signins with no risk levels.
+          type: boolean
+          example: false
+        applyCondition:
+          description: Whether to apply the policy to condition matches.
+          type: boolean
+          example: false
+    servicePrincipalRiskLevels:
+      type: object
+      properties:
+        lowRisk:
+          description: Whether the policy targets service principals at `low` risk level or higher.
+          type: boolean
+          example: false
+        mediumRisk:
+          description: Whether the policy targets service principals at `medium` risk level or higher.
+          type: boolean
+          example: false
+        highRisk:
+          description: Whether the policy targets service principals at `high` risk level.
+          type: boolean
+          example: false
+        applyCondition:
+          description: Whether to apply the policy to condition matches.
+          type: boolean
+          example: false
+    devicePlatforms:
+      description: Device platform policy scope.
+      type: object
+      properties:
+        all:
+          description: >
+            Policy platform targeting:
+              - `1`: All platforms
+              - `2`: Selected platforms
+          type: integer
+          enum: [1, 2]
+          example: 1
+        included:
+          type: object
+          properties:
+            android:
+              description: Whether Android is included.
+              type: boolean
+              example: false
+            ios:
+              description: Whether iOS is included.
+              type: boolean
+              example: false
+            windowsPhone:
+              description: Whether Windows Phone is included.
+              type: boolean
+              example: false
+            windows:
+              description: Whether Windows is included.
+              type: boolean
+              example: false
+            macOs:
+              description: Whether macOS is included.
+              type: boolean
+              example: false
+            linux:
+              description: Whether Linux is included.
+              type: boolean
+              example: false
+        excluded:
+          type: object
+          nullable: true
+          properties:
+            android:
+              description: Whether Android is excluded.
+              type: boolean
+              example: false
+            ios:
+              description: Whether iOS is excluded.
+              type: boolean
+              example: false
+            windowsPhone:
+              description: Whether Windows Phone is excluded.
+              type: boolean
+              example: false
+            windows:
+              description: Whether Windows is excluded.
+              type: boolean
+              example: false
+            macOs:
+              description: Whether macOS is excluded.
+              type: boolean
+              example: false
+            linux:
+              description: Whether Linux is excluded.
+              type: boolean
+              example: false
+        applyCondition:
+          description: Whether to apply the condition.
+          type: boolean
+          example: false
+    locations:
+      type: object
+      properties:
+        includeLocationType:
+          description: pending.
+          type: integer
+          enum: [0]
+          example: 0
+        excludeAllTrusted:
+          description: pending.
+          type: boolean
+          example: false
+        applyCondition:
+          description: Whether to apply the condition.
+          type: boolean
+          example: false
+    clientAppsV2:
+      type: object
+      properties:
+        webBrowsers:
+          description: Whether the policy applies to web browsers.
+          type: boolean
+          example: false
+        mobileDesktop:
+          description: Whether the policy applies to mobile apps and desktop clients.
+          type: boolean
+          example: false
+        modernAuth:
+          description: pending
+          type: boolean
+          example: false
+        exchangeActiveSync:
+          description: Whether the policy applies to exchange active sync clients (legacy authentication).
+          type: boolean
+          example: false
+        onlyAllowSupportedPlatforms:
+          description: pending
+          type: boolean
+          example: false
+        otherClients:
+          description: Whether the policy applies to 'other clients'.
+          type: boolean
+          example: false
+        applyCondition:
+          description: Whether to apply the condition.
+          type: boolean
+          example: false
+    deviceStateBase:
+      type: object
+      properties:
+        includeDeviceStateType:
+          description: pending
+          type: integer
+          enum: [0, 1]
+          example: 0
+        excludeDomainJoionedDevice:
+          description: Whether to exclude domain joined (hybrid) devices (typo is present in the API).
+          type: boolean
+          example: false
+        excludeCompliantDevice:
+          description: Whether to exclude compliant devices.
+          type: boolean
+          example: false
+        applyCondition:
+          description: Whether to apply the condition.
+          type: boolean
+          example: false
+    servicePrincipalsBase:
+      description: Cloud App scope configuration.
+      type: object
+      properties:
+        allServicePrincipals:
+          description: >
+            Whether all Cloud Apps are included in policy scope:
+              - `0`: None
+              - `1`: All cloud apps
+              - `2`: Select apps
+          type: integer
+          enum: [0, 1, 2]
+          example: 1
+        included:
+          type: object
+          properties:
+            ids:
+              type: array
+              items:
+                $ref: common.yml#/components/schemas/servicePrincipalId
+        userActions:
+          type: array
+          uniqueItems: true
+          items:
+            description: >
+              The user actions targeted by the policy:
+                - `1`: Register security information
+                - `5` Register or join devices
+            type: integer
+            enum: [1, 5]
+          nullable: true
+        stepUpTags:
+          type: array
+          nullable: true
+    users:
+      type: object
+      properties:
+        allUsers:
+          description: >
+            Whether all users are included in policy scope:
+              - `0`: None
+              - `1`: All Users
+              - `2`: Select users and groups
+          type: integer
+          enum: [0, 1, 2]
+          example: 1
+        excluded:
+          type: object
+          properties:
+            userIds:
+              type: array
+              items:
+                $ref: common.yml#/components/schemas/userId
+            groupIds:
+              type: array
+              items:
+                $ref: common.yml#/components/schemas/groupId
+        included:
+          type: object
+          properties:
+            userIds:
+              type: array
+              items:
+                $ref: common.yml#/components/schemas/userId
+            groupIds:
+              type: array
+              items:
+                $ref: common.yml#/components/schemas/groupId
+    PolicyConfiguration:
+      type: object
+      properties:
+        usersV2:
+          type: object
+          properties:
+            allUsers:
+              description: >
+                Whether all users are included in policy scope:
+                  - `0`: None
+                  - `1`: All Users
+                  - `2`: Select users and groups
+              type: integer
+              enum: [0, 1, 2]
+              example: 1
+            included:
+              $ref: '#/components/schemas/PolicyInclusivity'
+            excluded:
+              $ref: '#/components/schemas/PolicyInclusivity'
+        templateId:
+          description: The policy template identifier.
+          type: string
+          nullable: true
+          format: uuid
+          example: null
+        servicePrincipals:
+          allOf:
+            - $ref: '#/components/schemas/servicePrincipalsBase'
+            - description: Cloud App scope configuration.
+              type: object
+              properties:
+                excluded:
+                  type: object
+                  properties:
+                    ids:
+                      type: array
+                      items:
+                        $ref: common.yml#/components/schemas/servicePrincipalId
+                filter:
+                  description: Custom attribute filter.
+                  type: string
+                  nullable: true
+                  example: null
+                includeAllMicrosoftApps:
+                  description: Whether to include all Microsoft Apps.
+                  type: boolean
+                  example: false
+                excludeAllMicrosoftApps:
+                  description: Whether to exclude all Microsoft Apps.
+                  type: boolean
+                  example: false
+                networkAccess:
+                  type: object
+                  nullable: true
+        controls:
+          type: object
+          properties:
+            controlsOr:
+              description: Whether the policy is set to require only one control.
+              type: boolean
+              example: true
+            blockAccess:
+              description: Whether the policy blocks access.
+              type: boolean
+              example: false
+            challengeWithMfa:
+              description: Whether the policy challenges the user with multifactor authentication.
+              type: boolean
+              example: true
+            requireAuthStrength:
+              description: >
+                Specific authentication strength required by the policy:
+                  - `00000000-0000-0000-0000-000000000002`: Multifactor Authentication
+                  - `00000000-0000-0000-0000-000000000003`: Passwordless MFA
+                  - `00000000-0000-0000-0000-000000000004`: Phishing-resistant MFA
+              type: string
+              format: uuid
+              enum:
+                - 00000000-0000-0000-0000-000000000003
+              nullable: true
+              example: null
+            compliantDevice:
+              description: Whether a compliant device is required.
+              type: boolean
+              example: false
+            domainJoinedDevice:
+              description: Whether a domain joined (hybrid) device is required.
+              type: boolean
+              example: false
+            approvedClientApp:
+              description: >
+                Whether an approved client application is required.
+                More info: https://aka.ms/supportedmamapps
+              type: boolean
+              example: false
+            claimProviderControlIds:
+              type: array
+              items:
+                type: string
+            requireCompliantApp:
+              description: >
+                Whether a compliant application is required.
+                e.g. with an app protection policy.
+                More info: https://aka.ms/supportedmampolicyapps
+              type: boolean
+              example: false
+            requirePasswordChange:
+              description: Whether the policy requires a password change.
+              type: boolean
+              example: true
+            requiredFederatedAuthMethod:
+              description: What federated authentication method to enforce.
+              type: integer
+              enum: [0]
+              example: 0
+        sessionControls:
+          type: object
+          properties:
+            appEnforced:
+              description: >
+                Whether app enforced restrictions are enforced.
+                More info: https://aka.ms/caapprestrictions
+              type: boolean
+              example: false
+            cas:
+              description: >
+                Whether Cloud App Security (Defender for Cloud Apps) policy is enforced.
+                More info: https://aka.ms/mcaslearnmore
+              type: boolean
+              example: false
+            cloudAppSecuritySessionControlType:
+              type: integer
+              enum: [0]
+              example: 0
+            signInFrequencyTimeSpan:
+              type: object
+              description: >
+                Sign in frequency configuration. More info: https://aka.ms/RequireReauthentication)
+              properties:
+                type:
+                  description: >
+                    The timespan units:
+                      - `0`: Not configured
+                      - `1`: Days
+                      - `2`: Hour
+                  type: integer
+                  enum: [0, 1, 2]
+                  example: 1
+                value:
+                  description: The number of units, as specified in `type`, for the timespan.
+                  type: integer
+                  example: 6
+                authenticationType:
+                  description: pending.
+                  type: integer
+                  enum: [0]
+                  example: 0
+                frequencyInterval:
+                  description: >
+                    Whether to consider the timespan or enforce signin every time:
+                      - `0`: Periodic reauthentication
+                      - `1`: Every time
+                  type: integer
+                  enum: [0, 1]
+                  example: 0
+            signInFrequency:
+              description: pending.
+              type: integer
+              enum: [0]
+              example: 0
+            persistentBrowserSessionMode:
+              description: >
+                Persistent browser session mode:
+                  - `0`: Not configured
+                  - `10`: Always persistent
+                  - `20`: Never persistent
+              type: integer
+              enum: [0, 10, 20]
+              example: 0
+            continuousAccessEvaluation:
+              description: pending.
+              type: integer
+              enum: [0]
+              example: 0
+            resiliencyDefaults:
+              description: >
+                Resiliency Defaults mode:
+                  - `0`: Not configured (enabled)
+                  - `20`: Disabled
+              type: integer
+              enum: [0, 20]
+              example: 0
+            secureSignIn:
+              description: pending
+              type: boolean
+              example: false
+            secureApp:
+              description: pending
+              type: boolean
+              example: false
+            networkAccessSecurity:
+              type: object
+              nullable: true
+              example: null
+        conditions:
+          type: object
+          properties:
+            minUserRisk:
+              $ref: '#/components/schemas/minUserRisk'
+            minSigninRisk:
+              $ref: '#/components/schemas/minSigninRisk'
+            signInRiskDetections:
+              type: object
+              properties:
+                anonymousIPAddress:
+                  description: pending.
+                  type: boolean
+                  example: false
+                unfamiliarFeatures:
+                  description: pending.
+                  type: boolean
+                  example: false
+                realTimeThreatIntel:
+                  description: pending.
+                  type: boolean
+                  example: false
+                applyCondition:
+                  description: pending.
+                  type: boolean
+                  example: false
+            servicePrincipalRiskLevels:
+              $ref: '#/components/schemas/servicePrincipalRiskLevels'
+            devicePlatforms:
+              $ref: '#/components/schemas/devicePlatforms'
+            locations:
+              $ref: '#/components/schemas/locations'
+            namedNetworks:
+              type: object
+              properties:
+                includeLocationType:
+                  description: >
+                    Included network and location type:
+                      - `1`: Any network or location.
+                      - `2`: Selected networks and locations.
+                      - `3`: All trusted networks and locations.
+                  type: integer
+                  enum: [1, 2, 3]
+                  example: 1
+                excludeLocationType:
+                  description: >
+                    Excluded network and location type:
+                      - `2`: Selected networks and locations.
+                      - `3`: All trusted networks and locations.
+                  type: integer
+                  enum: [2, 3]
+                  example: 2
+                includeTrustedIps:
+                  description: Whether to include trusted IPs in policy scope.
+                  type: boolean
+                  example: true
+                excludeTrustedIps:
+                  description: Whether to exclude trusted IPs in policy scope.
+                  type: boolean
+                  example: false
+                includedNetworkIds:
+                  type: array
+                  uniqueItems: true
+                  items:
+                    description: The unique ID of included network.
+                    type: string
+                    format: uuid
+                excludedNetworkIds:
+                  type: array
+                  uniqueItems: true
+                  items:
+                    description: The unique ID of excluded network.
+                    type: string
+                    format: uuid
+                includeCorpnet:
+                  description: Whether to include the corporate network.
+                  type: boolean
+                  example: false
+                excludeCorpnet:
+                  description: Whether to exclude the corporate network.
+                  type: boolean
+                  example: false
+                applyCondition:
+                  description: Whether to apply the condition.
+                  type: boolean
+                  example: false
+            clientApps:
+              type: object
+              properties:
+                specificClientApps:
+                  description: pending
+                  type: boolean
+                  example: false
+                webBrowsers:
+                  description: Whether the policy applies to web browsers.
+                  type: boolean
+                  example: false
+                mobileDesktop:
+                  description: Whether the policy applies to mobile apps and desktop clients.
+                  type: boolean
+                  example: false
+                exchangeActiveSync:
+                  description: Whether the policy applies to exchange active sync clients (legacy authentication).
+                  type: boolean
+                  example: false
+                onlyAllowSupportedPlatforms:
+                  description: pending
+                  type: boolean
+                  example: false
+                applyCondition:
+                  description: Whether to apply the condition.
+                  type: boolean
+                  example: false
+            clientAppsV2:
+              $ref: '#/components/schemas/clientAppsV2'
+            time:
+              type: object
+              properties:
+                all:
+                  description: pending
+                  type: integer
+                  enum: [0]
+                  example: 0
+                included:
+                  $ref: '#/components/schemas/PolicyTimeInclusivity'
+                excluded:
+                  $ref: '#/components/schemas/PolicyTimeInclusivity'
+                applyCondition:
+                  description: Whether to apply the condition.
+                  type: boolean
+                  example: false
+            deviceState:
+              allOf:
+                - $ref: '#/components/schemas/clientAppsV2'
+                - type: object
+                  properties:
+                    filter:
+                      $ref: '#/components/schemas/PolicyFilter'
+        clientApplications:
+          type: object
+          properties:
+            allServicePrincipals:
+              description: pending.
+              type: integer
+              enum: [0]
+              example: 0
+            filter:
+              $ref: '#/components/schemas/PolicyFilter'
+            includedServicePrincipals:
+              description: pending.
+              type: array
+              nullable: true
+              items:
+                $ref: common.yml#/components/schemas/servicePrincipalId
+              example: null
+            excludedServicePrincipals:
+              description: pending.
+              type: array
+              nullable: true
+              items:
+                $ref: common.yml#/components/schemas/servicePrincipalId
+              example: null
+        isAllProtocolsEnabled:
+          description: pending
+          type: boolean
+          example: false
+        isUsersGroupsV2Enabled:
+          description: pending
+          type: boolean
+          example: false
+        version:
+          description: Version number.
+          type: integer
+          example: 1
+        isFallbackUsed:
+          description: pending
+          type: boolean
+          example: false
+        policyId:
+          description: The unique ID of the policy.
+          type: string
+          format: uuid
+          example: 2f803cd9-83c6-439c-ba90-93412e70ade5
+        policyName:
+          description: The name of the policy.
+          type: string
+          example: CA-Require-MFA
+        applyRule:
+          description: Whether to apply the rules.
+          type: boolean
+          example: false
+        policyState:
+          description: >
+            The policy state:
+              - `1`: Disabled
+              - `2`: Enabled
+              - `3`: Report-only
+          type: integer
+          enum: [1, 2, 3]
+          example: 2
+        usePolicyState:
+          description: pending
+          type: boolean
+          example: true
+        baselineType:
+          description: pending
+          type: integer
+          enum: [0]
+          example: 0
+        createdDateTime:
+          description: The timestamp of policy creation.
+          type: string
+          format: date-time
+          example: 2024-05-02T11:14:44.965429+00:00
+        modifiedDateTime:
+          description: The timestamp of policy modification.
+          type: string
+          format: date-time
+          example: 2024-05-14T16:36:14.457216+00:00
+
+    PolicyTimeInclusivity:
+      type: object
+      properties:
+        type:
+          description: pending.
+          type: integer
+          enum: [0]
+          example: 0
+        timezoneId:
+          description: Timezone identifier.
+          type: string
+          nullable: true
+          example: null
+        dateRange:
+          type: object
+          properties:
+            startDateTime:
+              description: Start date and time.
+              type: string
+              example: 5/14/2024 12:00:00 AM
+            endDateTime:
+              description: End date and time.
+              type: string
+              example: 5/15/2024 12:00:00 AM
+        daysOfWeek:
+          type: object
+          properties:
+            day:
+              type: array
+              uniqueItems: true
+              items:
+                type: integer
+                minimum: 0
+                maximum: 6
+            startTime:
+              description: Start date and time.
+              type: string
+              example: 5/14/2024 12:00:00 AM
+            endTime:
+              description: End date and time.
+              type: string
+              example: 5/15/2024 12:00:00 AM
+            allDay:
+              description: Whether the time range covers all day.
+              type: boolean
+              example: false
+        isExcludeSet:
+          description: Whether set is excluded.
+          type: boolean
+          example: false
+    PolicyInclusivity:
+      type: object
+      properties:
+        allGuestUsers:
+          description: Whether all guest users are included.
+          type: boolean
+          example: false
+        roles:
+          description: Whether the policy targets directory roles.
+          type: boolean
+          example: false
+        usersGroups:
+          description: Whether the policy targets users and groups.
+          type: boolean
+          example: true
+        roleIds:
+          description: The unique IDs of the roles targeted by the policy.
+          type: array
+          items:
+            $ref: common.yml#/components/schemas/objectId
+        externalUsers:
+          type: object
+          nullable: true
+          properties:
+            guestOrExternalUserTypes:
+              type: string
+              description: >-
+                The guet or external user types included in policy scope.
+                Comma seperated list supporting the following values:
+                  - None
+                  - InternalGuest
+                  - B2BCollaborationGuest
+                  - B2BCollaborationMember
+                  - B2BDirectConnectUser
+                  - OtherExternalUser
+                  - ServiceProvider
+              example: 'InternalGuest, ServiceProvider'
+            externalTenants:
+              type: object
+              description: The external tenants included in policy scope.
+              properties:
+                membershipKind:
+                  description: The membership kind.
+                  type: string
+                  enum: [all, enumerated]
+                  example: all
+                '@odata.type':
+                  description: The odata type of resource (static value).
+                  type: string
+                  enum: ['#microsoft.graph.conditionalAccessAllExternalTenants']
+                  example: '#microsoft.graph.conditionalAccessAllExternalTenants'
+        groupIds:
+          type: array
+          items:
+            $ref: common.yml#/components/schemas/groupId
+        userIds:
+          type: array
+          items:
+            $ref: common.yml#/components/schemas/userId
+    PolicyFilter:
+      type: object
+      nullable: true
+      properties:
+        mode:
+          description: The effect of the filter.
+          type: string
+          enum: [include, exclude]
+          example: include
+        rule:
+          description: The filter rule.
+          type: string
+          example: ''
+paths:
+  /Policies:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    post:
+      summary: Create policy
+      description: >-
+        Create conditional access policy by policy ID.
+      operationId: Policies.Create
+      tags: [Policies]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PolicyConfiguration'
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PolicyConfiguration'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /Policies/Validate:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    post:
+      summary: Validate policy
+      description: >-
+        Validate conditional access policy definition.
+      operationId: Policies.Validate
+      tags: [Policies]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PolicyConfiguration'
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: integer
+                enum: [3, 11, 9]
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /Policies/PolicyCountUnderMaxAllowedLimit:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    get:
+      summary: Check if policy count is under max allowed limit
+      description: >-
+        Check if policy count is under max allowed limit.
+      operationId: Policies.CheckPolicyCountUnderMaxAllowedLimit
+      tags: [Policies]
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /Policies/Policies:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    get:
+      summary: List policies
+      description: >-
+        List conditional access policies.
+      operationId: Policies.List
+      tags: [Policies]
+      parameters:
+        - name: top
+          description: The number of policies to return.
+          in: query
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 999
+        - name: nextLink
+          description: The next link string for paging.
+          in: query
+          required: true
+          schema:
+            $ref: common.yml#/components/schemas/nextLink
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        policyId:
+                          description: The unique identifier of the policy.
+                          type: string
+                          format: uuid
+                          example: a51c9e02-c941-423c-835c-4d32075ebe0f
+                        policyName:
+                          description: The name of the policy.
+                          type: string
+                          example: Require MFA for all Users.
+                        applyRule:
+                          description: Whether the policy rule is applied. e.g. if `policyState` = 2
+                          type: boolean
+                          example: true
+                        policyState:
+                          description: >-
+                            The state of the policy:
+                              - `1`: Disabled
+                              - `2`: Enabled
+                              - `3`: Report-only
+                          type: integer
+                          enum: [1, 2, 3]
+                          example: 2
+                        usePolicyState:
+                          description: unknown
+                          type: boolean
+                          example: true
+                        baselineType:
+                          description: unknown
+                          type: integer
+                          enum: [0]
+                          example: 0
+                        createdDateTime:
+                          description: The creation timestamp of the policy.
+                          type: string
+                          format: date-time
+                          example: 2023-10-25T15:08:24.101265+00:00
+                        modifiedDateTime:
+                          description: The last-modification timestamp of the policy.
+                          type: string
+                          nullable: true
+                          format: date-time
+                          example: 2024-05-02T11:00:53.6955322+00:00
+                  nextLink:
+                    $ref: common.yml#/components/schemas/nextLink
+                  totalCount:
+                    description: The number of policies returned.
+                    type: integer
+                    example: 1
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /Policies/{policyId}:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - name: policyId
+        description: The unique identifier of the policy.
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      summary: Get policy
+      description: >-
+        Get conditional access policy by policy ID.
+      operationId: Policies.Get
+      tags: [Policies]
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PolicyConfiguration'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    put:
+      summary: Update policy
+      description: >-
+        Update conditional access policy by policy ID.
+      operationId: Policies.Update
+      tags: [Policies]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PolicyConfiguration'
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PolicyConfiguration'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    delete:
+      summary: Delete policy
+      description: >-
+        Delete conditional access policy by policy ID.
+      operationId: Policies.Delete
+      tags: [Policies]
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: boolean
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /WhatIf/Evaluate:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    post:
+      summary: Evaluate policy
+      description: >-
+        Evaluate policy using WhatIf service.
+      operationId: WhatIf.Evaluate
+      tags: [Policies]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                conditions:
+                  type: object
+                  properties:
+                    users:
+                      $ref: '#/components/schemas/users'
+                    servicePrincipals:
+                      $ref: '#/components/schemas/servicePrincipalsBase'
+                    conditions:
+                      type: object
+                      properties:
+                        minUserRisk:
+                          $ref: '#/components/schemas/minUserRisk'
+                        minSigninRisk:
+                          $ref: '#/components/schemas/minSigninRisk'
+                        minInsiderRisk:
+                          type: array
+                        servicePrincipalRiskLevels:
+                          $ref: '#/components/schemas/servicePrincipalRiskLevels'
+                        devicePlatforms:
+                          $ref: '#/components/schemas/devicePlatforms'
+                        locations:
+                          $ref: '#/components/schemas/locations'
+                        clientAppsV2:
+                          $ref: '#/components/schemas/clientAppsV2'
+                        deviceState:
+                          $ref: '#/components/schemas/deviceStateBase'
+                ipAddress:
+                  description: IP address of the access scenario to query.
+                  type: string
+                  example: 123.123.123.x
+                country:
+                  description: Country of the access scenario to query.
+                  type: string
+                  example: UnknownAreas
+                device:
+                  type: object
+                authenticationStrengths:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        description: Authentication strength ID.
+                        type: string
+                        format: uuid
+                        example: 00000000-0000-0000-0000-000000000002
+                      createdDateTime:
+                        description: Created timestamp.
+                        type: string
+                        format: date-time
+                        example: 2021-12-01T00:00:00Z
+                      modifiedDateTime:
+                        description: Modified timestamp.
+                        type: string
+                        format: date-time
+                        example: 2021-12-01T00:00:00Z
+                      displayName:
+                        description: Authentication strenth display name.
+                        type: string
+                        example: Multifactor authentication
+                      description:
+                        description: Authentication method description.
+                        type: string
+                        example: Combinations of methods that satisfy strong authentication, such as a password + SMS
+                      policyType:
+                        description: Policy type.
+                        type: string
+                        example: builtIn
+                      requirementsSatisfied:
+                        description: Comma seperated list of satisfied requirements.
+                        type: string
+                        example: mfa
+                      allowedCombinations:
+                        description: Allowed combinations.
+                        type: array
+                        uniqueItems: true
+                        items:
+                          type: string
+                          example: windowsHelloForBusiness
+                      combinationConfigurations@odata.context:
+                        description: odata context.
+                        type: string
+                        example: https://graph.microsoft.com/beta/$metadata#identity/conditionalAccess/authenticationStrength/policies('00000000-0000-0000-0000-000000000002')/combinationConfigurations
+                      combinationConfigurations:
+                        description: pending
+                        type: array
+
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

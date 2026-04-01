@@ -1,0 +1,289 @@
+components:
+  schemas:
+    roamingSettings:
+      type: object
+      properties:
+        syncSetting:
+          type: integer
+          description: |
+            The sync setting configuration:
+              - `0`: All
+              - `1`: Some
+              - `2`: None
+          example: 1
+          enum: [0, 1, 2]
+        isAdminConfigurable:
+          type: boolean
+          example: true
+        isRoamingSettingChange:
+          type: boolean
+          example: false
+        syncSettingUsers:
+          type: array
+          uniqueItems: true
+          items:
+            type: object
+            properties:
+              id:
+                $ref: common.yml#/components/schemas/userId
+              email:
+                description: User email address.
+                type: string
+                nullable: true
+                example: null
+              displayName:
+                description: User display name.
+                type: string
+                nullable: true
+                example: null
+              type:
+                description: User type.
+                type: integer
+                example: 1
+              hasThumbnail:
+                description: Whether the user has a thumbnail.
+                type: boolean
+                example: false
+              imageUrl:
+                description: Url to user image.
+                type: string
+                nullable: true
+                example: null
+
+paths:
+  /Devices:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    post:
+      summary: Create device
+      description: >-
+        Create device.
+      operationId: Devices.Create
+      tags: [Device]
+      responses:
+        2XX:
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /RoamingSettings:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - name: ESRV2
+        description: Whether enterprise state roaming v2 is in use.
+        in: query
+        schema:
+          type: boolean
+    get:
+      summary: Get enterprise state roaming settings
+      description: >-
+        Get enterprise state roaming (ESR) settings.
+      operationId: RoamingSettings.Get
+      tags: [Enterprise State Roaming]
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/roamingSettings'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    post:
+      summary: Update enterprise state roaming settings
+      description: >-
+        Update enterprise state roaming (ESR) settings.
+      operationId: RoamingSettings.Update
+      tags: [Enterprise State Roaming]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/roamingSettings'
+      responses:
+        '204':
+          description: No Content
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /SyncingDevices/{0}/Download:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - name: '0'
+        description: pending
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: syncV2
+        description: Use V2 of the SyncingDevices API
+        in: query
+        schema:
+          type: boolean
+    get:
+      summary: Download syncing device details
+      description: >-
+        Download syncing device details.
+      operationId: SyncingDevices.Download
+      tags: [Device]
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /SyncingDevices/{0}:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - name: '0'
+        description: pending
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: syncV2
+        description: Use V2 of the SyncingDevices API
+        in: query
+        schema:
+          type: boolean
+    get:
+      summary: Get syncing device details
+      description: >-
+        Get syncing device details.
+      operationId: SyncingDevices.Get
+      tags: [Device]
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  preview:
+                    type: boolean
+                    example: false
+                  errorMessage:
+                    type: string
+                    nullable: true
+                    example: null
+                  content:
+                    type: array
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

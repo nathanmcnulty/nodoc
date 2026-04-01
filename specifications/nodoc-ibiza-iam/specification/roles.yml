@@ -1,0 +1,299 @@
+paths:
+  /Roles/{roleId}/RoleAssignments:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - name: roleId
+        description: The unique identifier of the role
+        in: path
+        required: true
+        schema:
+          $ref: common.yml#/components/schemas/objectId
+      - name: scope
+        description: The scope of the role assignment
+        in: query
+        required: true
+        schema:
+          type: string
+          example: '/'
+    put:
+      summary: Create user role assignment
+      description: >-
+        Create a role assignment for a user.
+      operationId: Role.Assignments.Create
+      tags: [Roles]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: common.yml#/components/schemas/userId
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Map of principal ID to assignment ID
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    delete:
+      summary: Delete user role assignment
+      description: >-
+        Delete a role assignment for a user.
+      operationId: Role.Assignments.Delete
+      tags: [Roles]
+      responses:
+        '204':
+          description: No Content
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /Roles/User/{userId}/RoleAssignments:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - in: path
+        name: userId
+        description: The object ID of the user to retrieve role assignments for.
+        required: true
+        schema:
+          $ref: common.yml#/components/schemas/userId
+    get:
+      summary: Get user role assignments
+      description: >-
+        Get all role assignments for a user by object ID.
+      operationId: Role.User.Assignments.Get
+      parameters:
+        - name: scope
+          description: The scope to retrieve role assignments for.
+          in: query
+          required: true
+          schema:
+            type: string
+            nullable: true
+            example: '/'
+      tags: [Roles]
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      description: The unique identifier for the role assignment.
+                      type: string
+                      example: nVOZnIaBBEiDX_1R754tzSWUMVRbb0RMiWL5-UvX12s-1
+                    resourceScope:
+                      description: The scope at which the role assignment is applied.
+                      type: string
+                      example: '/'
+                    resourceScopeType:
+                      description: pending.
+                      type: number
+                      enum: [0]
+                      example: 0
+                    directoryMember:
+                      description: pending.
+                      type: object
+                      example: null
+                    roleDefinition:
+                      description: The role definition for the assignment.
+                      type: object
+                      properties:
+                        description:
+                          description: The role definition description.
+                          type: string
+                          example: Read audit logs related to custom security attributes.
+                        displayName:
+                          description: The display name of the role definition.
+                          type: string
+                          example: Attribute Log Reader
+                        isBuiltIn:
+                          description: Whether the role definition is build-in.
+                          type: boolean
+                          example: true
+                        isEnabled:
+                          description: Whether the role definition is enabled.
+                          type: boolean
+                          example: true
+                        resourceScopes:
+                          type: array
+                          description: The resource scopes that the definition can be assigned to.
+                          items:
+                            type: string
+                            example: ['/']
+                        rolePermissions:
+                          type: array
+                          description: The permissions within the role definition.
+                          items:
+                            type: object
+                            properties:
+                              resourceActions:
+                                type: object
+                                description: The permitted resource actions for the role definition.
+                                properties:
+                                  allowedResourceActions:
+                                    type: array
+                                    items:
+                                      type: string
+                                      example: microsoft.directory/customSecurityAttributeAuditLogs/allProperties/read
+                              condition:
+                                description: pending.
+                                type: string
+                                example: null
+                        objectId:
+                          $ref: common.yml#/components/schemas/objectId
+                        templateId:
+                          description: The template ID of the role definition.
+                          type: string
+                          format: uuid
+                          example: 9c99539d-8186-4804-835f-fd51ef9e2dcd
+                        version:
+                          description: The version of role defintion.
+                          type: integer
+                          minimum: 0
+                          example: 1
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    put:
+      summary: Create user role assignment
+      description: >-
+        (pending) Create a role assignment for a user by object ID.
+        Unknown request body model.
+      operationId: Role.User.Assignments.Create
+      tags: [Roles]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: object
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

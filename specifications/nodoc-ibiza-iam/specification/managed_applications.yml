@@ -1,0 +1,532 @@
+components:
+  schemas:
+    appRoleAssignment:
+      type: object
+      properties:
+        objectId:
+          description: The unique identifier of the app role assignment.
+          type: string
+          example: hfge0cD7XUuMjGoyQ69KAGblVnm7AndHuUlIkV8dSfk
+        id:
+          description: The unique identifier of the app role.
+          type: string
+          example: a39633e3-7be8-4402-ac1c-d9234fa03519
+        principalDisplayName:
+          description: The display name of the principal that has been assigned the app role.
+          type: string
+          example: User123
+        creationTimeStamp:
+          description: The timestamp of app role assignment.
+          type: string
+          format: date-time
+          example: 2024-05-09T12:26:28.6582711Z
+        principalId:
+          description: The unique identifier of the principal assigned the app role.
+          type: string
+          format: uuid
+          example: d11ef885-fbc0-4b5d-8c8c-6a3243af4a00
+        principalType:
+          description: The type of principal assigned the role.
+          type: string
+          example: User
+        resourceDisplayName:
+          description: The display name of the resource.
+          type: string
+          example: ApplicationA
+        resourceId:
+          description: The unique identifier of the resource.
+          type: string
+          format: uuid
+          example: 15e061b9-e3f7-4446-bac8-6a760c00413c
+        imageUrl:
+          description: URL to the image of the principal assigned the app role.
+          type: string
+          format: url
+          example: https://main.iam.ad.ext.azure.com/Client/Users/Images/defaultUser.svg
+    managedApplication:
+      type: object
+      properties:
+        objectId:
+          $ref: common.yml#/components/schemas/servicePrincipalId
+        appId:
+          $ref: common.yml#/components/schemas/applicationId
+        displayName:
+          description: The display name of the service principal.
+          type: string
+          example: test
+        homePageUrl:
+          description: The homepage URL for the application.
+          type: string
+          example: https://account.activedirectory.windowsazure.com:444/applications/...
+        appDisplayName:
+          description: The display name of the application.
+          type: string
+          example: test
+        microsoftFirstParty:
+          description: Whether the service principal is for a first party microsoft application.
+          type: boolean
+          nullable: true
+          example: null
+        logo45Url:
+          description: The logo for the application.
+          type: string
+          example: https://galleryapplogos1.azureedge.net/app-logo/...
+        ssoConfiguration:
+          description: SSO configuration for the application.
+          type: object
+          nullable: true
+          example: null
+        appRoles:
+          description: The app roles configured for the application.
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                description: The unique identifier of the app role.
+                type: string
+                example: 18d14569-c3bd-439b-9a66-3a2aee01d14f
+              isEnabled:
+                description: Whether the app role is enabled.
+                type: boolean
+                example: true
+              displayName:
+                description: The display name of the application.
+                type: string
+                example: User
+        publisherName:
+          description: The publisher name for the application
+          type: string
+          example: Contoso
+        tags:
+          description: Tags applied to the application.
+          type: array
+          items:
+            type: string
+            enum:
+              - WindowsAzureActiveDirectoryCustomSingleSignOnApplication
+              - WindowsAzureActiveDirectoryIntegratedApp
+        accountEnabled:
+          description: Whether the service principal is enabled.
+          type: boolean
+          example: true
+        isSyncInbound:
+          description: pending.
+          type: boolean
+          example: false
+        replyUrls:
+          description: The reply URLs for the application.
+          type: array
+          items:
+            type: string
+            format: url
+        publisherDisplayName:
+          description: The display name of the application publisher.
+          type: string
+          nullable: true
+          example: null
+        appType:
+          description: The app type for the service principal.
+          type: integer
+          example: 5
+    managedApplicationList:
+      type: object
+      properties:
+        accountEnabled:
+          description: Filter for whether the application is enabled for sign-in.
+          type: boolean
+          nullable: true
+          example: null
+        isAppVisible:
+          description: Filter for whether the application is visible.
+          type: boolean
+          nullable: true
+          example: null
+        appListQuery:
+          description: pending.
+          type: integer
+          example: 0
+        top:
+          description: The number of applications to return.
+          type: integer
+          minimum: 1
+          maximum: 999
+          example: 999
+        loadLogo:
+          description: Whether to load application logos in the response.
+          type: boolean
+          example: false
+        putCachedLogoUrlOnly:
+          description: Whether to load cached application logo URL only in the response.
+          type: boolean
+          example: false
+        nextLink:
+          description: The `nextLink` for paging.
+          type: string
+          nullable: true
+          example: ''
+        usedFirstPartyAppIds:
+          type: array
+          nullable: true
+          example: null
+          items:
+            type: string
+        __ko_mapping__:
+          type: object
+          properties:
+            ignore:
+              type: array
+              items:
+                type: string
+            include:
+              type: array
+              items:
+                type: string
+            copy:
+              type: array
+              items:
+                type: string
+            observe:
+              type: array
+              items:
+                type: string
+            mappedProperties:
+              type: object
+            copiedProperties:
+              type: object
+
+paths:
+  /ManagedApplications/{spId}/PasswordSsoCustomApp:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - $ref: common.yml#/components/parameters/spId
+    post:
+      summary: Create managed application Password SSO custom app
+      description: >-
+        Create managed application Password SSO custom app.
+      operationId: ManagedApplications.PasswordSsoCustomApp.Create
+      tags: [Managed Applications]
+      requestBody:
+          $ref: common.yml#/components/requestBodies/unknownRequest
+      responses:
+        '200':
+          description: Ok
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: boolean
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /ManagedApplications/{spId}/PasswordSsoCustomApp/{customAppId}:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - $ref: common.yml#/components/parameters/spId
+      - name: customAppId
+        description: The ID of the custom app configuration
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      summary: Get managed application Password SSO custom app
+      description: >-
+        Get managed application Password SSO custom app by ID.
+      operationId: ManagedApplications.PasswordSsoCustomApp.Get
+      tags: [Managed Applications]
+      responses:
+        '200':
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /ManagedApplications/{spId}/PasswordSsoCredentials/{targetType}/{targetId}:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - $ref: common.yml#/components/parameters/spId
+      - name: targetType
+        description: The type of the credential target.
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: targetId
+        description: The Id of the credential target.
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      summary: Get managed application Password SSO custom app target
+      description: >-
+        Get managed application Password SSO custom app target.
+      operationId: ManagedApplications.PasswordSsoCustomApp.Target.Get
+      tags: [Managed Applications]
+      responses:
+        '200':
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /ManagedApplications/{spId}:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - $ref: common.yml#/components/parameters/spId
+    get:
+      summary: Get managed application
+      description: >-
+        Get managed application (service principal) by object ID.
+        Note: This operation hangs with no response for invalid service principal ID (`spId`).
+      operationId: ManagedApplication.Get
+      tags: [Managed Applications]
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/managedApplication'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /ManagedApplications/List:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    post:
+      summary: List managed applications
+      description: >-
+        List managed applications (service principal).
+      operationId: ManagedApplication.List
+      tags: [Managed Applications]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/managedApplicationList'
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  nextLink:
+                    $ref: common.yml#/components/schemas/nextLink
+                  appList:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/managedApplication'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /ManagedApplications/{spId}/AppRoleAssignments:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - $ref: common.yml#/components/parameters/spId
+      - $ref: common.yml#/components/parameters/nextLink
+      - $ref: common.yml#/components/parameters/top
+    get:
+      summary: Get managed application app role assignments
+      description: >-
+        Get managed application (service principal) app role assignments.
+        Note: This operation hangs with no response for invalid service principal ID (`spId`).
+      operationId: ManagedApplication.AppRoleAssginemnts.Get
+      tags: [Managed Applications]
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/appRoleAssignment'
+                  nextLink:
+                    $ref: common.yml#/components/schemas/nextLink
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    post:
+      summary: Create managed application app role assignments
+      description: >-
+        Create managed application (service principal) app role assignments.
+        Note: This operation hangs with no response for invalid service principal ID (`spId`).
+      operationId: ManagedApplication.AppRoleAssginemnts.Create
+      tags: [Managed Applications]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                objectId:
+                  $ref: common.yml#/components/schemas/servicePrincipalId
+                applicationRoleId:
+                  type: string
+                  description: The unique identifier of the app role.
+                  example: a39633e3-7be8-4402-ac1c-d9234fa03519
+                userId:
+                  $ref: common.yml#/components/schemas/userId
+                groupId:
+                  $ref: common.yml#/components/schemas/groupId
+                passwordSSOCredentials:
+                  description: Password SSO Credentials (format unknown)
+                  type: object
+                  nullable: true
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/appRoleAssignment'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

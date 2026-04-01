@@ -1,0 +1,603 @@
+components:
+  parameters:
+    groupId:
+      name: groupId
+      description: The object ID of the group to retrieve.
+      in: path
+      required: true
+      schema:
+        $ref: common.yml#/components/schemas/groupId
+  schemas:
+    dynamicGroupProperties:
+      type: object
+      properties:
+        membershipResourceType:
+          description: >-
+            The type of membership resource:
+              - `0`: None
+              - `1`: Device
+              - `2`: User
+          type: integer
+          enum: [0, 1, 2]
+          example: 1
+        membershipRuleType:
+          description: The type of membership rule.
+          type: integer
+          enum: [0]
+          example: 0
+        isDynamic:
+          description: Whether the group has dynamic membership.
+          type: boolean
+          example: true
+        membershipRule:
+          description: The membership rule of the dynamic group.
+          type: string
+          nullable: true
+          example: (device.isRooted -eq true)
+        membershipRuleProcessingState:
+          description: The state of membership rule processing
+          type: string
+          nullable: true
+          enum: [On, Paused]
+          example: Paused
+        membershipProcessingStatus:
+          description: The status of membership processing.
+          type: string
+          nullable: true
+          enum:
+            - Update complete
+            - Evaluating
+            - Processing
+            - Processing error
+            - Update paused
+          example: Update complete
+        membershipProcessingError:
+          description: Any membership processing errors.
+          type: string
+          nullable: true
+          example: ''
+        lastMembershipUpdateTime:
+          description: The timestamp of the last membership update.
+          type: string
+          nullable: true
+          format: date-time
+          example: 2023-10-24 13:36:29Z
+        lastRefreshTime:
+          description: The timestamp of the last refresh.
+          type: string
+          nullable: true
+          format: date-time
+          example: 2024-05-08 00:46:15Z
+        groupId:
+          $ref: common.yml#/components/schemas/groupId
+    group:
+      type: object
+      properties:
+        name:
+          description: Name of the group.
+          type: string
+          nullable: true
+          example: Group1
+        description:
+          description: Description of the group.
+          type: string
+          nullable: true
+          example: Example Group
+        mail:
+          description: pending.
+          type: string
+          nullable: true
+          example: null
+        mailNickname:
+          description: The mail nickname for the group.
+          type: string
+          example: example-group@constoso.com
+          nullable: true
+        source:
+          description: The source of the group.
+          type: string
+          nullable: true
+          enum: [Cloud]
+          example: Cloud
+        deletionTimestamp:
+          description: The timestamp of when the group was deleted.
+          type: string
+          nullable: true
+          format: datetime
+          example: null
+        permanentDeletionTimestamp:
+          description: The timestamp of when the group was permanently deleted.
+          type: string
+          nullable: true
+          format: datetime
+          example: null
+        ownerDisplayNames:
+          description: A list of display names of group owners.
+          type: array
+          nullable: true
+          items:
+            type: string
+            example: User123
+        groupTypeDisplayName:
+          description: The type of group.
+          type: string
+          enum: [Security]
+          example: Security
+        membershipType:
+          description: The membership type of the group
+          type: string
+          enum: [Assigned, Dynamic]
+          example: Assigned
+        externalSource:
+          description: pending.
+          type: object
+          nullable: true
+        customAttributes:
+          description: Custom attributes applied to the group.
+          type: object
+          nullable: true
+        dirSyncEnabled:
+          description: Whether directory synchronisation is enabled.
+          type: boolean
+          nullable: true
+          example: false
+        lastDirSyncTime:
+          description: The timestamp of the last directory synchronisation.
+          type: string
+          nullable: true
+          format: date-time
+          example: null
+        selectedUserIds:
+          description: pending
+          type: array
+          nullable: true
+          items:
+            $ref: common.yml#/components/schemas/userId
+        dynamicGroupProperties:
+          $ref: '#/components/schemas/dynamicGroupProperties'
+        groupType:
+          description: The type of group.
+          type: string
+          enum: [Security]
+          example: Security
+        isExternallyManaged:
+          description: Whether the group is externally managed.
+          type: boolean
+          example: false
+        objectId:
+          $ref: common.yml#/components/schemas/groupId
+        objectType:
+          description: The type of object (Group).
+          type: string
+          enum: [Group]
+          example: Group
+        displayName:
+          description: The display name of the group.
+          type: string
+          example: Group1
+        imageUrl:
+          description: URL to the group image.
+          type: string
+          format: uri
+          example: https://main.iam.ad.ext.azure.com/api/Images/Groups
+        userType:
+          description: The type of user (null).
+          type: string
+          nullable: true
+          example: null
+        thumbnailPhoto@odata.mediaContentType:
+          description: The media content type for the thumbnail photo.
+          type: string
+          nullable: true
+          example: null
+        hasThumbnail:
+          description: Whether the group has a thumbnail.
+          type: boolean
+          nullable: true
+          example: false
+        isUser:
+          description: Whether the object is a user (false).
+          type: boolean
+          example: false
+        isGroup:
+          description: Whether the object is a group (true).
+          type: boolean
+          example: true
+        isGuest:
+          description: Whether the object is a guest (false).
+          type: boolean
+          example: false
+
+paths:
+  /Groups/{groupId}/GetExtensionPropertiesByApp:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - $ref: '#/components/parameters/groupId'
+    get:
+      summary: Get group extension properties by app
+      description: Get group extension properties by app.
+      operationId: Group.ExtensionPropertiesByApp.Get
+      tags: [Groups]
+      responses:
+        '200':
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /Groups/{groupId}/members/count:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - $ref: '#/components/parameters/groupId'
+    get:
+      summary: Get group member count
+      description: >-
+        Get a breakdown of group members:
+          - users
+          - groups
+          - devices
+          - other
+      operationId: Group.MemberCount.Get
+      tags: [Groups]
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  userCount:
+                    type: integer
+                    description: The number of users in the group
+                    example: 1
+                  groupCount:
+                    type: integer
+                    description: The number of nested groups in the group
+                    example: 1
+                  deviceCount:
+                    type: integer
+                    description: The number of devices in the group
+                    example: 1
+                  otherCount:
+                    type: integer
+                    description: The number of other identities in the group
+                    example: 1
+                  totalMembersValueRange:
+                    type: integer
+                    description: The total member count
+                    example: 4
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /Groups/GetSupportedDynamicMembershipBaseAttributes/{id}:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - name: id
+        description: pending
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      summary: Get dynamic membership base attribute
+      description: Get dynamic membership base attribute.
+      operationId: Group.DynamicMembershipBaseAttributes.Get
+      tags: [Groups]
+      responses:
+        '200':
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /Groups/GetSupportedDynamicMembershipOperators:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    get:
+      summary: List dynamic membership operators
+      description: List dynamic membership operators.
+      operationId: Group.DynamicMembershipOperators.List
+      tags: [Groups]
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  operators:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                          description: The name of the operator.
+                          example: Add
+                        value:
+                          type: string
+                          description: The value of the operator.
+                          example: -plus
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /Groups:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    get:
+      parameters:
+        - $ref: common.yml#/components/parameters/top
+        - $ref: common.yml#/components/parameters/nextLink
+      summary: List groups
+      description: >-
+        List Microsoft Entra groups.
+      operationId: Group.list
+      tags: [Groups]
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/group'
+                  nextLink:
+                    $ref: common.yml#/components/schemas/nextLink
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /Groups/{groupId}:
+    parameters:
+      - $ref: '#/components/parameters/groupId'
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    get:
+      summary: Get group
+      description: >-
+        Get Microsoft Entra group by object ID.
+      operationId: Group.id.get
+      tags: [Groups]
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/group'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /Groups/{groupId}/GetDynamicGroupProperties:
+    parameters:
+      - name: groupId
+        description: The object ID of the group to retrieve dynamic properties for.
+        in: path
+        required: true
+        schema:
+          $ref: common.yml#/components/schemas/groupId
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    get:
+      summary: Get group dynamic group properties
+      description: >-
+        Get the dynamic group properties for a Microsoft Entra group by object ID.
+      operationId: Group.id.dynamic,get
+      tags: [Groups]
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/dynamicGroupProperties'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /Groups/{groupId}/owners/count:
+    parameters:
+      - name: groupId
+        description: The object ID of the group to retrieve owner count for.
+        in: path
+        required: true
+        schema:
+          $ref: common.yml#/components/schemas/groupId
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    get:
+      summary: Get owner count for group
+      description: >-
+        Get a count of the owners of a group by the group's object ID.
+      operationId: Group.id.owner.count.get
+      tags: [Groups]
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ownerCount:
+                    description: The number of group owners.
+                    type: integer
+                    example: 0
+                  totalOwnersValueRange:
+                    type: integer
+                    example: 0
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

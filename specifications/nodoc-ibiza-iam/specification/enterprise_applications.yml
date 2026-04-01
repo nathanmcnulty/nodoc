@@ -1,0 +1,456 @@
+components:
+  schemas:
+    enterpriseApplicationProperties:
+      type: object
+      properties:
+        objectId:
+          description: The object ID of the service principal (enterprise application).
+          type: string
+          format: uuid
+          minLength: 36
+          maxLength: 36
+          readOnly: true
+          example: 9679fc4f-a7b6-40aa-8a45-32e61e30a204
+        accountEnabled:
+          description: Whether the service principal is enabled.
+          type: boolean
+          example: true
+        displayName:
+          description: The display name of the service principal.
+          type: string
+          example: test
+        publisherName:
+          description: The publisher name for the application.
+          type: string
+          readOnly: true
+          example: Contoso
+        homePageUrl:
+          description: The homepage URL for the application.
+          type: string
+          nullable: true
+          readOnly: true
+          example: null
+        signOnUrl:
+          description: The sign-on URL for the application.
+          type: string
+          nullable: true
+          readOnly: true
+          example: null
+        userAccessUrl:
+          description: The user access URL for the application.
+          type: string
+          readOnly: true
+          example: https://launcher.myapps.microsoft.com/api/signin/xx
+        appId:
+          description: The application ID (client ID) of the application.
+          type: string
+          format: uuid
+          minLength: 36
+          maxLength: 36
+          readOnly: true
+          example: 693d2d81-7ad4-41ba-a844-070680da77f9
+        appObjectId:
+          description: The object ID of the application registration.
+          type: string
+          format: uuid
+          minLength: 36
+          maxLength: 36
+          readOnly: true
+          example: 693d2d81-7ad4-41ba-a844-070680da77f9
+        appRoleAssignmentRequired:
+          description: Whether the application requires assignment to users.
+          type: boolean
+          example: false
+        logoUrl:
+          description: The URL of the application logo.
+          type: string
+          example: https://main.iam.ad.ext.azure.com/api/Images/Applications/xxxx
+        applicationPropertiesEditable:
+          description: Whether application proerties can be edited.
+          type: boolean
+          readOnly: true
+          example: true
+        isApplicationVisible:
+          description: Whether the application is visible.
+          type: boolean
+          readOnly: true
+          example: false
+        tags:
+          description: List of tags applied to the application.
+          type: array
+          items:
+            type: string
+            enum: [HideApp, WindowsAzureActiveDirectoryIntegratedApp]
+        replyUrl:
+          description: The reply URL for the application.
+          type: string
+          readOnly: true
+          example: http://localhost/redirect
+        termsOfServiceUrl:
+          description: The URL to the application Terms of Service.
+          type: string
+          readOnly: true
+          nullable: true
+          example: null
+        privacyStatementUrl:
+          description: The URL to the application private statement.
+          type: string
+          nullable: true
+          readOnly: true
+          example: null
+        microsoftFirstParty:
+          description: Whether the application is a first party microsoft application.
+          type: string
+          nullable: true
+          readOnly: true
+          example: null
+        publisherDisplayName:
+          description: The display name of the application publisher.
+          type: string
+          nullable: true
+          readOnly: true
+          example: null
+        appType:
+          description: The application type.
+          type: integer
+          readOnly: true
+          example: 3
+        notes:
+          description: Notes applied to the application.
+          type: string
+          nullable: true
+          example: null
+        description:
+          description: The service principal description.
+          type: string
+          nullable: true
+          example: null
+        servicePrincipalType:
+          description: The service principal type.
+          type: string
+          enum: [Application]
+          readOnly: true
+          example: Application
+        alternativeNames:
+          description: Alternative names for the application.
+          type: array
+          readOnly: true
+          items:
+            type: string
+        disabledByMicrosoftStatus:
+          description: Status of application when disabled by Microsoft.
+          type: string
+          nullable: true
+          readOnly: true
+          example: null
+    userSettings:
+      type: object
+      properties:
+        usersCanAllowAppsToAccessData:
+          description: Whether users are permitted to allow apps to access data.
+          type: boolean
+          nullable: true
+          example: null
+        usersCanAddGalleryApps:
+          description: Whether users can add gallery applications.
+          type: boolean
+          nullable: true
+          example: null
+        hideOffice365Apps:
+          description: Whether to hide Office 365 applications.
+          type: boolean
+          nullable: true
+          example: null
+
+paths:
+  /EnterpriseApplications/{spId}/Properties:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - $ref: common.yml#/components/parameters/spId
+      - in: query
+        name: appId
+        description: >-
+          The application ID of the service principal (enterprise application)
+          to retrieve properties for.
+        required: true
+        schema:
+          $ref: common.yml#/components/schemas/applicationId
+      - in: query
+        name: loadLogo
+        description: Whether to load the application logo in the response.
+        schema:
+          type: boolean
+    get:
+      summary: Get Enterprise Application properties
+      description: >-
+        Get Enterprise Application (Service Principal) properties.
+      operationId: EnterpriseApplication.Properties.Get
+      tags: [Service Principal]
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/enterpriseApplicationProperties'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    patch:
+      summary: Update Enterprise Application properties
+      description: >-
+        Update Enterprise Application (Service Principal) properties.
+      operationId: EnterpriseApplication.Properties.Update
+      tags: [Service Principal]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/enterpriseApplicationProperties'
+      responses:
+        '204':
+          description: No Content
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /EnterpriseApplications/{spId}/ServicePrincipalPermissions:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - $ref: common.yml#/components/parameters/spId
+      - name: consentType
+        in: query
+        description: >-
+          Which type of consents to return, `user` or `admin`.
+        schema:
+          type: string
+          enum: [user, admin]
+          example: user
+      - name: userObjectId
+        in: query
+        description: >-
+          The user for which to retrieve permission grants for.
+        schema:
+          $ref: common.yml#/components/schemas/userId
+    get:
+      summary: Get consented Enterprise Application permissions
+      description: >-
+        Get Enterprise Application (service principal) permissions
+        that have been consented within the organisation. Either by
+        `admin`, or `user`.
+      operationId: EnterpriseApplication.Permissions.Get
+      tags: [Service Principal]
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    resourceName:
+                      type: string
+                      example: Microsoft Graph
+                    resourceAppId:
+                      type: string
+                      example: 5b538740-ddbd-42c6-bc28-15417ca8675f
+                    permissionType:
+                      type: string
+                      example: Delegated
+                    permissionDisplayName:
+                      type: string
+                      example: Sign in and read user profile
+                    permissionDescription:
+                      type: string
+                      example: Allows users to sign-in to the app, and allows the app to read the profile of signed-in users. It also allows the app to read basic company information of signed-in users.
+                    permissionId:
+                      type: string
+                      example: User.Read
+                    consentType:
+                      type: string
+                      example: Admin
+                    roleOrScopeClaim:
+                      type: string
+                      example: User.Read
+                    principalIds:
+                      type: array
+                      items:
+                        $ref: common.yml#/components/schemas/userId
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /EnterpriseApplications/UserSettings:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    get:
+      summary: Get Enterprise Application user settings
+      description: >-
+        Get Enterprise Application (service principal) 
+        tenant-wide user settings.
+      operationId: EnterpriseApplication.UserSettings.Get
+      tags: [Service Principal]
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/userSettings'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    patch:
+      summary: Update Enterprise Application user settings
+      description: >-
+        Update Enterprise Application (service principal) 
+        tenant-wide user settings.
+      operationId: EnterpriseApplication.UserSettings.Update
+      tags: [Service Principal]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/userSettings'
+      responses:
+        '204':
+          description: No Content
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

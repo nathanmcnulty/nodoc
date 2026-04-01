@@ -1,0 +1,84 @@
+paths:
+  /Directories/ADConnectStatus:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    get:
+      summary: Get directory AD Connect status
+      description: >-
+        Get directory AD Connect status.
+      operationId: Directories.ADConnectStatus.Get
+      tags: [Microsoft Entra Connect]
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  verifiedDomainCount:
+                    description: The number of verified domains.
+                    type: integer
+                    example: 2
+                  verifiedCustomDomainCount:
+                    description: The number of verified custom domains.
+                    type: integer
+                    example: 1
+                  federatedDomainCount:
+                    description: The number of federated domains.
+                    type: integer
+                    example: 0
+                  numberOfHoursFromLastSync:
+                    description: The number of hours since the last sync.
+                    type: integer
+                    nullable: true
+                    example: null
+                  dirSyncEnabled:
+                    description: Whether directory sync is enabled.
+                    type: boolean
+                    example: false
+                  dirSyncConfigured:
+                    description: Whether directory sync is configured.
+                    type: boolean
+                    example: false
+                  passThroughAuthenticationEnabled:
+                    description: Whether pass through authentication is enabled.
+                    type: boolean
+                    nullable: true
+                    example: boolean
+                  seamlessSingleSignOnEnabled:
+                    description: Whether seamless single sign-on is enabled.
+                    type: boolean
+                    nullable: true
+                    example: null
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

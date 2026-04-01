@@ -1,0 +1,693 @@
+openapi: 3.0.1
+info:
+  title: Entra IAM
+  description: |
+    The Entra IAM API (formerly Ibiza IAM) is used by Microsoft web portals for managing Identity and Access Management features, including:
+
+      - Users
+      - Groups
+      - Service Principals
+      - Applications
+      - Directories
+      - Policies
+
+    It includes functionality available through standard APIs (e.g. Microsoft Graph), as well as some additional capabilities.
+
+    This API only supports delegated authentication flows such as the [authorization code flow](https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-auth-code-flow),
+    and does not support service principals or the [client credentials flow](https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-client-creds-grant-flow).
+
+    | Application Name | Application ID                         | Scope                |
+    | ---------------- | -------------------------------------- | -------------------- |
+    | ADIbizaUX        | `74658136-14ec-4630-ad9b-26e160ff0fc6` | `user_impersonation` |
+
+    The following clients have pre-consented scopes for accessing this resource:
+
+    | Application Name    | Application ID                         |
+    | ------------------- | -------------------------------------- |
+    | Azure Portal        | `c44b4083-3bb0-49c1-b47d-974e53cbdf3c` |
+    | Microsoft Azure CLI | `04b07795-8ddb-461a-bbee-02f9e1bf7b46` |
+
+    For example, you can obtain a token using the [Azure CLI](https://learn.microsoft.com/en-us/cli/azure/) command:
+
+    ```bash
+    az account get-access-token --resource 74658136-14ec-4630-ad9b-26e160ff0fc6
+    ```
+
+    Note: The majority of requests require the `X-Ms-Client-Request-Id` header to be set to a GUID.
+
+    Documentation and specifications have been provided on a best efforts basis and may not be 100% accurate.
+
+  version: '1.0'
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+servers:
+  - url: https://main.iam.ad.ext.azure.com/api
+
+security:
+  - OAuth2: [74658136-14ec-4630-ad9b-26e160ff0fc6/user_impersonation]
+
+components:
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://login.microsoftonline.com/common/oauth2/authorize
+          tokenUrl: https://login.microsoftonline.com/common/oauth2/token
+          scopes:
+            74658136-14ec-4630-ad9b-26e160ff0fc6/user_impersonation: User impersonation scope
+
+tags:
+  - name: Application Insights
+    description: Operations relating to Application Insights.
+  - name: Application Proxy
+    description: Operations relating to Application Proxy.
+  - name: Application Registration
+    description: Operations relating to Application Registrations.
+  - name: Application SSO
+    description: >-
+      Operations relating to Application Registration management.
+  - name: Managed Applications
+    description: Operations relating to Managed Applications.
+  - name: Service Principal
+    description: >-
+      Operations relating to Service Principal (Enterprise Application) management.
+
+  - name: Authentication Methods
+    description: |
+      Operations relating to Authentication Methods.
+  - name: Multi Factor Authentication
+    description: Operations relating to MultiFactor Authentication (MFA).
+  - name: Password Reset
+    description: Operations relating to Password Resets.
+
+  - name: Classic Policies
+    description: |
+      Operations relating to Classic Conditional Access policy management.
+  - name: Policies
+    description: |
+      Operations relating to Conditional Access policy management, including functionality to manage claim providers and named locations.
+  - name: Security Defaults
+    description: Operations relating to Security Defaults.
+
+  - name: Device
+    description: Operations relating to devices.
+  - name: MDM
+    description: Operations relating to Mobile Device Management (MDM).
+  - name: Enterprise State Roaming
+    description: Operations relating to Enterprise State Roaming (ESR)
+
+  - name: B2B
+    description: Operations relating to B2B collaboration.
+  - name: B2C
+    description: Operations relating to B2C directory management. 
+  - name: Directory
+    description: Operations relating to Directory management.
+  - name: Microsoft Entra Connect
+    description: Operations relating to 
+
+  - name: Permissions
+    description: Read-only operations relating to assigned permissions and roles.
+  - name: Roles
+    description: Operations relating to role management.
+
+  - name: Users
+    description: |
+      Operations relating to user management, including the ability to retrieve, create, modify, and delete, users.
+      Additionally offers functionality to check the validity of user principal names.
+  - name: Groups
+    description: |
+      Operations relating to group management, including the ability to retrieve group properties.
+
+  - name: General
+    description: General operations.
+  - name: Data Insights
+    description: Operations relating to data insights.
+  - name: Document Processor Tasks
+    description: Operations relating to document processor tasks.
+  - name: GDPR
+    description: Operations relating to General Data Protection Regulation (GDPR) functions.
+  - name: Licensing
+    description: Operations relating to user and group licensing.
+  - name: Reports
+    description: Operations relating to report generation and management.
+
+x-tagGroups:
+  - name: Application
+    tags:
+      - Application Insights
+      - Application Proxy
+      - Application Registration
+      - Application SSO
+      - Managed Applications
+      - Service Principal
+  - name: Authentication
+    tags:
+      - Authentication Methods
+      - Multi Factor Authentication
+      - Password Reset
+  - name: Conditional Access
+    tags:
+      - Classic Policies
+      - Policies
+      - Security Defaults
+  - name: Device Management
+    tags:
+      - Device
+      - MDM
+      - Enterprise State Roaming
+  - name: Directory
+    tags:
+      - B2B
+      - B2C
+      - Directory
+      - Microsoft Entra Connect
+  - name: Roles and Permissions
+    tags:
+      - Permissions
+      - Roles
+  - name: Users and Groups
+    tags:
+      - Users
+      - Groups
+  - name: General
+    tags:
+      - General
+      - Data Insights
+      - Document Processor Tasks
+      - GDPR
+      - Licensing
+      - Reports
+
+paths:
+  /AccountSkus:
+    $ref: account_sku.yml#/paths/~1AccountSkus
+  /AccountSkus/Assign:
+    $ref: account_sku.yml#/paths/~1AccountSkus~1Assign
+  /AccountSkus/AssignUpdateRemove:
+    $ref: account_sku.yml#/paths/~1AccountSkus~1AssignUpdateRemove
+  /AccountSkus/CreateTrial:
+    $ref: account_sku.yml#/paths/~1AccountSkus~1CreateTrial
+  /AccountSkus/Group/{groupId}:
+    $ref: account_sku.yml#/paths/~1AccountSkus~1Group~1{groupId}
+  /AccountSkus/Group/{groupId}/AssignmentErrors:
+    $ref: account_sku.yml#/paths/~1AccountSkus~1Group~1{groupId}~1AssignmentErrors
+  /AccountSkus/Group/{groupId}/Reprocess:
+    $ref: account_sku.yml#/paths/~1AccountSkus~1Group~1{groupId}~1Reprocess
+  /AccountSkus/GroupAssignments:
+    $ref: account_sku.yml#/paths/~1AccountSkus~1GroupAssignments
+  /AccountSkus/GroupsWithLicensingErrors:
+    $ref: account_sku.yml#/paths/~1AccountSkus~1GroupsWithLicensingErrors
+  /AccountSkus/Remove:
+    $ref: account_sku.yml#/paths/~1AccountSkus~1Remove
+  /AccountSkus/User/{userId}:
+    $ref: account_sku.yml#/paths/~1AccountSkus~1User~1{userId}
+  /AccountSkus/User/{userId}/Reprocess:
+    $ref: account_sku.yml#/paths/~1AccountSkus~1User~1{userId}~1Reprocess
+  /AccountSkus/UserAssignments:
+    $ref: account_sku.yml#/paths/~1AccountSkus~1UserAssignments
+  /AccountSkus/Update:
+    $ref: account_sku.yml#/paths/~1AccountSkus~1Update
+
+  /ApplicationInsights/ApplicationLogos:
+    $ref: application_insights.yml#/paths/~1ApplicationInsights~1ApplicationLogos
+  /ApplicationInsights/AppMigration:
+    $ref: application_insights.yml#/paths/~1ApplicationInsights~1AppMigration
+  /ApplicationInsights/ConsentedPermissionsData:
+    $ref: application_insights.yml#/paths/~1ApplicationInsights~1ConsentedPermissionsData
+  /ApplicationInsights/ConsentedPermissionsDataAppBased:
+    $ref: application_insights.yml#/paths/~1ApplicationInsights~1ConsentedPermissionsDataAppBased
+  /ApplicationInsights/EnterpriseAppSignIns:
+    $ref: application_insights.yml#/paths/~1ApplicationInsights~1EnterpriseAppSignIns
+  /ApplicationInsights/SAMLApps:
+    $ref: application_insights.yml#/paths/~1ApplicationInsights~1SAMLApps
+  /ApplicationProxy/Applications/{appId}:
+    $ref: application_proxy.yml#/paths/~1ApplicationProxy~1Applications~1{appId}
+  /ApplicationProxy/Applications/TestButtonReport:
+    $ref: application_proxy.yml#/paths/~1ApplicationProxy~1Applications~1TestButtonReport
+  /ApplicationProxy/ConnectorGroups:
+    $ref: application_proxy.yml#/paths/~1ApplicationProxy~1ConnectorGroups
+  /ApplicationProxy/ConnectorGroups/{groupId}:
+    $ref: application_proxy.yml#/paths/~1ApplicationProxy~1ConnectorGroups~1{groupId}
+  /ApplicationProxy/ConnectorGroups/{groupId}/Applications:
+    $ref: application_proxy.yml#/paths/~1ApplicationProxy~1ConnectorGroups~1{groupId}~1Applications
+  /ApplicationProxy/Connectors/{connectorId}:
+    $ref: application_proxy.yml#/paths/~1ApplicationProxy~1Connectors~1{connectorId}
+  /ApplicationProxy/Directory:
+    $ref: application_proxy.yml#/paths/~1ApplicationProxy~1Directory
+
+  /Applications/Gallery:
+    $ref: applications.yml#/paths/~1Applications~1Gallery
+  /Applications/Gallery/{appId}:
+    $ref: applications.yml#/paths/~1Applications~1Gallery~1{appId}
+  /ApplicationManagement/ApplicationObject/{appId}:
+    $ref: applications.yml#/paths/~1ApplicationManagement~1ApplicationObject~1{appId}
+
+  /ApplicationSso/{spId}/CleanClaimTest:
+    $ref: application_sso.yml#/paths/~1ApplicationSso~1{spId}~1CleanClaimTest
+  /ApplicationSso/{spId}/FederatedSsoClaimsPolicyV3:
+    $ref: application_sso.yml#/paths/~1ApplicationSso~1{spId}~1FederatedSsoClaimsPolicyV3
+  /ApplicationSso/{spId}/FederatedSsoConfigV2:
+    $ref: application_sso.yml#/paths/~1ApplicationSso~1{spId}~1FederatedSsoConfigV2
+  /ApplicationSso/{spId}/FederatedSsoConfigV4/{appId}:
+    $ref: application_sso.yml#/paths/~1ApplicationSso~1{spId}~1FederatedSsoConfigV4~1{appId}
+  /ApplicationSso/{spId}/FederatedSsoV3:
+    $ref: application_sso.yml#/paths/~1ApplicationSso~1{spId}~1FederatedSsoV3
+  /ApplicationSso/{spId}/FederatedSsoV4/{appId}:
+    $ref: application_sso.yml#/paths/~1ApplicationSso~1{spId}~1FederatedSsoV4~1{appId}
+  /ApplicationSso/{spId}/GetCertificateByThumbprintBase64String/{thumbprint}:
+      $ref: application_sso.yml#/paths/~1ApplicationSso~1{spId}~1GetCertificateByThumbprintBase64String~1{thumbprint}
+  /ApplicationSso/{spId}/GetFederatedOneClickSsoSetupData:
+    $ref: application_sso.yml#/paths/~1ApplicationSso~1{spId}~1GetFederatedOneClickSsoSetupData
+  /ApplicationSso/{spId}/GetSignInUrl:
+    $ref: application_sso.yml#/paths/~1ApplicationSso~1{spId}~1GetSignInUrl
+  /ApplicationSso/{spId}/LinkFederatedSsoClaimsPolicy:
+    $ref: application_sso.yml#/paths/~1ApplicationSso~1{spId}~1LinkFederatedSsoClaimsPolicy
+  /ApplicationSso/{spId}/SetupClaimTest:
+    $ref: application_sso.yml#/paths/~1ApplicationSso~1{spId}~1SetupClaimTest
+  /ApplicationSso/{spId}/SetupFederation:
+    $ref: application_sso.yml#/paths/~1ApplicationSso~1{spId}~1SetupFederation
+  /ApplicationSso/{spId}/SPsWithSharedPolicy:
+    $ref: application_sso.yml#/paths/~1ApplicationSso~1{spId}~1SPsWithSharedPolicy
+  /ApplicationSso/{spId}/TestLink:
+    $ref: application_sso.yml#/paths/~1ApplicationSso~1{spId}~1TestLink
+  /ApplicationSso/{spId}/TokenIssuancePolicyId:
+    $ref: application_sso.yml#/paths/~1ApplicationSso~1{spId}~1TokenIssuancePolicyId
+  /ApplicationSso/EvaluateRegexTransformation:
+    $ref: application_sso.yml#/paths/~1ApplicationSso~1EvaluateRegexTransformation
+  /ApplicationSso/{spId}/LinkedSso:
+    $ref: application_sso.yml#/paths/~1ApplicationSso~1{spId}~1LinkedSso
+  /ApplicationSso/IsValidIdentifierUriV2:
+    $ref: application_sso.yml#/paths/~1ApplicationSso~1IsValidIdentifierUriV2
+  /ApplicationSso/IsValidUri:
+    $ref: application_sso.yml#/paths/~1ApplicationSso~1IsValidUri
+  /ApplicationSso/TokenSigningCert:
+    $ref: application_sso.yml#/paths/~1ApplicationSso~1TokenSigningCert
+
+  /ApplicationSso/{spId}/SingleSignOn:
+    $ref: application_sso.yml#/paths/~1ApplicationSso~1{spId}~1SingleSignOn
+  /ApplicationSso/FederatedSsoDefaultClaimsV2:
+    $ref: application_sso.yml#/paths/~1ApplicationSso~1FederatedSsoDefaultClaimsV2
+  /ApplicationSso/UserExtensionProperties:
+    $ref: application_sso.yml#/paths/~1ApplicationSso~1UserExtensionProperties
+  /ApplicationSso/{spId}/ClaimIssuancePolicyId:
+    $ref: application_sso.yml#/paths/~1ApplicationSso~1{spId}~1ClaimIssuancePolicyId
+  /ApplicationSso/{spId}/SsoApplication:
+    $ref: application_sso.yml#/paths/~1ApplicationSso~1{spId}~1SsoApplication
+  /ApplicationSso/{spId}/FederatedSsoClaimsPolicyV2:
+    $ref: application_sso.yml#/paths/~1ApplicationSso~1{spId}~1FederatedSsoClaimsPolicyV2
+  /ApplicationSso/{spId}/FederatedSsoV2:
+    $ref: application_sso.yml#/paths/~1ApplicationSso~1{spId}~1FederatedSsoV2
+  /AuthenticationMethods/AuthenticationMethodsPolicy:
+    $ref: authentication_methods.yml#/paths/~1AuthenticationMethods~1AuthenticationMethodsPolicy
+  /AuthenticationMethods/PasswordPolicy:
+    $ref: authentication_methods.yml#/paths/~1AuthenticationMethods~1PasswordPolicy
+  /B2B/b2bpolicy:
+    $ref: b2b.yml#/paths/~1B2B~1b2bpolicy
+  /B2B/customIdentityProviders:
+    $ref: b2b.yml#/paths/~1B2B~1customIdentityProviders
+  /B2B/getMetadataFile:
+    $ref: b2b.yml#/paths/~1B2B~1getMetadataFile
+  /ClaimProviders:
+    $ref: claim_providers.yml#/paths/~1ClaimProviders
+  /ClaimProviders/Controls:
+    $ref: claim_providers.yml#/paths/~1ClaimProviders~1Controls
+  /ClaimProviders/Validate:
+    $ref: claim_providers.yml#/paths/~1ClaimProviders~1Validate
+  /ClassicPolicies:
+    $ref: classic_policies.yml#/paths/~1ClassicPolicies
+  /ClassicPolicies/Delete:
+    $ref: classic_policies.yml#/paths/~1ClassicPolicies~1Delete
+  /ClassicPolicies/Detail:
+    $ref: classic_policies.yml#/paths/~1ClassicPolicies~1Detail
+  /ClassicPolicies/Detail2:
+    $ref: classic_policies.yml#/paths/~1ClassicPolicies~1Detail2
+  /ClassicPolicies/Disable:
+    $ref: classic_policies.yml#/paths/~1ClassicPolicies~1Disable
+  /ClassicPolicies/Migrate:
+    $ref: classic_policies.yml#/paths/~1ClassicPolicies~1Migrate
+  /ClassicPolicies/Save:
+    $ref: classic_policies.yml#/paths/~1ClassicPolicies~1Save
+  /Common/GetObjectsByObjectIds:
+    $ref: misc.yml#/paths/~1Common~1GetObjectsByObjectIds
+  /Common/VerifiedDomains:
+    $ref: misc.yml#/paths/~1Common~1VerifiedDomains
+  /DataInsights/GetCredentialUserRegistrationDetails:
+    $ref: data_insights.yml#/paths/~1DataInsights~1GetCredentialUserRegistrationDetails
+  /DataInsights/GetUserCredentialUsageDetails:
+    $ref: data_insights.yml#/paths/~1DataInsights~1GetUserCredentialUsageDetails
+  /Devices:
+    $ref: devices.yml#/paths/~1Devices
+
+  /Directories/ADConnectStatus:
+    $ref: microsoft_entra_connect.yml#/paths/~1Directories~1ADConnectStatus
+  /Directories/B2C:
+    $ref: b2c.yml#/paths/~1Directories~1B2C
+  /Directories/DirectoryWhatsNew:
+    $ref: directories.yml#/paths/~1Directories~1DirectoryWhatsNew
+  /Directories/DomainAvailability/{domainPrefix}:
+    $ref: directories.yml#/paths/~1Directories~1DomainAvailability~1{domainPrefix}
+  /Directories/DeletionRestrictions:
+    $ref: directories.yml#/paths/~1Directories~1DeletionRestrictions
+  /Directories/GetSeamlessSingleSignOnDomains:
+    $ref: directories.yml#/paths/~1Directories~1GetSeamlessSingleSignOnDomains
+  /Directories/GetPasswordSyncStatus:
+    $ref: directories.yml#/paths/~1Directories~1GetPasswordSyncStatus
+  /Directories/FeatureSettingsProperties:
+    $ref: directories.yml#/paths/~1Directories~1FeatureSettingsProperties
+  /Directories/LcmSettings:
+    $ref: directories.yml#/paths/~1Directories~1LcmSettings
+  /Directories/Properties:
+    $ref: directories.yml#/paths/~1Directories~1Properties
+  /Directories/PropertiesV2:
+    $ref: directories.yml#/paths/~1Directories~1PropertiesV2
+  /Directories/RecommendedPayloads:
+    $ref: directories.yml#/paths/~1Directories~1RecommendedPayloads
+  /Directories/SsgmProperties:
+    $ref: directories.yml#/paths/~1Directories~1SsgmProperties
+  /Directories/Summary:
+    $ref: directories.yml#/paths/~1Directories~1Summary
+  /Directories/{tenantId}/Details:
+    $ref: directories.yml#/paths/~1Directories~1{tenantId}~1Details
+  /Directories/{tenantId}/OnPremisesAgents:
+    $ref: directories.yml#/paths/~1Directories~1{tenantId}~1OnPremisesAgents
+  /Directories/{tenantId}/OnPremisesPublishedResources:
+    $ref: directories.yml#/paths/~1Directories~1{tenantId}~1OnPremisesPublishedResources
+  /Directories/{tenantId}/OnPremisesPublishedResources/{publishedResourceId}:
+    $ref: directories.yml#/paths/~1Directories~1{tenantId}~1OnPremisesPublishedResources~1{publishedResourceId}
+  /directoryObjects/{objectId}:
+    $ref: directories.yml#/paths/~1directoryObjects~1{objectId}
+  /directoryObjects/{objectId}/memberOf/count:
+    $ref: directories.yml#/paths/~1directoryObjects~1{objectId}~1memberOf~1count
+  /DirectoryObjectPicker/DirectoryMembersFromIds:
+    $ref: directories.yml#/paths/~1DirectoryObjectPicker~1DirectoryMembersFromIds
+  /DirectoryObjectPicker/Search:
+    $ref: directories.yml#/paths/~1DirectoryObjectPicker~1Search
+
+  /DocumentProcessorTasks:
+    $ref: document_processor_tasks.yml#/paths/~1DocumentProcessorTasks
+  /DocumentProcessorTasks/{id}:
+    $ref: document_processor_tasks.yml#/paths/~1DocumentProcessorTasks~1{id}
+  /DocumentProcessorTasks/Download/{id}:
+    $ref: document_processor_tasks.yml#/paths/~1DocumentProcessorTasks~1Download~1{id}
+  /DocumentProcessorTasks/ListTasks:
+    $ref: document_processor_tasks.yml#/paths/~1DocumentProcessorTasks~1ListTasks
+  /DocumentProcessorTasks/UploadTaskFile:
+    $ref: document_processor_tasks.yml#/paths/~1DocumentProcessorTasks~1UploadTaskFile
+  /Domains('{domainName}')/verify:
+    $ref: misc.yml#/paths/~1Domains('{domainName}')~1verify
+
+  /EnterpriseApplications/{spId}/Properties:
+    $ref: enterprise_applications.yml#/paths/~1EnterpriseApplications~1{spId}~1Properties
+  /EnterpriseApplications/{spId}/ServicePrincipalPermissions:
+    $ref: enterprise_applications.yml#/paths/~1EnterpriseApplications~1{spId}~1ServicePrincipalPermissions
+  /EnterpriseApplications/UserSettings:
+    $ref: enterprise_applications.yml#/paths/~1EnterpriseApplications~1UserSettings
+
+  /FeatureConfigurations:
+    $ref: misc.yml#/paths/~1FeatureConfigurations
+  /GDPR/DeleteSelf:
+    $ref: gdpr.yml#/paths/~1GDPR~1DeleteSelf
+  /GDPR/InitiateExportRequest:
+    $ref: gdpr.yml#/paths/~1GDPR~1InitiateExportRequest
+  /GDPR/IsViralUser:
+    $ref: gdpr.yml#/paths/~1GDPR~1IsViralUser
+  /GDPR/ListRequests:
+    $ref: gdpr.yml#/paths/~1GDPR~1ListRequests
+
+  /Groups:
+    $ref: groups.yml#/paths/~1Groups
+  /Groups/{groupId}:
+    $ref: groups.yml#/paths/~1Groups~1{groupId}
+  /Groups/{groupId}/GetDynamicGroupProperties:
+    $ref: groups.yml#/paths/~1Groups~1{groupId}~1GetDynamicGroupProperties
+  /Groups/{groupId}/GetExtensionPropertiesByApp:
+    $ref: groups.yml#/paths/~1Groups~1{groupId}~1GetExtensionPropertiesByApp
+  /Groups/{groupId}/members/count:
+    $ref: groups.yml#/paths/~1Groups~1{groupId}~1members~1count
+  /Groups/GetSupportedDynamicMembershipBaseAttributes/{id}:
+    $ref: groups.yml#/paths/~1Groups~1GetSupportedDynamicMembershipBaseAttributes~1{id}
+  /Groups/GetSupportedDynamicMembershipOperators:
+    $ref: groups.yml#/paths/~1Groups~1GetSupportedDynamicMembershipOperators
+  /Groups/{groupId}/owners/count:
+    $ref: groups.yml#/paths/~1Groups~1{groupId}~1owners~1count
+
+  /IntegratedApplications/{spId}/GetFederatedOneClickSsoConfigureInfo:
+    $ref: applications.yml#/paths/~1IntegratedApplications~1{spId}~1GetFederatedOneClickSsoConfigureInfo
+
+  /Licenses/DirectoryMembersImageUrlFromIds:
+    $ref: account_sku.yml#/paths/~1Licenses~1DirectoryMembersImageUrlFromIds
+
+  /LoginTenantBrandings:
+    $ref: directories.yml#/paths/~1LoginTenantBrandings
+  /LoginTenantBrandings/{locale}:
+    $ref: directories.yml#/paths/~1LoginTenantBrandings~1{locale}
+  /LoginTenantBrandings/BannerImage/{locale}:
+    $ref: directories.yml#/paths/~1LoginTenantBrandings~1BannerImage~1{locale}
+
+  /ManagedApplications/List:
+    $ref: managed_applications.yml#/paths/~1ManagedApplications~1List
+  /ManagedApplications/{spId}:
+    $ref: managed_applications.yml#/paths/~1ManagedApplications~1{spId}
+  /ManagedApplications/{spId}/AppRoleAssignments:
+    $ref: managed_applications.yml#/paths/~1ManagedApplications~1{spId}~1AppRoleAssignments
+  /ManagedApplications/{spId}/PasswordSsoCustomApp:
+    $ref: managed_applications.yml#/paths/~1ManagedApplications~1{spId}~1PasswordSsoCustomApp
+  /ManagedApplications/{spId}/PasswordSsoCustomApp/{customAppId}:
+    $ref: managed_applications.yml#/paths/~1ManagedApplications~1{spId}~1PasswordSsoCustomApp~1{customAppId}
+  /ManagedApplications/{spId}/PasswordSsoCredentials/{targetType}/{targetId}:
+    $ref: managed_applications.yml#/paths/~1ManagedApplications~1{spId}~1PasswordSsoCredentials~1{targetType}~1{targetId}
+
+  /MdmApplications:
+    $ref: mdm_applications.yml#/paths/~1MdmApplications
+  /MdmApplications/{spId}:
+    $ref: mdm_applications.yml#/paths/~1MdmApplications~1{spId}
+  /MdmApplications/Application/{appId}:
+    $ref: mdm_applications.yml#/paths/~1MdmApplications~1Application~1{appId}
+  /MdmApplications/Permissions/{appId}:
+    $ref: mdm_applications.yml#/paths/~1MdmApplications~1Permissions~1{appId}
+
+  /MultiFactorAuthentication/GetOrCreateExpandedTenantModel:
+    $ref: multifactor_authentication.yml#/paths/~1MultiFactorAuthentication~1GetOrCreateExpandedTenantModel
+  /MultiFactorAuthentication/HardwareToken/enable:
+    $ref: multifactor_authentication.yml#/paths/~1MultiFactorAuthentication~1HardwareToken~1enable
+  /MultiFactorAuthentication/HardwareToken/listUploads:
+    $ref: multifactor_authentication.yml#/paths/~1MultiFactorAuthentication~1HardwareToken~1listUploads
+  /MultiFactorAuthentication/HardwareToken/users:
+    $ref: multifactor_authentication.yml#/paths/~1MultiFactorAuthentication~1HardwareToken~1users
+  /MultiFactorAuthentication/HasPaidSubscription:
+    $ref: multifactor_authentication.yml#/paths/~1MultiFactorAuthentication~1HasPaidSubscription
+  /MultiFactorAuthentication/TenantModel:
+    $ref: multifactor_authentication.yml#/paths/~1MultiFactorAuthentication~1TenantModel
+  /MultiFactorAuthentication/ActivationCredentials:
+    $ref: multifactor_authentication.yml#/paths/~1MultiFactorAuthentication~1ActivationCredentials
+  /MultiFactorAuthentication/AuthenticationReport:
+    $ref: multifactor_authentication.yml#/paths/~1MultiFactorAuthentication~1AuthenticationReport
+  /MultiFactorAuthentication/BlockedUser:
+    $ref: multifactor_authentication.yml#/paths/~1MultiFactorAuthentication~1BlockedUser
+  /MultiFactorAuthentication/BypassedUser:
+    $ref: multifactor_authentication.yml#/paths/~1MultiFactorAuthentication~1BypassedUser
+  /MultiFactorAuthentication/CacheConfig/{configId}:
+    $ref: multifactor_authentication.yml#/paths/~1MultiFactorAuthentication~1CacheConfig~1{configId}
+  /MultiFactorAuthentication/CacheConfig:
+    $ref: multifactor_authentication.yml#/paths/~1MultiFactorAuthentication~1CacheConfig
+  /MultiFactorAuthentication/DownloadAuthenticationReport:
+    $ref: multifactor_authentication.yml#/paths/~1MultiFactorAuthentication~1DownloadAuthenticationReport
+  /MultiFactorAuthentication/DownloadServerStatusReport:
+    $ref: multifactor_authentication.yml#/paths/~1MultiFactorAuthentication~1DownloadServerStatusReport
+  /MultiFactorAuthentication/ExpandedTenantModel:
+    $ref: multifactor_authentication.yml#/paths/~1MultiFactorAuthentication~1ExpandedTenantModel
+  /MultiFactorAuthentication/Greeting:
+    $ref: multifactor_authentication.yml#/paths/~1MultiFactorAuthentication~1Greeting
+  /MultiFactorAuthentication/Group:
+    $ref: multifactor_authentication.yml#/paths/~1MultiFactorAuthentication~1Group
+  /MultiFactorAuthentication/HardwareToken/remove:
+    $ref: multifactor_authentication.yml#/paths/~1MultiFactorAuthentication~1HardwareToken~1remove
+  /MultiFactorAuthentication/HardwareToken/upload:
+    $ref: multifactor_authentication.yml#/paths/~1MultiFactorAuthentication~1HardwareToken~1upload
+  /MultiFactorAuthentication/HardwareToken/upload/{tokenId}:
+    $ref: multifactor_authentication.yml#/paths/~1MultiFactorAuthentication~1HardwareToken~1upload~1{tokenId}
+  /MultiFactorAuthentication/HardwareToken/users/download:
+    $ref: multifactor_authentication.yml#/paths/~1MultiFactorAuthentication~1HardwareToken~1users~1download
+  /MultiFactorAuthentication/Providers:
+    $ref: multifactor_authentication.yml#/paths/~1MultiFactorAuthentication~1Providers
+  /MultiFactorAuthentication/ServerStatusReport:
+    $ref: multifactor_authentication.yml#/paths/~1MultiFactorAuthentication~1ServerStatusReport
+  /MultiFactorAuthentication/Soundfile:
+    $ref: multifactor_authentication.yml#/paths/~1MultiFactorAuthentication~1Soundfile
+  /MultiFactorAuthentication/TenantModel/LicenseKey:
+    $ref: multifactor_authentication.yml#/paths/~1MultiFactorAuthentication~1TenantModel~1LicenseKey
+
+  /NamedNetworks:
+    $ref: named_networks.yml#/paths/~1NamedNetworks
+  /NamedNetworksV2:
+    $ref: named_networks.yml#/paths/~1NamedNetworksV2
+  /NamedNetworksV2/CountryCodes:
+    $ref: named_networks.yml#/paths/~1NamedNetworksV2~1CountryCodes
+  /NamedNetworksV2/{id}:
+    $ref: named_networks.yml#/paths/~1NamedNetworksV2~1{id}
+  /NamedNetworksV2/ValidatePolicySize/{id}:
+    $ref: named_networks.yml#/paths/~1NamedNetworksV2~1ValidatePolicySize~1{id}
+
+  /PasswordReset/CheckWritebackConnectivityStatus:
+    $ref: password_reset.yml#/paths/~1PasswordReset~1CheckWritebackConnectivityStatus
+  /PasswordReset/IsOnPremisesPasswordResetAvailable:
+    $ref: password_reset.yml#/paths/~1PasswordReset~1IsOnPremisesPasswordResetAvailable
+  /PasswordReset/IsResetPasswordByObjectIdAllowed:
+    $ref: password_reset.yml#/paths/~1PasswordReset~1IsResetPasswordByObjectIdAllowed
+  /PasswordReset/IsResetPasswordByUpnAllowed:
+    $ref: password_reset.yml#/paths/~1PasswordReset~1IsResetPasswordByUpnAllowed
+  /PasswordReset/ListConditionalAccessPolicyInfo:
+    $ref: password_reset.yml#/paths/~1PasswordReset~1ListConditionalAccessPolicyInfo
+  /PasswordReset/PasswordResetPolicies:
+    $ref: password_reset.yml#/paths/~1PasswordReset~1PasswordResetPolicies
+    # ?getPasswordResetEnabledGroup={0}
+    # ?byPassMethodCountCheck={0}
+  /PasswordReset/OnPremisesPasswordResetPolicies:
+    $ref: password_reset.yml#/paths/~1PasswordReset~1OnPremisesPasswordResetPolicies
+  /PasswordReset/ResetPasswordByUpn:
+    $ref: password_reset.yml#/paths/~1PasswordReset~1ResetPasswordByUpn
+
+  /Permissions:
+    $ref: permissions.yml#/paths/~1Permissions
+  /Permissions/IsTenantRegionScopeAllowed:
+    $ref: permissions.yml#/paths/~1Permissions~1IsTenantRegionScopeAllowed
+  /Permissions/{objectId}/IsOwner:
+    $ref: permissions.yml#/paths/~1Permissions~1{objectId}~1IsOwner
+  /Permissions/GetUserSystemRoleTemplateIds:
+    $ref: permissions.yml#/paths/~1Permissions~1GetUserSystemRoleTemplateIds
+
+  /Policies:
+    $ref: policies.yml#/paths/~1Policies
+  /Policies/{policyId}:
+    $ref: policies.yml#/paths/~1Policies~1{policyId}
+  /Policies/Policies:
+    $ref: policies.yml#/paths/~1Policies~1Policies
+  /Policies/PolicyCountUnderMaxAllowedLimit:
+    $ref: policies.yml#/paths/~1Policies~1PolicyCountUnderMaxAllowedLimit
+  /Policies/Validate:
+    $ref: policies.yml#/paths/~1Policies~1Validate
+
+  /RegisteredApplications:
+    $ref: registered_applications.yml#/paths/~1RegisteredApplications
+  /RegisteredApplications/{appId}:
+    $ref: registered_applications.yml#/paths/~1RegisteredApplications~1{appId}
+  /RegisteredApplications/{appId}/Consent:
+    $ref: registered_applications.yml#/paths/~1RegisteredApplications~1{appId}~1Consent
+
+  /Reports/{reportId}:
+    $ref: reports.yml#/paths/~1Reports~1{reportId}
+  /Reports/AuditEventsV2:
+    $ref: reports.yml#/paths/~1Reports~1AuditEventsV2
+  /Reports/ServicePrincipals/{spId}:
+    $ref: reports.yml#/paths/~1Reports~1ServicePrincipals~1{spId}
+  /Reports/AuditActivityTypes:
+    $ref: reports.yml#/paths/~1Reports~1AuditActivityTypes
+  /Reports/AuditActivityTypesV2:
+    $ref: reports.yml#/paths/~1Reports~1AuditActivityTypesV2
+  /Reports/Groups/{groupId}:
+    $ref: reports.yml#/paths/~1Reports~1Groups~1{groupId}
+  /Reports/GroupsActivitySummary:
+    $ref: reports.yml#/paths/~1Reports~1GroupsActivitySummary
+  /Reports/SignInEventsV2:
+    $ref: reports.yml#/paths/~1Reports~1SignInEventsV2
+  /Reports/Users/{userId}:
+    $ref: reports.yml#/paths/~1Reports~1Users~1{userId}
+  /Reports/UsersActivitySummary:
+    $ref: reports.yml#/paths/~1Reports~1UsersActivitySummary
+
+  /RequestApprovals/V2/BusinessFlows:
+    $ref: request_approvals.yml#/paths/~1RequestApprovals~1V2~1BusinessFlows
+  /RequestApprovals/V2/PolicyTemplates/{templateId}:
+    $ref: request_approvals.yml#/paths/~1RequestApprovals~1V2~1PolicyTemplates~1{templateId}
+  /RequestApprovals/V2/PolicyTemplates:
+    $ref: request_approvals.yml#/paths/~1RequestApprovals~1V2~1PolicyTemplates
+  /RequestApprovals/V2/Requests/{requestId}/block/{0}:
+    $ref: request_approvals.yml#/paths/~1RequestApprovals~1V2~1Requests~1{requestId}~1block~1{0}
+  /RequestApprovals/V2/Requests/{requestId}/deny:
+    $ref: request_approvals.yml#/paths/~1RequestApprovals~1V2~1Requests~1{requestId}~1deny
+  /RequestApprovals/V2/Requests:
+    $ref: request_approvals.yml#/paths/~1RequestApprovals~1V2~1Requests
+
+  /RequireAuthMethodVerification/{0}:
+    $ref: authentication_methods.yml#/paths/~1RequireAuthMethodVerification~1{0}
+
+  /RevokeMFA/{0}:
+    $ref: multifactor_authentication.yml#/paths/~1RevokeMFA~1{0}
+
+  /RoamingSettings:
+    $ref: devices.yml#/paths/~1RoamingSettings
+
+  /Roles/{roleId}/RoleAssignments:
+    $ref: roles.yml#/paths/~1Roles~1{roleId}~1RoleAssignments
+  /Roles/User/{userId}/RoleAssignments:
+    $ref: roles.yml#/paths/~1Roles~1User~1{userId}~1RoleAssignments
+
+  /Security/Overview/ChartCounts:
+    $ref: misc.yml#/paths/~1Security~1Overview~1ChartCounts
+  /Security/Overview/TileCounts:
+    $ref: misc.yml#/paths/~1Security~1Overview~1TileCounts
+  /SecurityDefaults/Configuration:
+    $ref: security_defaults.yml#/paths/~1SecurityDefaults~1Configuration
+  /SecurityDefaults/GetSecurityDefaultStatus:
+    $ref: security_defaults.yml#/paths/~1SecurityDefaults~1GetSecurityDefaultStatus
+  /SecurityDefaults/UpdateSecurityDefaultOnSave:
+    $ref: security_defaults.yml#/paths/~1SecurityDefaults~1UpdateSecurityDefaultOnSave
+
+  /Spotlight/enableSSPR:
+    $ref: misc.yml#/paths/~1Spotlight~1enableSSPR
+
+  /SupportRequestProblemDetails/Document:
+    $ref: misc.yml#/paths/~1SupportRequestProblemDetails~1Document
+  /SupportRequestProblemDetails/Document/XMLContent:
+    $ref: misc.yml#/paths/~1SupportRequestProblemDetails~1Document~1XMLContent
+
+  /SyncingDevices/{0}/Download:
+    $ref: devices.yml#/paths/~1SyncingDevices~1{0}~1Download
+  /SyncingDevices/{0}:
+    $ref: devices.yml#/paths/~1SyncingDevices~1{0}
+
+  /TenantSkuInfo:
+    $ref: account_sku.yml#/paths/~1TenantSkuInfo
+
+  /UpdateUser/{userId}/ImageProperties:
+    $ref: users.yml#/paths/~1UpdateUser~1{userId}~1ImageProperties
+  /UpdateUser/{userId}/MfaProperties:
+    $ref: users.yml#/paths/~1UpdateUser~1{userId}~1MfaProperties
+  /User/{userId}/FIDODevices:
+    $ref: users.yml#/paths/~1User~1{userId}~1FIDODevices
+  /Users/{userId}/assignedApplications:
+    $ref: users.yml#/paths/~1Users~1{userId}~1assignedApplications
+  /Users/GetUserFromObjectIds:
+    $ref: users.yml#/paths/~1Users~1GetUserFromObjectIds
+  /Users/IsUPNInAllowedDomain:
+    $ref: users.yml#/paths/~1Users~1IsUPNInAllowedDomain
+  /Users/IsUPNUnique:
+    $ref: users.yml#/paths/~1Users~1IsUPNUnique
+  /Users/ListVerifiedDomains:
+    $ref: users.yml#/paths/~1Users~1ListVerifiedDomains
+  /Users/ReInvite:
+    $ref: users.yml#/paths/~1Users~1ReInvite
+  /Users/Settings:
+    $ref: users.yml#/paths/~1Users~1Settings
+  /User/TemporaryPassword:
+    $ref: users.yml#/paths/~1User~1TemporaryPassword
+  /Users:
+    $ref: users.yml#/paths/~1Users
+  /Users/PermanentDelete:
+    $ref: users.yml#/paths/~1Users~1PermanentDelete
+  /Users/{userId}:
+    $ref: users.yml#/paths/~1Users~1{userId}
+  /Users/IsUPNUniqueOrPending/{userPrincipalName}:
+    $ref: users.yml#/paths/~1Users~1IsUPNUniqueOrPending~1{userPrincipalName}
+  /UserDetails:
+    $ref: users.yml#/paths/~1UserDetails
+  /UserDetails/{userId}:
+    $ref: users.yml#/paths/~1UserDetails~1{userId}
+  /ViralSubscriptions:
+    $ref: account_sku.yml#/paths/~1ViralSubscriptions
+  /ViralSku/delete:
+    $ref: account_sku.yml#/paths/~1ViralSku~1delete
+  /WhatIf/Evaluate:
+    $ref: policies.yml#/paths/~1WhatIf~1Evaluate

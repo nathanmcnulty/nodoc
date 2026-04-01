@@ -1,0 +1,325 @@
+components:
+  schemas:
+    requestApprovalPolicy:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: The unique identifier of the policy template.
+          nullable: true
+          readOnly: true
+          example: false
+        requestExpiresInDays:
+          type: integer
+          description: The number of days after which an request will expire.
+          example: 30
+        notificationsEnabled:
+          type: boolean
+          description: Whether notifications are enabled.
+          example: true
+        remindersEnabled:
+          type: boolean
+          description: Whether reminders are enabled.
+          example: true
+        approvers:
+          type: array
+          readOnly: true
+          uniqueItems: true
+          items:
+            $ref: common.yml#/components/schemas/userId
+        approversV2:
+          type: object
+          properties:
+            user:
+              type: array
+              items:
+                $ref: common.yml#/components/schemas/userId
+            group:
+              type: array
+              items:
+                $ref: common.yml#/components/schemas/groupId
+            role:
+              type: array
+              items:
+                type: string
+                description: The unique ID of role definition.
+                format: uuid
+                example: 6934698c-5dcf-4596-809d-bc5b566518e5
+
+paths:
+  /RequestApprovals/V2/BusinessFlows:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    get:
+      summary: Get request approval business flows (v2)
+      description: >-
+        Get request approval business flows (version 2).
+      operationId: RequestApprovalsV2.BusinessFlows.Get
+      parameters:
+        - $ref: common.yml#/components/parameters/nextLink
+        - $ref: common.yml#/components/parameters/top
+        - name: skip
+          description: The number of results to skip
+          in: query
+          schema:
+            type: integer
+            example: 10
+        - name: businessFlowScope
+          description: The scope of the business flow
+          in: query
+          schema:
+            type: string
+      tags: [General]
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                propeties:
+                  businessFlows:
+                    type: array
+                  nextLink:
+                    $ref: common.yml#/components/schemas/nextLink
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /RequestApprovals/V2/PolicyTemplates/{templateId}:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - name: templateId
+        description: The unique ID of the policy template.
+        in: path
+        required: true
+        example: 26a38547-eec2-473f-986a-fd9bc302d232
+        schema:
+          type: string
+          format: uuid
+    patch:
+      summary: Update request approval policy template (v2)
+      description: >-
+        Update request approval policy template (version 2).
+      operationId: RequestApprovalsV2.PolicyTemplate.Update
+      tags: [General]
+      responses:
+        '204':
+          description: No Content
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    delete:
+      summary: Delete request approval policy template (v2)
+      description: >-
+        Delete request approval policy template (version 2).
+      operationId: RequestApprovalsV2.PolicyTemplate.Delete
+      tags: [General]
+      responses:
+        '204':
+          description: No Content
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /RequestApprovals/V2/PolicyTemplates:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    post:
+      summary: Create request approval policy template (v2)
+      description: >-
+        Create request approval policy template (version 2).
+      operationId: RequestApprovalsV2.PolicyTemplate.Create
+      tags: [General]
+      parameters:
+        - name: type
+          description: The type of policy template
+          in: query
+          schema:
+            type: string
+            enum: [AdminConsentFlow]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/requestApprovalPolicy'
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/requestApprovalPolicy'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /RequestApprovals/V2/Requests/{requestId}/block/{0}:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - name: requestId
+        description: The unique ID of the request
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: '0'
+        description: pending
+        in: path
+        required: true
+        schema:
+          type: string
+    post:
+      summary: Block approval request (v2)
+      description: >-
+        Block approval request (version 2).
+      operationId: RequestApprovalsV2.Request.Block
+      tags: [General]
+      requestBody:
+        $ref: common.yml#/components/requestBodies/unknownRequest
+      responses:
+        '200':
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /RequestApprovals/V2/Requests/{requestId}/deny:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - name: requestId
+        description: The unique ID of the request
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      summary: Deny approval request (v2)
+      description: >-
+        Deny approval request (version 2).
+      operationId: RequestApprovalsV2.Request.Deny
+      tags: [General]
+      requestBody:
+        $ref: common.yml#/components/requestBodies/unknownRequest
+      responses:
+        '200':
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /RequestApprovals/V2/Requests:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    get:
+      parameters:
+        - $ref: common.yml#/components/parameters/nextLink
+        - $ref: common.yml#/components/parameters/top
+        - name: skip
+          description: The number of results to skip
+          in: query
+          schema:
+            type: integer
+            example: 10
+        - name: businessFlowId
+          description: The Id of the business flow
+          in: query
+          schema:
+            type: string
+        - name: businessFlowScope
+          description: The scope of the business flow
+          in: query
+          schema:
+            type: string
+      summary: List approval requests (v2)
+      description: >-
+        List approval requests (version 2).
+      operationId: RequestApprovalsV2.Request.List
+      tags: [General]
+      responses:
+        '200':
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

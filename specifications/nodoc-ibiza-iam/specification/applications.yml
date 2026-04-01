@@ -1,0 +1,355 @@
+components:
+  schemas:
+    galleryApplication:
+      type: object
+      properties:
+        id:
+          type: string
+          example: e9fcfce0-a20b-4d34-b580-909332723090
+        displayName:
+          type: string
+          example: AirWatch by VMware
+        homepageUrl:
+          type: string
+          example: http://www.air-watch.com/
+        logo215Url:
+          type: string
+          example: https://galleryapplogos1.azureedge.net/app-logo/airwatchmdm_3F1A6E2B_215.png
+        logo45Url:
+          type: string
+          example: https://galleryapplogos1.azureedge.net/app-logo/airwatchmdm_3F1A6E2B_45.png
+        description:
+          type: string
+          example: AirWatch by VMware is the leader in enterprise mobility management. The AirWatch platform includes industry-leading mobile device, email, application, content, and browser management solutions. The use of this application is specific to Windows 10.
+        publisher:
+          type: string
+          example: AirWatch
+        ssoConfigureInstruction2FwLink:
+          type: string
+          nullable: true
+          example: false
+        displayCategories:
+          type: array
+          items:
+            type: string
+            example: mdm
+        appAlreadyAdded:
+          type: boolean
+          example: false
+        inPreview:
+          type: boolean
+          example: false
+        canBeInstantiated:
+          type: boolean
+          example: false
+        signupUrl:
+          type: string
+          example: http://www.air-watch.com/
+        appKey:
+          type: string
+          example: airwatchmdm
+        appCapabilities:
+          type: array
+          items:
+            type: string
+            example: ConditionalAccess
+        appCategory:
+          type: string
+          example: ISV1
+        displayCategory:
+          type: string
+          example: mdm
+        ssoOptions:
+          type: array
+          items:
+            type: string
+            example: existing
+
+paths:
+  /Applications/Gallery:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    get:
+      summary: List Gallery Applications
+      description: >-
+        List Gallery Applications.
+      operationId: Application.Gallery.List
+      tags: [Service Principal]
+      parameters:
+        - $ref: common.yml#/components/parameters/nextLink
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/galleryApplication'
+                  nextLink:
+                    $ref: common.yml#/components/schemas/nextLink
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /Applications/Gallery/{appId}:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - name: appId
+        description: pending.
+        in: path
+        required: true
+        schema:
+          $ref: common.yml#/components/schemas/applicationId
+    get:
+      summary: Get Gallery Application by app ID
+      description: >-
+        Get Gallery Application by application ID (client ID).
+      operationId: Application.Gallery.Get
+      tags: [Service Principal]
+      responses:
+        '200':
+          description: Ok
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/galleryApplication'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /ApplicationManagement/ApplicationObject/{appId}:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - name: appId
+        description: pending.
+        in: path
+        required: true
+        schema:
+          $ref: common.yml#/components/schemas/applicationId
+    get:
+      summary: Get Application Registration by app ID
+      description: >-
+        Get Application Registration by application ID (client ID).
+      operationId: Application.ApplicationObject.Get
+      tags: [Application Registration]
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  objectId:
+                    type: string
+                    example: df34926c-fb28-404b-8e1d-7ffdcf209d6b
+                  appId:
+                    type: string
+                    example: bbb4cfab-61a1-48a7-9a7f-a94dcce5f1b4
+                  displayName:
+                    type: string
+                    example: app-display
+                  homepage:
+                    type: string
+                    nullable: true
+                    example: null
+                  identifierUris:
+                    type: array
+                    items:
+                      type: string
+                  publicClient:
+                    type: boolean
+                    example: false
+                  replyUrls:
+                    type: array
+                    items:
+                      type: string
+                  logoutUrl:
+                    type: string
+                    nullable: true
+                    example: null
+                  keyCredentials:
+                    type: array
+                  tokenEncryptionKeyId:
+                    type: string
+                    nullable: true
+                    example: null
+                  groupMembershipClaims:
+                    type: object
+                    nullable: true
+                  optionalClaims:
+                    type: object
+                    properties:
+                      idToken:
+                        type: array
+                        items:
+                          type: string
+                      accessToken:
+                        type: array
+                        items:
+                          type: string
+                      saml2Token:
+                        type: array
+                        items:
+                          type: string
+                  oauth2AllowIdTokenImplicitFlow:
+                    type: boolean
+                    example: false
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /IntegratedApplications/{spId}/GetFederatedOneClickSsoConfigureInfo:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - $ref: common.yml#/components/parameters/spId
+    get:
+      summary: Get integrated application federated one-click SSO configuration info
+      description: >-
+        Get integrated application federated one-click SSO configuration info.
+      operationId: ApplicationSso.FederatedOneClickSsoConfigureInfo.Get
+      tags: [Application SSO]
+      responses:
+        '200':
+          description: Ok
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  appDisplayName:
+                    description: The display name of the app.
+                    type: string
+                    example: Terraform Cloud
+                  galleryApplicationId:
+                    description: The unique identifier for the application in the gallery
+                    type: string
+                    example: d2bb9154-1fa1-437e-b05f-4cd406289a7d
+                  thumbprint:
+                    description: Thumbprint of the SAML certificate
+                    type: string
+                    example: 16A074ECA24242A12618B4BD1237F87D1770832F
+                  oneCickFederationSsoInformation:
+                    description: Additional SSO information.
+                    type: string
+                    nullable: true
+                    example: null
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

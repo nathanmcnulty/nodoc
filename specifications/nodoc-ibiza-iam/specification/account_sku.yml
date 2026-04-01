@@ -1,0 +1,1311 @@
+components:
+  parameters:
+    accountSkuId:
+      name: accountSkuId
+      description: The tenant-specific unique ID of the SKU.
+      in: query
+      schema:
+        $ref: '#/components/schemas/AccountSkuId'
+      required: true
+  schemas:
+    AccountSku:
+      type: object
+      properties:
+        name:
+          description: The name of the SKU.
+          type: string
+          example: Microsoft 365 E5 Developer
+        accountId:
+          description: The unique ID of the account (tenant) that the SKU is associated with.
+          type: string
+          format: uuid
+          example: 7dd3f871-67fd-453e-937d-542240cc64ea
+        accountSkuId:
+          $ref: '#/components/schemas/AccountSkuId'
+        availableUnits:
+          description: The number of available licences.
+          type: integer
+          minimum: 0
+          example: 2
+        totalUnits:
+          description: The total number of licences.
+          type: integer
+          minimum: 0
+          example: 25
+        consumedUnits:
+          description: The number of consumed licences.
+          type: integer
+          minimum: 0
+          example: 23
+        skuId:
+          description: The unique ID of the SKU.
+          type: string
+          format: uuid
+          example: c42b9cae-ea4f-4ab7-9717-81576235ccac
+        isDepartment:
+          description: pending
+          type: boolean
+          example: false
+        warningUnits:
+          description: pending
+          type: integer
+          minimum: 0
+          example: 0
+        serviceStatuses:
+          description: A list of service statuses.
+          type: array
+          items:
+            $ref: '#/components/schemas/ServicePlanStatus'
+    AccountSkuId:
+      description: The unique string ID of the account (tenant) & SKU combination.
+      type: string
+      minLength: 36
+      example: contoso:DEVELOPERPACK_E5
+    GroupAssignment:
+      description: pending
+      type: object
+      properties:
+        objectId:
+          $ref: common.yml#/components/schemas/groupId
+        displayName:
+          description: The display name of the group.
+          type: string
+          example: GroupA
+        licenses:
+          type: array
+          description: A list of licenses assigned to the group.
+          items:
+            allOf:
+              - $ref: '#/components/schemas/License'
+              - type: object
+                properties:
+                  hasErrors:
+                    description: Does the license assignment have errors?
+                    type: boolean
+                    nullable: true
+                    example: true
+                  errorCount:
+                    description: Number of errors that the license assignment has.
+                    type: number
+                    example: 1
+        licenseProcessingStatus:
+          description: The status of license processing.
+          type: string
+          enum: [Unknown, Queued, Ready, Processing]
+          example: Ready
+        groupType:
+          description: The type of group.
+          type: string
+          enum: ['', security, mailenabledsecurity]
+          example: security
+    IndirectLicenseError:
+      description: Any indirect licensing errors.
+      type: object
+      properties:
+        accountSkuId:
+          $ref: '#/components/schemas/AccountSkuId'
+        error:
+          $ref: '#/components/schemas/LicenseErrorType'
+        referencedObjectId:
+          $ref: common.yml#/components/schemas/objectId
+        referencedObjectDisplayName:
+          description: The display name of the referenced object.
+          type: string
+          example: licensing_group
+    License:
+      type: object
+      description: A license.
+      properties:
+        accountSkuId:
+          $ref: '#/components/schemas/AccountSkuId'
+        disabledServicePlans:
+          type: array
+          items:
+            type: string
+      required:
+        - accountSkuId
+        - disabledServicePlans
+    LicenseAssignmentDetail:
+      type: object
+      properties:
+        accountSkuId:
+          $ref: '#/components/schemas/AccountSkuId'
+        assignments:
+          type: object
+          properties:
+            disabledServicePlans:
+              type: array
+              items:
+                type: string
+            error:
+              $ref: '#/components/schemas/LicenseErrorType'
+            referencedObjectId:
+              $ref: common.yml#/components/schemas/objectId
+            referencedObjectDisplayName:
+              description: The display name of the referenced object.
+              type: string
+              example: licensing_group
+            licenseAssignmentStatus:
+              description: The license assignment status.
+              type: string
+              enum: [active, activewitherror, error]
+              example: active
+    LicenseErrorType:
+      description: The license error type.
+      type: string
+      enum:
+        - none
+        - mutuallyexclusiveviolation
+        - countviolation
+        - other
+        - dependencyviolation
+        - prohibitedinusagelocationviolation
+        - uniquenessviolation
+      example: countviolation
+    LicenseModify:
+      type: object
+      properties:
+        assignments:
+          type: array
+          items:
+            type: object
+            description: A list of licenses to modify.
+            properties:
+              objectId:
+                $ref: common.yml#/components/schemas/objectId
+              displayName:
+                description: The display name of the user/group to manage assignments for.
+                type: string
+                example: UserA
+              isUser:
+                description: Is the referenced object a user?
+                type: boolean
+                example: true
+              addLicenses:
+                type: array
+                description: A list of licenses to add.
+                items:
+                  $ref: '#/components/schemas/License'
+              removeLicenses:
+                type: array
+                description: A list of licences to remove.
+                items:
+                  type: string
+                  description: The license ID.
+              updateLicenses:
+                type: array
+                description: A list of licences to update.
+                items:
+                  $ref: '#/components/schemas/License'
+            required:
+              - objectId
+              - addLicenses
+              - removeLicenses
+              - updateLicenses
+      required:
+        - assignments
+    ServicePlanStatus:
+      description: The status of the SKU service.
+      type: object
+      properties:
+        provisioningStatus:
+          description: The provisioning status of the service.
+          type: string
+          enum: [Success, PendingInput, PendingActivation]
+          example: Success
+        servicePlan:
+          description: The service plan for the service.
+          type: object
+          properties:
+            serviceName:
+              description: The name of the service.
+              type: string
+              example: AAD_PREMIUM
+            servicePlanId:
+              description: The unique ID of the service plan.
+              type: string
+              format: uuid
+              example: 41781fb2-bc02-4b7c-bd55-b576c07bb09d
+            serviceType:
+              description: The type of the service.
+              type: string
+              example: AADPremiumService
+            displayName:
+              description: The service display name.
+              type: string
+              example: Microsoft Entra ID P1
+    UserAssignment:
+      type: object
+      description: pending
+      properties:
+        objectId:
+          $ref: common.yml#/components/schemas/userId
+        displayName:
+          type: string
+          description: The display name of the user.
+          example: User A
+        userPrincipalName:
+          $ref: common.yml#/components/schemas/userPrincipalName
+        imageUrl:
+          description: The URL for the user image.
+          type: string
+          format: uri
+          example: https://main.iam.ad.ext.azure.com/Content/Images/defaultUser.svg
+        licenses:
+          type: array
+          items:
+            type: object
+            properties:
+              accountSkuId:
+                $ref: '#/components/schemas/AccountSkuId'
+              groupsAssigningLicense:
+                type: array
+                items:
+                  type: string
+              serviceStatuses:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ServicePlanStatus'
+        indirectLicenseErrors:
+          type: array
+          items:
+            $ref: '#/components/schemas/IndirectLicenseError'
+        licenseAssignmentDetails:
+          type: array
+          items:
+            $ref: '#/components/schemas/LicenseAssignmentDetail'
+
+paths:
+  /AccountSkus:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    get:
+      summary: List account SKUs
+      description: >-
+        List account SKUs (licenses) available within the tenant.
+      operationId: AccountSkus.List
+      tags: [Licensing]
+      parameters:
+        - name: backfillTenants
+          description: pending.
+          in: query
+          schema:
+            type: boolean
+          required: false
+        - $ref: common.yml#/components/parameters/filter
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AccountSku'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /AccountSkus/Assign:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    post:
+      summary: Assign account SKUs
+      description: >-
+        Assign account SKUs (licenses) to users or groups.
+      operationId: AccountSkus.Assign
+      tags: [Licensing]
+      parameters:
+        - $ref: common.yml#/components/parameters/XMsClientRequestId
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LicenseModify'
+      responses:
+        '204':
+          description: No Content
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /AccountSkus/AssignUpdateRemove:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    post:
+      summary: Assign, update, or remove account SKU assignments to users or groups
+      description: >-
+        Assign, update, or remove account SKUs (licenses) to users or groups.
+      operationId: AccountSkus.AssignUpdateRemove
+      tags: [Licensing]
+      parameters:
+        - $ref: common.yml#/components/parameters/XMsClientRequestId
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LicenseModify'
+      responses:
+        '204':
+          description: No Content
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+        '500':
+          $ref: common.yml#/components/responses/ClientException
+
+  /AccountSkus/CreateTrial:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    post:
+      summary: Create license trial
+      description: >-
+        Register for a license trial for a specific number of licenses.
+      operationId: AccountSkus.Trial.Create
+      tags: [Licensing]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                offerId:
+                  description: The ID of the offer.
+                  type: string
+                  example: ''
+                quantity:
+                  description: The number of required licenses for the trial.
+                  type: integer
+                  minimum: 0
+                  example: 50
+      responses:
+        '204':
+          description: No Content
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /AccountSkus/Group/{groupId}:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - in: path
+        name: groupId
+        description: The object ID of the group to retrieve Account SKU records for.
+        required: true
+        schema:
+          $ref: common.yml#/components/schemas/userId
+    get:
+      summary: Get group licence assignments
+      description: >-
+        Get licence assignments for a specific group, by group ID.
+      operationId: AccountSkus.Group.Get
+      tags: [Licensing]
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupAssignment'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /AccountSkus/Group/{groupId}/AssignmentErrors:
+    parameters:
+      - in: path
+        name: groupId
+        description: The object ID of the group to retrieve assignment errors for.
+        required: true
+        schema:
+          $ref: common.yml#/components/schemas/groupId
+      - $ref: common.yml#/components/parameters/top
+      - $ref: common.yml#/components/parameters/nextLink
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    get:
+      summary: Get group licence assignment errors
+      description: >-
+        Get licence assignment errors for a specific group, by group ID.
+      operationId: AccountSkus.Group.Errors.Get
+      tags: [Licensing]
+      responses:
+        '200':
+          description: Ok
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: common.yml#/components/schemas/PagedResponse
+                  - type: object
+                    properties:
+                      sortedList:
+                        description: Whether the list is sorted.
+                        type: boolean
+                        example: false
+                      items:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/UserAssignment'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /AccountSkus/Group/{groupId}/Reprocess:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - in: path
+        name: groupId
+        description: The object ID of the group to reprocess Account SKU records for.
+        required: true
+        schema:
+          $ref: common.yml#/components/schemas/groupId
+    post:
+      summary: Reprocess group license assignment
+      description: >-
+        Reprocess group license assignment, by group ID.
+      operationId: AccountSkus.Group.Reprocess
+      tags: [Licensing]
+      responses:
+        '204':
+          description: No Content
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /AccountSkus/GroupAssignments:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    get:
+      summary: List group licence assignments
+      description: >-
+        List group license assignments.
+      operationId: AccountSkus.Group.List
+      tags: [Licensing]
+      parameters:
+        - $ref: '#/components/parameters/accountSkuId'
+        - name: searchText
+          description: Search text to filter results by e.g. display name of group.
+          in: query
+          schema:
+            type: string
+            nullable: true
+            example: null
+        - $ref: common.yml#/components/parameters/sortOrder
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: common.yml#/components/schemas/PagedResponse
+                  - type: object
+                    properties:
+                      items:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/GroupAssignment'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /AccountSkus/GroupsWithLicensingErrors:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    get:
+      summary: List groups with licensing errors
+      description: >-
+        List groups with licensing errors.
+      operationId: AccountSkus.Group.Error.List
+      tags: [Licensing]
+      parameters:
+        - $ref: common.yml#/components/parameters/top
+        - $ref: common.yml#/components/parameters/nextLink
+        - name: includeErrorCount
+          description: Whether to include an error count.
+          in: query
+          schema:
+            type: boolean
+            example: true
+      responses:
+        '200':
+          description: Ok
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: common.yml#/components/schemas/PagedResponse
+                  - type: object
+                    properties:
+                      items:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/GroupAssignment'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /AccountSkus/Remove:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    post:
+      summary: Remove account SKU assignments to users or groups.
+      description: >-
+        Remove account SKUs (licenses) to users or groups.
+      operationId: AccountSkus.Remove
+      tags: [Licensing]
+      parameters:
+        - $ref: common.yml#/components/parameters/XMsClientRequestId
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LicenseModify'
+      responses:
+        '204':
+          description: No Content
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+        '400':
+          $ref: common.yml#/components/responses/ClientException
+        '500':
+          $ref: common.yml#/components/responses/ClientException
+
+  /AccountSkus/User/{userId}:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - in: path
+        name: userId
+        description: The object ID of the user to retrieve Account SKU records for.
+        required: true
+        schema:
+          $ref: common.yml#/components/schemas/userId
+    get:
+      summary: Get user licence assignments.
+      description: >-
+        Get licence assignments for a specific user, by user ID.
+      operationId: AccountSkus.user.Get
+      tags: [Licensing]
+      parameters:
+        - $ref: common.yml#/components/parameters/XMsClientRequestId
+      responses:
+        '200':
+          description: Ok
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserAssignment'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /AccountSkus/User/{userId}/Reprocess:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - in: path
+        name: userId
+        description: The object ID of the user to reprocess Account SKU records for.
+        required: true
+        schema:
+          $ref: common.yml#/components/schemas/userId
+    post:
+      summary: Reprocess user license assignment.
+      description: >-
+        Reprocess user license assignment, by user ID.
+      operationId: AccountSkus.User.Reprocess
+      tags: [Licensing]
+      responses:
+        '204':
+          description: No Content
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /AccountSkus/UserAssignments:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    get:
+      summary: List user licence assignments.
+      description: >-
+        List user license assignments.
+      operationId: AccountSkus.User.List
+      tags: [Licensing]
+      parameters:
+        - $ref: common.yml#/components/parameters/XMsClientRequestId
+        - $ref: '#/components/parameters/accountSkuId'
+        - $ref: common.yml#/components/parameters/nextLink
+        - $ref: common.yml#/components/parameters/searchText
+        - $ref: common.yml#/components/parameters/sortOrder
+        - $ref: common.yml#/components/parameters/columnName
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: common.yml#/components/schemas/PagedResponse
+                  - type: object
+                    properties:
+                      isSorted:
+                        description: Whether results are sorted.
+                        type: boolean
+                        example: true
+                      items:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/UserAssignment'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /AccountSkus/Update:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    post:
+      summary: Update account SKU assignments for users or groups.
+      description: >-
+        Update account SKUs (licenses) for users or groups.
+      operationId: AccountSkus.Update
+      tags: [Licensing]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LicenseModify'
+      responses:
+        '204':
+          description: No Content
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /Licenses/DirectoryMembersImageUrlFromIds:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    post:
+      summary: Get directory member image URLs from IDs.
+      description: >-
+        Get directory member image URLs from a list of user IDs.
+      operationId: Licences.DirectoryMembersImageUrlFromIds.Get
+      tags: [Licensing]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: common.yml#/components/schemas/userId
+      responses:
+        '200':
+          description: Ok
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: object
+                description: A map of user IDs to their image URL.
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /TenantSkuInfo:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    get:
+      summary: Get Tenant SKU information.
+      description: >-
+        Get details around SKU entitlements for the tenant.
+      operationId: TenantSkuInfo.Get
+      tags: [Licensing]
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  unauthorized:
+                    type: boolean
+                    example: false
+                  aadPremiumBasic:
+                    type: boolean
+                    example: false
+                  aadPremium:
+                    type: boolean
+                    example: true
+                  aadPremiumP2:
+                    type: boolean
+                    example: true
+                  aadBasic:
+                    type: boolean
+                    example: false
+                  aadBasicEdu:
+                    type: boolean
+                    example: false
+                  aadSmb:
+                    type: boolean
+                    example: false
+                  enterprisePackE3:
+                    type: boolean
+                    example: false
+                  enterprisePremiumE5:
+                    type: boolean
+                    example: false
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /ViralSubscriptions:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    get:
+      summary: List Viral Subscriptions
+      description: >-
+        List viral susbscriptions (self-service sign up products).
+      operationId: ViralSubscription.Get
+      tags: [Licensing]
+      responses:
+        '200':
+          description: List of viral subscriptions.
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    targetClass:
+                      description: The target class for the subscription.
+                      type: string
+                      enum: [User]
+                      example: User
+                    name:
+                      description: The name of the subscription.
+                      type: string
+                      example: Microsoft Power Automate Free
+                    availableUnits:
+                      description: The number of avilable units.
+                      minimum: 0
+                      type: integer
+                      example: 9997
+                    skuId:
+                      description: The unique ID of the SKU.
+                      type: string
+                      format: uuid
+                      example: f30db892-07e9-47e9-837c-80727f46fd3d
+                    consumedUnits:
+                      description: The number of consumed units.
+                      type: integer
+                      example: 3
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /ViralSku/delete:
+    delete:
+      summary: Delete Viral Subscription
+      description: >-
+        Delete viral susbscription (self-service sign up product).
+      operationId: ViralSubscription.Delete
+      tags: [Licensing]
+      parameters:
+        - $ref: common.yml#/components/parameters/XMsClientRequestId
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                skuId:
+                  description: The unique ID of the SKU.
+                  type: string
+                  format: uuid
+                  example: f30db892-07e9-47e9-837c-80727f46fd3d
+      responses:
+        '204':
+          description: No Content
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

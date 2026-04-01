@@ -1,0 +1,326 @@
+components:
+  schemas:
+    mdmApplication:
+      type: object
+      properties:
+        objectId:
+          $ref: common.yml#/components/schemas/servicePrincipalId
+        appId:
+          type: string
+          example: 0000000a-0000-0000-c000-000000000000
+          $ref: common.yml#/components/schemas/applicationId
+        appDisplayName:
+          type: string
+          example: Microsoft Intune
+        appCategory:
+          type: string
+          example: Mdm
+        logoUrl:
+          type: string
+          example: https://main.iam.ad.ext.azure.com/api/Images/Applications/...
+        isOnPrem:
+          type: boolean
+          example: false
+        appData:
+          type: object
+          nullable: true
+          example: null
+        originalAppData:
+          type: object
+          nullable: true
+          readOnly: true
+          properties:
+            mamEnrollmentUrl:
+              type: string
+              nullable: true
+              example: null
+            mamComplianceUrl:
+              type: string
+              nullable: true
+              example: null
+            mamTermsOfUseUrl:
+              type: string
+              nullable: true
+              example: null
+            enrollmentUrl:
+              type: string
+              nullable: true
+              example: https://ds22.airwatchportals.com/deviceservices/discovery.aws
+            complianceUrl:
+              type: string
+              nullable: true
+              example: null
+            termsOfUseUrl:
+              type: string
+              nullable: true
+              example: https://ds22.airwatchportals.com/devicemanagement/enrollment
+        mdmAppliesTo:
+          type: integer
+          nullable: true
+          readOnly: true
+          example: 0
+        mamAppliesTo:
+          type: integer
+          nullable: true
+          readOnly: true
+          example: 1
+        mdmAppliesToGroups:
+          type: array
+        mamAppliesToGroups:
+          type: array
+
+paths:
+  /MdmApplications:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    get:
+      summary: List MDM applications
+      description: >-
+        List MDM applications (service principals).
+      operationId: MdmApplication.List
+      tags: [MDM]
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/mdmApplication'
+
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+
+  /MdmApplications/{spId}:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - in: path
+        name: spId
+        description: The object ID of the service principal (enterprise application) for the MDM service.
+        required: true
+        schema:
+          $ref: common.yml#/components/schemas/servicePrincipalId
+    put:
+      parameters:
+        - name: mdmAppliesToChanged
+          description: Whether the `mdmAppliesTo` value has been updated.
+          in: query
+          required: true
+          schema:
+            type: boolean
+        - name: mamAppliesToChanged
+          description: Whether the `mamAppliesTo` value has been updated.
+          in: query
+          required: true
+          schema:
+            type: boolean
+      summary: Update MDM application
+      description: >-
+        Update MDM application (service principals) by object ID.
+      operationId: MdmApplication.Update
+      tags: [MDM]
+      responses:
+        '204':
+          description: No Content
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    get:
+      summary: Get MDM application
+      description: >-
+        Get MDM application (service principals) by object ID.
+      operationId: MdmApplication.Get
+      tags: [MDM]
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/mdmApplication'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /MdmApplications/Application/{appId}:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - name: appId
+        description: The application ID (client ID) of the MDM application.
+        in: path
+        required: true
+        schema:
+          $ref: common.yml#/components/schemas/applicationId
+    get:
+      summary: Get MDM application
+      description: >-
+        : Get MDM application.
+      operationId: MdmApplication.Application.Get
+      tags: [MDM]
+      responses:
+        '200':
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /MdmApplications/Permissions/{appId}:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - name: appId
+        description: The application ID (client ID) of the MDM application.
+        in: path
+        required: true
+        schema:
+          $ref: common.yml#/components/schemas/applicationId
+    get:
+      summary: List MDM application permissions
+      description: >-
+        List MDM application permissions.
+      operationId: MdmApplication.Permissions.List
+      tags: [MDM]
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+               type: array
+               items:
+                type: object
+                properties:
+                  appId:
+                    $ref: common.yml#/components/schemas/applicationId
+                  appDisplayName:
+                    description: The display name of the application.
+                    type: string
+                    example: Windows Azure Active Directory
+                  requirePermissionDefaults:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+                          description: The unique ID of the permission
+                          example: 5778995a-e1bf-45b8-affa-663a9f3f4d04
+                        title:
+                          type: string
+                          description: The title of the permission.
+                          example: Read directory data
+                        description:
+                          type: string
+                          description: The description of the permission.
+                          example: Allows the app to read data in your company or school directory, such as users, groups, and apps.
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

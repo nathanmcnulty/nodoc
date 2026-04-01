@@ -1,0 +1,1808 @@
+components:
+  parameters:
+    licenseKey:
+      name: licenseKey
+      description: pending
+      in: query
+      schema:
+        type: string
+  schemas:
+    mfaGroup:
+      type: object
+      properties:
+        id:
+          type: number
+          example: 9880468
+        groupName:
+          type: string
+          example: Azure Default
+        etag:
+          description: Entity tag for the group.
+          type: string
+          nullable: true
+          example: null
+    cacheConfig:
+      type: object
+      properties:
+        applicationName:
+          type: string
+          example: My Application
+        id:
+          type: integer
+          readOnly: true
+          example: 13594
+        authType:
+          type: string
+          enum:
+            - Terminal_services
+          nullable: true
+          example: Terminal_services
+        cacheDurationSeconds:
+          type: integer
+          example: 120
+        cacheType:
+          type: string
+          enum:
+            - Ip
+            - User
+            - App
+          example: Ip
+        etag:
+          type: string
+          readOnly: true
+          example: 1717842657.218722_3ee9ddd5
+    bypassedUser:
+      type: object
+      properties:
+        groupId:
+          description: The identifier of the group
+          type: integer
+          example: 9880468
+        objectId:
+          $ref: common.yml#/components/schemas/userId
+        username:
+          description: The username of the bypassed account.
+          type: string
+          example: user@contoso.com
+        reason:
+          description: The reason for the account MFA being bypassed.
+          type: string
+          example: Lost phone
+        bypassTimestamp:
+          description: The timestamp of the user MFA being bypassed.
+          type: string
+          format: date-time
+          readOnly: true
+          example: 2024-06-08T09:57:40.443905+00:00
+        unbypassTimestamp:
+          description: The timestamp of the user MFA bypass being removed.
+          type: string
+          format: date-time
+          nullable: true
+          readOnly: true
+          example: null
+        unblockReason:
+          description: The reason for the user MFA bypass being removed.
+          type: string
+          nullable: true
+          readOnly: true
+          example: null
+        etag:
+          description: The e-tag for caching.
+          type: string
+          nullable: true
+          readOnly: true
+          example: null
+    blockedUser:
+      type: object
+      properties:
+        groupId:
+          description: The identifier of the group
+          type: integer
+          example: 9880468
+        objectId:
+          $ref: common.yml#/components/schemas/userId
+        username:
+          description: The username of the blocked account.
+          type: string
+          example: user@contoso.com
+        reason:
+          description: The reason for the account being blocked.
+          type: string
+          example: Lost phone
+        blockTimestamp:
+          description: The timestamp of the user being blocked.
+          type: string
+          format: date-time
+          readOnly: true
+          example: 2024-06-08T09:57:40.443905+00:00
+        unblockTimestamp:
+          description: The timestamp of the user being unblocked.
+          type: string
+          format: date-time
+          nullable: true
+          readOnly: true
+          example: null
+        unblockReason:
+          description: The reason for the user being unblocked.
+          type: string
+          nullable: true
+          readOnly: true
+          example: null
+        etag:
+          description: The e-tag for caching.
+          type: string
+          nullable: true
+          readOnly: true
+          example: null
+    TenantModel:
+      type: object
+      properties:
+        tenantId:
+          $ref: common.yml#/components/schemas/tenantId
+        licenseKey:
+          description: License key for the customer.
+          type: string
+          example: ABCD1ABC12AB
+        customerId:
+          description: Identifier for the customer.
+          type: integer
+          example: 9911991
+        accountLockoutDurationMinutes:
+          description: Minutes until account is automatically unblocked.
+          type: integer
+          nullable: true
+          minimum: 0
+          example: null
+        accountLockoutResetMinutes:
+          description: Minutes until account lockout counter is reset.
+          type: integer
+          minimum: 0
+          nullable: true
+          example: 20
+        accountLockoutThreshold:
+          description: Number of multifactor authentication denials to trigger account lockout.
+          type: integer
+          nullable: true
+          example: null
+        allowPhoneMenu:
+          description: Whether to allow phone menu.
+          type: boolean
+          example: false
+        blockForFraud:
+          description: Automatically block users who report fraud.
+          type: boolean
+          example: true
+        callerId:
+          description: Multifactor authentication caller ID number (US phone number only).
+          type: string
+          nullable: true
+          example: null
+        defaultBypassTimespan:
+          type: number
+          format: float
+          example: 300.0
+        enableFraudAlert:
+          description: Allow users to submit fraud alerts.
+          type: boolean
+          example: true
+        fraudCode:
+          type: string
+          nullable: true
+          example: null
+        fraudNotificationEmailAddresses:
+          type: array
+          nullable: true
+          items:
+            type: string
+        oneTimeBypassEmailAddresses:
+          type: array
+          nullable: true
+          items:
+            type: string
+        pinAttempts:
+          description: Number of PIN attempts allowed per call.
+          type: integer
+          nullable: true
+          example: null
+        sayExtensionDigits:
+          description: Operator required to transfer extensions.
+          type: boolean
+          example: false
+        smsTimeoutSeconds:
+          description: Timeout of SMS MFA timeout (seconds).
+          type: integer
+          nullable: true
+          example: null
+        caches:
+          type: array
+          nullable: true
+          items:
+            type: object
+        notifications:
+          type: object
+          nullable: true
+        notificationEmailAddresses:
+          description: MFA notification recipient email addresses.
+          type: array
+          nullable: true
+          items:
+            type: string
+        greetings:
+          description: User greeting objects.
+          type: array
+          nullable: true
+          items:
+            type: object
+        blockedUsers:
+          description: Blocked users.
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/blockedUser'
+        bypassedUsers:
+          description: Bypassed users.
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/bypassedUser'
+        groups:
+          type: array
+          nullable: true
+          uniqueItems: true
+          items:
+            $ref: '#/components/schemas/mfaGroup'
+        etag:
+          description: Entity tag for the resource.
+          type: string
+          nullable: true
+          example: 1713791283.533179_d80bab12
+
+paths:
+  /RevokeMFA/{0}:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - name: '0'
+        description: Unknown
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: keyIdentifier
+        description: The identifier of the key
+        in: query
+        schema:
+          type: string
+    put:
+      summary: Revoke MFA
+      description: >-
+        Revoke MFA.
+      operationId: Mfa.Revoke
+      tags: [Multi Factor Authentication]
+      responses:
+        '200':
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /MultiFactorAuthentication/ActivationCredentials:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    get:
+      summary: Get MFA activation credentials
+      description: >-
+        Get activation credentials. e.g. for configuring an MFA provider.
+      operationId: Mfa.ActivationCredentials.Get
+      tags: [Multi Factor Authentication]
+      parameters:
+        - $ref: '#/components/parameters/licenseKey'
+      responses:
+        '200':
+          description: Ok
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  username:
+                    description: The username for MFA activation.
+                    type: string
+                    example: ABCD1ABCD1@azureadmin.com
+                  password:
+                    type: string
+                    description: The password for MFA activation.
+                    example: 123456ABCDEF654321FEDCBA
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /MultiFactorAuthentication/AuthenticationReport:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    post:
+      summary: Get MFA authentication report
+      description: >-
+        Get MFA authentication report.
+      operationId: MFA.AuthenticationReport.Get
+      tags: [Multi Factor Authentication]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                startDateTime:
+                  type: string
+                  format: date-time
+                  example: 2024-05-09T10:54:46.010Z
+                endDateTime:
+                  type: string
+                  format: date-time
+                  example: 2024-06-08T10:54:46.010Z
+                authenticationModes:
+                  type: array
+                  items:
+                    type: string
+                  example: []
+                authenticationTypes:
+                  type: array
+                  items:
+                    type: string
+                  example: []
+                usernames:
+                  type: array
+                  items:
+                    type: string
+                  example: []
+                tenantId:
+                  $ref: common.yml#/components/schemas/tenantId
+                continuationToken:
+                  type: string
+                  example: ''
+                licenseKey:
+                  type: string
+                  example: ''
+                resultsPerPage:
+                  type: integer
+                  example: 25
+      responses:
+        '200':
+          description: Ok
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pageResults:
+                    type: array
+                  hasMorePages:
+                    type: boolean
+                    example: false
+                  continuationToken:
+                    type: string
+                    nullable: true
+                    example: null
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /MultiFactorAuthentication/BlockedUser:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - $ref: '#/components/parameters/licenseKey'
+    get:
+      summary: List MFA blocked users
+      description: >-
+        List MFA blocked users.
+      operationId: Mfa.BlockedUsers.List
+      tags: [Multi Factor Authentication]
+      responses:
+        '200':
+          description: Ok
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/blockedUser'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    post:
+      summary: Block user from MFA
+      description: >-
+        Block user from MFA.
+      operationId: Mfa.BlockedUsers.Create
+      tags: [Multi Factor Authentication]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/blockedUser'
+      responses:
+        '200':
+          description: Ok
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/blockedUser'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    delete:
+      summary: Unlock user from MFA
+      description: >-
+        Unlock user from MFA.
+      operationId: Mfa.BlockedUsers.Delete
+      parameters:
+        - name: groupId
+          description: The group ID of the block group.
+          in: query
+          required: true
+          schema:
+            type: integer
+            example: 9880468
+        - name: username
+          description: The username of the user to unblock.
+          in: query
+          required: true
+          schema:
+            type: string
+            example: user@con
+        - name: reason
+          description: The reason for unblocking the user.
+          in: query
+          required: true
+          schema:
+            type: string
+            example: Phone found
+      tags: [Multi Factor Authentication]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/blockedUser'
+      responses:
+        '200':
+          description: Ok
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: boolean
+                example: true
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /MultiFactorAuthentication/BypassedUser:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - $ref: '#/components/parameters/licenseKey'
+    get:
+      tags: [Multi Factor Authentication]
+      summary: List MFA bypassed users
+      description: >-
+        List MFA bypassed users.
+      operationId: Mfa.BypassedUsers.List
+      responses:
+        '200':
+          description: Ok
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/bypassedUser'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    post:
+      tags: [Multi Factor Authentication]
+      summary: Bypass MFA for user
+      description: >-
+        Bypass MFA for user.
+      operationId: Mfa.BypassedUsers.Create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/bypassedUser'
+      responses:
+        '200':
+          description: Ok
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/bypassedUser'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    delete:
+      parameters:
+        - name: groupId
+          description: The group ID of the bypass group.
+          in: query
+          required: true
+          schema:
+            type: integer
+            example: 9880468
+        - name: username
+          description: The username of the user to remove bypass for.
+          in: query
+          required: true
+          schema:
+            type: string
+            example: user@con
+        - name: reason
+          description: The reason for removing the bypass for the user.
+          in: query
+          required: true
+          schema:
+            type: string
+            example: Phone found
+      tags: [Multi Factor Authentication]
+      summary: Remove MFA bypass for user
+      description: >-
+        Remove MFA bypass for user.
+      operationId: Mfa.BypassedUsers.Delete
+      responses:
+        '200':
+          description: Ok
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: boolean
+                example: true
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /MultiFactorAuthentication/CacheConfig/{configId}:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - $ref: '#/components/parameters/licenseKey'
+      - name: configId
+        description: The ID of the cache config.
+        in: path
+        required: true
+        schema:
+          type: number
+          example: 13596
+    patch:
+      summary: Update MFA cache config
+      description: >-
+        Update MFA cache config.
+      operationId: Mfa.CacheConfig.Update
+      tags: [Multi Factor Authentication]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/cacheConfig'
+      responses:
+        '200':
+          description: Ok
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: string
+                description: etag of the updated resource.
+                example: 1717843376.338953_1a921e51
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /MultiFactorAuthentication/CacheConfig:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - $ref: '#/components/parameters/licenseKey'
+    get:
+      summary: List MFA cache configs
+      description: >-
+        List MFA cache configs.
+      operationId: Mfa.CacheConfig.List
+      tags: [Multi Factor Authentication]
+      responses:
+        '200':
+          description: Ok
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/cacheConfig'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    post:
+      summary: Create MFA cache config
+      description: >-
+        Create MFA cache configs
+      operationId: Mfa.CacheConfig.Create
+      tags: [Multi Factor Authentication]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/cacheConfig'
+      responses:
+        '200':
+          description: Ok
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/cacheConfig'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    delete:
+      summary: Delete MFA cache config
+      description: >-
+        Delete MFA cache configs
+      operationId: Mfa.CacheConfig.Delete
+      tags: [Multi Factor Authentication]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Group ID to e-tag map
+      responses:
+        '204':
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+          description: No Content
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /MultiFactorAuthentication/DownloadAuthenticationReport:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    post:
+      summary: Download MFA Authentication report
+      description: >-
+        Download MFA Authentication report.
+      operationId: Mfa.AuthenticationReport.Download
+      tags: [Multi Factor Authentication]
+      responses:
+        '200':
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /MultiFactorAuthentication/DownloadServerStatusReport:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    get:
+      summary: Download MFA server status report
+      description: >-
+        Download MFA server status report.
+      operationId: Mfa.ServerStatusReport.Download
+      tags: [Multi Factor Authentication]
+      responses:
+        '200':
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /MultiFactorAuthentication/ExpandedTenantModel:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - $ref: '#/components/parameters/licenseKey'
+    get:
+      summary: Get MFA expanded tenant model
+      description: >-
+        Get MFA expanded tenant model.
+      operationId: Mfa.ExpandedTenantModel.Get
+      tags: [Multi Factor Authentication]
+      responses:
+        '200':
+          description: Ok
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantModel'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /MultiFactorAuthentication/Greeting:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - $ref: '#/components/parameters/licenseKey'
+    get:
+      summary: List MFA greetings
+      description: >-
+        List MFA greetings.
+      operationId: Mfa.Greetings.List
+      tags: [Multi Factor Authentication]
+      responses:
+        '200':
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    post:
+      summary: Create MFA greetings
+      description: >-
+        Create MFA greetings.
+      operationId: Mfa.Greetings.Create
+      tags: [Multi Factor Authentication]
+      responses:
+        '200':
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    delete:
+      summary: Delete MFA greetings
+      description: >-
+        Delete MFA greetings.
+      operationId: Mfa.Greetings.Delete
+      tags: [Multi Factor Authentication]
+      responses:
+        '200':
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /MultiFactorAuthentication/Group:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - $ref: '#/components/parameters/licenseKey'
+    get:
+      summary: List MFA groups
+      description: >-
+        List MFA groups.
+      operationId: Mfa.Groups.List
+      tags: [Multi Factor Authentication]
+      responses:
+        '200':
+          description: Ok
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/mfaGroup'
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /MultiFactorAuthentication/HardwareToken/remove:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    post:
+      summary: Remove MFA hardware token
+      description: >-
+        Remote MFA hardware token.
+      operationId: Mfa.HardwareToken.Delete
+      tags: [Multi Factor Authentication]
+      responses:
+        '200':
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /MultiFactorAuthentication/HardwareToken/upload:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    post:
+      summary: Create MFA hardware token
+      description: >-
+        Create MFA hardware token.
+      operationId: Mfa.HardwareToken.Create
+      tags: [Multi Factor Authentication]
+      responses:
+        '200':
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /MultiFactorAuthentication/HardwareToken/upload/{tokenId}:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - name: tokenId
+        description: The ID of the uploaded token
+        in: path
+        required: true
+        schema:
+          type: string
+    delete:
+      summary: Remove MFA hardware token upload
+      description: >-
+        Remote MFA hardware token upload.
+      operationId: Mfa.HardwareToken.Upload
+      tags: [Multi Factor Authentication]
+      responses:
+        '200':
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /MultiFactorAuthentication/HardwareToken/users/download:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    get:
+      summary: Download hardware token user assignments
+      description: >-
+        Download hardware token user assignments.
+      operationId: Mfa.HardwareToken.Users.Download
+      tags: [Multi Factor Authentication]
+      parameters:
+        - name: upn
+          description: The user principal name.
+          in: query
+          schema:
+            $ref: common.yml#/components/schemas/userPrincipalName
+        - name: enabledFilter
+          description: Whether to filter for enabled results only.
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /MultiFactorAuthentication/Providers:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    get:
+      summary: List MFA providers
+      description: >-
+        List MFA providers.
+      operationId: Mfa.Providers.List
+      tags: [Multi Factor Authentication]
+      responses:
+        '200':
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /MultiFactorAuthentication/ServerStatusReport:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    post:
+      summary: Get MFA server status report
+      description: >-
+        Get MFA server status report.
+      operationId: Mfa.ServerStatusReport.Get
+      tags: [Multi Factor Authentication]
+      parameters:
+        - $ref: '#/components/parameters/licenseKey'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                licenseKey:
+                  type: string
+                  example: ''
+      responses:
+        '200':
+          description: Ok
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: array
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /MultiFactorAuthentication/Soundfile:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    post:
+      summary: Create MFA sound file
+      description: >-
+        Create MFA sound file.
+      operationId: Mfa.SoundFile.Create
+      tags: [Multi Factor Authentication]
+      parameters:
+        - $ref: '#/components/parameters/licenseKey'
+      requestBody:
+        $ref: common.yml#/components/requestBodies/unknownRequest
+      responses:
+        '200':
+          $ref: common.yml#/components/responses/UnknownResponse
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /MultiFactorAuthentication/TenantModel/LicenseKey:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - name: tenantName
+        description: The name of the tenant
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: hasMFALicense
+        description: Whether the tenant has MFA license
+        in: query
+        required: false
+        schema:
+          type: boolean
+    get:
+      summary: Get tenant MFA license key
+      description: >-
+        Get tenant MFA license key.
+      operationId: Mfa.LicenseKey.Get
+      tags: [Multi Factor Authentication]
+      responses:
+        '200':
+          description: Ok
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: string
+                example: ABC123CBA321
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /MultiFactorAuthentication/GetOrCreateExpandedTenantModel:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    get:
+      summary: Get expanded MFA tenant model
+      description: >-
+        Get expanded multi-factor authentication tenant model.
+      operationId: MultiFactorAuthentication.Get
+      tags: [Multi Factor Authentication]
+      parameters:
+        - name: tenantName
+          description: The name of the tenant.
+          in: query
+          schema:
+            type: string
+            example: contoso
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/TenantModel'
+                  - type: object
+                    properties:
+                      etag:
+                        description: Entity tag for the resource.
+                        type: string
+                        nullable: true
+                        example: 1713791283.533179_d80bab12
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /MultiFactorAuthentication/HasPaidSubscription:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+      - name: ignoreEnforcementDate
+        description: Whether to ignore enforcement date.
+        in: query
+        schema:
+          type: boolean
+          example: true
+      - name: trialRestrictionKey
+        description: pending
+        in: query
+        schema:
+          type: string
+    get:
+      summary: Check if tenant has paid MFA subscription
+      description: >-
+        Check if tenant has paid MFA subscription.
+      operationId: MultiFactorAuthentication.PaidSubscription.Check
+      tags: [Multi Factor Authentication]
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: boolean
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /MultiFactorAuthentication/HardwareToken/enable:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    post:
+      summary: Enable hardware MFA tokens
+      description: >-
+        Enable hardware MFA tokens.
+      operationId: MultiFactorAuthentication.HardwareToken.Enable
+      tags: [Multi Factor Authentication]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                '@enableAction':
+                  type: string
+                  enum: [Activate]
+                  example: Activate
+                oathId:
+                  $ref: common.yml#/components/schemas/objectId
+                objectId:
+                  $ref: common.yml#/components/schemas/objectId
+                verificationCode:
+                  type: string
+                  example: abc123abc123
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /MultiFactorAuthentication/HardwareToken/listUploads:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    get:
+      summary: List uploads for hardware MFA tokens
+      description: >-
+        List uploads for hardware MFA tokens.
+      operationId: MultiFactorAuthentication.HardwareToken.Uploads.List
+      tags: [Multi Factor Authentication]
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /MultiFactorAuthentication/HardwareToken/users:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    get:
+      summary: List user hardware MFA tokens
+      description: >-
+        List user hardware MFA tokens.
+      operationId: MultiFactorAuthentication.HardwareToken.Users.List
+      tags: [Multi Factor Authentication]
+      parameters:
+        - name: skipToken
+          description: Skip token.
+          in: query
+          schema:
+            type: string
+        - name: upn
+          description: User Principal Name to filter results to.
+          in: query
+          schema:
+            $ref: common.yml#/components/schemas/userPrincipalName
+        - name: enabledFilter
+          description: Whether results should be filtered to enabled results only.
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  skipToken:
+                    description: Skip token.
+                    type: string
+                    nullable: true
+                    example: null
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      description: Object schema unknown.
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /MultiFactorAuthentication/TenantModel:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    get:
+      summary: Get MFA tenant model
+      description: >-
+        Get multi-factor authentication tenant model.
+      operationId: MultiFactorAuthentication.TenantModel.Get
+      tags: [Multi Factor Authentication]
+      parameters:
+        - name: licenseKey
+          description: pending
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/TenantModel'
+                  - type: object
+                    properties:
+                      etag:
+                        description: Entity tag for the resource.
+                        type: string
+                        nullable: true
+                        example: 1713791283.533179_d80bab12
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+    patch:
+      summary: Update MFA tenant model
+      description: >-
+        Update multi-factor authentication tenant model.
+      operationId: MultiFactorAuthentication.TenantModel.Update
+      tags: [Multi Factor Authentication]
+      parameters:
+        - name: licenseKey
+          description: pending
+          in: query
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TenantModel'
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: string
+        4XX:
+          $ref: common.yml#/components/responses/ClientException

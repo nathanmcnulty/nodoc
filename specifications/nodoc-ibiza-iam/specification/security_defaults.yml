@@ -1,0 +1,187 @@
+paths:
+  /SecurityDefaults/Configuration:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    get:
+      summary: Get Security Defaults configuration
+      description: >-
+        Get Security Defaults configuration.
+      operationId: SecurityDefaults.Configuration.Get
+      tags: [Security Defaults]
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ignoreBaselineProtectionPolicies:
+                    type: boolean
+                    example: true
+                  isEnabled:
+                    type: boolean
+                    example: false
+                  securityDefaultsUpsell:
+                    type: boolean
+                    nullable: true
+                    example: null
+                  controlTypes:
+                    type: array
+                    nullable: true
+                    example: null
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /SecurityDefaults/GetSecurityDefaultStatus:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    get:
+      summary: Get Security Defaults status
+      description: >-
+        Get Security Defaults status.
+      operationId: SecurityDefaults.Status.Get
+      tags: [Security Defaults]
+      responses:
+        '200':
+          description: OK
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  anyBaselinePolicyEnabled:
+                    description: Whether any baseline policy is enabled.
+                    type: boolean
+                    example: false
+                  anyCAPolicyEnabled:
+                    description: Whether any conditional access policy is enabled.
+                    type: boolean
+                    example: true
+                  securityDefaultsEnabled:
+                    description: Whether security defaults is enabled.
+                    type: boolean
+                    example: false
+                  ignoreBaselineProtectionPolicies:
+                    description: Whether baseline protection policies are ignored.
+                    type: boolean
+                    example: true
+                  anyClassicPolicyEnabled:
+                    description: Whether any classic policies are enabled.
+                    type: boolean
+                    example: false
+                  anyIPCEnabled:
+                    description: Whether any identity protection alerts are enabled.
+                    type: boolean
+                    example: false
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
+
+  /SecurityDefaults/UpdateSecurityDefaultOnSave:
+    parameters:
+      - $ref: common.yml#/components/parameters/XMsClientRequestId
+    put:
+      summary: Set Security Defaults
+      description: >-
+        Set Security Defaults.
+      operationId: SecurityDefaults.Set
+      tags: [Security Defaults]
+      parameters:
+        - name: enableSecurityDefaults
+          description: Whether to enable security defaults.
+          in: query
+          required: true
+          schema:
+            type: boolean
+      responses:
+        '204':
+          description: No Content
+          headers:
+            Cache-Control:
+              $ref: common.yml#/components/headers/Cache-Control
+            Content-Encoding:
+              $ref: common.yml#/components/headers/Content-Encoding
+            Vary:
+              $ref: common.yml#/components/headers/Vary
+            X-Content-Type-Options:
+              $ref: common.yml#/components/headers/X-Content-Type-Options
+            X-XSS-Protection:
+              $ref: common.yml#/components/headers/X-XSS-Protection
+            x-ms-version:
+              $ref: common.yml#/components/headers/x-ms-version
+            Strict-Transport-Security:
+              $ref: common.yml#/components/headers/Strict-Transport-Security
+            Access-Control-Expose-Headers:
+              $ref: common.yml#/components/headers/Access-Control-Expose-Headers
+            x-ms-correlation-id:
+              $ref: common.yml#/components/headers/x-ms-correlation-id
+            x-ms-operation-maturity:
+              $ref: common.yml#/components/headers/x-ms-operation-maturity
+            x-ms-expected-duration:
+              $ref: common.yml#/components/headers/x-ms-expected-duration
+            X-UA-Compatible:
+              $ref: common.yml#/components/headers/X-UA-Compatible
+            Date:
+              $ref: common.yml#/components/headers/Date
+            Content-Length:
+              $ref: common.yml#/components/headers/Content-Length
+        4XX:
+          $ref: common.yml#/components/responses/ClientException
