@@ -1,14 +1,7 @@
 /**
  * Docusaurus Scalar plugin - local fork of @x-delfino/docusaurus-scalar
- * Uses fast-glob (CJS) instead of globby (ESM) for Node.js compatibility.
+ * Uses fast-glob (CJS) and dynamic imports for the ESM Scalar packages.
  */
-const {
-  load,
-  dereference,
-  validate,
-  readFilesPlugin,
-  fetchUrlsPlugin,
-} = require("@scalar/openapi-parser");
 const fg = require("fast-glob");
 const _ = require("lodash");
 const path = require("path");
@@ -37,6 +30,26 @@ const DEFAULT_SCALAR_CONFIG = {
   paths: [DEFAULT_PATH_CONFIG],
   configurations: [],
 };
+
+let scalarParserModulesPromise;
+
+async function getScalarParserModules() {
+  if (!scalarParserModulesPromise) {
+    scalarParserModulesPromise = Promise.all([
+      import("@scalar/openapi-parser"),
+      import("@scalar/openapi-parser/plugins/read-files"),
+      import("@scalar/openapi-parser/plugins/fetch-urls"),
+    ]).then(([parser, readFiles, fetchUrls]) => ({
+      load: parser.load,
+      dereference: parser.dereference,
+      validate: parser.validate,
+      readFilesPlugin: readFiles.readFiles,
+      fetchUrlsPlugin: fetchUrls.fetchUrls,
+    }));
+  }
+
+  return scalarParserModulesPromise;
+}
 
 function splitPathSegments(value) {
   return (value || "").split(/[\\/]/).filter(Boolean);
@@ -87,10 +100,13 @@ function mergeConfig(source, base) {
 }
 
 async function loadSpecContent(specPath) {
+  const { load, dereference, readFilesPlugin, fetchUrlsPlugin } =
+    await getScalarParserModules();
   const fileSystem = await load(specPath, {
     plugins: [readFilesPlugin(), fetchUrlsPlugin()],
   });
-  return (await dereference(fileSystem)).schema;
+  const dereferencedSchema = (await dereference(fileSystem)).schema;
+  return dereferencedSchema.specification || dereferencedSchema;
 }
 
 async function loadSpecFromFile(source, file) {
@@ -100,7 +116,7 @@ async function loadSpecFromFile(source, file) {
   const config = {
     ...source,
     spec: {
-      content: await loadSpecContent(`${source.path}/${file}`),
+      content: await loadSpecContent(path.join(source.path, file)),
     },
     nav: {
       ...source.nav,
@@ -128,6 +144,7 @@ async function loadSpecFromFile(source, file) {
 
 async function loadSpecFromContent(config) {
   if (config.spec?.content) {
+    const { validate } = await getScalarParserModules();
     const validated = await validate(config.spec.content);
     // Support x-nodoc-category extension field for dropdown nav grouping
     const specCategory =
@@ -153,10 +170,10 @@ async function loadSpecFromContent(config) {
           ].flatMap((seg) => seg.split("/").map((s) => _.kebabCase(s)))
         ),
       },
-    };
-      } else {
-        throw "Specification content has not been loaded";
-      }
+      };
+  } else {
+    throw new Error("Specification content has not been loaded");
+  }
 }
 
 async function loadSpecsFromConfig(configs, baseConfig) {
