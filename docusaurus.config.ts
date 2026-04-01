@@ -9,15 +9,16 @@ const config: Config = {
   favicon: "img/favicon.svg",
 
   // Set the production url of your site here
-  url: "https://nodoc.cloud",
+  url: "https://nathanmcnulty.github.io",
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
-  baseUrl: "/",
+  baseUrl: "/nodoc/",
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
-  organizationName: "dolphinsec", // Usually your GitHub org/user name.
+  organizationName: "nathanmcnulty", // Usually your GitHub org/user name.
   projectName: "nodoc", // Usually your repo name.
+  trailingSlash: false,
 
   onBrokenLinks: "throw",
   onBrokenMarkdownLinks: "warn",
@@ -76,7 +77,7 @@ const config: Config = {
           position: "right",
         },
         {
-          href: "https://github.com/dolphinsec/nodoc",
+          href: "https://github.com/nathanmcnulty/nodoc",
           className: "icon--github navbar--icon-link",
           "aria-label": "GitHub repository",
           position: "right",
