@@ -1,7 +1,6 @@
 import { themes as prismThemes } from "prism-react-renderer";
 import type { Config } from "@docusaurus/types";
 import type * as Preset from "@docusaurus/preset-classic";
-import type { ScalarConfig } from "@x-delfino/docusaurus-scalar";
 
 const config: Config = {
   title: "nodoc",
@@ -33,7 +32,7 @@ const config: Config = {
 
   plugins: [
     [
-      "@x-delfino/docusaurus-scalar", {
+      "./plugins/docusaurus-scalar", {
         withDefaultFonts: false,
         nav: {
           categoryFromPath: false
