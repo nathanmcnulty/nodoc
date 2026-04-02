@@ -616,62 +616,6 @@ paths:
         '404':
           $ref: common.yml#/components/responses/NotFound
 
-  /mcas/cas/api/v1/policies/:
-    post:
-      summary: List Cloud Apps malware policies
-      description: >-
-        Retrieve the malware policy IDs the file page uses before querying Defender for
-        Cloud Apps file prevalence by SHA-256.
-      operationId: Files.ListCloudAppsMalwarePolicies
-      tags: [Files]
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CloudAppsPolicyQueryRequest'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CloudAppsPoliciesResponse'
-        '401':
-          $ref: common.yml#/components/responses/Unauthorized
-        '403':
-          $ref: common.yml#/components/responses/Forbidden
-        '404':
-          $ref: common.yml#/components/responses/NotFound
-
-  /mcas/cas/api/v1/files/count/:
-    post:
-      summary: Get Cloud Apps file count
-      description: >-
-        Return the Defender for Cloud Apps prevalence count for a file hash under a selected
-        malware policy.
-      operationId: Files.GetCloudAppsFileCount
-      tags: [Files]
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CloudAppsFileCountRequest'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CloudAppsFileCountResponse'
-        '401':
-          $ref: common.yml#/components/responses/Unauthorized
-        '403':
-          $ref: common.yml#/components/responses/Forbidden
-        '404':
-          $ref: common.yml#/components/responses/NotFound
-
 components:
   schemas:
     FileProfile:
@@ -834,10 +778,18 @@ components:
           example: 980dddb7036eae7e38d30dee7f11b51e573a6fc2
         FirstSeen:
           type: string
-          example: 0001-01-01T00:00:00
+          format: date-time
+          description: >-
+            Device-specific first-seen timestamp. The backend can emit a zero-value
+            sentinel string when this field is not populated.
+          example: 2026-03-31T00:20:47.622266Z
         LastSeen:
           type: string
-          example: 0001-01-01T00:00:00
+          format: date-time
+          description: >-
+            Device-specific last-seen timestamp. The backend can emit a zero-value
+            sentinel string when this field is not populated.
+          example: 2026-03-31T00:20:47.622266Z
         ComputerName:
           type: string
           example: Aarons-Virtual-Machine

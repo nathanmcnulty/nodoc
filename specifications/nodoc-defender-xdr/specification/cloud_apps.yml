@@ -958,6 +958,64 @@ paths:
 
         '404':
           $ref: common.yml#/components/responses/NotFound
+    post:
+      summary: Query malware policies for file prevalence
+      description: >-
+        Retrieve the malware policy IDs the Defender file page uses before querying
+        Defender for Cloud Apps file prevalence by SHA-256.
+      operationId: Files.ListCloudAppsMalwarePolicies
+      tags: [CloudApps, Files]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: files.yml#/components/schemas/CloudAppsPolicyQueryRequest
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: files.yml#/components/schemas/CloudAppsPoliciesResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/files/count:
+    post:
+      summary: Get Cloud Apps file count
+      description: >-
+        Return the Defender for Cloud Apps prevalence count for a file hash under a
+        selected malware policy. This call is used by the Defender file page.
+      operationId: Files.GetCloudAppsFileCount
+      tags: [CloudApps, Files]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: files.yml#/components/schemas/CloudAppsFileCountRequest
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: files.yml#/components/schemas/CloudAppsFileCountResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mcas/cas/api/v1/standalone_entities/metadata:
     get:
