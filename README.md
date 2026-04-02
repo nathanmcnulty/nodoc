@@ -14,18 +14,18 @@ The project currently publishes the following API definitions:
 
 | API | Ops | Access model | Site page | Checked-in Postman collection |
 | --- | ---: | --- | --- | --- |
-| Defender | 261 | Portal session cookie (`sccauth`) | [Browse](https://nathanmcnulty.github.io/nodoc/defender) | `postman/collections/defender.collection.json` |
-| M365 Admin | 215 | Portal session + custom admin headers | [Browse](https://nathanmcnulty.github.io/nodoc/m-365-admin) | `postman/collections/m365-admin.collection.json` |
-| Purview | 74 | Portal session cookie (`sccauth`) | [Browse](https://nathanmcnulty.github.io/nodoc/purview) | `postman/collections/purview.collection.json` |
-| Entra IAM | 277 | Delegated OAuth2 + `X-Ms-Client-Request-Id` | [Browse](https://nathanmcnulty.github.io/nodoc/entra-iam) | `postman/collections/entra-iam.collection.json` |
-| Entra PIM | 14 | Azure AD bearer token | [Browse](https://nathanmcnulty.github.io/nodoc/entra-pim) | `postman/collections/entra-pim.collection.json` |
-| Entra IGA | 14 | Azure AD bearer token | [Browse](https://nathanmcnulty.github.io/nodoc/entra-iga) | `postman/collections/entra-iga.collection.json` |
-| Entra IDGov | 11 | Azure AD bearer token | [Browse](https://nathanmcnulty.github.io/nodoc/entra-id-gov) | `postman/collections/entra-idgov.collection.json` |
-| Entra B2C | 5 | Azure AD bearer token + `tenantId` context | [Browse](https://nathanmcnulty.github.io/nodoc/entra-b-2-c) | `postman/collections/entra-b2c.collection.json` |
+| Defender | 261 | Portal session cookie (`sccauth`) | [Browse](https://nodoc.nathanmcnulty.com/defender) | `postman/collections/defender.collection.json` |
+| M365 Admin | 215 | Portal session + custom admin headers | [Browse](https://nodoc.nathanmcnulty.com/m-365-admin) | `postman/collections/m365-admin.collection.json` |
+| Purview | 74 | Portal session cookie (`sccauth`) | [Browse](https://nodoc.nathanmcnulty.com/purview) | `postman/collections/purview.collection.json` |
+| Entra IAM | 277 | Delegated OAuth2 + `X-Ms-Client-Request-Id` | [Browse](https://nodoc.nathanmcnulty.com/entra-iam) | `postman/collections/entra-iam.collection.json` |
+| Entra PIM | 14 | Azure AD bearer token | [Browse](https://nodoc.nathanmcnulty.com/entra-pim) | `postman/collections/entra-pim.collection.json` |
+| Entra IGA | 14 | Azure AD bearer token | [Browse](https://nodoc.nathanmcnulty.com/entra-iga) | `postman/collections/entra-iga.collection.json` |
+| Entra IDGov | 11 | Azure AD bearer token | [Browse](https://nodoc.nathanmcnulty.com/entra-id-gov) | `postman/collections/entra-idgov.collection.json` |
+| Entra B2C | 5 | Azure AD bearer token + `tenantId` context | [Browse](https://nodoc.nathanmcnulty.com/entra-b-2-c) | `postman/collections/entra-b2c.collection.json` |
 
 ## Getting started
 
-Start with the launch guide: [Getting Started](https://nathanmcnulty.github.io/nodoc/getting-started)
+Start with the launch guide: [Getting Started](https://nodoc.nathanmcnulty.com/getting-started)
 
 The short version:
 
@@ -57,7 +57,7 @@ To make things easier, we've published the OpenAPI definitions in a couple of di
 
 ### Website
 
-The latest site published from this repository is accessible at [https://nathanmcnulty.github.io/nodoc/](https://nathanmcnulty.github.io/nodoc/). It is built using [Docusaurus](https://docusaurus.io/) and [Scalar](https://github.com/scalar/scalar). The files for the website are stored within this repository.
+The latest site published from this repository is accessible at [https://nodoc.nathanmcnulty.com](https://nodoc.nathanmcnulty.com). It is built using [Docusaurus](https://docusaurus.io/) and [Scalar](https://github.com/scalar/scalar). The files for the website are stored within this repository.
 
 ### Postman
 

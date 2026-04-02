@@ -6,6 +6,7 @@ const siteTitle = "nodoc";
 const siteTagline = "documenting undocumented interfaces";
 const siteDescription =
   "OpenAPI specs and checked-in Postman collections for undocumented Microsoft portal APIs across Defender XDR, M365 Admin, Purview, and Entra surfaces.";
+const siteUrl = "https://nodoc.nathanmcnulty.com";
 
 const config: Config = {
   title: siteTitle,
@@ -22,20 +23,16 @@ const config: Config = {
         "@context": "https://schema.org",
         "@type": "WebSite",
         name: siteTitle,
-        url: "https://nathanmcnulty.github.io/nodoc/",
+        url: siteUrl,
         description: siteDescription,
       }),
     },
   ],
 
   // Set the production url of your site here
-  url: "https://nathanmcnulty.github.io",
-  // Set the /<baseUrl>/ pathname under which your site is served
-  // For GitHub pages deployment, it is often '/<projectName>/'
-  baseUrl: "/nodoc/",
+  url: siteUrl,
+  baseUrl: "/",
 
-  // GitHub pages deployment config.
-  // If you aren't using GitHub pages, you don't need these.
   organizationName: "nathanmcnulty", // Usually your GitHub org/user name.
   projectName: "nodoc", // Usually your repo name.
   trailingSlash: false,

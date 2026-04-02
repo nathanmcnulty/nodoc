@@ -38,7 +38,7 @@ export const checkedInCollectionsTreeUrl =
   "https://github.com/nathanmcnulty/nodoc/tree/main/postman/collections";
 export const postmanWorkspaceUrl =
   "https://www.postman.com/dolphinlabs/workspace/nodoc";
-export const publishedSiteUrl = "https://nathanmcnulty.github.io/nodoc/";
+export const publishedSiteUrl = "https://nodoc.nathanmcnulty.com";
 
 export const apiCatalog: ApiCatalogItem[] = [
   {
