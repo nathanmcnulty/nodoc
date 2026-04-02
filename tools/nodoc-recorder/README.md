@@ -17,12 +17,10 @@ A Chrome/Edge DevTools extension that captures API traffic from Microsoft portal
 
 ## Installation
 
-1. Open **Edge** or **Chrome** and navigate to `edge://extensions` (or `chrome://extensions`).
+1. Open **Edge** and navigate to `edge://extensions` (or use `chrome://extensions` if Chrome is available).
 2. Enable **Developer mode** (toggle in top-right corner).
 3. Click **Load unpacked** and select this `tools/nodoc-recorder` directory.
 4. Open DevTools (F12) on any supported portal — the **nodoc-recorder** tab will appear.
-
-> **Note:** Icon files are not included yet. The extension will load without them.
 
 ## Usage
 
