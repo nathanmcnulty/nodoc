@@ -79,6 +79,10 @@ tags:
     description: |
       Operations relating to Advanced Hunting, including schema discovery, saved functions,
       custom detection rules, and query encoding.
+  - name: Files
+    description: |
+      Operations relating to the Defender file entity page, including file profiles,
+      prevalence, reputation, indicator checks, and collect or download actions.
   - name: Endpoint Devices
     description: |
       Operations relating to endpoint device management in Microsoft Defender for Endpoint (MDE),
@@ -141,6 +145,9 @@ x-tagGroups:
   - name: Advanced Hunting
     tags:
       - Advanced Hunting
+  - name: File Investigation
+    tags:
+      - Files
   - name: Endpoint Management
     tags:
       - Endpoint Devices
@@ -245,6 +252,46 @@ paths:
     $ref: advanced_hunting.yml#/paths/~1mtp~1huntingService~1queries~1defender~1savedqueries~1{id}
   /mtp/huntingService/queries/defender/communityqueries/{id}:
     $ref: advanced_hunting.yml#/paths/~1mtp~1huntingService~1queries~1defender~1communityqueries~1{id}
+
+  # File Investigation
+  /mtp/detectionCyberProfile/api/detection/cyberprofileprovider/user/profiles/file:
+    $ref: files.yml#/paths/~1mtp~1detectionCyberProfile~1api~1detection~1cyberprofileprovider~1user~1profiles~1file
+  /mtp/files/files/{Sha256}/FileVerdict:
+    $ref: files.yml#/paths/~1mtp~1files~1files~1{Sha256}~1FileVerdict
+  /mtp/huntingService/goHunt/File:
+    $ref: files.yml#/paths/~1mtp~1huntingService~1goHunt~1File
+  /mtp/cloudPivot/cloud/pivot/portal/file/device/prevalence:
+    $ref: files.yml#/paths/~1mtp~1cloudPivot~1cloud~1pivot~1portal~1file~1device~1prevalence
+  /mtp/cloudPivot/cloud/pivot/portal/file/device/trend:
+    $ref: files.yml#/paths/~1mtp~1cloudPivot~1cloud~1pivot~1portal~1file~1device~1trend
+  /mtp/cloudPivot/cloud/pivot/portal/file/device/fileNamesBySha2:
+    $ref: files.yml#/paths/~1mtp~1cloudPivot~1cloud~1pivot~1portal~1file~1device~1fileNamesBySha2
+  /mtp/mdeDeepAnalysis/api/DeepAnalysisRequest:
+    $ref: files.yml#/paths/~1mtp~1mdeDeepAnalysis~1api~1DeepAnalysisRequest
+  /mtp/activeAlertsSummary/activeAlertsSummary:
+    $ref: files.yml#/paths/~1mtp~1activeAlertsSummary~1activeAlertsSummary
+  /mtp/responseApiPortal/remediation/permission:
+    $ref: files.yml#/paths/~1mtp~1responseApiPortal~1remediation~1permission
+  /mtp/responseApiPortal/sampledownloadrequest/state:
+    $ref: files.yml#/paths/~1mtp~1responseApiPortal~1sampledownloadrequest~1state
+  /mtp/responseApiPortal/sampledownloadrequest/createcollectionrequest:
+    $ref: files.yml#/paths/~1mtp~1responseApiPortal~1sampledownloadrequest~1createcollectionrequest
+  /mtp/responseApiPortal/sampledownloadrequest/generatedownloaduri/V2:
+    $ref: files.yml#/paths/~1mtp~1responseApiPortal~1sampledownloadrequest~1generatedownloaduri~1V2
+  /mtp/mdeEntitiesExperience/files/{Sha256}/capabilities:
+    $ref: files.yml#/paths/~1mtp~1mdeEntitiesExperience~1files~1{Sha256}~1capabilities
+  /mtp/papin/api/cloud/public/internal/indicators/getQuery:
+    $ref: files.yml#/paths/~1mtp~1papin~1api~1cloud~1public~1internal~1indicators~1getQuery
+  /mtp/files/files/{Sha256}/virustotal:
+    $ref: files.yml#/paths/~1mtp~1files~1files~1{Sha256}~1virustotal
+  /mtp/threatAnalyticsIndicators/stix/outbreaks/indicators/outbreaks/query:
+    $ref: files.yml#/paths/~1mtp~1threatAnalyticsIndicators~1stix~1outbreaks~1indicators~1outbreaks~1query
+  /mtp/threatAnalyticsIndicators/stix/oneti/reputation/fileHash:
+    $ref: files.yml#/paths/~1mtp~1threatAnalyticsIndicators~1stix~1oneti~1reputation~1fileHash
+  /mcas/cas/api/v1/policies/:
+    $ref: files.yml#/paths/~1mcas~1cas~1api~1v1~1policies~1
+  /mcas/cas/api/v1/files/count/:
+    $ref: files.yml#/paths/~1mcas~1cas~1api~1v1~1files~1count~1
 
   # Endpoint Devices
   /mtp/ndr/machines:

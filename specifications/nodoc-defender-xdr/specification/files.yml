@@ -1,0 +1,1284 @@
+paths:
+  /mtp/detectionCyberProfile/api/detection/cyberprofileprovider/user/profiles/file:
+    get:
+      summary: Get file cyber profile
+      description: >-
+        Retrieve the file metadata card used to bootstrap the unified Defender file page.
+        The portal calls this endpoint with either a SHA-1 or SHA-256 identifier depending
+        on page context.
+      operationId: Files.GetProfile
+      tags: [Files]
+      parameters:
+        - name: searchBy
+          in: query
+          required: true
+          description: Selects which file hash field the `id` parameter contains.
+          schema:
+            type: string
+            enum: [Sha1, Sha256]
+        - name: id
+          in: query
+          required: true
+          description: The file hash to resolve.
+          schema:
+            type: string
+            example: 82d330861950d594c415efaa33fe388b50d7cfbf
+        - name: UseCyberProfileProviderService
+          in: query
+          description: Feature flag sent by the current portal client.
+          schema:
+            type: boolean
+            default: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileProfile'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/files/files/{Sha256}/FileVerdict:
+    get:
+      summary: List file verdicts
+      description: >-
+        Return the file verdict entries shown in the File verdict card on the Defender
+        file page.
+      operationId: Files.ListVerdicts
+      tags: [Files]
+      parameters:
+        - name: Sha256
+          in: path
+          required: true
+          description: The SHA-256 of the file.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileVerdictListResponse'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/huntingService/goHunt/File:
+    post:
+      summary: Generate file hunting pivot
+      description: >-
+        Build the guided hunting payloads behind the file page's **Go hunt** action.
+        The returned values are compressed or encoded KQL query presets for portal use.
+      operationId: Files.GoHunt
+      tags: [Files]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FileGoHuntRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileGoHuntResponse'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/cloudPivot/cloud/pivot/portal/file/device/prevalence:
+    get:
+      summary: Get file device prevalence
+      description: >-
+        Return first and last observed device details for the file over the selected
+        lookback window.
+      operationId: Files.GetDevicePrevalence
+      tags: [Files]
+      parameters:
+        - name: entityId
+          in: query
+          required: true
+          description: The SHA-256 of the file on unified file pages.
+          schema:
+            type: string
+        - name: daysToLookBack
+          in: query
+          description: The device-observation lookback window, in days.
+          schema:
+            type: integer
+            default: 30
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileDevicePrevalenceResponse'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/cloudPivot/cloud/pivot/portal/file/device/trend:
+    get:
+      summary: Get file device trend
+      description: Return the device trend chart shown on the Defender file page.
+      operationId: Files.GetDeviceTrend
+      tags: [Files]
+      parameters:
+        - name: entityId
+          in: query
+          required: true
+          description: The SHA-256 of the file on unified file pages.
+          schema:
+            type: string
+        - name: daysToLookBack
+          in: query
+          description: The trend lookback window, in days.
+          schema:
+            type: integer
+            default: 30
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileDeviceTrendResponse'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/cloudPivot/cloud/pivot/portal/file/device/fileNamesBySha2:
+    get:
+      summary: List observed file names
+      description: >-
+        Return the file-name variants Defender observed for the SHA-256 over the selected
+        time window.
+      operationId: Files.ListObservedNames
+      tags: [Files]
+      parameters:
+        - name: entityId
+          in: query
+          required: true
+          description: The SHA-256 of the file.
+          schema:
+            type: string
+        - name: daysToLookBack
+          in: query
+          description: The observation lookback window, in days.
+          schema:
+            type: integer
+            default: 30
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileObservedNamesResponse'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/mdeDeepAnalysis/api/DeepAnalysisRequest:
+    get:
+      summary: Get deep analysis request state
+      description: >-
+        Return the current deep-analysis submission state for the file hash shown on the
+        Defender file page.
+      operationId: Files.GetDeepAnalysisStatus
+      tags: [Files]
+      parameters:
+        - name: sha1
+          in: query
+          required: true
+          description: The SHA-1 of the file.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileDeepAnalysisState'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/activeAlertsSummary/activeAlertsSummary:
+    get:
+      summary: Get active alert summary for file
+      description: >-
+        Return the severity rollup and incident count shown on the file overview page.
+        The portal supplies either `Sha1` or `Sha256` depending on file context.
+      operationId: Files.GetActiveAlertsSummary
+      tags: [Files]
+      parameters:
+        - name: lookingBackInDays
+          in: query
+          description: Alert-summary lookback window, in days.
+          schema:
+            type: integer
+            default: 180
+        - name: Sha1
+          in: query
+          description: SHA-1 identifier for the file.
+          schema:
+            type: string
+        - name: Sha256
+          in: query
+          description: SHA-256 identifier for the file.
+          schema:
+            type: string
+        - name: tenantIds
+          in: query
+          description: >-
+            Optional multi-tenant context. The single-tenant portal commonly sends the
+            literal string `null`.
+          schema:
+            type: string
+            nullable: true
+            example: 'null'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileActiveAlertsSummary'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/responseApiPortal/remediation/permission:
+    get:
+      summary: Get file remediation permission
+      description: >-
+        Return the permission gate the file page uses before enabling remediation-oriented
+        actions. The observed file page requests this with the file SHA-1.
+      operationId: Files.GetRemediationPermission
+      tags: [Files]
+      parameters:
+        - name: FileIdentifier
+          in: query
+          required: true
+          description: The file hash to evaluate for action eligibility.
+          schema:
+            type: string
+        - name: FileIdentifierType
+          in: query
+          required: true
+          description: The hash type supplied in `FileIdentifier`.
+          schema:
+            type: string
+            example: Sha1
+        - name: tenantIds
+          in: query
+          description: Optional multi-tenant context.
+          schema:
+            type: string
+            nullable: true
+            example: 'null'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileRemediationPermissionResponse'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/responseApiPortal/sampledownloadrequest/state:
+    get:
+      summary: Get file collect or download state
+      description: >-
+        Return whether the file page should show **Collect file**, **Download file**, or
+        no sample action at all, and whether the current action is enabled. The portal uses
+        `CheckPrevalence=false` for bootstrap or refresh and `CheckPrevalence=true` when
+        opening the collect or download flyout and while polling collection readiness.
+      operationId: Files.GetSampleDownloadState
+      tags: [Files]
+      parameters:
+        - name: Sha
+          in: query
+          required: true
+          description: SHA-1 or SHA-256 of the file.
+          schema:
+            type: string
+        - name: CheckPrevalence
+          in: query
+          required: true
+          description: Whether to perform the more expensive availability check.
+          schema:
+            type: boolean
+        - name: tenantIds
+          in: query
+          description: Optional multi-tenant context.
+          schema:
+            type: string
+            nullable: true
+            example: 'null'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileSampleActionStateResponse'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/responseApiPortal/sampledownloadrequest/createcollectionrequest:
+    post:
+      summary: Create file collection request
+      description: >-
+        Submit the **Collect file** action from the file page. The portal only enables this
+        when `sampledownloadrequest/state` returns `ActionType = 2` (`Collect`).
+      operationId: Files.CreateSampleCollectionRequest
+      tags: [Files]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FileCreateCollectionRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileCreateCollectionResponse'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/responseApiPortal/sampledownloadrequest/generatedownloaduri/V2:
+    get:
+      summary: Generate file download URI
+      description: >-
+        Generate the short-lived SAS URL used by the file page's **Download file** flow
+        after the sample is ready. The request shape is recovered from the Defender client
+        source (`GenerateDownloadUriApiCall` and `generateFileDownloadLinkNew`) because the
+        portal wraps the request behind a generated-link step. The current UI requires both
+        a free-text reason and a ZIP password before it will call this endpoint.
+      operationId: Files.GenerateSampleDownloadUri
+      tags: [Files]
+      parameters:
+        - name: sha
+          in: query
+          required: true
+          description: SHA-1 or SHA-256 of the file to download.
+          schema:
+            type: string
+        - name: filename
+          in: query
+          required: true
+          description: Filename to embed in the generated download package.
+          schema:
+            type: string
+        - name: requestorComment
+          in: query
+          required: true
+          description: Analyst-provided justification shown in sample request history.
+          schema:
+            type: string
+        - name: zipPassword
+          in: query
+          required: true
+          description: Password the portal applies to the generated ZIP package.
+          schema:
+            type: string
+        - name: tenantIds
+          in: query
+          description: Optional multi-tenant context.
+          schema:
+            type: string
+            nullable: true
+            example: 'null'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileDownloadUriResponse'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/mdeEntitiesExperience/files/{Sha256}/capabilities:
+    get:
+      summary: Get file page capabilities
+      description: Return capability flags for the unified file experience.
+      operationId: Files.GetCapabilities
+      tags: [Files]
+      parameters:
+        - name: Sha256
+          in: path
+          required: true
+          description: The SHA-256 of the file.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileCapabilitiesResponse'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/papin/api/cloud/public/internal/indicators/getQuery:
+    get:
+      summary: Find matching file indicators
+      description: >-
+        Query existing tenant indicators for the file hashes shown under the file page's
+        **Manage indicator** action.
+      operationId: Files.ListIndicators
+      tags: [Files]
+      parameters:
+        - name: tiIndicator
+          in: query
+          required: true
+          description: The file hash to search for in the indicator store.
+          schema:
+            type: string
+        - name: type
+          in: query
+          required: true
+          description: Indicator entity type.
+          schema:
+            type: string
+            enum: [files]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileIndicatorsResponse'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/files/files/{Sha256}/virustotal:
+    get:
+      summary: Get VirusTotal report
+      description: Return the VirusTotal summary card shown on the Defender file page.
+      operationId: Files.GetVirusTotalReport
+      tags: [Files]
+      parameters:
+        - name: Sha256
+          in: path
+          required: true
+          description: The SHA-256 of the file.
+          schema:
+            type: string
+        - name: fileIdentifier
+          in: query
+          required: true
+          description: The file hash the portal wants scored by the VirusTotal-backed service.
+          schema:
+            type: string
+        - name: UseVirusTotalFromEntityPagesService
+          in: query
+          description: Feature flag sent by the current portal client.
+          schema:
+            type: boolean
+            default: true
+        - name: tenantIds
+          in: query
+          description: Optional multi-tenant context.
+          schema:
+            type: string
+            nullable: true
+            example: 'null'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileVirusTotalReport'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/threatAnalyticsIndicators/stix/outbreaks/indicators/outbreaks/query:
+    post:
+      summary: Query threat analytics outbreaks for file hash
+      description: >-
+        Search Threat Analytics outbreak reports that reference the file hash from the file
+        page's intelligence cards.
+      operationId: Files.QueryThreatAnalyticsOutbreaks
+      tags: [Files]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ThreatAnalyticsOutbreakQueryRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ThreatAnalyticsOutbreakQueryResponse'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/threatAnalyticsIndicators/stix/oneti/reputation/fileHash:
+    get:
+      summary: Get file hash reputation
+      description: Return the Threat Analytics reputation score and matching rules for a file hash.
+      operationId: Files.GetThreatReputation
+      tags: [Files]
+      parameters:
+        - name: query
+          in: query
+          required: true
+          description: The file hash to score.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileHashReputationResponse'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/policies/:
+    post:
+      summary: List Cloud Apps malware policies
+      description: >-
+        Retrieve the malware policy IDs the file page uses before querying Defender for
+        Cloud Apps file prevalence by SHA-256.
+      operationId: Files.ListCloudAppsMalwarePolicies
+      tags: [Files]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CloudAppsPolicyQueryRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CloudAppsPoliciesResponse'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/files/count/:
+    post:
+      summary: Get Cloud Apps file count
+      description: >-
+        Return the Defender for Cloud Apps prevalence count for a file hash under a selected
+        malware policy.
+      operationId: Files.GetCloudAppsFileCount
+      tags: [Files]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CloudAppsFileCountRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CloudAppsFileCountResponse'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+components:
+  schemas:
+    FileProfile:
+      type: object
+      description: File metadata projected by the cyber profile provider used on the unified file page.
+      properties:
+        SHA1:
+          type: string
+          example: 82d330861950d594c415efaa33fe388b50d7cfbf
+        SHA256:
+          type: string
+          example: fc513b434751bb1a1d748344db287718dadcba9f90bca54d0579699b5131cfca
+        MD5:
+          type: string
+          example: 96031f5a8a8ff27e405b7f2f8d3bc0bc
+        FileSize:
+          type: integer
+          format: int64
+          example: 15904
+        GlobalPrevalence:
+          type: integer
+          example: 15709
+        GlobalFirstSeen:
+          type: string
+          format: date-time
+          example: 2026-03-26T13:28:34.3419902Z
+        GlobalLastSeen:
+          type: string
+          format: date-time
+          example: 2026-04-02T02:45:55.6943737Z
+        IsExecutable:
+          type: boolean
+          example: true
+        IsSigningInfoPopulated:
+          type: boolean
+          example: true
+        SignatureState:
+          type: string
+          example: Unsigned
+        ProfileAvailability:
+          type: string
+          example: Available
+        DeterminationType:
+          type: string
+          nullable: true
+          example: AutomationClean
+
+    FileVerdictListResponse:
+      type: object
+      description: File verdict collection shown on the file page.
+      properties:
+        Count:
+          type: integer
+          example: 0
+        FileVerdicts:
+          type: array
+          items:
+            $ref: '#/components/schemas/FileVerdictSummary'
+
+    FileVerdictSummary:
+      type: object
+      description: A single verdict entry associated with the file.
+      properties:
+        Sources:
+          type: array
+          description: Numeric backend source codes that contributed to the verdict.
+          items:
+            type: integer
+        ThreatName:
+          type: string
+          nullable: true
+          example: Trojan:Win32/Example
+        RelatedAlertsCount:
+          type: integer
+          example: 0
+
+    FileGoHuntRequest:
+      type: object
+      description: Request payload used by the file page's Go hunt action.
+      properties:
+        actionTime:
+          type: string
+          format: date-time
+          example: 2026-03-26T13:28:34.341Z
+        sha1:
+          type: string
+          nullable: true
+          example: 82d330861950d594c415efaa33fe388b50d7cfbf
+        sha256:
+          type: string
+          nullable: true
+          example: fc513b434751bb1a1d748344db287718dadcba9f90bca54d0579699b5131cfca
+        fileName:
+          type: string
+          nullable: true
+          example: System.Xml.XDocument.dll
+        machineId:
+          type: string
+          nullable: true
+          example: 980dddb7036eae7e38d30dee7f11b51e573a6fc2
+      required:
+        - actionTime
+
+    FileGoHuntResponse:
+      type: object
+      description: Encoded guided-hunting payloads generated for the file.
+      properties:
+        KqlQueries:
+          type: object
+          description: Mapping of query preset names to encoded KQL payloads.
+          additionalProperties:
+            type: string
+          example:
+            AllActivity: H4sIAAAAAAAAA62TS0_jQBCE68yviHJyRGBj4rxYcWCXILgh4MQlmjg2RApxhNmFAz-er9sGlgg0SEUKjmenXVNW0xwtluldDue...
+
+    FileDevicePrevalenceResponse:
+      type: object
+      description: Device prevalence summary for the file.
+      properties:
+        FirstSeen:
+          type: string
+          format: date-time
+          example: 2026-03-31T00:20:47.622266Z
+        LastSeen:
+          type: string
+          format: date-time
+          example: 2026-03-31T00:20:47.622266Z
+        FirstReportId:
+          type: string
+          example: '46365'
+        LastReportId:
+          type: string
+          example: '46365'
+        FirstActionType:
+          type: string
+          example: FileCreated
+        LastActionType:
+          type: string
+          example: FileCreated
+        Prevalence:
+          type: integer
+          example: 1
+        FirstMachineId:
+          type: string
+          example: 980dddb7036eae7e38d30dee7f11b51e573a6fc2
+        LastMachineId:
+          type: string
+          example: 980dddb7036eae7e38d30dee7f11b51e573a6fc2
+        FirstDeviceDetails:
+          $ref: '#/components/schemas/FileObservedDevice'
+        LastDeviceDetails:
+          $ref: '#/components/schemas/FileObservedDevice'
+
+    FileObservedDevice:
+      type: object
+      description: Device details embedded inside the file prevalence response.
+      properties:
+        MachineId:
+          type: string
+          example: 980dddb7036eae7e38d30dee7f11b51e573a6fc2
+        FirstSeen:
+          type: string
+          example: 0001-01-01T00:00:00
+        LastSeen:
+          type: string
+          example: 0001-01-01T00:00:00
+        ComputerName:
+          type: string
+          example: Aarons-Virtual-Machine
+        ExposureScore:
+          type: string
+          example: High
+        OnboardingStatus:
+          type: string
+          example: Onboarded
+        OsPlatformFriendlyName:
+          type: string
+          example: macOS
+        OsVersionFriendlyName:
+          type: string
+          example: Tahoe 26.3
+        RiskScore:
+          type: string
+          example: Medium
+        FirstReportId:
+          type: string
+          nullable: true
+        LastReportId:
+          type: string
+          nullable: true
+        FirstActionType:
+          type: string
+          nullable: true
+        LastActionType:
+          type: string
+          nullable: true
+        FirstInitiatingProcessName:
+          type: string
+          nullable: true
+        LastInitiatingProcessName:
+          type: string
+          nullable: true
+        DeviceTags:
+          type: array
+          items:
+            type: string
+        Domain:
+          type: string
+          example: Workgroup
+        HealthState:
+          type: string
+          example: Active
+
+    FileDeviceTrendResponse:
+      type: object
+      description: Trend buckets for file observations across devices.
+      properties:
+        AggregationType:
+          type: integer
+          example: 1
+        Items:
+          type: array
+          items:
+            $ref: '#/components/schemas/FileDeviceTrendBucket'
+
+    FileDeviceTrendBucket:
+      type: object
+      properties:
+        Date:
+          type: string
+          format: date-time
+          example: 2026-03-31T00:00:00Z
+        Count:
+          type: integer
+          example: 1
+
+    FileObservedNamesResponse:
+      type: object
+      description: File name variants observed for the SHA-256.
+      properties:
+        Results:
+          type: array
+          items:
+            $ref: '#/components/schemas/FileObservedName'
+
+    FileObservedName:
+      type: object
+      properties:
+        FileName:
+          type: string
+          example: System.Xml.XDocument.dll
+        FirstSeen:
+          type: string
+          format: date-time
+          example: 2026-03-31T00:20:47.622266Z
+        LastSeen:
+          type: string
+          format: date-time
+          example: 2026-03-31T00:20:47.622266Z
+        Prevalence:
+          type: integer
+          example: 1
+
+    FileDeepAnalysisState:
+      type: object
+      description: Deep-analysis request state for the file.
+      properties:
+        Sha1:
+          type: string
+          example: 82d330861950d594c415efaa33fe388b50d7cfbf
+        RequestState:
+          type: integer
+          description: Raw backend request-state code used by the file page.
+          example: 0
+        ExistsInSampleStore:
+          type: boolean
+          example: false
+        HasRecentSenseReports:
+          type: boolean
+          example: true
+        SupportedTypeBasedOnSense:
+          type: boolean
+          example: true
+        FailReason:
+          type: string
+          nullable: true
+
+    FileActiveAlertsSummary:
+      type: object
+      description: Severity summary returned for the file overview page.
+      properties:
+        HighSevAlerts:
+          type: integer
+          example: 0
+        MediumSevAlerts:
+          type: integer
+          example: 0
+        LowSevAlerts:
+          type: integer
+          example: 0
+        InformationalSevAlerts:
+          type: integer
+          example: 0
+        LookingBackInDays:
+          type: integer
+          example: 180
+        IncidentCount:
+          type: integer
+          example: 0
+
+    FileRemediationPermissionResponse:
+      type: object
+      description: >-
+        Permission gate used before enabling sensitive file actions. `Result` values observed
+        in client code are `-1 = Disallowed`, `0 = Allowed`, and `1 = AllowedWithWarning`.
+        `Reason` is a bit-flag set where `1 = FileHighPrevalence`, `2 = FileCertificateMicrosoftRoot`,
+        `4 = FileCertificateNonMsTrustedSigner`, `8 = NonPeFile`, and `16 = NotSupported`.
+      properties:
+        Type:
+          type: integer
+          nullable: true
+        Source:
+          type: integer
+          example: 0
+        Result:
+          type: integer
+          enum: [-1, 0, 1]
+          example: 0
+        Reason:
+          type: integer
+          example: 0
+        ReasonDescription:
+          type: string
+          nullable: true
+
+    FileSampleActionStateResponse:
+      type: object
+      description: >-
+        Sample action state for the file page. `ActionType` values observed in client code are
+        `0 = None`, `1 = Download`, and `2 = Collect`. `DisabledReason` values are
+        `0 = None`, `1 = UserRbacUnauthorized`, `2 = FileNotObservedInOrg`, and
+        `3 = CollectionInProgress`.
+      properties:
+        ActionType:
+          type: integer
+          enum: [0, 1, 2]
+          example: 2
+        IsEnabled:
+          type: boolean
+          example: true
+        DisabledReason:
+          type: integer
+          enum: [0, 1, 2, 3]
+          example: 0
+        SampleRequestHistory:
+          type: array
+          items:
+            $ref: '#/components/schemas/FileSampleRequestInfo'
+
+    FileSampleRequestInfo:
+      type: object
+      description: Historical sample collection request attached to the file.
+      properties:
+        RequestGuid:
+          type: string
+          format: uuid
+        Sha1:
+          type: string
+          example: 82d330861950d594c415efaa33fe388b50d7cfbf
+        OrgId:
+          type: string
+          format: uuid
+        Requestor:
+          type: string
+        RequestorComment:
+          type: string
+        Status:
+          type: integer
+          description: '`-1 = Failed`, `0 = Active`, `1 = Completed`.'
+          enum: [-1, 0, 1]
+        CreationTime:
+          type: string
+          format: date-time
+        LastUpdateTime:
+          type: string
+          format: date-time
+
+    FileCreateCollectionRequest:
+      type: object
+      description: Request body submitted by the **Collect file** action.
+      properties:
+        sha:
+          type: string
+          example: 82d330861950d594c415efaa33fe388b50d7cfbf
+        requestorComment:
+          type: string
+          example: Documentation capture only
+      required:
+        - sha
+        - requestorComment
+
+    FileCreateCollectionResponse:
+      type: object
+      description: >-
+        Response returned after creating a collection request. The client treats `State = 3`
+        as a restricted-file error and otherwise relies on polling `sampledownloadrequest/state`
+        for readiness.
+      properties:
+        State:
+          type: integer
+          example: 0
+        RequestGuid:
+          type: string
+          format: uuid
+
+    FileDownloadUriResponse:
+      type: object
+      description: Short-lived SAS link wrapper returned by the file download flow.
+      properties:
+        DownloadSasUri:
+          type: string
+          format: uri
+          example: https://download.example.invalid/sample.zip?sv=...
+
+    FileCapabilitiesResponse:
+      type: object
+      description: Capability flags for the unified file experience.
+      properties:
+        Capabilities:
+          type: object
+          nullable: true
+          additionalProperties: true
+        LastModifiedUtc:
+          type: string
+          format: date-time
+          nullable: true
+
+    FileIndicatorsResponse:
+      type: array
+      description: Matching indicators returned for the file hash lookup.
+      items:
+        type: object
+        additionalProperties: true
+
+    FileVirusTotalReport:
+      type: object
+      description: VirusTotal summary card returned for the file.
+      properties:
+        total:
+          type: integer
+          example: 0
+        positives:
+          type: integer
+          example: 0
+        permalink:
+          type: string
+          nullable: true
+          example: null
+        sha1:
+          type: string
+          nullable: true
+        sha256:
+          type: string
+          example: fc513b434751bb1a1d748344db287718dadcba9f90bca54d0579699b5131cfca
+
+    ThreatAnalyticsOutbreakQueryRequest:
+      type: object
+      description: STIX outbreak query issued for a file hash from the file page.
+      properties:
+        condition:
+          $ref: '#/components/schemas/ThreatAnalyticsCondition'
+        sortBy:
+          $ref: '#/components/schemas/ThreatAnalyticsSort'
+        minPageSize:
+          type: integer
+          example: 100
+        maxPageSize:
+          type: integer
+          example: 100
+      required:
+        - condition
+
+    ThreatAnalyticsCondition:
+      type: object
+      properties:
+        stixObjectType:
+          type: string
+          example: indicator
+        conditionConnective:
+          type: string
+          example: And
+        clauses:
+          type: array
+          items:
+            $ref: '#/components/schemas/ThreatAnalyticsClause'
+        isUnconditional:
+          type: boolean
+          example: false
+
+    ThreatAnalyticsClause:
+      type: object
+      properties:
+        field:
+          type: string
+          example: pattern
+        operator:
+          type: string
+          example: StringContains
+        values:
+          type: array
+          items:
+            type: string
+          example:
+            - FC513B434751BB1A1D748344DB287718DADCBA9F90BCA54D0579699B5131CFCA
+
+    ThreatAnalyticsSort:
+      type: object
+      properties:
+        field:
+          type: string
+          example: lastUpdatedTimeUtc
+        direction:
+          type: string
+          example: DESC
+
+    ThreatAnalyticsOutbreakQueryResponse:
+      type: array
+      description: Threat Analytics outbreak summaries matching the file hash.
+      items:
+        type: object
+        additionalProperties: true
+
+    FileHashReputationResponse:
+      type: object
+      description: Threat Analytics reputation score for a file hash.
+      properties:
+        data:
+          type: object
+          properties:
+            score:
+              type: integer
+              example: 0
+            rules:
+              type: array
+              items:
+                type: object
+                additionalProperties: true
+
+    CloudAppsPolicyQueryRequest:
+      type: object
+      description: Cloud Apps malware policy filter request used by the file page.
+      properties:
+        filters:
+          type: object
+          properties:
+            type:
+              type: object
+              properties:
+                eq:
+                  type: array
+                  items:
+                    type: string
+                  example: [MALWARE]
+      required:
+        - filters
+
+    CloudAppsPoliciesResponse:
+      type: object
+      description: Cloud Apps policy query result used to locate malware-policy IDs.
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+
+    CloudAppsFileCountRequest:
+      type: object
+      description: Cloud Apps file-count query for a specific SHA-256 and malware policy.
+      properties:
+        filters:
+          type: object
+          properties:
+            sha256:
+              type: object
+              properties:
+                eq:
+                  type: array
+                  items:
+                    type: string
+            policy:
+              type: object
+              properties:
+                cabinetmatchedrulesequals:
+                  type: array
+                  items:
+                    type: string
+      required:
+        - filters
+
+    CloudAppsFileCountResponse:
+      type: object
+      description: Cloud Apps count result for matching files.
+      properties:
+        total:
+          type: integer
+          example: 0
+        moreThanTotal:
+          type: boolean
+          example: false
