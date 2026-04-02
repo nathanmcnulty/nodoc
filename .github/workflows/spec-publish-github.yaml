@@ -29,31 +29,31 @@
           contents: write
         steps:
           - name: Checkout code
-            uses: actions/checkout@v6
+            uses: actions/checkout@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v6
     
           - name: Download spec
             id: download-spec
-            uses: actions/download-artifact@v8
+            uses: actions/download-artifact@53b83947a5a98c8d113130e565377fae1a50d02f # v8
             with:
               name: ${{ inputs.spec-artifact-name }}
     
           - name: Download stats
             id: download-stats
-            uses: actions/download-artifact@v8
+            uses: actions/download-artifact@53b83947a5a98c8d113130e565377fae1a50d02f # v8
             with:
               name: ${{ inputs.stats-artifact-name }}
     
           - name: Create GitHub release
-            run: gh release create --verify-tag --notes-from-tag ${{ inputs.release-tag }}
+            run: gh release create --verify-tag --notes-from-tag "${{ inputs.release-tag }}"
             env:
               GH_TOKEN: ${{ github.token }}
     
           - name: Release spec
-            run: gh release upload ${{ inputs.release-tag }} ${{ steps.download-spec.outputs.download-path }}/${{inputs.spec-artifact-name }}
+            run: gh release upload "${{ inputs.release-tag }}" "${{ steps.download-spec.outputs.download-path }}/${{ inputs.spec-artifact-name }}"
             env:
               GH_TOKEN: ${{ github.token }}
     
           - name: Release stats
-            run: gh release upload ${{ inputs.release-tag }} ${{ steps.download-stats.outputs.download-path }}/${{inputs.stats-artifact-name }}
+            run: gh release upload "${{ inputs.release-tag }}" "${{ steps.download-stats.outputs.download-path }}/${{ inputs.stats-artifact-name }}"
             env:
               GH_TOKEN: ${{ github.token }}

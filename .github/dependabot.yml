@@ -11,6 +11,12 @@ registries:
     username: x-delfino
     password: ${{secrets.NPM_TOKEN}}
 updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    reviewers:
+      - "x-delfino"
   - package-ecosystem: "gitsubmodule"
     directory: "/"
     schedule:

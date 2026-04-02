@@ -1,6 +1,5 @@
 # nodoc
 
-[![Deploy Pages](https://github.com/nathanmcnulty/nodoc/actions/workflows/deploy-pages.yml/badge.svg)](https://github.com/nathanmcnulty/nodoc/actions/workflows/deploy-pages.yml)
 [![Postman Workspace](https://img.shields.io/badge/postman-dolphinlabs-ef5b25?logo=postman&logoColor=white)](https://www.postman.com/dolphinlabs/workspace/nodoc)
 ![GitHub License](https://img.shields.io/github/license/nathanmcnulty/nodoc)
 

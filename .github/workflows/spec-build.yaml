@@ -29,6 +29,9 @@ on:
         description: The ID of the GitHub build action run
         value: ${{ github.run_id }}
 
+permissions:
+  contents: read
+
 jobs:
   bundle:
     runs-on: ubuntu-latest
@@ -37,17 +40,17 @@ jobs:
       stats-artifact-id: ${{ steps.upload-stats.outputs.artifact-id }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v6
         with:
           fetch-depth: 0
 
       - name: Setup node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v6
         with:
           node-version: "24"
 
       - name: Install Redocly CLI
-        run: npm install -g @redocly/cli@latest
+        run: npm install -g @redocly/cli@2.25.3
 
       - name: Bundle specification
         run: |
@@ -55,7 +58,7 @@ jobs:
 
       - name: Upload specification
         id: upload-spec
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v7
         with:
           name: ${{inputs.bundled-spec-filename}}
           path: ${{inputs.build-dir}}/${{inputs.bundled-spec-filename}}
@@ -67,7 +70,7 @@ jobs:
 
       - name: Upload stats
         id: upload-stats
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v7
         with:
           name: ${{inputs.stats-filename}}
           path: ${{inputs.build-dir}}/${{inputs.stats-filename}}

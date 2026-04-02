@@ -3,20 +3,23 @@ name: Validate OpenAPI Spec
 on:
   workflow_call:
 
+permissions:
+  contents: read
+
 jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v6
 
       - name: Setup node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v6
         with:
           node-version: "24"
 
       - name: Install Redocly CLI
-        run: npm install -g @redocly/cli@latest
+        run: npm install -g @redocly/cli@2.25.3
 
       - name: Validate configuration
         run: |
