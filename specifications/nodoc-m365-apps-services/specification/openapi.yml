@@ -1,0 +1,325 @@
+openapi: 3.0.1
+info:
+  title: M365 Apps Services
+  x-nodoc-category: M365 Apps
+  description: |
+    The M365 Apps Services API is used by the Microsoft 365 Apps admin center
+    to query onboarding state, feature availability, release catalogs, component
+    sharding, and OneDrive Sync health telemetry from `clients.config.office.net`.
+
+    This surface was observed while browsing:
+
+      - Home and Cloud Update
+      - Device Configuration
+      - OneDrive Sync
+      - Setup
+
+    Requests are issued from the portal with bearer tokens and diagnostic headers
+    such as `x-api-name`, `x-correlationid`, `x-manageoffice-client-sid`, and
+    `x-requested-with`.
+
+    Static bundle analysis also exposed related or preview hosts including
+    `canary.clients.config.office.net` and `sip.clients.config.office.net`,
+    but the operations below were the concrete requests observed in the current
+    tenant.
+
+    Documentation and specifications have been provided on a best-efforts basis and
+    may not be 100% accurate.
+  version: 0.1.0
+  contact:
+    name: nodoc
+    url: https://github.com/nathanmcnulty/nodoc
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+servers:
+  - url: https://clients.config.office.net
+    description: M365 Apps shared services API
+security:
+  - bearerAuth: []
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        Browser-obtained bearer token used by the M365 Apps admin center.
+        Observed requests also include portal diagnostic headers such as
+        `x-api-name`, `x-correlationid`, `x-manageoffice-client-sid`, and
+        `x-requested-with`.
+  parameters:
+    featureFilter:
+      name: $filter
+      in: query
+      description: OData filter used to scope feature provisioning records.
+      schema:
+        type: string
+  schemas:
+    GenericObject:
+      type: object
+      additionalProperties: true
+    EligibilityRecord:
+      type: object
+      properties:
+        '@odata.context':
+          type: string
+        id:
+          type: string
+          format: uuid
+        eligibilities:
+          type: array
+          items:
+            type: string
+      required:
+        - '@odata.context'
+        - id
+        - eligibilities
+    FeatureDefinition:
+      type: object
+      properties:
+        featureName:
+          type: string
+        featureRing:
+          type: string
+        featureRingAgreementVersion:
+          type: string
+        learningConsent:
+          type: string
+        learningConsentAgreementVersion:
+          type: string
+        eligibilityRequirement:
+          type: string
+      additionalProperties: true
+    FeatureDataResponse:
+      type: object
+      properties:
+        '@odata.context':
+          type: string
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/FeatureDefinition'
+      required:
+        - '@odata.context'
+        - value
+    FeatureProvisionRecord:
+      type: object
+      properties:
+        featureName:
+          type: string
+        featureProvisionStatus:
+          type: string
+        featureMigrationStatus:
+          type: string
+      additionalProperties: true
+    FeatureProvisionResponse:
+      type: object
+      properties:
+        '@odata.context':
+          type: string
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/FeatureProvisionRecord'
+      required:
+        - '@odata.context'
+        - value
+    ODataBooleanResponse:
+      type: object
+      properties:
+        '@odata.context':
+          type: string
+        value:
+          type: boolean
+      required:
+        - '@odata.context'
+        - value
+    OneDriveSyncCountRequest:
+      type: array
+      description: Array of filter expressions used to request multiple OneDrive Sync counters in one call.
+      items:
+        type: string
+    IndexedCountMap:
+      type: object
+      description: Response keyed by request filter index.
+      additionalProperties:
+        type: integer
+    OneDriveVersionCount:
+      type: object
+      properties:
+        updateRing:
+          type: integer
+        currentOneDriveVersion:
+          type: string
+        newerCount:
+          type: integer
+        currentCount:
+          type: integer
+        olderCount:
+          type: integer
+        oneDrivePlatformType:
+          type: integer
+      additionalProperties: true
+    OfficeVersion:
+      type: object
+      properties:
+        legacyVersion:
+          type: string
+        releaseVersion:
+          type: string
+        buildVersion:
+          type: string
+        availabilityDate:
+          type: string
+          format: date-time
+        endOfSupportDate:
+          type: string
+          format: date-time
+        cdnBaseUrl:
+          type: string
+          format: uri
+      additionalProperties: true
+    OfficeReleaseChannel:
+      type: object
+      properties:
+        channel:
+          type: string
+        channelId:
+          type: string
+        alternateNames:
+          type: array
+          items:
+            type: string
+        latestVersion:
+          type: string
+        officeVersions:
+          type: array
+          items:
+            $ref: '#/components/schemas/OfficeVersion'
+      additionalProperties: true
+tags:
+  - name: Intents
+    description: Component-sharding and portal bootstrap calls.
+  - name: Onboarding
+    description: Feature discovery, eligibility, and provisioning helpers.
+  - name: OneDrive Sync
+    description: OneDrive Sync telemetry and version distribution used by the health page.
+  - name: Release Catalog
+    description: Office release catalog used by Device Configuration and related UX.
+paths:
+  /intents/v1.0/ComponentGroupIntentShard:
+    post:
+      tags: [Intents]
+      summary: Resolve component group shard
+      description: |
+        Resolves or initializes the component-group shard used by the portal shell.
+        Observed as a body-less POST returning a boolean.
+      responses:
+        '200':
+          description: Shard resolution succeeded
+          content:
+            application/json:
+              schema:
+                type: boolean
+              example: true
+  /odbhealth/v1.0/synchealth/reports/count:
+    post:
+      tags: [OneDrive Sync]
+      summary: Get OneDrive Sync bucket counts
+      description: |
+        Returns counts for multiple OneDrive Sync report filters in a single request.
+        The request body is an array of filter expressions, and the response is keyed
+        by filter index.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OneDriveSyncCountRequest'
+      responses:
+        '200':
+          description: Count results by filter index
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IndexedCountMap'
+  /odbhealth/v1.0/synchealth/reports/versioncount:
+    get:
+      tags: [OneDrive Sync]
+      summary: Get OneDrive Sync version distribution
+      description: Returns OneDrive Sync client version distribution grouped by update ring and platform type.
+      responses:
+        '200':
+          description: Version distribution
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OneDriveVersionCount'
+  /onboarding/odata/v1.0/EligibilityRecord:
+    get:
+      tags: [Onboarding]
+      summary: Get onboarding eligibility record
+      description: Returns the tenant eligibility record that gates M365 Apps admin center features.
+      responses:
+        '200':
+          description: Eligibility record
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EligibilityRecord'
+  /onboarding/odata/v1.0/FeatureData:
+    get:
+      tags: [Onboarding]
+      summary: List feature definitions
+      description: Returns feature metadata, ring assignments, and eligibility requirements used by the portal.
+      responses:
+        '200':
+          description: Feature definitions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeatureDataResponse'
+  /onboarding/odata/v1.0/FeatureProvisiondata:
+    get:
+      tags: [Onboarding]
+      summary: Query feature provisioning state
+      description: Returns provisioning state for one or more features, typically scoped with an OData filter.
+      parameters:
+        - $ref: '#/components/parameters/featureFilter'
+      responses:
+        '200':
+          description: Feature provisioning state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeatureProvisionResponse'
+    post:
+      tags: [Onboarding]
+      summary: Provision or confirm a feature state
+      description: |
+        Observed as a body-less POST that returns an OData boolean wrapper.
+        Treat this as a potentially state-changing provisioning call.
+      responses:
+        '200':
+          description: Provisioning completed or already satisfied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataBooleanResponse'
+  /releases/v1.0/OfficeReleases:
+    get:
+      tags: [Release Catalog]
+      summary: Get Office release catalog
+      description: Returns the release catalog used by Device Configuration and release-selection experiences.
+      responses:
+        '200':
+          description: Release catalog by servicing channel
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OfficeReleaseChannel'

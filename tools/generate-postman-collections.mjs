@@ -1,4 +1,4 @@
-import { mkdtempSync, mkdirSync, rmSync } from "node:fs";
+import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import process from "node:process";
@@ -20,6 +20,31 @@ const collectionDefinitions = [
     name: "M365 Admin",
     spec: "specifications/nodoc-m365-admin/specification/openapi.yml",
     output: "postman/collections/m365-admin.collection.json",
+  },
+  {
+    name: "M365 Apps Config",
+    spec: "specifications/nodoc-m365-apps-config/specification/openapi.yml",
+    output: "postman/collections/m365-apps-config.collection.json",
+  },
+  {
+    name: "M365 Apps Services",
+    spec: "specifications/nodoc-m365-apps-services/specification/openapi.yml",
+    output: "postman/collections/m365-apps-services.collection.json",
+  },
+  {
+    name: "M365 Apps Inventory",
+    spec: "specifications/nodoc-m365-apps-inventory/specification/openapi.yml",
+    output: "postman/collections/m365-apps-inventory.collection.json",
+  },
+  {
+    name: "Intune Autopatch",
+    spec: "specifications/nodoc-intune-autopatch/specification/openapi.yml",
+    output: "postman/collections/intune-autopatch.collection.json",
+  },
+  {
+    name: "Intune Portal",
+    spec: "specifications/nodoc-intune-portal/specification/openapi.yml",
+    output: "postman/collections/intune-portal.collection.json",
   },
   {
     name: "Purview",
@@ -77,15 +102,163 @@ function run(command, args) {
   }
 }
 
+function normalizePath(pathValue) {
+  return `/${pathValue.replace(/^\/+/u, "").replace(/\/+/gu, "/")}`;
+}
+
+function escapeRegex(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
+}
+
+function pathTemplateToRegex(pathTemplate) {
+  return new RegExp(
+    `^${escapeRegex(normalizePath(pathTemplate)).replace(/\\\{[^}]+\\\}/gu, "[^/]+")}$`,
+    "u",
+  );
+}
+
+function buildOperationIndex(openapi) {
+  return Object.entries(openapi.paths ?? {}).flatMap(([pathname, pathItem]) => (
+    Object.entries(pathItem ?? {})
+      .filter(([method]) => ["get", "put", "post", "patch", "delete", "head", "options", "trace"].includes(method))
+      .map(([method, operation]) => ({
+        method: method.toUpperCase(),
+        pathRegex: pathTemplateToRegex(pathname),
+        responses: operation.responses ?? {},
+      }))
+  ));
+}
+
+function getCollectionPath(request) {
+  const requestPath = request?.url?.path;
+
+  if (!Array.isArray(requestPath) || requestPath.length === 0) {
+    return null;
+  }
+
+  return normalizePath(requestPath.join("/"));
+}
+
+function getResponseContentType(response) {
+  const contentTypeHeader = response?.header?.find(
+    (header) => header.key?.toLowerCase() === "content-type",
+  );
+
+  return contentTypeHeader?.value?.split(";")[0]?.trim().toLowerCase() ?? null;
+}
+
+function getMediaTypeExample(mediaType) {
+  if (!mediaType || typeof mediaType !== "object") {
+    return undefined;
+  }
+
+  if (Object.hasOwn(mediaType, "example")) {
+    return mediaType.example;
+  }
+
+  if (mediaType.schema && Object.hasOwn(mediaType.schema, "example")) {
+    return mediaType.schema.example;
+  }
+
+  return undefined;
+}
+
+function formatExampleBody(exampleValue, contentType) {
+  if (exampleValue === undefined) {
+    return undefined;
+  }
+
+  if (contentType === "application/json") {
+    if (exampleValue !== null && typeof exampleValue === "object") {
+      return JSON.stringify(exampleValue, null, 2);
+    }
+
+    return JSON.stringify(exampleValue);
+  }
+
+  return String(exampleValue);
+}
+
+function visitItems(items, callback) {
+  for (const item of items ?? []) {
+    callback(item);
+
+    if (item.item) {
+      visitItems(item.item, callback);
+    }
+  }
+}
+
+// openapi-to-postman drops top-level falsy primitive examples like `false` and `0`.
+function patchEmptyResponseExamples(openapiPath, collectionPath) {
+  const openapi = JSON.parse(readFileSync(openapiPath, "utf8"));
+  const collection = JSON.parse(readFileSync(collectionPath, "utf8"));
+  const operations = buildOperationIndex(openapi);
+  let changed = false;
+
+  visitItems(collection.item, (item) => {
+    for (const response of item.response ?? []) {
+      if (response.body !== "") {
+        continue;
+      }
+
+      const request = response.originalRequest ?? item.request;
+      const method = request?.method?.toUpperCase();
+      const pathname = getCollectionPath(request);
+
+      if (!method || !pathname) {
+        continue;
+      }
+
+      const operation = operations.find(
+        (candidate) => candidate.method === method && candidate.pathRegex.test(pathname),
+      );
+
+      if (!operation) {
+        continue;
+      }
+
+      const specResponse = operation.responses[String(response.code)] ?? operation.responses.default;
+      const contentType = getResponseContentType(response);
+      const mediaTypes = specResponse?.content ?? {};
+      const mediaTypeKey = Object.keys(mediaTypes).find(
+        (candidate) => candidate.toLowerCase() === contentType,
+      ) ?? (Object.keys(mediaTypes).length === 1 ? Object.keys(mediaTypes)[0] : null);
+
+      if (!mediaTypeKey) {
+        continue;
+      }
+
+      const exampleValue = getMediaTypeExample(mediaTypes[mediaTypeKey]);
+      const body = formatExampleBody(exampleValue, mediaTypeKey.toLowerCase());
+
+      if (body === undefined) {
+        continue;
+      }
+
+      response.body = body;
+      changed = true;
+    }
+  });
+
+  if (changed) {
+    writeFileSync(collectionPath, `${JSON.stringify(collection, null, 4)}\n`);
+  }
+}
+
 mkdirSync(outputDir, { recursive: true });
 
 const tempDir = mkdtempSync(path.join(os.tmpdir(), "nodoc-postman-"));
 
 try {
   for (const definition of collectionDefinitions) {
-    const bundledPath = path.join(
+    const bundledYamlPath = path.join(
       tempDir,
       `${path.basename(definition.output, ".json")}.bundled.yaml`,
+    );
+    const bundledJsonPath = path.join(
+      tempDir,
+      `${path.basename(definition.output, ".json")}.bundled.json`,
     );
 
     console.log(`\n==> Generating ${definition.name}`);
@@ -99,7 +272,21 @@ try {
       "bundle",
       definition.spec,
       "-o",
-      bundledPath,
+      bundledYamlPath,
+    ]);
+
+    run(npmCommand, [
+      "exec",
+      "--yes",
+      "--package=@redocly/cli@latest",
+      "--",
+      "redocly",
+      "bundle",
+      definition.spec,
+      "--ext",
+      "json",
+      "-o",
+      bundledJsonPath,
     ]);
 
     run(npmCommand, [
@@ -109,13 +296,15 @@ try {
       "--",
       "openapi2postmanv2",
       "-s",
-      bundledPath,
+      bundledYamlPath,
       "-o",
       definition.output,
       "-p",
       "-c",
       "postman_to_openapi.json",
     ]);
+
+    patchEmptyResponseExamples(bundledJsonPath, path.join(repoRoot, definition.output));
   }
 } finally {
   rmSync(tempDir, { recursive: true, force: true });

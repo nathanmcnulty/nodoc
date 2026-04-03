@@ -64,7 +64,7 @@ export const apiCatalog: ApiCatalogItem[] = [
     title: "M365 Admin",
     slug: "/m-365-admin",
     family: "Admin portal",
-    operations: 215,
+    operations: 218,
     authModel: "Portal session cookie + custom admin headers",
     baseUrl: "https://admin.cloud.microsoft",
     summary:
@@ -77,6 +77,96 @@ export const apiCatalog: ApiCatalogItem[] = [
     collectionPath: "postman/collections/m365-admin.collection.json",
     collectionDownloadUrl:
       "https://raw.githubusercontent.com/nathanmcnulty/nodoc/main/postman/collections/m365-admin.collection.json",
+  },
+  {
+    title: "M365 Apps Config",
+    slug: "/m-365-apps-config",
+    family: "M365 Apps admin center",
+    operations: 23,
+    authModel: "Portal bearer token + diagnostic headers",
+    baseUrl: "https://config.office.com",
+    summary:
+      "Cloud Update, servicing profiles, policy management, device configuration, rollout metadata, and portal bootstrap state from the M365 Apps admin center.",
+    highlights: [
+      "Servicing profiles, tenant rules, and exclusion windows",
+      "Policy settings catalog and Office Customization Tool save flows",
+      "Browser bearer tokens with portal diagnostic headers modeled in-spec",
+    ],
+    collectionPath: "postman/collections/m365-apps-config.collection.json",
+    collectionDownloadUrl:
+      "https://raw.githubusercontent.com/nathanmcnulty/nodoc/main/postman/collections/m365-apps-config.collection.json",
+  },
+  {
+    title: "M365 Apps Services",
+    slug: "/m-365-apps-services",
+    family: "M365 Apps admin center",
+    operations: 8,
+    authModel: "Portal bearer token + diagnostic headers",
+    baseUrl: "https://clients.config.office.net",
+    summary:
+      "Shared M365 Apps service coverage for onboarding state, feature availability, release catalogs, component sharding, and OneDrive Sync health.",
+    highlights: [
+      "Eligibility and feature provisioning state",
+      "Release catalogs, setup state, and component mappings",
+      "Shared services host used across Cloud Update, Device Configuration, and OneDrive Sync",
+    ],
+    collectionPath: "postman/collections/m365-apps-services.collection.json",
+    collectionDownloadUrl:
+      "https://raw.githubusercontent.com/nathanmcnulty/nodoc/main/postman/collections/m365-apps-services.collection.json",
+  },
+  {
+    title: "M365 Apps Inventory",
+    slug: "/m-365-apps-inventory",
+    family: "M365 Apps admin center",
+    operations: 27,
+    authModel: "Portal bearer token + diagnostic headers",
+    baseUrl: "https://query.inventory.insights.office.net",
+    summary:
+      "Device inventory, build currency, add-ins, setup state, and security update status from the M365 Apps admin center inventory surface.",
+    highlights: [
+      "Device/build inventory with OData-style query support",
+      "Add-ins, languages, Office applications, and onboarding state",
+      "Setup and security-currency write flows captured from portal saves",
+    ],
+    collectionPath: "postman/collections/m365-apps-inventory.collection.json",
+    collectionDownloadUrl:
+      "https://raw.githubusercontent.com/nathanmcnulty/nodoc/main/postman/collections/m365-apps-inventory.collection.json",
+  },
+  {
+    title: "Intune Autopatch",
+    slug: "/intune-autopatch",
+    family: "Intune admin center",
+    operations: 32,
+    authModel: "Portal bearer token + x-ms portal headers",
+    baseUrl: "https://services.autopatch.microsoft.com",
+    summary:
+      "Windows Autopatch tenant state, roles, groups, messages, support, and reporting surfaces from the Intune admin center.",
+    highlights: [
+      "Tenant resolution, feature enablement, and admin actions",
+      "Autopatch roles, permissions, scope tags, and role assignments",
+      "Messages plus support detail, activity, and write-flow request shapes",
+    ],
+    collectionPath: "postman/collections/intune-autopatch.collection.json",
+    collectionDownloadUrl:
+      "https://raw.githubusercontent.com/nathanmcnulty/nodoc/main/postman/collections/intune-autopatch.collection.json",
+  },
+  {
+    title: "Intune Portal",
+    slug: "/intune-portal",
+    family: "Intune admin center",
+    operations: 3,
+    authModel: "Portal bearer token + same-origin portal context",
+    baseUrl: "https://intune.microsoft.com/api",
+    summary:
+      "Same-origin Intune admin center experimentation and persistent portal settings storage used across tenant administration blades.",
+    highlights: [
+      "Extension flighting for Intune, PIM, and Azure Monitor blades",
+      "Persistent storage namespace reads via `Settings/Select`",
+      "Portal settings writes via `Settings/Update`",
+    ],
+    collectionPath: "postman/collections/intune-portal.collection.json",
+    collectionDownloadUrl:
+      "https://raw.githubusercontent.com/nathanmcnulty/nodoc/main/postman/collections/intune-portal.collection.json",
   },
   {
     title: "Purview",
@@ -100,7 +190,7 @@ export const apiCatalog: ApiCatalogItem[] = [
     title: "Entra IAM",
     slug: "/entra-iam",
     family: "Entra portal",
-    operations: 277,
+    operations: 286,
     authModel: "Delegated OAuth2 + `X-Ms-Client-Request-Id`",
     baseUrl: "https://main.iam.ad.ext.azure.com/api",
     summary:
@@ -118,7 +208,7 @@ export const apiCatalog: ApiCatalogItem[] = [
     title: "Entra PIM",
     slug: "/entra-pim",
     family: "Entra portal",
-    operations: 14,
+    operations: 16,
     authModel: "Azure AD bearer token",
     baseUrl: "https://api.azrbac.mspim.azure.com",
     summary:
@@ -136,7 +226,7 @@ export const apiCatalog: ApiCatalogItem[] = [
     title: "Entra IGA",
     slug: "/entra-iga",
     family: "Entra portal",
-    operations: 14,
+    operations: 17,
     authModel: "Azure AD bearer token",
     baseUrl: "https://elm.iga.azure.com",
     summary:
@@ -154,7 +244,7 @@ export const apiCatalog: ApiCatalogItem[] = [
     title: "Entra IDGov",
     slug: "/entra-id-gov",
     family: "Entra portal",
-    operations: 11,
+    operations: 14,
     authModel: "Azure AD bearer token",
     baseUrl: "https://api.accessreviews.identitygovernance.azure.com",
     summary:
@@ -188,13 +278,6 @@ export const apiCatalog: ApiCatalogItem[] = [
   },
 ];
 
-export const launchStats = [
-  { label: "Published specs", value: "8" },
-  { label: "Modeled operations", value: "1062" },
-  { label: "Access models", value: "4" },
-  { label: "Checked-in collections", value: "8" },
-];
-
 export const accessModels: AccessModel[] = [
   {
     title: "Portal session cookies",
@@ -209,10 +292,22 @@ export const accessModels: AccessModel[] = [
     portals: ["M365 Admin"],
   },
   {
+    title: "Portal bearer tokens + diagnostic headers",
+    description:
+      "M365 Apps uses browser-obtained bearer tokens together with diagnostic headers such as `x-api-name`, `x-correlationid`, `x-manageoffice-client-sid`, and `x-requested-with`.",
+    portals: ["M365 Apps Config", "M365 Apps Services", "M365 Apps Inventory"],
+  },
+  {
     title: "Delegated OAuth2",
     description:
       "Entra IAM uses the ADIbizaUX resource with delegated user auth only and typically needs `X-Ms-Client-Request-Id`.",
     portals: ["Entra IAM"],
+  },
+  {
+    title: "Portal bearer tokens",
+    description:
+      "Intune Portal and Intune Autopatch use browser-obtained bearer tokens plus same-origin cookies or portal headers from the authenticated Intune session.",
+    portals: ["Intune Portal", "Intune Autopatch"],
   },
   {
     title: "Azure AD bearer tokens",
@@ -220,6 +315,16 @@ export const accessModels: AccessModel[] = [
       "Entra PIM, IGA, IDGov, and B2C use Azure AD bearer tokens, with tenant- or feature-specific constraints on top.",
     portals: ["Entra PIM", "Entra IGA", "Entra IDGov", "Entra B2C"],
   },
+];
+
+const modeledOperationCount = apiCatalog.reduce((total, api) => total + api.operations, 0);
+const checkedInCollectionCount = apiCatalog.length;
+
+export const launchStats = [
+  { label: "Published specs", value: String(apiCatalog.length) },
+  { label: "Modeled operations", value: String(modeledOperationCount) },
+  { label: "Access models", value: String(accessModels.length) },
+  { label: "Checked-in collections", value: String(checkedInCollectionCount) },
 ];
 
 export const quickStartSteps: QuickStartStep[] = [
@@ -304,6 +409,63 @@ export const gettingStartedGuides: GettingStartedGuide[] = [
       "Missing one of the custom admin headers can look like a generic auth or routing failure.",
       "Some data comes through federated Graph proxies and can differ from the shared Graph proxy behavior in Defender or Purview.",
       "Header values can change as the admin shell bootstraps or refreshes.",
+    ],
+  },
+  {
+    title: "M365 Apps admin center",
+    portals: ["M365 Apps Config", "M365 Apps Services", "M365 Apps Inventory"],
+    authModel: "Portal bearer token + diagnostic headers",
+    baseUrls: [
+      "https://config.office.com",
+      "https://clients.config.office.net",
+      "https://query.inventory.insights.office.net",
+    ],
+    confirmedDetails: [
+      "All three specs use browser-obtained bearer tokens from the live M365 Apps admin center session.",
+      "Observed requests include diagnostic headers such as `x-api-name`, `x-correlationid`, `x-manageoffice-client-sid`, and `x-requested-with`.",
+      "Config covers servicing and policy saves, Services covers feature/onboarding/release lookups, and Inventory covers device, add-in, and security-currency paths.",
+    ],
+    practicalGuidance: [
+      "Start from a signed-in `config.office.com` session and validate access with read-only calls on the same host family you intend to automate.",
+      "Keep host-specific routing in mind: `config.office.com`, `clients.config.office.net`, and `query.inventory.insights.office.net` serve different parts of the M365 Apps experience.",
+      "Use browser capture for write flows first; setup and security-status operations include real POST and PUT requests with tenant impact.",
+    ],
+    mutationGuidance: [
+      "Treat configuration updates, Setup saves, and Security Currency Goal posts as live writes.",
+      "Capture the original values and portal request bodies before replaying any mutation, and test only in a safe tenant.",
+    ],
+    pitfalls: [
+      "The portal spreads related workflows across multiple hosts that share the same token/header model.",
+      "Preview or bundle-only hosts such as canary, sip, or health surfaces are not necessarily active in every tenant.",
+      "Missing diagnostic headers can look like generic API or auth failures even when the bearer token is valid.",
+    ],
+  },
+  {
+    title: "Intune Portal and Autopatch",
+    portals: ["Intune Portal", "Intune Autopatch"],
+    authModel: "Portal bearer token + same-origin cookies or portal headers",
+    baseUrls: [
+      "https://intune.microsoft.com/api",
+      "https://services.autopatch.microsoft.com",
+    ],
+    confirmedDetails: [
+      "Both specs use browser-obtained bearer tokens from the live Intune admin center session.",
+      "Intune Portal also carries same-origin cookies plus portal headers such as `x-ms-client-request-id`, `x-ms-client-session-id`, `x-ms-extension-flags`, and `x-requested-with`.",
+      "Intune Autopatch confirmed live tenant, support, and access-control paths on `services.autopatch.microsoft.com`, with additional support detail and mutation shapes recovered from the Support requests bundle.",
+    ],
+    practicalGuidance: [
+      "Start from a real authenticated Intune admin center browser session and validate access with read-only calls such as `GET /api/Flighting`, `GET /api/v1.0/tenant/resolve`, or `POST /api/Settings/Select`.",
+      "Keep the current blade in mind when replaying requests: Tenant administration routes can redirect into different blade namespaces such as the roles landing blade or connectors menu.",
+      "Expect the portal host to mix useful same-origin APIs with telemetry, ARM calls, and static extension loading; isolate the feature-specific calls before automating.",
+    ],
+    mutationGuidance: [
+      "Treat `POST /api/Settings/Update` and any undocumented Autopatch onboarding/support mutations as live writes with tenant impact.",
+      "If you need to map a write flow, capture the request shape from the browser first, wait before making a change, record the original value, and revert immediately after testing in a safe tenant.",
+    ],
+    pitfalls: [
+      "The Intune portal issues a large amount of telemetry and extension bootstrapping traffic that is easy to confuse with real feature APIs.",
+      "Some bundles reference Microsoft Graph or public ARM paths alongside the undocumented Intune and Autopatch hosts; only the dedicated non-Graph hosts belong in this family.",
+      "Bundle-visible paths are not always safe GETs: `PreOnboardTenant` returned `405 Method Not Allowed` when probed as a GET and should be treated as a likely write-oriented flow.",
     ],
   },
   {

@@ -1,0 +1,739 @@
+{
+    "item": [
+        {
+            "name": "api",
+            "description": "",
+            "item": [
+                {
+                    "name": "Experimentation",
+                    "description": "",
+                    "item": [
+                        {
+                            "name": "GetExtensionVariants",
+                            "description": "",
+                            "item": [
+                                {
+                                    "id": "ac527502-d6c1-478d-906d-ab9bff6d1237",
+                                    "name": "Get extension variants",
+                                    "request": {
+                                        "name": "Get extension variants",
+                                        "description": {
+                                            "content": "Resolves experimentation flights and variables for an Intune or Azure portal extension.\nConfirmed live for Intune enrollment, Intune devices, Azure Monitor, and PIM-related\nextensions while browsing tenant administration blades.\n",
+                                            "type": "text/plain"
+                                        },
+                                        "url": {
+                                            "path": [
+                                                "api",
+                                                "Experimentation",
+                                                "GetExtensionVariants"
+                                            ],
+                                            "host": [
+                                                "{{baseUrl}}"
+                                            ],
+                                            "query": [
+                                                {
+                                                    "disabled": false,
+                                                    "description": {
+                                                        "content": "(Required) Extension name whose experimentation flights should be resolved.",
+                                                        "type": "text/plain"
+                                                    },
+                                                    "key": "extension",
+                                                    "value": "microsoft_intune_enrollment"
+                                                },
+                                                {
+                                                    "disabled": false,
+                                                    "description": {
+                                                        "content": "(Required) Extension version string observed in the portal request.",
+                                                        "type": "text/plain"
+                                                    },
+                                                    "key": "extensionVersion",
+                                                    "value": "7.2603.15.3001.260326-0317"
+                                                }
+                                            ],
+                                            "variable": []
+                                        },
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            }
+                                        ],
+                                        "method": "GET",
+                                        "body": {},
+                                        "auth": null
+                                    },
+                                    "response": [
+                                        {
+                                            "id": "bea9de89-b19b-4d9a-a882-98493740486a",
+                                            "name": "Experimentation variants resolved successfully.",
+                                            "originalRequest": {
+                                                "url": {
+                                                    "path": [
+                                                        "api",
+                                                        "Experimentation",
+                                                        "GetExtensionVariants"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [
+                                                        {
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "(Required) Extension name whose experimentation flights should be resolved.",
+                                                                "type": "text/plain"
+                                                            },
+                                                            "key": "extension",
+                                                            "value": "microsoft_intune_enrollment"
+                                                        },
+                                                        {
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "(Required) Extension version string observed in the portal request.",
+                                                                "type": "text/plain"
+                                                            },
+                                                            "key": "extensionVersion",
+                                                            "value": "7.2603.15.3001.260326-0317"
+                                                        }
+                                                    ],
+                                                    "variable": []
+                                                },
+                                                "header": [
+                                                    {
+                                                        "key": "Accept",
+                                                        "value": "application/json"
+                                                    }
+                                                ],
+                                                "method": "GET",
+                                                "body": {}
+                                            },
+                                            "status": "OK",
+                                            "code": 200,
+                                            "header": [
+                                                {
+                                                    "key": "Content-Type",
+                                                    "value": "application/json"
+                                                }
+                                            ],
+                                            "body": "{\n  \"assignmentContext\": \"string\",\n  \"flights\": [\n    \"string\",\n    \"string\"\n  ],\n  \"variables\": {\n    \"key_0\": 161,\n    \"key_1\": 4724,\n    \"key_2\": 7267.951878997787\n  },\n  \"dataVersion\": 1945\n}",
+                                            "cookie": [],
+                                            "_postman_previewlanguage": "json"
+                                        },
+                                        {
+                                            "id": "38d3c26d-17bd-4621-9dda-b53c4b4398bd",
+                                            "name": "The request shape or parameters were invalid.",
+                                            "originalRequest": {
+                                                "url": {
+                                                    "path": [
+                                                        "api",
+                                                        "Experimentation",
+                                                        "GetExtensionVariants"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [
+                                                        {
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "(Required) Extension name whose experimentation flights should be resolved.",
+                                                                "type": "text/plain"
+                                                            },
+                                                            "key": "extension",
+                                                            "value": "microsoft_intune_enrollment"
+                                                        },
+                                                        {
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "(Required) Extension version string observed in the portal request.",
+                                                                "type": "text/plain"
+                                                            },
+                                                            "key": "extensionVersion",
+                                                            "value": "7.2603.15.3001.260326-0317"
+                                                        }
+                                                    ],
+                                                    "variable": []
+                                                },
+                                                "method": "GET",
+                                                "body": {}
+                                            },
+                                            "status": "Bad Request",
+                                            "code": 400,
+                                            "header": [],
+                                            "cookie": [],
+                                            "_postman_previewlanguage": "text"
+                                        },
+                                        {
+                                            "id": "7cef9474-c9d6-43e0-b916-705e57299821",
+                                            "name": "Authentication is required or the browser token is no longer valid.",
+                                            "originalRequest": {
+                                                "url": {
+                                                    "path": [
+                                                        "api",
+                                                        "Experimentation",
+                                                        "GetExtensionVariants"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [
+                                                        {
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "(Required) Extension name whose experimentation flights should be resolved.",
+                                                                "type": "text/plain"
+                                                            },
+                                                            "key": "extension",
+                                                            "value": "microsoft_intune_enrollment"
+                                                        },
+                                                        {
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "(Required) Extension version string observed in the portal request.",
+                                                                "type": "text/plain"
+                                                            },
+                                                            "key": "extensionVersion",
+                                                            "value": "7.2603.15.3001.260326-0317"
+                                                        }
+                                                    ],
+                                                    "variable": []
+                                                },
+                                                "method": "GET",
+                                                "body": {}
+                                            },
+                                            "status": "Unauthorized",
+                                            "code": 401,
+                                            "header": [],
+                                            "cookie": [],
+                                            "_postman_previewlanguage": "text"
+                                        },
+                                        {
+                                            "id": "79d6cf17-555f-4dc8-a005-2cc71f84dcfc",
+                                            "name": "The authenticated principal does not have access to the requested portal data.",
+                                            "originalRequest": {
+                                                "url": {
+                                                    "path": [
+                                                        "api",
+                                                        "Experimentation",
+                                                        "GetExtensionVariants"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [
+                                                        {
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "(Required) Extension name whose experimentation flights should be resolved.",
+                                                                "type": "text/plain"
+                                                            },
+                                                            "key": "extension",
+                                                            "value": "microsoft_intune_enrollment"
+                                                        },
+                                                        {
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "(Required) Extension version string observed in the portal request.",
+                                                                "type": "text/plain"
+                                                            },
+                                                            "key": "extensionVersion",
+                                                            "value": "7.2603.15.3001.260326-0317"
+                                                        }
+                                                    ],
+                                                    "variable": []
+                                                },
+                                                "method": "GET",
+                                                "body": {}
+                                            },
+                                            "status": "Forbidden",
+                                            "code": 403,
+                                            "header": [],
+                                            "cookie": [],
+                                            "_postman_previewlanguage": "text"
+                                        }
+                                    ],
+                                    "event": [],
+                                    "protocolProfileBehavior": {
+                                        "disableBodyPruning": true
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "Settings",
+                    "description": "",
+                    "item": [
+                        {
+                            "name": "Select",
+                            "description": "",
+                            "item": [
+                                {
+                                    "id": "8b5c901f-ef87-4f9b-b69c-3ed8af7f1c40",
+                                    "name": "Read portal persistent settings",
+                                    "request": {
+                                        "name": "Read portal persistent settings",
+                                        "description": {
+                                            "content": "Reads one or more persistent storage namespaces used by Intune portal extensions.\nConfirmed live from the Windows Autopatch groups blade using the\n`Microsoft_EMM_ModernWorkplacePersistentStorage` namespace.\n",
+                                            "type": "text/plain"
+                                        },
+                                        "url": {
+                                            "path": [
+                                                "api",
+                                                "Settings",
+                                                "Select"
+                                            ],
+                                            "host": [
+                                                "{{baseUrl}}"
+                                            ],
+                                            "query": [],
+                                            "variable": []
+                                        },
+                                        "header": [
+                                            {
+                                                "key": "Content-Type",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            }
+                                        ],
+                                        "method": "POST",
+                                        "body": {
+                                            "mode": "raw",
+                                            "raw": "[\n  \"Microsoft_EMM_ModernWorkplacePersistentStorage\"\n]",
+                                            "options": {
+                                                "raw": {
+                                                    "headerFamily": "json",
+                                                    "language": "json"
+                                                }
+                                            }
+                                        },
+                                        "auth": null
+                                    },
+                                    "response": [
+                                        {
+                                            "id": "e8b6896e-0d5e-4824-aa1f-9d26d24dc639",
+                                            "name": "Requested storage namespaces returned successfully.",
+                                            "originalRequest": {
+                                                "url": {
+                                                    "path": [
+                                                        "api",
+                                                        "Settings",
+                                                        "Select"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [],
+                                                    "variable": []
+                                                },
+                                                "header": [
+                                                    {
+                                                        "key": "Content-Type",
+                                                        "value": "application/json"
+                                                    },
+                                                    {
+                                                        "key": "Accept",
+                                                        "value": "application/json"
+                                                    }
+                                                ],
+                                                "method": "POST",
+                                                "body": {
+                                                    "mode": "raw",
+                                                    "raw": "[\n  \"Microsoft_EMM_ModernWorkplacePersistentStorage\"\n]",
+                                                    "options": {
+                                                        "raw": {
+                                                            "headerFamily": "json",
+                                                            "language": "json"
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            "status": "OK",
+                                            "code": 200,
+                                            "header": [
+                                                {
+                                                    "key": "Content-Type",
+                                                    "value": "application/json"
+                                                }
+                                            ],
+                                            "body": "{\n  \"Microsoft_EMM_ModernWorkplacePersistentStorage\": {}\n}",
+                                            "cookie": [],
+                                            "_postman_previewlanguage": "json"
+                                        },
+                                        {
+                                            "id": "53c0fd45-cc11-4f68-8179-a345ff48deb0",
+                                            "name": "The request shape or parameters were invalid.",
+                                            "originalRequest": {
+                                                "url": {
+                                                    "path": [
+                                                        "api",
+                                                        "Settings",
+                                                        "Select"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [],
+                                                    "variable": []
+                                                },
+                                                "header": [
+                                                    {
+                                                        "key": "Content-Type",
+                                                        "value": "application/json"
+                                                    }
+                                                ],
+                                                "method": "POST",
+                                                "body": {
+                                                    "mode": "raw",
+                                                    "raw": "[\n  \"Microsoft_EMM_ModernWorkplacePersistentStorage\"\n]",
+                                                    "options": {
+                                                        "raw": {
+                                                            "headerFamily": "json",
+                                                            "language": "json"
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            "status": "Bad Request",
+                                            "code": 400,
+                                            "header": [],
+                                            "cookie": [],
+                                            "_postman_previewlanguage": "text"
+                                        },
+                                        {
+                                            "id": "4643cfd1-4f02-4991-bd0c-2a5dcdaaef04",
+                                            "name": "Authentication is required or the browser token is no longer valid.",
+                                            "originalRequest": {
+                                                "url": {
+                                                    "path": [
+                                                        "api",
+                                                        "Settings",
+                                                        "Select"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [],
+                                                    "variable": []
+                                                },
+                                                "header": [
+                                                    {
+                                                        "key": "Content-Type",
+                                                        "value": "application/json"
+                                                    }
+                                                ],
+                                                "method": "POST",
+                                                "body": {
+                                                    "mode": "raw",
+                                                    "raw": "[\n  \"Microsoft_EMM_ModernWorkplacePersistentStorage\"\n]",
+                                                    "options": {
+                                                        "raw": {
+                                                            "headerFamily": "json",
+                                                            "language": "json"
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            "status": "Unauthorized",
+                                            "code": 401,
+                                            "header": [],
+                                            "cookie": [],
+                                            "_postman_previewlanguage": "text"
+                                        },
+                                        {
+                                            "id": "45af9cca-9f94-4c5f-9a1f-9b95ac82b503",
+                                            "name": "The authenticated principal does not have access to the requested portal data.",
+                                            "originalRequest": {
+                                                "url": {
+                                                    "path": [
+                                                        "api",
+                                                        "Settings",
+                                                        "Select"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [],
+                                                    "variable": []
+                                                },
+                                                "header": [
+                                                    {
+                                                        "key": "Content-Type",
+                                                        "value": "application/json"
+                                                    }
+                                                ],
+                                                "method": "POST",
+                                                "body": {
+                                                    "mode": "raw",
+                                                    "raw": "[\n  \"Microsoft_EMM_ModernWorkplacePersistentStorage\"\n]",
+                                                    "options": {
+                                                        "raw": {
+                                                            "headerFamily": "json",
+                                                            "language": "json"
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            "status": "Forbidden",
+                                            "code": 403,
+                                            "header": [],
+                                            "cookie": [],
+                                            "_postman_previewlanguage": "text"
+                                        }
+                                    ],
+                                    "event": [],
+                                    "protocolProfileBehavior": {
+                                        "disableBodyPruning": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "Update",
+                            "description": "",
+                            "item": [
+                                {
+                                    "id": "71130ed2-394e-4567-9c2e-027cbfc528f4",
+                                    "name": "Update portal persistent settings",
+                                    "request": {
+                                        "name": "Update portal persistent settings",
+                                        "description": {
+                                            "content": "Persists or removes values in Intune portal storage namespaces. Confirmed live through a\nsame-origin portal save call with the namespace\n`Microsoft_Intune_DeviceSettingsPersistentStorage` and the key\n`Intune_isCopilotEnabled`.\n",
+                                            "type": "text/plain"
+                                        },
+                                        "url": {
+                                            "path": [
+                                                "api",
+                                                "Settings",
+                                                "Update"
+                                            ],
+                                            "host": [
+                                                "{{baseUrl}}"
+                                            ],
+                                            "query": [],
+                                            "variable": []
+                                        },
+                                        "header": [
+                                            {
+                                                "key": "Content-Type",
+                                                "value": "application/json"
+                                            }
+                                        ],
+                                        "method": "POST",
+                                        "body": {
+                                            "mode": "raw",
+                                            "raw": "{\n  \"save\": {\n    \"Microsoft_Intune_DeviceSettingsPersistentStorage\": {\n      \"Intune_isCopilotEnabled\": \"true\"\n    }\n  },\n  \"remove\": {}\n}",
+                                            "options": {
+                                                "raw": {
+                                                    "headerFamily": "json",
+                                                    "language": "json"
+                                                }
+                                            }
+                                        },
+                                        "auth": null
+                                    },
+                                    "response": [
+                                        {
+                                            "id": "8a8b60f7-9691-4f91-af54-cc117e83bcb7",
+                                            "name": "Settings updated successfully.",
+                                            "originalRequest": {
+                                                "url": {
+                                                    "path": [
+                                                        "api",
+                                                        "Settings",
+                                                        "Update"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [],
+                                                    "variable": []
+                                                },
+                                                "header": [
+                                                    {
+                                                        "key": "Content-Type",
+                                                        "value": "application/json"
+                                                    }
+                                                ],
+                                                "method": "POST",
+                                                "body": {
+                                                    "mode": "raw",
+                                                    "raw": "{\n  \"save\": {\n    \"Microsoft_Intune_DeviceSettingsPersistentStorage\": {\n      \"Intune_isCopilotEnabled\": \"true\"\n    }\n  },\n  \"remove\": {}\n}",
+                                                    "options": {
+                                                        "raw": {
+                                                            "headerFamily": "json",
+                                                            "language": "json"
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            "status": "No Content",
+                                            "code": 204,
+                                            "header": [],
+                                            "cookie": [],
+                                            "_postman_previewlanguage": "text"
+                                        },
+                                        {
+                                            "id": "edf0bd07-77d0-4da6-a5ac-b3e02e44c0d4",
+                                            "name": "The request shape or parameters were invalid.",
+                                            "originalRequest": {
+                                                "url": {
+                                                    "path": [
+                                                        "api",
+                                                        "Settings",
+                                                        "Update"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [],
+                                                    "variable": []
+                                                },
+                                                "header": [
+                                                    {
+                                                        "key": "Content-Type",
+                                                        "value": "application/json"
+                                                    }
+                                                ],
+                                                "method": "POST",
+                                                "body": {
+                                                    "mode": "raw",
+                                                    "raw": "{\n  \"save\": {\n    \"Microsoft_Intune_DeviceSettingsPersistentStorage\": {\n      \"Intune_isCopilotEnabled\": \"true\"\n    }\n  },\n  \"remove\": {}\n}",
+                                                    "options": {
+                                                        "raw": {
+                                                            "headerFamily": "json",
+                                                            "language": "json"
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            "status": "Bad Request",
+                                            "code": 400,
+                                            "header": [],
+                                            "cookie": [],
+                                            "_postman_previewlanguage": "text"
+                                        },
+                                        {
+                                            "id": "c24bf3db-bcf5-4cc7-ab97-c3a126635ace",
+                                            "name": "Authentication is required or the browser token is no longer valid.",
+                                            "originalRequest": {
+                                                "url": {
+                                                    "path": [
+                                                        "api",
+                                                        "Settings",
+                                                        "Update"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [],
+                                                    "variable": []
+                                                },
+                                                "header": [
+                                                    {
+                                                        "key": "Content-Type",
+                                                        "value": "application/json"
+                                                    }
+                                                ],
+                                                "method": "POST",
+                                                "body": {
+                                                    "mode": "raw",
+                                                    "raw": "{\n  \"save\": {\n    \"Microsoft_Intune_DeviceSettingsPersistentStorage\": {\n      \"Intune_isCopilotEnabled\": \"true\"\n    }\n  },\n  \"remove\": {}\n}",
+                                                    "options": {
+                                                        "raw": {
+                                                            "headerFamily": "json",
+                                                            "language": "json"
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            "status": "Unauthorized",
+                                            "code": 401,
+                                            "header": [],
+                                            "cookie": [],
+                                            "_postman_previewlanguage": "text"
+                                        },
+                                        {
+                                            "id": "e1bf654d-dc98-4aec-8294-13047f3589b4",
+                                            "name": "The authenticated principal does not have access to the requested portal data.",
+                                            "originalRequest": {
+                                                "url": {
+                                                    "path": [
+                                                        "api",
+                                                        "Settings",
+                                                        "Update"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [],
+                                                    "variable": []
+                                                },
+                                                "header": [
+                                                    {
+                                                        "key": "Content-Type",
+                                                        "value": "application/json"
+                                                    }
+                                                ],
+                                                "method": "POST",
+                                                "body": {
+                                                    "mode": "raw",
+                                                    "raw": "{\n  \"save\": {\n    \"Microsoft_Intune_DeviceSettingsPersistentStorage\": {\n      \"Intune_isCopilotEnabled\": \"true\"\n    }\n  },\n  \"remove\": {}\n}",
+                                                    "options": {
+                                                        "raw": {
+                                                            "headerFamily": "json",
+                                                            "language": "json"
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            "status": "Forbidden",
+                                            "code": 403,
+                                            "header": [],
+                                            "cookie": [],
+                                            "_postman_previewlanguage": "text"
+                                        }
+                                    ],
+                                    "event": [],
+                                    "protocolProfileBehavior": {
+                                        "disableBodyPruning": true
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "auth": {
+        "type": "bearer",
+        "bearer": [
+            {
+                "type": "any",
+                "value": "{{bearerToken}}",
+                "key": "token"
+            }
+        ]
+    },
+    "event": [],
+    "variable": [
+        {
+            "key": "baseUrl",
+            "value": "https://intune.microsoft.com"
+        }
+    ],
+    "info": {
+        "_postman_id": "026a2cc6-ceb9-4239-8011-88c1f15f0b26",
+        "name": "Intune Portal",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+        "description": {
+            "content": "The Intune Portal API is used by the Microsoft Intune admin center (`intune.microsoft.com`)\nfor same-origin portal experimentation and persistent client-side settings storage.\n\nThe operations below were confirmed while browsing the Tenant administration section of the\nIntune admin center with a real authenticated Edge session. They were observed on blades such as:\n\n  - Windows Autopatch > Autopatch groups\n  - Tenant administration > Terms and conditions\n  - Tenant administration > Diagnostics settings\n  - Tenant administration > Microsoft Entra Privileged Identity Management\n  - Tenant administration > Multi Admin Approval\n\nRequests use a browser-obtained bearer token together with same-origin portal cookies and\nportal headers such as `x-ms-client-request-id`, `x-ms-client-session-id`,\n`x-ms-effective-locale`, `x-ms-extension-flags`, and `x-requested-with`.\n\n`POST /api/Settings/Select` and `POST /api/Settings/Update` operate on named persistent\nstorage buckets. Observed namespaces included `Microsoft_EMM_ModernWorkplacePersistentStorage`\nand `Microsoft_Intune_DeviceSettingsPersistentStorage`.\n\nDocumentation and specifications have been provided on a best-efforts basis and may not be\n100% accurate.\n\n\nContact Support:\n Name: nodoc",
+            "type": "text/plain"
+        }
+    }
+}

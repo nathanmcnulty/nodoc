@@ -1,0 +1,909 @@
+openapi: 3.0.1
+info:
+  title: M365 Apps Inventory
+  x-nodoc-category: M365 Apps
+  description: |
+    The M365 Apps Inventory API is used by the Microsoft 365 Apps admin center
+    to query device inventory, build summaries, add-ins, setup state, and
+    security update currency from `query.inventory.insights.office.net`.
+
+    This surface was observed while browsing:
+
+      - Home and Cloud Update
+      - Inventory
+      - Security Update Status
+      - Setup
+
+    Requests use portal-issued bearer tokens together with diagnostic headers such
+    as `x-api-name`, `x-correlationid`, `x-manageoffice-client-sid`, and
+    `x-requested-with`. Most observed requests specify `api-version=1.1` and
+    accept OData-style query options.
+
+    A second pass with token-backed probes confirmed additional inventory
+    families including Languages, OfficeApplications, OfficeAddinVersions,
+    Onboarding, `GetLatestSecurityReleasesPerServicingChannel`, and the
+    `SecurityVulnerabilities` endpoints. Intercepted save flows also exposed the
+    request bodies used by Setup (`POST /inventory/api/Settings`) and Security
+    Update Status (`POST /inventory/api/SecurityCurrencyGoal`).
+
+    Export paths and the configured but still-unlit host
+    `health.insights.office.net` remain bundle discoveries that were not
+    exercised in the current tenant.
+
+    Documentation and specifications have been provided on a best-efforts basis and
+    may not be 100% accurate.
+  version: 0.1.0
+  contact:
+    name: nodoc
+    url: https://github.com/nathanmcnulty/nodoc
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+servers:
+  - url: https://query.inventory.insights.office.net
+    description: M365 Apps inventory and health data API
+security:
+  - bearerAuth: []
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        Portal-issued bearer token used by the M365 Apps admin center inventory
+        experiences. Observed requests also include portal diagnostic headers
+        such as `x-api-name`, `x-correlationid`, `x-manageoffice-client-sid`,
+        and `x-requested-with`.
+  parameters:
+    apiVersion:
+      name: api-version
+      in: query
+      required: true
+      description: Observed inventory API version.
+      schema:
+        type: string
+        example: '1.1'
+    goalId:
+      name: goalId
+      in: path
+      required: true
+      description: Security currency goal identifier.
+      schema:
+        type: string
+        format: uuid
+    settingsId:
+      name: settingsId
+      in: path
+      required: true
+      description: Inventory settings identifier.
+      schema:
+        type: string
+        format: uuid
+    select:
+      name: $select
+      in: query
+      description: OData projection expression.
+      schema:
+        type: string
+    expand:
+      name: $expand
+      in: query
+      description: OData expand expression.
+      schema:
+        type: string
+    filter:
+      name: $filter
+      in: query
+      description: OData filter expression.
+      schema:
+        type: string
+    top:
+      name: $top
+      in: query
+      description: Maximum number of results to return.
+      schema:
+        type: integer
+    skip:
+      name: $skip
+      in: query
+      description: Number of results to skip.
+      schema:
+        type: integer
+    count:
+      name: $count
+      in: query
+      description: Whether to include a count in the response.
+      schema:
+        type: boolean
+    orderby:
+      name: $orderby
+      in: query
+      description: OData sort expression.
+      schema:
+        type: string
+    cloudManagement:
+      name: cloudManagement
+      in: query
+      description: Comma-separated cloud management modes to include.
+      schema:
+        type: string
+    mecVersion:
+      name: mecVersion
+      in: query
+      description: Monthly Enterprise build version used in update progress calculations.
+      schema:
+        type: string
+    ccVersion:
+      name: ccVersion
+      in: query
+      description: Current Channel build version used in update progress calculations.
+      schema:
+        type: string
+    saecVersion:
+      name: saecVersion
+      in: query
+      description: Semi-Annual Enterprise Channel build version used in update progress calculations.
+      schema:
+        type: string
+  schemas:
+    GenericObject:
+      type: object
+      additionalProperties: true
+    InventoryCollection:
+      type: object
+      description: Generic OData-style collection returned by inventory endpoints.
+      properties:
+        '@odata.context':
+          type: string
+        '@odata.count':
+          type: integer
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/GenericObject'
+      required:
+        - '@odata.context'
+        - value
+    DeviceUpdateStatusSummary:
+      type: object
+      properties:
+        updateStatus:
+          type: string
+        numberOfDevices:
+          type: integer
+      required:
+        - updateStatus
+        - numberOfDevices
+    DeviceUpdateProgressChannelSummary:
+      type: object
+      properties:
+        targetChannel:
+          type: string
+        updateStatusSummary:
+          type: array
+          items:
+            $ref: '#/components/schemas/DeviceUpdateStatusSummary'
+      required:
+        - targetChannel
+        - updateStatusSummary
+    DeviceUpdateProgressSummaryResponse:
+      type: object
+      properties:
+        '@odata.context':
+          type: string
+        totalNumberOfDevices:
+          type: integer
+        summary:
+          type: array
+          items:
+            $ref: '#/components/schemas/DeviceUpdateProgressChannelSummary'
+      required:
+        - '@odata.context'
+        - totalNumberOfDevices
+        - summary
+    DeviceSummary:
+      type: object
+      properties:
+        '@odata.context':
+          type: string
+        totalDevices:
+          type: integer
+        officeArchitectureCounts:
+          type: array
+          items:
+            $ref: '#/components/schemas/GenericObject'
+      required:
+        - '@odata.context'
+        - totalDevices
+        - officeArchitectureCounts
+    LatestPatchDate:
+      type: object
+      properties:
+        '@odata.context':
+          type: string
+        latestPatchDate:
+          type: string
+          format: date-time
+        latestPatchDateKnown:
+          type: boolean
+      required:
+        - '@odata.context'
+        - latestPatchDate
+        - latestPatchDateKnown
+    SecurityRelease:
+      type: object
+      properties:
+        officeServicingChannel:
+          type: string
+        releaseType:
+          type: string
+        buildVersion:
+          type: string
+        releaseVersion:
+          type: string
+        availabilityDate:
+          type: string
+          format: date-time
+        endOfSupportDate:
+          type: string
+          format: date-time
+        cveIds:
+          type: array
+          items:
+            type: string
+      additionalProperties: true
+    SecurityReleaseCollection:
+      type: object
+      properties:
+        '@odata.context':
+          type: string
+        '@odata.count':
+          type: integer
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/SecurityRelease'
+      required:
+        - '@odata.context'
+        - value
+    SecurityCurrencyMetrics:
+      type: object
+      properties:
+        '@odata.context':
+          type: string
+        securityCurrencyDevicesWithAppsTotal:
+          type: integer
+        securityCurrencyUpToDateDevicesTotal:
+          type: integer
+        securityCurrencyNotUpToDateDevicesTotal:
+          type: integer
+        securityCurrencyUnknownStatusDevicesTotal:
+          type: integer
+      required:
+        - '@odata.context'
+        - securityCurrencyDevicesWithAppsTotal
+        - securityCurrencyUpToDateDevicesTotal
+        - securityCurrencyNotUpToDateDevicesTotal
+        - securityCurrencyUnknownStatusDevicesTotal
+    SecurityCurrencyGoal:
+      type: object
+      properties:
+        securityCurrencyGoalId:
+          type: string
+          format: uuid
+        securityCurrencyGoalTimeInDays:
+          type: integer
+          minimum: 0
+          maximum: 30
+        securityCurrencyGoalPercentage:
+          type: integer
+          minimum: 0
+          maximum: 100
+      required:
+        - securityCurrencyGoalId
+        - securityCurrencyGoalTimeInDays
+        - securityCurrencyGoalPercentage
+    SecurityCurrencyGoalUpdate:
+      type: object
+      properties:
+        securityCurrencyGoalTimeInDays:
+          type: integer
+          minimum: 0
+          maximum: 30
+        securityCurrencyGoalPercentage:
+          type: integer
+          minimum: 0
+          maximum: 100
+      required:
+        - securityCurrencyGoalTimeInDays
+        - securityCurrencyGoalPercentage
+    InventorySettings:
+      type: object
+      properties:
+        '@odata.context':
+          type: string
+        settingsId:
+          type: string
+          format: uuid
+        deviceRetentionInDays:
+          type: integer
+        deviceInactiveThresholdInDays:
+          type: integer
+          nullable: true
+      required:
+        - '@odata.context'
+        - settingsId
+        - deviceRetentionInDays
+    InventorySettingsUpdateRequest:
+      type: object
+      properties:
+        settingsId:
+          type: string
+          format: uuid
+        deviceRetentionInDays:
+          type: integer
+          minimum: 30
+          maximum: 180
+        deviceInactiveThresholdInDays:
+          type: integer
+          nullable: true
+      required:
+        - settingsId
+        - deviceRetentionInDays
+    InventorySettingsDeltaRequest:
+      type: object
+      properties:
+        deviceRetentionInDays:
+          type: integer
+          minimum: 30
+          maximum: 180
+        deviceInactiveThresholdInDays:
+          type: integer
+          nullable: true
+      required:
+        - deviceRetentionInDays
+    OnboardingState:
+      type: object
+      properties:
+        '@odata.context':
+          type: string
+        onboardingLink:
+          type: string
+        onboardingStatus:
+          type: string
+      required:
+        - '@odata.context'
+        - onboardingLink
+        - onboardingStatus
+    PlainInteger:
+      type: integer
+tags:
+  - name: Devices
+    description: Inventory queries for device counts, build summaries, and add-in rollups.
+  - name: Onboarding
+    description: Inventory onboarding and offboarding operations exposed on setup-enabled tenants.
+  - name: Update Progress
+    description: Cloud Update progress calculations by servicing channel.
+  - name: Security Currency
+    description: Security update status and latest patch posture used by the health page.
+  - name: Security Vulnerabilities
+    description: Vulnerability rollups and device lists lit by hidden security experiences.
+  - name: Settings
+    description: Inventory and setup settings exposed through the inventory service.
+paths:
+  /inventory/api/DeviceActions/GetUpdateProgressSummaryByChannel():
+    get:
+      tags: [Update Progress]
+      summary: Get update progress summary by channel
+      description: Returns update progress totals by servicing channel and update state.
+      parameters:
+        - $ref: '#/components/parameters/cloudManagement'
+        - $ref: '#/components/parameters/mecVersion'
+        - $ref: '#/components/parameters/ccVersion'
+        - $ref: '#/components/parameters/saecVersion'
+      responses:
+        '200':
+          description: Update progress summary
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceUpdateProgressSummaryResponse'
+  /inventory/api/Devices:
+    get:
+      tags: [Devices]
+      summary: Query devices
+      description: Returns an OData-style collection of devices filtered by inventory attributes.
+      parameters:
+        - $ref: '#/components/parameters/apiVersion'
+        - $ref: '#/components/parameters/filter'
+        - $ref: '#/components/parameters/top'
+        - $ref: '#/components/parameters/count'
+      responses:
+        '200':
+          description: Device collection
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryCollection'
+  /inventory/api/Devices/GetDeviceSummary:
+    get:
+      tags: [Devices]
+      summary: Get device summary
+      description: Returns aggregate device totals and architecture counts used by the Inventory landing page.
+      parameters:
+        - $ref: '#/components/parameters/apiVersion'
+      responses:
+        '200':
+          description: Device summary
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceSummary'
+  /inventory/api/DevicesWithCloudManagementInfo:
+    get:
+      tags: [Devices]
+      summary: Query devices with cloud management info
+      description: Returns devices enriched with cloud management state and related metadata.
+      parameters:
+        - $ref: '#/components/parameters/apiVersion'
+        - $ref: '#/components/parameters/filter'
+      responses:
+        '200':
+          description: Device collection with cloud management information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryCollection'
+  /inventory/api/DevicesWithMetadata/GetOfficeBuildChannelSummaryWithMetadata:
+    get:
+      tags: [Devices]
+      summary: Get Office build channel summary with metadata
+      description: Returns inventory rollups by servicing channel, including metadata for the Inventory page.
+      parameters:
+        - $ref: '#/components/parameters/apiVersion'
+        - $ref: '#/components/parameters/orderby'
+        - $ref: '#/components/parameters/count'
+      responses:
+        '200':
+          description: Channel summary collection
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryCollection'
+  /inventory/api/DevicesWithMetadata/GetOfficeBuildDeviceSummaryWithMetadata:
+    get:
+      tags: [Devices]
+      summary: Get Office build device summary with metadata
+      description: Returns inventory rollups by Office build, including metadata for display and filtering.
+      parameters:
+        - $ref: '#/components/parameters/apiVersion'
+        - $ref: '#/components/parameters/count'
+      responses:
+        '200':
+          description: Office build summary collection
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryCollection'
+  /inventory/api/OfficeAddins:
+    get:
+      tags: [Devices]
+      summary: List Office add-ins
+      description: Returns add-in inventory ordered by number of devices.
+      parameters:
+        - $ref: '#/components/parameters/apiVersion'
+        - $ref: '#/components/parameters/orderby'
+        - $ref: '#/components/parameters/top'
+        - $ref: '#/components/parameters/skip'
+        - $ref: '#/components/parameters/count'
+      responses:
+        '200':
+          description: Office add-in inventory
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryCollection'
+  /inventory/api/OfficeAddins/$Count:
+    get:
+      tags: [Devices]
+      summary: Count Office add-ins
+      description: Returns the total number of Office add-ins as plain text.
+      parameters:
+        - $ref: '#/components/parameters/apiVersion'
+      responses:
+        '200':
+          description: Add-in count
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/PlainInteger'
+              example: 0
+  /inventory/api/Languages:
+    get:
+      tags: [Devices]
+      summary: List Office UI languages
+      description: Returns inventoried Office language-pack rollups. The hidden collection endpoint was confirmed through a token-backed probe and returned an empty collection in the current tenant.
+      parameters:
+        - $ref: '#/components/parameters/apiVersion'
+        - $ref: '#/components/parameters/select'
+        - $ref: '#/components/parameters/expand'
+        - $ref: '#/components/parameters/filter'
+        - $ref: '#/components/parameters/orderby'
+        - $ref: '#/components/parameters/top'
+        - $ref: '#/components/parameters/skip'
+        - $ref: '#/components/parameters/count'
+      responses:
+        '200':
+          description: Office language inventory
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryCollection'
+  /inventory/api/OfficeApplications:
+    get:
+      tags: [Devices]
+      summary: List Office applications
+      description: Returns inventoried Office application rollups. The hidden collection endpoint was confirmed through a token-backed probe and returned an empty collection in the current tenant.
+      parameters:
+        - $ref: '#/components/parameters/apiVersion'
+        - $ref: '#/components/parameters/select'
+        - $ref: '#/components/parameters/expand'
+        - $ref: '#/components/parameters/filter'
+        - $ref: '#/components/parameters/orderby'
+        - $ref: '#/components/parameters/top'
+        - $ref: '#/components/parameters/skip'
+        - $ref: '#/components/parameters/count'
+      responses:
+        '200':
+          description: Office application inventory
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryCollection'
+  /inventory/api/OfficeAddinVersions:
+    get:
+      tags: [Devices]
+      summary: List Office add-in versions
+      description: Returns Office add-in version rollups that power deeper add-in drill-down views. The hidden collection endpoint returned an empty collection in the current tenant.
+      parameters:
+        - $ref: '#/components/parameters/apiVersion'
+        - $ref: '#/components/parameters/select'
+        - $ref: '#/components/parameters/expand'
+        - $ref: '#/components/parameters/filter'
+        - $ref: '#/components/parameters/orderby'
+        - $ref: '#/components/parameters/top'
+        - $ref: '#/components/parameters/skip'
+        - $ref: '#/components/parameters/count'
+      responses:
+        '200':
+          description: Office add-in version inventory
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryCollection'
+  /inventory/api/Onboarding:
+    get:
+      tags: [Onboarding]
+      summary: Get inventory onboarding state
+      description: Returns the tenant onboarding state and the onboarding action link. Hidden endpoint confirmed by a token-backed probe.
+      parameters:
+        - $ref: '#/components/parameters/apiVersion'
+        - $ref: '#/components/parameters/select'
+        - $ref: '#/components/parameters/expand'
+      responses:
+        '200':
+          description: Onboarding state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OnboardingState'
+  /inventory/api/Onboarding/Onboard():
+    post:
+      tags: [Onboarding]
+      summary: Start inventory onboarding
+      description: |
+        Bundle-generated inventory client exposes this POST to start onboarding.
+        It was not executed because the current tenant already reported
+        `onboardingStatus: Onboarded`.
+      parameters:
+        - $ref: '#/components/parameters/apiVersion'
+        - $ref: '#/components/parameters/select'
+        - $ref: '#/components/parameters/expand'
+      responses:
+        '200':
+          description: Onboarding state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OnboardingState'
+        '202':
+          description: Onboarding accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OnboardingState'
+        '422':
+          description: Tenant is already onboarded or cannot be onboarded
+  /inventory/api/Onboarding/Offboard:
+    post:
+      tags: [Onboarding]
+      summary: Start inventory offboarding
+      description: Bundle-generated inventory client exposes this POST to offboard a tenant from inventory collection. This request was not executed in the current tenant.
+      parameters:
+        - $ref: '#/components/parameters/apiVersion'
+      responses:
+        '200':
+          description: Offboarding acknowledged
+        '204':
+          description: Offboarding completed with no response body
+        '422':
+          description: Tenant is not onboarded or is not allow-listed for offboarding
+  /inventory/api/SecurityCurrencyDevices/GetLatestPatchDate:
+    get:
+      tags: [Security Currency]
+      summary: Get latest patch date
+      description: Returns the most recent patch date known to the security currency pipeline.
+      parameters:
+        - $ref: '#/components/parameters/apiVersion'
+      responses:
+        '200':
+          description: Latest patch information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LatestPatchDate'
+  /inventory/api/SecurityCurrencyDevices/GetLatestSecurityReleasesPerServicingChannel:
+    get:
+      tags: [Security Currency]
+      summary: Get latest security releases per servicing channel
+      description: Returns the latest Office security release metadata per servicing channel, including build and CVE rollup details.
+      parameters:
+        - $ref: '#/components/parameters/apiVersion'
+        - $ref: '#/components/parameters/select'
+        - $ref: '#/components/parameters/expand'
+        - $ref: '#/components/parameters/filter'
+        - $ref: '#/components/parameters/orderby'
+        - $ref: '#/components/parameters/top'
+        - $ref: '#/components/parameters/skip'
+        - $ref: '#/components/parameters/count'
+      responses:
+        '200':
+          description: Security releases by servicing channel
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SecurityReleaseCollection'
+  /inventory/api/SecurityCurrencyDevices/GetSecurityUpdateStatusMetrics:
+    get:
+      tags: [Security Currency]
+      summary: Get security update status metrics
+      description: Returns aggregate security update status totals for inventoried devices.
+      parameters:
+        - $ref: '#/components/parameters/apiVersion'
+      responses:
+        '200':
+          description: Security update status metrics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SecurityCurrencyMetrics'
+  /inventory/api/SecurityCurrencyDevices/GetSecurityUpdateStatusMetricsByChannel:
+    get:
+      tags: [Security Currency]
+      summary: Get security update status metrics by channel
+      description: Returns per-channel security update status metrics as an OData-style collection.
+      parameters:
+        - $ref: '#/components/parameters/apiVersion'
+      responses:
+        '200':
+          description: Security update status metrics by channel
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryCollection'
+  /inventory/api/SecurityCurrencyGoal:
+    get:
+      tags: [Security Currency]
+      summary: Get security currency goal
+      description: Returns the configured security currency goal when available. In the observed tenant this returned 404.
+      parameters:
+        - $ref: '#/components/parameters/apiVersion'
+      responses:
+        '200':
+          description: Security currency goal
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SecurityCurrencyGoal'
+        '404':
+          description: Security currency goal is not configured or the feature is unavailable for the tenant
+    post:
+      tags: [Security Currency]
+      summary: Create security currency goal
+      description: |
+        Captured by intercepting the Set a goal flyout save request after setting
+        a 10-day / 8% sample target. The request was aborted before persistence, so
+        no goal was created in the tenant.
+      parameters:
+        - $ref: '#/components/parameters/apiVersion'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SecurityCurrencyGoal'
+      responses:
+        '200':
+          description: Goal created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SecurityCurrencyGoal'
+        '204':
+          description: Goal created with no response body
+        '409':
+          description: Tenant is not successfully onboarded
+  /inventory/api/SecurityCurrencyGoal({goalId}):
+    patch:
+      tags: [Security Currency]
+      summary: Update security currency goal
+      description: Bundle-generated inventory client exposes an entity PATCH endpoint for modifying an existing goal after creation.
+      parameters:
+        - $ref: '#/components/parameters/goalId'
+        - $ref: '#/components/parameters/apiVersion'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SecurityCurrencyGoalUpdate'
+      responses:
+        '200':
+          description: Updated goal
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SecurityCurrencyGoal'
+        '400':
+          description: Goal update payload is invalid
+        '404':
+          description: Security currency goal was not found
+        '409':
+          description: Tenant is not successfully onboarded
+  /inventory/api/SecurityVulnerabilities/GetSecurityVulnerabilityByChannel:
+    get:
+      tags: [Security Vulnerabilities]
+      summary: List security vulnerabilities by channel
+      description: Hidden security-currency companion endpoint that returned an empty OData collection in the current tenant.
+      parameters:
+        - $ref: '#/components/parameters/apiVersion'
+        - $ref: '#/components/parameters/select'
+        - $ref: '#/components/parameters/expand'
+        - $ref: '#/components/parameters/filter'
+        - $ref: '#/components/parameters/orderby'
+        - $ref: '#/components/parameters/top'
+        - $ref: '#/components/parameters/skip'
+        - $ref: '#/components/parameters/count'
+      responses:
+        '200':
+          description: Vulnerabilities grouped by channel
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryCollection'
+  /inventory/api/SecurityVulnerabilities/GetSecurityVulnerabilityByReleaseDate:
+    get:
+      tags: [Security Vulnerabilities]
+      summary: List security vulnerabilities by release date
+      description: Hidden security-currency companion endpoint that returned an empty OData collection in the current tenant.
+      parameters:
+        - $ref: '#/components/parameters/apiVersion'
+        - $ref: '#/components/parameters/select'
+        - $ref: '#/components/parameters/expand'
+        - $ref: '#/components/parameters/filter'
+        - $ref: '#/components/parameters/orderby'
+        - $ref: '#/components/parameters/top'
+        - $ref: '#/components/parameters/skip'
+        - $ref: '#/components/parameters/count'
+      responses:
+        '200':
+          description: Vulnerabilities grouped by release date
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryCollection'
+  /inventory/api/SecurityVulnerabilitiesDevices/GetSecurityVulnerabilityForEveryDevice():
+    get:
+      tags: [Security Vulnerabilities]
+      summary: List device-level security vulnerabilities
+      description: Hidden device-level vulnerability endpoint that returned an empty OData collection in the current tenant.
+      parameters:
+        - $ref: '#/components/parameters/apiVersion'
+        - $ref: '#/components/parameters/select'
+        - $ref: '#/components/parameters/expand'
+        - $ref: '#/components/parameters/filter'
+        - $ref: '#/components/parameters/orderby'
+        - $ref: '#/components/parameters/top'
+        - $ref: '#/components/parameters/skip'
+        - $ref: '#/components/parameters/count'
+      responses:
+        '200':
+          description: Vulnerabilities for every device
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryCollection'
+  /inventory/api/Settings:
+    get:
+      tags: [Settings]
+      summary: Get inventory settings
+      description: Returns retention and inactivity settings used by Setup and inventory onboarding.
+      parameters:
+        - $ref: '#/components/parameters/apiVersion'
+      responses:
+        '200':
+          description: Inventory settings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventorySettings'
+    post:
+      tags: [Settings]
+      summary: Update inventory settings
+      description: |
+        Captured by intercepting the Setup page retention-slider save request.
+        The UI emitted a POST to the collection URL with the current `settingsId`
+        and the selected retention value. The intercepted slider moved from `30`
+        to `35`, revealing the UI's 5-day increment behavior.
+      parameters:
+        - $ref: '#/components/parameters/apiVersion'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InventorySettingsUpdateRequest'
+      responses:
+        '200':
+          description: Updated inventory settings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventorySettings'
+        '204':
+          description: Settings updated with no response body
+        '400':
+          description: Settings payload is invalid or outside the retention bounds
+        '409':
+          description: Tenant is not successfully onboarded
+  /inventory/api/Settings({settingsId}):
+    patch:
+      tags: [Settings]
+      summary: Patch inventory settings by id
+      description: |
+        Bundle-generated inventory client also exposes a PATCH-by-id delta
+        endpoint for the same settings entity. The current Setup page save flow
+        used the collection POST above instead.
+      parameters:
+        - $ref: '#/components/parameters/settingsId'
+        - $ref: '#/components/parameters/apiVersion'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InventorySettingsDeltaRequest'
+      responses:
+        '200':
+          description: Updated inventory settings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventorySettings'
+        '400':
+          description: Settings patch payload is invalid or outside the retention bounds
+        '404':
+          description: Settings entity was not found
+        '409':
+          description: Tenant is not successfully onboarded
