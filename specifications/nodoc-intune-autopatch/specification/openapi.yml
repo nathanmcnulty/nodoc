@@ -118,9 +118,7 @@ components:
       required: true
       description: Managed service plan identifier.
       schema:
-        type: string
-        enum: [Starter, Premium]
-        example: Starter
+        $ref: '#/components/schemas/ManagedServicePlan'
     adminAction:
       name: adminAction
       in: query
@@ -506,6 +504,10 @@ components:
     AutopatchTrendDuration:
       type: string
       enum: [Trend30To0d, Trend60To30d, Trend90To60d]
+    ManagedServicePlan:
+      type: string
+      enum: [Starter, Premium]
+      example: Starter
     QualityUpdateSummaryBusinessGroupsRequest:
       type: object
       properties:
@@ -640,8 +642,7 @@ components:
         top:
           type: integer
         plan:
-          type: string
-          enum: [Starter, Premium]
+          $ref: '#/components/schemas/ManagedServicePlan'
         requestType:
           type: string
           example: All
@@ -663,8 +664,7 @@ components:
         top:
           type: integer
         plan:
-          type: string
-          enum: [Starter, Premium]
+          $ref: '#/components/schemas/ManagedServicePlan'
         search:
           type: string
         filters:
@@ -682,8 +682,7 @@ components:
         top:
           type: integer
         plan:
-          type: string
-          enum: [Starter, Premium]
+          $ref: '#/components/schemas/ManagedServicePlan'
         isDesc:
           type: boolean
         startTime:
@@ -713,8 +712,7 @@ components:
         top:
           type: integer
         plan:
-          type: string
-          enum: [Starter, Premium]
+          $ref: '#/components/schemas/ManagedServicePlan'
       required:
         - skip
         - top
@@ -728,8 +726,7 @@ components:
         top:
           type: integer
         plan:
-          type: string
-          enum: [Starter, Premium]
+          $ref: '#/components/schemas/ManagedServicePlan'
         sortKey:
           type: string
           example: DevicesCount
@@ -760,8 +757,7 @@ components:
         top:
           type: integer
         plan:
-          type: string
-          enum: [Starter, Premium]
+          $ref: '#/components/schemas/ManagedServicePlan'
         sortKey:
           type: string
           description: Empty string was the default bundle-generated value on the live blade.
@@ -786,8 +782,7 @@ components:
           type: string
           example: FirstFileOnly
         plan:
-          type: string
-          enum: [Starter, Premium]
+          $ref: '#/components/schemas/ManagedServicePlan'
         filters:
           $ref: '#/components/schemas/GenericObject'
         search:

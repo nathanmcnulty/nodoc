@@ -561,8 +561,6 @@ Current takeaway:
 - Treat `net::ERR_ABORTED` timeline fetches during transitions as crawl artifacts, not as evidence that the route family is invalid.
 - Add incremental checkpoint writes or progress logging to make long entity crawls observable without stopping them.
 
-### 2026-04-03 — Final gap closure via normalized family diffs
-
 ### 2026-04-03 — Intune Autopatch report blades
 
 Idea:
