@@ -1125,6 +1125,56 @@ paths:
         '404':
           $ref: common.yml#/components/responses/NotFound
 
+  /mtp/papin/api/cloud/public/internal/IncidentNotificationSettingsV2:
+    get:
+      summary: List incident notification settings
+      description: >-
+        Retrieve the Defender XDR incident email-notification rules shown on
+        the Settings > Email notifications experience.
+      operationId: Configuration.ListIncidentNotificationSettings
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/IncidentNotificationSetting'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/settings/GetUserSettings:
+    get:
+      summary: Get Defender XDR user settings
+      description: >-
+        Retrieve tenant-level Defender XDR user settings such as regional context,
+        retention bounds, and industry-specific configuration flags.
+      operationId: Configuration.GetUserSettings
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSettings'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
 components:
   schemas:
     SuppressionRule:
@@ -1197,3 +1247,113 @@ components:
         - ruleName
         - query
         - criticalityLevel
+    IncidentNotificationSetting:
+      type: object
+      description: Incident email-notification rule shown in the Defender XDR settings UI.
+      properties:
+        IncidentNotificationsSettingId:
+          type: integer
+        Name:
+          type: string
+        Description:
+          type: string
+        AlertSeverities:
+          type: integer
+        AllRbacGroups:
+          type: boolean
+        RbacGroupIds:
+          type: array
+          items:
+            type: string
+        Scopes:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        Rules:
+          type: array
+          items:
+            $ref: '#/components/schemas/IncidentNotificationRule'
+        CreatedBy:
+          type: string
+          format: email
+        FormatOptions:
+          type: integer
+        SendOncePerIncident:
+          type: boolean
+        CreationTime:
+          type: string
+          format: date-time
+        LastUpdateTime:
+          type: string
+          format: date-time
+        Recipients:
+          type: array
+          items:
+            type: string
+            format: email
+        IsReadOnly:
+          type: boolean
+        RulesReadOnly:
+          type: boolean
+    IncidentNotificationRule:
+      type: object
+      description: Rule condition within an incident email-notification setting.
+      properties:
+        RuleOrder:
+          type: integer
+        AlertSeverities:
+          type: integer
+        RuleServiceSources:
+          type: array
+          items:
+            $ref: '#/components/schemas/IncidentNotificationServiceSource'
+    IncidentNotificationServiceSource:
+      type: object
+      description: Detection-source selection for an incident notification rule.
+      properties:
+        ServiceSource:
+          type: integer
+        AllDetectionSources:
+          type: boolean
+        DetectionSources:
+          type: array
+          items:
+            type: integer
+    UserSettings:
+      type: object
+      description: Tenant-level Defender XDR user settings.
+      properties:
+        GeoRegion:
+          type: string
+        RetentionPolicy:
+          type: integer
+        MinEndpoints:
+          type: integer
+        MaxEndpoints:
+          type: integer
+        CommunicationsAndMedia:
+          type: object
+          nullable: true
+          additionalProperties: true
+          description: Industry-specific settings payload; observed as null in live capture.
+        FinancialServices:
+          type: object
+          nullable: true
+          additionalProperties: true
+          description: Industry-specific settings payload; observed as null in live capture.
+        ManufacturingAndResources:
+          type: object
+          nullable: true
+          additionalProperties: true
+          description: Industry-specific settings payload; observed as null in live capture.
+        PublicSector:
+          type: object
+          nullable: true
+          additionalProperties: true
+          description: Industry-specific settings payload; observed as null in live capture.
+        RetailConsumerProductsAndService:
+          type: object
+          nullable: true
+          additionalProperties: true
+          description: Industry-specific settings payload; observed as null in live capture.

@@ -657,12 +657,14 @@ What helped:
 - Modeling `/api/*` and `/apiproxy/*` as separate surfaces matched the real portal architecture and avoided awkward path-prefix collisions.
 - Stopwatch + log-file execution made it obvious that healthy generation was finishing in minutes, while shell wrappers could still look hung or replay stale output.
 - Targeted collection generation was faster for iteration and kept random Postman IDs and synthetic examples from dirtying unrelated files.
+- Giving sibling specs from the same portal a shared `info.x-nodoc-category` kept the Scalar navbar grouped under one parent instead of creating duplicate top-level entries.
 
 Current takeaway:
 
 - Treat same-origin portal routes and proxy routes as separate spec candidates when both exist in one product.
 - For build and generation benchmarking, trust logged elapsed time over interactive shell behavior.
 - Prefer targeted regeneration while iterating, then run the full validation set before merging.
+- When one portal is split into multiple specs, set the same `x-nodoc-category` on each sibling spec so they stay grouped under a single navbar parent.
 
 ## Ideas backlog
 
