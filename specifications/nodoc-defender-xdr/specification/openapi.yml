@@ -396,6 +396,16 @@ paths:
     $ref: endpoint_configuration.yml#/paths/~1mtp~1deviceManagement~1configuration~1PurviewSharing
 
   # Vulnerability Management
+  /mtp/tvm/analytics/assets/countByExposureLevel:
+    $ref: vulnerability_management.yml#/paths/~1mtp~1tvm~1analytics~1assets~1countByExposureLevel
+  /mtp/tvm/analytics/changeEvents/va/topPerDay:
+    $ref: vulnerability_management.yml#/paths/~1mtp~1tvm~1analytics~1changeEvents~1va~1topPerDay
+  /mtp/tvm/analytics/recommendations/va:
+    $ref: vulnerability_management.yml#/paths/~1mtp~1tvm~1analytics~1recommendations~1va
+  /mtp/tvm/analytics/certificates/algorithms:
+    $ref: vulnerability_management.yml#/paths/~1mtp~1tvm~1analytics~1certificates~1algorithms
+  /mtp/tvm/analytics/vulnerableDevicesReport:
+    $ref: vulnerability_management.yml#/paths/~1mtp~1tvm~1analytics~1vulnerableDevicesReport
   /mtp/tvm/analytics/vulnerabilities:
     $ref: vulnerability_management.yml#/paths/~1mtp~1tvm~1analytics~1vulnerabilities
   /mtp/tvm/analytics/vulnerabilities/summary:
@@ -429,8 +439,6 @@ paths:
     $ref: vulnerability_management.yml#/paths/~1mtp~1tvm~1analytics~1recommendations
   /mtp/tvm/orgsettings/vulnerability-notification-rules/metadata:
     $ref: vulnerability_management.yml#/paths/~1mtp~1tvm~1orgsettings~1vulnerability-notification-rules~1metadata
-  /mtp/posture/oversight/tenants:
-    $ref: vulnerability_management.yml#/paths/~1mtp~1posture~1oversight~1tenants
 
   # Identity (MDI)
   /mdi/identity/userapiservice/user/resolve:
@@ -654,6 +662,44 @@ paths:
     $ref: cloud_apps.yml#/paths/~1m365appprotection~1mapg-glsservice~1compliance~1getUserProfile
 
   # Exposure Management
+  /mtp/k8s/machines/deviceTotals:
+    $ref: exposure_management.yml#/paths/~1mtp~1k8s~1machines~1deviceTotals
+  /mtp/posture/oversight/tenants:
+    $ref: exposure_management.yml#/paths/~1mtp~1posture~1oversight~1tenants
+  /mtp/posture/oversight/initiatives:
+    $ref: exposure_management.yml#/paths/~1mtp~1posture~1oversight~1initiatives
+  /mtp/posture/oversight/initiatives/summarized:
+    $ref: exposure_management.yml#/paths/~1mtp~1posture~1oversight~1initiatives~1summarized
+  /mtp/posture/oversight/metrics:
+    $ref: exposure_management.yml#/paths/~1mtp~1posture~1oversight~1metrics
+  /mtp/posture/oversight/metrics/ids:
+    $ref: exposure_management.yml#/paths/~1mtp~1posture~1oversight~1metrics~1ids
+  /mtp/posture/oversight/recommendations:
+    $ref: exposure_management.yml#/paths/~1mtp~1posture~1oversight~1recommendations
+  /mtp/posture/oversight/recommendations/aggregated:
+    $ref: exposure_management.yml#/paths/~1mtp~1posture~1oversight~1recommendations~1aggregated
+  /mtp/posture/oversight/scaRecommendations/filters:
+    $ref: exposure_management.yml#/paths/~1mtp~1posture~1oversight~1scaRecommendations~1filters
+  /mtp/posture/oversight/scaRecommendations/tags:
+    $ref: exposure_management.yml#/paths/~1mtp~1posture~1oversight~1scaRecommendations~1tags
+  /mtp/posture/oversight/securityEvents:
+    $ref: exposure_management.yml#/paths/~1mtp~1posture~1oversight~1securityEvents
+  /mtp/posture/oversight/updates:
+    $ref: exposure_management.yml#/paths/~1mtp~1posture~1oversight~1updates
+  /mtp/posture/oversight/easm/vendors:
+    $ref: exposure_management.yml#/paths/~1mtp~1posture~1oversight~1easm~1vendors
+  /mtp/tvm/analytics/riskscore:
+    $ref: exposure_management.yml#/paths/~1mtp~1tvm~1analytics~1riskscore
+  /mtp/xspmatlas/attacksurface/query:
+    $ref: exposure_management.yml#/paths/~1mtp~1xspmatlas~1attacksurface~1query
+  /mtp/xspmatlas/attacksurface/attackpaths:
+    $ref: exposure_management.yml#/paths/~1mtp~1xspmatlas~1attacksurface~1attackpaths
+  /mtp/xspmatlas/attacksurface/attackpaths/filters:
+    $ref: exposure_management.yml#/paths/~1mtp~1xspmatlas~1attacksurface~1attackpaths~1filters
+  /mtp/xspmatlas/attacksurface/chokepoints/list:
+    $ref: exposure_management.yml#/paths/~1mtp~1xspmatlas~1attacksurface~1chokepoints~1list
+  /mtp/xspmatlas/attacksurface/chokepoints/filters:
+    $ref: exposure_management.yml#/paths/~1mtp~1xspmatlas~1attacksurface~1chokepoints~1filters
   /mtp/xspm/attackpaths:
     $ref: exposure_management.yml#/paths/~1mtp~1xspm~1attackpaths
   /mtp/xspm/chokepoints:
@@ -717,6 +763,12 @@ paths:
     $ref: streaming.yml#/paths/~1mtp~1streamingapi~1streamingApiConfiguration
 
   # Secure Score
+  /mdc/views/secureScore/cloudInitiativeMetrics:
+    $ref: secure_score.yml#/paths/~1mdc~1views~1secureScore~1cloudInitiativeMetrics
+  /mtp/tvm/analytics/configurations/securescore/categories:
+    $ref: secure_score.yml#/paths/~1mtp~1tvm~1analytics~1configurations~1securescore~1categories
+  /mtp/tvm/analytics/configurations/securescore/total:
+    $ref: secure_score.yml#/paths/~1mtp~1tvm~1analytics~1configurations~1securescore~1total
   /mtp/secureScore/security/secureScoresV2:
     $ref: secure_score.yml#/paths/~1mtp~1secureScore~1security~1secureScoresV2
   /mtp/secureScore/security/secureScoreControlProfilesV2:

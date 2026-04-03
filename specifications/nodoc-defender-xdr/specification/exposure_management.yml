@@ -1,4 +1,782 @@
 paths:
+  /mtp/k8s/machines/deviceTotals:
+    get:
+      summary: Get Kubernetes device totals
+      description: >-
+        Retrieve device count totals for Kubernetes nodes, grouped by risk score,
+        exposure score, onboarding status, and asset attributes. Observed live on the
+        Exposure Management overview page.
+      operationId: ExposureManagement.GetK8sDeviceTotals
+      tags: [Exposure Management]
+      parameters:
+        - name: lookingBackIndays
+          in: query
+          description: Number of days to look back for device data.
+          schema:
+            type: integer
+            example: 30
+        - name: hideLowFidelityDevices
+          in: query
+          description: Whether to exclude low-fidelity device records.
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    DeviceCount:
+                      type: integer
+                      description: Number of devices matching this group.
+                    RiskScore:
+                      type: string
+                      description: Risk score level (e.g. None, Low, Medium, High, Critical).
+                    ExposureScore:
+                      type: string
+                      description: Exposure score level.
+                    AssetValue:
+                      type: string
+                      nullable: true
+                      description: Asset value classification.
+                    OnboardingStatus:
+                      type: string
+                      description: Device onboarding status.
+                    DeviceCategory:
+                      type: string
+                      nullable: true
+                      description: Device category classification.
+                    IsActiveOnboarded:
+                      type: boolean
+                    IsNewDevice:
+                      type: boolean
+                    IsInternetFacing:
+                      type: boolean
+                    IsCriticalAsset:
+                      type: boolean
+                    IsLowFidelity:
+                      type: boolean
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/posture/oversight/tenants:
+    get:
+      summary: Get posture oversight tenant configuration
+      description: >-
+        Retrieve tenant configuration and infrastructure details for Exposure Management
+        posture oversight, including geo-region, data-center assignments, EASM onboarding
+        state, and cluster routing details. Observed live on the Exposure Management overview page.
+      operationId: ExposureManagement.GetPostureOversightTenants
+      tags: [Exposure Management]
+      parameters:
+        - name: warmCache
+          in: query
+          description: Pre-warm the server-side cache before returning data.
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  orgId:
+                    type: string
+                    format: uuid
+                    description: Organisation identifier.
+                  tenantId:
+                    type: string
+                    format: uuid
+                  geoRegion:
+                    type: string
+                    description: Geographic region for the tenant.
+                  dataCenter:
+                    type: string
+                    description: Primary data center.
+                  mpsDataCenter:
+                    type: string
+                  mpsSliceId:
+                    type: integer
+                  oversightSliceId:
+                    type: integer
+                  oversightTvmDedicatedClusterUrl:
+                    type: string
+                  immuneTvmDedicatedClusterUrl:
+                    type: string
+                  easmData:
+                    type: object
+                    description: EASM (External Attack Surface Management) onboarding details.
+                    properties:
+                      vendorId:
+                        type: string
+                      vendorName:
+                        type: string
+                      onboardingDate:
+                        type: string
+                        format: date-time
+                      isPremium:
+                        type: boolean
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/posture/oversight/initiatives:
+    get:
+      summary: List posture oversight initiatives
+      description: >-
+        Retrieve the list of security posture initiatives (e.g. XSPM, Threat Analytics)
+        with optional highlights and time-range filtering. Supports pagination. Observed live
+        on the Exposure Management overview and initiatives pages.
+      operationId: ExposureManagement.ListPostureOversightInitiatives
+      tags: [Exposure Management]
+      parameters:
+        - name: highlights
+          in: query
+          description: Include highlight metadata for each initiative.
+          schema:
+            type: boolean
+            default: true
+        - name: daysAgo
+          in: query
+          description: Number of days to look back.
+          schema:
+            type: integer
+            example: 90
+        - name: initiativeTypes
+          in: query
+          description: >-
+            Filter by initiative types. Can be repeated. Known values: XSPM, TA.
+            Use bracket notation (initiativeTypes[0]=XSPM&initiativeTypes[1]=TA).
+          style: deepObject
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+        - name: calculationId
+          in: query
+          description: Calculation snapshot ID for deterministic result sets.
+          schema:
+            type: string
+        - name: pagination.pageNumber
+          in: query
+          schema:
+            type: integer
+            example: 1
+        - name: pagination.numberOfPageRecords
+          in: query
+          schema:
+            type: integer
+            example: 10
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PostureInitiative'
+                  recordsCount:
+                    type: integer
+                  calculationId:
+                    type: string
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/posture/oversight/initiatives/summarized:
+    get:
+      summary: Get summarized posture initiatives
+      description: >-
+        Retrieve a compact summary of posture oversight initiatives. Bundle-discovered;
+        direct GET probing returned a contextual 500 without page-specific parameters.
+        Shape mirrors /mtp/posture/oversight/initiatives but with reduced field depth.
+      operationId: ExposureManagement.GetPostureOversightInitiativesSummarized
+      tags: [Exposure Management]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Summarized initiatives response — exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '500':
+          description: Server error — may require page-specific query parameters not captured during probing.
+
+  /mtp/posture/oversight/metrics:
+    get:
+      summary: List posture oversight metrics
+      description: >-
+        Retrieve posture oversight metrics, optionally filtered by initiative and whether
+        to include full data and highlights. Returns time-series metric objects with
+        category, description, and scoring detail. Observed live on the Exposure Management
+        overview page.
+      operationId: ExposureManagement.ListPostureOversightMetrics
+      tags: [Exposure Management]
+      parameters:
+        - name: initiativeId
+          in: query
+          description: Filter metrics for a specific initiative ID.
+          schema:
+            type: string
+        - name: highlights
+          in: query
+          description: Include highlight metadata.
+          schema:
+            type: boolean
+            default: true
+        - name: fullData
+          in: query
+          description: Return the full data set rather than a reduced summary.
+          schema:
+            type: boolean
+            default: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PostureMetric'
+                  recordsCount:
+                    type: integer
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/posture/oversight/metrics/ids:
+    get:
+      summary: Get posture metric IDs
+      description: >-
+        Retrieve the list of available posture metric identifiers. Bundle-discovered;
+        direct GET probing returned a contextual 500 without page-specific parameters.
+      operationId: ExposureManagement.GetPostureOversightMetricIds
+      tags: [Exposure Management]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Metric ID list — exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '500':
+          description: Server error — may require page-specific query parameters not captured during probing.
+
+  /mtp/posture/oversight/recommendations:
+    get:
+      summary: List posture oversight recommendations
+      description: >-
+        Retrieve a paginated list of posture oversight recommendations, with sorting,
+        filtering by category, and highlights toggle. Observed live on the Exposure
+        Management overview and recommendations pages.
+      operationId: ExposureManagement.ListPostureOversightRecommendations
+      tags: [Exposure Management]
+      parameters:
+        - name: calculationId
+          in: query
+          description: Calculation snapshot ID.
+          schema:
+            type: string
+        - name: sort.sortDirection
+          in: query
+          schema:
+            type: string
+            enum: [asc, desc]
+        - name: sort.sortByField
+          in: query
+          description: Field to sort by (e.g. domainScoreImpact).
+          schema:
+            type: string
+        - name: pagination.pageNumber
+          in: query
+          schema:
+            type: integer
+            example: 1
+        - name: pagination.numberOfPageRecords
+          in: query
+          schema:
+            type: integer
+            example: 25
+        - name: highlights
+          in: query
+          schema:
+            type: boolean
+            default: false
+        - name: filters
+          in: query
+          description: >-
+            Filter criteria using bracket notation. Key, value array, and operator per entry.
+            Example: filters[0].key=category&filters[0].value[0]=DeviceMisconfiguration&filters[0].operator=Contains.
+          style: deepObject
+          explode: true
+          schema:
+            type: array
+            items:
+              type: object
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PostureRecommendation'
+                  recordsCount:
+                    type: integer
+                  calculationId:
+                    type: string
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/posture/oversight/recommendations/aggregated:
+    get:
+      summary: Get aggregated posture recommendations
+      description: >-
+        Retrieve aggregated posture oversight recommendations grouped by category or metric.
+        Bundle-discovered; direct GET probing returned a contextual 500 without page-specific parameters.
+      operationId: ExposureManagement.GetPostureOversightRecommendationsAggregated
+      tags: [Exposure Management]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Aggregated recommendations — exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '500':
+          description: Server error — may require page-specific query parameters not captured during probing.
+
+  /mtp/posture/oversight/scaRecommendations/filters:
+    get:
+      summary: Get SCA recommendation filter categories
+      description: >-
+        Retrieve the available filter categories and sub-categories for SCA
+        (Security Configuration Assessment) recommendations. Observed live on the
+        Exposure Management overview page.
+      operationId: ExposureManagement.GetScaRecommendationFilters
+      tags: [Exposure Management]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        category:
+                          type: string
+                          description: Top-level filter category.
+                        subCategories:
+                          type: array
+                          items:
+                            type: string
+                          description: Sub-category options within this category.
+                  recordsCount:
+                    type: integer
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/posture/oversight/scaRecommendations/tags:
+    get:
+      summary: Get SCA recommendation tags
+      description: >-
+        Retrieve the list of available tags for filtering SCA recommendations.
+        Observed live on the Exposure Management overview page.
+      operationId: ExposureManagement.GetScaRecommendationTags
+      tags: [Exposure Management]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: string
+                    description: Available tag values.
+                  recordsCount:
+                    type: integer
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/posture/oversight/securityEvents:
+    get:
+      summary: List posture security events
+      description: >-
+        Retrieve the list of recent posture security events, including drift events and
+        score changes across initiatives. Observed live on the Exposure Management overview page.
+      operationId: ExposureManagement.ListPostureSecurityEvents
+      tags: [Exposure Management]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        eventType:
+                          type: string
+                          description: Event type (e.g. Drift).
+                        eventTime:
+                          type: string
+                          format: date-time
+                        tenantId:
+                          type: string
+                          format: uuid
+                        isGlobal:
+                          type: boolean
+                        createdTimestamp:
+                          type: string
+                          format: date-time
+                        properties:
+                          type: object
+                          description: >-
+                            Event-type-specific properties. For Drift events includes
+                            resourceId, resourceType, resourceName, driftStartTime,
+                            driftEndTime, and driftPercentage.
+                  recordsCount:
+                    type: integer
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/posture/oversight/updates:
+    get:
+      summary: List posture oversight updates
+      description: >-
+        Retrieve pending posture oversight updates or changelog entries. Observed live on
+        the Exposure Management overview page. Response was empty during capture (no
+        pending updates in the test tenant).
+      operationId: ExposureManagement.ListPostureOversightUpdates
+      tags: [Exposure Management]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      description: pending — update item shape not captured (empty response in test tenant).
+                  recordsCount:
+                    type: integer
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/posture/oversight/easm/vendors:
+    get:
+      summary: Get EASM vendor list
+      description: >-
+        Retrieve the list of External Attack Surface Management (EASM) vendors available
+        for the tenant. Bundle-discovered; direct GET probing returned a contextual 500
+        without page-specific parameters.
+      operationId: ExposureManagement.GetEasmVendors
+      tags: [Exposure Management]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: EASM vendor list — exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '500':
+          description: Server error — may require page-specific query parameters not captured during probing.
+
+  /mtp/tvm/analytics/riskscore:
+    get:
+      summary: Get TVM risk score
+      description: >-
+        Retrieve the current organisational exposure risk score from Threat and Vulnerability
+        Management, including a historical time series. Observed live on the Exposure Management
+        overview page.
+      operationId: ExposureManagement.GetTvmRiskScore
+      tags: [Exposure Management]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  risk:
+                    type: number
+                    format: double
+                    description: Current risk score (0–100).
+                  riskHistory:
+                    type: array
+                    items:
+                      type: number
+                      format: double
+                    description: Historical risk score values in reverse-chronological order.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/xspmatlas/attacksurface/query:
+    post:
+      summary: Query attack surface graph
+      description: >-
+        Execute a KQL query against the attack surface graph (XSPMAtlas). Used by the
+        Exposure Management overview to compute asset counts, attack path totals, and
+        environment breakdowns. The request body accepts a KQL query string and an API
+        version. Observed live on the Exposure Management overview page.
+      operationId: ExposureManagement.QueryAttackSurface
+      tags: [Exposure Management]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - query
+              properties:
+                query:
+                  type: string
+                  description: >-
+                    KQL query targeting the attack surface graph tables (e.g. Nodes,
+                    AttackPathsV2). Queries may use summarize, mv-expand, and union.
+                apiVersion:
+                  type: string
+                  description: Graph API version (e.g. v2).
+                  example: v2
+                ApiVersion:
+                  type: string
+                  description: Alternative casing accepted by some callers.
+                  example: v2
+                options:
+                  type: object
+                  description: Optional query options.
+                  properties:
+                    top:
+                      type: integer
+                      description: Maximum number of results.
+                    skip:
+                      type: integer
+                      description: Number of results to skip.
+            examples:
+              countCriticalAssets:
+                summary: Count critical cloud and identity assets
+                value:
+                  query: "Nodes | extend isCloud = EntityIds contains \"AwsResourceName\" | extend isCritical = Properties.criticalityLevel.criticalityLevel < 4 | summarize criticalCloudAssets = countif(isCloud and isCritical)"
+                  ApiVersion: v2
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  totalRecords:
+                    type: integer
+                  count:
+                    type: integer
+                  skipToken:
+                    type: string
+                    nullable: true
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      description: Query result row — shape depends on the KQL projection.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/xspmatlas/attacksurface/attackpaths:
+    get:
+      summary: List attack surface attack paths
+      description: >-
+        Retrieve a list of active attack paths from the XSPMAtlas attack surface. Bundle-discovered;
+        direct GET probing returned a contextual 500 without page-specific parameters.
+        Related POST query surfaces are documented at /mtp/xspmatlas/attacksurface/query.
+      operationId: ExposureManagement.ListAttackSurfaceAttackPaths
+      tags: [Exposure Management]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Attack paths list — exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '500':
+          description: Server error — may require page-specific query parameters not captured during probing.
+
+  /mtp/xspmatlas/attacksurface/attackpaths/filters:
+    get:
+      summary: Get attack path filter options
+      description: >-
+        Retrieve the available filter options for attack surface attack paths. Bundle-discovered;
+        direct GET probing returned a contextual 500 without page-specific parameters.
+      operationId: ExposureManagement.GetAttackSurfaceAttackPathFilters
+      tags: [Exposure Management]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Attack path filter options — exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '500':
+          description: Server error — may require page-specific query parameters not captured during probing.
+
+  /mtp/xspmatlas/attacksurface/chokepoints/list:
+    get:
+      summary: List attack surface choke points
+      description: >-
+        Retrieve a list of choke points from the XSPMAtlas attack surface. Bundle-discovered;
+        direct GET probing returned a contextual 500 without page-specific parameters.
+        Compare with the legacy XSPM endpoint at /mtp/xspm/chokepoints (POST).
+      operationId: ExposureManagement.ListAttackSurfaceChokepoints
+      tags: [Exposure Management]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Choke points list — exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '500':
+          description: Server error — may require page-specific query parameters not captured during probing.
+
+  /mtp/xspmatlas/attacksurface/chokepoints/filters:
+    get:
+      summary: Get choke point filter options
+      description: >-
+        Retrieve the available filter options for attack surface choke points. Bundle-discovered;
+        direct GET probing returned a contextual 500 without page-specific parameters.
+      operationId: ExposureManagement.GetAttackSurfaceChokepointFilters
+      tags: [Exposure Management]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Choke point filter options — exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '500':
+          description: Server error — may require page-specific query parameters not captured during probing.
+
   /mtp/xspm/attackpaths:
     post:
       summary: Get attack paths
@@ -303,3 +1081,77 @@ components:
         riskLevel:
           description: The risk level.
           type: string
+    PostureInitiative:
+      type: object
+      description: A security posture initiative tracked by Exposure Management.
+      properties:
+        id:
+          type: string
+          description: Initiative identifier (e.g. saas_security).
+        name:
+          type: string
+          description: Display name of the initiative.
+        description:
+          type: string
+          description: Description of the initiative's scope and purpose.
+        score:
+          type: number
+          format: double
+          description: Current initiative score.
+        maxScore:
+          type: number
+          format: double
+          description: Maximum possible score.
+        initiativeType:
+          type: string
+          description: Initiative type (e.g. XSPM, TA).
+    PostureMetric:
+      type: object
+      description: A posture oversight metric with scoring and category detail.
+      properties:
+        id:
+          type: string
+          description: Metric identifier.
+        version:
+          type: number
+          description: Metric version.
+        name:
+          type: string
+          description: Display name of the metric.
+        category:
+          type: string
+          description: Metric category (e.g. protection, detection).
+        description:
+          type: string
+          description: Description of what the metric measures.
+        score:
+          type: number
+          format: double
+        maxScore:
+          type: number
+          format: double
+    PostureRecommendation:
+      type: object
+      description: A posture oversight recommendation.
+      properties:
+        id:
+          type: string
+          description: Recommendation identifier (e.g. scid_6090).
+        title:
+          type: string
+          description: Recommendation title.
+        category:
+          type: string
+          description: Recommendation category (e.g. deviceMisconfiguration).
+        product:
+          type: string
+          description: Affected product (e.g. MDATP).
+        description:
+          type: string
+          description: Description of the recommendation.
+        severity:
+          type: string
+          description: Severity level.
+        remediation:
+          type: string
+          description: Remediation guidance.
