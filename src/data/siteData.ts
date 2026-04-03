@@ -45,15 +45,16 @@ export const apiCatalog: ApiCatalogItem[] = [
     title: "Defender",
     slug: "/defender",
     family: "Security portal",
-    operations: 279,
+    operations: 452,
     authModel: "Portal session cookie (`sccauth`)",
     baseUrl: "https://security.microsoft.com/apiproxy",
     summary:
-      "Security operations coverage across alerts, incidents, hunting, file investigation, endpoint, identity, vulnerability, and exposure workflows.",
+      "Security operations coverage across alerts, incidents, case management, hunting, cloud apps, investigation pivots, endpoint, identity, vulnerability, configuration, and exposure workflows.",
     highlights: [
-      "Alerts, incidents, and action center coverage",
-      "Advanced hunting, custom detections, live response, and file-page actions",
-      "Endpoint, identity, XSPM, and TVM portal surfaces",
+      "Alerts, incidents, case management, and AutoIR coverage",
+      "Advanced hunting, custom detections, and live response",
+      "Cloud Apps discovery, entity resolution, domain and URL pivots, and file-page actions",
+      "Policy inventory, AI inventory, unified connectors, and identity posture helpers",
     ],
     collectionPath: "postman/collections/defender.collection.json",
     collectionDownloadUrl:

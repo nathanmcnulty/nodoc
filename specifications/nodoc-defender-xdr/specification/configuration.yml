@@ -563,6 +563,568 @@ paths:
         '404':
           $ref: common.yml#/components/responses/NotFound
 
+  /mtp/sentinelOnboarding/sentinel/workspaces/eligibleForOnboarding:
+    post:
+      summary: List eligible Sentinel workspaces
+      description: >-
+        Retrieve the Microsoft Sentinel workspaces that are eligible for onboarding from
+        the Defender portal's unified connector experience.
+      operationId: Configuration.ListEligibleSentinelWorkspaces
+      tags: [Configuration]
+      parameters:
+        - name: useRealTime
+          in: query
+          description: Whether the portal should bypass cached onboarding metadata.
+          schema:
+            type: boolean
+            default: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                subscriptions:
+                  type: array
+                  description: Azure subscription identifiers to inspect for eligible workspaces.
+                  items:
+                    type: string
+              required:
+                - subscriptions
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  workspaces:
+                    type: array
+                    items:
+                      type: object
+                      description: pending - eligible Sentinel workspace
+                  skipToken:
+                    type: string
+                    nullable: true
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/sentinelOnboarding/sentinel/workspaces/isOnboarded:
+    get:
+      summary: Get Sentinel onboarding state
+      description: >-
+        Retrieve whether Microsoft Sentinel onboarding has already been completed from
+        the Defender unified connector experience.
+      operationId: Configuration.GetSentinelOnboardedState
+      tags: [Configuration]
+      parameters:
+        - name: useRealTime
+          in: query
+          description: Whether the portal should bypass cached onboarding metadata.
+          schema:
+            type: boolean
+            default: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: boolean
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/unifiedConnectors/public/connectors:
+    get:
+      summary: List unified connectors
+      description: >-
+        Retrieve the catalog of unified connectors available from the Defender portal's
+        Sentinel and identity connector experiences.
+      operationId: Configuration.ListUnifiedConnectors
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  description: pending - unified connector definition
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/unifiedConnectors/public/connectors/checkrequirements:
+    get:
+      summary: Check unified connector requirements
+      description: >-
+        Retrieve workload activation and permission requirements for the unified connector
+        catalog.
+      operationId: Configuration.CheckUnifiedConnectorRequirements
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  permissionStatus:
+                    type: object
+                    description: Permission status grouped by protection type.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/urbacConfiguration/gw/unifiedrbac/configuration/roleDefinitions:
+    get:
+      summary: List unified RBAC role definitions
+      description: >-
+        Retrieve the unified RBAC role definitions shown on the Defender security
+        permissions page.
+      operationId: Configuration.ListUnifiedRbacRoleDefinitions
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  value:
+                    type: array
+                    items:
+                      type: object
+                      description: pending - unified RBAC role definition
+                  isPartial:
+                    type: boolean
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mdc/views/inventory/assets:
+    post:
+      summary: Query cloud asset inventory
+      description: >-
+        Retrieve the Defender for Cloud inventory table used by the assets inventory view.
+      operationId: Configuration.QueryCloudAssetInventory
+      tags: [Configuration]
+      parameters:
+        - name: c
+          in: query
+          description: Portal locale sent by the Defender client.
+          schema:
+            type: string
+        - name: v
+          in: query
+          description: Portal build version sent by the Defender client.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                schemaId:
+                  type: string
+                  description: Inventory schema identifier to query.
+                schemaParameters:
+                  type: object
+                  additionalProperties: true
+                searchTerms:
+                  type: array
+                  items:
+                    type: object
+                    description: pending - asset inventory search term
+                columns:
+                  type: array
+                  items:
+                    type: object
+                    description: pending - requested inventory column
+                filters:
+                  type: array
+                  items:
+                    type: object
+                    description: pending - inventory filter
+                paging:
+                  type: object
+                  description: Paging settings for the inventory query.
+              required:
+                - schemaId
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Defender for Cloud inventory table response with properties and rows.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mdc/views/inventory/metrics:
+    post:
+      summary: Query cloud asset inventory metrics
+      description: >-
+        Retrieve the aggregate metrics tiles shown above the Defender for Cloud asset
+        inventory table.
+      operationId: Configuration.QueryCloudAssetInventoryMetrics
+      tags: [Configuration]
+      parameters:
+        - name: c
+          in: query
+          description: Portal locale sent by the Defender client.
+          schema:
+            type: string
+        - name: v
+          in: query
+          description: Portal build version sent by the Defender client.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                schemaId:
+                  type: string
+                aggregatedColumns:
+                  type: array
+                  items:
+                    type: object
+                    description: pending - requested aggregation
+                schemaParameters:
+                  type: object
+                  additionalProperties: true
+                filters:
+                  type: array
+                  items:
+                    type: object
+                    description: pending - metrics filter
+              required:
+                - schemaId
+                - aggregatedColumns
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Defender for Cloud inventory aggregation response.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mdc/views/inventory/schema:
+    post:
+      summary: Get cloud asset inventory schema
+      description: >-
+        Retrieve the schema definition for the Defender for Cloud asset inventory view.
+      operationId: Configuration.GetCloudAssetInventorySchema
+      tags: [Configuration]
+      parameters:
+        - name: c
+          in: query
+          description: Portal locale sent by the Defender client.
+          schema:
+            type: string
+        - name: v
+          in: query
+          description: Portal build version sent by the Defender client.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                schemaId:
+                  type: string
+                schemaParameters:
+                  type: object
+                  additionalProperties: true
+              required:
+                - schemaId
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Defender for Cloud inventory schema definition.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mdc/views/overview/overviewMetrics:
+    post:
+      summary: Get cloud overview metrics
+      description: >-
+        Retrieve the Defender for Cloud overview metrics payload used by the overview page.
+      operationId: Configuration.GetCloudOverviewMetrics
+      tags: [Configuration]
+      parameters:
+        - name: c
+          in: query
+          description: Portal locale sent by the Defender client.
+          schema:
+            type: string
+        - name: v
+          in: query
+          description: Portal build version sent by the Defender client.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                startDateTime:
+                  type: string
+                  format: date-time
+                  description: Start time for the overview metric window.
+              required:
+                - startDateTime
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Defender for Cloud overview metrics response.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mdc/views/inventory/ai-agents-v3/agents-current-count-by-platform-metrics:
+    post:
+      summary: Get AI agent counts by platform
+      description: >-
+        Retrieve the current AI-agent counts by platform for the Defender for Cloud
+        AI inventory experience.
+      operationId: Configuration.GetAiAgentCountsByPlatform
+      tags: [Configuration]
+      parameters:
+        - name: c
+          in: query
+          description: Portal locale sent by the Defender client.
+          schema:
+            type: string
+        - name: v
+          in: query
+          description: Portal build version sent by the Defender client.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                platforms:
+                  type: string
+                  description: Comma-separated AI platforms to include.
+                paging:
+                  type: object
+                  description: Paging settings for the metric query.
+              required:
+                - platforms
+                - paging
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: AI-agent metric table response with properties and rows.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mdc/views/inventory/ai-agents-v3/agents-discovered-overtime:
+    post:
+      summary: Get AI agents discovered over time
+      description: >-
+        Retrieve the AI-agent discovery-over-time chart used by the Defender for Cloud
+        AI inventory experience.
+      operationId: Configuration.GetAiAgentsDiscoveredOverTime
+      tags: [Configuration]
+      parameters:
+        - name: c
+          in: query
+          description: Portal locale sent by the Defender client.
+          schema:
+            type: string
+        - name: v
+          in: query
+          description: Portal build version sent by the Defender client.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                daysAgo:
+                  type: string
+                  description: Relative lookback window such as 60d.
+                platforms:
+                  type: string
+                  description: Comma-separated AI platforms to include.
+                paging:
+                  type: object
+                  description: Paging settings for the metric query.
+              required:
+                - daysAgo
+                - platforms
+                - paging
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: AI-agent discovery-over-time response with properties and rows.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mdc/views/inventory/ai-agents-v3/agents-requiring-attention-overtime-metrics:
+    post:
+      summary: Get AI agents requiring attention over time
+      description: >-
+        Retrieve the AI-agent attention-over-time chart used by the Defender for Cloud
+        AI inventory experience.
+      operationId: Configuration.GetAiAgentsRequiringAttentionOverTime
+      tags: [Configuration]
+      parameters:
+        - name: c
+          in: query
+          description: Portal locale sent by the Defender client.
+          schema:
+            type: string
+        - name: v
+          in: query
+          description: Portal build version sent by the Defender client.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                daysAgo:
+                  type: string
+                  description: Relative lookback window such as 60d.
+                platforms:
+                  type: string
+                  description: Comma-separated AI platforms to include.
+                paging:
+                  type: object
+                  description: Paging settings for the metric query.
+              required:
+                - daysAgo
+                - platforms
+                - paging
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: AI-agent attention-over-time response with properties and rows.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
 components:
   schemas:
     SuppressionRule:

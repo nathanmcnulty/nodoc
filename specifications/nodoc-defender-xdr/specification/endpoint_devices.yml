@@ -1039,6 +1039,738 @@ paths:
         '404':
           $ref: common.yml#/components/responses/NotFound
 
+  /mtp/mdeTimelineExperience/machines/{MachineId}/events:
+    get:
+      summary: Get machine timeline events
+      description: >-
+        Retrieve the event stream backing the modern machine timeline
+        experience.
+      operationId: EndpointDevices.GetMachineTimelineEvents
+      tags: [Endpoint Devices]
+      parameters:
+        - name: MachineId
+          in: path
+          required: true
+          description: The unique identifier of the device.
+          schema:
+            type: string
+        - name: machineDnsName
+          in: query
+          description: The machine DNS name echoed by the current portal client.
+          schema:
+            type: string
+            nullable: true
+        - name: SenseClientVersion
+          in: query
+          description: The endpoint sensor version shown on device pages.
+          schema:
+            type: string
+            nullable: true
+        - name: fromDate
+          in: query
+          description: The inclusive start of the requested time range.
+          schema:
+            type: string
+            format: date-time
+        - name: toDate
+          in: query
+          description: The inclusive end of the requested time range.
+          schema:
+            type: string
+            format: date-time
+        - name: pageSize
+          in: query
+          description: The number of timeline rows to return.
+          schema:
+            type: integer
+            default: 200
+        - name: generateIdentityEvents
+          in: query
+          description: Include generated identity events in the timeline.
+          schema:
+            type: boolean
+        - name: includeIdentityEvents
+          in: query
+          description: Include identity events in the timeline response.
+          schema:
+            type: boolean
+        - name: supportMdiOnlyEvents
+          in: query
+          description: Include MDI-only timeline events when supported.
+          schema:
+            type: boolean
+        - name: correlationId
+          in: query
+          description: Correlation identifier supplied by the portal timeline client.
+          schema:
+            type: string
+            format: uuid
+        - name: doNotUseCache
+          in: query
+          description: Bypass the timeline cache when true.
+          schema:
+            type: boolean
+        - name: forceUseCache
+          in: query
+          description: Force use of cached timeline data when true.
+          schema:
+            type: boolean
+        - name: includeSentinelEvents
+          in: query
+          description: Include Sentinel-backed events when available.
+          schema:
+            type: boolean
+        - name: ReportIdForScrolling
+          in: query
+          description: Optional continuation cursor returned by prior timeline responses.
+          schema:
+            type: string
+        - name: IsScrollingForward
+          in: query
+          description: Indicates the requested scroll direction for continuation queries.
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - machine timeline event data
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/mdeTimelineExperience/machines/{MachineId}/prefetch:
+    post:
+      summary: Prefetch machine timeline
+      description: >-
+        Warm the machine timeline cache for the requested time range before the
+        event grid loads timeline rows.
+      operationId: EndpointDevices.PrefetchMachineTimeline
+      tags: [Endpoint Devices]
+      parameters:
+        - name: MachineId
+          in: path
+          required: true
+          description: The unique identifier of the device.
+          schema:
+            type: string
+        - name: machineId
+          in: query
+          description: Redundant machine identifier currently sent by the portal.
+          schema:
+            type: string
+        - name: machineDnsName
+          in: query
+          description: The machine DNS name echoed by the current portal client.
+          schema:
+            type: string
+            nullable: true
+        - name: fromDate
+          in: query
+          description: The inclusive start of the requested time range.
+          schema:
+            type: string
+            format: date-time
+        - name: toDate
+          in: query
+          description: The inclusive end of the requested time range.
+          schema:
+            type: string
+            format: date-time
+        - name: generateIdentityEvents
+          in: query
+          description: Include generated identity events in the prefetch request.
+          schema:
+            type: boolean
+        - name: supportMdiOnlyEvents
+          in: query
+          description: Include MDI-only timeline events when supported.
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - timeline prefetch result
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/mdeTimelineExperience/ips/{IpAddress}/events:
+    get:
+      summary: Get IP timeline events
+      description: >-
+        Retrieve the event stream shown on IP entity pages.
+      operationId: EndpointDevices.GetIpTimelineEvents
+      tags: [Endpoint Devices]
+      parameters:
+        - name: IpAddress
+          in: path
+          required: true
+          description: The IP address shown on the entity page.
+          schema:
+            type: string
+        - name: fromDate
+          in: query
+          description: The inclusive start of the requested time range.
+          schema:
+            type: string
+            format: date-time
+        - name: toDate
+          in: query
+          description: The inclusive end of the requested time range.
+          schema:
+            type: string
+            format: date-time
+        - name: pageSize
+          in: query
+          description: The number of timeline rows to return.
+          schema:
+            type: integer
+            default: 200
+        - name: generateIdentityEvents
+          in: query
+          description: Include generated identity events in the timeline.
+          schema:
+            type: boolean
+        - name: includeIdentityEvents
+          in: query
+          description: Include identity events in the timeline response.
+          schema:
+            type: boolean
+        - name: correlationId
+          in: query
+          description: Correlation identifier supplied by the portal timeline client.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - IP timeline event data
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/ndr/machines/{MachineId}/exclusionDetails:
+    get:
+      summary: Get NDR machine exclusion details
+      description: >-
+        Retrieve the NDR exclusion state and explanatory metadata for a machine.
+      operationId: EndpointDevices.GetNdrMachineExclusionDetails
+      tags: [Endpoint Devices]
+      parameters:
+        - name: MachineId
+          in: path
+          required: true
+          description: The unique identifier of the device.
+          schema:
+            type: string
+        - name: senseMachineId
+          in: query
+          description: Redundant machine identifier currently sent by the portal.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - NDR machine exclusion details
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/ndr/machines/{MachineId}/InterceptingMachines:
+    get:
+      summary: Get NDR intercepting machines
+      description: >-
+        Retrieve machines currently intercepting or proxying traffic for the
+        selected NDR machine.
+      operationId: EndpointDevices.GetNdrInterceptingMachines
+      tags: [Endpoint Devices]
+      parameters:
+        - name: MachineId
+          in: path
+          required: true
+          description: The unique identifier of the device.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - intercepting machine details
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/ndr/machines/deviceTotalCount:
+    get:
+      summary: Get NDR device total count
+      description: >-
+        Retrieve the total number of NDR-scoped devices matching the current
+        filters.
+      operationId: EndpointDevices.GetNdrDeviceTotalCount
+      tags: [Endpoint Devices]
+      parameters:
+        - name: lookingBackIndays
+          in: query
+          description: The NDR discovery lookback window, in days.
+          schema:
+            type: integer
+            default: 180
+        - name: deviceRoles
+          in: query
+          description: Optional NDR device-role filter.
+          schema:
+            type: string
+        - name: deviceRoleConfidence
+          in: query
+          description: Optional confidence filter for the selected device role.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - NDR device total count
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/ndr/machines/machineTags:
+    get:
+      summary: Get NDR machine tags
+      description: >-
+        Retrieve the machine tags available to NDR inventory filters, including
+        device-page lookups for the current machine.
+      operationId: EndpointDevices.GetNdrMachineTags
+      tags: [Endpoint Devices]
+      parameters:
+        - name: senseMachineId
+          in: query
+          description: Optional machine identifier for device-scoped tag lookups.
+          schema:
+            type: string
+        - name: tenantIds
+          in: query
+          description: Optional cross-tenant context. The portal currently sends an empty value.
+          schema:
+            type: string
+            nullable: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - NDR machine tags
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/alertsApiService/Evidences/device/Alerts:
+    get:
+      summary: List device alert evidences
+      description: >-
+        Retrieve the alert list shown on the unified device page's alert evidence pane.
+      operationId: EndpointDevices.ListAlertEvidences
+      tags: [Endpoint Devices]
+      parameters:
+        - name: status
+          in: query
+          description: Alert status filter applied by the device page.
+          schema:
+            type: integer
+            default: 6
+        - name: WcdMachineId
+          in: query
+          required: true
+          description: The device identifier used by the device evidence experience.
+          schema:
+            type: string
+        - name: ComputerDnsName
+          in: query
+          description: The current DNS name of the device.
+          schema:
+            type: string
+        - name: MachineId
+          in: query
+          required: true
+          description: The Defender machine identifier.
+          schema:
+            type: string
+        - name: tenantIds
+          in: query
+          description: Optional cross-tenant context. The portal currently sends an empty value.
+          schema:
+            type: string
+            nullable: true
+        - name: lookBackInDays
+          in: query
+          description: Number of days of alert history to include.
+          schema:
+            type: integer
+            default: 180
+        - name: sortByField
+          in: query
+          description: The field used to sort the device alerts grid.
+          schema:
+            type: string
+            default: severity
+        - name: sortOrder
+          in: query
+          description: Sort direction for the alert grid.
+          schema:
+            type: string
+            enum: [Ascending, Descending]
+            default: Descending
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - device alert evidence list
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/getLatestMachineIpsByIds/LatestMachineIpsByIds:
+    get:
+      summary: Get latest device IP addresses
+      description: >-
+        Retrieve the latest IP address observations shown on the unified device page.
+      operationId: EndpointDevices.GetLatestIps
+      tags: [Endpoint Devices]
+      parameters:
+        - name: isUnifiedDevicePage
+          in: query
+          description: Indicates the unified device page requested the lookup.
+          schema:
+            type: boolean
+            default: true
+        - name: machineId
+          in: query
+          required: true
+          description: The Defender machine identifier.
+          schema:
+            type: string
+        - name: idType
+          in: query
+          required: true
+          description: The type of machine identifier provided.
+          schema:
+            type: string
+            default: SenseMachineId
+        - name: lastSeen
+          in: query
+          description: Timestamp used by the portal to anchor the latest IP lookup.
+          schema:
+            type: string
+            format: date-time
+        - name: senseMachineId
+          in: query
+          description: The Sense machine identifier for the same device.
+          schema:
+            type: string
+        - name: computerDnsName
+          in: query
+          description: The current DNS name of the device.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - latest device IP observations
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/getTopUsersByIds/TopUsersByIds:
+    get:
+      summary: Get top users for device
+      description: >-
+        Retrieve the top user identities shown on the unified device page.
+      operationId: EndpointDevices.GetTopUsers
+      tags: [Endpoint Devices]
+      parameters:
+        - name: isUnifiedDevicePage
+          in: query
+          description: Indicates the unified device page requested the lookup.
+          schema:
+            type: boolean
+            default: true
+        - name: machineId
+          in: query
+          required: true
+          description: The Defender machine identifier.
+          schema:
+            type: string
+        - name: senseMachineId
+          in: query
+          description: The Sense machine identifier for the same device.
+          schema:
+            type: string
+        - name: computerDnsName
+          in: query
+          description: The current DNS name of the device.
+          schema:
+            type: string
+        - name: tenantIds
+          in: query
+          description: Optional cross-tenant context. The portal currently sends an empty value.
+          schema:
+            type: string
+            nullable: true
+        - name: armId
+          in: query
+          description: Optional Azure resource ID context for the device.
+          schema:
+            type: string
+            nullable: true
+        - name: lookingBackIndays
+          in: query
+          description: Number of days of user activity to include.
+          schema:
+            type: integer
+            default: 30
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - top users for device
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/responseApiPortal/requests/latest:
+    get:
+      summary: Get latest device response action
+      description: >-
+        Retrieve the most recent response action request for the selected device.
+      operationId: EndpointDevices.GetLatestActionRequest
+      tags: [Endpoint Devices]
+      parameters:
+        - name: machineId
+          in: query
+          required: true
+          description: The Defender machine identifier.
+          schema:
+            type: string
+        - name: tenantIds
+          in: query
+          description: Optional cross-tenant context. The portal currently sends an empty value.
+          schema:
+            type: string
+            nullable: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - latest device action request
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/responseApiPortal/requests/machine/any:
+    get:
+      summary: Check for any device response actions
+      description: >-
+        Check whether the selected device currently has any response action requests.
+      operationId: EndpointDevices.HasAnyActionRequests
+      tags: [Endpoint Devices]
+      parameters:
+        - name: machineId
+          in: query
+          required: true
+          description: The Defender machine identifier.
+          schema:
+            type: string
+        - name: tenantIds
+          in: query
+          description: Optional cross-tenant context. The portal currently sends an empty value.
+          schema:
+            type: string
+            nullable: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - device action existence state
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/responseApiPortal/requests/machinestate:
+    get:
+      summary: Get device response action state
+      description: >-
+        Retrieve the response-action state block shown on the unified device page.
+      operationId: EndpointDevices.GetActionState
+      tags: [Endpoint Devices]
+      parameters:
+        - name: machineId
+          in: query
+          required: true
+          description: The Defender machine identifier.
+          schema:
+            type: string
+        - name: overrideCache
+          in: query
+          description: Whether the portal should bypass cached machine action state.
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - device response action state
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/responseApiPortal/requests/permissions:
+    get:
+      summary: Get device response action permissions
+      description: >-
+        Retrieve the action-permission matrix used to enable or disable device-response
+        actions on the unified device page.
+      operationId: EndpointDevices.GetActionPermissions
+      tags: [Endpoint Devices]
+      parameters:
+        - name: machineId
+          in: query
+          required: true
+          description: The Defender machine identifier.
+          schema:
+            type: string
+        - name: tenantIds
+          in: query
+          description: Optional cross-tenant context. The portal currently sends an empty value.
+          schema:
+            type: string
+            nullable: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - device response action permissions
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
 components:
   schemas:
     Device:

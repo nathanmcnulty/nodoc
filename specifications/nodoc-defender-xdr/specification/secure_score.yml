@@ -1,4 +1,209 @@
 paths:
+  /mdc/views/secureScore/cloudInitiativeMetrics:
+    post:
+      summary: Get cloud initiative secure score metrics
+      description: >-
+        Retrieve over-time secure score metrics and recommendation completion statistics
+        for cloud initiatives (MDC). Request accepts a startDateTime for historical
+        windowing. Observed live on the Microsoft Secure Score page.
+      operationId: SecureScore.GetCloudInitiativeMetrics
+      tags: [Secure Score]
+      parameters:
+        - name: c
+          in: query
+          description: Locale/culture code (e.g. en-us).
+          schema:
+            type: string
+            example: en-us
+        - name: v
+          in: query
+          description: API version of the MDC view endpoint.
+          schema:
+            type: string
+            example: 1.0.2797.1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                startDateTime:
+                  type: string
+                  format: date-time
+                  description: >-
+                    Start of the metrics window. The endpoint returns data from this
+                    date forward (typically 8 data points).
+              required:
+                - startDateTime
+            example:
+              startDateTime: "2026-03-27T05:51:56.116Z"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  overtimeMetrics:
+                    type: object
+                    description: Time-series recommendation and secure score data.
+                    properties:
+                      type:
+                        type: string
+                        example: overtimeMetricsResponse
+                      properties:
+                        type: object
+                        properties:
+                          overtimeMetrics:
+                            type: object
+                            description: Contains RecommendationByRiskAndWorkload and secureScoreOverTime arrays.
+                            properties:
+                              RecommendationByRiskAndWorkload:
+                                type: array
+                                items:
+                                  $ref: '#/components/schemas/TimeSeriesMetricGroup'
+                              secureScoreOverTime:
+                                type: array
+                                items:
+                                  $ref: '#/components/schemas/TimeSeriesMetricGroup'
+                  recommendationsByCompletionStatus:
+                    type: object
+                    description: Aggregated recommendation counts by completion status.
+                    properties:
+                      type:
+                        type: string
+                        example: metricsResponse
+                      properties:
+                        type: object
+                        properties:
+                          aggregations:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                                  description: Status identifier (e.g. Overdue, OnTime, Unassigned, Completed).
+                                value:
+                                  type: integer
+                  environmentsInformation:
+                    type: object
+                    description: Environment coverage and critical asset counts.
+                    properties:
+                      type:
+                        type: string
+                        example: metricsResponse
+                      properties:
+                        type: object
+                        properties:
+                          aggregations:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                                  description: >-
+                                    Metric identifier (e.g. CriticalAssetsCount,
+                                    DcspmEnabledCount, DcspmNotEnabledCount,
+                                    IsPartiallyCoveredCount).
+                                value:
+                                  type: integer
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/tvm/analytics/configurations/securescore/categories:
+    get:
+      summary: Get secure score categories
+      description: >-
+        Retrieve the secure score breakdown by SCA category (e.g. Network, Accounts,
+        Security controls, OS, Application), including current and maximum scores for
+        each. Observed live on the Microsoft Secure Score page.
+      operationId: SecureScore.GetConfigurationsSecureScoreCategories
+      tags: [Secure Score]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    category:
+                      type: string
+                      description: Score category name (e.g. Network, Accounts, OS).
+                    currentScore:
+                      type: number
+                      format: double
+                      description: Current score points for this category.
+                    maxScore:
+                      type: number
+                      format: double
+                      description: Maximum achievable score for this category.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/tvm/analytics/configurations/securescore/total:
+    get:
+      summary: Get total secure score
+      description: >-
+        Retrieve the overall TVM secure score totals including current score, maximum score,
+        and rolling history arrays. Observed live on the Microsoft Secure Score page.
+      operationId: SecureScore.GetConfigurationsSecureScoreTotal
+      tags: [Secure Score]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  currentScore:
+                    type: number
+                    format: double
+                    description: Current aggregate secure score.
+                  maxScore:
+                    type: number
+                    format: double
+                    description: Maximum achievable score.
+                  currentScoreHistory:
+                    type: array
+                    items:
+                      type: number
+                      format: double
+                    description: Historical current score values (most recent first).
+                  maxScoreHistory:
+                    type: array
+                    items:
+                      type: number
+                      format: double
+                    description: Historical max score values (most recent first).
+                  secureScoreHistory:
+                    type: array
+                    items:
+                      type: number
+                      format: double
+                    description: Historical percentage scores (most recent first).
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
   /mtp/secureScore/security/secureScoresV2:
     get:
       summary: Get secure scores V2
@@ -123,3 +328,27 @@ paths:
 
         '404':
           $ref: common.yml#/components/responses/NotFound
+
+components:
+  schemas:
+    TimeSeriesMetricGroup:
+      type: object
+      description: A group of time-series values with associated dimension labels.
+      properties:
+        dimensions:
+          type: object
+          description: Key/value dimension labels for this group (e.g. riskLevel, category, Workload).
+          additionalProperties:
+            type: string
+        values:
+          type: array
+          items:
+            type: number
+            format: double
+          description: Data point values corresponding to the dates array.
+        dates:
+          type: array
+          items:
+            type: string
+            format: date-time
+          description: ISO 8601 date strings for each data point.

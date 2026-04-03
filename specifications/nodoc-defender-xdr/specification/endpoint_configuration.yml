@@ -304,6 +304,215 @@ paths:
         '404':
           $ref: common.yml#/components/responses/NotFound
 
+  /mtp/unifiedExperience/mde/configurationManagement/mem/securityPolicies:
+    post:
+      summary: List endpoint security policies
+      description: >-
+        Retrieve the Microsoft Intune endpoint security policies shown on the Defender
+        policy inventory experience for the selected platform.
+      operationId: EndpointConfiguration.ListSecurityPolicies
+      tags: [Endpoint Configuration]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                platform:
+                  description: The platform family to list policies for.
+                  type: string
+                  example: Windows
+              required:
+                - platform
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - endpoint security policy inventory response
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/unifiedExperience/mde/configurationManagement/mem/securityPolicies/filters:
+    get:
+      summary: Get endpoint security policy filters
+      description: >-
+        Retrieve the filter values used by the Defender policy inventory page
+        for Microsoft Intune endpoint security policies.
+      operationId: EndpointConfiguration.GetSecurityPolicyFilters
+      tags: [Endpoint Configuration]
+      parameters:
+        - name: platform
+          in: query
+          required: true
+          description: The platform family to enumerate filters for.
+          schema:
+            type: string
+            example: Windows
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - endpoint security policy filters
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/unifiedExperience/mde/configurationManagement/mem/device/{MachineId}/policies:
+    get:
+      summary: List device policy assignments
+      description: >-
+        Retrieve the endpoint security policies assigned to a specific device from the
+        policy inventory device pane.
+      operationId: EndpointConfiguration.ListDevicePolicies
+      tags: [Endpoint Configuration]
+      parameters:
+        - name: MachineId
+          in: path
+          required: true
+          description: The Defender machine identifier for the device.
+          schema:
+            type: string
+        - name: aadDeviceId
+          in: query
+          description: The Microsoft Entra device identifier when the device is Intune-managed.
+          schema:
+            type: string
+        - name: isManagedByMde
+          in: query
+          required: true
+          description: Whether the device is managed directly by Defender for Endpoint.
+          schema:
+            type: boolean
+        - name: page
+          in: query
+          description: Page number for paginated policy results.
+          schema:
+            type: integer
+            default: 1
+        - name: pageSize
+          in: query
+          description: Number of policy assignments to return.
+          schema:
+            type: integer
+            default: 25
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - device policy assignment response
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/unifiedExperience/mde/configurationManagement/mem/proxy/deviceManagement/managedDevices:
+    get:
+      summary: Resolve Intune managed device
+      description: >-
+        Look up the backing Microsoft Intune managed-device record that corresponds
+        to the selected Defender device.
+      operationId: EndpointConfiguration.ListManagedDevices
+      tags: [Endpoint Configuration]
+      parameters:
+        - name: $filter
+          in: query
+          required: true
+          description: OData filter used to resolve the managed device by Entra device ID.
+          schema:
+            type: string
+        - name: $top
+          in: query
+          description: Maximum number of managed devices to return.
+          schema:
+            type: integer
+            default: 1
+        - name: $select
+          in: query
+          description: Projection of the managed-device fields required by the portal.
+          schema:
+            type: string
+            default: id
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - managed-device lookup response
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/unifiedExperience/mde/configurationManagement/mem/proxy/deviceManagement/managedDevices/{ManagedDeviceId}/users:
+    get:
+      summary: List managed device users
+      description: >-
+        Retrieve the primary users projected from the linked Microsoft Intune managed device.
+      operationId: EndpointConfiguration.ListManagedDeviceUsers
+      tags: [Endpoint Configuration]
+      parameters:
+        - name: ManagedDeviceId
+          in: path
+          required: true
+          description: The Microsoft Intune managed-device identifier.
+          schema:
+            type: string
+        - name: $select
+          in: query
+          description: Projection of the user fields required by the portal.
+          schema:
+            type: string
+            default: id,displayName,userPrincipalName
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  description: pending - managed device user
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
 components:
   schemas:
     AdvancedFeaturesSettings:
