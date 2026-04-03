@@ -83,6 +83,10 @@ tags:
     description: |
       Operations relating to the Defender file entity page, including file profiles,
       prevalence, reputation, indicator checks, and collect or download actions.
+  - name: Entity Pivots
+    description: |
+      Operations relating to the domain, URL, and email pivot experiences used by
+      Defender investigation pages.
   - name: Endpoint Devices
     description: |
       Operations relating to endpoint device management in Microsoft Defender for Endpoint (MDE),
@@ -148,6 +152,7 @@ x-tagGroups:
   - name: File Investigation
     tags:
       - Files
+      - Entity Pivots
   - name: Endpoint Management
     tags:
       - Endpoint Devices
@@ -209,6 +214,30 @@ paths:
     $ref: alerts_incidents.yml#/paths/~1mtp~1alertsApiService~1alerts~1count
   /mtp/incidentDashboard/Dashboard/ActiveIncidentsSummary:
     $ref: alerts_incidents.yml#/paths/~1mtp~1incidentDashboard~1Dashboard~1ActiveIncidentsSummary
+  /mtp/incidents/{IncidentId}/AggregatedCustomDetails:
+    $ref: alerts_incidents.yml#/paths/~1mtp~1incidents~1{IncidentId}~1AggregatedCustomDetails
+  /mtp/incidents/{IncidentId}/AssociatedAlerts:
+    $ref: alerts_incidents.yml#/paths/~1mtp~1incidents~1{IncidentId}~1AssociatedAlerts
+  /mtp/incidents/{IncidentId}/outbreaks:
+    $ref: alerts_incidents.yml#/paths/~1mtp~1incidents~1{IncidentId}~1outbreaks
+  /mtp/incidents/{IncidentId}/riskfactors:
+    $ref: alerts_incidents.yml#/paths/~1mtp~1incidents~1{IncidentId}~1riskfactors
+  /mtp/incidents/dsiMessageBarIndicators:
+    $ref: alerts_incidents.yml#/paths/~1mtp~1incidents~1dsiMessageBarIndicators
+  /mtp/CaseManagement/be/cases:
+    $ref: alerts_incidents.yml#/paths/~1mtp~1CaseManagement~1be~1cases
+  /mtp/CaseManagement/be/caseRelations:
+    $ref: alerts_incidents.yml#/paths/~1mtp~1CaseManagement~1be~1caseRelations
+  /mtp/CaseManagement/be/tasks:
+    $ref: alerts_incidents.yml#/paths/~1mtp~1CaseManagement~1be~1tasks
+  /mtp/CaseManagement/be/templates/{TemplateId}:
+    $ref: alerts_incidents.yml#/paths/~1mtp~1CaseManagement~1be~1templates~1{TemplateId}
+  /mtp/autoIr/incidents/{IncidentId}:
+    $ref: alerts_incidents.yml#/paths/~1mtp~1autoIr~1incidents~1{IncidentId}
+  /mtp/autoIr/incidents/{IncidentId}/filters:
+    $ref: alerts_incidents.yml#/paths/~1mtp~1autoIr~1incidents~1{IncidentId}~1filters
+  /mtp/GAIAMedeinaApi/skills/guidedresponse/{IncidentId}/similarIncidents:
+    $ref: alerts_incidents.yml#/paths/~1mtp~1GAIAMedeinaApi~1skills~1guidedresponse~1{IncidentId}~1similarIncidents
 
   # Advanced Hunting
   /mtp/huntingService/schema:
@@ -252,6 +281,18 @@ paths:
     $ref: advanced_hunting.yml#/paths/~1mtp~1huntingService~1queries~1defender~1savedqueries~1{id}
   /mtp/huntingService/queries/defender/communityqueries/{id}:
     $ref: advanced_hunting.yml#/paths/~1mtp~1huntingService~1queries~1defender~1communityqueries~1{id}
+  /mtp/huntingService/goHunt/Device:
+    $ref: advanced_hunting.yml#/paths/~1mtp~1huntingService~1goHunt~1Device
+  /mtp/huntingService/goHunt/IP:
+    $ref: advanced_hunting.yml#/paths/~1mtp~1huntingService~1goHunt~1IP
+  /mtp/huntingService/goHunt/URL:
+    $ref: advanced_hunting.yml#/paths/~1mtp~1huntingService~1goHunt~1URL
+  /mtp/huntingService/queryExecutor:
+    $ref: advanced_hunting.yml#/paths/~1mtp~1huntingService~1queryExecutor
+  /mtp/huntingService/queryExecutor/huntingGraph:
+    $ref: advanced_hunting.yml#/paths/~1mtp~1huntingService~1queryExecutor~1huntingGraph
+  /mtp/huntingService/rules/streamingDetectionCompatibleRules:
+    $ref: advanced_hunting.yml#/paths/~1mtp~1huntingService~1rules~1streamingDetectionCompatibleRules
 
   # File Investigation
   /mtp/detectionCyberProfile/api/detection/cyberprofileprovider/user/profiles/file:
@@ -266,6 +307,8 @@ paths:
     $ref: files.yml#/paths/~1mtp~1cloudPivot~1cloud~1pivot~1portal~1file~1device~1trend
   /mtp/cloudPivot/cloud/pivot/portal/file/device/fileNamesBySha2:
     $ref: files.yml#/paths/~1mtp~1cloudPivot~1cloud~1pivot~1portal~1file~1device~1fileNamesBySha2
+  /mtp/cloudPivot/cloud/pivot/portal/file/device/details:
+    $ref: files.yml#/paths/~1mtp~1cloudPivot~1cloud~1pivot~1portal~1file~1device~1details
   /mtp/mdeDeepAnalysis/api/DeepAnalysisRequest:
     $ref: files.yml#/paths/~1mtp~1mdeDeepAnalysis~1api~1DeepAnalysisRequest
   /mtp/activeAlertsSummary/activeAlertsSummary:
@@ -280,6 +323,8 @@ paths:
     $ref: files.yml#/paths/~1mtp~1responseApiPortal~1sampledownloadrequest~1generatedownloaduri~1V2
   /mtp/mdeEntitiesExperience/files/{Sha256}/capabilities:
     $ref: files.yml#/paths/~1mtp~1mdeEntitiesExperience~1files~1{Sha256}~1capabilities
+  /mtp/mdeEntitiesExperience/files/{Sha256}/content:
+    $ref: files.yml#/paths/~1mtp~1mdeEntitiesExperience~1files~1{Sha256}~1content
   /mtp/papin/api/cloud/public/internal/indicators/getQuery:
     $ref: files.yml#/paths/~1mtp~1papin~1api~1cloud~1public~1internal~1indicators~1getQuery
   /mtp/files/files/{Sha256}/virustotal:
@@ -288,6 +333,46 @@ paths:
     $ref: files.yml#/paths/~1mtp~1threatAnalyticsIndicators~1stix~1outbreaks~1indicators~1outbreaks~1query
   /mtp/threatAnalyticsIndicators/stix/oneti/reputation/fileHash:
     $ref: files.yml#/paths/~1mtp~1threatAnalyticsIndicators~1stix~1oneti~1reputation~1fileHash
+
+  # Entity Pivots
+  /mtp/cloudPivot/cloud/pivot/portal/domain/device/details:
+    $ref: entity_pivots.yml#/paths/~1mtp~1cloudPivot~1cloud~1pivot~1portal~1domain~1device~1details
+  /mtp/cloudPivot/cloud/pivot/portal/domain/device/prevalence:
+    $ref: entity_pivots.yml#/paths/~1mtp~1cloudPivot~1cloud~1pivot~1portal~1domain~1device~1prevalence
+  /mtp/cloudPivot/cloud/pivot/portal/domain/device/trend:
+    $ref: entity_pivots.yml#/paths/~1mtp~1cloudPivot~1cloud~1pivot~1portal~1domain~1device~1trend
+  /mtp/cloudPivot/cloud/pivot/portal/domain/email/details:
+    $ref: entity_pivots.yml#/paths/~1mtp~1cloudPivot~1cloud~1pivot~1portal~1domain~1email~1details
+  /mtp/cloudPivot/cloud/pivot/portal/domain/email/prevalence:
+    $ref: entity_pivots.yml#/paths/~1mtp~1cloudPivot~1cloud~1pivot~1portal~1domain~1email~1prevalence
+  /mtp/cloudPivot/cloud/pivot/portal/domain/email/trend:
+    $ref: entity_pivots.yml#/paths/~1mtp~1cloudPivot~1cloud~1pivot~1portal~1domain~1email~1trend
+  /mtp/cloudPivot/cloud/pivot/portal/domainClick/email/click/details:
+    $ref: entity_pivots.yml#/paths/~1mtp~1cloudPivot~1cloud~1pivot~1portal~1domainClick~1email~1click~1details
+  /mtp/cloudPivot/cloud/pivot/portal/domainClick/email/click/prevalence:
+    $ref: entity_pivots.yml#/paths/~1mtp~1cloudPivot~1cloud~1pivot~1portal~1domainClick~1email~1click~1prevalence
+  /mtp/cloudPivot/cloud/pivot/portal/domainClick/email/click/trend:
+    $ref: entity_pivots.yml#/paths/~1mtp~1cloudPivot~1cloud~1pivot~1portal~1domainClick~1email~1click~1trend
+  /mtp/cloudPivot/cloud/pivot/portal/url/device/details:
+    $ref: entity_pivots.yml#/paths/~1mtp~1cloudPivot~1cloud~1pivot~1portal~1url~1device~1details
+  /mtp/cloudPivot/cloud/pivot/portal/url/device/prevalence:
+    $ref: entity_pivots.yml#/paths/~1mtp~1cloudPivot~1cloud~1pivot~1portal~1url~1device~1prevalence
+  /mtp/cloudPivot/cloud/pivot/portal/url/device/trend:
+    $ref: entity_pivots.yml#/paths/~1mtp~1cloudPivot~1cloud~1pivot~1portal~1url~1device~1trend
+  /mtp/cloudPivot/cloud/pivot/portal/url/email/details:
+    $ref: entity_pivots.yml#/paths/~1mtp~1cloudPivot~1cloud~1pivot~1portal~1url~1email~1details
+  /mtp/cloudPivot/cloud/pivot/portal/url/email/prevalence:
+    $ref: entity_pivots.yml#/paths/~1mtp~1cloudPivot~1cloud~1pivot~1portal~1url~1email~1prevalence
+  /mtp/cloudPivot/cloud/pivot/portal/url/email/trend:
+    $ref: entity_pivots.yml#/paths/~1mtp~1cloudPivot~1cloud~1pivot~1portal~1url~1email~1trend
+  /mtp/cloudPivot/cloud/pivot/portal/urlClick/email/click/details:
+    $ref: entity_pivots.yml#/paths/~1mtp~1cloudPivot~1cloud~1pivot~1portal~1urlClick~1email~1click~1details
+  /mtp/cloudPivot/cloud/pivot/portal/urlClick/email/click/prevalence:
+    $ref: entity_pivots.yml#/paths/~1mtp~1cloudPivot~1cloud~1pivot~1portal~1urlClick~1email~1click~1prevalence
+  /mtp/cloudPivot/cloud/pivot/portal/urlClick/email/click/trend:
+    $ref: entity_pivots.yml#/paths/~1mtp~1cloudPivot~1cloud~1pivot~1portal~1urlClick~1email~1click~1trend
+  /mtp/useServiceBaseUrl/ine/entitypagesservice/urls/overview:
+    $ref: entity_pivots.yml#/paths/~1mtp~1useServiceBaseUrl~1ine~1entitypagesservice~1urls~1overview
 
   # Endpoint Devices
   /mtp/ndr/machines:
@@ -314,8 +399,28 @@ paths:
     $ref: endpoint_devices.yml#/paths/~1mtp~1responseApiPortal~1requests~1create
   /mtp/responseApiPortal/requests/{ActionId}:
     $ref: endpoint_devices.yml#/paths/~1mtp~1responseApiPortal~1requests~1{ActionId}
+  /mtp/alertsApiService/Evidences/device/Alerts:
+    $ref: endpoint_devices.yml#/paths/~1mtp~1alertsApiService~1Evidences~1device~1Alerts
+  /mtp/getLatestMachineIpsByIds/LatestMachineIpsByIds:
+    $ref: endpoint_devices.yml#/paths/~1mtp~1getLatestMachineIpsByIds~1LatestMachineIpsByIds
+  /mtp/getTopUsersByIds/TopUsersByIds:
+    $ref: endpoint_devices.yml#/paths/~1mtp~1getTopUsersByIds~1TopUsersByIds
+  /mtp/responseApiPortal/requests/latest:
+    $ref: endpoint_devices.yml#/paths/~1mtp~1responseApiPortal~1requests~1latest
+  /mtp/responseApiPortal/requests/machine/any:
+    $ref: endpoint_devices.yml#/paths/~1mtp~1responseApiPortal~1requests~1machine~1any
+  /mtp/responseApiPortal/requests/machinestate:
+    $ref: endpoint_devices.yml#/paths/~1mtp~1responseApiPortal~1requests~1machinestate
+  /mtp/responseApiPortal/requests/permissions:
+    $ref: endpoint_devices.yml#/paths/~1mtp~1responseApiPortal~1requests~1permissions
   /mtp/deviceTimeline/timeline/{DeviceId}:
     $ref: endpoint_devices.yml#/paths/~1mtp~1deviceTimeline~1timeline~1{DeviceId}
+  /mtp/mdeTimelineExperience/machines/{MachineId}/events:
+    $ref: endpoint_devices.yml#/paths/~1mtp~1mdeTimelineExperience~1machines~1{MachineId}~1events
+  /mtp/mdeTimelineExperience/machines/{MachineId}/prefetch:
+    $ref: endpoint_devices.yml#/paths/~1mtp~1mdeTimelineExperience~1machines~1{MachineId}~1prefetch
+  /mtp/mdeTimelineExperience/ips/{IpAddress}/events:
+    $ref: endpoint_devices.yml#/paths/~1mtp~1mdeTimelineExperience~1ips~1{IpAddress}~1events
   /mtp/deviceManagement/deviceModels:
     $ref: endpoint_devices.yml#/paths/~1mtp~1deviceManagement~1deviceModels
   /mtp/deviceManagement/deviceVendors:
@@ -349,6 +454,14 @@ paths:
     $ref: endpoint_devices.yml#/paths/~1mtp~1rbacManagementApi~1rbac~1machine_groups
   /mtp/ndr/machines/deviceTypeDistribution:
     $ref: endpoint_devices.yml#/paths/~1mtp~1ndr~1machines~1deviceTypeDistribution
+  /mtp/ndr/machines/{MachineId}/exclusionDetails:
+    $ref: endpoint_devices.yml#/paths/~1mtp~1ndr~1machines~1{MachineId}~1exclusionDetails
+  /mtp/ndr/machines/{MachineId}/InterceptingMachines:
+    $ref: endpoint_devices.yml#/paths/~1mtp~1ndr~1machines~1{MachineId}~1InterceptingMachines
+  /mtp/ndr/machines/deviceTotalCount:
+    $ref: endpoint_devices.yml#/paths/~1mtp~1ndr~1machines~1deviceTotalCount
+  /mtp/ndr/machines/machineTags:
+    $ref: endpoint_devices.yml#/paths/~1mtp~1ndr~1machines~1machineTags
   /mtp/wdatpApi/machines:
     $ref: endpoint_devices.yml#/paths/~1mtp~1wdatpApi~1machines
   /mtp/mdi/tri/defensor/onboarding/devices/sensor_compatible_machines:
@@ -394,8 +507,28 @@ paths:
     $ref: endpoint_configuration.yml#/paths/~1mtp~1deviceManagement~1configuration~1IntuneConnection
   /mtp/deviceManagement/configuration/PurviewSharing:
     $ref: endpoint_configuration.yml#/paths/~1mtp~1deviceManagement~1configuration~1PurviewSharing
+  /mtp/unifiedExperience/mde/configurationManagement/mem/securityPolicies:
+    $ref: endpoint_configuration.yml#/paths/~1mtp~1unifiedExperience~1mde~1configurationManagement~1mem~1securityPolicies
+  /mtp/unifiedExperience/mde/configurationManagement/mem/securityPolicies/filters:
+    $ref: endpoint_configuration.yml#/paths/~1mtp~1unifiedExperience~1mde~1configurationManagement~1mem~1securityPolicies~1filters
+  /mtp/unifiedExperience/mde/configurationManagement/mem/device/{MachineId}/policies:
+    $ref: endpoint_configuration.yml#/paths/~1mtp~1unifiedExperience~1mde~1configurationManagement~1mem~1device~1{MachineId}~1policies
+  /mtp/unifiedExperience/mde/configurationManagement/mem/proxy/deviceManagement/managedDevices:
+    $ref: endpoint_configuration.yml#/paths/~1mtp~1unifiedExperience~1mde~1configurationManagement~1mem~1proxy~1deviceManagement~1managedDevices
+  /mtp/unifiedExperience/mde/configurationManagement/mem/proxy/deviceManagement/managedDevices/{ManagedDeviceId}/users:
+    $ref: endpoint_configuration.yml#/paths/~1mtp~1unifiedExperience~1mde~1configurationManagement~1mem~1proxy~1deviceManagement~1managedDevices~1{ManagedDeviceId}~1users
 
   # Vulnerability Management
+  /mtp/tvm/analytics/assets/countByExposureLevel:
+    $ref: vulnerability_management.yml#/paths/~1mtp~1tvm~1analytics~1assets~1countByExposureLevel
+  /mtp/tvm/analytics/changeEvents/va/topPerDay:
+    $ref: vulnerability_management.yml#/paths/~1mtp~1tvm~1analytics~1changeEvents~1va~1topPerDay
+  /mtp/tvm/analytics/recommendations/va:
+    $ref: vulnerability_management.yml#/paths/~1mtp~1tvm~1analytics~1recommendations~1va
+  /mtp/tvm/analytics/certificates/algorithms:
+    $ref: vulnerability_management.yml#/paths/~1mtp~1tvm~1analytics~1certificates~1algorithms
+  /mtp/tvm/analytics/vulnerableDevicesReport:
+    $ref: vulnerability_management.yml#/paths/~1mtp~1tvm~1analytics~1vulnerableDevicesReport
   /mtp/tvm/analytics/vulnerabilities:
     $ref: vulnerability_management.yml#/paths/~1mtp~1tvm~1analytics~1vulnerabilities
   /mtp/tvm/analytics/vulnerabilities/summary:
@@ -429,8 +562,26 @@ paths:
     $ref: vulnerability_management.yml#/paths/~1mtp~1tvm~1analytics~1recommendations
   /mtp/tvm/orgsettings/vulnerability-notification-rules/metadata:
     $ref: vulnerability_management.yml#/paths/~1mtp~1tvm~1orgsettings~1vulnerability-notification-rules~1metadata
-  /mtp/posture/oversight/tenants:
-    $ref: vulnerability_management.yml#/paths/~1mtp~1posture~1oversight~1tenants
+  /mtp/tvm/analytics/assets/{assetId}:
+    $ref: vulnerability_management.yml#/paths/~1mtp~1tvm~1analytics~1assets~1{assetId}
+  /mtp/tvm/analytics/assets/{assetId}/installations:
+    $ref: vulnerability_management.yml#/paths/~1mtp~1tvm~1analytics~1assets~1{assetId}~1installations
+  /mtp/tvm/analytics/assets/{assetId}/recommendations:
+    $ref: vulnerability_management.yml#/paths/~1mtp~1tvm~1analytics~1assets~1{assetId}~1recommendations
+  /mtp/tvm/analytics/assets/{assetId}/vulnerabilities:
+    $ref: vulnerability_management.yml#/paths/~1mtp~1tvm~1analytics~1assets~1{assetId}~1vulnerabilities
+  /mtp/tvm/analytics/assets/{assetId}/vulnerabilitiesDistribution:
+    $ref: vulnerability_management.yml#/paths/~1mtp~1tvm~1analytics~1assets~1{assetId}~1vulnerabilitiesDistribution
+  /mtp/tvm/analytics/assets/topVulnerable:
+    $ref: vulnerability_management.yml#/paths/~1mtp~1tvm~1analytics~1assets~1topVulnerable
+  /mtp/tvm/analytics/changeEvents/sca/topPerDay:
+    $ref: vulnerability_management.yml#/paths/~1mtp~1tvm~1analytics~1changeEvents~1sca~1topPerDay
+  /mtp/tvm/analytics/devicehealth:
+    $ref: vulnerability_management.yml#/paths/~1mtp~1tvm~1analytics~1devicehealth
+  /mtp/tvm/remediation-tasks/remediationTasks:
+    $ref: vulnerability_management.yml#/paths/~1mtp~1tvm~1remediation-tasks~1remediationTasks
+  /mtp/tvm/remediation-tasks/remediationTasks/top:
+    $ref: vulnerability_management.yml#/paths/~1mtp~1tvm~1remediation-tasks~1remediationTasks~1top
 
   # Identity (MDI)
   /mdi/identity/userapiservice/user/resolve:
@@ -453,6 +604,46 @@ paths:
     $ref: identity.yml#/paths/~1mdi~1identity~1userapiservice~1directoryServiceAccount
   /mdi/identity/identitiesapiservice/remediationAccount:
     $ref: identity.yml#/paths/~1mdi~1identity~1identitiesapiservice~1remediationAccount
+  /mdi/identity/userapiservice/actions/byAccounts:
+    $ref: identity.yml#/paths/~1mdi~1identity~1userapiservice~1actions~1byAccounts
+  /mdi/identity/userapiservice/devices:
+    $ref: identity.yml#/paths/~1mdi~1identity~1userapiservice~1devices
+  /mdi/identity/userapiservice/devices/count:
+    $ref: identity.yml#/paths/~1mdi~1identity~1userapiservice~1devices~1count
+  /mdi/identity/userapiservice/identities:
+    $ref: identity.yml#/paths/~1mdi~1identity~1userapiservice~1identities
+  /mdi/identity/userapiservice/identities/aggregatedData:
+    $ref: identity.yml#/paths/~1mdi~1identity~1userapiservice~1identities~1aggregatedData
+  /mdi/identity/userapiservice/identities/count:
+    $ref: identity.yml#/paths/~1mdi~1identity~1userapiservice~1identities~1count
+  /mdi/identity/userapiservice/ispms:
+    $ref: identity.yml#/paths/~1mdi~1identity~1userapiservice~1ispms
+  /mdi/identity/userapiservice/manager:
+    $ref: identity.yml#/paths/~1mdi~1identity~1userapiservice~1manager
+  /mdi/identity/userapiservice/pdProtection/domainsPolicies:
+    $ref: identity.yml#/paths/~1mdi~1identity~1userapiservice~1pdProtection~1domainsPolicies
+  /mdi/identity/userapiservice/pdProtection/entities:
+    $ref: identity.yml#/paths/~1mdi~1identity~1userapiservice~1pdProtection~1entities
+  /mdi/identity/userapiservice/pdProtection/mdaReports/PasswordHygiene:
+    $ref: identity.yml#/paths/~1mdi~1identity~1userapiservice~1pdProtection~1mdaReports~1PasswordHygiene
+  /mdi/identity/userapiservice/pdProtection/mdaReports/PasswordPolicies:
+    $ref: identity.yml#/paths/~1mdi~1identity~1userapiservice~1pdProtection~1mdaReports~1PasswordPolicies
+  /mdi/identity/userapiservice/pdProtection/reportDefinitions/PasswordHygiene:
+    $ref: identity.yml#/paths/~1mdi~1identity~1userapiservice~1pdProtection~1reportDefinitions~1PasswordHygiene
+  /mdi/identity/userapiservice/pdProtection/reportDefinitions/PasswordPolicies:
+    $ref: identity.yml#/paths/~1mdi~1identity~1userapiservice~1pdProtection~1reportDefinitions~1PasswordPolicies
+  /mdi/identity/userapiservice/serviceAccounts:
+    $ref: identity.yml#/paths/~1mdi~1identity~1userapiservice~1serviceAccounts
+  /mdi/identity/userapiservice/serviceAccounts/count:
+    $ref: identity.yml#/paths/~1mdi~1identity~1userapiservice~1serviceAccounts~1count
+  /mdi/identity/userapiservice/serviceAccounts/filterOptions:
+    $ref: identity.yml#/paths/~1mdi~1identity~1userapiservice~1serviceAccounts~1filterOptions
+  /mdi/identity/userapiservice/timeline/mtp:
+    $ref: identity.yml#/paths/~1mdi~1identity~1userapiservice~1timeline~1mtp
+  /mdi/identity/userapiservice/user/activityPeriod:
+    $ref: identity.yml#/paths/~1mdi~1identity~1userapiservice~1user~1activityPeriod
+  /mdi/identity/userapiservice/users/IdentitiesStats:
+    $ref: identity.yml#/paths/~1mdi~1identity~1userapiservice~1users~1IdentitiesStats
 
   /aatp/api/sensors/domainControllerCoverage:
     $ref: identity.yml#/paths/~1aatp~1api~1sensors~1domainControllerCoverage
@@ -487,6 +678,20 @@ paths:
     $ref: identity.yml#/paths/~1aatp~1api~1workspace~1isActive
   /aatp/api/workspaces/isWorkspaceExists:
     $ref: identity.yml#/paths/~1aatp~1api~1workspaces~1isWorkspaceExists
+  /aatp/api/ispmReports/DormantEntities/newEntryCount:
+    $ref: identity.yml#/paths/~1aatp~1api~1ispmReports~1DormantEntities~1newEntryCount
+  /aatp/api/ispmReports/RiskyLateralMovementPath/newEntryCount:
+    $ref: identity.yml#/paths/~1aatp~1api~1ispmReports~1RiskyLateralMovementPath~1newEntryCount
+  /aatp/api/ispmReports/UnsecureDomainConfigurations:
+    $ref: identity.yml#/paths/~1aatp~1api~1ispmReports~1UnsecureDomainConfigurations
+  /aatp/api/ispmReports/UnsecureDomainConfigurations/newEntryCount:
+    $ref: identity.yml#/paths/~1aatp~1api~1ispmReports~1UnsecureDomainConfigurations~1newEntryCount
+  /aatp/api/sensors/identityInfrastructuresInfo:
+    $ref: identity.yml#/paths/~1aatp~1api~1sensors~1identityInfrastructuresInfo
+  /mtp/siamApi/domaincontrollers/totals:
+    $ref: identity.yml#/paths/~1mtp~1siamApi~1domaincontrollers~1totals
+  /mtp/siamApi/MdeAttachEnabled:
+    $ref: identity.yml#/paths/~1mtp~1siamApi~1MdeAttachEnabled
   /aatp/odata/ExclusionEntityDatas/Global:
     $ref: identity.yml#/paths/~1aatp~1odata~1ExclusionEntityDatas~1Global
   /aatp/odata/SecurityAlertExclusionDatas:
@@ -497,6 +702,24 @@ paths:
     $ref: identity.yml#/paths/~1aatp~1odata~1directoryServices
   /aatp/odata/workspaceMonitoringAlerts:
     $ref: identity.yml#/paths/~1aatp~1odata~1workspaceMonitoringAlerts
+  /radius/api/radius/identities/accountsByUserId:
+    $ref: identity.yml#/paths/~1radius~1api~1radius~1identities~1accountsByUserId
+  /radius/api/radius/identities/accountsByUserIdCount:
+    $ref: identity.yml#/paths/~1radius~1api~1radius~1identities~1accountsByUserIdCount
+  /radius/api/radius/identities/getCriticalityScore:
+    $ref: identity.yml#/paths/~1radius~1api~1radius~1identities~1getCriticalityScore
+  /radius/api/radius/identities/getDefenderRiskKillChain:
+    $ref: identity.yml#/paths/~1radius~1api~1radius~1identities~1getDefenderRiskKillChain
+  /radius/api/radius/identities/getDefenderRiskScoresOverTime:
+    $ref: identity.yml#/paths/~1radius~1api~1radius~1identities~1getDefenderRiskScoresOverTime
+  /radius/api/radius/identities/getDefenderRiskSummary:
+    $ref: identity.yml#/paths/~1radius~1api~1radius~1identities~1getDefenderRiskSummary
+  /radius/api/radius/identities/getIdentityType:
+    $ref: identity.yml#/paths/~1radius~1api~1radius~1identities~1getIdentityType
+  /radius/api/radius/identities/getTenantPartners:
+    $ref: identity.yml#/paths/~1radius~1api~1radius~1identities~1getTenantPartners
+  /radius/api/radius/remediation/lmf/{Sid}:
+    $ref: identity.yml#/paths/~1radius~1api~1radius~1remediation~1lmf~1{Sid}
 
   # Attack Simulation
   /astgws/AttackSimulator/api/v1/AdvanceReporting/chart/NRT/RepeatOffender:
@@ -541,6 +764,30 @@ paths:
     $ref: configuration.yml#/paths/~1radius~1api~1radius~1serviceaccounts~1classificationrule~1getall
   /mtp/urbacConfiguration/gw/unifiedrbac/configuration/tenantinfo:
     $ref: configuration.yml#/paths/~1mtp~1urbacConfiguration~1gw~1unifiedrbac~1configuration~1tenantinfo
+  /mtp/sentinelOnboarding/sentinel/workspaces/eligibleForOnboarding:
+    $ref: configuration.yml#/paths/~1mtp~1sentinelOnboarding~1sentinel~1workspaces~1eligibleForOnboarding
+  /mtp/sentinelOnboarding/sentinel/workspaces/isOnboarded:
+    $ref: configuration.yml#/paths/~1mtp~1sentinelOnboarding~1sentinel~1workspaces~1isOnboarded
+  /mtp/unifiedConnectors/public/connectors:
+    $ref: configuration.yml#/paths/~1mtp~1unifiedConnectors~1public~1connectors
+  /mtp/unifiedConnectors/public/connectors/checkrequirements:
+    $ref: configuration.yml#/paths/~1mtp~1unifiedConnectors~1public~1connectors~1checkrequirements
+  /mtp/urbacConfiguration/gw/unifiedrbac/configuration/roleDefinitions:
+    $ref: configuration.yml#/paths/~1mtp~1urbacConfiguration~1gw~1unifiedrbac~1configuration~1roleDefinitions
+  /mdc/views/inventory/assets:
+    $ref: configuration.yml#/paths/~1mdc~1views~1inventory~1assets
+  /mdc/views/inventory/metrics:
+    $ref: configuration.yml#/paths/~1mdc~1views~1inventory~1metrics
+  /mdc/views/inventory/schema:
+    $ref: configuration.yml#/paths/~1mdc~1views~1inventory~1schema
+  /mdc/views/overview/overviewMetrics:
+    $ref: configuration.yml#/paths/~1mdc~1views~1overview~1overviewMetrics
+  /mdc/views/inventory/ai-agents-v3/agents-current-count-by-platform-metrics:
+    $ref: configuration.yml#/paths/~1mdc~1views~1inventory~1ai-agents-v3~1agents-current-count-by-platform-metrics
+  /mdc/views/inventory/ai-agents-v3/agents-discovered-overtime:
+    $ref: configuration.yml#/paths/~1mdc~1views~1inventory~1ai-agents-v3~1agents-discovered-overtime
+  /mdc/views/inventory/ai-agents-v3/agents-requiring-attention-overtime-metrics:
+    $ref: configuration.yml#/paths/~1mdc~1views~1inventory~1ai-agents-v3~1agents-requiring-attention-overtime-metrics
   /mcas/cas/api/v1/settings:
     $ref: configuration.yml#/paths/~1mcas~1cas~1api~1v1~1settings
 
@@ -564,6 +811,10 @@ paths:
     $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1version
   /mcas/cas/api/tags:
     $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1tags
+  /mcas/cas/api/discovery/streams:
+    $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1discovery~1streams
+  /mcas/cas/api/stories/get_stories_details:
+    $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1stories~1get_stories_details
   /mcas/cas/api/about/info:
     $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1about~1info
   /mcas/cas/api/about/server_url:
@@ -584,12 +835,18 @@ paths:
     $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1activities~1get_activities_threat_scores
   /mcas/cas/api/v1/activities/metadata:
     $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1activities~1metadata
+  /mcas/cas/api/v1/activities_locations/by_user:
+    $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1activities_locations~1by_user
   /mcas/cas/api/v1/app_connectors:
     $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1app_connectors
   /mcas/cas/api/v1/app_connectors/count:
     $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1app_connectors~1count
   /mcas/cas/api/v1/app_connectors/dashboard/get_apps_count_by_status:
     $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1app_connectors~1dashboard~1get_apps_count_by_status
+  /mcas/cas/api/v1/app_connectors/dashboard/get_instance_count_by_app:
+    $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1app_connectors~1dashboard~1get_instance_count_by_app
+  /mcas/cas/api/v1/app_connectors/dashboard/get_supported_apps_metadata:
+    $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1app_connectors~1dashboard~1get_supported_apps_metadata
   /mcas/cas/api/v1/app_connectors/last_activity:
     $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1app_connectors~1last_activity
   /mcas/cas/api/v1/app_connectors/metadata:
@@ -604,6 +861,10 @@ paths:
     $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1app_permissions~1metadata
   /mcas/cas/api/v1/autocomplete/entities:
     $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1autocomplete~1entities
+  /mcas/cas/api/v1/autocomplete/discovery_app_tags:
+    $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1autocomplete~1discovery_app_tags
+  /mcas/cas/api/v1/autocomplete/scoped_profiles:
+    $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1autocomplete~1scoped_profiles
   /mcas/cas/api/v1/autocomplete/tags:
     $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1autocomplete~1tags
   /mcas/cas/api/v1/autocomplete/tokens:
@@ -616,8 +877,38 @@ paths:
     $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1connected_services~1instances
   /mcas/cas/api/v1/discovery/categories:
     $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1discovery~1categories
+  /mcas/cas/api/v1/discovery/app_catalog:
+    $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1discovery~1app_catalog
+  /mcas/cas/api/v1/discovery/app_catalog/categories:
+    $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1discovery~1app_catalog~1categories
+  /mcas/cas/api/v1/discovery/app_catalog/count:
+    $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1discovery~1app_catalog~1count
+  /mcas/cas/api/v1/discovery/app_catalog/metadata:
+    $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1discovery~1app_catalog~1metadata
+  /mcas/cas/api/v1/discovery/category_stats:
+    $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1discovery~1category_stats
+  /mcas/cas/api/v1/discovery/get_locations:
+    $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1discovery~1get_locations
+  /mcas/cas/api/v1/discovery/service_locations:
+    $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1discovery~1service_locations
+  /mcas/cas/api/v1/discovery/snapshot_reports:
+    $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1discovery~1snapshot_reports
+  /mcas/cas/api/v1/discovery/top_apps:
+    $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1discovery~1top_apps
+  /mcas/cas/api/v1/discovery/top_categories:
+    $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1discovery~1top_categories
+  /mcas/cas/api/v1/discovery/top_entities:
+    $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1discovery~1top_entities
   /mcas/cas/api/v1/entities/metadata:
     $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1entities~1metadata
+  /mcas/cas/api/v1/entities/resolve_entity:
+    $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1entities~1resolve_entity
+  /mcas/cas/api/v1/get_feature_values:
+    $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1get_feature_values
+  /mcas/cas/api/v1/lcnc_settings:
+    $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1lcnc_settings
+  /mcas/cas/api/v1/mtp_scopes_and_permissions:
+    $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1mtp_scopes_and_permissions
   /mcas/cas/api/v1/governance:
     $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1governance
   /mcas/cas/api/v1/governance/count:
@@ -628,6 +919,20 @@ paths:
     $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1files~1count
   /mcas/cas/api/v1/policies:
     $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1policies
+  /mcas/cas/api/v1/policies/count:
+    $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1policies~1count
+  /mcas/cas/api/v1/policies/metadata:
+    $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1policies~1metadata
+  /mcas/cas/api/v1/policy_templates_inmemo:
+    $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1policy_templates_inmemo
+  /mcas/cas/api/v1/policy_templates_inmemo/count:
+    $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1policy_templates_inmemo~1count
+  /mcas/cas/api/v1/policy_templates_inmemo/linked_policies_by_template_ids:
+    $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1policy_templates_inmemo~1linked_policies_by_template_ids
+  /mcas/cas/api/v1/policy_templates_inmemo/metadata:
+    $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1policy_templates_inmemo~1metadata
+  /mcas/cas/api/v1/standalone_entities/count:
+    $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1standalone_entities~1count
   /mcas/cas/api/v1/standalone_entities/metadata:
     $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1standalone_entities~1metadata
   /mcas/cas/api/v1/translation/log-error:
@@ -654,6 +959,44 @@ paths:
     $ref: cloud_apps.yml#/paths/~1m365appprotection~1mapg-glsservice~1compliance~1getUserProfile
 
   # Exposure Management
+  /mtp/k8s/machines/deviceTotals:
+    $ref: exposure_management.yml#/paths/~1mtp~1k8s~1machines~1deviceTotals
+  /mtp/posture/oversight/tenants:
+    $ref: exposure_management.yml#/paths/~1mtp~1posture~1oversight~1tenants
+  /mtp/posture/oversight/initiatives:
+    $ref: exposure_management.yml#/paths/~1mtp~1posture~1oversight~1initiatives
+  /mtp/posture/oversight/initiatives/summarized:
+    $ref: exposure_management.yml#/paths/~1mtp~1posture~1oversight~1initiatives~1summarized
+  /mtp/posture/oversight/metrics:
+    $ref: exposure_management.yml#/paths/~1mtp~1posture~1oversight~1metrics
+  /mtp/posture/oversight/metrics/ids:
+    $ref: exposure_management.yml#/paths/~1mtp~1posture~1oversight~1metrics~1ids
+  /mtp/posture/oversight/recommendations:
+    $ref: exposure_management.yml#/paths/~1mtp~1posture~1oversight~1recommendations
+  /mtp/posture/oversight/recommendations/aggregated:
+    $ref: exposure_management.yml#/paths/~1mtp~1posture~1oversight~1recommendations~1aggregated
+  /mtp/posture/oversight/scaRecommendations/filters:
+    $ref: exposure_management.yml#/paths/~1mtp~1posture~1oversight~1scaRecommendations~1filters
+  /mtp/posture/oversight/scaRecommendations/tags:
+    $ref: exposure_management.yml#/paths/~1mtp~1posture~1oversight~1scaRecommendations~1tags
+  /mtp/posture/oversight/securityEvents:
+    $ref: exposure_management.yml#/paths/~1mtp~1posture~1oversight~1securityEvents
+  /mtp/posture/oversight/updates:
+    $ref: exposure_management.yml#/paths/~1mtp~1posture~1oversight~1updates
+  /mtp/posture/oversight/easm/vendors:
+    $ref: exposure_management.yml#/paths/~1mtp~1posture~1oversight~1easm~1vendors
+  /mtp/tvm/analytics/riskscore:
+    $ref: exposure_management.yml#/paths/~1mtp~1tvm~1analytics~1riskscore
+  /mtp/xspmatlas/attacksurface/query:
+    $ref: exposure_management.yml#/paths/~1mtp~1xspmatlas~1attacksurface~1query
+  /mtp/xspmatlas/attacksurface/attackpaths:
+    $ref: exposure_management.yml#/paths/~1mtp~1xspmatlas~1attacksurface~1attackpaths
+  /mtp/xspmatlas/attacksurface/attackpaths/filters:
+    $ref: exposure_management.yml#/paths/~1mtp~1xspmatlas~1attacksurface~1attackpaths~1filters
+  /mtp/xspmatlas/attacksurface/chokepoints/list:
+    $ref: exposure_management.yml#/paths/~1mtp~1xspmatlas~1attacksurface~1chokepoints~1list
+  /mtp/xspmatlas/attacksurface/chokepoints/filters:
+    $ref: exposure_management.yml#/paths/~1mtp~1xspmatlas~1attacksurface~1chokepoints~1filters
   /mtp/xspm/attackpaths:
     $ref: exposure_management.yml#/paths/~1mtp~1xspm~1attackpaths
   /mtp/xspm/chokepoints:
@@ -686,6 +1029,10 @@ paths:
     $ref: threat_analytics.yml#/paths/~1mtp~1threatAnalytics~1outbreaks~1outbreaksEnrichedDataMtp
   /mtp/threatAnalytics/outbreaks/topthreats:
     $ref: threat_analytics.yml#/paths/~1mtp~1threatAnalytics~1outbreaks~1topthreats
+  /mtp/threatAnalyticsIndicators/stix/oneti/reputation:
+    $ref: threat_analytics.yml#/paths/~1mtp~1threatAnalyticsIndicators~1stix~1oneti~1reputation
+  /mtp/threatAnalyticsIndicators/stix/oneti/reputation/URL:
+    $ref: threat_analytics.yml#/paths/~1mtp~1threatAnalyticsIndicators~1stix~1oneti~1reputation~1URL
 
   # Action Center
   /mtp/actionCenter/actioncenterui/history-actions:
@@ -717,6 +1064,12 @@ paths:
     $ref: streaming.yml#/paths/~1mtp~1streamingapi~1streamingApiConfiguration
 
   # Secure Score
+  /mdc/views/secureScore/cloudInitiativeMetrics:
+    $ref: secure_score.yml#/paths/~1mdc~1views~1secureScore~1cloudInitiativeMetrics
+  /mtp/tvm/analytics/configurations/securescore/categories:
+    $ref: secure_score.yml#/paths/~1mtp~1tvm~1analytics~1configurations~1securescore~1categories
+  /mtp/tvm/analytics/configurations/securescore/total:
+    $ref: secure_score.yml#/paths/~1mtp~1tvm~1analytics~1configurations~1securescore~1total
   /mtp/secureScore/security/secureScoresV2:
     $ref: secure_score.yml#/paths/~1mtp~1secureScore~1security~1secureScoresV2
   /mtp/secureScore/security/secureScoreControlProfilesV2:

@@ -119,6 +119,70 @@ paths:
         '404':
           $ref: common.yml#/components/responses/NotFound
 
+  /mtp/threatAnalyticsIndicators/stix/oneti/reputation:
+    get:
+      summary: Get indicator reputation
+      description: >-
+        Retrieve Threat Analytics reputation data for a generic indicator value such as
+        an IP address or domain investigated from the unified entity pages.
+      operationId: ThreatAnalytics.GetIndicatorReputation
+      tags: [Threat Analytics]
+      parameters:
+        - name: query
+          in: query
+          required: true
+          description: The indicator value to score.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - indicator reputation data
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/threatAnalyticsIndicators/stix/oneti/reputation/URL:
+    get:
+      summary: Get URL reputation
+      description: >-
+        Retrieve Threat Analytics reputation data for the selected URL from the unified
+        URL investigation experience.
+      operationId: ThreatAnalytics.GetUrlReputation
+      tags: [Threat Analytics]
+      parameters:
+        - name: query
+          in: query
+          required: true
+          description: The URL value to score.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - URL reputation data
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
 components:
   schemas:
     Outbreak:

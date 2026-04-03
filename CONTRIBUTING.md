@@ -29,3 +29,9 @@ Checked-in Postman collections live under `postman/collections/` and are generat
 - Do not edit the checked-in collection JSON by hand.
 - Regenerate them with `npm run generate:postman`.
 - When specs change, commit the updated collections alongside the spec changes so the validation workflow stays green.
+
+## Discovery workflow
+
+For recurring portal research and undocumented API discovery work, use the living playbook in [AGENT_DISCOVERY_PLAYBOOK.md](./AGENT_DISCOVERY_PLAYBOOK.md).
+
+It captures the preferred browser/auth workflow, traffic-first discovery process, JavaScript bundle mining guidance, write-shape safety practices, and an experiment log for iterating on better techniques over time.
