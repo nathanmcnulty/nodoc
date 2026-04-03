@@ -18,7 +18,7 @@ The project currently publishes the following API definitions:
 | M365 Apps Config | 23 | Portal bearer token + diagnostic headers | [Browse](https://nodoc.nathanmcnulty.com/m-365-apps-config) | `postman/collections/m365-apps-config.collection.json` |
 | M365 Apps Services | 8 | Portal bearer token + diagnostic headers | [Browse](https://nodoc.nathanmcnulty.com/m-365-apps-services) | `postman/collections/m365-apps-services.collection.json` |
 | M365 Apps Inventory | 27 | Portal bearer token + diagnostic headers | [Browse](https://nodoc.nathanmcnulty.com/m-365-apps-inventory) | `postman/collections/m365-apps-inventory.collection.json` |
-| Intune Autopatch | 32 | Portal bearer token + x-ms portal headers | [Browse](https://nodoc.nathanmcnulty.com/intune-autopatch) | `postman/collections/intune-autopatch.collection.json` |
+| Intune Autopatch | 52 | Portal bearer token + x-ms portal headers | [Browse](https://nodoc.nathanmcnulty.com/intune-autopatch) | `postman/collections/intune-autopatch.collection.json` |
 | Intune Portal | 3 | Portal bearer token + same-origin portal context | [Browse](https://nodoc.nathanmcnulty.com/intune-portal) | `postman/collections/intune-portal.collection.json` |
 | Purview | 74 | Portal session cookie (`sccauth`) | [Browse](https://nodoc.nathanmcnulty.com/purview) | `postman/collections/purview.collection.json` |
 | Entra IAM | 286 | Delegated OAuth2 + `X-Ms-Client-Request-Id` | [Browse](https://nodoc.nathanmcnulty.com/entra-iam) | `postman/collections/entra-iam.collection.json` |

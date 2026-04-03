@@ -136,7 +136,7 @@ export const apiCatalog: ApiCatalogItem[] = [
     title: "Intune Autopatch",
     slug: "/intune-autopatch",
     family: "Intune admin center",
-    operations: 32,
+    operations: 52,
     authModel: "Portal bearer token + x-ms portal headers",
     baseUrl: "https://services.autopatch.microsoft.com",
     summary:
@@ -144,7 +144,7 @@ export const apiCatalog: ApiCatalogItem[] = [
     highlights: [
       "Tenant resolution, feature enablement, and admin actions",
       "Autopatch roles, permissions, scope tags, and role assignments",
-      "Messages plus support detail, activity, and write-flow request shapes",
+      "Messages, support flows, and quality/feature update reporting summaries, details, distinct filters, and export helpers",
     ],
     collectionPath: "postman/collections/intune-autopatch.collection.json",
     collectionDownloadUrl:
