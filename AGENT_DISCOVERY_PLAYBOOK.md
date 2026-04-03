@@ -255,6 +255,12 @@ Useful companion artifacts:
 - `probe-results.json`
 - per-feature analysis notes
 
+When the filtered `api-records.json` output appears to miss a route family, cross-check
+`page-states.json` before assuming the route is absent. The page-state request inventory
+often preserves exact methods and path variants (for example, extra segments like
+`/radius/api/radius/identities/...`) even when the normalized API export only captured a
+subset of those requests or omitted the body shape.
+
 ## Process patterns that worked well
 
 ### Effective

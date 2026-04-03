@@ -83,6 +83,10 @@ tags:
     description: |
       Operations relating to the Defender file entity page, including file profiles,
       prevalence, reputation, indicator checks, and collect or download actions.
+  - name: Entity Pivots
+    description: |
+      Operations relating to the domain, URL, and email pivot experiences used by
+      Defender investigation pages.
   - name: Endpoint Devices
     description: |
       Operations relating to endpoint device management in Microsoft Defender for Endpoint (MDE),
@@ -148,6 +152,7 @@ x-tagGroups:
   - name: File Investigation
     tags:
       - Files
+      - Entity Pivots
   - name: Endpoint Management
     tags:
       - Endpoint Devices
@@ -209,6 +214,30 @@ paths:
     $ref: alerts_incidents.yml#/paths/~1mtp~1alertsApiService~1alerts~1count
   /mtp/incidentDashboard/Dashboard/ActiveIncidentsSummary:
     $ref: alerts_incidents.yml#/paths/~1mtp~1incidentDashboard~1Dashboard~1ActiveIncidentsSummary
+  /mtp/incidents/{IncidentId}/AggregatedCustomDetails:
+    $ref: alerts_incidents.yml#/paths/~1mtp~1incidents~1{IncidentId}~1AggregatedCustomDetails
+  /mtp/incidents/{IncidentId}/AssociatedAlerts:
+    $ref: alerts_incidents.yml#/paths/~1mtp~1incidents~1{IncidentId}~1AssociatedAlerts
+  /mtp/incidents/{IncidentId}/outbreaks:
+    $ref: alerts_incidents.yml#/paths/~1mtp~1incidents~1{IncidentId}~1outbreaks
+  /mtp/incidents/{IncidentId}/riskfactors:
+    $ref: alerts_incidents.yml#/paths/~1mtp~1incidents~1{IncidentId}~1riskfactors
+  /mtp/incidents/dsiMessageBarIndicators:
+    $ref: alerts_incidents.yml#/paths/~1mtp~1incidents~1dsiMessageBarIndicators
+  /mtp/CaseManagement/be/cases:
+    $ref: alerts_incidents.yml#/paths/~1mtp~1CaseManagement~1be~1cases
+  /mtp/CaseManagement/be/caseRelations:
+    $ref: alerts_incidents.yml#/paths/~1mtp~1CaseManagement~1be~1caseRelations
+  /mtp/CaseManagement/be/tasks:
+    $ref: alerts_incidents.yml#/paths/~1mtp~1CaseManagement~1be~1tasks
+  /mtp/CaseManagement/be/templates/{TemplateId}:
+    $ref: alerts_incidents.yml#/paths/~1mtp~1CaseManagement~1be~1templates~1{TemplateId}
+  /mtp/autoIr/incidents/{IncidentId}:
+    $ref: alerts_incidents.yml#/paths/~1mtp~1autoIr~1incidents~1{IncidentId}
+  /mtp/autoIr/incidents/{IncidentId}/filters:
+    $ref: alerts_incidents.yml#/paths/~1mtp~1autoIr~1incidents~1{IncidentId}~1filters
+  /mtp/GAIAMedeinaApi/skills/guidedresponse/{IncidentId}/similarIncidents:
+    $ref: alerts_incidents.yml#/paths/~1mtp~1GAIAMedeinaApi~1skills~1guidedresponse~1{IncidentId}~1similarIncidents
 
   # Advanced Hunting
   /mtp/huntingService/schema:
@@ -266,6 +295,8 @@ paths:
     $ref: files.yml#/paths/~1mtp~1cloudPivot~1cloud~1pivot~1portal~1file~1device~1trend
   /mtp/cloudPivot/cloud/pivot/portal/file/device/fileNamesBySha2:
     $ref: files.yml#/paths/~1mtp~1cloudPivot~1cloud~1pivot~1portal~1file~1device~1fileNamesBySha2
+  /mtp/cloudPivot/cloud/pivot/portal/file/device/details:
+    $ref: files.yml#/paths/~1mtp~1cloudPivot~1cloud~1pivot~1portal~1file~1device~1details
   /mtp/mdeDeepAnalysis/api/DeepAnalysisRequest:
     $ref: files.yml#/paths/~1mtp~1mdeDeepAnalysis~1api~1DeepAnalysisRequest
   /mtp/activeAlertsSummary/activeAlertsSummary:
@@ -288,6 +319,44 @@ paths:
     $ref: files.yml#/paths/~1mtp~1threatAnalyticsIndicators~1stix~1outbreaks~1indicators~1outbreaks~1query
   /mtp/threatAnalyticsIndicators/stix/oneti/reputation/fileHash:
     $ref: files.yml#/paths/~1mtp~1threatAnalyticsIndicators~1stix~1oneti~1reputation~1fileHash
+
+  # Entity Pivots
+  /mtp/cloudPivot/cloud/pivot/portal/domain/device/details:
+    $ref: entity_pivots.yml#/paths/~1mtp~1cloudPivot~1cloud~1pivot~1portal~1domain~1device~1details
+  /mtp/cloudPivot/cloud/pivot/portal/domain/device/prevalence:
+    $ref: entity_pivots.yml#/paths/~1mtp~1cloudPivot~1cloud~1pivot~1portal~1domain~1device~1prevalence
+  /mtp/cloudPivot/cloud/pivot/portal/domain/device/trend:
+    $ref: entity_pivots.yml#/paths/~1mtp~1cloudPivot~1cloud~1pivot~1portal~1domain~1device~1trend
+  /mtp/cloudPivot/cloud/pivot/portal/domain/email/details:
+    $ref: entity_pivots.yml#/paths/~1mtp~1cloudPivot~1cloud~1pivot~1portal~1domain~1email~1details
+  /mtp/cloudPivot/cloud/pivot/portal/domain/email/prevalence:
+    $ref: entity_pivots.yml#/paths/~1mtp~1cloudPivot~1cloud~1pivot~1portal~1domain~1email~1prevalence
+  /mtp/cloudPivot/cloud/pivot/portal/domain/email/trend:
+    $ref: entity_pivots.yml#/paths/~1mtp~1cloudPivot~1cloud~1pivot~1portal~1domain~1email~1trend
+  /mtp/cloudPivot/cloud/pivot/portal/domainClick/email/click/details:
+    $ref: entity_pivots.yml#/paths/~1mtp~1cloudPivot~1cloud~1pivot~1portal~1domainClick~1email~1click~1details
+  /mtp/cloudPivot/cloud/pivot/portal/domainClick/email/click/prevalence:
+    $ref: entity_pivots.yml#/paths/~1mtp~1cloudPivot~1cloud~1pivot~1portal~1domainClick~1email~1click~1prevalence
+  /mtp/cloudPivot/cloud/pivot/portal/domainClick/email/click/trend:
+    $ref: entity_pivots.yml#/paths/~1mtp~1cloudPivot~1cloud~1pivot~1portal~1domainClick~1email~1click~1trend
+  /mtp/cloudPivot/cloud/pivot/portal/url/device/details:
+    $ref: entity_pivots.yml#/paths/~1mtp~1cloudPivot~1cloud~1pivot~1portal~1url~1device~1details
+  /mtp/cloudPivot/cloud/pivot/portal/url/device/prevalence:
+    $ref: entity_pivots.yml#/paths/~1mtp~1cloudPivot~1cloud~1pivot~1portal~1url~1device~1prevalence
+  /mtp/cloudPivot/cloud/pivot/portal/url/device/trend:
+    $ref: entity_pivots.yml#/paths/~1mtp~1cloudPivot~1cloud~1pivot~1portal~1url~1device~1trend
+  /mtp/cloudPivot/cloud/pivot/portal/url/email/details:
+    $ref: entity_pivots.yml#/paths/~1mtp~1cloudPivot~1cloud~1pivot~1portal~1url~1email~1details
+  /mtp/cloudPivot/cloud/pivot/portal/url/email/prevalence:
+    $ref: entity_pivots.yml#/paths/~1mtp~1cloudPivot~1cloud~1pivot~1portal~1url~1email~1prevalence
+  /mtp/cloudPivot/cloud/pivot/portal/url/email/trend:
+    $ref: entity_pivots.yml#/paths/~1mtp~1cloudPivot~1cloud~1pivot~1portal~1url~1email~1trend
+  /mtp/cloudPivot/cloud/pivot/portal/urlClick/email/click/details:
+    $ref: entity_pivots.yml#/paths/~1mtp~1cloudPivot~1cloud~1pivot~1portal~1urlClick~1email~1click~1details
+  /mtp/cloudPivot/cloud/pivot/portal/urlClick/email/click/prevalence:
+    $ref: entity_pivots.yml#/paths/~1mtp~1cloudPivot~1cloud~1pivot~1portal~1urlClick~1email~1click~1prevalence
+  /mtp/cloudPivot/cloud/pivot/portal/urlClick/email/click/trend:
+    $ref: entity_pivots.yml#/paths/~1mtp~1cloudPivot~1cloud~1pivot~1portal~1urlClick~1email~1click~1trend
 
   # Endpoint Devices
   /mtp/ndr/machines:
@@ -316,6 +385,12 @@ paths:
     $ref: endpoint_devices.yml#/paths/~1mtp~1responseApiPortal~1requests~1{ActionId}
   /mtp/deviceTimeline/timeline/{DeviceId}:
     $ref: endpoint_devices.yml#/paths/~1mtp~1deviceTimeline~1timeline~1{DeviceId}
+  /mtp/mdeTimelineExperience/machines/{MachineId}/events:
+    $ref: endpoint_devices.yml#/paths/~1mtp~1mdeTimelineExperience~1machines~1{MachineId}~1events
+  /mtp/mdeTimelineExperience/machines/{MachineId}/prefetch:
+    $ref: endpoint_devices.yml#/paths/~1mtp~1mdeTimelineExperience~1machines~1{MachineId}~1prefetch
+  /mtp/mdeTimelineExperience/ips/{IpAddress}/events:
+    $ref: endpoint_devices.yml#/paths/~1mtp~1mdeTimelineExperience~1ips~1{IpAddress}~1events
   /mtp/deviceManagement/deviceModels:
     $ref: endpoint_devices.yml#/paths/~1mtp~1deviceManagement~1deviceModels
   /mtp/deviceManagement/deviceVendors:
@@ -349,6 +424,14 @@ paths:
     $ref: endpoint_devices.yml#/paths/~1mtp~1rbacManagementApi~1rbac~1machine_groups
   /mtp/ndr/machines/deviceTypeDistribution:
     $ref: endpoint_devices.yml#/paths/~1mtp~1ndr~1machines~1deviceTypeDistribution
+  /mtp/ndr/machines/{MachineId}/exclusionDetails:
+    $ref: endpoint_devices.yml#/paths/~1mtp~1ndr~1machines~1{MachineId}~1exclusionDetails
+  /mtp/ndr/machines/{MachineId}/InterceptingMachines:
+    $ref: endpoint_devices.yml#/paths/~1mtp~1ndr~1machines~1{MachineId}~1InterceptingMachines
+  /mtp/ndr/machines/deviceTotalCount:
+    $ref: endpoint_devices.yml#/paths/~1mtp~1ndr~1machines~1deviceTotalCount
+  /mtp/ndr/machines/machineTags:
+    $ref: endpoint_devices.yml#/paths/~1mtp~1ndr~1machines~1machineTags
   /mtp/wdatpApi/machines:
     $ref: endpoint_devices.yml#/paths/~1mtp~1wdatpApi~1machines
   /mtp/mdi/tri/defensor/onboarding/devices/sensor_compatible_machines:
@@ -439,6 +522,26 @@ paths:
     $ref: vulnerability_management.yml#/paths/~1mtp~1tvm~1analytics~1recommendations
   /mtp/tvm/orgsettings/vulnerability-notification-rules/metadata:
     $ref: vulnerability_management.yml#/paths/~1mtp~1tvm~1orgsettings~1vulnerability-notification-rules~1metadata
+  /mtp/tvm/analytics/assets/{assetId}:
+    $ref: vulnerability_management.yml#/paths/~1mtp~1tvm~1analytics~1assets~1{assetId}
+  /mtp/tvm/analytics/assets/{assetId}/installations:
+    $ref: vulnerability_management.yml#/paths/~1mtp~1tvm~1analytics~1assets~1{assetId}~1installations
+  /mtp/tvm/analytics/assets/{assetId}/recommendations:
+    $ref: vulnerability_management.yml#/paths/~1mtp~1tvm~1analytics~1assets~1{assetId}~1recommendations
+  /mtp/tvm/analytics/assets/{assetId}/vulnerabilities:
+    $ref: vulnerability_management.yml#/paths/~1mtp~1tvm~1analytics~1assets~1{assetId}~1vulnerabilities
+  /mtp/tvm/analytics/assets/{assetId}/vulnerabilitiesDistribution:
+    $ref: vulnerability_management.yml#/paths/~1mtp~1tvm~1analytics~1assets~1{assetId}~1vulnerabilitiesDistribution
+  /mtp/tvm/analytics/assets/topVulnerable:
+    $ref: vulnerability_management.yml#/paths/~1mtp~1tvm~1analytics~1assets~1topVulnerable
+  /mtp/tvm/analytics/changeEvents/sca/topPerDay:
+    $ref: vulnerability_management.yml#/paths/~1mtp~1tvm~1analytics~1changeEvents~1sca~1topPerDay
+  /mtp/tvm/analytics/devicehealth:
+    $ref: vulnerability_management.yml#/paths/~1mtp~1tvm~1analytics~1devicehealth
+  /mtp/tvm/remediation-tasks/remediationTasks:
+    $ref: vulnerability_management.yml#/paths/~1mtp~1tvm~1remediation-tasks~1remediationTasks
+  /mtp/tvm/remediation-tasks/remediationTasks/top:
+    $ref: vulnerability_management.yml#/paths/~1mtp~1tvm~1remediation-tasks~1remediationTasks~1top
 
   # Identity (MDI)
   /mdi/identity/userapiservice/user/resolve:
@@ -461,6 +564,46 @@ paths:
     $ref: identity.yml#/paths/~1mdi~1identity~1userapiservice~1directoryServiceAccount
   /mdi/identity/identitiesapiservice/remediationAccount:
     $ref: identity.yml#/paths/~1mdi~1identity~1identitiesapiservice~1remediationAccount
+  /mdi/identity/userapiservice/actions/byAccounts:
+    $ref: identity.yml#/paths/~1mdi~1identity~1userapiservice~1actions~1byAccounts
+  /mdi/identity/userapiservice/devices:
+    $ref: identity.yml#/paths/~1mdi~1identity~1userapiservice~1devices
+  /mdi/identity/userapiservice/devices/count:
+    $ref: identity.yml#/paths/~1mdi~1identity~1userapiservice~1devices~1count
+  /mdi/identity/userapiservice/identities:
+    $ref: identity.yml#/paths/~1mdi~1identity~1userapiservice~1identities
+  /mdi/identity/userapiservice/identities/aggregatedData:
+    $ref: identity.yml#/paths/~1mdi~1identity~1userapiservice~1identities~1aggregatedData
+  /mdi/identity/userapiservice/identities/count:
+    $ref: identity.yml#/paths/~1mdi~1identity~1userapiservice~1identities~1count
+  /mdi/identity/userapiservice/ispms:
+    $ref: identity.yml#/paths/~1mdi~1identity~1userapiservice~1ispms
+  /mdi/identity/userapiservice/manager:
+    $ref: identity.yml#/paths/~1mdi~1identity~1userapiservice~1manager
+  /mdi/identity/userapiservice/pdProtection/domainsPolicies:
+    $ref: identity.yml#/paths/~1mdi~1identity~1userapiservice~1pdProtection~1domainsPolicies
+  /mdi/identity/userapiservice/pdProtection/entities:
+    $ref: identity.yml#/paths/~1mdi~1identity~1userapiservice~1pdProtection~1entities
+  /mdi/identity/userapiservice/pdProtection/mdaReports/PasswordHygiene:
+    $ref: identity.yml#/paths/~1mdi~1identity~1userapiservice~1pdProtection~1mdaReports~1PasswordHygiene
+  /mdi/identity/userapiservice/pdProtection/mdaReports/PasswordPolicies:
+    $ref: identity.yml#/paths/~1mdi~1identity~1userapiservice~1pdProtection~1mdaReports~1PasswordPolicies
+  /mdi/identity/userapiservice/pdProtection/reportDefinitions/PasswordHygiene:
+    $ref: identity.yml#/paths/~1mdi~1identity~1userapiservice~1pdProtection~1reportDefinitions~1PasswordHygiene
+  /mdi/identity/userapiservice/pdProtection/reportDefinitions/PasswordPolicies:
+    $ref: identity.yml#/paths/~1mdi~1identity~1userapiservice~1pdProtection~1reportDefinitions~1PasswordPolicies
+  /mdi/identity/userapiservice/serviceAccounts:
+    $ref: identity.yml#/paths/~1mdi~1identity~1userapiservice~1serviceAccounts
+  /mdi/identity/userapiservice/serviceAccounts/count:
+    $ref: identity.yml#/paths/~1mdi~1identity~1userapiservice~1serviceAccounts~1count
+  /mdi/identity/userapiservice/serviceAccounts/filterOptions:
+    $ref: identity.yml#/paths/~1mdi~1identity~1userapiservice~1serviceAccounts~1filterOptions
+  /mdi/identity/userapiservice/timeline/mtp:
+    $ref: identity.yml#/paths/~1mdi~1identity~1userapiservice~1timeline~1mtp
+  /mdi/identity/userapiservice/user/activityPeriod:
+    $ref: identity.yml#/paths/~1mdi~1identity~1userapiservice~1user~1activityPeriod
+  /mdi/identity/userapiservice/users/IdentitiesStats:
+    $ref: identity.yml#/paths/~1mdi~1identity~1userapiservice~1users~1IdentitiesStats
 
   /aatp/api/sensors/domainControllerCoverage:
     $ref: identity.yml#/paths/~1aatp~1api~1sensors~1domainControllerCoverage
@@ -505,6 +648,24 @@ paths:
     $ref: identity.yml#/paths/~1aatp~1odata~1directoryServices
   /aatp/odata/workspaceMonitoringAlerts:
     $ref: identity.yml#/paths/~1aatp~1odata~1workspaceMonitoringAlerts
+  /radius/api/radius/identities/accountsByUserId:
+    $ref: identity.yml#/paths/~1radius~1api~1radius~1identities~1accountsByUserId
+  /radius/api/radius/identities/accountsByUserIdCount:
+    $ref: identity.yml#/paths/~1radius~1api~1radius~1identities~1accountsByUserIdCount
+  /radius/api/radius/identities/getCriticalityScore:
+    $ref: identity.yml#/paths/~1radius~1api~1radius~1identities~1getCriticalityScore
+  /radius/api/radius/identities/getDefenderRiskKillChain:
+    $ref: identity.yml#/paths/~1radius~1api~1radius~1identities~1getDefenderRiskKillChain
+  /radius/api/radius/identities/getDefenderRiskScoresOverTime:
+    $ref: identity.yml#/paths/~1radius~1api~1radius~1identities~1getDefenderRiskScoresOverTime
+  /radius/api/radius/identities/getDefenderRiskSummary:
+    $ref: identity.yml#/paths/~1radius~1api~1radius~1identities~1getDefenderRiskSummary
+  /radius/api/radius/identities/getIdentityType:
+    $ref: identity.yml#/paths/~1radius~1api~1radius~1identities~1getIdentityType
+  /radius/api/radius/identities/getTenantPartners:
+    $ref: identity.yml#/paths/~1radius~1api~1radius~1identities~1getTenantPartners
+  /radius/api/radius/remediation/lmf/{Sid}:
+    $ref: identity.yml#/paths/~1radius~1api~1radius~1remediation~1lmf~1{Sid}
 
   # Attack Simulation
   /astgws/AttackSimulator/api/v1/AdvanceReporting/chart/NRT/RepeatOffender:

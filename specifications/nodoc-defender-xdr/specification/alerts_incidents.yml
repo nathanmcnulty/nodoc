@@ -322,6 +322,465 @@ paths:
         '404':
           $ref: common.yml#/components/responses/NotFound
 
+  /mtp/incidents/{IncidentId}/AggregatedCustomDetails:
+    get:
+      summary: Get aggregated incident custom details
+      description: >-
+        Retrieve the custom detail rollup shown on the incident overview page.
+      operationId: Incidents.GetAggregatedCustomDetails
+      tags: [Incidents]
+      parameters:
+        - name: IncidentId
+          in: path
+          required: true
+          description: The unique identifier of the incident.
+          schema:
+            type: integer
+        - name: maxAlerts
+          in: query
+          description: Maximum number of alerts to aggregate in the detail rollup.
+          schema:
+            type: integer
+            default: 150
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - aggregated incident custom details
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/incidents/{IncidentId}/AssociatedAlerts:
+    post:
+      summary: List incident associated alerts
+      description: >-
+        Retrieve the associated alerts table shown on incident detail pages.
+      operationId: Incidents.ListAssociatedAlerts
+      tags: [Incidents]
+      parameters:
+        - name: IncidentId
+          in: path
+          required: true
+          description: The unique identifier of the incident.
+          schema:
+            type: integer
+        - name: incidentId
+          in: query
+          description: Redundant incident identifier currently sent by the portal.
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: The incident alert-grid request payload.
+              properties:
+                LookBackInDays:
+                  type: integer
+                  description: The lookback window for associated alerts.
+                PageSize:
+                  type: integer
+                  description: Number of alerts to return per page.
+                PageIndex:
+                  type: integer
+                  description: The 1-based page index.
+                SortByField:
+                  type: string
+                  description: The field used to sort alert rows.
+                SortOrder:
+                  type: integer
+                  description: Sort direction enum used by the portal client.
+                GroupType:
+                  type: string
+                  description: Alert grouping mode.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - associated alerts page
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/incidents/{IncidentId}/outbreaks:
+    get:
+      summary: Get incident outbreaks
+      description: >-
+        Retrieve outbreak correlations and related campaign details for an
+        incident.
+      operationId: Incidents.GetOutbreaks
+      tags: [Incidents]
+      parameters:
+        - name: IncidentId
+          in: path
+          required: true
+          description: The unique identifier of the incident.
+          schema:
+            type: integer
+        - name: incidentId
+          in: query
+          description: Redundant incident identifier currently sent by the portal.
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - incident outbreaks
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/incidents/{IncidentId}/riskfactors:
+    get:
+      summary: Get incident risk factors
+      description: >-
+        Retrieve the incident risk factors summary shown on incident overview
+        pages.
+      operationId: Incidents.GetRiskFactors
+      tags: [Incidents]
+      parameters:
+        - name: IncidentId
+          in: path
+          required: true
+          description: The unique identifier of the incident.
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - incident risk factors
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/incidents/dsiMessageBarIndicators:
+    post:
+      summary: Get incident message bar indicators
+      description: >-
+        Retrieve the incident-specific message bar indicators used to highlight
+        notable entities on the incident page.
+      operationId: Incidents.GetMessageBarIndicators
+      tags: [Incidents]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                IncidentId:
+                  type: integer
+                  description: The incident identifier to evaluate.
+                V3EntityTypes:
+                  type: array
+                  description: Entity types to include in the message bar query.
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - message bar indicators
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/CaseManagement/be/cases:
+    get:
+      summary: List case management cases
+      description: >-
+        Retrieve case records from the Defender case-management backend.
+      operationId: Incidents.ListCases
+      tags: [Incidents]
+      parameters:
+        - name: $orderby
+          in: query
+          description: Optional OData sort expression for case rows.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - cases list
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/CaseManagement/be/caseRelations:
+    get:
+      summary: List case relations
+      description: >-
+        Retrieve relations between cases and source incidents or other linked
+        objects.
+      operationId: Incidents.ListCaseRelations
+      tags: [Incidents]
+      parameters:
+        - name: link.type
+          in: query
+          description: The type of linked origin, such as incident.
+          schema:
+            type: string
+        - name: link.id
+          in: query
+          description: The identifier of the linked origin object.
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - case relations
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/CaseManagement/be/tasks:
+    get:
+      summary: List case tasks
+      description: >-
+        Retrieve tasks associated with an incident-backed case-management
+        record.
+      operationId: Incidents.ListCaseTasks
+      tags: [Incidents]
+      parameters:
+        - name: origin.type
+          in: query
+          description: The origin type, such as incident.
+          schema:
+            type: string
+        - name: origin.id
+          in: query
+          description: The identifier of the origin object.
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - case tasks
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/CaseManagement/be/templates/{TemplateId}:
+    get:
+      summary: Get case template
+      description: >-
+        Retrieve a case template definition by template ID.
+      operationId: Incidents.GetCaseTemplate
+      tags: [Incidents]
+      parameters:
+        - name: TemplateId
+          in: path
+          required: true
+          description: The unique identifier of the case template.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - case template definition
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/autoIr/incidents/{IncidentId}:
+    get:
+      summary: Get AutoIR incident data
+      description: >-
+        Retrieve the Automated Investigation and Response (AutoIR) summary for
+        an incident.
+      operationId: Incidents.GetAutoIrIncident
+      tags: [Incidents]
+      parameters:
+        - name: IncidentId
+          in: path
+          required: true
+          description: The unique identifier of the incident.
+          schema:
+            type: integer
+        - name: pageSize
+          in: query
+          description: The maximum number of AutoIR rows to return.
+          schema:
+            type: integer
+            default: 1
+        - name: pageIndex
+          in: query
+          description: The 1-based page index.
+          schema:
+            type: integer
+            default: 1
+        - name: IncidentId
+          in: query
+          description: Redundant incident identifier currently sent by the portal.
+          schema:
+            type: integer
+        - name: useDotnetAutoIrUi
+          in: query
+          description: Feature flag for the .NET-backed AutoIR experience.
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - AutoIR incident data
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/autoIr/incidents/{IncidentId}/filters:
+    get:
+      summary: Get AutoIR incident filters
+      description: >-
+        Retrieve the available filter options for the AutoIR incident view.
+      operationId: Incidents.GetAutoIrIncidentFilters
+      tags: [Incidents]
+      parameters:
+        - name: IncidentId
+          in: path
+          required: true
+          description: The unique identifier of the incident.
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - AutoIR filter metadata
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/GAIAMedeinaApi/skills/guidedresponse/{IncidentId}/similarIncidents:
+    get:
+      summary: Get guided-response similar incidents
+      description: >-
+        Retrieve incidents considered similar by the GAIA guided-response skill
+        for the supplied incident.
+      operationId: Incidents.GetGuidedResponseSimilarIncidents
+      tags: [Incidents]
+      parameters:
+        - name: IncidentId
+          in: path
+          required: true
+          description: The unique identifier of the incident.
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - similar incident recommendations
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
 components:
   schemas:
     Alert:

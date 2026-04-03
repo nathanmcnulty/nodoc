@@ -203,6 +203,69 @@ paths:
         '404':
           $ref: common.yml#/components/responses/NotFound
 
+  /mtp/cloudPivot/cloud/pivot/portal/file/device/details:
+    get:
+      summary: List devices for file
+      description: >-
+        Return the device details table shown on the Defender file page for the
+        selected SHA-256.
+      operationId: Files.ListDeviceDetails
+      tags: [Files]
+      parameters:
+        - name: entityId
+          in: query
+          required: true
+          description: The SHA-256 of the file on unified file pages.
+          schema:
+            type: string
+        - name: daysToLookBack
+          in: query
+          description: The device-observation lookback window, in days.
+          schema:
+            type: integer
+            default: 7
+        - name: firstRowIndex
+          in: query
+          description: The 1-based row index used by the device details grid.
+          schema:
+            type: integer
+            default: 1
+        - name: pageSize
+          in: query
+          description: The maximum number of device rows to return.
+          schema:
+            type: integer
+            default: 50
+        - name: RiskScores
+          in: query
+          description: Optional risk-score filter values.
+          schema:
+            type: string
+        - name: ExposureScores
+          in: query
+          description: Optional exposure-score filter values.
+          schema:
+            type: string
+        - name: OsPlatformFriendlyNames
+          in: query
+          description: Optional OS-platform filter values.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - paged device details for the file
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
   /mtp/mdeDeepAnalysis/api/DeepAnalysisRequest:
     get:
       summary: Get deep analysis request state

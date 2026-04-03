@@ -1,0 +1,556 @@
+paths:
+  /mtp/cloudPivot/cloud/pivot/portal/domain/device/details:
+    get:
+      summary: List devices for domain
+      description: >-
+        Return the device details grid shown on domain investigation pages.
+      operationId: EntityPivots.ListDomainDevices
+      tags: [Entity Pivots]
+      parameters:
+        - $ref: '#/components/parameters/EntityId'
+        - $ref: '#/components/parameters/DaysToLookBack7'
+        - $ref: '#/components/parameters/FirstRowIndex'
+        - $ref: '#/components/parameters/PageSize'
+        - $ref: '#/components/parameters/RiskScores'
+        - $ref: '#/components/parameters/ExposureScores'
+        - $ref: '#/components/parameters/OsPlatformFriendlyNames'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityPivotListResponse'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/cloudPivot/cloud/pivot/portal/domain/device/prevalence:
+    get:
+      summary: Get domain device prevalence
+      description: >-
+        Return the first and last observed device summary for the selected
+        domain.
+      operationId: EntityPivots.GetDomainDevicePrevalence
+      tags: [Entity Pivots]
+      parameters:
+        - $ref: '#/components/parameters/EntityId'
+        - $ref: '#/components/parameters/DaysToLookBack30'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityPivotPrevalenceResponse'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/cloudPivot/cloud/pivot/portal/domain/device/trend:
+    get:
+      summary: Get domain device trend
+      description: Return the domain device trend chart.
+      operationId: EntityPivots.GetDomainDeviceTrend
+      tags: [Entity Pivots]
+      parameters:
+        - $ref: '#/components/parameters/EntityId'
+        - $ref: '#/components/parameters/DaysToLookBack30'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityPivotTrendResponse'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/cloudPivot/cloud/pivot/portal/domain/email/details:
+    get:
+      summary: List email events for domain
+      description: >-
+        Return the email delivery details table shown on domain investigation
+        pages.
+      operationId: EntityPivots.ListDomainEmails
+      tags: [Entity Pivots]
+      parameters:
+        - $ref: '#/components/parameters/EntityId'
+        - $ref: '#/components/parameters/DaysToLookBack30'
+        - $ref: '#/components/parameters/FirstRowIndex'
+        - $ref: '#/components/parameters/PageSize'
+        - $ref: '#/components/parameters/DeliveryAction'
+        - $ref: '#/components/parameters/OriginalDeliveryLocation'
+        - $ref: '#/components/parameters/LatestDeliveryLocation'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityPivotListResponse'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/cloudPivot/cloud/pivot/portal/domain/email/prevalence:
+    get:
+      summary: Get domain email prevalence
+      description: Return the domain email prevalence summary.
+      operationId: EntityPivots.GetDomainEmailPrevalence
+      tags: [Entity Pivots]
+      parameters:
+        - $ref: '#/components/parameters/EntityId'
+        - $ref: '#/components/parameters/DaysToLookBack30'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityPivotPrevalenceResponse'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/cloudPivot/cloud/pivot/portal/domain/email/trend:
+    get:
+      summary: Get domain email trend
+      description: Return the domain email trend chart.
+      operationId: EntityPivots.GetDomainEmailTrend
+      tags: [Entity Pivots]
+      parameters:
+        - $ref: '#/components/parameters/EntityId'
+        - $ref: '#/components/parameters/DaysToLookBack30'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityPivotTrendResponse'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/cloudPivot/cloud/pivot/portal/domainClick/email/click/details:
+    get:
+      summary: List domain click events
+      description: >-
+        Return email click-through details associated with the selected domain.
+      operationId: EntityPivots.ListDomainClicks
+      tags: [Entity Pivots]
+      parameters:
+        - $ref: '#/components/parameters/EntityId'
+        - $ref: '#/components/parameters/DaysToLookBack30'
+        - $ref: '#/components/parameters/FirstRowIndex'
+        - $ref: '#/components/parameters/PageSize'
+        - $ref: '#/components/parameters/ActionType'
+        - $ref: '#/components/parameters/ThreatTypes'
+        - $ref: '#/components/parameters/DetectionMethods'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityPivotListResponse'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/cloudPivot/cloud/pivot/portal/domainClick/email/click/prevalence:
+    get:
+      summary: Get domain click prevalence
+      description: Return the domain click prevalence summary.
+      operationId: EntityPivots.GetDomainClickPrevalence
+      tags: [Entity Pivots]
+      parameters:
+        - $ref: '#/components/parameters/EntityId'
+        - $ref: '#/components/parameters/DaysToLookBack30'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityPivotPrevalenceResponse'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/cloudPivot/cloud/pivot/portal/domainClick/email/click/trend:
+    get:
+      summary: Get domain click trend
+      description: Return the domain click trend chart.
+      operationId: EntityPivots.GetDomainClickTrend
+      tags: [Entity Pivots]
+      parameters:
+        - $ref: '#/components/parameters/EntityId'
+        - $ref: '#/components/parameters/DaysToLookBack30'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityPivotTrendResponse'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/cloudPivot/cloud/pivot/portal/url/device/details:
+    get:
+      summary: List devices for URL
+      description: >-
+        Return the device details grid shown on URL investigation pages.
+      operationId: EntityPivots.ListUrlDevices
+      tags: [Entity Pivots]
+      parameters:
+        - $ref: '#/components/parameters/EntityId'
+        - $ref: '#/components/parameters/DaysToLookBack7'
+        - $ref: '#/components/parameters/FirstRowIndex'
+        - $ref: '#/components/parameters/PageSize'
+        - $ref: '#/components/parameters/RiskScores'
+        - $ref: '#/components/parameters/ExposureScores'
+        - $ref: '#/components/parameters/OsPlatformFriendlyNames'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityPivotListResponse'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/cloudPivot/cloud/pivot/portal/url/device/prevalence:
+    get:
+      summary: Get URL device prevalence
+      description: Return the first and last observed device summary for the selected URL.
+      operationId: EntityPivots.GetUrlDevicePrevalence
+      tags: [Entity Pivots]
+      parameters:
+        - $ref: '#/components/parameters/EntityId'
+        - $ref: '#/components/parameters/DaysToLookBack30'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityPivotPrevalenceResponse'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/cloudPivot/cloud/pivot/portal/url/device/trend:
+    get:
+      summary: Get URL device trend
+      description: Return the URL device trend chart.
+      operationId: EntityPivots.GetUrlDeviceTrend
+      tags: [Entity Pivots]
+      parameters:
+        - $ref: '#/components/parameters/EntityId'
+        - $ref: '#/components/parameters/DaysToLookBack30'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityPivotTrendResponse'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/cloudPivot/cloud/pivot/portal/url/email/details:
+    get:
+      summary: List email events for URL
+      description: >-
+        Return the email delivery details table shown on URL investigation
+        pages.
+      operationId: EntityPivots.ListUrlEmails
+      tags: [Entity Pivots]
+      parameters:
+        - $ref: '#/components/parameters/EntityId'
+        - $ref: '#/components/parameters/DaysToLookBack30'
+        - $ref: '#/components/parameters/FirstRowIndex'
+        - $ref: '#/components/parameters/PageSize'
+        - $ref: '#/components/parameters/DeliveryAction'
+        - $ref: '#/components/parameters/OriginalDeliveryLocation'
+        - $ref: '#/components/parameters/LatestDeliveryLocation'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityPivotListResponse'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/cloudPivot/cloud/pivot/portal/url/email/prevalence:
+    get:
+      summary: Get URL email prevalence
+      description: Return the URL email prevalence summary.
+      operationId: EntityPivots.GetUrlEmailPrevalence
+      tags: [Entity Pivots]
+      parameters:
+        - $ref: '#/components/parameters/EntityId'
+        - $ref: '#/components/parameters/DaysToLookBack30'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityPivotPrevalenceResponse'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/cloudPivot/cloud/pivot/portal/url/email/trend:
+    get:
+      summary: Get URL email trend
+      description: Return the URL email trend chart.
+      operationId: EntityPivots.GetUrlEmailTrend
+      tags: [Entity Pivots]
+      parameters:
+        - $ref: '#/components/parameters/EntityId'
+        - $ref: '#/components/parameters/DaysToLookBack30'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityPivotTrendResponse'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/cloudPivot/cloud/pivot/portal/urlClick/email/click/details:
+    get:
+      summary: List URL click events
+      description: >-
+        Return email click-through details associated with the selected URL.
+      operationId: EntityPivots.ListUrlClicks
+      tags: [Entity Pivots]
+      parameters:
+        - $ref: '#/components/parameters/EntityId'
+        - $ref: '#/components/parameters/DaysToLookBack30'
+        - $ref: '#/components/parameters/FirstRowIndex'
+        - $ref: '#/components/parameters/PageSize'
+        - $ref: '#/components/parameters/ActionType'
+        - $ref: '#/components/parameters/ThreatTypes'
+        - $ref: '#/components/parameters/DetectionMethods'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityPivotListResponse'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/cloudPivot/cloud/pivot/portal/urlClick/email/click/prevalence:
+    get:
+      summary: Get URL click prevalence
+      description: Return the URL click prevalence summary.
+      operationId: EntityPivots.GetUrlClickPrevalence
+      tags: [Entity Pivots]
+      parameters:
+        - $ref: '#/components/parameters/EntityId'
+        - $ref: '#/components/parameters/DaysToLookBack30'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityPivotPrevalenceResponse'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/cloudPivot/cloud/pivot/portal/urlClick/email/click/trend:
+    get:
+      summary: Get URL click trend
+      description: Return the URL click trend chart.
+      operationId: EntityPivots.GetUrlClickTrend
+      tags: [Entity Pivots]
+      parameters:
+        - $ref: '#/components/parameters/EntityId'
+        - $ref: '#/components/parameters/DaysToLookBack30'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityPivotTrendResponse'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+components:
+  parameters:
+    EntityId:
+      name: entityId
+      in: query
+      required: true
+      description: The investigated domain or URL value.
+      schema:
+        type: string
+    DaysToLookBack7:
+      name: daysToLookBack
+      in: query
+      description: The lookback window, in days.
+      schema:
+        type: integer
+        default: 7
+    DaysToLookBack30:
+      name: daysToLookBack
+      in: query
+      description: The lookback window, in days.
+      schema:
+        type: integer
+        default: 30
+    FirstRowIndex:
+      name: firstRowIndex
+      in: query
+      description: The 1-based row index used by the portal grid.
+      schema:
+        type: integer
+        default: 1
+    PageSize:
+      name: pageSize
+      in: query
+      description: The maximum number of rows to return.
+      schema:
+        type: integer
+        default: 50
+    RiskScores:
+      name: RiskScores
+      in: query
+      description: Optional risk-score filter values.
+      schema:
+        type: string
+    ExposureScores:
+      name: ExposureScores
+      in: query
+      description: Optional exposure-score filter values.
+      schema:
+        type: string
+    OsPlatformFriendlyNames:
+      name: OsPlatformFriendlyNames
+      in: query
+      description: Optional OS-platform filter values.
+      schema:
+        type: string
+    DeliveryAction:
+      name: deliveryAction
+      in: query
+      description: Optional mail delivery action filter.
+      schema:
+        type: string
+    OriginalDeliveryLocation:
+      name: originalDeliveryLocation
+      in: query
+      description: Optional original mail delivery location filter.
+      schema:
+        type: string
+    LatestDeliveryLocation:
+      name: latestDeliveryLocation
+      in: query
+      description: Optional latest mail delivery location filter.
+      schema:
+        type: string
+    ActionType:
+      name: ActionType
+      in: query
+      description: Optional click action-type filter.
+      schema:
+        type: string
+    ThreatTypes:
+      name: ThreatTypes
+      in: query
+      description: Optional threat-type filter.
+      schema:
+        type: string
+    DetectionMethods:
+      name: DetectionMethods
+      in: query
+      description: Optional detection-method filter.
+      schema:
+        type: string
+  schemas:
+    EntityPivotListResponse:
+      type: object
+      description: pending - paged entity pivot details
+    EntityPivotPrevalenceResponse:
+      type: object
+      description: pending - first and last seen prevalence summary
+    EntityPivotTrendResponse:
+      type: object
+      description: pending - time-series trend data

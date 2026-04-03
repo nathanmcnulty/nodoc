@@ -890,6 +890,972 @@ paths:
         '404':
           $ref: common.yml#/components/responses/NotFound
 
+  /mdi/identity/userapiservice/actions/byAccounts:
+    post:
+      summary: Get account actions
+      description: >-
+        Retrieve the remediation and investigation actions available for the
+        supplied identity accounts.
+      operationId: Identity.GetActionsByAccounts
+      tags: [Identity]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending - account action lookup payload
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - account actions
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mdi/identity/userapiservice/devices:
+    post:
+      summary: List user devices
+      description: >-
+        Retrieve the devices associated with a resolved identity on the user
+        entity page.
+      operationId: Identity.ListUserDevices
+      tags: [Identity]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending - user device grid request payload
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - user devices
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mdi/identity/userapiservice/devices/count:
+    post:
+      summary: Get user devices count
+      description: >-
+        Retrieve the total number of devices associated with the supplied
+        identity payload.
+      operationId: Identity.GetUserDevicesCount
+      tags: [Identity]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending - user device count request payload
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - user devices count
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mdi/identity/userapiservice/identities:
+    post:
+      summary: List identities
+      description: >-
+        Retrieve identities from the user API service with filtering, search,
+        and sorting.
+      operationId: Identity.ListIdentities
+      tags: [Identity]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                PageSize:
+                  type: integer
+                  description: Number of rows to return.
+                Skip:
+                  type: integer
+                  description: Number of rows to skip.
+                SortBy:
+                  type: object
+                  description: Requested sort field and direction.
+                Filters:
+                  type: object
+                  description: Identity filter set.
+                SearchText:
+                  type: string
+                  description: Free-text search input.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - identities list
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mdi/identity/userapiservice/identities/aggregatedData:
+    post:
+      summary: Get identities aggregated data
+      description: >-
+        Retrieve aggregated totals and facets for the identities grid.
+      operationId: Identity.GetIdentitiesAggregatedData
+      tags: [Identity]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                Filters:
+                  type: object
+                  description: Identity filter set.
+                SearchText:
+                  type: string
+                  description: Free-text search input.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - identities aggregated data
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mdi/identity/userapiservice/identities/count:
+    post:
+      summary: Get identities count
+      description: >-
+        Retrieve the total number of identities matching the supplied filters.
+      operationId: Identity.GetIdentitiesCount
+      tags: [Identity]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                Filters:
+                  type: object
+                  description: Identity filter set.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - identities count
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mdi/identity/userapiservice/ispms:
+    post:
+      summary: Get identity ISPM data
+      description: >-
+        Retrieve Identity Security Posture Management (ISPM) data associated
+        with the supplied accounts.
+      operationId: Identity.GetIspmData
+      tags: [Identity]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending - ISPM lookup payload
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - identity ISPM data
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mdi/identity/userapiservice/manager:
+    get:
+      summary: Get user manager
+      description: >-
+        Retrieve the manager relationship for the selected Entra identity.
+      operationId: Identity.GetManager
+      tags: [Identity]
+      parameters:
+        - name: managerAd
+          in: query
+          allowEmptyValue: true
+          description: Empty query flag requesting the Active Directory manager projection.
+          schema:
+            type: boolean
+        - name: userAad
+          in: query
+          required: true
+          description: The Microsoft Entra object ID for the selected user.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - manager relationship data
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mdi/identity/userapiservice/pdProtection/domainsPolicies:
+    get:
+      summary: Get password domains and policies
+      description: >-
+        Retrieve password protection domains and policy metadata for the
+        identity posture experience.
+      operationId: Identity.GetPasswordDomainsPolicies
+      tags: [Identity]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - password domains and policy metadata
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mdi/identity/userapiservice/pdProtection/entities:
+    post:
+      summary: List password protection entities
+      description: >-
+        Retrieve password hygiene and password policy findings from the identity
+        posture experience.
+      operationId: Identity.ListPasswordProtectionEntities
+      tags: [Identity]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                pageSize:
+                  type: integer
+                  description: Number of rows to return.
+                skip:
+                  type: integer
+                  description: Number of rows to skip.
+                searchText:
+                  type: string
+                  description: Free-text search input.
+                categories:
+                  type: array
+                  description: High-level report categories.
+                  items:
+                    type: string
+                subCategories:
+                  type: array
+                  description: Report subcategories.
+                  items:
+                    type: string
+                ReportNames:
+                  type: array
+                  description: Concrete report names to query.
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - password protection entities
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mdi/identity/userapiservice/pdProtection/mdaReports/PasswordHygiene:
+    get:
+      summary: Get password hygiene reports
+      description: >-
+        Retrieve the available password hygiene report catalog.
+      operationId: Identity.GetPasswordHygieneReports
+      tags: [Identity]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - password hygiene reports
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mdi/identity/userapiservice/pdProtection/mdaReports/PasswordPolicies:
+    get:
+      summary: Get password policy reports
+      description: >-
+        Retrieve the available password policy report catalog.
+      operationId: Identity.GetPasswordPolicyReports
+      tags: [Identity]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - password policy reports
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mdi/identity/userapiservice/pdProtection/reportDefinitions/PasswordHygiene:
+    get:
+      summary: Get password hygiene report definitions
+      description: >-
+        Retrieve report definitions for password hygiene findings.
+      operationId: Identity.GetPasswordHygieneReportDefinitions
+      tags: [Identity]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - password hygiene report definitions
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mdi/identity/userapiservice/pdProtection/reportDefinitions/PasswordPolicies:
+    get:
+      summary: Get password policy report definitions
+      description: >-
+        Retrieve report definitions for password policy findings.
+      operationId: Identity.GetPasswordPolicyReportDefinitions
+      tags: [Identity]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - password policy report definitions
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mdi/identity/userapiservice/serviceAccounts:
+    post:
+      summary: List service accounts
+      description: >-
+        Retrieve service accounts from the newer user API service grid.
+      operationId: Identity.ListServiceAccountsV2
+      tags: [Identity]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                PageSize:
+                  type: integer
+                  description: Number of rows to return.
+                Skip:
+                  type: integer
+                  description: Number of rows to skip.
+                Filters:
+                  type: object
+                  description: Service account filters.
+                IncludeAccountActivity:
+                  type: boolean
+                  description: Include the latest activity projections.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - service accounts list
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mdi/identity/userapiservice/serviceAccounts/count:
+    get:
+      summary: Get service accounts count
+      description: >-
+        Retrieve the total number of service accounts shown in the grid.
+      operationId: Identity.GetServiceAccountsCount
+      tags: [Identity]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - service accounts count
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mdi/identity/userapiservice/serviceAccounts/filterOptions:
+    post:
+      summary: Get service account filter options
+      description: >-
+        Retrieve filter-option values for service account columns.
+      operationId: Identity.GetServiceAccountFilterOptions
+      tags: [Identity]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                KeyColumn:
+                  type: string
+                  description: The backing key column to aggregate.
+                ValueColumn:
+                  type: string
+                  description: The projected display column to return.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - service account filter options
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mdi/identity/userapiservice/timeline/mtp:
+    post:
+      summary: Get user cross-workload timeline
+      description: >-
+        Retrieve the cross-workload timeline shown on the unified user entity
+        page.
+      operationId: Identity.GetUserMtpTimeline
+      tags: [Identity]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending - cross-workload timeline request payload
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - cross-workload timeline
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mdi/identity/userapiservice/user/activityPeriod:
+    post:
+      summary: Get user activity period
+      description: >-
+        Retrieve the first-seen and last-seen activity period summary for the
+        selected user.
+      operationId: Identity.GetUserActivityPeriod
+      tags: [Identity]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending - user activity period request payload
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - user activity period summary
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mdi/identity/userapiservice/users/IdentitiesStats:
+    post:
+      summary: Get identity stats
+      description: >-
+        Retrieve the identity statistics card totals requested by the identities
+        pages.
+      operationId: Identity.GetIdentitiesStats
+      tags: [Identity]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                StatsType:
+                  type: string
+                  description: The named statistics set to retrieve.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - identity statistics
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /radius/api/radius/identities/accountsByUserId:
+    post:
+      summary: List Radius accounts by user ID
+      description: >-
+        Retrieve Radius-linked accounts for the supplied identity ID.
+      operationId: Identity.ListRadiusAccountsByUserId
+      tags: [Identity]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                PageSize:
+                  type: integer
+                  description: Number of rows to return.
+                userId:
+                  type: string
+                  description: The Radius or Defender identity ID to resolve.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - Radius accounts list
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /radius/api/radius/identities/accountsByUserIdCount:
+    post:
+      summary: Get Radius accounts count by user ID
+      description: >-
+        Retrieve the total number of Radius-linked accounts for the supplied
+        identity ID.
+      operationId: Identity.GetRadiusAccountsByUserIdCount
+      tags: [Identity]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                UserId:
+                  type: string
+                  description: The Radius or Defender identity ID to resolve.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - Radius accounts count
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /radius/api/radius/identities/getCriticalityScore:
+    get:
+      summary: Get identity criticality score
+      description: >-
+        Retrieve the Radius criticality score for the selected identity.
+      operationId: Identity.GetRadiusCriticalityScore
+      tags: [Identity]
+      parameters:
+        - name: onPremiseSid
+          in: query
+          description: The on-premises SID for the identity.
+          schema:
+            type: string
+        - name: aadId
+          in: query
+          description: The Microsoft Entra object ID for the identity.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - criticality score data
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /radius/api/radius/identities/getDefenderRiskKillChain:
+    get:
+      summary: Get Defender risk kill chain
+      description: >-
+        Retrieve the Defender risk kill-chain projection for the selected
+        identity.
+      operationId: Identity.GetRadiusDefenderRiskKillChain
+      tags: [Identity]
+      parameters:
+        - name: identityId
+          in: query
+          required: true
+          description: The Defender identity identifier.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - risk kill chain data
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /radius/api/radius/identities/getDefenderRiskScoresOverTime:
+    get:
+      summary: Get Defender risk scores over time
+      description: >-
+        Retrieve the time-series risk scores for the selected identity.
+      operationId: Identity.GetRadiusDefenderRiskScoresOverTime
+      tags: [Identity]
+      parameters:
+        - name: identityId
+          in: query
+          required: true
+          description: The Defender identity identifier.
+          schema:
+            type: string
+        - name: startTime
+          in: query
+          description: The inclusive start of the requested time range.
+          schema:
+            type: string
+            format: date-time
+        - name: endTime
+          in: query
+          description: The inclusive end of the requested time range.
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - risk score time series
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /radius/api/radius/identities/getDefenderRiskSummary:
+    get:
+      summary: Get Defender risk summary
+      description: >-
+        Retrieve the risk-summary card for the selected identity.
+      operationId: Identity.GetRadiusDefenderRiskSummary
+      tags: [Identity]
+      parameters:
+        - name: identityId
+          in: query
+          required: true
+          description: The Defender identity identifier.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - risk summary data
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /radius/api/radius/identities/getIdentityType:
+    get:
+      summary: Get Radius identity type
+      description: >-
+        Retrieve the Radius identity-type classification for the selected Entra
+        ID.
+      operationId: Identity.GetRadiusIdentityType
+      tags: [Identity]
+      parameters:
+        - name: aadId
+          in: query
+          required: true
+          description: The Microsoft Entra object ID for the identity.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - identity type classification
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /radius/api/radius/identities/getTenantPartners:
+    get:
+      summary: Get Radius tenant partners
+      description: >-
+        Retrieve tenant partner metadata used by Radius-backed identity pages.
+      operationId: Identity.GetRadiusTenantPartners
+      tags: [Identity]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - tenant partner metadata
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /radius/api/radius/remediation/lmf/{Sid}:
+    get:
+      summary: Get Radius remediation state
+      description: >-
+        Retrieve the Radius remediation state for the supplied on-premises SID.
+      operationId: Identity.GetRadiusRemediationState
+      tags: [Identity]
+      parameters:
+        - name: Sid
+          in: path
+          required: true
+          description: The on-premises SID for the identity.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - remediation state data
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
 components:
   schemas:
     IdentityUser:
