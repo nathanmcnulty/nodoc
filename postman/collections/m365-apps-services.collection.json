@@ -1,0 +1,800 @@
+{
+    "item": [
+        {
+            "name": "intents",
+            "description": "",
+            "item": [
+                {
+                    "name": "v1.0",
+                    "description": "",
+                    "item": [
+                        {
+                            "name": "ComponentGroupIntentShard",
+                            "description": "",
+                            "item": [
+                                {
+                                    "id": "ef5fac85-41ee-4d27-8b4e-e35ce6879263",
+                                    "name": "Resolve component group shard",
+                                    "request": {
+                                        "name": "Resolve component group shard",
+                                        "description": {
+                                            "content": "Resolves or initializes the component-group shard used by the portal shell.\nObserved as a body-less POST returning a boolean.\n",
+                                            "type": "text/plain"
+                                        },
+                                        "url": {
+                                            "path": [
+                                                "intents",
+                                                "v1.0",
+                                                "ComponentGroupIntentShard"
+                                            ],
+                                            "host": [
+                                                "{{baseUrl}}"
+                                            ],
+                                            "query": [],
+                                            "variable": []
+                                        },
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            }
+                                        ],
+                                        "method": "POST",
+                                        "body": {},
+                                        "auth": null
+                                    },
+                                    "response": [
+                                        {
+                                            "id": "62c13f58-57bf-44b9-8467-e12fc1f9c31e",
+                                            "name": "Shard resolution succeeded",
+                                            "originalRequest": {
+                                                "url": {
+                                                    "path": [
+                                                        "intents",
+                                                        "v1.0",
+                                                        "ComponentGroupIntentShard"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [],
+                                                    "variable": []
+                                                },
+                                                "header": [
+                                                    {
+                                                        "key": "Accept",
+                                                        "value": "application/json"
+                                                    }
+                                                ],
+                                                "method": "POST",
+                                                "body": {}
+                                            },
+                                            "status": "OK",
+                                            "code": 200,
+                                            "header": [
+                                                {
+                                                    "key": "Content-Type",
+                                                    "value": "application/json"
+                                                }
+                                            ],
+                                            "body": "true",
+                                            "cookie": [],
+                                            "_postman_previewlanguage": "json"
+                                        }
+                                    ],
+                                    "event": [],
+                                    "protocolProfileBehavior": {
+                                        "disableBodyPruning": true
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "odbhealth",
+            "description": "",
+            "item": [
+                {
+                    "name": "v1.0",
+                    "description": "",
+                    "item": [
+                        {
+                            "name": "synchealth",
+                            "description": "",
+                            "item": [
+                                {
+                                    "name": "reports",
+                                    "description": "",
+                                    "item": [
+                                        {
+                                            "name": "count",
+                                            "description": "",
+                                            "item": [
+                                                {
+                                                    "id": "af97b98b-f39d-4705-8309-c0f7d43aa7c2",
+                                                    "name": "Get OneDrive Sync bucket counts",
+                                                    "request": {
+                                                        "name": "Get OneDrive Sync bucket counts",
+                                                        "description": {
+                                                            "content": "Returns counts for multiple OneDrive Sync report filters in a single request.\nThe request body is an array of filter expressions, and the response is keyed\nby filter index.\n",
+                                                            "type": "text/plain"
+                                                        },
+                                                        "url": {
+                                                            "path": [
+                                                                "odbhealth",
+                                                                "v1.0",
+                                                                "synchealth",
+                                                                "reports",
+                                                                "count"
+                                                            ],
+                                                            "host": [
+                                                                "{{baseUrl}}"
+                                                            ],
+                                                            "query": [],
+                                                            "variable": []
+                                                        },
+                                                        "header": [
+                                                            {
+                                                                "key": "Content-Type",
+                                                                "value": "application/json"
+                                                            },
+                                                            {
+                                                                "key": "Accept",
+                                                                "value": "application/json"
+                                                            }
+                                                        ],
+                                                        "method": "POST",
+                                                        "body": {
+                                                            "mode": "raw",
+                                                            "raw": "[\n  \"string\",\n  \"string\"\n]",
+                                                            "options": {
+                                                                "raw": {
+                                                                    "headerFamily": "json",
+                                                                    "language": "json"
+                                                                }
+                                                            }
+                                                        },
+                                                        "auth": null
+                                                    },
+                                                    "response": [
+                                                        {
+                                                            "id": "1515c945-ab75-4922-8dd7-86d1e8062390",
+                                                            "name": "Count results by filter index",
+                                                            "originalRequest": {
+                                                                "url": {
+                                                                    "path": [
+                                                                        "odbhealth",
+                                                                        "v1.0",
+                                                                        "synchealth",
+                                                                        "reports",
+                                                                        "count"
+                                                                    ],
+                                                                    "host": [
+                                                                        "{{baseUrl}}"
+                                                                    ],
+                                                                    "query": [],
+                                                                    "variable": []
+                                                                },
+                                                                "header": [
+                                                                    {
+                                                                        "key": "Content-Type",
+                                                                        "value": "application/json"
+                                                                    },
+                                                                    {
+                                                                        "key": "Accept",
+                                                                        "value": "application/json"
+                                                                    }
+                                                                ],
+                                                                "method": "POST",
+                                                                "body": {
+                                                                    "mode": "raw",
+                                                                    "raw": "[\n  \"string\",\n  \"string\"\n]",
+                                                                    "options": {
+                                                                        "raw": {
+                                                                            "headerFamily": "json",
+                                                                            "language": "json"
+                                                                        }
+                                                                    }
+                                                                }
+                                                            },
+                                                            "status": "OK",
+                                                            "code": 200,
+                                                            "header": [
+                                                                {
+                                                                    "key": "Content-Type",
+                                                                    "value": "application/json"
+                                                                }
+                                                            ],
+                                                            "body": "{\n  \"key_0\": 2433\n}",
+                                                            "cookie": [],
+                                                            "_postman_previewlanguage": "json"
+                                                        }
+                                                    ],
+                                                    "event": [],
+                                                    "protocolProfileBehavior": {
+                                                        "disableBodyPruning": true
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "name": "versioncount",
+                                            "description": "",
+                                            "item": [
+                                                {
+                                                    "id": "56d6721c-03bd-46bc-a941-8fdf25b9ea96",
+                                                    "name": "Get OneDrive Sync version distribution",
+                                                    "request": {
+                                                        "name": "Get OneDrive Sync version distribution",
+                                                        "description": {
+                                                            "content": "Returns OneDrive Sync client version distribution grouped by update ring and platform type.",
+                                                            "type": "text/plain"
+                                                        },
+                                                        "url": {
+                                                            "path": [
+                                                                "odbhealth",
+                                                                "v1.0",
+                                                                "synchealth",
+                                                                "reports",
+                                                                "versioncount"
+                                                            ],
+                                                            "host": [
+                                                                "{{baseUrl}}"
+                                                            ],
+                                                            "query": [],
+                                                            "variable": []
+                                                        },
+                                                        "header": [
+                                                            {
+                                                                "key": "Accept",
+                                                                "value": "application/json"
+                                                            }
+                                                        ],
+                                                        "method": "GET",
+                                                        "body": {},
+                                                        "auth": null
+                                                    },
+                                                    "response": [
+                                                        {
+                                                            "id": "e05b6396-d5fe-4da8-a9ac-893f9e1a8672",
+                                                            "name": "Version distribution",
+                                                            "originalRequest": {
+                                                                "url": {
+                                                                    "path": [
+                                                                        "odbhealth",
+                                                                        "v1.0",
+                                                                        "synchealth",
+                                                                        "reports",
+                                                                        "versioncount"
+                                                                    ],
+                                                                    "host": [
+                                                                        "{{baseUrl}}"
+                                                                    ],
+                                                                    "query": [],
+                                                                    "variable": []
+                                                                },
+                                                                "header": [
+                                                                    {
+                                                                        "key": "Accept",
+                                                                        "value": "application/json"
+                                                                    }
+                                                                ],
+                                                                "method": "GET",
+                                                                "body": {}
+                                                            },
+                                                            "status": "OK",
+                                                            "code": 200,
+                                                            "header": [
+                                                                {
+                                                                    "key": "Content-Type",
+                                                                    "value": "application/json"
+                                                                }
+                                                            ],
+                                                            "body": "[\n  {\n    \"updateRing\": 3106,\n    \"currentOneDriveVersion\": \"string\",\n    \"newerCount\": 4233,\n    \"currentCount\": 8061,\n    \"olderCount\": 4559,\n    \"oneDrivePlatformType\": 1565,\n    \"key_0\": 1145.5400567604534,\n    \"key_1\": 4027.377810375794\n  },\n  {\n    \"updateRing\": 4729,\n    \"currentOneDriveVersion\": \"string\",\n    \"newerCount\": 609,\n    \"currentCount\": 5187,\n    \"olderCount\": 6110,\n    \"oneDrivePlatformType\": 3265,\n    \"key_0\": \"string\",\n    \"key_1\": \"string\",\n    \"key_2\": 2417.9214524678305\n  }\n]",
+                                                            "cookie": [],
+                                                            "_postman_previewlanguage": "json"
+                                                        }
+                                                    ],
+                                                    "event": [],
+                                                    "protocolProfileBehavior": {
+                                                        "disableBodyPruning": true
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "onboarding",
+            "description": "",
+            "item": [
+                {
+                    "name": "odata",
+                    "description": "",
+                    "item": [
+                        {
+                            "name": "v1.0",
+                            "description": "",
+                            "item": [
+                                {
+                                    "name": "EligibilityRecord",
+                                    "description": "",
+                                    "item": [
+                                        {
+                                            "id": "ad7dfff4-5e9a-4543-9f1e-d5093b25f416",
+                                            "name": "Get onboarding eligibility record",
+                                            "request": {
+                                                "name": "Get onboarding eligibility record",
+                                                "description": {
+                                                    "content": "Returns the tenant eligibility record that gates M365 Apps admin center features.",
+                                                    "type": "text/plain"
+                                                },
+                                                "url": {
+                                                    "path": [
+                                                        "onboarding",
+                                                        "odata",
+                                                        "v1.0",
+                                                        "EligibilityRecord"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [],
+                                                    "variable": []
+                                                },
+                                                "header": [
+                                                    {
+                                                        "key": "Accept",
+                                                        "value": "application/json"
+                                                    }
+                                                ],
+                                                "method": "GET",
+                                                "body": {},
+                                                "auth": null
+                                            },
+                                            "response": [
+                                                {
+                                                    "id": "66e82ee6-3364-46ca-86bf-3f72a55d8e56",
+                                                    "name": "Eligibility record",
+                                                    "originalRequest": {
+                                                        "url": {
+                                                            "path": [
+                                                                "onboarding",
+                                                                "odata",
+                                                                "v1.0",
+                                                                "EligibilityRecord"
+                                                            ],
+                                                            "host": [
+                                                                "{{baseUrl}}"
+                                                            ],
+                                                            "query": [],
+                                                            "variable": []
+                                                        },
+                                                        "header": [
+                                                            {
+                                                                "key": "Accept",
+                                                                "value": "application/json"
+                                                            }
+                                                        ],
+                                                        "method": "GET",
+                                                        "body": {}
+                                                    },
+                                                    "status": "OK",
+                                                    "code": 200,
+                                                    "header": [
+                                                        {
+                                                            "key": "Content-Type",
+                                                            "value": "application/json"
+                                                        }
+                                                    ],
+                                                    "body": "{\n  \"@odata.context\": \"string\",\n  \"id\": \"df60470f-e24b-5488-a7d4-6c2f74252a53\",\n  \"eligibilities\": [\n    \"string\",\n    \"string\"\n  ]\n}",
+                                                    "cookie": [],
+                                                    "_postman_previewlanguage": "json"
+                                                }
+                                            ],
+                                            "event": [],
+                                            "protocolProfileBehavior": {
+                                                "disableBodyPruning": true
+                                            }
+                                        }
+                                    ]
+                                },
+                                {
+                                    "name": "FeatureData",
+                                    "description": "",
+                                    "item": [
+                                        {
+                                            "id": "4385538e-820f-40d2-b358-9460aac1af9e",
+                                            "name": "List feature definitions",
+                                            "request": {
+                                                "name": "List feature definitions",
+                                                "description": {
+                                                    "content": "Returns feature metadata, ring assignments, and eligibility requirements used by the portal.",
+                                                    "type": "text/plain"
+                                                },
+                                                "url": {
+                                                    "path": [
+                                                        "onboarding",
+                                                        "odata",
+                                                        "v1.0",
+                                                        "FeatureData"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [],
+                                                    "variable": []
+                                                },
+                                                "header": [
+                                                    {
+                                                        "key": "Accept",
+                                                        "value": "application/json"
+                                                    }
+                                                ],
+                                                "method": "GET",
+                                                "body": {},
+                                                "auth": null
+                                            },
+                                            "response": [
+                                                {
+                                                    "id": "f57658ea-9cf9-4c9c-9c6d-972bce018a28",
+                                                    "name": "Feature definitions",
+                                                    "originalRequest": {
+                                                        "url": {
+                                                            "path": [
+                                                                "onboarding",
+                                                                "odata",
+                                                                "v1.0",
+                                                                "FeatureData"
+                                                            ],
+                                                            "host": [
+                                                                "{{baseUrl}}"
+                                                            ],
+                                                            "query": [],
+                                                            "variable": []
+                                                        },
+                                                        "header": [
+                                                            {
+                                                                "key": "Accept",
+                                                                "value": "application/json"
+                                                            }
+                                                        ],
+                                                        "method": "GET",
+                                                        "body": {}
+                                                    },
+                                                    "status": "OK",
+                                                    "code": 200,
+                                                    "header": [
+                                                        {
+                                                            "key": "Content-Type",
+                                                            "value": "application/json"
+                                                        }
+                                                    ],
+                                                    "body": "{\n  \"@odata.context\": \"string\",\n  \"value\": [\n    {\n      \"featureName\": \"string\",\n      \"featureRing\": \"string\",\n      \"featureRingAgreementVersion\": \"string\",\n      \"learningConsent\": \"string\",\n      \"learningConsentAgreementVersion\": \"string\",\n      \"eligibilityRequirement\": \"string\"\n    },\n    {\n      \"featureName\": \"string\",\n      \"featureRing\": \"string\",\n      \"featureRingAgreementVersion\": \"string\",\n      \"learningConsent\": \"string\",\n      \"learningConsentAgreementVersion\": \"string\",\n      \"eligibilityRequirement\": \"string\"\n    }\n  ]\n}",
+                                                    "cookie": [],
+                                                    "_postman_previewlanguage": "json"
+                                                }
+                                            ],
+                                            "event": [],
+                                            "protocolProfileBehavior": {
+                                                "disableBodyPruning": true
+                                            }
+                                        }
+                                    ]
+                                },
+                                {
+                                    "name": "FeatureProvisiondata",
+                                    "description": "",
+                                    "item": [
+                                        {
+                                            "id": "d9c9a272-0438-4e98-9233-fc3ebe1a2144",
+                                            "name": "Query feature provisioning state",
+                                            "request": {
+                                                "name": "Query feature provisioning state",
+                                                "description": {
+                                                    "content": "Returns provisioning state for one or more features, typically scoped with an OData filter.",
+                                                    "type": "text/plain"
+                                                },
+                                                "url": {
+                                                    "path": [
+                                                        "onboarding",
+                                                        "odata",
+                                                        "v1.0",
+                                                        "FeatureProvisiondata"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [
+                                                        {
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "OData filter used to scope feature provisioning records.",
+                                                                "type": "text/plain"
+                                                            },
+                                                            "key": "$filter",
+                                                            "value": "string"
+                                                        }
+                                                    ],
+                                                    "variable": []
+                                                },
+                                                "header": [
+                                                    {
+                                                        "key": "Accept",
+                                                        "value": "application/json"
+                                                    }
+                                                ],
+                                                "method": "GET",
+                                                "body": {},
+                                                "auth": null
+                                            },
+                                            "response": [
+                                                {
+                                                    "id": "98602325-d52c-47ca-a67f-d0ef316f478e",
+                                                    "name": "Feature provisioning state",
+                                                    "originalRequest": {
+                                                        "url": {
+                                                            "path": [
+                                                                "onboarding",
+                                                                "odata",
+                                                                "v1.0",
+                                                                "FeatureProvisiondata"
+                                                            ],
+                                                            "host": [
+                                                                "{{baseUrl}}"
+                                                            ],
+                                                            "query": [
+                                                                {
+                                                                    "disabled": false,
+                                                                    "description": {
+                                                                        "content": "OData filter used to scope feature provisioning records.",
+                                                                        "type": "text/plain"
+                                                                    },
+                                                                    "key": "$filter",
+                                                                    "value": "string"
+                                                                }
+                                                            ],
+                                                            "variable": []
+                                                        },
+                                                        "header": [
+                                                            {
+                                                                "key": "Accept",
+                                                                "value": "application/json"
+                                                            }
+                                                        ],
+                                                        "method": "GET",
+                                                        "body": {}
+                                                    },
+                                                    "status": "OK",
+                                                    "code": 200,
+                                                    "header": [
+                                                        {
+                                                            "key": "Content-Type",
+                                                            "value": "application/json"
+                                                        }
+                                                    ],
+                                                    "body": "{\n  \"@odata.context\": \"string\",\n  \"value\": [\n    {\n      \"featureName\": \"string\",\n      \"featureProvisionStatus\": \"string\",\n      \"featureMigrationStatus\": \"string\"\n    },\n    {\n      \"featureName\": \"string\",\n      \"featureProvisionStatus\": \"string\",\n      \"featureMigrationStatus\": \"string\"\n    }\n  ]\n}",
+                                                    "cookie": [],
+                                                    "_postman_previewlanguage": "json"
+                                                }
+                                            ],
+                                            "event": [],
+                                            "protocolProfileBehavior": {
+                                                "disableBodyPruning": true
+                                            }
+                                        },
+                                        {
+                                            "id": "8132f8c8-cc49-4466-ba02-872480f87136",
+                                            "name": "Provision or confirm a feature state",
+                                            "request": {
+                                                "name": "Provision or confirm a feature state",
+                                                "description": {
+                                                    "content": "Observed as a body-less POST that returns an OData boolean wrapper.\nTreat this as a potentially state-changing provisioning call.\n",
+                                                    "type": "text/plain"
+                                                },
+                                                "url": {
+                                                    "path": [
+                                                        "onboarding",
+                                                        "odata",
+                                                        "v1.0",
+                                                        "FeatureProvisiondata"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [],
+                                                    "variable": []
+                                                },
+                                                "header": [
+                                                    {
+                                                        "key": "Accept",
+                                                        "value": "application/json"
+                                                    }
+                                                ],
+                                                "method": "POST",
+                                                "body": {},
+                                                "auth": null
+                                            },
+                                            "response": [
+                                                {
+                                                    "id": "d87c9e24-6054-46e1-9459-8d512e49e7e9",
+                                                    "name": "Provisioning completed or already satisfied",
+                                                    "originalRequest": {
+                                                        "url": {
+                                                            "path": [
+                                                                "onboarding",
+                                                                "odata",
+                                                                "v1.0",
+                                                                "FeatureProvisiondata"
+                                                            ],
+                                                            "host": [
+                                                                "{{baseUrl}}"
+                                                            ],
+                                                            "query": [],
+                                                            "variable": []
+                                                        },
+                                                        "header": [
+                                                            {
+                                                                "key": "Accept",
+                                                                "value": "application/json"
+                                                            }
+                                                        ],
+                                                        "method": "POST",
+                                                        "body": {}
+                                                    },
+                                                    "status": "OK",
+                                                    "code": 200,
+                                                    "header": [
+                                                        {
+                                                            "key": "Content-Type",
+                                                            "value": "application/json"
+                                                        }
+                                                    ],
+                                                    "body": "{\n  \"@odata.context\": \"string\",\n  \"value\": true\n}",
+                                                    "cookie": [],
+                                                    "_postman_previewlanguage": "json"
+                                                }
+                                            ],
+                                            "event": [],
+                                            "protocolProfileBehavior": {
+                                                "disableBodyPruning": true
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "releases",
+            "description": "",
+            "item": [
+                {
+                    "name": "v1.0",
+                    "description": "",
+                    "item": [
+                        {
+                            "name": "OfficeReleases",
+                            "description": "",
+                            "item": [
+                                {
+                                    "id": "77328d50-902b-4293-ba06-6b3cfb8b7ee0",
+                                    "name": "Get Office release catalog",
+                                    "request": {
+                                        "name": "Get Office release catalog",
+                                        "description": {
+                                            "content": "Returns the release catalog used by Device Configuration and release-selection experiences.",
+                                            "type": "text/plain"
+                                        },
+                                        "url": {
+                                            "path": [
+                                                "releases",
+                                                "v1.0",
+                                                "OfficeReleases"
+                                            ],
+                                            "host": [
+                                                "{{baseUrl}}"
+                                            ],
+                                            "query": [],
+                                            "variable": []
+                                        },
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            }
+                                        ],
+                                        "method": "GET",
+                                        "body": {},
+                                        "auth": null
+                                    },
+                                    "response": [
+                                        {
+                                            "id": "ade99883-ec64-4a4f-8e9f-05b5f506f907",
+                                            "name": "Release catalog by servicing channel",
+                                            "originalRequest": {
+                                                "url": {
+                                                    "path": [
+                                                        "releases",
+                                                        "v1.0",
+                                                        "OfficeReleases"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [],
+                                                    "variable": []
+                                                },
+                                                "header": [
+                                                    {
+                                                        "key": "Accept",
+                                                        "value": "application/json"
+                                                    }
+                                                ],
+                                                "method": "GET",
+                                                "body": {}
+                                            },
+                                            "status": "OK",
+                                            "code": 200,
+                                            "header": [
+                                                {
+                                                    "key": "Content-Type",
+                                                    "value": "application/json"
+                                                }
+                                            ],
+                                            "body": "[\n  {\n    \"channel\": \"string\",\n    \"channelId\": \"string\",\n    \"alternateNames\": [\n      \"string\",\n      \"string\"\n    ],\n    \"latestVersion\": \"string\",\n    \"officeVersions\": [\n      {\n        \"legacyVersion\": \"string\",\n        \"releaseVersion\": \"string\",\n        \"buildVersion\": \"string\",\n        \"availabilityDate\": \"1971-09-08T20:15:42.256Z\",\n        \"endOfSupportDate\": \"2015-11-03T14:49:18.587Z\",\n        \"cdnBaseUrl\": \"http://uMXp.gnccZsKhVQDIEKJ0DJbt3qhI0PXeB3cAfYdyoXCfnq\",\n        \"key_0\": 4230.343304696868\n      },\n      {\n        \"legacyVersion\": \"string\",\n        \"releaseVersion\": \"string\",\n        \"buildVersion\": \"string\",\n        \"availabilityDate\": \"2004-03-18T16:36:46.125Z\",\n        \"endOfSupportDate\": \"1992-10-28T21:50:49.091Z\",\n        \"cdnBaseUrl\": \"https://ULcudxdQObDufWjeuJS.cva\"\n      }\n    ]\n  },\n  {\n    \"channel\": \"string\",\n    \"channelId\": \"string\",\n    \"alternateNames\": [\n      \"string\",\n      \"string\"\n    ],\n    \"latestVersion\": \"string\",\n    \"officeVersions\": [\n      {\n        \"legacyVersion\": \"string\",\n        \"releaseVersion\": \"string\",\n        \"buildVersion\": \"string\",\n        \"availabilityDate\": \"1998-10-18T14:24:20.313Z\",\n        \"endOfSupportDate\": \"1987-10-12T18:03:07.656Z\",\n        \"cdnBaseUrl\": \"https://rYQRIMFPvRrFhgfcGdEMdPcsJY.gpmI.1NpGkDvc8PunLocpc9.sGZsxgFLr9jXSutoAXUxL2loW7LVQWuyiJTGin\",\n        \"key_0\": 6752.877514978487,\n        \"key_1\": \"string\"\n      },\n      {\n        \"legacyVersion\": \"string\",\n        \"releaseVersion\": \"string\",\n        \"buildVersion\": \"string\",\n        \"availabilityDate\": \"1967-01-15T15:12:00.421Z\",\n        \"endOfSupportDate\": \"2019-01-08T15:45:58.586Z\",\n        \"cdnBaseUrl\": \"http://vaHWBA.iwYehbTV-EJXba0VlAhe6uu\"\n      }\n    ]\n  }\n]",
+                                            "cookie": [],
+                                            "_postman_previewlanguage": "json"
+                                        }
+                                    ],
+                                    "event": [],
+                                    "protocolProfileBehavior": {
+                                        "disableBodyPruning": true
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "auth": {
+        "type": "bearer",
+        "bearer": [
+            {
+                "type": "any",
+                "value": "{{bearerToken}}",
+                "key": "token"
+            }
+        ]
+    },
+    "event": [],
+    "variable": [
+        {
+            "key": "baseUrl",
+            "value": "https://clients.config.office.net"
+        }
+    ],
+    "info": {
+        "_postman_id": "2df50d86-25eb-4b02-ac87-fd79f6796b1c",
+        "name": "M365 Apps Services",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+        "description": {
+            "content": "The M365 Apps Services API is used by the Microsoft 365 Apps admin center\nto query onboarding state, feature availability, release catalogs, component\nsharding, and OneDrive Sync health telemetry from `clients.config.office.net`.\n\nThis surface was observed while browsing:\n\n  - Home and Cloud Update\n  - Device Configuration\n  - OneDrive Sync\n  - Setup\n\nRequests are issued from the portal with bearer tokens and diagnostic headers\nsuch as `x-api-name`, `x-correlationid`, `x-manageoffice-client-sid`, and\n`x-requested-with`.\n\nStatic bundle analysis also exposed related or preview hosts including\n`canary.clients.config.office.net` and `sip.clients.config.office.net`,\nbut the operations below were the concrete requests observed in the current\ntenant.\n\nDocumentation and specifications have been provided on a best-efforts basis and\nmay not be 100% accurate.\n\n\nContact Support:\n Name: nodoc",
+            "type": "text/plain"
+        }
+    }
+}

@@ -22,6 +22,21 @@ const collectionDefinitions = [
     output: "postman/collections/m365-admin.collection.json",
   },
   {
+    name: "M365 Apps Config",
+    spec: "specifications/nodoc-m365-apps-config/specification/openapi.yml",
+    output: "postman/collections/m365-apps-config.collection.json",
+  },
+  {
+    name: "M365 Apps Services",
+    spec: "specifications/nodoc-m365-apps-services/specification/openapi.yml",
+    output: "postman/collections/m365-apps-services.collection.json",
+  },
+  {
+    name: "M365 Apps Inventory",
+    spec: "specifications/nodoc-m365-apps-inventory/specification/openapi.yml",
+    output: "postman/collections/m365-apps-inventory.collection.json",
+  },
+  {
     name: "Purview",
     spec: "specifications/nodoc-purview/specification/openapi.yml",
     output: "postman/collections/purview.collection.json",

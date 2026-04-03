@@ -1,0 +1,871 @@
+openapi: 3.0.1
+info:
+  title: M365 Apps Config
+  x-nodoc-category: M365 Apps
+  description: |
+    The M365 Apps Config API is used by the Microsoft 365 Apps admin center
+    (`config.office.com`) for cloud update, servicing profiles, policy management,
+    device configuration, rollout metadata, and portal bootstrap state.
+
+    This surface was observed while browsing the authenticated M365 Apps admin
+    center pages for:
+
+      - Home and Cloud Update
+      - Device Configuration
+      - Policy Management
+      - Security Update Status
+      - Setup
+
+    A second pass with token-backed probes confirmed additional servicing-profile
+    and settings catalog surfaces such as `serviceProfile/v3.0/profiles`,
+    `serviceProfile/v1.0/tenantrules`,
+    `serviceProfile/v1.0/ServiceProfileAggregator/tenantServicingExclusionWindows`,
+    `serviceProfile/v1.0/serviceProfileAggregator/filteredDevicesAndGroups`, and
+    `settings/v1.0/SettingsCatalog/auth/Settings`. Intercepted save flows also
+    exposed the paired `UpdateConfiguration` PUT requests emitted by the Office
+    Customization Tool editor.
+
+    The operations below were confirmed either by direct portal traffic,
+    token-backed probing with the same browser session, or by intercepting live
+    save requests before persistence.
+
+    Requests are issued with browser-obtained bearer tokens and commonly include
+    portal correlation headers such as `x-api-name`, `x-correlationid`,
+    `x-manageoffice-client-sid`, `x-requested-with`, and `x-start-time`.
+
+    Documentation and specifications have been provided on a best-efforts basis and
+    may not be 100% accurate.
+  version: 0.1.0
+  contact:
+    name: nodoc
+    url: https://github.com/nathanmcnulty/nodoc
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+servers:
+  - url: https://config.office.com
+    description: M365 Apps admin center configuration API
+security:
+  - bearerAuth: []
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        Browser-obtained bearer token used by the M365 Apps admin center.
+        Observed requests also include portal diagnostic headers such as
+        `x-api-name`, `x-correlationid`, `x-manageoffice-client-sid`, and
+        `x-requested-with`.
+  parameters:
+    profileId:
+      name: profileId
+      in: path
+      required: true
+      description: Servicing profile identifier.
+      schema:
+        type: string
+        format: uuid
+    configurationId:
+      name: configurationId
+      in: path
+      required: true
+      description: Deployment configuration identifier.
+      schema:
+        type: string
+        format: uuid
+    releaseType:
+      name: releaseType
+      in: query
+      description: Release classification filter observed on release lookup requests.
+      schema:
+        type: string
+    settingsFilter:
+      name: filter
+      in: query
+      description: |
+        Settings catalog filter expression. Observed example:
+        `Not(tag=Cloud Policies Composite),All(tag=Cloud Policies)`.
+      schema:
+        type: string
+    includeRollbackByOfficeServicingChannel:
+      name: includeRollbackByOfficeServicingChannel
+      in: query
+      description: Include rollback entries grouped by Office servicing channel.
+      schema:
+        type: boolean
+  schemas:
+    GenericObject:
+      type: object
+      additionalProperties: true
+    ShellInfo:
+      type: object
+      description: Portal shell metadata used to build menus, external links, and account actions.
+      properties:
+        AboutMeLink:
+          type: object
+          properties:
+            Text:
+              type: string
+              example: My Microsoft 365 profile
+            Title:
+              type: string
+              example: Go to your Microsoft 365 profile page
+            Url:
+              type: string
+              format: uri
+              example: https://contoso-my.sharepoint.com/person.aspx
+          additionalProperties: true
+      additionalProperties: true
+    UserFlights:
+      type: object
+      description: Feature flags and rollout switches used by the portal shell.
+      properties:
+        enableShell:
+          type: boolean
+        enableServiceHealthDashboard:
+          type: boolean
+        enableNewReporting:
+          type: boolean
+        enableDeviceClassificationUX:
+          type: boolean
+        enableStandardConfigs:
+          type: boolean
+        enableInventoryUX:
+          type: boolean
+        enableActionCenter:
+          type: boolean
+        enableSecurityBaselineSupport:
+          type: boolean
+        enableDBSLicensing:
+          type: boolean
+      additionalProperties: true
+    TenantAssociation:
+      type: object
+      description: Tenant association state used during setup and endpoint provisioning.
+      properties:
+        tenantAssociationJwt:
+          type: string
+          description: Signed tenant association token.
+        enabled:
+          type: boolean
+      required:
+        - tenantAssociationJwt
+        - enabled
+    DeploymentConfiguration:
+      type: object
+      description: Saved Office Deployment Tool configuration definition.
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        product:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        sharedUri:
+          type: string
+          format: uri
+          nullable: true
+        defaultFileFormatSelection:
+          type: string
+          nullable: true
+        defaultFileFormatSelectionDate:
+          type: string
+          format: date-time
+        createdDate:
+          type: string
+          format: date-time
+        updatedDate:
+          type: string
+          format: date-time
+        lastAccessedDate:
+          type: string
+          format: date-time
+      additionalProperties: true
+    ConfigNameValue:
+      type: object
+      properties:
+        name:
+          type: string
+        value:
+          type: string
+          nullable: true
+      required:
+        - name
+      additionalProperties: true
+    AuthDeploymentSettingsConfigurationRequest:
+      type: object
+      description: |
+        Office Customization Tool save payload sent to the auth deployment settings
+        companion endpoint when saving an existing deployment configuration.
+      properties:
+        id:
+          type: string
+          format: uuid
+        configurationItem:
+          type: object
+          additionalProperties: true
+        property:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConfigNameValue'
+        updateConfiguration:
+          type: object
+          additionalProperties: true
+        upgradeConfiguration:
+          type: object
+          additionalProperties: true
+        displayConfiguration:
+          type: object
+          nullable: true
+          additionalProperties: true
+        infoConfiguration:
+          type: object
+          nullable: true
+          additionalProperties: true
+        appSettingGroup:
+          type: object
+          nullable: true
+          additionalProperties: true
+      required:
+        - id
+        - configurationItem
+        - property
+      additionalProperties: true
+    Policy:
+      type: object
+      description: Cloud policy assignment container.
+      properties:
+        id:
+          type: string
+        displayName:
+          type: string
+        description:
+          type: string
+        priority:
+          type: integer
+        policyType:
+          type: string
+        groupIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+        excludedGroupIds:
+          type: array
+          nullable: true
+          items:
+            type: string
+            format: uuid
+        policyAssignmentType:
+          type: string
+        lastModifiedDateTime:
+          type: string
+          format: date-time
+        lastUpdatedUserFriendlyName:
+          type: string
+        lastUpdatedUserUpn:
+          type: string
+        hideInCPSHint:
+          type: string
+          nullable: true
+        isHidden:
+          type: boolean
+      additionalProperties: true
+    BuildVersion:
+      type: object
+      properties:
+        major:
+          type: integer
+        minor:
+          type: integer
+        build:
+          type: integer
+        buildRevision:
+          type: integer
+        buildVersionString:
+          type: string
+      required:
+        - major
+        - minor
+        - build
+        - buildRevision
+        - buildVersionString
+    LatestRelease:
+      type: object
+      description: Latest published Office build for a servicing channel.
+      properties:
+        id:
+          type: integer
+        channel:
+          type: integer
+        channelId:
+          type: string
+        releaseVersion:
+          type: integer
+        releaseType:
+          type: integer
+        availabilityDate:
+          type: string
+          format: date-time
+        endOfSupportDate:
+          type: string
+          format: date-time
+        buildVersion:
+          $ref: '#/components/schemas/BuildVersion'
+        releaseRank:
+          type: string
+        kbLink:
+          type: string
+          format: uri
+        cdnBaseUrl:
+          type: string
+          format: uri
+      additionalProperties: true
+    NextReleaseVersion:
+      type: object
+      description: Next Monthly Enterprise release window.
+      properties:
+        releaseVersion:
+          type: integer
+        availabilityDate:
+          type: string
+          format: date-time
+      required:
+        - releaseVersion
+        - availabilityDate
+    ResidencyInfo:
+      type: object
+      description: Tenant residency and mailbox region metadata used by the portal.
+      properties:
+        location:
+          type: string
+        isHostedInEUDataBoundary:
+          type: boolean
+        isExchangeGoLocalResidencyGuaranteed:
+          type: boolean
+        isSharepointGoLocalResidencyGuaranteed:
+          type: boolean
+        isMNC:
+          type: boolean
+        defaultMailboxRegion:
+          type: string
+        allowedMailboxRegions:
+          type: array
+          items:
+            type: string
+      required:
+        - location
+        - isHostedInEUDataBoundary
+        - isExchangeGoLocalResidencyGuaranteed
+        - isSharepointGoLocalResidencyGuaranteed
+        - isMNC
+        - defaultMailboxRegion
+        - allowedMailboxRegions
+    ServiceProfile:
+      type: object
+      description: Cloud Update servicing profile summary.
+      properties:
+        id:
+          type: string
+          format: uuid
+        active:
+          type: boolean
+        profileState:
+          type: integer
+        profileType:
+          type: integer
+        rolloutPipeline:
+          type: integer
+        targetChannel:
+          type: integer
+      additionalProperties: true
+    ServiceProfileRule:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        ruleType:
+          type: integer
+        frequency:
+          type: integer
+        value:
+          type: string
+          nullable: true
+      additionalProperties: true
+    ScopedServiceProfileRule:
+      allOf:
+        - $ref: '#/components/schemas/ServiceProfileRule'
+        - type: object
+          properties:
+            scopedToAllProfileDevices:
+              type: boolean
+            scopedAADGroups:
+              type: array
+              items:
+                type: string
+                format: uuid
+            scopedDevices:
+              type: array
+              nullable: true
+              items:
+                type: string
+          additionalProperties: true
+    ExpressionServiceProfileRule:
+      allOf:
+        - $ref: '#/components/schemas/ServiceProfileRule'
+        - type: object
+          properties:
+            property:
+              type: string
+            expressionOperator:
+              type: string
+          additionalProperties: true
+    ServiceProfileRules:
+      type: object
+      description: Rule set that defines Cloud Update servicing profile targeting and deadlines.
+      properties:
+        profileId:
+          type: string
+          format: uuid
+        rulesList:
+          type: object
+          properties:
+            valueRules:
+              type: array
+              items:
+                $ref: '#/components/schemas/ServiceProfileRule'
+            scopedValueRules:
+              type: array
+              items:
+                $ref: '#/components/schemas/ScopedServiceProfileRule'
+            excludedValueRules:
+              type: array
+              items:
+                $ref: '#/components/schemas/ServiceProfileRule'
+            expressionRules:
+              type: array
+              items:
+                $ref: '#/components/schemas/ExpressionServiceProfileRule'
+          additionalProperties: true
+      required:
+        - profileId
+        - rulesList
+    TenantRules:
+      type: object
+      description: Tenant-wide servicing-profile rules returned by the hidden tenant rules endpoint.
+      properties:
+        rulesList:
+          type: object
+          properties:
+            valueRules:
+              type: array
+              items:
+                $ref: '#/components/schemas/ServiceProfileRule'
+            scopedValueRules:
+              type: array
+              items:
+                $ref: '#/components/schemas/ScopedServiceProfileRule'
+            excludedValueRules:
+              type: array
+              items:
+                $ref: '#/components/schemas/ServiceProfileRule'
+            expressionRules:
+              type: array
+              items:
+                $ref: '#/components/schemas/ExpressionServiceProfileRule'
+          additionalProperties: true
+      required:
+        - rulesList
+    SettingsCatalogEntry:
+      type: object
+      description: Cloud Policy setting catalog entry.
+      properties:
+        id:
+          type: string
+        uniqueId:
+          type: integer
+        displayName:
+          type: string
+        description:
+          type: string
+        settingType:
+          type: object
+          additionalProperties: true
+        supportedPlatforms:
+          type: array
+          items:
+            type: string
+        tags:
+          type: array
+          items:
+            type: string
+      additionalProperties: true
+tags:
+  - name: Bootstrap
+    description: Portal shell and feature-flight bootstrap state.
+  - name: Device Configuration
+    description: Office Deployment Tool and setup-related configuration resources.
+  - name: Policy Management
+    description: Cloud policy licensing, policy containers, and settings catalog metadata.
+  - name: Releases
+    description: Current and upcoming build metadata for Office servicing channels.
+  - name: Rollout
+    description: Tenant rollout and residency metadata.
+  - name: Servicing Profiles
+    description: Cloud Update servicing profile discovery and rule inspection.
+paths:
+  /appConfig/v1.0/ServiceHealth:
+    get:
+      tags: [Bootstrap]
+      summary: Get service health bootstrap data
+      description: Returns service-health bootstrap data used by the portal shell. Observed responses can be an empty array.
+      responses:
+        '200':
+          description: Service health bootstrap records
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GenericObject'
+              example: []
+  /appConfig/v1.0/ShellService/GetShellInfo:
+    get:
+      tags: [Bootstrap]
+      summary: Get portal shell metadata
+      description: Returns shell metadata, menu links, and environment-specific UX configuration.
+      responses:
+        '200':
+          description: Shell metadata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShellInfo'
+  /appConfig/v1.0/userflights:
+    get:
+      tags: [Bootstrap]
+      summary: Get portal feature flights
+      description: Returns client-side feature flags that light up or suppress M365 Apps admin center experiences.
+      responses:
+        '200':
+          description: Portal feature flag state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserFlights'
+  /endpointprovisionhealth/v1.0/tenantassociation:
+    get:
+      tags: [Device Configuration]
+      summary: Get tenant association state
+      description: Returns the setup-time tenant association token and whether endpoint provisioning health is enabled.
+      responses:
+        '200':
+          description: Tenant association metadata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantAssociation'
+  /intents/v1.0/DeploymentConfiguration/GetConfigurations:
+    get:
+      tags: [Device Configuration]
+      summary: List deployment configurations
+      description: Lists saved Office Deployment Tool configurations shown in Device Configuration.
+      responses:
+        '200':
+          description: Deployment configurations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DeploymentConfiguration'
+  /intents/v1.0/AuthDeploymentSettings/UpdateConfiguration/{configurationId}:
+    put:
+      tags: [Device Configuration]
+      summary: Update auth deployment settings for a configuration
+      description: |
+        Captured by intercepting an Office Customization Tool save from the
+        existing deployment configuration editor. The request was aborted after
+        payload capture, so the response shape was not observed.
+      parameters:
+        - $ref: '#/components/parameters/configurationId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthDeploymentSettingsConfigurationRequest'
+      responses:
+        '200':
+          description: Configuration save result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+  /intents/v1.0/DeploymentConfiguration/UpdateConfiguration/{configurationId}:
+    put:
+      tags: [Device Configuration]
+      summary: Update deployment configuration metadata
+      description: |
+        Captured by intercepting a save from the deployment configuration editor
+        after changing only the configuration name. This request is emitted
+        alongside the auth deployment settings update request above.
+      parameters:
+        - $ref: '#/components/parameters/configurationId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeploymentConfiguration'
+      responses:
+        '200':
+          description: Configuration save result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+  /policyadmin/v1.0/DbsLicensing/HasDbsLicense:
+    get:
+      tags: [Policy Management]
+      summary: Check DBS licensing
+      description: Indicates whether the tenant has the database-backed settings licensing required by some policy management features.
+      responses:
+        '200':
+          description: Licensing state
+          content:
+            application/json:
+              schema:
+                type: boolean
+              example: false
+  /policyadmin/v1.0/policies:
+    get:
+      tags: [Policy Management]
+      summary: List cloud policy containers
+      description: Returns cloud policy assignments shown on the Policy Management page.
+      responses:
+        '200':
+          description: Policy containers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Policy'
+  /releases/v1.0/LatestRelease/CurrentChannel:
+    get:
+      tags: [Releases]
+      summary: Get latest Current Channel release
+      description: Returns the latest release metadata for Current Channel.
+      parameters:
+        - $ref: '#/components/parameters/releaseType'
+      responses:
+        '200':
+          description: Current Channel release metadata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LatestRelease'
+  /releases/v1.0/LatestRelease/MonthlyEnterpriseChannel:
+    get:
+      tags: [Releases]
+      summary: Get latest Monthly Enterprise release
+      description: Returns the latest release metadata for Monthly Enterprise Channel.
+      parameters:
+        - $ref: '#/components/parameters/releaseType'
+      responses:
+        '200':
+          description: Monthly Enterprise release metadata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LatestRelease'
+  /releases/v1.0/NextReleaseVersion/MonthlyEnterpriseChannel:
+    get:
+      tags: [Releases]
+      summary: Get next Monthly Enterprise release version
+      description: Returns the next planned Monthly Enterprise release version and availability date.
+      responses:
+        '200':
+          description: Next release information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NextReleaseVersion'
+  /rollout/v1.0/residency:
+    get:
+      tags: [Rollout]
+      summary: Get tenant residency metadata
+      description: Returns mailbox and data-boundary residency metadata used by rollout and regional feature logic.
+      responses:
+        '200':
+          description: Residency information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResidencyInfo'
+  /serviceProfile/v1.0/{profileId}/rules:
+    get:
+      tags: [Servicing Profiles]
+      summary: Get servicing profile rules
+      description: Returns targeting, scoping, and deadline rules for a Cloud Update servicing profile.
+      parameters:
+        - $ref: '#/components/parameters/profileId'
+      responses:
+        '200':
+          description: Servicing profile rules
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceProfileRules'
+  /ServiceProfile/v1.0/Profiles:
+    get:
+      tags: [Servicing Profiles]
+      summary: List servicing profiles
+      description: Returns the servicing profiles shown in Cloud Update.
+      responses:
+        '200':
+          description: Servicing profile summaries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ServiceProfile'
+  /serviceProfile/v3.0/profiles:
+    get:
+      tags: [Servicing Profiles]
+      summary: List servicing profiles (v3)
+      description: |
+        Hidden servicing-profile collection confirmed during the feature-gated
+        probe pass. It returned the same high-level servicing profile summaries as
+        the older v1 surface.
+      responses:
+        '200':
+          description: Servicing profile summaries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ServiceProfile'
+  /serviceProfile/v1.0/ServiceProfileAggregator/tenantServicingExclusionWindows:
+    get:
+      tags: [Servicing Profiles]
+      summary: Get tenant servicing exclusion windows
+      description: Returns tenant-wide servicing exclusion windows used by advanced Cloud Update scheduling.
+      responses:
+        '200':
+          description: Tenant exclusion windows
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GenericObject'
+              example: []
+  /serviceProfile/v1.0/serviceProfileAggregator/filteredDevicesAndGroups:
+    get:
+      tags: [Servicing Profiles]
+      summary: Get filtered devices and groups
+      description: Returns the filtered devices and groups collection used by feature-gated servicing profile targeting UX.
+      responses:
+        '200':
+          description: Filtered devices and groups
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GenericObject'
+              example: []
+  /serviceProfile/v1.0/tenantrules:
+    get:
+      tags: [Servicing Profiles]
+      summary: Get tenant servicing rules
+      description: Returns tenant-wide servicing rules that apply before per-profile rule evaluation.
+      responses:
+        '200':
+          description: Tenant servicing rules
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantRules'
+    put:
+      tags: [Servicing Profiles]
+      summary: Update tenant servicing rules
+      description: Bundle-generated servicing-profile client exposes a PUT that persists tenant-wide servicing rules before per-profile rule evaluation.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TenantRules'
+      responses:
+        '200':
+          description: Updated tenant servicing rules
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantRules'
+  /serviceProfile/v1.0/serviceProfileAggregator/{profileId}/rollbackEntries:
+    get:
+      tags: [Servicing Profiles]
+      summary: Get servicing profile rollback entries
+      description: Returns rollback eligibility or execution entries for a servicing profile. Observed responses can be an empty array.
+      parameters:
+        - $ref: '#/components/parameters/profileId'
+        - $ref: '#/components/parameters/includeRollbackByOfficeServicingChannel'
+      responses:
+        '200':
+          description: Rollback entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GenericObject'
+              example: []
+  /settings/v1.0/SettingsCatalog/Settings:
+    get:
+      tags: [Policy Management]
+      summary: Query settings catalog entries
+      description: Returns setting definitions and metadata used by Cloud Policy policy authoring and filtering.
+      parameters:
+        - $ref: '#/components/parameters/settingsFilter'
+      responses:
+        '200':
+          description: Settings catalog entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SettingsCatalogEntry'
+  /settings/v1.0/SettingsCatalog/auth/Settings:
+    get:
+      tags: [Policy Management]
+      summary: Query auth settings catalog entries
+      description: |
+        Hidden auth settings catalog confirmed during the feature-gated probe
+        pass. The current tenant returned the same settings catalog entry shape as
+        the main Cloud Policy catalog.
+      responses:
+        '200':
+          description: Auth settings catalog entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SettingsCatalogEntry'
