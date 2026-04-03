@@ -8,6 +8,8 @@ info:
     backs blades such as:
 
       - Windows Autopatch > Autopatch groups
+      - Reports > Windows quality updates
+      - Reports > Windows feature updates
       - Windows Autopatch > Messages
       - Windows Autopatch > Support requests
       - Windows Autopatch > Tenant management
@@ -17,6 +19,12 @@ info:
     endpoints. A second pass mined the loaded `hosting.portal.azure.net/modernworkplace/*`
     bundles for additional concrete GET paths under `/access-control/` and `/support/`, then
     validated those with token-backed GET probes using the same browser session.
+
+    A later report-focused pass captured live request and response samples for the Windows
+    quality updates and Windows feature updates blades, then safely probed hidden sibling read
+    routes recovered from the same blade bundles. That work confirmed the live
+    `/reporting/reports/v2/*` report families plus alternate
+    `/unified-reporting/odata/1.0/WindowsFeatureUpdates*` resources.
 
     A related path, `GET /support/v1.0/Tenants/PreOnboardTenant`, returned `405 Method Not Allowed`
     during probing and is therefore treated as a likely write-oriented onboarding flow rather than
@@ -110,8 +118,7 @@ components:
       required: true
       description: Managed service plan identifier.
       schema:
-        type: string
-        example: Starter
+        $ref: '#/components/schemas/ManagedServicePlan'
     adminAction:
       name: adminAction
       in: query
@@ -133,6 +140,64 @@ components:
       in: path
       required: true
       description: Windows Autopatch support request identifier.
+      schema:
+        type: string
+        format: uuid
+    reportApiVersion2:
+      name: api-version
+      in: query
+      required: true
+      description: Reporting API version used by the report POST routes.
+      schema:
+        type: string
+        enum: ['2.0']
+        default: '2.0'
+    reportApiVersion1:
+      name: api-version
+      in: query
+      required: true
+      description: Reporting API version used by the export status helper.
+      schema:
+        type: string
+        enum: ['1.0']
+        default: '1.0'
+    includeHistoricalValue:
+      name: includeHistoricalValue
+      in: query
+      required: true
+      description: Whether historical values should be included in distinct-column responses.
+      schema:
+        type: boolean
+        default: false
+    hotpatched:
+      name: hotpatched
+      in: query
+      required: false
+      description: Restrict quality update distinct-column results to hotpatch-specific values.
+      schema:
+        type: boolean
+    exportQueryName:
+      name: queryName
+      in: query
+      required: true
+      description: Export query identifier returned by the report blade bundle.
+      schema:
+        type: string
+        example: DeviceFeatureUpdatesDetailsQuery
+    exportQueryVersion:
+      name: queryVersion
+      in: query
+      required: true
+      description: Export query version used by the report blade bundle.
+      schema:
+        type: string
+        example: '1.0'
+        default: '1.0'
+    exportTrackingId:
+      name: trackingId
+      in: query
+      required: true
+      description: Tracking identifier returned by a `detailsExport` POST.
       schema:
         type: string
         format: uuid
@@ -413,6 +478,1079 @@ components:
           type: integer
         readOnly:
           type: boolean
+      additionalProperties: true
+    AutopatchReportPage:
+      type: object
+      properties:
+        totalRowCount:
+          type: integer
+        startRowIndex:
+          type: integer
+        endRowIndex:
+          type: integer
+        tenantId:
+          type: string
+          format: uuid
+        activityId:
+          type: string
+          format: uuid
+      required:
+        - totalRowCount
+        - startRowIndex
+        - endRowIndex
+        - tenantId
+        - activityId
+      additionalProperties: true
+    AutopatchTrendDuration:
+      type: string
+      enum: [Trend30To0d, Trend60To30d, Trend90To60d]
+    ManagedServicePlan:
+      type: string
+      enum: [Starter, Premium]
+      example: Starter
+    QualityUpdateSummaryBusinessGroupsRequest:
+      type: object
+      properties:
+        skip:
+          type: integer
+        top:
+          type: integer
+        sortKey:
+          type: string
+          example: DevicesCount
+        isDesc:
+          type: boolean
+      required:
+        - skip
+        - top
+      additionalProperties: true
+    QualityUpdateSummaryMetricsRequest:
+      type: object
+      properties:
+        skip:
+          type: integer
+        top:
+          type: integer
+        search:
+          type: string
+        filters:
+          $ref: '#/components/schemas/GenericObject'
+      required:
+        - skip
+        - top
+      additionalProperties: true
+    QualityUpdateTrendingRequest:
+      type: object
+      properties:
+        skip:
+          type: integer
+        top:
+          type: integer
+        isDesc:
+          type: boolean
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
+        trendDuration:
+          $ref: '#/components/schemas/AutopatchTrendDuration'
+        filters:
+          $ref: '#/components/schemas/GenericObject'
+      required:
+        - skip
+        - top
+        - isDesc
+        - startTime
+        - endTime
+        - trendDuration
+      additionalProperties: true
+    QualityUpdateSummaryDeploymentGroupsRequest:
+      type: object
+      properties:
+        skip:
+          type: integer
+        top:
+          type: integer
+        sortKey:
+          type: string
+          example: DevicesCount
+        isDesc:
+          type: boolean
+        filters:
+          type: object
+          properties:
+            businessGroupIds:
+              type: array
+              items:
+                type: string
+                format: uuid
+          required:
+            - businessGroupIds
+          additionalProperties: true
+      required:
+        - skip
+        - top
+        - filters
+      additionalProperties: true
+    QualityUpdateDetailsRequest:
+      type: object
+      properties:
+        skip:
+          type: integer
+        top:
+          type: integer
+        sortKey:
+          type: string
+        isDesc:
+          type: boolean
+        search:
+          type: string
+        filters:
+          $ref: '#/components/schemas/GenericObject'
+      required:
+        - skip
+        - top
+      additionalProperties: true
+    QualityUpdateDetailsExportRequest:
+      type: object
+      properties:
+        format:
+          type: string
+          example: CSV
+        headerOptions:
+          type: string
+          example: FirstFileOnly
+        filters:
+          $ref: '#/components/schemas/GenericObject'
+        search:
+          type: string
+        selectedColumns:
+          type: array
+          items:
+            type: string
+      required:
+        - format
+        - headerOptions
+      additionalProperties: true
+    FeatureUpdateSummaryReleasesRequest:
+      type: object
+      properties:
+        skip:
+          type: integer
+        top:
+          type: integer
+        plan:
+          $ref: '#/components/schemas/ManagedServicePlan'
+        requestType:
+          type: string
+          example: All
+        sortKey:
+          type: string
+          example: DevicesCount
+        isDesc:
+          type: boolean
+      required:
+        - skip
+        - top
+        - plan
+      additionalProperties: true
+    FeatureUpdateSummaryMetricsRequest:
+      type: object
+      properties:
+        skip:
+          type: integer
+        top:
+          type: integer
+        plan:
+          $ref: '#/components/schemas/ManagedServicePlan'
+        search:
+          type: string
+        filters:
+          $ref: '#/components/schemas/GenericObject'
+      required:
+        - skip
+        - top
+        - plan
+      additionalProperties: true
+    FeatureUpdateTrendingRequest:
+      type: object
+      properties:
+        skip:
+          type: integer
+        top:
+          type: integer
+        plan:
+          $ref: '#/components/schemas/ManagedServicePlan'
+        isDesc:
+          type: boolean
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
+        trendDuration:
+          $ref: '#/components/schemas/AutopatchTrendDuration'
+        filters:
+          $ref: '#/components/schemas/GenericObject'
+      required:
+        - skip
+        - top
+        - plan
+        - isDesc
+        - startTime
+        - endTime
+        - trendDuration
+      additionalProperties: true
+    FeatureUpdateCompletionReleasesRequest:
+      type: object
+      properties:
+        skip:
+          type: integer
+        top:
+          type: integer
+        plan:
+          $ref: '#/components/schemas/ManagedServicePlan'
+      required:
+        - skip
+        - top
+        - plan
+      additionalProperties: true
+    FeatureUpdateSummaryPhasesRequest:
+      type: object
+      properties:
+        skip:
+          type: integer
+        top:
+          type: integer
+        plan:
+          $ref: '#/components/schemas/ManagedServicePlan'
+        sortKey:
+          type: string
+          example: DevicesCount
+        isDesc:
+          type: boolean
+        filters:
+          type: object
+          properties:
+            releaseIds:
+              type: array
+              items:
+                type: string
+                format: uuid
+          required:
+            - releaseIds
+          additionalProperties: true
+      required:
+        - skip
+        - top
+        - plan
+        - filters
+      additionalProperties: true
+    FeatureUpdateDetailsRequest:
+      type: object
+      properties:
+        skip:
+          type: integer
+        top:
+          type: integer
+        plan:
+          $ref: '#/components/schemas/ManagedServicePlan'
+        sortKey:
+          type: string
+          description: Empty string was the default bundle-generated value on the live blade.
+        isDesc:
+          type: boolean
+        search:
+          type: string
+        filters:
+          $ref: '#/components/schemas/GenericObject'
+      required:
+        - skip
+        - top
+        - plan
+      additionalProperties: true
+    FeatureUpdateDetailsExportRequest:
+      type: object
+      properties:
+        format:
+          type: string
+          example: CSV
+        headerOptions:
+          type: string
+          example: FirstFileOnly
+        plan:
+          $ref: '#/components/schemas/ManagedServicePlan'
+        filters:
+          $ref: '#/components/schemas/GenericObject'
+        search:
+          type: string
+        selectedColumns:
+          type: array
+          items:
+            type: string
+      required:
+        - format
+        - headerOptions
+        - plan
+      additionalProperties: true
+    QualityUpdateBusinessGroupSummary:
+      type: object
+      properties:
+        businessGroupId:
+          type: string
+          format: uuid
+        businessGroupName:
+          type: string
+        businessGroupAltName:
+          type: string
+        policyId:
+          type: string
+          format: uuid
+        policyName:
+          type: string
+        uptoDateDevicesCount:
+          type: integer
+        notuptodateDevicesCount:
+          type: integer
+        inProgressDevicesCount:
+          type: integer
+        pausedDevicesCount:
+          type: integer
+        notReadyDevicesCount:
+          type: integer
+        devicesCount:
+          type: integer
+        completion:
+          type: number
+        updatedCompletion:
+          type: number
+        isBusinessGroupEnabled:
+          type: integer
+        timestamp:
+          type: string
+          format: date-time
+        tenantId:
+          type: string
+          format: uuid
+      additionalProperties: true
+    QualityUpdateSummaryMetricRow:
+      type: object
+      properties:
+        quStatusLevel1Name:
+          type: string
+        devicesCount:
+          type: integer
+        tenantId:
+          type: string
+          format: uuid
+        timestamp:
+          type: string
+          format: date-time
+      additionalProperties: true
+    AutopatchReportTrendRow:
+      type: object
+      properties:
+        uptoDateDevicesCount:
+          type: integer
+        notuptodateDevicesCount:
+          type: integer
+        inProgressDevicesCount:
+          type: integer
+        pausedDevicesCount:
+          type: integer
+        notReadyDevicesCount:
+          type: integer
+        devicesCount:
+          type: integer
+        timestamp:
+          type: string
+          format: date-time
+      additionalProperties: true
+    QualityUpdateDeploymentGroupSummary:
+      type: object
+      properties:
+        businessGroupId:
+          type: string
+          format: uuid
+        businessGroupName:
+          type: string
+        deploymentGroupId:
+          type: string
+          format: uuid
+        deploymentGroupName:
+          type: string
+        uptoDateDevicesCount:
+          type: integer
+        notuptodateDevicesCount:
+          type: integer
+        inProgressDevicesCount:
+          type: integer
+        pausedDevicesCount:
+          type: integer
+        notReadyDevicesCount:
+          type: integer
+        devicesCount:
+          type: integer
+        completion:
+          type: number
+        updatedCompletion:
+          type: number
+        isBusinessGroupEnabled:
+          type: integer
+        timestamp:
+          type: string
+          format: date-time
+        tenantId:
+          type: string
+          format: uuid
+      additionalProperties: true
+    QualityUpdateDeviceDetail:
+      type: object
+      properties:
+        name:
+          type: string
+        businessGroupName:
+          type: string
+        businessGroupAltName:
+          type: string
+        deploymentGroupName:
+          type: string
+        quStatusLevel1Name:
+          type: string
+        quPauseStatus:
+          type: string
+        osBuild:
+          type: string
+        deviceReadiness:
+          type: string
+        aadDeviceId:
+          type: string
+          format: uuid
+        serialNumber:
+          type: string
+        lastIntuneSyncDateTimeUtc:
+          type: string
+          format: date-time
+        quServiceState:
+          type: string
+        quServiceSubstate:
+          type: string
+        quClientState:
+          type: string
+        quClientSubstate:
+          type: string
+        osServicingChannel:
+          type: string
+        quServiceUpdateAlertErrorCode:
+          type: string
+        quClientUpdateAlertErrorCode:
+          type: string
+        quServiceUpdateAlert:
+          type: string
+        quClientUpdateAlert:
+          type: string
+        policyAlertsArray:
+          type: array
+          items:
+            $ref: '#/components/schemas/GenericObject'
+        alertCount:
+          type: integer
+        AlertNames:
+          type: array
+          items:
+            type: string
+        cadenceType:
+          type: string
+        quUpdateInstalledTime:
+          type: string
+          format: date-time
+        featureSet:
+          type: string
+        hotpatchStatus:
+          type: string
+        hotpatchReadiness:
+          type: string
+        qualityUpdatePolicyName:
+          type: string
+        scopeTag:
+          type: string
+        extendedSecurity:
+          $ref: '#/components/schemas/GenericObject'
+      additionalProperties: true
+    QualityUpdateDistinctColumnsRecord:
+      type: object
+      properties:
+        valuesOfBusinessGroupNameArray:
+          type: array
+          items:
+            type: string
+        valuesOfDeploymentGroupNameArray:
+          type: array
+          items:
+            type: string
+        valuesOfOSBuildArray:
+          type: array
+          items:
+            type: string
+        valuesOfQUServiceStateArray:
+          type: array
+          items:
+            type: string
+        valuesOfQUServiceSubstateArray:
+          type: array
+          items:
+            type: string
+        valuesOfQUClientStateArray:
+          type: array
+          items:
+            type: string
+        valuesOfQUClientSubstateArray:
+          type: array
+          items:
+            type: string
+        valuesOfOSServicingChannelArray:
+          type: array
+          items:
+            type: string
+        valuesOfQualityUpdatePolicyNameArray:
+          type: array
+          items:
+            type: string
+        valuesOfDeviceScopeTagsArray:
+          type: array
+          items:
+            type: string
+      additionalProperties: true
+    FeatureUpdateReleaseSummary:
+      type: object
+      properties:
+        releaseId:
+          type: string
+          format: uuid
+        releaseName:
+          type: string
+        versionToDeploy:
+          type: string
+        isReleaseEnabled:
+          type: integer
+        uptoDateDevicesCount:
+          type: integer
+        notuptodateDevicesCount:
+          type: integer
+        inProgressDevicesCount:
+          type: integer
+        pausedDevicesCount:
+          type: integer
+        notReadyDevicesCount:
+          type: integer
+        devicesCount:
+          type: integer
+        completion:
+          type: number
+        updatedCompletion:
+          type: number
+        timestamp:
+          type: string
+          format: date-time
+        tenantId:
+          type: string
+          format: uuid
+      additionalProperties: true
+    FeatureUpdateSummaryMetricRow:
+      type: object
+      properties:
+        fuStatusLevel1Name:
+          type: string
+        devicesCount:
+          type: integer
+        tenantId:
+          type: string
+          format: uuid
+        timestamp:
+          type: string
+          format: date-time
+      additionalProperties: true
+    FeatureUpdateCompletionPhaseInfo:
+      type: object
+      properties:
+        phaseId:
+          type: string
+          format: uuid
+        devicesCount:
+          type: integer
+        readyDevicesCount:
+          type: integer
+        completion:
+          type: number
+        updatedCompletion:
+          type: number
+      additionalProperties: true
+    FeatureUpdateCompletionRelease:
+      type: object
+      properties:
+        releaseId:
+          type: string
+          format: uuid
+        devicesCount:
+          type: integer
+        readyDevicesCount:
+          type: integer
+        completion:
+          type: number
+        updatedCompletion:
+          type: number
+        phases:
+          type: array
+          items:
+            $ref: '#/components/schemas/GenericObject'
+        phasesInfo:
+          type: array
+          items:
+            $ref: '#/components/schemas/FeatureUpdateCompletionPhaseInfo'
+        timestamp:
+          type: string
+          format: date-time
+        tenantId:
+          type: string
+          format: uuid
+      additionalProperties: true
+    FeatureUpdatePhaseSummary:
+      type: object
+      properties:
+        phaseId:
+          type: string
+          format: uuid
+        phaseName:
+          type: string
+        releaseId:
+          type: string
+          format: uuid
+        releaseName:
+          type: string
+        versionToDeploy:
+          type: string
+        isReleaseEnabled:
+          type: integer
+        uptoDateDevicesCount:
+          type: integer
+        notuptodateDevicesCount:
+          type: integer
+        inProgressDevicesCount:
+          type: integer
+        pausedDevicesCount:
+          type: integer
+        notReadyDevicesCount:
+          type: integer
+        devicesCount:
+          type: integer
+        completion:
+          type: number
+        updatedCompletion:
+          type: number
+        timestamp:
+          type: string
+          format: date-time
+        tenantId:
+          type: string
+          format: uuid
+      additionalProperties: true
+    FeatureUpdateDeviceDetail:
+      type: object
+      properties:
+        name:
+          type: string
+        osVersion:
+          type: string
+        targetOSVersion:
+          type: string
+        osStatus:
+          type: string
+        fuStatusLevel1Name:
+          type: string
+        deviceReadiness:
+          type: string
+        fuPauseStatus:
+          type: string
+        lastIntuneSyncDateTimeUtc:
+          type: string
+          format: date-time
+        fuServiceState:
+          type: string
+        fuServiceSubstate:
+          type: string
+        fuClientState:
+          type: string
+        fuClientSubstate:
+          type: string
+        releaseName:
+          type: string
+        phaseName:
+          type: string
+        osServicingChannel:
+          type: string
+        aadDeviceId:
+          type: string
+          format: uuid
+        serialNumber:
+          type: string
+        fuClientUpdateAlertErrorCode:
+          type: string
+        fuServiceUpdateAlertErrorCode:
+          type: string
+        fuServiceUpdateAlert:
+          type: string
+        fuClientUpdateAlert:
+          type: string
+        policyAlertsArray:
+          type: array
+          items:
+            $ref: '#/components/schemas/GenericObject'
+        alertCount:
+          type: integer
+        cadenceType:
+          type: string
+        fuUpdateInstalledTime:
+          type: string
+          format: date-time
+        scopeTag:
+          type: string
+        AlertNames:
+          type: array
+          items:
+            type: string
+      additionalProperties: true
+    FeatureUpdateDistinctColumnsRecord:
+      type: object
+      properties:
+        valuesOfOSVersionArray:
+          type: array
+          items:
+            type: string
+        valuesOfTargetOSVersionArray:
+          type: array
+          items:
+            type: string
+        valuesOfFUServiceStateArray:
+          type: array
+          items:
+            type: string
+        valuesOfFUServiceSubstateArray:
+          type: array
+          items:
+            type: string
+        valuesOfFUClientStateArray:
+          type: array
+          items:
+            type: string
+        valuesOfFUClientSubstateArray:
+          type: array
+          items:
+            type: string
+        valuesOfReleaseNameArray:
+          type: array
+          items:
+            type: string
+        valuesOfPhaseNameArray:
+          type: array
+          items:
+            type: string
+        valuesOfOSServicingChannelArray:
+          type: array
+          items:
+            type: string
+        valuesOfDeviceScopeTagsArray:
+          type: array
+          items:
+            type: string
+      additionalProperties: true
+    WindowsFeatureUpdateSummaryReleaseRecord:
+      type: object
+      properties:
+        releaseId:
+          type: string
+          format: uuid
+        releaseName:
+          type: string
+        versionToDeploy:
+          type: string
+        isReleaseEnabled:
+          type: boolean
+        upToDateDevicesCount:
+          type: integer
+        notUpToDateDevicesCount:
+          type: integer
+        inProgressDevicesCount:
+          type: integer
+        pausedDevicesCount:
+          type: integer
+        notReadyDevicesCount:
+          type: integer
+        devicesCount:
+          type: integer
+        completion:
+          type: number
+        updatedCompletion:
+          type: number
+      additionalProperties: true
+    WindowsFeatureUpdateSummaryMetricRecord:
+      type: object
+      properties:
+        fuStatusLevel1NameMapped:
+          type: string
+        devicesCount:
+          type: integer
+      additionalProperties: true
+    WindowsFeatureUpdateTrendRecord:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        upToDateDevicesCount:
+          type: integer
+        notUpToDateDevicesCount:
+          type: integer
+        inProgressDevicesCount:
+          type: integer
+        pausedDevicesCount:
+          type: integer
+        notReadyDevicesCount:
+          type: integer
+        devicesCount:
+          type: integer
+      additionalProperties: true
+    WindowsFeatureUpdateDistinctColumnsRecord:
+      type: object
+      properties:
+        tenantId:
+          type: string
+          format: uuid
+        valuesOfReleaseName:
+          type: string
+        valuesOfPhaseName:
+          type: string
+        valuesOfOSStatus:
+          type: string
+        valuesOfServiceState:
+          type: string
+        valuesOfServiceSubstate:
+          type: string
+        valuesOfClientState:
+          type: string
+        valuesOfClientSubstate:
+          type: string
+        valuesOfScopeTagIds:
+          type: string
+      additionalProperties: true
+    QualityUpdateBusinessGroupSummaryResponse:
+      allOf:
+        - $ref: '#/components/schemas/AutopatchReportPage'
+        - type: object
+          properties:
+            values:
+              type: array
+              items:
+                $ref: '#/components/schemas/QualityUpdateBusinessGroupSummary'
+          required:
+            - values
+    QualityUpdateSummaryMetricsResponse:
+      allOf:
+        - $ref: '#/components/schemas/AutopatchReportPage'
+        - type: object
+          properties:
+            values:
+              type: array
+              items:
+                $ref: '#/components/schemas/QualityUpdateSummaryMetricRow'
+          required:
+            - values
+    QualityUpdateTrendingResponse:
+      allOf:
+        - $ref: '#/components/schemas/AutopatchReportPage'
+        - type: object
+          properties:
+            values:
+              type: array
+              items:
+                $ref: '#/components/schemas/AutopatchReportTrendRow'
+          required:
+            - values
+    QualityUpdateDeploymentGroupSummaryResponse:
+      allOf:
+        - $ref: '#/components/schemas/AutopatchReportPage'
+        - type: object
+          properties:
+            values:
+              type: array
+              items:
+                $ref: '#/components/schemas/QualityUpdateDeploymentGroupSummary'
+          required:
+            - values
+    QualityUpdateDetailsResponse:
+      allOf:
+        - $ref: '#/components/schemas/AutopatchReportPage'
+        - type: object
+          properties:
+            values:
+              type: array
+              items:
+                $ref: '#/components/schemas/QualityUpdateDeviceDetail'
+          required:
+            - values
+    QualityUpdateDistinctColumnsResponse:
+      allOf:
+        - $ref: '#/components/schemas/AutopatchReportPage'
+        - type: object
+          properties:
+            values:
+              type: array
+              items:
+                $ref: '#/components/schemas/QualityUpdateDistinctColumnsRecord'
+          required:
+            - values
+    FeatureUpdateReleaseSummaryResponse:
+      allOf:
+        - $ref: '#/components/schemas/AutopatchReportPage'
+        - type: object
+          properties:
+            values:
+              type: array
+              items:
+                $ref: '#/components/schemas/FeatureUpdateReleaseSummary'
+          required:
+            - values
+    FeatureUpdateSummaryMetricsResponse:
+      allOf:
+        - $ref: '#/components/schemas/AutopatchReportPage'
+        - type: object
+          properties:
+            values:
+              type: array
+              items:
+                $ref: '#/components/schemas/FeatureUpdateSummaryMetricRow'
+          required:
+            - values
+    FeatureUpdateTrendingResponse:
+      allOf:
+        - $ref: '#/components/schemas/AutopatchReportPage'
+        - type: object
+          properties:
+            values:
+              type: array
+              items:
+                $ref: '#/components/schemas/AutopatchReportTrendRow'
+          required:
+            - values
+    FeatureUpdateCompletionReleasesResponse:
+      allOf:
+        - $ref: '#/components/schemas/AutopatchReportPage'
+        - type: object
+          properties:
+            values:
+              type: array
+              items:
+                $ref: '#/components/schemas/FeatureUpdateCompletionRelease'
+          required:
+            - values
+    FeatureUpdatePhaseSummaryResponse:
+      allOf:
+        - $ref: '#/components/schemas/AutopatchReportPage'
+        - type: object
+          properties:
+            values:
+              type: array
+              items:
+                $ref: '#/components/schemas/FeatureUpdatePhaseSummary'
+          required:
+            - values
+    FeatureUpdateDetailsResponse:
+      allOf:
+        - $ref: '#/components/schemas/AutopatchReportPage'
+        - type: object
+          properties:
+            values:
+              type: array
+              items:
+                $ref: '#/components/schemas/FeatureUpdateDeviceDetail'
+          required:
+            - values
+    FeatureUpdateDistinctColumnsResponse:
+      allOf:
+        - $ref: '#/components/schemas/AutopatchReportPage'
+        - type: object
+          properties:
+            values:
+              type: array
+              items:
+                $ref: '#/components/schemas/FeatureUpdateDistinctColumnsRecord'
+          required:
+            - values
+    WindowsFeatureUpdateSummaryReleaseODataCollection:
+      type: object
+      properties:
+        '@odata.context':
+          type: string
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/WindowsFeatureUpdateSummaryReleaseRecord'
+      required:
+        - '@odata.context'
+        - value
+    WindowsFeatureUpdateSummaryMetricsODataCollection:
+      type: object
+      properties:
+        '@odata.context':
+          type: string
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/WindowsFeatureUpdateSummaryMetricRecord'
+      required:
+        - '@odata.context'
+        - value
+    WindowsFeatureUpdateDistinctColumnsODataCollection:
+      type: object
+      properties:
+        '@odata.context':
+          type: string
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/WindowsFeatureUpdateDistinctColumnsRecord'
+      required:
+        - '@odata.context'
+        - value
+    WindowsFeatureUpdateTrendingODataCollection:
+      type: object
+      properties:
+        '@odata.context':
+          type: string
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/WindowsFeatureUpdateTrendRecord'
+      required:
+        - '@odata.context'
+        - value
+    ReportExportStartResponse:
+      type: object
+      properties:
+        trackingId:
+          type: string
+          format: uuid
+      additionalProperties: true
+    ReportExportStatusResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        exportedBlobSASUrl:
+          type: string
+          format: uri
       additionalProperties: true
     CustomerCommMessage:
       type: object
@@ -713,6 +1851,8 @@ tags:
     description: Customer communications and message feed operations.
   - name: Support
     description: Support request listing, entitlement lookup, and request metadata.
+  - name: Reporting
+    description: Windows quality and feature update reporting endpoints, distinct filters, and exports.
 x-tagGroups:
   - name: Platform
     tags: [Platform]
@@ -721,7 +1861,7 @@ x-tagGroups:
   - name: Roles
     tags: [Roles]
   - name: Windows Autopatch
-    tags: [AutopatchGroups, Messages, Support]
+    tags: [AutopatchGroups, Messages, Support, Reporting]
 paths:
   /api/Flighting:
     get:
@@ -1075,6 +2215,548 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ODataGenericCollection'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /reporting/reports/v2/deviceAccounting/wqu/summary/businessgroups:
+    post:
+      tags: [Reporting]
+      summary: List quality update business group summaries
+      description: |
+        Returns the baseline Windows quality update summary rows grouped by business group for
+        `windowsQualityUpdatesReactView`. Confirmed live on the report blade's initial load.
+      operationId: IntuneAutopatch.Reporting.ListQualityUpdateBusinessGroups
+      parameters:
+        - $ref: '#/components/parameters/reportApiVersion2'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QualityUpdateSummaryBusinessGroupsRequest'
+      responses:
+        '200':
+          description: Quality update business group summary returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QualityUpdateBusinessGroupSummaryResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /reporting/reports/v2/deviceAccounting/wqu/summaryMetrics:
+    post:
+      tags: [Reporting]
+      summary: Get quality update summary metrics
+      description: |
+        Returns Windows quality update count buckets used by the summary cards on
+        `windowsQualityUpdatesReactView`. Confirmed live on the report blade's initial load.
+      operationId: IntuneAutopatch.Reporting.GetQualityUpdateSummaryMetrics
+      parameters:
+        - $ref: '#/components/parameters/reportApiVersion2'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QualityUpdateSummaryMetricsRequest'
+      responses:
+        '200':
+          description: Quality update summary metrics returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QualityUpdateSummaryMetricsResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /reporting/reports/v2/deviceAccounting/wqu/trending:
+    post:
+      tags: [Reporting]
+      summary: List quality update trend points
+      description: |
+        Returns Windows quality update trend buckets for durations such as `Trend30To0d`.
+        Confirmed live on the report blade's initial load.
+      operationId: IntuneAutopatch.Reporting.ListQualityUpdateTrending
+      parameters:
+        - $ref: '#/components/parameters/reportApiVersion2'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QualityUpdateTrendingRequest'
+      responses:
+        '200':
+          description: Quality update trend rows returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QualityUpdateTrendingResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /reporting/reports/v2/deviceAccounting/wqu/summary/deploymentgroups:
+    post:
+      tags: [Reporting]
+      summary: List quality update deployment group summaries
+      description: |
+        Returns Windows quality update summary rows grouped by deployment group for a selected
+        business group. The route was recovered from the report bundle and then confirmed with a
+        safe probe using a live `businessGroupId` captured from the summary grid.
+      operationId: IntuneAutopatch.Reporting.ListQualityUpdateDeploymentGroups
+      parameters:
+        - $ref: '#/components/parameters/reportApiVersion2'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QualityUpdateSummaryDeploymentGroupsRequest'
+      responses:
+        '200':
+          description: Quality update deployment group summary returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QualityUpdateDeploymentGroupSummaryResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /reporting/reports/v2/deviceAccounting/wqu/details:
+    post:
+      tags: [Reporting]
+      summary: List quality update device details
+      description: |
+        Returns the Windows quality update device-detail grid. The route was recovered from the
+        report bundle and confirmed with a safe probe; this tenant returned an empty `values`
+        array, so the field list here comes from the blade's response-mapping code.
+      operationId: IntuneAutopatch.Reporting.ListQualityUpdateDetails
+      parameters:
+        - $ref: '#/components/parameters/reportApiVersion2'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QualityUpdateDetailsRequest'
+      responses:
+        '200':
+          description: Quality update device details returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QualityUpdateDetailsResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /reporting/reports/v2/deviceAccounting/wqu/distinct/selectedColumns:
+    post:
+      tags: [Reporting]
+      summary: Get quality update distinct filter values
+      description: |
+        Returns Windows quality update distinct-column values used to populate report filters.
+        The route was recovered from the report bundle and confirmed with safe probes for both the
+        default path and the optional `hotpatched=true` variant.
+      operationId: IntuneAutopatch.Reporting.GetQualityUpdateDistinctColumns
+      parameters:
+        - $ref: '#/components/parameters/reportApiVersion2'
+        - $ref: '#/components/parameters/includeHistoricalValue'
+        - $ref: '#/components/parameters/hotpatched'
+      responses:
+        '200':
+          description: Quality update distinct-column values returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QualityUpdateDistinctColumnsResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /reporting/reports/v2/deviceAccounting/wqu/detailsExport:
+    post:
+      tags: [Reporting]
+      summary: Start a quality update details export
+      description: |
+        Starts the quality update details export flow. The route and request body were recovered
+        from the report bundle; the helper expects a `trackingId` response, then polls
+        `GET /reporting/reports/v1/export/status/` with
+        `queryName=DeviceQualityUpdatesDetailsQuery` until an export SAS URL is returned.
+      operationId: IntuneAutopatch.Reporting.StartQualityUpdateDetailsExport
+      parameters:
+        - $ref: '#/components/parameters/reportApiVersion2'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QualityUpdateDetailsExportRequest'
+      responses:
+        '200':
+          description: Quality update export job started successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportExportStartResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /reporting/reports/v2/windowsFeatureUpdates/summary/releases:
+    post:
+      tags: [Reporting]
+      summary: List feature update release summaries
+      description: |
+        Returns the baseline Windows feature update summary rows grouped by release for
+        `windowsFeatureUpdatesReactView`. Confirmed live on the report blade's initial load.
+      operationId: IntuneAutopatch.Reporting.ListFeatureUpdateReleases
+      parameters:
+        - $ref: '#/components/parameters/reportApiVersion2'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FeatureUpdateSummaryReleasesRequest'
+      responses:
+        '200':
+          description: Feature update release summary returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeatureUpdateReleaseSummaryResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /reporting/reports/v2/windowsFeatureUpdates/summaryMetrics:
+    post:
+      tags: [Reporting]
+      summary: Get feature update summary metrics
+      description: |
+        Returns Windows feature update count buckets used by the summary cards on
+        `windowsFeatureUpdatesReactView`. Confirmed live on the report blade's initial load.
+      operationId: IntuneAutopatch.Reporting.GetFeatureUpdateSummaryMetrics
+      parameters:
+        - $ref: '#/components/parameters/reportApiVersion2'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FeatureUpdateSummaryMetricsRequest'
+      responses:
+        '200':
+          description: Feature update summary metrics returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeatureUpdateSummaryMetricsResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /reporting/reports/v2/windowsFeatureUpdates/trending:
+    post:
+      tags: [Reporting]
+      summary: List feature update trend points
+      description: |
+        Returns Windows feature update trend buckets for durations such as `Trend30To0d`.
+        Confirmed live on the report blade's initial load.
+      operationId: IntuneAutopatch.Reporting.ListFeatureUpdateTrending
+      parameters:
+        - $ref: '#/components/parameters/reportApiVersion2'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FeatureUpdateTrendingRequest'
+      responses:
+        '200':
+          description: Feature update trend rows returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeatureUpdateTrendingResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /reporting/reports/v2/windowsFeatureUpdates/completion/releases:
+    post:
+      tags: [Reporting]
+      summary: List feature update completion-by-release rows
+      description: |
+        Returns release-level completion rows and nested phase completion details for Windows
+        feature updates. The route was recovered from the report bundle and confirmed with a safe
+        probe.
+      operationId: IntuneAutopatch.Reporting.ListFeatureUpdateCompletionReleases
+      parameters:
+        - $ref: '#/components/parameters/reportApiVersion2'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FeatureUpdateCompletionReleasesRequest'
+      responses:
+        '200':
+          description: Feature update completion rows returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeatureUpdateCompletionReleasesResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /reporting/reports/v2/windowsFeatureUpdates/summary/phases:
+    post:
+      tags: [Reporting]
+      summary: List feature update phase summaries
+      description: |
+        Returns Windows feature update summary rows grouped by phase for a selected release. The
+        route was recovered from the report bundle and confirmed with a safe probe using a live
+        `releaseId` captured from the summary grid.
+      operationId: IntuneAutopatch.Reporting.ListFeatureUpdatePhases
+      parameters:
+        - $ref: '#/components/parameters/reportApiVersion2'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FeatureUpdateSummaryPhasesRequest'
+      responses:
+        '200':
+          description: Feature update phase summary returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeatureUpdatePhaseSummaryResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /reporting/reports/v2/windowsFeatureUpdates/details:
+    post:
+      tags: [Reporting]
+      summary: List feature update device details
+      description: |
+        Returns the Windows feature update device-detail grid. The route was recovered from the
+        report bundle and confirmed with a safe probe; this tenant returned an empty `values`
+        array, so the field list here comes from the blade's response-mapping code. The bundle's
+        default request uses an empty `sortKey`; an invalid summary-style sort key returned `422`
+        during probing.
+      operationId: IntuneAutopatch.Reporting.ListFeatureUpdateDetails
+      parameters:
+        - $ref: '#/components/parameters/reportApiVersion2'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FeatureUpdateDetailsRequest'
+      responses:
+        '200':
+          description: Feature update device details returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeatureUpdateDetailsResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /reporting/reports/v2/windowsFeatureUpdates/distinct/planTypes/{plan}:
+    post:
+      tags: [Reporting]
+      summary: Get feature update distinct filter values
+      description: |
+        Returns Windows feature update distinct-column values used to populate report filters.
+        The route was recovered from the report bundle and confirmed with a safe probe.
+      operationId: IntuneAutopatch.Reporting.GetFeatureUpdateDistinctColumns
+      parameters:
+        - $ref: '#/components/parameters/plan'
+        - $ref: '#/components/parameters/reportApiVersion2'
+        - $ref: '#/components/parameters/includeHistoricalValue'
+      responses:
+        '200':
+          description: Feature update distinct-column values returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeatureUpdateDistinctColumnsResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /reporting/reports/v2/windowsFeatureUpdates/detailsExport:
+    post:
+      tags: [Reporting]
+      summary: Start a feature update details export
+      description: |
+        Starts the feature update details export flow. The route and request body were recovered
+        from the report bundle; the helper expects a `trackingId` response, then polls
+        `GET /reporting/reports/v1/export/status/` with
+        `queryName=DeviceFeatureUpdatesDetailsQuery` until an export SAS URL is returned.
+      operationId: IntuneAutopatch.Reporting.StartFeatureUpdateDetailsExport
+      parameters:
+        - $ref: '#/components/parameters/reportApiVersion2'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FeatureUpdateDetailsExportRequest'
+      responses:
+        '200':
+          description: Feature update export job started successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportExportStartResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /reporting/reports/v1/export/status/:
+    get:
+      tags: [Reporting]
+      summary: Get report export job status
+      description: |
+        Polls the report export helper until an export SAS URL is ready. This concrete path was
+        recovered from the report bundle; it was not exercised live in this pass.
+      operationId: IntuneAutopatch.Reporting.GetExportStatus
+      parameters:
+        - $ref: '#/components/parameters/reportApiVersion1'
+        - $ref: '#/components/parameters/exportQueryName'
+        - $ref: '#/components/parameters/exportQueryVersion'
+        - $ref: '#/components/parameters/exportTrackingId'
+      responses:
+        '200':
+          description: Export status returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportExportStatusResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /unified-reporting/odata/1.0/WindowsFeatureUpdatesSummaryRelease:
+    get:
+      tags: [Reporting]
+      summary: List feature update release summaries via URS
+      description: |
+        Returns the alternate URS/OData model for feature update release summaries. The path was
+        recovered from the report bundle and confirmed with a safe GET probe.
+      operationId: IntuneAutopatch.Reporting.ListFeatureUpdateSummaryReleaseOData
+      parameters:
+        - $ref: '#/components/parameters/top'
+        - $ref: '#/components/parameters/orderBy'
+      responses:
+        '200':
+          description: Feature update release summaries returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WindowsFeatureUpdateSummaryReleaseODataCollection'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /unified-reporting/odata/1.0/WindowsFeatureUpdatesSummaryMetrics:
+    get:
+      tags: [Reporting]
+      summary: Get feature update summary metrics via URS
+      description: |
+        Returns the alternate URS/OData model for feature update summary metrics. The path was
+        recovered from the report bundle and confirmed with a safe GET probe.
+      operationId: IntuneAutopatch.Reporting.ListFeatureUpdateSummaryMetricsOData
+      parameters:
+        - $ref: '#/components/parameters/top'
+        - $ref: '#/components/parameters/filter'
+      responses:
+        '200':
+          description: Feature update summary metrics returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WindowsFeatureUpdateSummaryMetricsODataCollection'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /unified-reporting/odata/1.0/WindowsFeatureUpdatesDistinctColumns:
+    get:
+      tags: [Reporting]
+      summary: Get feature update distinct columns via URS
+      description: |
+        Returns the alternate URS/OData model for feature update distinct-column values. The path
+        was recovered from the report bundle and confirmed with a safe GET probe.
+      operationId: IntuneAutopatch.Reporting.ListFeatureUpdateDistinctColumnsOData
+      parameters:
+        - $ref: '#/components/parameters/top'
+      responses:
+        '200':
+          description: Feature update distinct-column values returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WindowsFeatureUpdateDistinctColumnsODataCollection'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /unified-reporting/odata/1.0/WindowsFeatureUpdatesTrending:
+    get:
+      tags: [Reporting]
+      summary: List feature update trend points via URS
+      description: |
+        Returns the alternate URS/OData model for feature update trend data. This path was
+        confirmed live on `windowsFeatureUpdatesReactView` and separately confirmed with a safe
+        GET probe.
+      operationId: IntuneAutopatch.Reporting.ListFeatureUpdateTrendingOData
+      parameters:
+        - $ref: '#/components/parameters/top'
+        - $ref: '#/components/parameters/filter'
+        - $ref: '#/components/parameters/orderBy'
+      responses:
+        '200':
+          description: Feature update trend rows returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WindowsFeatureUpdateTrendingODataCollection'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':

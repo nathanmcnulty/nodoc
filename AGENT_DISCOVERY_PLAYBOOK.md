@@ -85,8 +85,12 @@ Preferred flow:
 Practical notes:
 
 - Prefer `playwright-core` plus `chromium.connectOverCDP(...)`.
-- Do **not** close the user’s browser when the script ends; close only the page you opened and disconnect by exiting the script.
-- If direct inline one-liners get messy, move the logic into a scratch `.mjs` file in the artifacts directory.
+- Best-known flow: start or reuse the signed-in Edge Work profile with `--remote-debugging-port=9222`, then attach over CDP instead of launching an automation-owned browser.
+- Avoid cloning the user profile unless CDP attach is impossible; copied profiles can lose auth or drift from the live browser state.
+- If you must fall back to a copied profile, make a **fresh copy for each run**. Reusing an older copied profile later in the session redirected back to Microsoft login even though a fresh copy still worked.
+- Once the page is live, capture at least one real backend request from the target feature family and preserve its auth + portal headers. That header set is often enough to power later safe probes without reopening the UI for every candidate.
+- Do **not** close the user’s browser when the script ends; open a fresh page or tab for the investigation, close only that page, and disconnect by exiting the script.
+- If direct inline one-liners get messy, move the logic into a scratch `.mjs` file in the artifacts directory and keep raw captures there as well.
 
 ### 3. Inventory the navigation surface
 
@@ -125,6 +129,10 @@ Recommended pattern:
 - Write artifacts after each crawl phase instead of only at the very end.
 - Keep the browser capture script focused on traffic collection; do bundle download in a separate step.
 - For broad portal passes, use bounded parallel tabs only if you can still attribute requests back to the originating page.
+- For report or dashboard blades, do two passes: initial-load traffic first, then a second pass that changes one safe control at a time.
+- During the interaction pass, prefer safe state changes such as filters, date range, grouping, row drill-ins, tabs, sort, paging, and export preflight so each new request can be tied back to the triggering UI state.
+- Record a page-state checklist alongside each request set: selected tab, filter chips, date range, business group or release selection, tenant scope, and any report-mode toggles.
+- If a report blade uses virtualization, shadow DOM, or a delayed/hidden grid, do not block on the DOM becoming rich. Traffic is the primary evidence; DOM and accessibility snapshots are still useful for control attribution and UI-state labeling.
 
 ### 5. Download and mine the loaded JavaScript
 
@@ -147,6 +155,8 @@ What to extract:
 - pagination/sorting/filter parameter names
 - likely write surfaces that need careful handling
 - route candidates for a later safe-probe queue
+- If you have sibling pages in the same feature family, diff their `script-urls.json` sets early so page-specific bundles stand out before you mine generic shell chunks.
+- Prioritize unique or near-unique bundles first; these are often where request factories, enum values, hidden sibling routes, and request-body defaults live.
 
 ### 5a. Build a candidate queue
 
@@ -161,6 +171,29 @@ After traffic, DOM extraction, and bundle mining, build a queue of follow-up can
 - confidence score
 
 This makes it much easier to prioritize what to crawl next instead of rediscovering the same leads repeatedly.
+
+### 5b. Safe-probe hidden reads
+
+When bundle mining exposes likely read routes that the UI did not call directly:
+
+1. Capture one real request to the same backend family and preserve a sanitized header set:
+   - `authorization`
+   - `origin`
+   - `referer`
+   - `accept` / `accept-language`
+   - `x-requested-with`
+   - relevant `x-ms-*` portal headers
+2. Reuse identifiers from live captures instead of inventing them:
+   - business group IDs from summary grids
+   - release or phase IDs from report summaries
+   - tenant-scoped enums already seen in live request/response samples
+3. Probe idempotent reads first:
+   - summary child routes
+   - detail grids
+   - distinct-column helpers
+   - alternate OData/URS reads
+4. Match bundle defaults exactly. Empty strings, `includeHistoricalValue`, plan names, and sort-key maps can matter; a guessed summary sort key produced `422` on a live feature-details route until the bundle default was used.
+5. Record the request shape and the outcome for each probe so later spec work can distinguish confirmed routes from stale bundle strings.
 
 ### 6. Promote discoveries carefully
 
@@ -177,6 +210,12 @@ If a safe probe returns a contextual error like a portal-side `500` without page
 - record that result
 - keep the endpoint labeled as bundle-discovered or partially confirmed
 - do not overstate supportability
+
+Interpret probe results carefully:
+
+- `200` / `204` with an empty array still confirms that the route exists and gives you the real response envelope.
+- `400` / `422` often means the route is live but the body or query shape is wrong; recover the exact defaults from request factories before you discard the endpoint.
+- `404` on both the canonical and trailing-slash variants is strong negative evidence that the bundle string is stale or gated away; keep it out of confirmed coverage unless newer evidence appears.
 
 ### 7. Capture write shapes without persisting changes
 
@@ -200,6 +239,8 @@ Only if interception is insufficient:
 5. Revert immediately.
 
 Do **not** use shared shell, webshell, or similarly broad-impact flows unless they are clearly portal-specific and safely isolated.
+
+Treat export-start routes as writes or job starters even if they look report-like. Capture the export request shape and the follow-up status poller separately, and avoid triggering the export unless you explicitly need the job lifecycle.
 
 ### 8. Author specs with evidence labels
 
@@ -520,7 +561,48 @@ Current takeaway:
 - Treat `net::ERR_ABORTED` timeline fetches during transitions as crawl artifacts, not as evidence that the route family is invalid.
 - Add incremental checkpoint writes or progress logging to make long entity crawls observable without stopping them.
 
-### 2026-04-03 — Final gap closure via normalized family diffs
+### 2026-04-03 — Intune Autopatch report blades
+
+Idea:
+
+- Treat sibling report blades as a paired capture + bundle-diff target so live traffic identifies the real host family first, then a second interaction pass exposes better request shapes.
+
+What was tried:
+
+- Captured authenticated initial loads for:
+  - `https://intune.microsoft.com/#view/Microsoft_Intune_Enrollment/ReportingMenu/~/windowsQualityUpdatesReactView`
+  - `https://intune.microsoft.com/#view/Microsoft_Intune_Enrollment/ReportingMenu/~/windowsFeatureUpdatesReactView`
+- Compared the observed API families to separate blade-specific traffic from generic portal/bootstrap calls.
+
+What helped:
+
+- The quality updates blade primarily used `services.autopatch.microsoft.com` report routes under:
+  - `/reporting/reports/v2/deviceAccounting/wqu/summary/businessgroups`
+  - `/reporting/reports/v2/deviceAccounting/wqu/summaryMetrics`
+  - `/reporting/reports/v2/deviceAccounting/wqu/trending`
+- The feature updates blade primarily used:
+  - `/reporting/reports/v2/windowsFeatureUpdates/summary/releases`
+  - `/reporting/reports/v2/windowsFeatureUpdates/summaryMetrics`
+  - `/reporting/reports/v2/windowsFeatureUpdates/trending`
+  - `/unified-reporting/odata/1.0/WindowsFeatureUpdatesTrending`
+- Generic Graph `deviceManagement` requests and same-origin Intune settings/telemetry calls were mostly shell/bootstrap noise, not the blade-specific feature surface.
+- Sibling report blades are good script-diff targets because the shared shell code cancels out quickly and the unique feature chunks become clear mining candidates.
+- Initial page load surfaced only baseline summary/trending families; deeper safe interactions are needed to reveal richer POST body shapes, sibling routes, and parameter defaults.
+- Safe probes were necessary after bundle mining: they confirmed hidden read routes like `wqu/summary/deploymentgroups`, `windowsFeatureUpdates/completion/releases`, `windowsFeatureUpdates/summary/phases`, details grids, distinct-column helpers, and alternate `WindowsFeatureUpdates*` URS resources.
+- Safe probes also filtered out stale bundle strings: `POST /reporting/reports/v2/deviceAccounting/wqu/completion/businessgroups` returned `404` with both slash variants and should not be treated as a confirmed live route without newer evidence.
+- Reusing the header set from one live report request was enough to safely confirm several hidden sibling reads without reopening the full UI each time.
+- Empty-array probe responses were still useful because they confirmed the real response envelopes for details and distinct-column helpers.
+- `POST /reporting/reports/v2/windowsFeatureUpdates/details` returned `422` when probed with a guessed summary sort key; the bundle-default empty `sortKey` and the bundle's field map were accepted.
+- Feature update bundles exposed an alternate URS/OData surface behind a feature gate, so both the POST report family and `WindowsFeatureUpdates*` OData reads need to be modeled separately when they appear.
+
+Current takeaway:
+
+- Attach over CDP to the live signed-in Edge Work profile and keep the browser open; use artifact-scoped scratch scripts and raw captures.
+- For report blades, capture first paint and then a second pass with one safe interaction at a time: filters, date range changes, grouping, row drill-ins, tab switches, sorting, paging, and export-preflight actions.
+- Label every captured request with the exact UI state that triggered it so later safe probes and spec descriptions can explain when each route appears.
+- After traffic capture, diff the page-specific script sets between sibling blades and mine only the unique bundles for hidden sibling routes, default query/body fields, enum values, and request-factory defaults.
+- Treat bundle-recovered report routes as a probe queue, not as confirmed coverage. Hidden siblings can be real and probeable, but stale strings also exist and need to be pruned with token-backed reads before they reach the spec.
+- Before another browser run, diff the normalized captured families against existing specs plus `api-records.json` and `page-states.json` so follow-up crawling only targets unresolved gaps.
 
 Idea:
 
