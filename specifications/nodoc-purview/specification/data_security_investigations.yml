@@ -1,0 +1,25 @@
+paths:
+  /dsi/api/v1/investigations:
+    get:
+      operationId: listDataSecurityInvestigations
+      summary: List data security investigations
+      description: >-
+        Retrieve investigation records from the Data Security Investigations (DSI)
+        solution. Confirmed from the Purview DSI blade; the captured tenant returned
+        an empty collection together with an OData count.
+      tags: [DataSecurityInvestigations]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/DataSecurityInvestigationsResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

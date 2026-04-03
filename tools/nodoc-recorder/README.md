@@ -9,6 +9,7 @@ A Chrome/Edge DevTools extension that captures API traffic from Microsoft portal
 | Defender | `security.microsoft.com` | `/apiproxy/*` |
 | M365 Admin | `admin.cloud.microsoft` | `/admin/api/*` |
 | Purview | `purview.microsoft.com` | `/apiproxy/*` |
+| Purview Portal | `purview.microsoft.com` | `/api/*` |
 | Entra IAM | `main.iam.ad.ext.azure.com` | `/api/*` |
 | Entra IGA | `elm.iga.azure.com` | `/api/*` |
 | Entra PIM | `api.azrbac.mspim.azure.com` | `/api/*` |

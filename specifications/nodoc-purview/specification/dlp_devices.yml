@@ -147,6 +147,37 @@ paths:
         '404':
           $ref: common.yml#/components/responses/NotFound
 
+  /mtp/sccManagement/mgmt/TenantContext:
+    get:
+      operationId: getMtpTenantContext
+      summary: Get shared MTP tenant context
+      description: >-
+        Retrieve shared Microsoft Threat Protection tenant context used by Purview
+        experiences that depend on MTP-backed licensing, workloads, and feature flags.
+      tags: [DLPDevices]
+      parameters:
+        - name: realTime
+          in: query
+          required: false
+          description: Request the latest tenant context instead of cached startup state.
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/MtpTenantContextResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
   /mtp/incidentQueue/incidents/alerts:
     post:
       operationId: queryIncidentAlerts

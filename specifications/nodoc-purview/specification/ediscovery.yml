@@ -217,3 +217,36 @@ paths:
 
         '404':
           $ref: common.yml#/components/responses/NotFound
+
+  /aedmcc/ediscovery/v1/tenantSettings:
+    get:
+      operationId: getEdiscoveryTenantSettings
+      summary: Get eDiscovery tenant settings
+      description: >-
+        Retrieve tenant-wide eDiscovery settings for a specific feature. The captured
+        Purview case-creation flow requested the `GeneralSettings` feature and received
+        a service-generated message indicating that no tenant settings were present yet.
+      tags: [eDiscovery]
+      parameters:
+        - name: feature
+          in: query
+          required: false
+          description: The tenant-level eDiscovery feature to resolve.
+          schema:
+            type: string
+            example: GeneralSettings
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/EdiscoveryTenantSettingsResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

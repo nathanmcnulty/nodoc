@@ -172,19 +172,37 @@ export const apiCatalog: ApiCatalogItem[] = [
     title: "Purview",
     slug: "/purview",
     family: "Security portal",
-    operations: 74,
+    operations: 85,
     authModel: "Portal session cookie (`sccauth`)",
     baseUrl: "https://purview.microsoft.com/apiproxy",
     summary:
-      "Compliance, governance, eDiscovery, audit, insider risk, and shared data-service coverage from the Purview portal.",
+      "Compliance, governance, eDiscovery, investigations, and shared Security Platform coverage from the Purview portal proxy surface.",
     highlights: [
-      "Data infrastructure, governance, and compliance manager",
-      "eDiscovery, audit, DLP devices, and insider risk",
-      "Shared backend prefixes called out alongside Defender",
+      "Data infrastructure, governance, compliance manager, and DSI",
+      "eDiscovery, audit, DLP devices, insider risk, and ARM role lookups",
+      "Security Platform / Security Copilot provisioning plus shared backend prefixes",
     ],
     collectionPath: "postman/collections/purview.collection.json",
     collectionDownloadUrl:
       "https://raw.githubusercontent.com/nathanmcnulty/nodoc/main/postman/collections/purview.collection.json",
+  },
+  {
+    title: "Purview Portal",
+    slug: "/purview-portal",
+    family: "Security portal",
+    operations: 6,
+    authModel: "Portal session cookie (`sccauth`) + same-origin portal context",
+    baseUrl: "https://purview.microsoft.com/api/",
+    summary:
+      "Same-origin Purview bootstrap, token minting, role evaluation, audit settings, and label-activity analytics used directly by the portal UX.",
+    highlights: [
+      "Portal-issued downstream token minting via `/api/Auth/getToken`",
+      "Role cache and batch role-evaluation helpers used during startup",
+      "Admin audit settings, user picker lookups, and label activity charts",
+    ],
+    collectionPath: "postman/collections/purview-portal.collection.json",
+    collectionDownloadUrl:
+      "https://raw.githubusercontent.com/nathanmcnulty/nodoc/main/postman/collections/purview-portal.collection.json",
   },
   {
     title: "Entra IAM",
@@ -286,6 +304,12 @@ export const accessModels: AccessModel[] = [
     portals: ["Defender", "Purview"],
   },
   {
+    title: "Portal session + same-origin context",
+    description:
+      "Purview Portal uses the same `sccauth` browser session, but its same-origin `/api/` calls also depend on portal bootstrap state and are where Purview mints downstream bearer tokens.",
+    portals: ["Purview Portal"],
+  },
+  {
     title: "Portal session + custom headers",
     description:
       "M365 Admin requires `AjaxSessionKey` plus portal routing and hosting headers extracted from the admin shell.",
@@ -359,7 +383,7 @@ export const safeUsePrinciples = [
 
 export const gettingStartedGuides: GettingStartedGuide[] = [
   {
-    title: "Defender XDR and Purview",
+    title: "Defender XDR and Purview proxy",
     portals: ["Defender", "Purview"],
     authModel: "Portal session cookie (`sccauth`)",
     baseUrls: [
@@ -384,6 +408,33 @@ export const gettingStartedGuides: GettingStartedGuide[] = [
       "Expired portal sessions usually fail without a helpful auth error.",
       "Shared prefixes can expose different subsets of the same backend depending on the portal you entered through.",
       "Because these APIs are internal, some endpoints can disappear or change shape with little warning.",
+    ],
+  },
+  {
+    title: "Purview Portal",
+    portals: ["Purview Portal"],
+    authModel: "Portal session cookie (`sccauth`) + same-origin portal context",
+    baseUrls: [
+      "https://purview.microsoft.com/api/",
+    ],
+    confirmedDetails: [
+      "Observed operations are same-origin `/api/` calls rather than `/apiproxy` backend routes.",
+      "`GET /api/Auth/getToken` mints short-lived downstream tokens for Purview services, Microsoft Graph, and Azure Resource Manager resources.",
+      "Role and feature evaluation happens through `GET /api/v2/auth/GetCachedRoles` and `POST /api/auth/IsInRoles` before many blades fully light up.",
+    ],
+    practicalGuidance: [
+      "Capture requests from an already-authenticated Purview tab because same-origin portal state matters more here than with pure proxy calls.",
+      "Expect many useful `/api/` calls to be bootstrap or lookup helpers that front other services rather than the final workload APIs themselves.",
+      "Start with the read-only auth, role, audit, and picker endpoints so you can validate the session safely before chasing downstream APIs.",
+    ],
+    mutationGuidance: [
+      "The published same-origin set is mostly read-heavy, but treat any newly discovered POST under `/api/` as a live write until you have mapped its side effects.",
+      "If Purview uses `/api/Auth/getToken` to mint a downstream bearer token, validate the target resource with harmless GETs before invoking its write APIs directly.",
+    ],
+    pitfalls: [
+      "`/api/` and `/apiproxy/` are distinct surfaces with different responsibilities, so don't assume routing or auth behavior from one applies cleanly to the other.",
+      "Some same-origin responses contain user directory or role data, so sanitize captures before keeping artifacts.",
+      "Portal-minted downstream tokens are short-lived and resource-specific, which makes replay brittle if you capture them too early.",
     ],
   },
   {

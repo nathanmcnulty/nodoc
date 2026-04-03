@@ -1161,6 +1161,618 @@ components:
             msg:
               type: string
               example: 'Demand source returns error (Name: GN_ps, Error: No eligible content.).'
+    EdiscoveryTenantSettingsResponse:
+      type: object
+      description: Tenant-level eDiscovery settings lookup result for a requested feature.
+      properties:
+        "@odata.context":
+          type: string
+          example: https://nam2.mccservice.ediscovery.svc.cloud.microsoft/ediscovery/v1/$metadata#Edm.String
+        value:
+          type: string
+          example: 'Tenant settings not found for the feature: GeneralSettings'
+    CompliancePremiumTemplateAssessmentInstance:
+      type: object
+      description: Assessment instance associated with a premium regulation template.
+      properties:
+        group:
+          type: string
+          example: Default Group
+        title:
+          type: string
+          example: CJIS Assessment
+        templateTitle:
+          type: string
+          example: Criminal Justice Information Services (CJIS) Security Policy
+        childTemplateTitle:
+          type: string
+          example: ''
+    CompliancePremiumTemplateConsumption:
+      type: object
+      description: Premium regulation template consumption entry for the current tenant.
+      properties:
+        title:
+          type: string
+          example: CJIS
+        associatedInstances:
+          type: array
+          items:
+            $ref: '#/components/schemas/CompliancePremiumTemplateAssessmentInstance'
+    CompliancePremiumRegulationSummaryResponse:
+      type: object
+      description: Compliance Manager premium regulation entitlement and consumption summary.
+      properties:
+        consumedCount:
+          type: integer
+          example: 1
+        allowedCount:
+          type: integer
+          example: 3
+        premiumTemplatesConsumed:
+          type: array
+          items:
+            $ref: '#/components/schemas/CompliancePremiumTemplateConsumption'
+        anonymousTenantId:
+          type: string
+          example: 1,170E91BBBD42B0783E66D316ED666CCB34C38BB6196FF1864413FC518DD896FD
+        activeAssessmentTemplateIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+    ComplianceRegulationDimension:
+      type: object
+      description: Dimension metadata attached to a Compliance Manager regulation template.
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: <guid-redacted>
+        key:
+          type: string
+          example: Product
+        value:
+          type: string
+          example: Universal
+        isMappedToComplianceEntities:
+          type: boolean
+          example: false
+        isMultiselectionAllowed:
+          type: boolean
+          example: false
+        isGlobalDimension:
+          type: boolean
+          example: false
+    ComplianceRegulationServiceMapping:
+      type: object
+      description: Service mapped to a regulation template.
+      properties:
+        title:
+          type: string
+          example: Microsoft 365
+        serviceId:
+          type: string
+          format: uuid
+          example: <guid-redacted>
+    ComplianceRegulationTemplate:
+      type: object
+      description: Compliance Manager regulation template record.
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: <guid-redacted>
+        draftRegulationId:
+          type: string
+          example: ''
+        _etag:
+          type: string
+          example: ''
+        syncTag:
+          type: string
+          example: ''
+        itemStorageType:
+          type: string
+          example: ''
+        whenCreated:
+          type: string
+          format: date-time
+          example: 2021-10-15T05:29:07.7637852+00:00
+        whoCreated:
+          type: string
+          example: Microsoft
+        whenLastUpdated:
+          type: string
+          format: date-time
+          example: 0001-01-01T00:00:00+00:00
+        whoModified:
+          type: string
+          example: ''
+        parentId:
+          type: string
+          format: uuid
+          example: 00000000-0000-0000-0000-000000000000
+        templateId:
+          type: string
+          format: uuid
+          example: <guid-redacted>
+        title:
+          type: string
+          example: NIST 800-171
+        description:
+          type: string
+          example: ''
+        dimension:
+          type: array
+          items:
+            $ref: '#/components/schemas/ComplianceRegulationDimension'
+        version:
+          type: integer
+          example: 0
+        isCurrentVersion:
+          type: boolean
+          example: false
+        state:
+          type: string
+          example: Active
+        status:
+          type: string
+          example: Approved
+        inScopeServices:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        overarchingRegulation:
+          type: string
+          example: NIST 800-171
+        whenPublished:
+          type: string
+          format: date-time
+          example: 2023-07-11T00:53:24.8850875Z
+        whoPublished:
+          type: string
+          example: Microsoft
+        draftId:
+          type: string
+          example: ''
+        draftOwnerId:
+          type: string
+          example: ''
+        whenApproved:
+          type: string
+          format: date-time
+          example: 0001-01-01T00:00:00.0000000
+        whoApproved:
+          type: string
+          example: Microsoft
+        controlFamilies:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        isTenantSubscribed:
+          type: boolean
+          example: false
+        assessmentInstanceIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+        score:
+          type: integer
+          example: 0
+        isTenantTemplate:
+          type: boolean
+          example: false
+        isTemplateActivated:
+          type: boolean
+          example: false
+        templateType:
+          type: string
+          example: Default
+        regulationType:
+          type: string
+          example: Premium
+        servicesWithControlMapping:
+          type: array
+          items:
+            $ref: '#/components/schemas/ComplianceRegulationServiceMapping'
+        userRole:
+          type: string
+          example: ComplianceManagerAdministration
+        regulationPublishState:
+          type: string
+          example: Published
+      additionalProperties: true
+    ComplianceRegulationTemplatesResponse:
+      type: array
+      description: Compliance Manager regulation templates returned by the portal catalog view.
+      items:
+        $ref: '#/components/schemas/ComplianceRegulationTemplate'
+    DataSecurityInvestigationsResponse:
+      type: object
+      description: OData response wrapper for Data Security Investigations.
+      properties:
+        "@odata.context":
+          type: string
+          example: https://nam2.dsiservice.dsi.svc.cloud.microsoft/api/v1/$metadata#investigations
+        "@odata.count":
+          type: integer
+          example: 0
+        value:
+          type: array
+          items:
+            type: object
+            description: Investigation resources. The captured sample returned an empty list.
+            additionalProperties: true
+    GraphDirectoryRole:
+      type: object
+      description: Microsoft Entra directory role returned through the Graph proxy.
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: <guid-redacted>
+        deletedDateTime:
+          type: string
+          format: date-time
+          nullable: true
+          example: null
+        description:
+          type: string
+          example: Can manage all aspects of Microsoft Entra ID and Microsoft services that use Microsoft Entra identities.
+        displayName:
+          type: string
+          example: <redacted-name>
+        roleTemplateId:
+          type: string
+          format: uuid
+          example: <guid-redacted>
+    GraphDirectoryRolesResponse:
+      type: object
+      description: OData response wrapper for directory roles proxied through Purview.
+      properties:
+        "@odata.context":
+          type: string
+          example: https://graph.microsoft.com/v1.0/$metadata#directoryRoles
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/GraphDirectoryRole'
+    GraphMemberObjectsRequest:
+      type: object
+      description: Request payload for resolving the current user's transitive memberships.
+      properties:
+        securityEnabledOnly:
+          type: boolean
+          example: true
+    GraphMemberObjectsResponse:
+      type: object
+      description: OData response wrapper containing the current user's transitive memberships.
+      properties:
+        "@odata.context":
+          type: string
+          example: https://graph.microsoft.com/v1.0/$metadata#Collection(Edm.String)
+        value:
+          type: array
+          items:
+            type: string
+            format: uuid
+            example: <guid-redacted>
+    ArmRoleAssignmentProperties:
+      type: object
+      description: ARM role assignment properties returned by the Purview proxy.
+      properties:
+        roleDefinitionId:
+          type: string
+          example: /providers/Microsoft.Authorization/roleDefinitions/<guid-redacted>
+        principalId:
+          type: string
+          format: uuid
+          example: <guid-redacted>
+        principalType:
+          type: string
+          example: User
+        scope:
+          type: string
+          example: /
+        condition:
+          type: string
+          nullable: true
+          example: null
+        conditionVersion:
+          type: string
+          nullable: true
+          example: null
+        createdOn:
+          type: string
+          format: date-time
+          example: 2023-02-17T00:51:08.2215118Z
+        updatedOn:
+          type: string
+          format: date-time
+          example: 2023-02-17T00:51:08.2215118Z
+        createdBy:
+          type: string
+          nullable: true
+          example: <guid-redacted>
+        updatedBy:
+          type: string
+          nullable: true
+          example: <guid-redacted>
+        delegatedManagedIdentityResourceId:
+          type: string
+          nullable: true
+          example: null
+        description:
+          type: string
+          nullable: true
+          example: null
+    ArmRoleAssignment:
+      type: object
+      description: Azure Resource Manager role assignment record.
+      properties:
+        properties:
+          $ref: '#/components/schemas/ArmRoleAssignmentProperties'
+        id:
+          type: string
+          example: /providers/Microsoft.Authorization/roleAssignments/<guid-redacted>
+        type:
+          type: string
+          example: Microsoft.Authorization/roleAssignments
+        name:
+          type: string
+          example: <guid-redacted>
+    ArmRoleAssignmentsResponse:
+      type: object
+      description: ARM role assignment list returned through the Purview proxy.
+      properties:
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/ArmRoleAssignment'
+    MtpTenantContextResponse:
+      type: object
+      description: Shared MTP tenant context used by Purview-integrated information protection experiences.
+      properties:
+        EnvironmentName:
+          type: string
+          example: Production
+        OrgId:
+          type: string
+          format: uuid
+          example: <guid-redacted>
+        GeoRegion:
+          type: string
+          example: Us3
+        DataCenter:
+          type: string
+          example: EastUs3
+        AccountMode:
+          type: integer
+          example: 1
+        AccountType:
+          type: string
+          example: Production
+        IsSuspended:
+          type: boolean
+          example: false
+        IsDeleted:
+          type: boolean
+          example: false
+        IsMdatpLicenseExpired:
+          type: boolean
+          example: false
+        IsMtpEligible:
+          type: boolean
+          example: true
+        HasMachineGroups:
+          type: boolean
+          example: true
+        IsMdatpActive:
+          type: boolean
+          example: true
+        IsOatpActive:
+          type: boolean
+          example: true
+        IsItpActive:
+          type: boolean
+          example: true
+        IsMapgActive:
+          type: boolean
+          example: true
+        IsAadIpActive:
+          type: boolean
+          example: true
+        IsDlpActive:
+          type: boolean
+          example: true
+        IsIrmActive:
+          type: boolean
+          example: true
+        IsMdiActive:
+          type: boolean
+          example: true
+        IsMdcActive:
+          type: boolean
+          example: true
+        IsSentinelActive:
+          type: boolean
+          example: false
+        ActiveMtpWorkloads:
+          type: array
+          items:
+            type: integer
+        Features:
+          type: object
+          additionalProperties:
+            type: boolean
+      additionalProperties: true
+    SecurityPlatformSystemData:
+      type: object
+      description: System metadata returned by Security Platform resources.
+      properties:
+        createdBy:
+          type: string
+          nullable: true
+          example: <guid-redacted>
+        createdByType:
+          type: string
+          example: User
+        createdAt:
+          type: string
+          format: date-time
+          example: 2025-08-07T06:35:35.7057904Z
+        lastModifiedBy:
+          type: string
+          nullable: true
+          example: <guid-redacted>
+        lastModifiedByType:
+          type: string
+          example: User
+        lastModifiedAt:
+          type: string
+          format: date-time
+          example: 2025-08-07T06:36:04.8469301Z
+      additionalProperties: true
+    SecurityPlatformPod:
+      type: object
+      description: Provisioned Security Platform environment (pod).
+      properties:
+        podId:
+          type: string
+          format: uuid
+          example: <guid-redacted>
+        geo:
+          type: string
+          example: United States
+        geoCode:
+          type: string
+          example: US
+        provisioningState:
+          type: string
+          example: Succeeded
+        resourceType:
+          type: string
+          example: Microsoft.SecurityPlatform/environments
+        systemData:
+          $ref: '#/components/schemas/SecurityPlatformSystemData'
+    SecurityPlatformAccountResponse:
+      type: object
+      description: Tenant-level Security Platform account returned by Purview.
+      properties:
+        accountId:
+          type: string
+          format: uuid
+          example: <guid-redacted>
+        tenantId:
+          type: string
+          format: uuid
+          example: <guid-redacted>
+        pods:
+          type: array
+          items:
+            $ref: '#/components/schemas/SecurityPlatformPod'
+        resourceType:
+          type: string
+          example: Microsoft.SecurityPlatform/accounts
+        systemData:
+          $ref: '#/components/schemas/SecurityPlatformSystemData'
+      additionalProperties: true
+    SecurityPlatformWorkspaceOptInConfig:
+      type: object
+      description: Workspace opt-in flags returned as strings by the preview service.
+      properties:
+        isAllowModelImprovement:
+          type: string
+          example: 'true'
+        isAllowProductImprovement:
+          type: string
+          example: 'true'
+    SecurityPlatformCapacityReference:
+      type: object
+      description: Capacity reference attached to a Security Platform workspace.
+      properties:
+        type:
+          type: string
+          example: CapacityReference
+        referenceName:
+          type: string
+          example: security-copilot
+    SecurityPlatformWorkspace:
+      type: object
+      description: Security Platform workspace record.
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: <guid-redacted>
+        name:
+          type: string
+          example: security-copilot
+        workspaceOptInConfig:
+          $ref: '#/components/schemas/SecurityPlatformWorkspaceOptInConfig'
+        capacity:
+          $ref: '#/components/schemas/SecurityPlatformCapacityReference'
+        managementUrl:
+          type: string
+          example: us.api.securityplatform.microsoft.com
+        path:
+          type: string
+          example: pods/<guid-redacted>/workspaces/security-copilot
+        systemData:
+          $ref: '#/components/schemas/SecurityPlatformSystemData'
+      additionalProperties: true
+    SecurityPlatformWorkspacesResponse:
+      type: object
+      description: Workspace list returned by the Security Platform preview API.
+      properties:
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/SecurityPlatformWorkspace'
+        count:
+          type: integer
+          example: 1
+    SecurityPlatformAccountProperties:
+      type: object
+      description: Tenant provisioning outcome returned by the Sentinel Graph preview API.
+      properties:
+        status:
+          type: string
+          example: Succeeded
+        primaryRegion:
+          type: string
+          example: westus2
+        features:
+          type: object
+          additionalProperties:
+            type: string
+          example:
+            Lake_USX: Succeeded
+            Graph_USX: Succeeded
+            Graph_USX_Optional: Failed
+        errorCode:
+          type: string
+          example: None
+      additionalProperties: true
+    SecurityPlatformCheckTenantResponse:
+      type: object
+      description: Tenant provisioning and feature eligibility response for Security Platform.
+      properties:
+        accountProperties:
+          $ref: '#/components/schemas/SecurityPlatformAccountProperties'
+        eligibleFeatures:
+          type: array
+          items:
+            type: string
+          example:
+            - Lake_USX
+            - Lake_Purview
+            - Graph_USX
+            - Graph_DSI
+            - Graph_IRM
   responses:
     Unauthorized:
       description: Unauthorized - Authentication is required or has failed.

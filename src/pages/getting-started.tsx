@@ -87,8 +87,8 @@ export default function GettingStarted(): ReactElement {
             <div className={styles.sectionHeader}>
               <Heading as="h2">Access models</Heading>
               <p>
-                The repo currently spans four distinct ways of authenticating to
-                portal-backed APIs.
+                The repo currently spans {accessModels.length} distinct ways of
+                authenticating to portal-backed APIs.
               </p>
             </div>
             <div className={styles.modelGrid}>

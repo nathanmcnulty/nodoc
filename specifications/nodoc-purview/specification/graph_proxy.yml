@@ -24,6 +24,30 @@ paths:
         '404':
           $ref: common.yml#/components/responses/NotFound
 
+  /msgraph/v1.0/directoryRoles:
+    get:
+      operationId: listDirectoryRoles
+      summary: List directory roles
+      description: >-
+        Retrieve Microsoft Entra directory roles via the Graph proxy. Confirmed from
+        Purview role-aware startup flows that enumerate active administrative roles.
+      tags: [GraphProxy]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/GraphDirectoryRolesResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
   /msgraph/v1.0/roleManagement/directory/roleAssignments:
     get:
       operationId: getDirectoryRoleAssignments
@@ -180,6 +204,37 @@ paths:
               schema:
                 type: object
                 description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /msgraph/v1.0/me/getMemberObjects:
+    post:
+      operationId: getCurrentUserMemberObjects
+      summary: Get current user's transitive memberships
+      description: >-
+        Resolve directory objects the current user is a member of through the Graph
+        proxy. Purview used this request with `securityEnabledOnly=true` while
+        evaluating effective access and workspace eligibility.
+      tags: [GraphProxy]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: common.yml#/components/schemas/GraphMemberObjectsRequest
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/GraphMemberObjectsResponse
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 

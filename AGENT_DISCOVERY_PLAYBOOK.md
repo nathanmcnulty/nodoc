@@ -73,6 +73,7 @@ Treat spidering as a **candidate generator plus prioritization aid**, not as the
   - `npm run generate:postman`
   - `npm run typecheck`
   - `npm run build`
+- When the shell wrapper is noisy or unreliable on long runs, wrap those commands with a stopwatch and redirect output to an artifacts log so you can distinguish a real hang from delayed streaming.
 
 ### 2. Attach to the authenticated browser
 
@@ -269,6 +270,7 @@ Before finishing:
 - remove unrelated generated churn
 - make sure checked-in Postman collections were not hand-edited
 - update README/site metadata counts if the operation count changed
+- if only one surface changed, use a targeted Postman regeneration pass (for example `NODOC_COLLECTIONS=purview,purview-portal npm run generate:postman`) before the final full validation sweep so unrelated collections stay stable during iteration
 
 ## Data model for research artifacts
 
@@ -636,6 +638,31 @@ Current takeaway:
 - Only launch another crawl when the remaining gaps are still broad or ambiguous; if the
   tail is already concentrated into a few confirmed families, extract exact shapes directly
   from the existing artifacts first.
+
+### 2026-04-03 — Purview portal split and generation hygiene
+
+Idea:
+
+- Treat the Purview same-origin portal root separately from the shared proxy layer and tighten the generation loop so validation is easier to trust.
+
+What was tried:
+
+- Captured both `https://purview.microsoft.com/api/*` and `https://purview.microsoft.com/apiproxy/*` traffic during the same signed-in crawl.
+- Split the new same-origin `/api/*` endpoints into a dedicated `Purview Portal` spec instead of folding them into the existing proxy-focused Purview spec.
+- Benchmarked collection generation with stopwatch-wrapped commands and artifact logs rather than relying on interactive shell streaming alone.
+- Updated the Postman generator to support targeted runs and to preserve checked-in collection metadata so unrelated collections do not churn on every regeneration.
+
+What helped:
+
+- Modeling `/api/*` and `/apiproxy/*` as separate surfaces matched the real portal architecture and avoided awkward path-prefix collisions.
+- Stopwatch + log-file execution made it obvious that healthy generation was finishing in minutes, while shell wrappers could still look hung or replay stale output.
+- Targeted collection generation was faster for iteration and kept random Postman IDs and synthetic examples from dirtying unrelated files.
+
+Current takeaway:
+
+- Treat same-origin portal routes and proxy routes as separate spec candidates when both exist in one product.
+- For build and generation benchmarking, trust logged elapsed time over interactive shell behavior.
+- Prefer targeted regeneration while iterating, then run the full validation set before merging.
 
 ## Ideas backlog
 
