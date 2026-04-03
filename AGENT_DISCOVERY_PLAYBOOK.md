@@ -291,6 +291,43 @@ Current takeaway:
 - For full Defender navigation coverage, a **bounded worker pool (3 tabs was effective here)** is better than a purely sequential crawl.
 - Enumerating `scc-nav-*` anchors from the DOM is more reliable than trying to model the visible expand/collapse state of the left nav.
 
+### 2026-04-03 — Deep-link entity page phase
+
+Idea:
+
+- After a left-nav crawl, follow up with a separate pass over high-value entity/detail pages that are not reachable from the nav inventory alone.
+
+What was tried:
+
+- Safely loaded deep-link GET pages for:
+  - `threatpolicy`
+  - `machines/v2/{id}/overview`
+  - `user?...`
+  - `file/{sha256}/overview`
+  - `url/overview?url=...`
+  - `ip/{address}/overview`
+
+Results:
+
+- All 6 target pages loaded successfully in the signed-in tenant.
+- They exposed materially different API surfaces from the left-nav crawl:
+  - Device page: **36** same-origin API paths
+  - User page: **30**
+  - File page: **28**
+  - URL page: **27**
+  - IP page: **21**
+  - Threat policies page: **12**
+
+What helped:
+
+- Entity/detail pages surfaced page-specific APIs that do not naturally appear in a nav-only crawl.
+- The device, user, file, URL, and IP pages were especially rich and are strong candidates for a dedicated entity-page discovery pass.
+
+Current takeaway:
+
+- Treat **entity/detail pages as a distinct discovery phase** after nav traversal.
+- A “full Defender crawl” is not complete if it only covers left-nav routes; deep links can reveal high-value entity APIs, live-response helpers, threat-intel endpoints, and page-specific POST-backed read actions.
+
 ## Ideas backlog
 
 Add new ideas here before trying them, then move the result into the experiment log.
