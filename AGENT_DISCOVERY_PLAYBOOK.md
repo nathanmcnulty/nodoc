@@ -21,6 +21,48 @@ The goal is to turn real portal behavior into high-quality specs and generated a
 5. **Separate confidence levels.** Do not present bundle-only discoveries as if they were fully confirmed.
 6. **Scratch stays out of repo.** Scripts, network logs, bundle downloads, screenshots, and raw notes belong in workspace artifacts, not in the repository.
 
+## Coverage expansion model
+
+Do **not** rely on any single technique to discover the full surface area.
+
+The most effective pattern is a layered pipeline:
+
+1. **Portal traffic crawl**
+   - Ground truth for real requests, response shapes, auth requirements, and page context.
+2. **DOM and HTML route extraction**
+   - Good for nav anchors, hidden menu items, tab links, action links, and page-local routes.
+3. **JavaScript bundle mining**
+   - Good for hidden endpoints, alternate hosts, route templates, parameter names, enums, and write-capable flows.
+4. **Seeded deep-link traversal**
+   - Use identifiers captured from traffic to open entity/detail pages directly: device IDs, user IDs, SHA256s, URLs, IPs, case IDs, incident IDs, and similar.
+5. **Safe probe queue**
+   - Exercise high-confidence read candidates with the authenticated browser context to distinguish live endpoints from dead or parameter-dependent ones.
+6. **Intercepted write-shape capture**
+   - Observe state-changing flows without persisting changes whenever possible.
+
+### Why not just spider everything blindly?
+
+Blind spidering is useful for **candidate discovery**, but it is not enough on its own:
+
+- many bundle strings are not actually routable without page-specific parameters
+- some links point to adjacent products or external hosts
+- many useful routes are parameterized and need real IDs from prior traffic
+- some POST routes are read-like, but some are true writes
+- auth, routing, and tenant context often matter more than the raw path
+
+Treat spidering as a **candidate generator plus prioritization aid**, not as the only validation step.
+
+### Recommended spidering rules
+
+- same-origin first
+- GET first
+- dedupe by normalized path
+- keep a request budget and bounded concurrency
+- preserve page attribution
+- prefer parameters harvested from observed traffic or bundle defaults over empty probes
+- queue entity pages separately from nav pages
+- never promote write-capable candidates without concrete evidence
+
 ## Recommended workflow
 
 ### 1. Review the current repo baseline
@@ -82,6 +124,7 @@ Recommended pattern:
 - Capture page states and API records separately.
 - Write artifacts after each crawl phase instead of only at the very end.
 - Keep the browser capture script focused on traffic collection; do bundle download in a separate step.
+- For broad portal passes, use bounded parallel tabs only if you can still attribute requests back to the originating page.
 
 ### 5. Download and mine the loaded JavaScript
 
@@ -103,6 +146,21 @@ What to extract:
 - path templates with `{id}` style placeholders
 - pagination/sorting/filter parameter names
 - likely write surfaces that need careful handling
+- route candidates for a later safe-probe queue
+
+### 5a. Build a candidate queue
+
+After traffic, DOM extraction, and bundle mining, build a queue of follow-up candidates with fields like:
+
+- candidate path or route
+- candidate type: nav route, entity page, API endpoint, external host
+- evidence source: traffic, DOM, bundle, probe
+- required identifiers or parameters
+- safe method to test
+- feature family
+- confidence score
+
+This makes it much easier to prioritize what to crawl next instead of rediscovering the same leads repeatedly.
 
 ### 6. Promote discoveries carefully
 
@@ -328,6 +386,30 @@ Current takeaway:
 - Treat **entity/detail pages as a distinct discovery phase** after nav traversal.
 - A “full Defender crawl” is not complete if it only covers left-nav routes; deep links can reveal high-value entity APIs, live-response helpers, threat-intel endpoints, and page-specific POST-backed read actions.
 
+### 2026-04-03 — Multi-layer discovery strategy
+
+Idea:
+
+- Combine DOM extraction, bundle mining, entity-page seeding, and safe probing instead of relying on one crawl type.
+
+What was learned:
+
+- Nav crawling exposed broad portal families.
+- Deep-link entity pages exposed richer page-specific APIs that nav crawling missed.
+- Bundle mining exposed additional candidate endpoints, but many required page-specific parameters or state.
+
+Current takeaway:
+
+- The best practical strategy is:
+  1. crawl nav routes
+  2. open seeded entity pages
+  3. mine JS bundles
+  4. build a candidate queue
+  5. safe-probe high-confidence reads
+  6. intercept writes to capture shapes
+
+- “Scrape HTML and JS and spider outward” is worth doing, but only as one stage in this larger pipeline.
+
 ## Ideas backlog
 
 Add new ideas here before trying them, then move the result into the experiment log.
@@ -338,6 +420,7 @@ Add new ideas here before trying them, then move the result into the experiment 
 - Diff the script set between navigation items to identify the most relevant bundles for each page.
 - Record a feature-to-bundle index so future runs can skip generic shell bundles and focus on feature chunks first.
 - Add a repeatable checklist for page-specific state, such as selected tab, filters, and tenant scope, before probing.
+- Build a reusable same-origin spider that consumes DOM routes, bundle-derived routes, and entity seeds from prior traffic, then prioritizes them through a safe-probe queue.
 
 ## PR-ready checklist
 
