@@ -1,0 +1,1505 @@
+openapi: 3.0.1
+info:
+  title: Intune Autopatch
+  x-nodoc-category: Intune
+  description: |
+    The Intune Autopatch API is used by Windows Autopatch experiences inside the Microsoft
+    Intune admin center. The live surface is hosted on `services.autopatch.microsoft.com` and
+    backs blades such as:
+
+      - Windows Autopatch > Autopatch groups
+      - Windows Autopatch > Messages
+      - Windows Autopatch > Support requests
+      - Windows Autopatch > Tenant management
+      - Roles > Windows Autopatch roles
+
+    Real tenant traffic confirmed the main tenant, reporting, support, and role-management
+    endpoints. A second pass mined the loaded `hosting.portal.azure.net/modernworkplace/*`
+    bundles for additional concrete GET paths under `/access-control/` and `/support/`, then
+    validated those with token-backed GET probes using the same browser session.
+
+    A related path, `GET /support/v1.0/Tenants/PreOnboardTenant`, returned `405 Method Not Allowed`
+    during probing and is therefore treated as a likely write-oriented onboarding flow rather than
+    documented as a confirmed GET operation here.
+
+    Requests use a browser-obtained bearer token together with portal headers such as
+    `x-ms-client-request-id`, `x-ms-client-session-id`, and `x-ms-effective-locale`.
+
+    Documentation and specifications have been provided on a best-efforts basis and may not be
+    100% accurate.
+  version: 0.1.0
+  contact:
+    name: nodoc
+    url: https://github.com/nathanmcnulty/nodoc
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+servers:
+  - url: https://services.autopatch.microsoft.com
+    description: Windows Autopatch API used by the Intune admin center
+security:
+  - bearerAuth: []
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        Browser-obtained bearer token used by Windows Autopatch blades in the Intune admin
+        center. Observed requests also include portal headers such as `x-ms-client-request-id`,
+        `x-ms-client-session-id`, and `x-ms-effective-locale`.
+  parameters:
+    count:
+      name: $count
+      in: query
+      description: Whether to include an OData count in the response.
+      schema:
+        type: boolean
+    filter:
+      name: $filter
+      in: query
+      description: OData filter expression.
+      schema:
+        type: string
+    orderBy:
+      name: $orderBy
+      in: query
+      description: OData sort expression.
+      schema:
+        type: string
+    top:
+      name: $top
+      in: query
+      description: Maximum number of results to return.
+      schema:
+        type: integer
+    skip:
+      name: $skip
+      in: query
+      description: Number of results to skip.
+      schema:
+        type: integer
+    select:
+      name: $select
+      in: query
+      description: OData projection expression.
+      schema:
+        type: string
+    permission:
+      name: permission
+      in: query
+      required: true
+      description: Access-control permission name to evaluate.
+      schema:
+        type: string
+        example: Microsoft.Autopatch_Roles_Read
+    roleAssignmentsFilter:
+      name: $filter
+      in: query
+      required: true
+      description: |
+        Required role assignment filter. Observed and bundle-confirmed pattern:
+        `RoleId eq {roleDefinitionId}`.
+      schema:
+        type: string
+        example: RoleId eq 1477f34a-94a3-489b-8be5-1f6789424e11
+    plan:
+      name: plan
+      in: path
+      required: true
+      description: Managed service plan identifier.
+      schema:
+        type: string
+        example: Starter
+    adminAction:
+      name: adminAction
+      in: query
+      required: true
+      description: Tenant admin action identifier to evaluate.
+      schema:
+        type: string
+        example: ClientBrokerInstall
+    tenantSettingName:
+      name: name
+      in: query
+      required: true
+      description: Tenant setting name to retrieve.
+      schema:
+        type: string
+        example: showDeviceUsageData
+    supportRequestId:
+      name: supportRequestId
+      in: path
+      required: true
+      description: Windows Autopatch support request identifier.
+      schema:
+        type: string
+        format: uuid
+  responses:
+    Unauthorized:
+      description: Authentication is required or the browser token is no longer valid.
+    Forbidden:
+      description: The authenticated principal does not have access to the requested Autopatch data.
+    BadRequest:
+      description: The request shape or parameters were invalid.
+  schemas:
+    GenericObject:
+      type: object
+      additionalProperties: true
+    ODataGenericCollection:
+      type: object
+      properties:
+        '@odata.context':
+          type: string
+        '@odata.count':
+          type: integer
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/GenericObject'
+      required:
+        - '@odata.context'
+        - value
+    ODataStringCollection:
+      type: object
+      properties:
+        '@odata.context':
+          type: string
+        value:
+          type: array
+          items:
+            type: string
+      required:
+        - '@odata.context'
+        - value
+    ODataBooleanResponse:
+      type: object
+      properties:
+        '@odata.context':
+          type: string
+        value:
+          type: boolean
+      required:
+        - '@odata.context'
+        - value
+    FlightingResponse:
+      type: object
+      description: Feature-flag map returned by the Windows Autopatch platform.
+      additionalProperties:
+        type: boolean
+    TenantPlanState:
+      type: object
+      properties:
+        plan:
+          type: string
+        state:
+          type: string
+        onboardedTimestampUtc:
+          type: string
+          format: date-time
+        partiallyEnrolledTimestampUtc:
+          type: string
+          format: date-time
+        enrolledTimestampUtc:
+          type: string
+          format: date-time
+        enrollmentType:
+          type: string
+        failedEnrollmentAttempts:
+          type: integer
+      additionalProperties: true
+    TenantResolveResponse:
+      type: object
+      properties:
+        isNotFound:
+          type: boolean
+        isOnboarded:
+          type: boolean
+        isEnrolled:
+          type: boolean
+        isEnrolling:
+          type: boolean
+        isDisabled:
+          type: boolean
+        appPackagingEnrolled:
+          type: boolean
+        plans:
+          type: array
+          items:
+            $ref: '#/components/schemas/TenantPlanState'
+      additionalProperties: true
+    FeatureEnablementStatusResponse:
+      type: object
+      properties:
+        directoryId:
+          type: string
+          format: uuid
+        id:
+          type: string
+          format: uuid
+        domain:
+          type: string
+        name:
+          type: string
+        state:
+          type: string
+        adminAccountName:
+          type: string
+        tenantRing:
+          type: string
+        plans:
+          type: array
+          items:
+            $ref: '#/components/schemas/TenantPlanState'
+        windowsAutopatchEnabled:
+          type: boolean
+        readOnly:
+          type: boolean
+      additionalProperties: true
+    AdminAction:
+      type: object
+      properties:
+        adminAction:
+          type: string
+        actionType:
+          type: string
+        severity:
+          type: string
+        priority:
+          type: integer
+        deadlineUtc:
+          type: string
+          format: date-time
+        status:
+          type: string
+        context:
+          type: string
+      additionalProperties: true
+    AdminActionStatusResponse:
+      type: object
+      properties:
+        state:
+          type: string
+          description: |
+            Observed values include `Pending` during the client broker install flow and `Failed`
+            from the follow-up status poll.
+      additionalProperties: true
+    ResourceOperationPermission:
+      type: object
+      properties:
+        Id:
+          type: string
+        PermissionName:
+          type: string
+        PermissionVerb:
+          type: string
+        Description:
+          type: string
+      additionalProperties: true
+    ResourceOperation:
+      type: object
+      properties:
+        EntityName:
+          type: string
+        DisplayName:
+          type: string
+        ResourceOperationPermissions:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResourceOperationPermission'
+      additionalProperties: true
+    ResourceOperationCollection:
+      type: object
+      properties:
+        '@odata.context':
+          type: string
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResourceOperation'
+      required:
+        - '@odata.context'
+        - value
+    RoleDefinition:
+      type: object
+      properties:
+        Permissions:
+          type: array
+          items:
+            type: string
+        ScopeTags:
+          type: array
+          items:
+            type: string
+        EntityName:
+          type: string
+        TenantId:
+          type: string
+          format: uuid
+        Name:
+          type: string
+        Description:
+          type: string
+        RoleType:
+          type: string
+        Id:
+          type: string
+          format: uuid
+        CreatedDateTime:
+          type: string
+          format: date-time
+        LastModifiedDateTime:
+          type: string
+          format: date-time
+      additionalProperties: true
+    RoleDefinitionCollection:
+      type: object
+      properties:
+        '@odata.context':
+          type: string
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoleDefinition'
+      required:
+        - '@odata.context'
+        - value
+    DeploymentGroup:
+      type: object
+      properties:
+        aadId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        distribution:
+          type: integer
+        userManagedAadGroups:
+          type: array
+          items:
+            $ref: '#/components/schemas/GenericObject'
+      additionalProperties: true
+    AutopatchGroup:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        tenantId:
+          type: string
+          format: uuid
+        description:
+          type: string
+        type:
+          type: string
+        status:
+          type: string
+        isLockedByPolicy:
+          type: boolean
+        distributionType:
+          type: string
+        deploymentGroups:
+          type: array
+          items:
+            $ref: '#/components/schemas/DeploymentGroup'
+        globalUserManagedAadGroups:
+          type: array
+          items:
+            $ref: '#/components/schemas/GenericObject'
+        numberOfRegisteredDevices:
+          type: integer
+        readOnly:
+          type: boolean
+      additionalProperties: true
+    CustomerCommMessage:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        tenantId:
+          type: string
+          format: uuid
+        title:
+          type: string
+        content:
+          type: string
+        creationTime:
+          type: string
+          format: date-time
+        readInMem:
+          type: boolean
+      additionalProperties: true
+    SupportLanguage:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        status:
+          type: string
+      additionalProperties: true
+    RequestTypeNode:
+      type: object
+      properties:
+        key:
+          type: string
+        contactType:
+          type: string
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/RequestTypeNode'
+      additionalProperties: true
+    ManagedServiceStatus:
+      type: object
+      properties:
+        tenantId:
+          type: string
+          format: uuid
+        plan:
+          type: string
+        state:
+          type: string
+        onboardedTimestampUtc:
+          type: string
+          format: date-time
+        partiallyEnrolledTimestampUtc:
+          type: string
+          format: date-time
+        enrolledTimestampUtc:
+          type: string
+          format: date-time
+      additionalProperties: true
+    AccessControlUserToken:
+      type: object
+      properties:
+        wids:
+          type: array
+          items:
+            type: string
+        roles:
+          type: array
+          items:
+            type: string
+      additionalProperties: true
+    TenantSettingState:
+      type: object
+      properties:
+        tenantId:
+          type: string
+          format: uuid
+        plan:
+          type: string
+        name:
+          type: string
+        state:
+          oneOf:
+            - type: boolean
+            - type: string
+            - type: integer
+      additionalProperties: true
+    TenantSettingUpdateRequest:
+      type: object
+      description: |
+        Bundle-recovered tenant setting mutation payload. The Tenant management blade augments the
+        payload with `tenantId` before POSTing it to `/tenant-management/v1/TenantSetting`.
+      properties:
+        tenantId:
+          type: string
+          format: uuid
+        plan:
+          type: string
+          example: Starter
+        name:
+          type: string
+          example: showDeviceUsageData
+        state:
+          oneOf:
+            - type: boolean
+            - type: string
+            - type: integer
+      additionalProperties: true
+    SupportRequestContact:
+      type: object
+      properties:
+        givenName:
+          type: string
+        surname:
+          type: string
+        email:
+          type: string
+        phoneNumber:
+          type: string
+        preferredLanguageId:
+          type: string
+        preferredLanguage:
+          type: string
+      additionalProperties: true
+    SupportRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        state:
+          type: string
+        createdDateTime:
+          type: string
+          format: date-time
+        resolvedDateTime:
+          type: string
+          format: date-time
+        severity:
+          type: integer
+        contact:
+          $ref: '#/components/schemas/SupportRequestContact'
+        category:
+          type: string
+        subcategory:
+          type: string
+        nextActionTime:
+          type: string
+          format: date-time
+        nextActionDueDate:
+          type: string
+          format: date-time
+        nextActionOwner:
+          type: string
+        surveyLink:
+          type: string
+        committedSurvey:
+          type: boolean
+        description:
+          type: string
+        businessImpact:
+          type: string
+        usersOrDevicesImpacted:
+          type: integer
+        issueReproduced:
+          oneOf:
+            - type: boolean
+            - type: string
+        troubleshootingSteps:
+          type: string
+        issueFirstNoticed:
+          type: string
+          format: date-time
+        plan:
+          type: string
+        type:
+          type: string
+      additionalProperties: true
+    SupportRequestActivityCollection:
+      type: object
+      properties:
+        '@odata.context':
+          type: string
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/GenericObject'
+      required:
+        - '@odata.context'
+        - value
+    SupportRequestCreateRequest:
+      type: object
+      description: |
+        Bundle-recovered payload used by the Support requests blade to create a new Windows
+        Autopatch support request.
+      properties:
+        aadDeviceIds:
+          type: array
+          items:
+            type: string
+        businessImpact:
+          type: string
+        category:
+          type: string
+        subCategory:
+          type: string
+        description:
+          type: string
+        contact:
+          allOf:
+            - $ref: '#/components/schemas/SupportRequestContact'
+            - type: object
+              properties:
+                preferredLanguageId:
+                  type: string
+        issueFirstNoticed:
+          type: string
+          format: date-time
+        issueReproduced:
+          oneOf:
+            - type: boolean
+            - type: string
+        nextActionOwner:
+          type: string
+        plan:
+          type: string
+          example: WindowsAutopatch
+        severity:
+          type: integer
+        title:
+          type: string
+        troubleshootingSteps:
+          type: string
+        type:
+          type: string
+        usersOrDevicesImpacted:
+          type: integer
+      additionalProperties: true
+    SupportRequestCreateResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+      additionalProperties: true
+    SupportRequestUpdateRequest:
+      type: object
+      properties:
+        severity:
+          type: integer
+        businessImpact:
+          type: string
+      additionalProperties: true
+    SupportRequestUpdateContactRequest:
+      type: object
+      properties:
+        contact:
+          $ref: '#/components/schemas/SupportRequestContact'
+      required:
+        - contact
+      additionalProperties: true
+    SupportRequestAddNoteRequest:
+      type: object
+      properties:
+        text:
+          type: string
+      required:
+        - text
+      additionalProperties: true
+    SupportRequestUploadAttachmentRequest:
+      type: object
+      properties:
+        filename:
+          type: string
+        data:
+          type: string
+          description: Base64-encoded attachment content.
+      required:
+        - filename
+        - data
+      additionalProperties: true
+tags:
+  - name: Platform
+    description: Shared platform-level endpoints and feature flags used by Autopatch blades.
+  - name: Tenant
+    description: Tenant enrollment, enablement, and tenant-level action state.
+  - name: Roles
+    description: Windows Autopatch access-control and custom role operations.
+  - name: AutopatchGroups
+    description: Windows Autopatch group definitions and related reporting.
+  - name: Messages
+    description: Customer communications and message feed operations.
+  - name: Support
+    description: Support request listing, entitlement lookup, and request metadata.
+x-tagGroups:
+  - name: Platform
+    tags: [Platform]
+  - name: Tenant
+    tags: [Tenant]
+  - name: Roles
+    tags: [Roles]
+  - name: Windows Autopatch
+    tags: [AutopatchGroups, Messages, Support]
+paths:
+  /api/Flighting:
+    get:
+      tags: [Platform]
+      summary: Get Autopatch feature flags
+      description: |
+        Returns Windows Autopatch feature flags and rollout toggles used across tenant
+        administration blades. Confirmed live across every Windows Autopatch-related blade.
+      operationId: IntuneAutopatch.Platform.GetFlighting
+      responses:
+        '200':
+          description: Feature flags returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlightingResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/v1.0/tenant/resolve:
+    get:
+      tags: [Tenant]
+      summary: Resolve tenant enrollment state
+      description: |
+        Returns Windows Autopatch tenant enrollment and plan state. Confirmed live on messages
+        and help/support blades and further confirmed with a token-backed GET probe.
+      operationId: IntuneAutopatch.Tenant.Resolve
+      responses:
+        '200':
+          description: Tenant state returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantResolveResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /tenant-management/v1/Enrollment/Starter/featureEnablementStatus:
+    get:
+      tags: [Tenant]
+      summary: Get starter feature enablement status
+      description: |
+        Returns tenant onboarding, Autopatch enablement, and subscription summary details for the
+        Starter plan. Confirmed live on many tenant-administration blades and validated again with
+        a GET probe.
+      operationId: IntuneAutopatch.Tenant.GetFeatureEnablementStatus
+      responses:
+        '200':
+          description: Starter feature enablement status returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeatureEnablementStatusResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /tenant-management/v2/AdminActionsV:
+    get:
+      tags: [Tenant]
+      summary: Get tenant admin actions
+      description: |
+        Returns Windows Autopatch tenant-level admin actions such as client broker install tasks.
+        Confirmed live on the Tenant management blade and validated with a GET probe.
+      operationId: IntuneAutopatch.Tenant.ListAdminActions
+      responses:
+        '200':
+          description: Admin actions returned successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AdminAction'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    post:
+      tags: [Tenant]
+      summary: Submit tenant admin actions
+      description: |
+        Submits one or more Windows Autopatch tenant admin actions such as
+        `ClientBrokerInstall`. The call was recovered from the Tenant management bundle and
+        corroborated by a live install flow in the Intune admin center that changed the
+        `ClientBrokerInstall` row from `NotStarted` to `Pending`, then redirected the portal to
+        `ClientBroker.ReactView`.
+
+        The exact success status code and response body were not captured during the live flow;
+        after submission the portal polls `GET /tenant-management/v2/AdminActionsV/actionStatus`
+        for per-action state.
+      operationId: IntuneAutopatch.Tenant.SubmitAdminActions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/AdminAction'
+      responses:
+        default:
+          description: Action submission response returned by the service.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /tenant-management/v2/AdminActionsV/actionStatus:
+    get:
+      tags: [Tenant]
+      summary: Get tenant admin action status
+      description: |
+        Returns the current state for a submitted Windows Autopatch tenant admin action.
+        Confirmed live from the client broker install flow, which polled
+        `adminAction=ClientBrokerInstall` after submission and returned `Failed`.
+      operationId: IntuneAutopatch.Tenant.GetAdminActionStatus
+      parameters:
+        - $ref: '#/components/parameters/adminAction'
+      responses:
+        '200':
+          description: Admin action state returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminActionStatusResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /update-management/partnergraph/1.0/tenantSettings/mdmAppSettings:
+    get:
+      tags: [Tenant]
+      summary: Get MDM app tenant settings
+      description: |
+        Returns tenant MDM application settings exposed through the Windows Autopatch update
+        management surface. Confirmed live on the Tenant management blade and validated with a
+        GET probe.
+      operationId: IntuneAutopatch.Tenant.GetMdmAppSettings
+      responses:
+        '200':
+          description: Tenant MDM app settings returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataGenericCollection'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /access-control/odata/v1/EffectivePermissions:
+    get:
+      tags: [Roles]
+      summary: Get effective permissions
+      description: |
+        Returns the caller's effective Windows Autopatch permissions. Confirmed live from the
+        roles blade.
+      operationId: IntuneAutopatch.Roles.GetEffectivePermissions
+      responses:
+        '200':
+          description: Effective permissions returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataStringCollection'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /access-control/odata/v1/ResourceOperations:
+    get:
+      tags: [Roles]
+      summary: List resource operations
+      description: |
+        Lists Windows Autopatch resource operations and verbs. Recovered from the
+        `modernworkplace` bundles and confirmed with a GET probe.
+      operationId: IntuneAutopatch.Roles.ListResourceOperations
+      responses:
+        '200':
+          description: Resource operations returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceOperationCollection'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /access-control/odata/v1/RoleDefinitions:
+    get:
+      tags: [Roles]
+      summary: List role definitions
+      description: |
+        Lists Windows Autopatch built-in and custom role definitions. Confirmed live from the
+        roles blade and further grounded with a GET probe.
+      operationId: IntuneAutopatch.Roles.ListRoleDefinitions
+      parameters:
+        - $ref: '#/components/parameters/filter'
+        - $ref: '#/components/parameters/orderBy'
+      responses:
+        '200':
+          description: Role definitions returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoleDefinitionCollection'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /access-control/odata/v1/RoleAssignments:
+    get:
+      tags: [Roles]
+      summary: List role assignments
+      description: |
+        Lists Windows Autopatch role assignments for a specific role definition. The bundle
+        requires `$filter=RoleId eq {roleDefinitionId}`; probing without it returns
+        `400 Please provide RoleId in $filter`.
+      operationId: IntuneAutopatch.Roles.ListRoleAssignments
+      parameters:
+        - $ref: '#/components/parameters/roleAssignmentsFilter'
+        - $ref: '#/components/parameters/orderBy'
+      responses:
+        '200':
+          description: Role assignments returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataGenericCollection'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /access-control/odata/v1/ScopeTags:
+    get:
+      tags: [Roles]
+      summary: Get scope tags for a permission
+      description: |
+        Returns scope tags applicable to a Windows Autopatch permission. Recovered from the roles
+        bundle and confirmed with a GET probe.
+      operationId: IntuneAutopatch.Roles.GetScopeTags
+      parameters:
+        - $ref: '#/components/parameters/permission'
+      responses:
+        '200':
+          description: Scope tags returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataStringCollection'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /access-control/odata/v1/ScopedForResources:
+    get:
+      tags: [Roles]
+      summary: Check whether a permission is resource-scoped
+      description: |
+        Returns whether a Windows Autopatch permission is scoped for resources. Recovered from the
+        roles bundle and confirmed with a GET probe.
+      operationId: IntuneAutopatch.Roles.GetScopedForResources
+      parameters:
+        - $ref: '#/components/parameters/permission'
+      responses:
+        '200':
+          description: Resource-scoping state returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataBooleanResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /access-control/v1/UserToken:
+    get:
+      tags: [Roles]
+      summary: Get access-control user token context
+      description: |
+        Returns the caller's access-control token context, including directory role template IDs in
+        `wids`. Confirmed live from the Tenant management route during a page reload.
+      operationId: IntuneAutopatch.Roles.GetUserToken
+      responses:
+        '200':
+          description: Access-control token context returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessControlUserToken'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /device/v2/autopatchGroups:
+    get:
+      tags: [AutopatchGroups]
+      summary: List Windows Autopatch groups
+      description: |
+        Returns Windows Autopatch group definitions and associated deployment groups. Confirmed
+        live on the Autopatch groups blade.
+      operationId: IntuneAutopatch.AutopatchGroups.List
+      responses:
+        '200':
+          description: Autopatch groups returned successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AutopatchGroup'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /unified-reporting/odata/1.0/AutopatchGroupMembershipRegistered:
+    get:
+      tags: [AutopatchGroups]
+      summary: List registered Autopatch group memberships
+      description: |
+        Returns registered Windows Autopatch group membership reporting data. Confirmed live with
+        `$count=true` on the Autopatch groups blade.
+      operationId: IntuneAutopatch.AutopatchGroups.ListMembershipRegistered
+      parameters:
+        - $ref: '#/components/parameters/count'
+      responses:
+        '200':
+          description: Group membership reporting returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataGenericCollection'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /support/v1/Messages/CustomerComms:
+    get:
+      tags: [Messages]
+      summary: List customer communications
+      description: |
+        Returns Windows Autopatch customer communications shown on the Messages blade.
+      operationId: IntuneAutopatch.Messages.ListCustomerComms
+      responses:
+        '200':
+          description: Customer communications returned successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CustomerCommMessage'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /support/odata/v1/supportRequests:
+    get:
+      tags: [Support]
+      summary: List support requests
+      description: |
+        Returns Windows Autopatch support requests. Confirmed live with OData-style projection,
+        filtering, paging, sorting, and count parameters.
+      operationId: IntuneAutopatch.Support.ListSupportRequests
+      parameters:
+        - $ref: '#/components/parameters/select'
+        - $ref: '#/components/parameters/filter'
+        - $ref: '#/components/parameters/top'
+        - $ref: '#/components/parameters/skip'
+        - $ref: '#/components/parameters/orderBy'
+        - $ref: '#/components/parameters/count'
+      responses:
+        '200':
+          description: Support requests returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataGenericCollection'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    post:
+      tags: [Support]
+      summary: Create a support request
+      description: |
+        Creates a Windows Autopatch support request. The request shape was recovered from the
+        Support requests bundle, including the nested contact block and Autopatch-specific plan
+        fields. This write was not executed live in this pass.
+      operationId: IntuneAutopatch.Support.CreateSupportRequest
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SupportRequestCreateRequest'
+      responses:
+        '200':
+          description: Support request created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupportRequestCreateResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /support/odata/v1/supportRequests('{supportRequestId}'):
+    get:
+      tags: [Support]
+      summary: Get a support request
+      description: |
+        Returns a single Windows Autopatch support request by ID. The exact path was recovered from
+        the Support requests bundle; a live GET was not exercised in this tenant because the list
+        endpoint returned no requests to inspect.
+      operationId: IntuneAutopatch.Support.GetSupportRequest
+      parameters:
+        - $ref: '#/components/parameters/supportRequestId'
+      responses:
+        '200':
+          description: Support request returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupportRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    patch:
+      tags: [Support]
+      summary: Update a support request
+      description: |
+        Updates mutable fields on a Windows Autopatch support request. The bundle-recovered edit
+        flow patches severity and business impact before issuing other support-request mutations.
+        This write was not executed live in this pass.
+      operationId: IntuneAutopatch.Support.UpdateSupportRequest
+      parameters:
+        - $ref: '#/components/parameters/supportRequestId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SupportRequestUpdateRequest'
+      responses:
+        '200':
+          description: Support request updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupportRequest'
+        '204':
+          description: Support request updated successfully with no response body.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /support/odata/v1/supportRequests('{supportRequestId}')/activities:
+    get:
+      tags: [Support]
+      summary: List support request activities
+      description: |
+        Returns the activity/discussion feed for a Windows Autopatch support request. The path was
+        recovered from the Support requests bundle; a live GET was not exercised in this tenant
+        because no support request IDs were available.
+      operationId: IntuneAutopatch.Support.ListSupportRequestActivities
+      parameters:
+        - $ref: '#/components/parameters/supportRequestId'
+      responses:
+        '200':
+          description: Support request activities returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupportRequestActivityCollection'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /support/odata/v1/supportRequests('{supportRequestId}')/UpdateContact:
+    post:
+      tags: [Support]
+      summary: Update support request contact
+      description: |
+        Updates the contact block on a Windows Autopatch support request. The exact request body was
+        recovered from the Support requests bundle. This write was not executed live in this pass.
+      operationId: IntuneAutopatch.Support.UpdateSupportRequestContact
+      parameters:
+        - $ref: '#/components/parameters/supportRequestId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SupportRequestUpdateContactRequest'
+      responses:
+        '200':
+          description: Support request contact updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupportRequest'
+        '204':
+          description: Support request contact updated successfully with no response body.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /support/odata/v1/supportRequests('{supportRequestId}')/addNote:
+    post:
+      tags: [Support]
+      summary: Add a note to a support request
+      description: |
+        Adds a note to a Windows Autopatch support request discussion thread. The exact request body
+        was recovered from the Support requests bundle. This write was not executed live in this
+        pass.
+      operationId: IntuneAutopatch.Support.AddSupportRequestNote
+      parameters:
+        - $ref: '#/components/parameters/supportRequestId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SupportRequestAddNoteRequest'
+      responses:
+        '200':
+          description: Note added successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '204':
+          description: Note added successfully with no response body.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /support/odata/v1/supportRequests('{supportRequestId}')/UploadAttachment:
+    post:
+      tags: [Support]
+      summary: Upload a support request attachment
+      description: |
+        Uploads a base64-encoded attachment to a Windows Autopatch support request. The exact
+        request shape was recovered from the Support requests bundle. This write was not executed
+        live in this pass.
+      operationId: IntuneAutopatch.Support.UploadSupportRequestAttachment
+      parameters:
+        - $ref: '#/components/parameters/supportRequestId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SupportRequestUploadAttachmentRequest'
+      responses:
+        '200':
+          description: Attachment uploaded successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '204':
+          description: Attachment uploaded successfully with no response body.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /support/odata/v1/supportRequests('{supportRequestId}')/Reactivate:
+    post:
+      tags: [Support]
+      summary: Reactivate a support request
+      description: |
+        Reactivates a recently resolved Windows Autopatch support request. The path was recovered
+        from the Support requests bundle. This write was not executed live in this pass.
+      operationId: IntuneAutopatch.Support.ReactivateSupportRequest
+      parameters:
+        - $ref: '#/components/parameters/supportRequestId'
+      responses:
+        '200':
+          description: Support request reactivated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '204':
+          description: Support request reactivated successfully with no response body.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /support/v1/Languages:
+    get:
+      tags: [Support]
+      summary: List support languages
+      description: |
+        Returns available support languages. Recovered from the support bundles and confirmed with
+        a GET probe.
+      operationId: IntuneAutopatch.Support.ListLanguages
+      responses:
+        '200':
+          description: Support languages returned successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SupportLanguage'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /support/v1/RequestTypeHierarchy:
+    get:
+      tags: [Support]
+      summary: Get support request type hierarchy
+      description: |
+        Returns the request-type hierarchy used when creating or categorizing Windows Autopatch
+        support requests. Recovered from the support bundles and confirmed with a GET probe.
+      operationId: IntuneAutopatch.Support.GetRequestTypeHierarchy
+      responses:
+        '200':
+          description: Support request type hierarchy returned successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RequestTypeNode'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /support/v1/tenants/getSupportEntitlementInfo:
+    get:
+      tags: [Support]
+      summary: Get support entitlement info
+      description: |
+        Returns support entitlement information for the current tenant. Recovered from the support
+        bundles and confirmed with a GET probe.
+      operationId: IntuneAutopatch.Support.GetEntitlementInfo
+      responses:
+        '200':
+          description: Support entitlement information returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /support/v1.0/Tenants/GetTenantManagedService/{plan}:
+    get:
+      tags: [Support]
+      summary: Get tenant managed service state
+      description: |
+        Returns Windows Autopatch managed-service state for a specific plan. Recovered from the
+        support bundles and confirmed with a GET probe for the `Starter` plan.
+      operationId: IntuneAutopatch.Support.GetTenantManagedService
+      parameters:
+        - $ref: '#/components/parameters/plan'
+      responses:
+        '200':
+          description: Managed service state returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagedServiceStatus'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /tenant-management/v1/TenantSetting:
+    get:
+      tags: [Tenant]
+      summary: Get a tenant setting
+      description: |
+        Returns a tenant-management setting by name and plan. This GET was confirmed live with
+        `name=showDeviceUsageData&plan=Starter`, which returned `204 No Content` in this tenant.
+      operationId: IntuneAutopatch.Tenant.GetSetting
+      parameters:
+        - $ref: '#/components/parameters/tenantSettingName'
+        - name: plan
+          in: query
+          required: true
+          description: Managed service plan identifier.
+          schema:
+            type: string
+            example: Starter
+      responses:
+        '200':
+          description: Tenant setting returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantSettingState'
+        '204':
+          description: The tenant setting name was valid but no value was returned for this tenant.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    post:
+      tags: [Tenant]
+      summary: Update a tenant setting
+      description: |
+        Updates a tenant-management setting. The Tenant management bundle augments the outgoing
+        payload with `tenantId` before POSTing it to this path. This write was recovered from the
+        Tenant management bundle and was not executed live in this pass.
+      operationId: IntuneAutopatch.Tenant.UpdateSetting
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TenantSettingUpdateRequest'
+      responses:
+        '200':
+          description: Tenant setting updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantSettingState'
+        '204':
+          description: Tenant setting updated successfully with no response body.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

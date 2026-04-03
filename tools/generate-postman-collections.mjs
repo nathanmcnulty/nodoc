@@ -37,6 +37,16 @@ const collectionDefinitions = [
     output: "postman/collections/m365-apps-inventory.collection.json",
   },
   {
+    name: "Intune Autopatch",
+    spec: "specifications/nodoc-intune-autopatch/specification/openapi.yml",
+    output: "postman/collections/intune-autopatch.collection.json",
+  },
+  {
+    name: "Intune Portal",
+    spec: "specifications/nodoc-intune-portal/specification/openapi.yml",
+    output: "postman/collections/intune-portal.collection.json",
+  },
+  {
     name: "Purview",
     spec: "specifications/nodoc-purview/specification/openapi.yml",
     output: "postman/collections/purview.collection.json",

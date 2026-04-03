@@ -1,0 +1,219 @@
+openapi: 3.0.1
+info:
+  title: Intune Portal
+  x-nodoc-category: Intune
+  description: |
+    The Intune Portal API is used by the Microsoft Intune admin center (`intune.microsoft.com`)
+    for same-origin portal experimentation and persistent client-side settings storage.
+
+    The operations below were confirmed while browsing the Tenant administration section of the
+    Intune admin center with a real authenticated Edge session. They were observed on blades such as:
+
+      - Windows Autopatch > Autopatch groups
+      - Tenant administration > Terms and conditions
+      - Tenant administration > Diagnostics settings
+      - Tenant administration > Microsoft Entra Privileged Identity Management
+      - Tenant administration > Multi Admin Approval
+
+    Requests use a browser-obtained bearer token together with same-origin portal cookies and
+    portal headers such as `x-ms-client-request-id`, `x-ms-client-session-id`,
+    `x-ms-effective-locale`, `x-ms-extension-flags`, and `x-requested-with`.
+
+    `POST /api/Settings/Select` and `POST /api/Settings/Update` operate on named persistent
+    storage buckets. Observed namespaces included `Microsoft_EMM_ModernWorkplacePersistentStorage`
+    and `Microsoft_Intune_DeviceSettingsPersistentStorage`.
+
+    Documentation and specifications have been provided on a best-efforts basis and may not be
+    100% accurate.
+  version: 0.1.0
+  contact:
+    name: nodoc
+    url: https://github.com/nathanmcnulty/nodoc
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+servers:
+  - url: https://intune.microsoft.com
+    description: Intune admin center same-origin portal API
+security:
+  - bearerAuth: []
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        Browser-obtained bearer token used by the Intune admin center. Observed requests also
+        carry same-origin cookies and portal headers such as `x-ms-client-request-id`,
+        `x-ms-client-session-id`, `x-ms-effective-locale`, and `x-requested-with`.
+  parameters:
+    extension:
+      name: extension
+      in: query
+      required: true
+      description: Extension name whose experimentation flights should be resolved.
+      schema:
+        type: string
+        example: microsoft_intune_enrollment
+    extensionVersion:
+      name: extensionVersion
+      in: query
+      required: true
+      description: Extension version string observed in the portal request.
+      schema:
+        type: string
+        example: 7.2603.15.3001.260326-0317
+  responses:
+    Unauthorized:
+      description: Authentication is required or the browser token is no longer valid.
+    Forbidden:
+      description: The authenticated principal does not have access to the requested portal data.
+    BadRequest:
+      description: The request shape or parameters were invalid.
+  schemas:
+    GenericObject:
+      type: object
+      additionalProperties: true
+    ExperimentationVariantsResponse:
+      type: object
+      description: Experimentation and flighting payload for a portal extension.
+      properties:
+        assignmentContext:
+          type: string
+        flights:
+          type: array
+          items:
+            type: string
+        variables:
+          type: object
+          additionalProperties: true
+        dataVersion:
+          type: integer
+      additionalProperties: true
+    SettingsSelectRequest:
+      type: array
+      description: Array of persistent storage namespaces to read.
+      items:
+        type: string
+      example:
+        - Microsoft_EMM_ModernWorkplacePersistentStorage
+    SettingsSelectResponse:
+      type: object
+      description: Object keyed by requested persistent storage namespace.
+      additionalProperties:
+        type: object
+        additionalProperties: true
+      example:
+        Microsoft_EMM_ModernWorkplacePersistentStorage: {}
+    SettingsUpdateRequest:
+      type: object
+      description: |
+        Persistent storage mutation payload. `save` contains namespaces and values to persist;
+        `remove` contains namespaces or keys to delete.
+      required:
+        - save
+        - remove
+      properties:
+        save:
+          type: object
+          additionalProperties:
+            type: object
+            additionalProperties: true
+        remove:
+          type: object
+          additionalProperties: true
+      example:
+        save:
+          Microsoft_Intune_DeviceSettingsPersistentStorage:
+            Intune_isCopilotEnabled: "true"
+        remove: {}
+tags:
+  - name: Experimentation
+    description: Portal extension flighting and experimentation helpers.
+  - name: Settings
+    description: Persistent client-side portal settings and storage operations.
+x-tagGroups:
+  - name: Portal
+    tags: [Experimentation, Settings]
+paths:
+  /api/Experimentation/GetExtensionVariants:
+    get:
+      tags: [Experimentation]
+      summary: Get extension variants
+      description: |
+        Resolves experimentation flights and variables for an Intune or Azure portal extension.
+        Confirmed live for Intune enrollment, Intune devices, Azure Monitor, and PIM-related
+        extensions while browsing tenant administration blades.
+      operationId: IntunePortal.Experimentation.GetExtensionVariants
+      parameters:
+        - $ref: '#/components/parameters/extension'
+        - $ref: '#/components/parameters/extensionVersion'
+      responses:
+        '200':
+          description: Experimentation variants resolved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExperimentationVariantsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/Settings/Select:
+    post:
+      tags: [Settings]
+      summary: Read portal persistent settings
+      description: |
+        Reads one or more persistent storage namespaces used by Intune portal extensions.
+        Confirmed live from the Windows Autopatch groups blade using the
+        `Microsoft_EMM_ModernWorkplacePersistentStorage` namespace.
+      operationId: IntunePortal.Settings.Select
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SettingsSelectRequest'
+      responses:
+        '200':
+          description: Requested storage namespaces returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SettingsSelectResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/Settings/Update:
+    post:
+      tags: [Settings]
+      summary: Update portal persistent settings
+      description: |
+        Persists or removes values in Intune portal storage namespaces. Confirmed live through a
+        same-origin portal save call with the namespace
+        `Microsoft_Intune_DeviceSettingsPersistentStorage` and the key
+        `Intune_isCopilotEnabled`.
+      operationId: IntunePortal.Settings.Update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SettingsUpdateRequest'
+      responses:
+        '204':
+          description: Settings updated successfully.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
