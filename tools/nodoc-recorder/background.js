@@ -21,6 +21,13 @@ const portalConfig = [
     urlPatterns: ['https://purview.microsoft.com/apiproxy/*']
   },
   {
+    id: 'purview-portal',
+    name: 'Purview Portal',
+    hostname: 'purview.microsoft.com',
+    pathPrefixes: ['/api/'],
+    urlPatterns: ['https://purview.microsoft.com/api/*']
+  },
+  {
     id: 'entra-iam',
     name: 'Entra IAM',
     hostname: 'main.iam.ad.ext.azure.com',

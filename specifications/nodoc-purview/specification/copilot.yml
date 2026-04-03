@@ -142,3 +142,113 @@ paths:
 
         '404':
           $ref: common.yml#/components/responses/NotFound
+
+  /securityplatform/provisioning/account:
+    get:
+      operationId: getSecurityPlatformAccount
+      summary: Get Security Platform account
+      description: >-
+        Retrieve the tenant-level Security Platform account used by the Purview
+        Security Copilot and AI experiences.
+      tags: [Copilot]
+      parameters:
+        - name: api-version
+          in: query
+          required: false
+          description: Security Platform API version used by the portal call.
+          schema:
+            type: string
+            example: 2024-03-01-preview
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/SecurityPlatformAccountResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /securityplatform/workspaces:
+    get:
+      operationId: listSecurityPlatformWorkspaces
+      summary: List Security Platform workspaces
+      description: >-
+        Retrieve Security Platform workspaces available to the current tenant. The
+        captured Purview response exposed the `security-copilot` workspace together
+        with opt-in configuration and management endpoint details.
+      tags: [Copilot]
+      parameters:
+        - name: api-version
+          in: query
+          required: false
+          description: Security Platform API version used by the portal call.
+          schema:
+            type: string
+            example: 2023-12-01-preview
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/SecurityPlatformWorkspacesResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /securityplatform/sentinelgraph/provisioning/checkTenant:
+    post:
+      operationId: checkSecurityPlatformTenantProvisioning
+      summary: Check Security Platform tenant provisioning
+      description: >-
+        Evaluate whether the tenant can enable Security Platform graph-backed features.
+        Purview called this endpoint with an empty body while asking for eligible features.
+      tags: [Copilot]
+      parameters:
+        - name: api-version
+          in: query
+          required: false
+          description: Security Platform API version used by the portal call.
+          schema:
+            type: string
+            example: 2024-07-01
+        - name: includeFeatures
+          in: query
+          required: false
+          description: Include the feature-level eligibility breakdown in the response.
+          schema:
+            type: boolean
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Captured samples sent an empty JSON object.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/SecurityPlatformCheckTenantResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

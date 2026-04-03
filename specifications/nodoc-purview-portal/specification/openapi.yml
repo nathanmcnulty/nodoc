@@ -1,0 +1,387 @@
+openapi: 3.0.1
+info:
+  title: Purview Portal
+  x-nodoc-category: Purview
+  description: |
+    The Purview Portal API is used by the Microsoft Purview portal (`purview.microsoft.com`)
+    for same-origin bootstrap, token minting, role evaluation, user lookup, audit configuration,
+    and label activity analytics.
+
+    The operations below were confirmed while browsing the Purview portal with a real authenticated
+    Edge session. They were observed during startup and while navigating blades such as:
+
+      - Home and solution launcher
+      - Agents, Learn, and Usage center
+      - Compliance Manager
+      - eDiscovery
+      - Records Management
+      - Audit
+      - Settings > OCR
+
+    Requests rely on the authenticated Purview browser session and same-origin portal context.
+    `GET /api/Auth/getToken` was observed minting short-lived downstream access tokens for resources
+    including `api.purview-service.microsoft.com`, tenant-specific Purview service hosts,
+    `management.azure.com`, and `graph.microsoft.com`.
+
+    Documentation and specifications have been provided on a best-efforts basis and may not be
+    100% accurate.
+  version: 0.1.0
+  contact:
+    name: nodoc
+    url: https://github.com/nathanmcnulty/nodoc
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+servers:
+  - url: https://purview.microsoft.com
+    description: Purview same-origin portal API
+security:
+  - PortalSession: []
+components:
+  securitySchemes:
+    PortalSession:
+      type: apiKey
+      in: cookie
+      name: sccauth
+      description: |
+        Authenticated Purview portal browser session. Observed requests also depend on same-origin
+        browser context and portal-issued headers when replayed outside the portal.
+  responses:
+    Unauthorized:
+      description: Authentication is required or the active Purview portal session is no longer valid.
+    Forbidden:
+      description: The authenticated principal does not have access to the requested portal data.
+    BadRequest:
+      description: The request shape or parameters were invalid.
+  schemas:
+    ErrorResponse:
+      type: object
+      additionalProperties: true
+    GenericObject:
+      type: object
+      additionalProperties: true
+    PurviewPortalTokenResponse:
+      type: object
+      description: Short-lived downstream access token minted by the portal for another resource.
+      required:
+        - Token
+        - NotAfter
+      properties:
+        Token:
+          type: string
+          example: <redacted>
+        NotAfter:
+          type: integer
+          description: Remaining token lifetime observed in portal responses.
+          example: 4255
+    PurviewPortalRoleCheckRequest:
+      type: array
+      description: |
+        Ordered list of role, feature, or permission identifiers to evaluate. The response preserves
+        positional ordering.
+      items:
+        type: string
+      example:
+        - compliance-ucc:Get-DlpCompliancePolicy
+        - exo:Search-UnifiedAuditLog?SessionId
+        - ucc:InformationProtectionAdmin
+    PurviewPortalRoleCheckResponse:
+      type: array
+      description: Positional boolean results corresponding to the submitted identifiers.
+      items:
+        type: boolean
+      example:
+        - true
+        - true
+        - false
+    PurviewPortalAdminAuditLogConfig:
+      type: object
+      description: Admin audit log configuration surfaced by the Purview settings experience.
+      properties:
+        Identity:
+          type: string
+          example: Admin Audit Log Settings
+        UnifiedAuditLogIngestionEnabled:
+          type: boolean
+          example: true
+        UnifiedAuditLogFirstOptInDate:
+          type: string
+          format: date-time
+          example: 2023-02-08T05:41:03.181563Z
+      additionalProperties: true
+    PurviewPortalUser:
+      type: object
+      description: Same-origin user picker result used by Purview case and role assignment flows.
+      properties:
+        UserPrincipalName:
+          type: string
+          example: <redacted-email>
+        ObjectId:
+          type: string
+          format: uuid
+          example: <guid-redacted>
+        DisplayName:
+          type: string
+          example: <redacted-name>
+        primarySmtpAddress:
+          type: string
+          nullable: true
+          example: <redacted-email>
+        Mail:
+          type: string
+          nullable: true
+          example: <redacted-email>
+        ProfileInitials:
+          type: string
+          nullable: true
+          example: AA
+      additionalProperties: true
+    PurviewPortalCachedRolesResponse:
+      type: object
+      description: Cached role and feature-flight evaluation payload returned during portal bootstrap.
+      properties:
+        rolesChanged:
+          type: boolean
+          example: false
+        cachedRoles:
+          type: object
+          additionalProperties:
+            type: boolean
+          description: Dictionary keyed by permission, role, service plan, or feature identifier.
+      additionalProperties: true
+    PurviewPortalLabelActivityRequest:
+      type: object
+      description: Time-bounded label activity analytics query.
+      required:
+        - pivot
+        - startTime
+        - endTime
+      properties:
+        pivot:
+          type: string
+          example: File-WhoApplied
+        startTime:
+          type: string
+          format: date-time
+          example: 2026-03-03T21:04:35.657Z
+        endTime:
+          type: string
+          format: date-time
+          example: 2026-04-03T21:04:35.657Z
+    PurviewPortalLabelActivityResponse:
+      type: object
+      description: Chart payload returned for Records Management label activity views.
+      properties:
+        categories:
+          type: array
+          nullable: true
+          items:
+            type: string
+        series:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/GenericObject'
+        status:
+          type: integer
+          example: 1
+        serieNameMapping:
+          type: object
+          nullable: true
+          additionalProperties:
+            type: string
+        errorMessage:
+          type: string
+          nullable: true
+        ThreatIntelSessionContext:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/GenericObject'
+      additionalProperties: true
+tags:
+  - name: Auth
+    description: Portal bootstrap, downstream token minting, and role-evaluation helpers.
+  - name: Audit
+    description: Same-origin audit configuration surfaced by Purview settings pages.
+  - name: Users
+    description: User lookup helpers used by eDiscovery and other picker-driven portal flows.
+  - name: Analytics
+    description: Same-origin analytics calls used by Records Management and label activity views.
+x-tagGroups:
+  - name: Portal
+    tags: [Auth, Audit, Users, Analytics]
+paths:
+  /api/Auth/getToken:
+    get:
+      tags: [Auth]
+      summary: Mint a downstream bearer token
+      description: |
+        Retrieves a short-lived access token for another Purview-adjacent resource.
+        Confirmed live from startup and solution navigation flows for resources including
+        `api.purview-service.microsoft.com`, tenant-scoped Purview service hosts,
+        `management.azure.com`, and `graph.microsoft.com`.
+      operationId: PurviewPortal.Auth.GetToken
+      parameters:
+        - name: resource
+          in: query
+          required: true
+          description: Resource URI or application identifier for the downstream token.
+          schema:
+            type: string
+            example: https://api.purview-service.microsoft.com
+        - name: serviceType
+          in: query
+          required: false
+          description: Optional portal service identifier paired with the requested resource.
+          schema:
+            type: string
+            example: 73c2949e-da2d-457a-9607-fcc665198967
+      responses:
+        '200':
+          description: Downstream token minted successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PurviewPortalTokenResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/v2/auth/GetCachedRoles:
+    get:
+      tags: [Auth]
+      summary: Get cached Purview roles
+      description: |
+        Returns the cached role, permission, service-plan, and feature-flight evaluation payload used
+        by the Purview shell during startup and solution transitions.
+      operationId: PurviewPortal.Auth.GetCachedRoles
+      parameters:
+        - name: refreshCache
+          in: query
+          required: false
+          description: Force the portal to refresh its cached role state before returning it.
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Cached roles returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PurviewPortalCachedRolesResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/auth/IsInRoles:
+    post:
+      tags: [Auth]
+      summary: Evaluate role and feature membership
+      description: |
+        Evaluates a batch of role, permission, and feature identifiers and returns a positional boolean
+        array indicating which entries are available to the current portal session.
+      operationId: PurviewPortal.Auth.IsInRoles
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PurviewPortalRoleCheckRequest'
+      responses:
+        '200':
+          description: Role evaluation completed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PurviewPortalRoleCheckResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/adminauditlogconfig/:
+    get:
+      tags: [Audit]
+      summary: Get admin audit log configuration
+      description: |
+        Returns the tenant's Purview admin audit log ingestion status and first opt-in timestamp.
+        Confirmed live from the Settings experience.
+      operationId: PurviewPortal.Audit.GetAdminAuditLogConfig
+      responses:
+        '200':
+          description: Admin audit log settings returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PurviewPortalAdminAuditLogConfig'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/user/:
+    get:
+      tags: [Users]
+      summary: Search users for portal pickers
+      description: |
+        Returns user objects used by Purview pickers and assignment flows. Confirmed live from
+        same-origin user lookup traffic while browsing the portal.
+      operationId: PurviewPortal.Users.Search
+      parameters:
+        - name: query
+          in: query
+          required: false
+          description: Free-text search string used by the portal picker.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User picker results returned successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PurviewPortalUser'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/LabelUserActivityLog/GetChartData:
+    post:
+      tags: [Analytics]
+      summary: Get label user activity chart data
+      description: |
+        Retrieves Records Management label activity chart data for a requested pivot and time range.
+        Confirmed from the label activity experience with the `File-WhoApplied` pivot.
+      operationId: PurviewPortal.Analytics.GetLabelUserActivityChartData
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PurviewPortalLabelActivityRequest'
+      responses:
+        '200':
+          description: Label activity chart payload returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PurviewPortalLabelActivityResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

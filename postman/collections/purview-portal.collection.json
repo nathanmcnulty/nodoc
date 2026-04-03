@@ -1,0 +1,1329 @@
+{
+    "item": [
+        {
+            "name": "api",
+            "description": "",
+            "item": [
+                {
+                    "name": "Auth",
+                    "description": "",
+                    "item": [
+                        {
+                            "name": "getToken",
+                            "description": "",
+                            "item": [
+                                {
+                                    "id": "77907fab-175e-4101-8258-87ff224180ed",
+                                    "name": "Mint a downstream bearer token",
+                                    "request": {
+                                        "name": "Mint a downstream bearer token",
+                                        "description": {
+                                            "content": "Retrieves a short-lived access token for another Purview-adjacent resource.\nConfirmed live from startup and solution navigation flows for resources including\n`api.purview-service.microsoft.com`, tenant-scoped Purview service hosts,\n`management.azure.com`, and `graph.microsoft.com`.\n",
+                                            "type": "text/plain"
+                                        },
+                                        "url": {
+                                            "path": [
+                                                "api",
+                                                "Auth",
+                                                "getToken"
+                                            ],
+                                            "host": [
+                                                "{{baseUrl}}"
+                                            ],
+                                            "query": [
+                                                {
+                                                    "disabled": false,
+                                                    "description": {
+                                                        "content": "(Required) Resource URI or application identifier for the downstream token.",
+                                                        "type": "text/plain"
+                                                    },
+                                                    "key": "resource",
+                                                    "value": "https://api.purview-service.microsoft.com"
+                                                },
+                                                {
+                                                    "disabled": false,
+                                                    "description": {
+                                                        "content": "Optional portal service identifier paired with the requested resource.",
+                                                        "type": "text/plain"
+                                                    },
+                                                    "key": "serviceType",
+                                                    "value": "73c2949e-da2d-457a-9607-fcc665198967"
+                                                }
+                                            ],
+                                            "variable": []
+                                        },
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            }
+                                        ],
+                                        "method": "GET",
+                                        "body": {},
+                                        "auth": null
+                                    },
+                                    "response": [
+                                        {
+                                            "id": "d86ec630-88a7-43da-ab3f-f639ec14b06c",
+                                            "name": "Downstream token minted successfully.",
+                                            "originalRequest": {
+                                                "url": {
+                                                    "path": [
+                                                        "api",
+                                                        "Auth",
+                                                        "getToken"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [
+                                                        {
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "(Required) Resource URI or application identifier for the downstream token.",
+                                                                "type": "text/plain"
+                                                            },
+                                                            "key": "resource",
+                                                            "value": "https://api.purview-service.microsoft.com"
+                                                        },
+                                                        {
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "Optional portal service identifier paired with the requested resource.",
+                                                                "type": "text/plain"
+                                                            },
+                                                            "key": "serviceType",
+                                                            "value": "73c2949e-da2d-457a-9607-fcc665198967"
+                                                        }
+                                                    ],
+                                                    "variable": []
+                                                },
+                                                "header": [
+                                                    {
+                                                        "key": "Accept",
+                                                        "value": "application/json"
+                                                    }
+                                                ],
+                                                "method": "GET",
+                                                "body": {}
+                                            },
+                                            "status": "OK",
+                                            "code": 200,
+                                            "header": [
+                                                {
+                                                    "key": "Content-Type",
+                                                    "value": "application/json"
+                                                }
+                                            ],
+                                            "body": "{\n  \"Token\": \"<redacted>\",\n  \"NotAfter\": 4255\n}",
+                                            "cookie": [],
+                                            "_postman_previewlanguage": "json"
+                                        },
+                                        {
+                                            "id": "01ed7691-c8d7-4783-9a15-3b5111c3492c",
+                                            "name": "The request shape or parameters were invalid.",
+                                            "originalRequest": {
+                                                "url": {
+                                                    "path": [
+                                                        "api",
+                                                        "Auth",
+                                                        "getToken"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [
+                                                        {
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "(Required) Resource URI or application identifier for the downstream token.",
+                                                                "type": "text/plain"
+                                                            },
+                                                            "key": "resource",
+                                                            "value": "https://api.purview-service.microsoft.com"
+                                                        },
+                                                        {
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "Optional portal service identifier paired with the requested resource.",
+                                                                "type": "text/plain"
+                                                            },
+                                                            "key": "serviceType",
+                                                            "value": "73c2949e-da2d-457a-9607-fcc665198967"
+                                                        }
+                                                    ],
+                                                    "variable": []
+                                                },
+                                                "method": "GET",
+                                                "body": {}
+                                            },
+                                            "status": "Bad Request",
+                                            "code": 400,
+                                            "header": [],
+                                            "cookie": [],
+                                            "_postman_previewlanguage": "text"
+                                        },
+                                        {
+                                            "id": "5605cb48-ac50-43de-8694-39648d622915",
+                                            "name": "Authentication is required or the active Purview portal session is no longer valid.",
+                                            "originalRequest": {
+                                                "url": {
+                                                    "path": [
+                                                        "api",
+                                                        "Auth",
+                                                        "getToken"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [
+                                                        {
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "(Required) Resource URI or application identifier for the downstream token.",
+                                                                "type": "text/plain"
+                                                            },
+                                                            "key": "resource",
+                                                            "value": "https://api.purview-service.microsoft.com"
+                                                        },
+                                                        {
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "Optional portal service identifier paired with the requested resource.",
+                                                                "type": "text/plain"
+                                                            },
+                                                            "key": "serviceType",
+                                                            "value": "73c2949e-da2d-457a-9607-fcc665198967"
+                                                        }
+                                                    ],
+                                                    "variable": []
+                                                },
+                                                "method": "GET",
+                                                "body": {}
+                                            },
+                                            "status": "Unauthorized",
+                                            "code": 401,
+                                            "header": [],
+                                            "cookie": [],
+                                            "_postman_previewlanguage": "text"
+                                        },
+                                        {
+                                            "id": "607ce454-32dc-490c-9441-8dc600a709ff",
+                                            "name": "The authenticated principal does not have access to the requested portal data.",
+                                            "originalRequest": {
+                                                "url": {
+                                                    "path": [
+                                                        "api",
+                                                        "Auth",
+                                                        "getToken"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [
+                                                        {
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "(Required) Resource URI or application identifier for the downstream token.",
+                                                                "type": "text/plain"
+                                                            },
+                                                            "key": "resource",
+                                                            "value": "https://api.purview-service.microsoft.com"
+                                                        },
+                                                        {
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "Optional portal service identifier paired with the requested resource.",
+                                                                "type": "text/plain"
+                                                            },
+                                                            "key": "serviceType",
+                                                            "value": "73c2949e-da2d-457a-9607-fcc665198967"
+                                                        }
+                                                    ],
+                                                    "variable": []
+                                                },
+                                                "method": "GET",
+                                                "body": {}
+                                            },
+                                            "status": "Forbidden",
+                                            "code": 403,
+                                            "header": [],
+                                            "cookie": [],
+                                            "_postman_previewlanguage": "text"
+                                        }
+                                    ],
+                                    "event": [],
+                                    "protocolProfileBehavior": {
+                                        "disableBodyPruning": true
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "v2",
+                    "description": "",
+                    "item": [
+                        {
+                            "name": "auth",
+                            "description": "",
+                            "item": [
+                                {
+                                    "name": "GetCachedRoles",
+                                    "description": "",
+                                    "item": [
+                                        {
+                                            "id": "9c3051dc-52e7-4b1d-8c49-f888c2939691",
+                                            "name": "Get cached Purview roles",
+                                            "request": {
+                                                "name": "Get cached Purview roles",
+                                                "description": {
+                                                    "content": "Returns the cached role, permission, service-plan, and feature-flight evaluation payload used\nby the Purview shell during startup and solution transitions.\n",
+                                                    "type": "text/plain"
+                                                },
+                                                "url": {
+                                                    "path": [
+                                                        "api",
+                                                        "v2",
+                                                        "auth",
+                                                        "GetCachedRoles"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [
+                                                        {
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "Force the portal to refresh its cached role state before returning it.",
+                                                                "type": "text/plain"
+                                                            },
+                                                            "key": "refreshCache",
+                                                            "value": "false"
+                                                        }
+                                                    ],
+                                                    "variable": []
+                                                },
+                                                "header": [
+                                                    {
+                                                        "key": "Accept",
+                                                        "value": "application/json"
+                                                    }
+                                                ],
+                                                "method": "GET",
+                                                "body": {},
+                                                "auth": null
+                                            },
+                                            "response": [
+                                                {
+                                                    "id": "0777e387-f5b2-45de-8400-2ffb14f81c31",
+                                                    "name": "Cached roles returned successfully.",
+                                                    "originalRequest": {
+                                                        "url": {
+                                                            "path": [
+                                                                "api",
+                                                                "v2",
+                                                                "auth",
+                                                                "GetCachedRoles"
+                                                            ],
+                                                            "host": [
+                                                                "{{baseUrl}}"
+                                                            ],
+                                                            "query": [
+                                                                {
+                                                                    "disabled": false,
+                                                                    "description": {
+                                                                        "content": "Force the portal to refresh its cached role state before returning it.",
+                                                                        "type": "text/plain"
+                                                                    },
+                                                                    "key": "refreshCache",
+                                                                    "value": "false"
+                                                                }
+                                                            ],
+                                                            "variable": []
+                                                        },
+                                                        "header": [
+                                                            {
+                                                                "key": "Accept",
+                                                                "value": "application/json"
+                                                            }
+                                                        ],
+                                                        "method": "GET",
+                                                        "body": {}
+                                                    },
+                                                    "status": "OK",
+                                                    "code": 200,
+                                                    "header": [
+                                                        {
+                                                            "key": "Content-Type",
+                                                            "value": "application/json"
+                                                        }
+                                                    ],
+                                                    "body": "{\n  \"rolesChanged\": false,\n  \"cachedRoles\": {\n    \"key_0\": false,\n    \"key_1\": false,\n    \"key_2\": true\n  }\n}",
+                                                    "cookie": [],
+                                                    "_postman_previewlanguage": "json"
+                                                },
+                                                {
+                                                    "id": "0fa6c4dc-01f9-4ce7-b978-345b1ac932dd",
+                                                    "name": "The request shape or parameters were invalid.",
+                                                    "originalRequest": {
+                                                        "url": {
+                                                            "path": [
+                                                                "api",
+                                                                "v2",
+                                                                "auth",
+                                                                "GetCachedRoles"
+                                                            ],
+                                                            "host": [
+                                                                "{{baseUrl}}"
+                                                            ],
+                                                            "query": [
+                                                                {
+                                                                    "disabled": false,
+                                                                    "description": {
+                                                                        "content": "Force the portal to refresh its cached role state before returning it.",
+                                                                        "type": "text/plain"
+                                                                    },
+                                                                    "key": "refreshCache",
+                                                                    "value": "false"
+                                                                }
+                                                            ],
+                                                            "variable": []
+                                                        },
+                                                        "method": "GET",
+                                                        "body": {}
+                                                    },
+                                                    "status": "Bad Request",
+                                                    "code": 400,
+                                                    "header": [],
+                                                    "cookie": [],
+                                                    "_postman_previewlanguage": "text"
+                                                },
+                                                {
+                                                    "id": "2d70ab2e-8afe-437e-bb9b-fbdc0e42d1aa",
+                                                    "name": "Authentication is required or the active Purview portal session is no longer valid.",
+                                                    "originalRequest": {
+                                                        "url": {
+                                                            "path": [
+                                                                "api",
+                                                                "v2",
+                                                                "auth",
+                                                                "GetCachedRoles"
+                                                            ],
+                                                            "host": [
+                                                                "{{baseUrl}}"
+                                                            ],
+                                                            "query": [
+                                                                {
+                                                                    "disabled": false,
+                                                                    "description": {
+                                                                        "content": "Force the portal to refresh its cached role state before returning it.",
+                                                                        "type": "text/plain"
+                                                                    },
+                                                                    "key": "refreshCache",
+                                                                    "value": "false"
+                                                                }
+                                                            ],
+                                                            "variable": []
+                                                        },
+                                                        "method": "GET",
+                                                        "body": {}
+                                                    },
+                                                    "status": "Unauthorized",
+                                                    "code": 401,
+                                                    "header": [],
+                                                    "cookie": [],
+                                                    "_postman_previewlanguage": "text"
+                                                },
+                                                {
+                                                    "id": "1eff999c-2d08-4442-94db-0d41f97c0379",
+                                                    "name": "The authenticated principal does not have access to the requested portal data.",
+                                                    "originalRequest": {
+                                                        "url": {
+                                                            "path": [
+                                                                "api",
+                                                                "v2",
+                                                                "auth",
+                                                                "GetCachedRoles"
+                                                            ],
+                                                            "host": [
+                                                                "{{baseUrl}}"
+                                                            ],
+                                                            "query": [
+                                                                {
+                                                                    "disabled": false,
+                                                                    "description": {
+                                                                        "content": "Force the portal to refresh its cached role state before returning it.",
+                                                                        "type": "text/plain"
+                                                                    },
+                                                                    "key": "refreshCache",
+                                                                    "value": "false"
+                                                                }
+                                                            ],
+                                                            "variable": []
+                                                        },
+                                                        "method": "GET",
+                                                        "body": {}
+                                                    },
+                                                    "status": "Forbidden",
+                                                    "code": 403,
+                                                    "header": [],
+                                                    "cookie": [],
+                                                    "_postman_previewlanguage": "text"
+                                                }
+                                            ],
+                                            "event": [],
+                                            "protocolProfileBehavior": {
+                                                "disableBodyPruning": true
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "auth",
+                    "description": "",
+                    "item": [
+                        {
+                            "name": "IsInRoles",
+                            "description": "",
+                            "item": [
+                                {
+                                    "id": "7dddb047-48e8-4ddb-ad05-ef9998774182",
+                                    "name": "Evaluate role and feature membership",
+                                    "request": {
+                                        "name": "Evaluate role and feature membership",
+                                        "description": {
+                                            "content": "Evaluates a batch of role, permission, and feature identifiers and returns a positional boolean\narray indicating which entries are available to the current portal session.\n",
+                                            "type": "text/plain"
+                                        },
+                                        "url": {
+                                            "path": [
+                                                "api",
+                                                "auth",
+                                                "IsInRoles"
+                                            ],
+                                            "host": [
+                                                "{{baseUrl}}"
+                                            ],
+                                            "query": [],
+                                            "variable": []
+                                        },
+                                        "header": [
+                                            {
+                                                "key": "Content-Type",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            }
+                                        ],
+                                        "method": "POST",
+                                        "body": {
+                                            "mode": "raw",
+                                            "raw": "[\n  \"compliance-ucc:Get-DlpCompliancePolicy\",\n  \"exo:Search-UnifiedAuditLog?SessionId\",\n  \"ucc:InformationProtectionAdmin\"\n]",
+                                            "options": {
+                                                "raw": {
+                                                    "headerFamily": "json",
+                                                    "language": "json"
+                                                }
+                                            }
+                                        },
+                                        "auth": null
+                                    },
+                                    "response": [
+                                        {
+                                            "id": "a7950106-0b6f-4d14-98bb-cfc5ae5253f6",
+                                            "name": "Role evaluation completed successfully.",
+                                            "originalRequest": {
+                                                "url": {
+                                                    "path": [
+                                                        "api",
+                                                        "auth",
+                                                        "IsInRoles"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [],
+                                                    "variable": []
+                                                },
+                                                "header": [
+                                                    {
+                                                        "key": "Content-Type",
+                                                        "value": "application/json"
+                                                    },
+                                                    {
+                                                        "key": "Accept",
+                                                        "value": "application/json"
+                                                    }
+                                                ],
+                                                "method": "POST",
+                                                "body": {
+                                                    "mode": "raw",
+                                                    "raw": "[\n  \"compliance-ucc:Get-DlpCompliancePolicy\",\n  \"exo:Search-UnifiedAuditLog?SessionId\",\n  \"ucc:InformationProtectionAdmin\"\n]",
+                                                    "options": {
+                                                        "raw": {
+                                                            "headerFamily": "json",
+                                                            "language": "json"
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            "status": "OK",
+                                            "code": 200,
+                                            "header": [
+                                                {
+                                                    "key": "Content-Type",
+                                                    "value": "application/json"
+                                                }
+                                            ],
+                                            "body": "[\n  true,\n  true,\n  false\n]",
+                                            "cookie": [],
+                                            "_postman_previewlanguage": "json"
+                                        },
+                                        {
+                                            "id": "b4823dbc-2af1-41d5-9fdd-b83bdf9dad84",
+                                            "name": "The request shape or parameters were invalid.",
+                                            "originalRequest": {
+                                                "url": {
+                                                    "path": [
+                                                        "api",
+                                                        "auth",
+                                                        "IsInRoles"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [],
+                                                    "variable": []
+                                                },
+                                                "header": [
+                                                    {
+                                                        "key": "Content-Type",
+                                                        "value": "application/json"
+                                                    }
+                                                ],
+                                                "method": "POST",
+                                                "body": {
+                                                    "mode": "raw",
+                                                    "raw": "[\n  \"compliance-ucc:Get-DlpCompliancePolicy\",\n  \"exo:Search-UnifiedAuditLog?SessionId\",\n  \"ucc:InformationProtectionAdmin\"\n]",
+                                                    "options": {
+                                                        "raw": {
+                                                            "headerFamily": "json",
+                                                            "language": "json"
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            "status": "Bad Request",
+                                            "code": 400,
+                                            "header": [],
+                                            "cookie": [],
+                                            "_postman_previewlanguage": "text"
+                                        },
+                                        {
+                                            "id": "7d0db728-335a-4d04-ac13-576252c9eadb",
+                                            "name": "Authentication is required or the active Purview portal session is no longer valid.",
+                                            "originalRequest": {
+                                                "url": {
+                                                    "path": [
+                                                        "api",
+                                                        "auth",
+                                                        "IsInRoles"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [],
+                                                    "variable": []
+                                                },
+                                                "header": [
+                                                    {
+                                                        "key": "Content-Type",
+                                                        "value": "application/json"
+                                                    }
+                                                ],
+                                                "method": "POST",
+                                                "body": {
+                                                    "mode": "raw",
+                                                    "raw": "[\n  \"compliance-ucc:Get-DlpCompliancePolicy\",\n  \"exo:Search-UnifiedAuditLog?SessionId\",\n  \"ucc:InformationProtectionAdmin\"\n]",
+                                                    "options": {
+                                                        "raw": {
+                                                            "headerFamily": "json",
+                                                            "language": "json"
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            "status": "Unauthorized",
+                                            "code": 401,
+                                            "header": [],
+                                            "cookie": [],
+                                            "_postman_previewlanguage": "text"
+                                        },
+                                        {
+                                            "id": "c86ff54e-e943-4dc4-97fb-88136a82325b",
+                                            "name": "The authenticated principal does not have access to the requested portal data.",
+                                            "originalRequest": {
+                                                "url": {
+                                                    "path": [
+                                                        "api",
+                                                        "auth",
+                                                        "IsInRoles"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [],
+                                                    "variable": []
+                                                },
+                                                "header": [
+                                                    {
+                                                        "key": "Content-Type",
+                                                        "value": "application/json"
+                                                    }
+                                                ],
+                                                "method": "POST",
+                                                "body": {
+                                                    "mode": "raw",
+                                                    "raw": "[\n  \"compliance-ucc:Get-DlpCompliancePolicy\",\n  \"exo:Search-UnifiedAuditLog?SessionId\",\n  \"ucc:InformationProtectionAdmin\"\n]",
+                                                    "options": {
+                                                        "raw": {
+                                                            "headerFamily": "json",
+                                                            "language": "json"
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            "status": "Forbidden",
+                                            "code": 403,
+                                            "header": [],
+                                            "cookie": [],
+                                            "_postman_previewlanguage": "text"
+                                        }
+                                    ],
+                                    "event": [],
+                                    "protocolProfileBehavior": {
+                                        "disableBodyPruning": true
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "adminauditlogconfig",
+                    "description": "",
+                    "item": [
+                        {
+                            "id": "057b802a-a809-43ce-beab-494ae2217421",
+                            "name": "Get admin audit log configuration",
+                            "request": {
+                                "name": "Get admin audit log configuration",
+                                "description": {
+                                    "content": "Returns the tenant's Purview admin audit log ingestion status and first opt-in timestamp.\nConfirmed live from the Settings experience.\n",
+                                    "type": "text/plain"
+                                },
+                                "url": {
+                                    "path": [
+                                        "api",
+                                        "adminauditlogconfig",
+                                        ""
+                                    ],
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "query": [],
+                                    "variable": []
+                                },
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "method": "GET",
+                                "body": {},
+                                "auth": null
+                            },
+                            "response": [
+                                {
+                                    "id": "88246325-3d57-48f4-be61-4c0196a3d356",
+                                    "name": "Admin audit log settings returned successfully.",
+                                    "originalRequest": {
+                                        "url": {
+                                            "path": [
+                                                "api",
+                                                "adminauditlogconfig",
+                                                ""
+                                            ],
+                                            "host": [
+                                                "{{baseUrl}}"
+                                            ],
+                                            "query": [],
+                                            "variable": []
+                                        },
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            }
+                                        ],
+                                        "method": "GET",
+                                        "body": {}
+                                    },
+                                    "status": "OK",
+                                    "code": 200,
+                                    "header": [
+                                        {
+                                            "key": "Content-Type",
+                                            "value": "application/json"
+                                        }
+                                    ],
+                                    "body": "{\n  \"Identity\": \"Admin Audit Log Settings\",\n  \"UnifiedAuditLogIngestionEnabled\": true,\n  \"UnifiedAuditLogFirstOptInDate\": \"2023-02-08T05:41:03.181563Z\"\n}",
+                                    "cookie": [],
+                                    "_postman_previewlanguage": "json"
+                                },
+                                {
+                                    "id": "46d9837c-4ef4-4d61-ab46-8543a99ba779",
+                                    "name": "Authentication is required or the active Purview portal session is no longer valid.",
+                                    "originalRequest": {
+                                        "url": {
+                                            "path": [
+                                                "api",
+                                                "adminauditlogconfig",
+                                                ""
+                                            ],
+                                            "host": [
+                                                "{{baseUrl}}"
+                                            ],
+                                            "query": [],
+                                            "variable": []
+                                        },
+                                        "method": "GET",
+                                        "body": {}
+                                    },
+                                    "status": "Unauthorized",
+                                    "code": 401,
+                                    "header": [],
+                                    "cookie": [],
+                                    "_postman_previewlanguage": "text"
+                                },
+                                {
+                                    "id": "33507068-8fd6-46a1-88a5-64b9c37f72a0",
+                                    "name": "The authenticated principal does not have access to the requested portal data.",
+                                    "originalRequest": {
+                                        "url": {
+                                            "path": [
+                                                "api",
+                                                "adminauditlogconfig",
+                                                ""
+                                            ],
+                                            "host": [
+                                                "{{baseUrl}}"
+                                            ],
+                                            "query": [],
+                                            "variable": []
+                                        },
+                                        "method": "GET",
+                                        "body": {}
+                                    },
+                                    "status": "Forbidden",
+                                    "code": 403,
+                                    "header": [],
+                                    "cookie": [],
+                                    "_postman_previewlanguage": "text"
+                                }
+                            ],
+                            "event": [],
+                            "protocolProfileBehavior": {
+                                "disableBodyPruning": true
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "user",
+                    "description": "",
+                    "item": [
+                        {
+                            "id": "c2f0ef36-c7c0-4a11-b6da-81588f923589",
+                            "name": "Search users for portal pickers",
+                            "request": {
+                                "name": "Search users for portal pickers",
+                                "description": {
+                                    "content": "Returns user objects used by Purview pickers and assignment flows. Confirmed live from\nsame-origin user lookup traffic while browsing the portal.\n",
+                                    "type": "text/plain"
+                                },
+                                "url": {
+                                    "path": [
+                                        "api",
+                                        "user",
+                                        ""
+                                    ],
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "query": [
+                                        {
+                                            "disabled": false,
+                                            "description": {
+                                                "content": "Free-text search string used by the portal picker.",
+                                                "type": "text/plain"
+                                            },
+                                            "key": "query",
+                                            "value": "string"
+                                        }
+                                    ],
+                                    "variable": []
+                                },
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "method": "GET",
+                                "body": {},
+                                "auth": null
+                            },
+                            "response": [
+                                {
+                                    "id": "6e3a9350-888d-4113-9365-3909354dc45b",
+                                    "name": "User picker results returned successfully.",
+                                    "originalRequest": {
+                                        "url": {
+                                            "path": [
+                                                "api",
+                                                "user",
+                                                ""
+                                            ],
+                                            "host": [
+                                                "{{baseUrl}}"
+                                            ],
+                                            "query": [
+                                                {
+                                                    "disabled": false,
+                                                    "description": {
+                                                        "content": "Free-text search string used by the portal picker.",
+                                                        "type": "text/plain"
+                                                    },
+                                                    "key": "query",
+                                                    "value": "string"
+                                                }
+                                            ],
+                                            "variable": []
+                                        },
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            }
+                                        ],
+                                        "method": "GET",
+                                        "body": {}
+                                    },
+                                    "status": "OK",
+                                    "code": 200,
+                                    "header": [
+                                        {
+                                            "key": "Content-Type",
+                                            "value": "application/json"
+                                        }
+                                    ],
+                                    "body": "[\n  {\n    \"UserPrincipalName\": \"<redacted-email>\",\n    \"ObjectId\": \"4698c7ef-fcb0-06a6-2c53-a5629f01fe71\",\n    \"DisplayName\": \"<redacted-name>\",\n    \"primarySmtpAddress\": \"<redacted-email>\",\n    \"Mail\": \"<redacted-email>\",\n    \"ProfileInitials\": \"AA\"\n  },\n  {\n    \"UserPrincipalName\": \"<redacted-email>\",\n    \"ObjectId\": \"9d764ad2-f3da-1af4-881c-aad12e6f041a\",\n    \"DisplayName\": \"<redacted-name>\",\n    \"primarySmtpAddress\": \"<redacted-email>\",\n    \"Mail\": \"<redacted-email>\",\n    \"ProfileInitials\": \"AA\",\n    \"key_0\": 8939.877245459413\n  }\n]",
+                                    "cookie": [],
+                                    "_postman_previewlanguage": "json"
+                                },
+                                {
+                                    "id": "3dad65fd-82c2-436e-a7e6-331d1d71e967",
+                                    "name": "The request shape or parameters were invalid.",
+                                    "originalRequest": {
+                                        "url": {
+                                            "path": [
+                                                "api",
+                                                "user",
+                                                ""
+                                            ],
+                                            "host": [
+                                                "{{baseUrl}}"
+                                            ],
+                                            "query": [
+                                                {
+                                                    "disabled": false,
+                                                    "description": {
+                                                        "content": "Free-text search string used by the portal picker.",
+                                                        "type": "text/plain"
+                                                    },
+                                                    "key": "query",
+                                                    "value": "string"
+                                                }
+                                            ],
+                                            "variable": []
+                                        },
+                                        "method": "GET",
+                                        "body": {}
+                                    },
+                                    "status": "Bad Request",
+                                    "code": 400,
+                                    "header": [],
+                                    "cookie": [],
+                                    "_postman_previewlanguage": "text"
+                                },
+                                {
+                                    "id": "cc3e660e-4409-4a02-818f-d4445b71c7e5",
+                                    "name": "Authentication is required or the active Purview portal session is no longer valid.",
+                                    "originalRequest": {
+                                        "url": {
+                                            "path": [
+                                                "api",
+                                                "user",
+                                                ""
+                                            ],
+                                            "host": [
+                                                "{{baseUrl}}"
+                                            ],
+                                            "query": [
+                                                {
+                                                    "disabled": false,
+                                                    "description": {
+                                                        "content": "Free-text search string used by the portal picker.",
+                                                        "type": "text/plain"
+                                                    },
+                                                    "key": "query",
+                                                    "value": "string"
+                                                }
+                                            ],
+                                            "variable": []
+                                        },
+                                        "method": "GET",
+                                        "body": {}
+                                    },
+                                    "status": "Unauthorized",
+                                    "code": 401,
+                                    "header": [],
+                                    "cookie": [],
+                                    "_postman_previewlanguage": "text"
+                                },
+                                {
+                                    "id": "8b19d409-dae8-455a-90b3-ad64f61f5a94",
+                                    "name": "The authenticated principal does not have access to the requested portal data.",
+                                    "originalRequest": {
+                                        "url": {
+                                            "path": [
+                                                "api",
+                                                "user",
+                                                ""
+                                            ],
+                                            "host": [
+                                                "{{baseUrl}}"
+                                            ],
+                                            "query": [
+                                                {
+                                                    "disabled": false,
+                                                    "description": {
+                                                        "content": "Free-text search string used by the portal picker.",
+                                                        "type": "text/plain"
+                                                    },
+                                                    "key": "query",
+                                                    "value": "string"
+                                                }
+                                            ],
+                                            "variable": []
+                                        },
+                                        "method": "GET",
+                                        "body": {}
+                                    },
+                                    "status": "Forbidden",
+                                    "code": 403,
+                                    "header": [],
+                                    "cookie": [],
+                                    "_postman_previewlanguage": "text"
+                                }
+                            ],
+                            "event": [],
+                            "protocolProfileBehavior": {
+                                "disableBodyPruning": true
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "LabelUserActivityLog",
+                    "description": "",
+                    "item": [
+                        {
+                            "name": "GetChartData",
+                            "description": "",
+                            "item": [
+                                {
+                                    "id": "a2e0f2b7-67b8-405a-bda4-ef189c6cd353",
+                                    "name": "Get label user activity chart data",
+                                    "request": {
+                                        "name": "Get label user activity chart data",
+                                        "description": {
+                                            "content": "Retrieves Records Management label activity chart data for a requested pivot and time range.\nConfirmed from the label activity experience with the `File-WhoApplied` pivot.\n",
+                                            "type": "text/plain"
+                                        },
+                                        "url": {
+                                            "path": [
+                                                "api",
+                                                "LabelUserActivityLog",
+                                                "GetChartData"
+                                            ],
+                                            "host": [
+                                                "{{baseUrl}}"
+                                            ],
+                                            "query": [],
+                                            "variable": []
+                                        },
+                                        "header": [
+                                            {
+                                                "key": "Content-Type",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            }
+                                        ],
+                                        "method": "POST",
+                                        "body": {
+                                            "mode": "raw",
+                                            "raw": "{\n  \"pivot\": \"File-WhoApplied\",\n  \"startTime\": \"2026-03-03T21:04:35.657Z\",\n  \"endTime\": \"2026-04-03T21:04:35.657Z\"\n}",
+                                            "options": {
+                                                "raw": {
+                                                    "headerFamily": "json",
+                                                    "language": "json"
+                                                }
+                                            }
+                                        },
+                                        "auth": null
+                                    },
+                                    "response": [
+                                        {
+                                            "id": "e7ea56c2-6207-437f-9066-5054d70bf45b",
+                                            "name": "Label activity chart payload returned successfully.",
+                                            "originalRequest": {
+                                                "url": {
+                                                    "path": [
+                                                        "api",
+                                                        "LabelUserActivityLog",
+                                                        "GetChartData"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [],
+                                                    "variable": []
+                                                },
+                                                "header": [
+                                                    {
+                                                        "key": "Content-Type",
+                                                        "value": "application/json"
+                                                    },
+                                                    {
+                                                        "key": "Accept",
+                                                        "value": "application/json"
+                                                    }
+                                                ],
+                                                "method": "POST",
+                                                "body": {
+                                                    "mode": "raw",
+                                                    "raw": "{\n  \"pivot\": \"File-WhoApplied\",\n  \"startTime\": \"2026-03-03T21:04:35.657Z\",\n  \"endTime\": \"2026-04-03T21:04:35.657Z\"\n}",
+                                                    "options": {
+                                                        "raw": {
+                                                            "headerFamily": "json",
+                                                            "language": "json"
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            "status": "OK",
+                                            "code": 200,
+                                            "header": [
+                                                {
+                                                    "key": "Content-Type",
+                                                    "value": "application/json"
+                                                }
+                                            ],
+                                            "body": "{\n  \"categories\": [\n    \"string\",\n    \"string\"\n  ],\n  \"series\": [\n    {\n      \"key_0\": 3124,\n      \"key_1\": \"string\"\n    },\n    {\n      \"key_0\": 1313.7759792860259\n    }\n  ],\n  \"status\": 1,\n  \"serieNameMapping\": {\n    \"key_0\": \"string\",\n    \"key_1\": \"string\",\n    \"key_2\": \"string\",\n    \"key_3\": \"string\"\n  },\n  \"errorMessage\": \"string\",\n  \"ThreatIntelSessionContext\": {}\n}",
+                                            "cookie": [],
+                                            "_postman_previewlanguage": "json"
+                                        },
+                                        {
+                                            "id": "53fd42a4-b7df-4b26-a9de-9c34c72cd691",
+                                            "name": "The request shape or parameters were invalid.",
+                                            "originalRequest": {
+                                                "url": {
+                                                    "path": [
+                                                        "api",
+                                                        "LabelUserActivityLog",
+                                                        "GetChartData"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [],
+                                                    "variable": []
+                                                },
+                                                "header": [
+                                                    {
+                                                        "key": "Content-Type",
+                                                        "value": "application/json"
+                                                    }
+                                                ],
+                                                "method": "POST",
+                                                "body": {
+                                                    "mode": "raw",
+                                                    "raw": "{\n  \"pivot\": \"File-WhoApplied\",\n  \"startTime\": \"2026-03-03T21:04:35.657Z\",\n  \"endTime\": \"2026-04-03T21:04:35.657Z\"\n}",
+                                                    "options": {
+                                                        "raw": {
+                                                            "headerFamily": "json",
+                                                            "language": "json"
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            "status": "Bad Request",
+                                            "code": 400,
+                                            "header": [],
+                                            "cookie": [],
+                                            "_postman_previewlanguage": "text"
+                                        },
+                                        {
+                                            "id": "aec4f6a4-5277-410c-b17b-b50bc95a7339",
+                                            "name": "Authentication is required or the active Purview portal session is no longer valid.",
+                                            "originalRequest": {
+                                                "url": {
+                                                    "path": [
+                                                        "api",
+                                                        "LabelUserActivityLog",
+                                                        "GetChartData"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [],
+                                                    "variable": []
+                                                },
+                                                "header": [
+                                                    {
+                                                        "key": "Content-Type",
+                                                        "value": "application/json"
+                                                    }
+                                                ],
+                                                "method": "POST",
+                                                "body": {
+                                                    "mode": "raw",
+                                                    "raw": "{\n  \"pivot\": \"File-WhoApplied\",\n  \"startTime\": \"2026-03-03T21:04:35.657Z\",\n  \"endTime\": \"2026-04-03T21:04:35.657Z\"\n}",
+                                                    "options": {
+                                                        "raw": {
+                                                            "headerFamily": "json",
+                                                            "language": "json"
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            "status": "Unauthorized",
+                                            "code": 401,
+                                            "header": [],
+                                            "cookie": [],
+                                            "_postman_previewlanguage": "text"
+                                        },
+                                        {
+                                            "id": "95ad5490-a8c0-4c66-8808-fc60e409b9c7",
+                                            "name": "The authenticated principal does not have access to the requested portal data.",
+                                            "originalRequest": {
+                                                "url": {
+                                                    "path": [
+                                                        "api",
+                                                        "LabelUserActivityLog",
+                                                        "GetChartData"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [],
+                                                    "variable": []
+                                                },
+                                                "header": [
+                                                    {
+                                                        "key": "Content-Type",
+                                                        "value": "application/json"
+                                                    }
+                                                ],
+                                                "method": "POST",
+                                                "body": {
+                                                    "mode": "raw",
+                                                    "raw": "{\n  \"pivot\": \"File-WhoApplied\",\n  \"startTime\": \"2026-03-03T21:04:35.657Z\",\n  \"endTime\": \"2026-04-03T21:04:35.657Z\"\n}",
+                                                    "options": {
+                                                        "raw": {
+                                                            "headerFamily": "json",
+                                                            "language": "json"
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            "status": "Forbidden",
+                                            "code": 403,
+                                            "header": [],
+                                            "cookie": [],
+                                            "_postman_previewlanguage": "text"
+                                        }
+                                    ],
+                                    "event": [],
+                                    "protocolProfileBehavior": {
+                                        "disableBodyPruning": true
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "auth": {
+        "type": "apikey",
+        "apikey": [
+            {
+                "type": "any",
+                "value": "sccauth",
+                "key": "key"
+            },
+            {
+                "type": "any",
+                "value": "{{apiKey}}",
+                "key": "value"
+            },
+            {
+                "type": "any",
+                "value": "header",
+                "key": "in"
+            }
+        ]
+    },
+    "event": [],
+    "variable": [
+        {
+            "key": "baseUrl",
+            "value": "https://purview.microsoft.com"
+        }
+    ],
+    "info": {
+        "_postman_id": "e6c619dc-0275-48f9-8c07-841b9f3e6fdb",
+        "name": "Purview Portal",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+        "description": {
+            "content": "The Purview Portal API is used by the Microsoft Purview portal (`purview.microsoft.com`)\nfor same-origin bootstrap, token minting, role evaluation, user lookup, audit configuration,\nand label activity analytics.\n\nThe operations below were confirmed while browsing the Purview portal with a real authenticated\nEdge session. They were observed during startup and while navigating blades such as:\n\n  - Home and solution launcher\n  - Agents, Learn, and Usage center\n  - Compliance Manager\n  - eDiscovery\n  - Records Management\n  - Audit\n  - Settings > OCR\n\nRequests rely on the authenticated Purview browser session and same-origin portal context.\n`GET /api/Auth/getToken` was observed minting short-lived downstream access tokens for resources\nincluding `api.purview-service.microsoft.com`, tenant-specific Purview service hosts,\n`management.azure.com`, and `graph.microsoft.com`.\n\nDocumentation and specifications have been provided on a best-efforts basis and may not be\n100% accurate.\n\n\nContact Support:\n Name: nodoc",
+            "type": "text/plain"
+        }
+    }
+}

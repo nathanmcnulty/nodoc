@@ -204,6 +204,44 @@ paths:
         '404':
           $ref: common.yml#/components/responses/NotFound
 
+  /arm/providers/Microsoft.Authorization/roleAssignments:
+    get:
+      operationId: listArmRoleAssignments
+      summary: List Azure role assignments
+      description: >-
+        Retrieve Azure Resource Manager role assignments through Purview's proxy layer.
+        Confirmed from Purview for AI permission checks that filtered assignments by principal ID.
+      tags: [PlatformServices]
+      parameters:
+        - name: api-version
+          in: query
+          required: false
+          description: ARM API version used by the proxied request.
+          schema:
+            type: string
+            example: 2022-04-01
+        - name: $filter
+          in: query
+          required: false
+          description: OData-style filter used to scope role assignments, commonly by principal ID.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/ArmRoleAssignmentsResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
   /purviewplatform/api/v1/insight/GetStartedTasks:
     get:
       operationId: getStartedTasks

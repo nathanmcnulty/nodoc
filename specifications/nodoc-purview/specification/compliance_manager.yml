@@ -131,6 +131,62 @@ paths:
         '404':
           $ref: common.yml#/components/responses/NotFound
 
+  /cpm/v1.0/Regulations/PremiumRegulationSummary:
+    get:
+      operationId: getPremiumRegulationSummary
+      summary: Get premium regulation consumption summary
+      description: >-
+        Retrieve Compliance Manager premium regulation consumption and entitlement data.
+        Confirmed from the Regulations and AI Regulations entry points on the overview page.
+      tags: [ComplianceManager]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/CompliancePremiumRegulationSummaryResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /cpm/v1.0/RegulationTemplates:
+    get:
+      operationId: listRegulationTemplates
+      summary: List regulation templates
+      description: >-
+        Retrieve the regulation templates catalog shown by Compliance Manager. The
+        observed Purview flow requested premium templates and optionally included
+        predeployment templates.
+      tags: [ComplianceManager]
+      parameters:
+        - name: includePredeploymentTemplates
+          in: query
+          required: false
+          description: Include templates that are not yet fully deployed in the tenant.
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/ComplianceRegulationTemplatesResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
   /Ingestion/NativeConnectorJob:
     get:
       operationId: getNativeConnectorJobStatus
