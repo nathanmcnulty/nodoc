@@ -317,7 +317,7 @@ export const accessModels: AccessModel[] = [
 ];
 
 const modeledOperationCount = apiCatalog.reduce((total, api) => total + api.operations, 0);
-const checkedInCollectionCount = apiCatalog.filter((api) => api.collectionPath).length;
+const checkedInCollectionCount = apiCatalog.length;
 
 export const launchStats = [
   { label: "Published specs", value: String(apiCatalog.length) },
