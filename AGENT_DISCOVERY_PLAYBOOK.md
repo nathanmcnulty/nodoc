@@ -410,6 +410,47 @@ Current takeaway:
 
 - “Scrape HTML and JS and spider outward” is worth doing, but only as one stage in this larger pipeline.
 
+### 2026-04-03 — Entity pivot extraction
+
+Idea:
+
+- Treat each entity/detail page as a graph node and extract additional safe traversal edges from the page itself.
+
+What was tried:
+
+- On representative Defender entity pages, extracted:
+  - visible `role="tab"` items
+  - same-origin internal links outside the left nav
+  - visible buttons, then classified them heuristically as risky or non-risky
+
+Representative results:
+
+- **Device page**: 7 tabs, 4 internal links
+- **User page**: 9 tabs, 1 internal link
+- **File page**: 7 tabs, 5 internal links
+- **URL page**: 6 tabs, 4 internal links
+- **IP page**: 4 tabs, 2 internal links
+- **Threat policies**: 0 tabs, 3 internal links
+
+What helped:
+
+- Tabs are the cleanest next traversal edge because they are usually read-only context switches within the same entity surface.
+- Internal same-origin links exposed pivots like device inventory, related devices, and other entity pages.
+
+What did not generalize well:
+
+- Raw visible-button extraction was too noisy because it includes shell controls, chrome, and action menus.
+- Text-only “risky button” filtering is not enough to decide what is safe to click.
+
+Current takeaway:
+
+- A deeper safe crawler should prioritize:
+  1. **entity tabs**
+  2. **same-origin internal links in the content area**
+  3. **explicit allowlisted “View …” style pivots**
+
+- It should **not** click arbitrary buttons by default.
+
 ## Ideas backlog
 
 Add new ideas here before trying them, then move the result into the experiment log.
