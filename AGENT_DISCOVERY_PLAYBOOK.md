@@ -451,6 +451,69 @@ Current takeaway:
 
 - It should **not** click arbitrary buttons by default.
 
+### 2026-04-03 — Depth-limited entity graph crawl
+
+Idea:
+
+- Start from a small set of confirmed deep-link entities and spider outward by tabs first, then content links, while keeping strict same-origin, depth, and page-count limits.
+
+What was tried:
+
+- Seeded the crawler with:
+  - `threatpolicy`
+  - `machines/v2/{id}/overview`
+  - `user?...`
+  - `file/{sha256}/overview`
+  - `url/overview?url=...`
+  - `ip/{address}/overview`
+- Used a same-origin crawler that:
+  - visited the default page state
+  - clicked visible tabs
+  - queued same-origin content links outside the left nav
+  - excluded arbitrary button clicks
+- Run parameters:
+  - `maxDepth: 2`
+  - `maxPages: 24`
+
+Results:
+
+- **24** pages visited from **6** seeds before hitting the page cap
+- **267** same-origin XHR/fetch API records captured
+- **134** discovered same-origin links
+- **116** queued-but-unvisited links remained
+- **24** request failures, dominated by `net::ERR_ABORTED` on timeline/event requests during tab or page transitions
+- **215** method+path pairs were new relative to the earlier left-nav crawl
+- Highest-yield visited surfaces were:
+  - machine overview/timeline pages: **50+** API records each
+  - user page: **49**
+  - URL, incident, file, and domain pages: roughly **29-33** each
+- Highest-yield newly surfaced families included:
+  - `mtp/tvm`: **38**
+  - `mtp/cloudPivot`: **22**
+  - `mtp/mdeTimelineExperience`: **13**
+  - `mtp/ndr`: **12**
+  - `radius`: **9**
+  - `mdi`: **8**
+
+What helped:
+
+- Tabs remained the safest high-signal traversal edge; they unlocked much richer API activity than simply opening the default entity page.
+- Timeline, incident, and entity-detail pivots exposed families that the left-nav crawl missed or only sampled lightly.
+- A hard page cap kept the first entity graph run bounded while still producing enough signal to tune the crawler.
+
+What did not generalize well:
+
+- The queue skewed heavily toward more machine pages; **72** queued URLs matched `/machines/{id}`, which reduces surface diversity quickly.
+- Shared settings pivots like `securitysettings/defender/alert_suppression` were reachable from multiple entity types and produced repeated capture with limited new value.
+- End-of-run-only artifact writes made long crawls hard to monitor while they were still in flight.
+
+Current takeaway:
+
+- Keep the crawler **same-origin** and **tabs-first**, but add **per-route-family quotas** so `/machines/{id}` and `/machines/v2/{id}` do not dominate future runs.
+- Demote or denylist shared global settings pivots when the goal is breadth across entity surfaces rather than settings-specific research.
+- Treat `net::ERR_ABORTED` timeline fetches during transitions as crawl artifacts, not as evidence that the route family is invalid.
+- Add incremental checkpoint writes or progress logging to make long entity crawls observable without stopping them.
+
 ## Ideas backlog
 
 Add new ideas here before trying them, then move the result into the experiment log.
@@ -462,6 +525,9 @@ Add new ideas here before trying them, then move the result into the experiment 
 - Record a feature-to-bundle index so future runs can skip generic shell bundles and focus on feature chunks first.
 - Add a repeatable checklist for page-specific state, such as selected tab, filters, and tenant scope, before probing.
 - Build a reusable same-origin spider that consumes DOM routes, bundle-derived routes, and entity seeds from prior traffic, then prioritizes them through a safe-probe queue.
+- Add per-route-family quotas and sampling so the entity queue does not get overwhelmed by repeated machine-page pivots.
+- Add a denylist or lower priority for shared settings routes that are reachable from many entities but rarely add new API families.
+- Flush crawl checkpoints incrementally so long browser-based discovery runs can be monitored safely in real time.
 
 ## PR-ready checklist
 
