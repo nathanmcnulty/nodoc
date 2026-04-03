@@ -513,6 +513,127 @@ paths:
         '404':
           $ref: common.yml#/components/responses/NotFound
 
+  /mtp/alertsEmailNotifications/email_notifications:
+    get:
+      summary: List endpoint alert email notifications
+      description: >-
+        Retrieve the endpoint alert email-notification rules shown on the Endpoints
+        settings > Email notifications experience. Live capture returned an empty
+        items collection for the current tenant.
+      operationId: EndpointConfiguration.ListAlertEmailNotifications
+      tags: [Endpoint Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlertEmailNotificationListResponse'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/mdeCustomCollection/model:
+    get:
+      summary: Get custom data collection model
+      description: >-
+        Retrieve the platform, table, action-type, and column catalog used by
+        the Endpoints settings > Custom data collection rule builder.
+      operationId: EndpointConfiguration.GetCustomCollectionModel
+      tags: [Endpoint Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomCollectionModel'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/mdiotSettingsService/settings/DiscoveryEnabledTags:
+    get:
+      summary: Get device discovery enabled tags
+      description: >-
+        Retrieve the device-tag configuration that controls which tagged devices
+        participate in Device discovery scanning.
+      operationId: EndpointConfiguration.GetDiscoveryEnabledTags
+      tags: [Endpoint Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiscoveryEnabledTagsResponse'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/mdiotSettingsService/settings/v2/MagellanFeatures:
+    get:
+      summary: Get device discovery feature flags
+      description: >-
+        Retrieve Device discovery feature flags such as proactive discovery,
+        Corelight integration, and Log4j scanning.
+      operationId: EndpointConfiguration.GetMagellanFeatures
+      tags: [Endpoint Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MagellanFeatures'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/settings/overrideMdeFlavor:
+    get:
+      summary: Get MDE flavor override
+      description: >-
+        Retrieve the tenant-specific Defender for Endpoint flavor override used
+        by the Endpoints settings experience.
+      operationId: EndpointConfiguration.GetMdeFlavorOverride
+      tags: [Endpoint Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MdeFlavorOverride'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
 components:
   schemas:
     AdvancedFeaturesSettings:
@@ -590,4 +711,103 @@ components:
           type: string
         frequency:
           description: How often data is collected.
+          type: string
+    AlertEmailNotificationListResponse:
+      type: object
+      description: Response envelope for endpoint alert email-notification rules.
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/AlertEmailNotificationRuleSummary'
+    AlertEmailNotificationRuleSummary:
+      type: object
+      description: >-
+        Endpoint alert email-notification rule. Exact item schema is still
+        pending because the captured tenant response returned an empty `items`
+        array.
+    CustomCollectionModel:
+      type: object
+      description: Model metadata used by the custom data collection rule builder.
+      properties:
+        platforms:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomCollectionPlatform'
+    CustomCollectionPlatform:
+      type: object
+      description: Platform-specific custom collection metadata.
+      properties:
+        platform:
+          type: string
+        tables:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomCollectionTable'
+    CustomCollectionTable:
+      type: object
+      description: Table metadata available to custom collection rules.
+      properties:
+        name:
+          type: string
+        actionTypes:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomCollectionActionType'
+    CustomCollectionActionType:
+      type: object
+      description: Action-type metadata for a custom collection table.
+      properties:
+        actionType:
+          type: string
+        columns:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomCollectionColumn'
+    CustomCollectionColumn:
+      type: object
+      description: Column metadata available for a custom collection action type.
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+        possibleValues:
+          type: array
+          items:
+            type: string
+    DiscoveryEnabledTagsResponse:
+      type: object
+      description: Device discovery tag-selection state for scanning.
+      properties:
+        IsAllDevicesEnabled:
+          type: boolean
+        EnabledTagsForScan:
+          type: array
+          items:
+            $ref: '#/components/schemas/DiscoveryEnabledTag'
+    DiscoveryEnabledTag:
+      type: object
+      description: Device tag discovery-selection state.
+      properties:
+        Name:
+          type: string
+        IsTagEnabledForScan:
+          type: boolean
+    MagellanFeatures:
+      type: object
+      description: Device discovery feature flags exposed by the Magellan settings service.
+      properties:
+        IsProactiveDiscoveryEnabled:
+          type: boolean
+        IsCorelightIntegrationEnabled:
+          type: boolean
+          nullable: true
+        IsLog4jScanningEnabled:
+          type: boolean
+    MdeFlavorOverride:
+      type: object
+      description: Tenant override for the Defender for Endpoint product flavor.
+      properties:
+        overrideMdeFlavor:
           type: string
