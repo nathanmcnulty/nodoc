@@ -572,6 +572,10 @@ paths:
     $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1version
   /mcas/cas/api/tags:
     $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1tags
+  /mcas/cas/api/discovery/streams:
+    $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1discovery~1streams
+  /mcas/cas/api/stories/get_stories_details:
+    $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1stories~1get_stories_details
   /mcas/cas/api/about/info:
     $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1about~1info
   /mcas/cas/api/about/server_url:
@@ -598,6 +602,10 @@ paths:
     $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1app_connectors~1count
   /mcas/cas/api/v1/app_connectors/dashboard/get_apps_count_by_status:
     $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1app_connectors~1dashboard~1get_apps_count_by_status
+  /mcas/cas/api/v1/app_connectors/dashboard/get_instance_count_by_app:
+    $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1app_connectors~1dashboard~1get_instance_count_by_app
+  /mcas/cas/api/v1/app_connectors/dashboard/get_supported_apps_metadata:
+    $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1app_connectors~1dashboard~1get_supported_apps_metadata
   /mcas/cas/api/v1/app_connectors/last_activity:
     $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1app_connectors~1last_activity
   /mcas/cas/api/v1/app_connectors/metadata:
@@ -612,6 +620,10 @@ paths:
     $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1app_permissions~1metadata
   /mcas/cas/api/v1/autocomplete/entities:
     $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1autocomplete~1entities
+  /mcas/cas/api/v1/autocomplete/discovery_app_tags:
+    $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1autocomplete~1discovery_app_tags
+  /mcas/cas/api/v1/autocomplete/scoped_profiles:
+    $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1autocomplete~1scoped_profiles
   /mcas/cas/api/v1/autocomplete/tags:
     $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1autocomplete~1tags
   /mcas/cas/api/v1/autocomplete/tokens:
@@ -624,8 +636,36 @@ paths:
     $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1connected_services~1instances
   /mcas/cas/api/v1/discovery/categories:
     $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1discovery~1categories
+  /mcas/cas/api/v1/discovery/app_catalog:
+    $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1discovery~1app_catalog
+  /mcas/cas/api/v1/discovery/app_catalog/categories:
+    $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1discovery~1app_catalog~1categories
+  /mcas/cas/api/v1/discovery/app_catalog/count:
+    $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1discovery~1app_catalog~1count
+  /mcas/cas/api/v1/discovery/app_catalog/metadata:
+    $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1discovery~1app_catalog~1metadata
+  /mcas/cas/api/v1/discovery/category_stats:
+    $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1discovery~1category_stats
+  /mcas/cas/api/v1/discovery/get_locations:
+    $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1discovery~1get_locations
+  /mcas/cas/api/v1/discovery/service_locations:
+    $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1discovery~1service_locations
+  /mcas/cas/api/v1/discovery/snapshot_reports:
+    $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1discovery~1snapshot_reports
+  /mcas/cas/api/v1/discovery/top_apps:
+    $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1discovery~1top_apps
+  /mcas/cas/api/v1/discovery/top_categories:
+    $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1discovery~1top_categories
+  /mcas/cas/api/v1/discovery/top_entities:
+    $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1discovery~1top_entities
   /mcas/cas/api/v1/entities/metadata:
     $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1entities~1metadata
+  /mcas/cas/api/v1/get_feature_values:
+    $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1get_feature_values
+  /mcas/cas/api/v1/lcnc_settings:
+    $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1lcnc_settings
+  /mcas/cas/api/v1/mtp_scopes_and_permissions:
+    $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1mtp_scopes_and_permissions
   /mcas/cas/api/v1/governance:
     $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1governance
   /mcas/cas/api/v1/governance/count:
@@ -636,6 +676,20 @@ paths:
     $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1files~1count
   /mcas/cas/api/v1/policies:
     $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1policies
+  /mcas/cas/api/v1/policies/count:
+    $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1policies~1count
+  /mcas/cas/api/v1/policies/metadata:
+    $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1policies~1metadata
+  /mcas/cas/api/v1/policy_templates_inmemo:
+    $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1policy_templates_inmemo
+  /mcas/cas/api/v1/policy_templates_inmemo/count:
+    $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1policy_templates_inmemo~1count
+  /mcas/cas/api/v1/policy_templates_inmemo/linked_policies_by_template_ids:
+    $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1policy_templates_inmemo~1linked_policies_by_template_ids
+  /mcas/cas/api/v1/policy_templates_inmemo/metadata:
+    $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1policy_templates_inmemo~1metadata
+  /mcas/cas/api/v1/standalone_entities/count:
+    $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1standalone_entities~1count
   /mcas/cas/api/v1/standalone_entities/metadata:
     $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1standalone_entities~1metadata
   /mcas/cas/api/v1/translation/log-error:
