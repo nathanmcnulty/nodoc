@@ -453,6 +453,36 @@ paths:
         '404':
           $ref: common.yml#/components/responses/NotFound
 
+  /mtp/useServiceBaseUrl/ine/entitypagesservice/urls/overview:
+    get:
+      summary: Get URL overview card
+      description: >-
+        Retrieve the overview payload used by the unified URL entity page before
+        loading the richer pivot charts and prevalence details.
+      operationId: EntityPivots.GetUrlOverview
+      tags: [Entity Pivots]
+      parameters:
+        - name: url
+          in: query
+          required: true
+          description: The URL or domain value to investigate.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - URL overview card data
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
 components:
   parameters:
     EntityId:

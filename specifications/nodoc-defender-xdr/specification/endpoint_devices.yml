@@ -1424,6 +1424,353 @@ paths:
         '404':
           $ref: common.yml#/components/responses/NotFound
 
+  /mtp/alertsApiService/Evidences/device/Alerts:
+    get:
+      summary: List device alert evidences
+      description: >-
+        Retrieve the alert list shown on the unified device page's alert evidence pane.
+      operationId: EndpointDevices.ListAlertEvidences
+      tags: [Endpoint Devices]
+      parameters:
+        - name: status
+          in: query
+          description: Alert status filter applied by the device page.
+          schema:
+            type: integer
+            default: 6
+        - name: WcdMachineId
+          in: query
+          required: true
+          description: The device identifier used by the device evidence experience.
+          schema:
+            type: string
+        - name: ComputerDnsName
+          in: query
+          description: The current DNS name of the device.
+          schema:
+            type: string
+        - name: MachineId
+          in: query
+          required: true
+          description: The Defender machine identifier.
+          schema:
+            type: string
+        - name: tenantIds
+          in: query
+          description: Optional cross-tenant context. The portal currently sends an empty value.
+          schema:
+            type: string
+            nullable: true
+        - name: lookBackInDays
+          in: query
+          description: Number of days of alert history to include.
+          schema:
+            type: integer
+            default: 180
+        - name: sortByField
+          in: query
+          description: The field used to sort the device alerts grid.
+          schema:
+            type: string
+            default: severity
+        - name: sortOrder
+          in: query
+          description: Sort direction for the alert grid.
+          schema:
+            type: string
+            enum: [Ascending, Descending]
+            default: Descending
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - device alert evidence list
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/getLatestMachineIpsByIds/LatestMachineIpsByIds:
+    get:
+      summary: Get latest device IP addresses
+      description: >-
+        Retrieve the latest IP address observations shown on the unified device page.
+      operationId: EndpointDevices.GetLatestIps
+      tags: [Endpoint Devices]
+      parameters:
+        - name: isUnifiedDevicePage
+          in: query
+          description: Indicates the unified device page requested the lookup.
+          schema:
+            type: boolean
+            default: true
+        - name: machineId
+          in: query
+          required: true
+          description: The Defender machine identifier.
+          schema:
+            type: string
+        - name: idType
+          in: query
+          required: true
+          description: The type of machine identifier provided.
+          schema:
+            type: string
+            default: SenseMachineId
+        - name: lastSeen
+          in: query
+          description: Timestamp used by the portal to anchor the latest IP lookup.
+          schema:
+            type: string
+            format: date-time
+        - name: senseMachineId
+          in: query
+          description: The Sense machine identifier for the same device.
+          schema:
+            type: string
+        - name: computerDnsName
+          in: query
+          description: The current DNS name of the device.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - latest device IP observations
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/getTopUsersByIds/TopUsersByIds:
+    get:
+      summary: Get top users for device
+      description: >-
+        Retrieve the top user identities shown on the unified device page.
+      operationId: EndpointDevices.GetTopUsers
+      tags: [Endpoint Devices]
+      parameters:
+        - name: isUnifiedDevicePage
+          in: query
+          description: Indicates the unified device page requested the lookup.
+          schema:
+            type: boolean
+            default: true
+        - name: machineId
+          in: query
+          required: true
+          description: The Defender machine identifier.
+          schema:
+            type: string
+        - name: senseMachineId
+          in: query
+          description: The Sense machine identifier for the same device.
+          schema:
+            type: string
+        - name: computerDnsName
+          in: query
+          description: The current DNS name of the device.
+          schema:
+            type: string
+        - name: tenantIds
+          in: query
+          description: Optional cross-tenant context. The portal currently sends an empty value.
+          schema:
+            type: string
+            nullable: true
+        - name: armId
+          in: query
+          description: Optional Azure resource ID context for the device.
+          schema:
+            type: string
+            nullable: true
+        - name: lookingBackIndays
+          in: query
+          description: Number of days of user activity to include.
+          schema:
+            type: integer
+            default: 30
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - top users for device
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/responseApiPortal/requests/latest:
+    get:
+      summary: Get latest device response action
+      description: >-
+        Retrieve the most recent response action request for the selected device.
+      operationId: EndpointDevices.GetLatestActionRequest
+      tags: [Endpoint Devices]
+      parameters:
+        - name: machineId
+          in: query
+          required: true
+          description: The Defender machine identifier.
+          schema:
+            type: string
+        - name: tenantIds
+          in: query
+          description: Optional cross-tenant context. The portal currently sends an empty value.
+          schema:
+            type: string
+            nullable: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - latest device action request
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/responseApiPortal/requests/machine/any:
+    get:
+      summary: Check for any device response actions
+      description: >-
+        Check whether the selected device currently has any response action requests.
+      operationId: EndpointDevices.HasAnyActionRequests
+      tags: [Endpoint Devices]
+      parameters:
+        - name: machineId
+          in: query
+          required: true
+          description: The Defender machine identifier.
+          schema:
+            type: string
+        - name: tenantIds
+          in: query
+          description: Optional cross-tenant context. The portal currently sends an empty value.
+          schema:
+            type: string
+            nullable: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - device action existence state
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/responseApiPortal/requests/machinestate:
+    get:
+      summary: Get device response action state
+      description: >-
+        Retrieve the response-action state block shown on the unified device page.
+      operationId: EndpointDevices.GetActionState
+      tags: [Endpoint Devices]
+      parameters:
+        - name: machineId
+          in: query
+          required: true
+          description: The Defender machine identifier.
+          schema:
+            type: string
+        - name: overrideCache
+          in: query
+          description: Whether the portal should bypass cached machine action state.
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - device response action state
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/responseApiPortal/requests/permissions:
+    get:
+      summary: Get device response action permissions
+      description: >-
+        Retrieve the action-permission matrix used to enable or disable device-response
+        actions on the unified device page.
+      operationId: EndpointDevices.GetActionPermissions
+      tags: [Endpoint Devices]
+      parameters:
+        - name: machineId
+          in: query
+          required: true
+          description: The Defender machine identifier.
+          schema:
+            type: string
+        - name: tenantIds
+          in: query
+          description: Optional cross-tenant context. The portal currently sends an empty value.
+          schema:
+            type: string
+            nullable: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - device response action permissions
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
 components:
   schemas:
     Device:

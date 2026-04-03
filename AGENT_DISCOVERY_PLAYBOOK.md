@@ -520,6 +520,41 @@ Current takeaway:
 - Treat `net::ERR_ABORTED` timeline fetches during transitions as crawl artifacts, not as evidence that the route family is invalid.
 - Add incremental checkpoint writes or progress logging to make long entity crawls observable without stopping them.
 
+### 2026-04-03 — Final gap closure via normalized family diffs
+
+Idea:
+
+- Before launching another broad crawl, diff the already-documented routes against the
+  confirmed request inventory and only chase the remaining high-confidence families.
+
+What was tried:
+
+- Normalized current documented Defender routes against the captured request inventories by:
+  - removing the `/apiproxy` prefix
+  - trimming trailing slashes
+  - collapsing literal IDs into parameterized route shapes
+- Cross-checked both `api-records.json` and `page-states.json` instead of trusting only one artifact.
+- Extracted request and response samples only for the remaining route families instead of
+  re-reading the entire corpus.
+
+What helped:
+
+- This quickly separated real remaining families from false positives caused by literal IDs
+  and already-modeled parameterized routes.
+- `page-states.json` caught exact tails that the normalized API export could miss, such as
+  trailing-slash variants and smaller helper routes.
+- Targeted family diffs were enough to close the remaining high-signal gaps for policy
+  inventory, AI inventory, unified connectors, SIAM helpers, and ISPM report routes
+  without another expensive full crawl.
+
+Current takeaway:
+
+- After a broad nav + entity crawl, do a **normalized family diff** before starting another
+  browser run.
+- Only launch another crawl when the remaining gaps are still broad or ambiguous; if the
+  tail is already concentrated into a few confirmed families, extract exact shapes directly
+  from the existing artifacts first.
+
 ## Ideas backlog
 
 Add new ideas here before trying them, then move the result into the experiment log.

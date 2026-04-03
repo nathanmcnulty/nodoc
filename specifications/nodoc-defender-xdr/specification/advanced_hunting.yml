@@ -591,6 +591,236 @@ paths:
         '404':
           $ref: common.yml#/components/responses/NotFound
 
+  /mtp/huntingService/goHunt/Device:
+    post:
+      summary: Build device go hunt deep links
+      description: >-
+        Generate encoded advanced hunting query presets for the selected device entity page.
+      operationId: AdvancedHunting.GoHuntDevice
+      tags: [Advanced Hunting]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                deviceId:
+                  description: The Defender machine identifier to pivot from.
+                  type: string
+                deviceName:
+                  description: The device display name shown on the entity page.
+                  type: string
+              required:
+                - deviceId
+                - deviceName
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Encoded advanced hunting query presets for the device pivot.
+                additionalProperties:
+                  type: string
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/huntingService/goHunt/IP:
+    post:
+      summary: Build IP go hunt deep links
+      description: >-
+        Generate encoded advanced hunting query presets for the selected IP address.
+      operationId: AdvancedHunting.GoHuntIp
+      tags: [Advanced Hunting]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ip:
+                  description: The IP address to pivot from.
+                  type: string
+              required:
+                - ip
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Encoded advanced hunting query presets for the IP pivot.
+                additionalProperties:
+                  type: string
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/huntingService/goHunt/URL:
+    post:
+      summary: Build URL go hunt deep links
+      description: >-
+        Generate encoded advanced hunting query presets for the selected URL.
+      operationId: AdvancedHunting.GoHuntUrl
+      tags: [Advanced Hunting]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                url:
+                  description: The URL or domain value to pivot from.
+                  type: string
+              required:
+                - url
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Encoded advanced hunting query presets for the URL pivot.
+                additionalProperties:
+                  type: string
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/huntingService/queryExecutor:
+    post:
+      summary: Execute hunting query
+      description: >-
+        Execute an ad-hoc hunting query generated from an entity pivot or the advanced
+        hunting canvas.
+      operationId: AdvancedHunting.ExecuteQuery
+      tags: [Advanced Hunting]
+      parameters:
+        - name: useFanOut
+          in: query
+          description: Whether to enable fan-out execution across shards.
+          schema:
+            type: boolean
+            default: false
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: The query execution payload captured from the hunting client.
+              properties:
+                queryText:
+                  description: The KQL or graph-derived query text to execute.
+                  type: string
+              required:
+                - queryText
+              additionalProperties: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - hunting query execution result set
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/huntingService/queryExecutor/huntingGraph:
+    post:
+      summary: Execute hunting graph query
+      description: >-
+        Execute a graph-oriented hunting query generated from entity relationships
+        in the unified investigation experience.
+      operationId: AdvancedHunting.ExecuteGraphQuery
+      tags: [Advanced Hunting]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: The graph query payload captured from the entity pivot experience.
+              properties:
+                GraphQueryObject:
+                  description: Serialized graph query definition and filters.
+                  type: object
+              required:
+                - GraphQueryObject
+              additionalProperties: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - hunting graph execution result
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/huntingService/rules/streamingDetectionCompatibleRules:
+    get:
+      summary: List streaming-compatible detection rules
+      description: >-
+        Retrieve the custom detection rules that the portal flags as compatible with
+        streaming detections.
+      operationId: AdvancedHunting.ListStreamingDetectionCompatibleRules
+      tags: [Advanced Hunting]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  description: pending - streaming-compatible detection rule
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
 components:
   schemas:
     TableSchema:

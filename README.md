@@ -13,7 +13,7 @@ The project currently publishes the following API definitions:
 
 | API | Ops | Access model | Site page | Checked-in Postman collection |
 | --- | ---: | --- | --- | --- |
-| Defender | 409 | Portal session cookie (`sccauth`) | [Browse](https://nodoc.nathanmcnulty.com/defender) | `postman/collections/defender.collection.json` |
+| Defender | 452 | Portal session cookie (`sccauth`) | [Browse](https://nodoc.nathanmcnulty.com/defender) | `postman/collections/defender.collection.json` |
 | M365 Admin | 215 | Portal session + custom admin headers | [Browse](https://nodoc.nathanmcnulty.com/m-365-admin) | `postman/collections/m365-admin.collection.json` |
 | Purview | 74 | Portal session cookie (`sccauth`) | [Browse](https://nodoc.nathanmcnulty.com/purview) | `postman/collections/purview.collection.json` |
 | Entra IAM | 277 | Delegated OAuth2 + `X-Ms-Client-Request-Id` | [Browse](https://nodoc.nathanmcnulty.com/entra-iam) | `postman/collections/entra-iam.collection.json` |

@@ -679,6 +679,41 @@ paths:
         '404':
           $ref: common.yml#/components/responses/NotFound
 
+  /mtp/mdeEntitiesExperience/files/{Sha256}/content:
+    get:
+      summary: Get unified file content analysis
+      description: >-
+        Retrieve the content-analysis sections shown on the unified file experience,
+        including structured behavioral extracts such as file, registry, and URL activity.
+      operationId: Files.GetContentAnalysis
+      tags: [Files]
+      parameters:
+        - name: Sha256
+          in: path
+          required: true
+          description: The SHA-256 of the file.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Content-analysis sections displayed by the unified file experience.
+                properties:
+                  IsXplat:
+                    type: boolean
+                    description: Whether the content payload originated from a cross-platform analyzer.
+                additionalProperties: true
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
 components:
   schemas:
     FileProfile:

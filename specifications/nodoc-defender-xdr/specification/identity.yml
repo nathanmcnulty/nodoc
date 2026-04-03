@@ -1856,6 +1856,216 @@ paths:
         '404':
           $ref: common.yml#/components/responses/NotFound
 
+  /aatp/api/ispmReports/DormantEntities/newEntryCount:
+    get:
+      summary: Get dormant entities report delta
+      description: >-
+        Retrieve the count of newly surfaced dormant-entity posture findings used by the
+        Defender for Identity coverage and maturity dashboard.
+      operationId: Identity.GetDormantEntitiesNewEntryCount
+      tags: [Identity]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Count:
+                    type: integer
+                    description: Number of new dormant-entity report entries.
+                  IsCountExceeded:
+                    type: boolean
+                    description: Whether the result exceeded the service-side count ceiling.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /aatp/api/ispmReports/RiskyLateralMovementPath/newEntryCount:
+    get:
+      summary: Get risky lateral movement path delta
+      description: >-
+        Retrieve the count of newly surfaced risky lateral-movement-path findings used by
+        the Defender for Identity coverage and maturity dashboard.
+      operationId: Identity.GetRiskyLateralMovementPathNewEntryCount
+      tags: [Identity]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Count:
+                    type: integer
+                    description: Number of new risky lateral movement path entries.
+                  IsCountExceeded:
+                    type: boolean
+                    description: Whether the result exceeded the service-side count ceiling.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /aatp/api/ispmReports/UnsecureDomainConfigurations:
+    get:
+      summary: List unsecure domain configurations
+      description: >-
+        Retrieve insecure Active Directory domain-configuration findings surfaced by the
+        Defender for Identity posture dashboard.
+      operationId: Identity.ListUnsecureDomainConfigurations
+      tags: [Identity]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  IspmReportEntries:
+                    type: array
+                    items:
+                      type: object
+                      description: pending - insecure domain configuration finding
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /aatp/api/ispmReports/UnsecureDomainConfigurations/newEntryCount:
+    get:
+      summary: Get unsecure domain configuration delta
+      description: >-
+        Retrieve the count of newly surfaced insecure domain-configuration findings used
+        by the Defender for Identity coverage and maturity dashboard.
+      operationId: Identity.GetUnsecureDomainConfigurationsNewEntryCount
+      tags: [Identity]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Count:
+                    type: integer
+                    description: Number of new insecure domain configuration entries.
+                  IsCountExceeded:
+                    type: boolean
+                    description: Whether the result exceeded the service-side count ceiling.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /aatp/api/sensors/identityInfrastructuresInfo:
+    get:
+      summary: Get identity infrastructure inventory
+      description: >-
+        Retrieve the identity infrastructure devices and sensor coverage inventory used by
+        the Defender for Identity dashboard.
+      operationId: Identity.GetInfrastructureInfo
+      tags: [Identity]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Devices:
+                    type: array
+                    items:
+                      type: object
+                      description: pending - identity infrastructure device
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/siamApi/domaincontrollers/totals:
+    get:
+      summary: Get SIAM domain controller totals
+      description: >-
+        Retrieve the managed and unmanaged domain-controller totals surfaced by the
+        identity attachment experience.
+      operationId: Identity.GetDomainControllerTotals
+      tags: [Identity]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  isPartOfDcsMitigation:
+                    type: boolean
+                  isAdminSetIntent:
+                    type: boolean
+                  managedDcsCount:
+                    type: integer
+                  unManagedDcsCount:
+                    type: integer
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/siamApi/MdeAttachEnabled:
+    get:
+      summary: Get SIAM MDE attachment state
+      description: >-
+        Retrieve whether the tenant has enabled the Microsoft Defender for Endpoint
+        attachment used by the identity posture experience.
+      operationId: Identity.GetMdeAttachEnabled
+      tags: [Identity]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: boolean
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
 components:
   schemas:
     IdentityUser:

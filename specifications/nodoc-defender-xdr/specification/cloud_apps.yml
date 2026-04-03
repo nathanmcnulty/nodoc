@@ -2059,3 +2059,89 @@ paths:
 
         '404':
           $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/activities_locations/by_user:
+    get:
+      summary: Get activity locations by user
+      description: >-
+        Retrieve the activity-location summary shown for a resolved Cloud Apps user entity.
+      operationId: CloudApps.GetActivityLocationsByUser
+      tags: [CloudApps]
+      parameters:
+        - name: username
+          in: query
+          required: true
+          description: The encoded Cloud Apps entity identifier for the selected user.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - activity locations by user response
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/entities/resolve_entity:
+    post:
+      summary: Resolve Cloud Apps entity
+      description: >-
+        Resolve a Cloud Apps entity into the richer user profile used by the unified
+        Cloud Apps investigation pane, including available governance actions.
+      operationId: CloudApps.ResolveEntity
+      tags: [CloudApps]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                aad:
+                  type: string
+                  description: The Microsoft Entra object identifier for the user.
+                sid:
+                  type: string
+                  description: The Windows SID associated with the resolved user.
+                complexIdBase64:
+                  type: string
+                  description: The Cloud Apps encoded complex entity identifier.
+              required:
+                - aad
+                - sid
+                - complexIdBase64
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  displayName:
+                    type: string
+                  email:
+                    type: string
+                  actions:
+                    type: array
+                    items:
+                      type: object
+                      description: pending - governance action metadata
+                additionalProperties: true
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
