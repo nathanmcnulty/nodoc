@@ -259,6 +259,38 @@ Current takeaway:
 
 - Bundle-set diffing is worth doing early because it quickly separates page-specific feature chunks from generic shell noise.
 
+### 2026-04-03 — Full Defender left-nav bounded crawl
+
+Idea:
+
+- Use a bounded multi-tab crawl to traverse the entire Defender left navigation instead of working one submenu at a time.
+
+What was tried:
+
+- Inspected the live nav DOM from the signed-in Defender session.
+- Found **87** `scc-nav-*` anchor elements already present in the DOM, even though only a small subset was visibly expanded.
+- Crawled the same-origin internal nav targets with **3 parallel tabs** while keeping request attribution page-scoped.
+
+Results:
+
+- **86/86** same-origin internal nav items traversed successfully
+- **1** item skipped intentionally: `Exchange message trace` because it links to `admin.exchange.microsoft.com`
+- **248** same-origin XHR/fetch API records captured
+- **692** script URLs captured
+- **0** page failures
+- **0** request failures
+
+What helped:
+
+- Hidden nav anchors already existed in the DOM, so explicit group expansion was not required for traversal.
+- Bounded parallelism was fast without losing page attribution because each worker tab maintained its own request labeling.
+- Same-origin scoping prevented the crawl from drifting into adjacent admin portals that happen to be linked from Defender.
+
+Current takeaway:
+
+- For full Defender navigation coverage, a **bounded worker pool (3 tabs was effective here)** is better than a purely sequential crawl.
+- Enumerating `scc-nav-*` anchors from the DOM is more reliable than trying to model the visible expand/collapse state of the left nav.
+
 ## Ideas backlog
 
 Add new ideas here before trying them, then move the result into the experiment log.
