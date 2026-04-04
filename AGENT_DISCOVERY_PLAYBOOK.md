@@ -146,6 +146,7 @@ Recommended pattern:
 - On each entity/detail page or blade, click every visible read-only tab or pivot before moving on.
 - Prefer safe drill-ins such as display-name links, row detail blades, tabs, paging, filters, and same-origin content links over arbitrary action buttons.
 - Record which surfaces could **not** be reached because of missing tenant data, permissions, or feature flags so future agents do not mistake those gaps for completed coverage.
+- Keep those unreachable labels conservative: generic shell banners, dark-mode notices, or marketing copy are not strong evidence of a feature gate on their own.
 
 Rule of thumb:
 
