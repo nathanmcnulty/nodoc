@@ -18,7 +18,7 @@ const portalConfig = [
   },
   {
     id: 'sharepoint-admin',
-    name: 'SharePoint Admin',
+    name: 'SharePoint',
     hostnameSuffixes: ['-admin.sharepoint.com'],
     pathPrefixes: ['/_api/'],
     urlPatterns: ['https://*.sharepoint.com/_api/*']
@@ -90,6 +90,34 @@ const portalConfig = [
       'https://collabinsights.teams.cloud.microsoft/amer/api/*',
       'https://teams.cloud.microsoft/api/*',
       'https://amer.tags.teams.microsoft.com/api/*'
+    ]
+  },
+  {
+    id: 'power-platform',
+    name: 'Power Platform',
+    hostnames: [
+      'api.bap.microsoft.com',
+      'api.admin.powerplatform.microsoft.com',
+      'licensing.powerplatform.microsoft.com'
+    ],
+    hostnameSuffixes: [
+      '.adminanalytics.powerplatform.microsoft.com',
+      '.csanalytics.powerplatform.microsoft.com',
+      '.tenant.api.powerplatform.com',
+      '.crm.dynamics.com',
+      '.portal-infra.dynamics.com'
+    ],
+    pathPrefixes: ['/providers/', '/api/', '/analytics/', '/governance/', '/notificationservice/', '/v0.1', '/v0.1-alpha', '/v1.0', '/api/data/', '/api/nosql/', '/api/v1/'],
+    urlPatterns: [
+      'https://api.bap.microsoft.com/*',
+      'https://api.admin.powerplatform.microsoft.com/*',
+      'https://licensing.powerplatform.microsoft.com/*',
+      'https://*.adminanalytics.powerplatform.microsoft.com/*',
+      'https://*.csanalytics.powerplatform.microsoft.com/*',
+      'https://*.tenant.api.powerplatform.com/*',
+      'https://*.crm.dynamics.com/api/data/*',
+      'https://*.crm.dynamics.com/api/nosql/*',
+      'https://*.portal-infra.dynamics.com/api/v1/*'
     ]
   },
   {

@@ -97,7 +97,7 @@ export const apiCatalog: ApiCatalogItem[] = [
       "https://raw.githubusercontent.com/nathanmcnulty/nodoc/main/postman/collections/exchange-beta.collection.json",
   },
   {
-    title: "SharePoint Admin",
+    title: "SharePoint",
     slug: "/sharepoint-admin",
     family: "SharePoint admin center",
     operations: 41,
@@ -221,6 +221,24 @@ export const apiCatalog: ApiCatalogItem[] = [
     collectionPath: "postman/collections/intune-portal.collection.json",
     collectionDownloadUrl:
       "https://raw.githubusercontent.com/nathanmcnulty/nodoc/main/postman/collections/intune-portal.collection.json",
+  },
+  {
+    title: "Power Platform",
+    slug: "/power-platform",
+    family: "Power Platform admin center",
+    operations: 244,
+    authModel: "Portal bearer tokens + service-specific audiences",
+    baseUrl: "https://api.bap.microsoft.com",
+    summary:
+      "Exhaustive admin-center coverage across Business App Platform, analytics, licensing, Dataverse CRM, Power Pages portal infrastructure, tenant governance, notifications, and internal portal helpers used by the Power Platform admin center.",
+    highlights: [
+      "Nine backend families spanning Business App Platform, admin analytics, config analytics, licensing, tenant API, notifications, admin portal, Dynamics CRM, and Power Pages portal infrastructure",
+      "Same-origin crawl coverage from left-nav, list/detail drill-ins, read-only pivots, and safe report interactions across manage, security, monitor, deployment, licensing, and support blades",
+      "Tenant-dependent no-data, feature-limited, missing-link, and permission-limited surfaces called out from the live crawl",
+    ],
+    collectionPath: "postman/collections/power-platform.collection.json",
+    collectionDownloadUrl:
+      "https://raw.githubusercontent.com/nathanmcnulty/nodoc/main/postman/collections/power-platform.collection.json",
   },
   {
     title: "Purview",
@@ -378,8 +396,8 @@ export const accessModels: AccessModel[] = [
   {
     title: "Portal session + SharePoint digest",
     description:
-      "SharePoint Admin uses the tenant's `-admin.sharepoint.com` browser session together with same-origin SharePoint headers such as `x-requestdigest`, `SdkVersion`, and `odata-version` on POST requests.",
-    portals: ["SharePoint Admin"],
+      "SharePoint uses the tenant's `-admin.sharepoint.com` browser session together with same-origin SharePoint headers such as `x-requestdigest`, `SdkVersion`, and `odata-version` on POST requests.",
+    portals: ["SharePoint"],
   },
   {
     title: "Portal bearer tokens + regional discovery",
@@ -394,16 +412,22 @@ export const accessModels: AccessModel[] = [
     portals: ["M365 Apps Config", "M365 Apps Services", "M365 Apps Inventory"],
   },
   {
-    title: "Delegated OAuth2",
+    title: "Portal bearer tokens + service-specific audiences",
     description:
-      "Entra IAM uses the ADIbizaUX resource with delegated user auth only and typically needs `X-Ms-Client-Request-Id`.",
-    portals: ["Entra IAM"],
+      "Power Platform reuses browser-obtained bearer tokens from the admin center, but different backends expect different audiences plus portal context headers such as correlation IDs, session IDs, tenant IDs, and app identifiers.",
+    portals: ["Power Platform"],
   },
   {
     title: "Portal bearer tokens",
     description:
       "Intune Portal and Intune Autopatch use browser-obtained bearer tokens plus same-origin cookies or portal headers from the authenticated Intune session.",
     portals: ["Intune Portal", "Intune Autopatch"],
+  },
+  {
+    title: "Delegated OAuth2",
+    description:
+      "Entra IAM uses the ADIbizaUX resource with delegated user auth only and typically needs `X-Ms-Client-Request-Id`.",
+    portals: ["Entra IAM"],
   },
   {
     title: "Azure AD bearer tokens",
@@ -560,8 +584,8 @@ export const gettingStartedGuides: GettingStartedGuide[] = [
     ],
   },
   {
-    title: "SharePoint Admin",
-    portals: ["SharePoint Admin"],
+    title: "SharePoint",
+    portals: ["SharePoint"],
     authModel: "Portal session cookie (`FedAuth`) + same-origin SharePoint headers",
     baseUrls: ["https://{tenant}-admin.sharepoint.com/_api"],
     confirmedDetails: [
@@ -669,6 +693,41 @@ export const gettingStartedGuides: GettingStartedGuide[] = [
       "The Intune portal issues a large amount of telemetry and extension bootstrapping traffic that is easy to confuse with real feature APIs.",
       "Some bundles reference Microsoft Graph or public ARM paths alongside the undocumented Intune and Autopatch hosts; only the dedicated non-Graph hosts belong in this family.",
       "Bundle-visible paths are not always safe GETs: `PreOnboardTenant` returned `405 Method Not Allowed` when probed as a GET and should be treated as a likely write-oriented flow.",
+    ],
+  },
+  {
+    title: "Power Platform admin center",
+    portals: ["Power Platform"],
+    authModel: "Portal bearer tokens + service-specific audiences",
+    baseUrls: [
+      "https://api.bap.microsoft.com",
+      "https://api.admin.powerplatform.microsoft.com",
+      "https://{region}.adminanalytics.powerplatform.microsoft.com",
+      "https://{region}.csanalytics.powerplatform.microsoft.com",
+      "https://licensing.powerplatform.microsoft.com",
+      "https://{tenantHost}.tenant.api.powerplatform.com",
+      "https://{organizationHost}.crm.dynamics.com",
+      "https://{portalInfraHost}.portal-infra.dynamics.com",
+    ],
+    confirmedDetails: [
+      "The spec combines nine backend families observed live from `admin.powerplatform.microsoft.com`, including new `*.crm.dynamics.com` and `*.portal-infra.dynamics.com` sections recovered from environment, deployment, security, and Power Pages detail surfaces.",
+      "Coverage came from exhaustive same-origin crawling of left-nav routes, list/detail drill-ins, read-only pivots, and safe report interactions rather than a landing-page sweep.",
+      "Regional, tenant-scoped, organization-scoped, and portal-infra hosts are modeled with server variables so the same paths cover shard-specific PPAC and Dataverse hosts.",
+    ],
+    practicalGuidance: [
+      "Start from a real authenticated Power Platform admin center session because the portal fans out across multiple backends with different tokens, headers, and shard-specific hosts.",
+      "Drill into list rows, environment hubs, read-only tabs and pivots, and safe report interactions because many dedicated CRM and Power Pages endpoints do not appear on landing views.",
+      "Validate access with read-only environment, analytics, capacity, governance, deployment, or portal-management calls on the host family you care about before replaying any mutations.",
+    ],
+    mutationGuidance: [
+      "Treat Business App Platform POSTs, governance policy operations, and licensing/capacity actions as live tenant changes unless you have proven otherwise in a safe tenant.",
+      "When documenting a new flow, capture the original browser request body and headers per host family first because replaying the wrong bearer audience against another backend will fail or produce misleading errors.",
+    ],
+    pitfalls: [
+      "A token that works for one Power Platform backend is not automatically valid for another backend in the same admin center session.",
+      "Regional, tenant-specific, organization-specific, and portal-infra hosts change by tenant and blade, so hardcoding captured hosts will make automation brittle.",
+      "Some same-origin routes are tenant-dependent: this crawl hit feature-limited Copilot pages, no-data usage and portal blades, and permission-limited Dataverse user or role-editor details.",
+      "The admin center also touches Microsoft Graph, static assets, and downstream Dynamics-related surfaces, so isolate the non-Graph Power Platform hosts before expanding scope.",
     ],
   },
   {

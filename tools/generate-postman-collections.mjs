@@ -27,7 +27,7 @@ const collectionDefinitions = [
     output: "postman/collections/exchange-beta.collection.json",
   },
   {
-    name: "SharePoint Admin",
+    name: "SharePoint",
     spec: "specifications/nodoc-sharepoint-admin/specification/openapi.yml",
     output: "postman/collections/sharepoint-admin.collection.json",
   },
@@ -60,6 +60,11 @@ const collectionDefinitions = [
     name: "Intune Portal",
     spec: "specifications/nodoc-intune-portal/specification/openapi.yml",
     output: "postman/collections/intune-portal.collection.json",
+  },
+  {
+    name: "Power Platform",
+    spec: "specifications/nodoc-power-platform/specification/openapi.yml",
+    output: "postman/collections/power-platform.collection.json",
   },
   {
     name: "Purview",

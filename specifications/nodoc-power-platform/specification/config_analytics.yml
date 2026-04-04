@@ -1,0 +1,26 @@
+paths:
+  /api/v1/tenants/{tenantId}/tenantconsent:
+    servers:
+      - url: "https://{region}.csanalytics.powerplatform.microsoft.com"
+        description: "Regional Power Platform config analytics API"
+        variables:
+          region:
+            default: "na"
+            description: "Regional shard observed in live Power Platform admin center traffic."
+    get:
+      operationId: ConfigAnalytics_get_api_v1_tenants_tenantId_tenantconsent
+      summary: "GET /api/v1/tenants/{tenantId}/tenantconsent"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/billing/licenses/PowerApps/overview, https://admin.powerplatform.microsoft.com/billing/licenses/PowerApps/recommendations, https://admin.powerplatform.microsoft.com/billing/licenses/copilotStudio/overview, https://admin.powerplatform.microsoft.com/billing/licenses/dataverse/overview, and 83 more routes."
+      tags:
+        - ConfigAnalytics
+      parameters:
+        - name: "tenantId"
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "847b5907-ca15-40f4-b171-eb18619dbfab"
+      responses:
+        '200':
+          description: "200 captured response"

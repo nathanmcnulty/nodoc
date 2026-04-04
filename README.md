@@ -16,13 +16,14 @@ The project currently publishes the following API definitions:
 | Defender | 544 | Portal session cookie (`sccauth`) | [Browse](https://nodoc.nathanmcnulty.com/defender) | `postman/collections/defender.collection.json` |
 | M365 Admin | 213 | Portal session + custom admin headers | [Browse](https://nodoc.nathanmcnulty.com/m365-admin) | `postman/collections/m365-admin.collection.json` |
 | Exchange | 61 | Portal session cookie + same-origin `x-requested-with` | [Browse](https://nodoc.nathanmcnulty.com/exchange) | `postman/collections/exchange-beta.collection.json` |
-| SharePoint Admin | 41 | Portal session cookie (`FedAuth`) + SharePoint form digest | [Browse](https://nodoc.nathanmcnulty.com/sharepoint-admin) | `postman/collections/sharepoint-admin.collection.json` |
+| SharePoint | 41 | Portal session cookie (`FedAuth`) + SharePoint form digest | [Browse](https://nodoc.nathanmcnulty.com/sharepoint-admin) | `postman/collections/sharepoint-admin.collection.json` |
 | Teams | 99 | Portal bearer token + same-origin portal context | [Browse](https://nodoc.nathanmcnulty.com/teams) | `postman/collections/teams.collection.json` |
 | M365 Apps Config | 23 | Portal bearer token + diagnostic headers | [Browse](https://nodoc.nathanmcnulty.com/m-365-apps-config) | `postman/collections/m365-apps-config.collection.json` |
 | M365 Apps Services | 8 | Portal bearer token + diagnostic headers | [Browse](https://nodoc.nathanmcnulty.com/m-365-apps-services) | `postman/collections/m365-apps-services.collection.json` |
 | M365 Apps Inventory | 27 | Portal bearer token + diagnostic headers | [Browse](https://nodoc.nathanmcnulty.com/m-365-apps-inventory) | `postman/collections/m365-apps-inventory.collection.json` |
 | Intune Autopatch | 52 | Portal bearer token + x-ms portal headers | [Browse](https://nodoc.nathanmcnulty.com/intune-autopatch) | `postman/collections/intune-autopatch.collection.json` |
 | Intune Portal | 3 | Portal bearer token + same-origin portal context | [Browse](https://nodoc.nathanmcnulty.com/intune-portal) | `postman/collections/intune-portal.collection.json` |
+| Power Platform | 244 | Portal bearer tokens + service-specific audiences | [Browse](https://nodoc.nathanmcnulty.com/power-platform) | `postman/collections/power-platform.collection.json` |
 | Purview | 85 | Portal session cookie (`sccauth`) | [Browse](https://nodoc.nathanmcnulty.com/purview) | `postman/collections/purview.collection.json` |
 | Purview Portal | 6 | Portal session cookie (`sccauth`) + same-origin portal context | [Browse](https://nodoc.nathanmcnulty.com/purview-portal) | `postman/collections/purview-portal.collection.json` |
 | Entra IAM | 286 | Delegated OAuth2 + `X-Ms-Client-Request-Id` | [Browse](https://nodoc.nathanmcnulty.com/entra-iam) | `postman/collections/entra-iam.collection.json` |
