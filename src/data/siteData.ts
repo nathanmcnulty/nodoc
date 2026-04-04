@@ -45,7 +45,7 @@ export const apiCatalog: ApiCatalogItem[] = [
     title: "Defender",
     slug: "/defender",
     family: "Security portal",
-    operations: 459,
+    operations: 460,
     authModel: "Portal session cookie (`sccauth`)",
     baseUrl: "https://security.microsoft.com/apiproxy",
     summary:
