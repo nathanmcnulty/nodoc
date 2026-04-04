@@ -39,3 +39,203 @@ paths:
 
         '404':
           $ref: common.yml#/components/responses/NotFound
+
+  /insiderrisk/insiderrisk/api/v1.0/{tenantId}/ExtensibleIndicators:
+    get:
+      operationId: listExtensibleIndicators
+      summary: List extensible indicators
+      description: >-
+        Retrieve extensible Insider Risk indicators used by Purview's Insider
+        Risk application settings experience.
+      tags: [InsiderRisk]
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          description: The unique identifier (GUID) of the tenant.
+          schema:
+            type: string
+            format: uuid
+        - name: $filter
+          in: query
+          required: false
+          description: OData-style filter expression used to limit returned indicators.
+          schema:
+            type: string
+        - name: $top
+          in: query
+          required: false
+          description: The maximum number of indicators to return.
+          schema:
+            type: integer
+        - name: includeDeleted
+          in: query
+          required: false
+          description: Include deleted indicators in the result set.
+          schema:
+            type: boolean
+        - name: pageSize
+          in: query
+          required: false
+          description: Page size used by the settings blade.
+          schema:
+            type: integer
+        - name: type
+          in: query
+          required: false
+          description: Indicator type filter applied by the settings blade.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /insiderrisk/insiderrisk/api/v1.0/{tenantId}/ExtensibleIndicators/limits:
+    get:
+      operationId: getExtensibleIndicatorLimits
+      summary: Get extensible indicator limits
+      description: >-
+        Retrieve tenant limits for extensible Insider Risk indicators used by
+        Purview's Insider Risk application settings experience.
+      tags: [InsiderRisk]
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          description: The unique identifier (GUID) of the tenant.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /insiderrisk/insiderrisk/api/v1.0/{tenantId}/IsMcasEnabled:
+    get:
+      operationId: getInsiderRiskMcasStatus
+      summary: Get Insider Risk MCAS status
+      description: >-
+        Retrieve whether the Insider Risk experience is connected to Microsoft
+        Defender for Cloud Apps.
+      tags: [InsiderRisk]
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          description: The unique identifier (GUID) of the tenant.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /insiderrisk/insiderrisk/api/v1.0/{tenantId}/PolicyScoringDefaults:
+    get:
+      operationId: getPolicyScoringDefaults
+      summary: Get Insider Risk policy scoring defaults
+      description: >-
+        Retrieve default policy scoring settings used by Purview's Insider Risk
+        application settings experience.
+      tags: [InsiderRisk]
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          description: The unique identifier (GUID) of the tenant.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/app_connectors/:
+    get:
+      operationId: listInsiderRiskAppConnectors
+      summary: List Defender for Cloud Apps connectors
+      description: >-
+        Retrieve Defender for Cloud Apps connectors checked by Purview's Insider
+        Risk application settings experience.
+      tags: [InsiderRisk]
+      parameters:
+        - name: filters
+          in: query
+          required: false
+          description: Serialized filter payload applied by the app connector query.
+          schema:
+            type: string
+        - name: skip
+          in: query
+          required: false
+          description: The number of connector records to skip.
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

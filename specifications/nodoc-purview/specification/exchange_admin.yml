@@ -1,0 +1,40 @@
+paths:
+  /admin/Beta/{tenantId}/InvokeCommand:
+    post:
+      operationId: invokeExchangeAdminCommand
+      summary: Invoke Exchange-backed compliance admin command
+      description: >-
+        Invoke an Exchange-backed compliance cmdlet through Purview's admin proxy.
+        Captured from Data Loss Prevention policy surfaces calling
+        `Get-DlpCompliancePolicy` and `Get-DlpComplianceRule`.
+      tags: [ExchangeAdmin]
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          description: The tenant GUID to invoke the admin command against.
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Captured samples sent a CmdletInput object with CmdletName and Parameters fields.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

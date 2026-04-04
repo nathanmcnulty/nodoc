@@ -1,0 +1,50 @@
+paths:
+  /aip/api/TenantInfo:
+    get:
+      operationId: getAipTenantInfo
+      summary: Get Information Protection tenant info
+      description: >-
+        Retrieve Information Protection tenant metadata used by Purview's
+        Information protection scanner settings experience.
+      tags: [InformationProtection]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /rms/api/docs/all:
+    get:
+      operationId: listRmsTrackedDocuments
+      summary: List tracked Rights Management documents
+      description: >-
+        Retrieve the tracked-document and revocation catalog shown by Purview's
+        Tracking and revocation settings tab.
+      tags: [InformationProtection]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

@@ -208,3 +208,98 @@ paths:
 
         '404':
           $ref: common.yml#/components/responses/NotFound
+
+  /mtp/ndr/dlpmachines/filters:
+    get:
+      operationId: getDlpMachineFilters
+      summary: Get DLP machine filters
+      description: >-
+        Retrieve the filter options used by Purview's affected devices drill-in
+        from the Data Loss Prevention overview page.
+      tags: [DLPDevices]
+      parameters:
+        - name: lookingBackInDays
+          in: query
+          required: false
+          description: Number of days to look back for machine activity.
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /edlp/dlpInternalApi/api/cloud/dlp/logCollections/:
+    get:
+      operationId: listEndpointDlpLogCollections
+      summary: List endpoint DLP log collections
+      description: >-
+        Retrieve endpoint DLP log collection status for a device details blade
+        surfaced from Purview device settings.
+      tags: [DLPDevices]
+      parameters:
+        - name: MachineId
+          in: query
+          required: false
+          description: The machine identifier for the device whose log collections are being queried.
+          schema:
+            type: string
+        - name: Status
+          in: query
+          required: false
+          description: Filter log collections by collection status.
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /edlp/dlpInternalApi/api/cloud/dlp/logCollectionsSetting:
+    get:
+      operationId: getEndpointDlpLogCollectionSettings
+      summary: Get endpoint DLP log collection settings
+      description: >-
+        Retrieve endpoint DLP log collection settings used by Purview's device
+        details blade.
+      tags: [DLPDevices]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

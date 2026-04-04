@@ -73,3 +73,133 @@ paths:
 
         '404':
           $ref: common.yml#/components/responses/NotFound
+
+  /cbill/CbsReport/ReportingAPI/GetAggregates:
+    post:
+      operationId: getPurviewBillingAggregates
+      summary: Get Purview pay-as-you-go usage aggregates
+      description: >-
+        Retrieve pay-as-you-go billing aggregates for Purview usage report
+        blades, including the Audit pay-as-you-go usage experience.
+      tags: [Billing]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /cbill/LicenseUsage/E5TenantUsage:
+    get:
+      operationId: getE5TenantUsage
+      summary: Get E5 tenant usage summary
+      description: >-
+        Retrieve the E5 tenant usage summary shown by Purview's License Usage
+        report.
+      tags: [Billing]
+      parameters:
+        - name: date
+          in: query
+          required: false
+          description: The reporting timestamp used by the license usage blade.
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /cbill/LicenseUsage/E5TenantLicenseBreakdown:
+    get:
+      operationId: getE5TenantLicenseBreakdown
+      summary: Get E5 tenant license breakdown
+      description: >-
+        Retrieve the E5 license breakdown shown by Purview's License Usage
+        report.
+      tags: [Billing]
+      parameters:
+        - name: date
+          in: query
+          required: false
+          description: The reporting timestamp used by the license usage blade.
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /cbill/LicenseUsage/E5TenantSolutionBreakdown:
+    get:
+      operationId: getE5TenantSolutionBreakdown
+      summary: Get E5 tenant solution breakdown
+      description: >-
+        Retrieve the E5 solution breakdown shown by Purview's License Usage
+        report.
+      tags: [Billing]
+      parameters:
+        - name: date
+          in: query
+          required: false
+          description: The reporting timestamp used by the license usage blade.
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

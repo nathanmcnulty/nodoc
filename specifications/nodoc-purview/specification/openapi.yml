@@ -7,17 +7,21 @@ info:
 
       - Data Infrastructure (entity discovery and search)
       - eDiscovery case management
-      - Compliance Manager assessments
+      - Compliance Manager assessments and exports
       - Audit log search
       - Governance Web Services (authorization, DLM, classification)
+      - Communication Compliance supervision
       - Data Governance Services
       - Data Security Investigations
+      - Purview for AI, DSPM for AI, and oversharing assessments
       - Security Copilot integration
       - Microsoft Graph proxy
       - Platform Services (shell, IRIS, Azure Purview)
-      - Billing and licensing
-      - DLP device management
-      - Insider Risk Management
+      - Billing and license usage
+      - DLP device management and endpoint DLP log collection
+      - Insider Risk Management and connector settings
+      - Information Protection settings and Rights Management
+      - Exchange-backed compliance admin commands
       - SharePoint Online settings
 
     These APIs are accessed through the portal's API proxy layer at `purview.microsoft.com/apiproxy` and support delegated authentication flows.
@@ -35,6 +39,7 @@ info:
     | `/gws/` | Governance Web Services (authorization/DLM) — shared with Defender XDR |
       | `/dgs/` | Data Governance Services |
       | `/dsi/` | Data Security Investigations |
+      | `/oversharing/` | Purview for AI oversharing service |
       | `/medeina/` | Security Copilot (Medeina) — shared with Defender XDR |
       | `/cdssecuritycopilot/` | CDS Security Copilot (legacy, see /medeina/) |
       | `/securityplatform/` | Security Platform / Security Copilot provisioning |
@@ -42,7 +47,13 @@ info:
       | `/purviewplatform/` | Purview Platform |
       | `/cbill/` | Purview Billing |
       | `/mtp/` | Microsoft Threat Protection (DLP devices) — shared with Defender XDR |
+      | `/edlp/` | Endpoint DLP log collection service |
       | `/insiderrisk/` | Insider Risk Management |
+      | `/mcas/` | Defender for Cloud Apps connectors |
+      | `/WdatpPublicApi/` | Information Rights Management status |
+      | `/aip/` | Azure Information Protection settings |
+      | `/rms/` | Rights Management tracking and revocation |
+      | `/admin/` | Exchange-backed compliance admin proxy |
       | `/spo/` | SharePoint Online |
       | `/arm/` | Azure Resource Manager proxy |
       | `/shell/` | Portal Shell — shared with Defender XDR |
@@ -91,6 +102,10 @@ tags:
     description: |
       Operations relating to Compliance Manager, including compliance posture summaries,
       assessments, user context, filters, and native connector ingestion.
+  - name: CommunicationCompliance
+    description: |
+      Operations relating to Communication Compliance and supervision policy reads
+      surfaced within the Purview portal.
   - name: Audit
     description: Operations relating to audit log search and audit enablement status.
   - name: GovernanceServices
@@ -105,6 +120,10 @@ tags:
     description: |
       Operations relating to Data Security Investigations (DSI), including
       investigation inventory and solution bootstrap data.
+  - name: PurviewForAI
+    description: |
+      Operations relating to Purview for AI, DSPM for AI, oversharing assessments,
+      agent observability, and Microsoft 365 Copilot-specific insight surfaces.
   - name: Copilot
     description: |
       Operations relating to Security Copilot (Medeina) and CDS Security Copilot,
@@ -119,6 +138,14 @@ tags:
       IRIS feature selection, Azure Purview accounts, and Office Configuration policies.
   - name: Billing
     description: Operations relating to Purview billing, licensing, and free trial offers.
+  - name: InformationProtection
+    description: |
+      Operations relating to Purview Information Protection settings, Azure
+      Information Protection metadata, and Rights Management tracking/revocation.
+  - name: ExchangeAdmin
+    description: |
+      Operations relating to Exchange-backed compliance admin command invocation
+      through the Purview portal proxy.
   - name: DLPDevices
     description: |
       Operations relating to DLP device management and incident alerts,
@@ -137,10 +164,13 @@ x-tagGroups:
   - name: Compliance
     tags:
       - ComplianceManager
+      - CommunicationCompliance
       - Audit
       - GovernanceServices
   - name: Information Protection
     tags:
+      - InformationProtection
+      - ExchangeAdmin
       - DLPDevices
       - InsiderRisk
       - SharePoint
@@ -149,6 +179,7 @@ x-tagGroups:
       - eDiscovery
   - name: AI & Copilot
     tags:
+      - PurviewForAI
       - Copilot
   - name: Platform
     tags:
@@ -168,6 +199,8 @@ paths:
     $ref: 'data_infrastructure.yml#/paths/~1di~1find~1MIPSavedQuery'
   /di/find/Alert:
     $ref: 'data_infrastructure.yml#/paths/~1di~1find~1Alert'
+  /di/find/AppRetentionCompliancePolicy:
+    $ref: 'data_infrastructure.yml#/paths/~1di~1find~1AppRetentionCompliancePolicy'
   /di/find/PolicyConfig:
     $ref: 'data_infrastructure.yml#/paths/~1di~1find~1PolicyConfig'
   /di/find/DlpComplianceRule:
@@ -190,6 +223,8 @@ paths:
     $ref: 'data_infrastructure.yml#/paths/~1di~1find~1FeatureConfiguration'
   /di/find/MipAnalyticsTenantSettings:
     $ref: 'data_infrastructure.yml#/paths/~1di~1find~1MipAnalyticsTenantSettings'
+  /di/find/InsiderRiskEntityList:
+    $ref: 'data_infrastructure.yml#/paths/~1di~1find~1InsiderRiskEntityList'
   /di/find/InsiderRiskPolicy:
     $ref: 'data_infrastructure.yml#/paths/~1di~1find~1InsiderRiskPolicy'
   /di/find/RiskSpotlightingInsight:
@@ -234,6 +269,8 @@ paths:
     $ref: 'compliance_manager.yml#/paths/~1cpm~1v1.0~1Tenant~1Filters'
   /cpm/v1.0/Regulations/PremiumRegulationSummary:
     $ref: 'compliance_manager.yml#/paths/~1cpm~1v1.0~1Regulations~1PremiumRegulationSummary'
+  /cpm/v1.0/Reporting/Export:
+    $ref: 'compliance_manager.yml#/paths/~1cpm~1v1.0~1Reporting~1Export'
   /cpm/v1.0/RegulationTemplates:
     $ref: 'compliance_manager.yml#/paths/~1cpm~1v1.0~1RegulationTemplates'
   /Ingestion/NativeConnectorJob:
@@ -250,10 +287,24 @@ paths:
     $ref: 'governance_services.yml#/paths/~1gws~1ComplianceAuthServer~1v1.0~1IsAllowedPermissionWithScopes'
   /gws/ComplianceAuthServer/v1.0/GetUserRolesWithScopeInfo:
     $ref: 'governance_services.yml#/paths/~1gws~1ComplianceAuthServer~1v1.0~1GetUserRolesWithScopeInfo'
+  /gws/ComplianceAuthServer/v1.0/GetGrantedPermissions:
+    $ref: 'governance_services.yml#/paths/~1gws~1ComplianceAuthServer~1v1.0~1GetGrantedPermissions'
+  /gws/ComplianceAuthServer/v1.0/GetUserRoles:
+    $ref: 'governance_services.yml#/paths/~1gws~1ComplianceAuthServer~1v1.0~1GetUserRoles'
   /gws/DlmServices/api/v1.0/disposition/DispositionStatistics:
     $ref: 'governance_services.yml#/paths/~1gws~1DlmServices~1api~1v1.0~1disposition~1DispositionStatistics'
   "/gws/ipmlservice/CategoryTrainingModel//ModelMetadata":
     $ref: "governance_services.yml#/paths/~1gws~1ipmlservice~1CategoryTrainingModel~1~1ModelMetadata"
+  /gws/ipmlservice/CategoryTrainingModel/ModelMetadata:
+    $ref: 'governance_services.yml#/paths/~1gws~1ipmlservice~1CategoryTrainingModel~1ModelMetadata'
+
+  # Communication Compliance
+  /gws/CommsComplianceService/api/v1/Supervision/Policy:
+    $ref: 'communication_compliance.yml#/paths/~1gws~1CommsComplianceService~1api~1v1~1Supervision~1Policy'
+  /gws/CommsComplianceService/api/v1/Supervision/Policy/GetSelectedSITsForSITIndicator:
+    $ref: 'communication_compliance.yml#/paths/~1gws~1CommsComplianceService~1api~1v1~1Supervision~1Policy~1GetSelectedSITsForSITIndicator'
+  /gws/CommsComplianceService/api/v1/Supervision/ServiceSettings:
+    $ref: 'communication_compliance.yml#/paths/~1gws~1CommsComplianceService~1api~1v1~1Supervision~1ServiceSettings'
 
   # Data Governance
   /dgs/Item/GetTenantLicense:
@@ -284,6 +335,38 @@ paths:
     $ref: 'copilot.yml#/paths/~1securityplatform~1workspaces'
   /securityplatform/sentinelgraph/provisioning/checkTenant:
     $ref: 'copilot.yml#/paths/~1securityplatform~1sentinelgraph~1provisioning~1checkTenant'
+
+  # Purview for AI
+  /cpm/v1.0/Tenant/AIHubActionsStatus:
+    $ref: 'purview_for_ai.yml#/paths/~1cpm~1v1.0~1Tenant~1AIHubActionsStatus'
+  /di/find/PurviewForAI:
+    $ref: 'purview_for_ai.yml#/paths/~1di~1find~1PurviewForAI'
+  /di/find/PurviewForAISetting:
+    $ref: 'purview_for_ai.yml#/paths/~1di~1find~1PurviewForAISetting'
+  /di/search/PurviewDataAssessmentsInsights:
+    $ref: 'purview_for_ai.yml#/paths/~1di~1search~1PurviewDataAssessmentsInsights'
+  /di/search/PurviewForAIActivityData:
+    $ref: 'purview_for_ai.yml#/paths/~1di~1search~1PurviewForAIActivityData'
+  /gws/dspmaimtapp/api/v1/Agents:
+    $ref: 'purview_for_ai.yml#/paths/~1gws~1dspmaimtapp~1api~1v1~1Agents'
+  /gws/dspmaimtapp/api/v1/scenariosearch:
+    $ref: 'purview_for_ai.yml#/paths/~1gws~1dspmaimtapp~1api~1v1~1scenariosearch'
+  /medeina/agentDefinitions:
+    $ref: 'purview_for_ai.yml#/paths/~1medeina~1agentDefinitions'
+  /medeina/settings/datashare/defaultWorkspace:
+    $ref: 'purview_for_ai.yml#/paths/~1medeina~1settings~1datashare~1defaultWorkspace'
+  /oversharing/api/v1/p4ai/assessment:
+    $ref: 'purview_for_ai.yml#/paths/~1oversharing~1api~1v1~1p4ai~1assessment'
+  "/oversharing/api/v1/p4ai/assessment('{assessmentId}')":
+    $ref: "purview_for_ai.yml#/paths/~1oversharing~1api~1v1~1p4ai~1assessment('{assessmentId}')"
+  /oversharing/api/v1/p4ai/tenant/register:
+    $ref: 'purview_for_ai.yml#/paths/~1oversharing~1api~1v1~1p4ai~1tenant~1register'
+  /oversharing/api/v1/p4ai/tenantSettings/validateStored:
+    $ref: 'purview_for_ai.yml#/paths/~1oversharing~1api~1v1~1p4ai~1tenantSettings~1validateStored'
+  /oversharing/api/v1/p4ai/tenantSettings/validateStored/fabric:
+    $ref: 'purview_for_ai.yml#/paths/~1oversharing~1api~1v1~1p4ai~1tenantSettings~1validateStored~1fabric'
+  /WdatpPublicApi/irm/tenant/status:
+    $ref: 'purview_for_ai.yml#/paths/~1WdatpPublicApi~1irm~1tenant~1status'
 
   # Graph Proxy
   /msgraph/v1.0/subscribedSkus:
@@ -332,22 +415,56 @@ paths:
     $ref: 'billing.yml#/paths/~1cbill~1PurviewAccount'
   /cbill/PurviewAccount/billing-config-details:
     $ref: 'billing.yml#/paths/~1cbill~1PurviewAccount~1billing-config-details'
+  /cbill/CbsReport/ReportingAPI/GetAggregates:
+    $ref: 'billing.yml#/paths/~1cbill~1CbsReport~1ReportingAPI~1GetAggregates'
+  /cbill/LicenseUsage/E5TenantUsage:
+    $ref: 'billing.yml#/paths/~1cbill~1LicenseUsage~1E5TenantUsage'
+  /cbill/LicenseUsage/E5TenantLicenseBreakdown:
+    $ref: 'billing.yml#/paths/~1cbill~1LicenseUsage~1E5TenantLicenseBreakdown'
+  /cbill/LicenseUsage/E5TenantSolutionBreakdown:
+    $ref: 'billing.yml#/paths/~1cbill~1LicenseUsage~1E5TenantSolutionBreakdown'
+
+  # Information Protection
+  /aip/api/TenantInfo:
+    $ref: 'information_protection.yml#/paths/~1aip~1api~1TenantInfo'
+  /rms/api/docs/all:
+    $ref: 'information_protection.yml#/paths/~1rms~1api~1docs~1all'
 
   # DLP Devices
   /mtp/ndr/dlpmachines/count:
     $ref: 'dlp_devices.yml#/paths/~1mtp~1ndr~1dlpmachines~1count'
   /mtp/ndr/dlpmachines:
     $ref: 'dlp_devices.yml#/paths/~1mtp~1ndr~1dlpmachines'
+  /mtp/ndr/dlpmachines/filters:
+    $ref: 'dlp_devices.yml#/paths/~1mtp~1ndr~1dlpmachines~1filters'
   /mtp/ndr/dlpmachines/summaryStatus:
     $ref: 'dlp_devices.yml#/paths/~1mtp~1ndr~1dlpmachines~1summaryStatus'
   /mtp/sccManagement/mgmt/TenantContext:
     $ref: 'dlp_devices.yml#/paths/~1mtp~1sccManagement~1mgmt~1TenantContext'
   /mtp/incidentQueue/incidents/alerts:
     $ref: 'dlp_devices.yml#/paths/~1mtp~1incidentQueue~1incidents~1alerts'
+  /edlp/dlpInternalApi/api/cloud/dlp/logCollections/:
+    $ref: 'dlp_devices.yml#/paths/~1edlp~1dlpInternalApi~1api~1cloud~1dlp~1logCollections~1'
+  /edlp/dlpInternalApi/api/cloud/dlp/logCollectionsSetting:
+    $ref: 'dlp_devices.yml#/paths/~1edlp~1dlpInternalApi~1api~1cloud~1dlp~1logCollectionsSetting'
+
+  # Exchange Admin
+  /admin/Beta/{tenantId}/InvokeCommand:
+    $ref: 'exchange_admin.yml#/paths/~1admin~1Beta~1{tenantId}~1InvokeCommand'
 
   # Insider Risk
   "/insiderrisk/insiderrisk/api/v1.0/{tenantId}/InsiderRiskAnalyticsInsightMetadata('{date}')":
     $ref: "insider_risk.yml#/paths/~1insiderrisk~1insiderrisk~1api~1v1.0~1{tenantId}~1InsiderRiskAnalyticsInsightMetadata('{date}')"
+  /insiderrisk/insiderrisk/api/v1.0/{tenantId}/ExtensibleIndicators:
+    $ref: 'insider_risk.yml#/paths/~1insiderrisk~1insiderrisk~1api~1v1.0~1{tenantId}~1ExtensibleIndicators'
+  /insiderrisk/insiderrisk/api/v1.0/{tenantId}/ExtensibleIndicators/limits:
+    $ref: 'insider_risk.yml#/paths/~1insiderrisk~1insiderrisk~1api~1v1.0~1{tenantId}~1ExtensibleIndicators~1limits'
+  /insiderrisk/insiderrisk/api/v1.0/{tenantId}/IsMcasEnabled:
+    $ref: 'insider_risk.yml#/paths/~1insiderrisk~1insiderrisk~1api~1v1.0~1{tenantId}~1IsMcasEnabled'
+  /insiderrisk/insiderrisk/api/v1.0/{tenantId}/PolicyScoringDefaults:
+    $ref: 'insider_risk.yml#/paths/~1insiderrisk~1insiderrisk~1api~1v1.0~1{tenantId}~1PolicyScoringDefaults'
+  /mcas/cas/api/v1/app_connectors/:
+    $ref: 'insider_risk.yml#/paths/~1mcas~1cas~1api~1v1~1app_connectors~1'
 
   # SharePoint
   /spo/admin/_api/SPO.Tenant/EnableAIPIntegration:

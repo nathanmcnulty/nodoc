@@ -226,3 +226,34 @@ paths:
 
         '404':
           $ref: common.yml#/components/responses/NotFound
+
+  /cpm/v1.0/Reporting/Export:
+    post:
+      operationId: exportComplianceManagerHistoryReport
+      summary: Export compliance history report
+      description: >-
+        Export Compliance Manager history report data from the History reports
+        page.
+      tags: [ComplianceManager]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending
+      responses:
+        '200':
+          description: OK
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

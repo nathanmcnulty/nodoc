@@ -1,0 +1,91 @@
+paths:
+  /gws/CommsComplianceService/api/v1/Supervision/Policy:
+    get:
+      operationId: listCommunicationCompliancePolicies
+      summary: List supervision policies
+      description: >-
+        Retrieve Communication Compliance supervision policies used by Purview's
+        Microsoft 365 Copilot and related compliance experiences.
+      tags: [CommunicationCompliance]
+      parameters:
+        - name: $top
+          in: query
+          required: false
+          description: The maximum number of supervision policies to return.
+          schema:
+            type: integer
+        - name: tenantId
+          in: query
+          required: false
+          description: The tenant GUID used by the supervision service.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /gws/CommsComplianceService/api/v1/Supervision/Policy/GetSelectedSITsForSITIndicator:
+    get:
+      operationId: getSelectedSitsForSitIndicator
+      summary: Get selected SITs for SIT indicator
+      description: >-
+        Retrieve the sensitive information types selected for a supervision SIT
+        indicator. Observed on Purview's Insider Risk application settings
+        surface.
+      tags: [CommunicationCompliance]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /gws/CommsComplianceService/api/v1/Supervision/ServiceSettings:
+    get:
+      operationId: getCommunicationComplianceServiceSettings
+      summary: Get supervision service settings
+      description: >-
+        Retrieve Communication Compliance supervision service settings. Observed
+        on the Purview for AI Microsoft 365 Copilot tab and Insider Risk
+        settings.
+      tags: [CommunicationCompliance]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

@@ -244,15 +244,15 @@ export const apiCatalog: ApiCatalogItem[] = [
     title: "Purview",
     slug: "/purview",
     family: "Security portal",
-    operations: 85,
+    operations: 124,
     authModel: "Portal session cookie (`sccauth`)",
     baseUrl: "https://purview.microsoft.com/apiproxy",
     summary:
-      "Compliance, governance, eDiscovery, investigations, and shared Security Platform coverage from the Purview portal proxy surface.",
+      "Compliance, governance, DLP, insider risk, information protection, and Purview for AI coverage from the Purview portal proxy surface.",
     highlights: [
-      "Data infrastructure, governance, compliance manager, and DSI",
-      "eDiscovery, audit, DLP devices, insider risk, and ARM role lookups",
-      "Security Platform / Security Copilot provisioning plus shared backend prefixes",
+      "Purview for AI, DSPM for AI, oversharing assessments, and agent observability",
+      "Information Protection settings, DLP devices, insider risk settings, and Exchange-backed admin commands",
+      "Compliance exports, billing/license usage, and shared Purview backend prefixes",
     ],
     collectionPath: "postman/collections/purview.collection.json",
     collectionDownloadUrl:
