@@ -79,6 +79,24 @@ export const apiCatalog: ApiCatalogItem[] = [
       "https://raw.githubusercontent.com/nathanmcnulty/nodoc/main/postman/collections/m365-admin.collection.json",
   },
   {
+    title: "Exchange Beta",
+    slug: "/exchange-beta",
+    family: "Exchange admin center",
+    operations: 31,
+    authModel: "Portal session cookie + same-origin `x-requested-with`",
+    baseUrl: "https://admin.exchange.microsoft.com/beta",
+    summary:
+      "Same-origin Exchange admin center beta coverage for shell bootstrap, preferences, mail flow, recipients, migration, public folders, and report widgets.",
+    highlights: [
+      "Shell, tenant, profile, and preference routes used across the Exchange portal",
+      "Accepted domains, connectors, transport rules, alert policies, and mail flow reports",
+      "Recipient, role group, migration, and public folder inventory surfaces",
+    ],
+    collectionPath: "postman/collections/exchange-beta.collection.json",
+    collectionDownloadUrl:
+      "https://raw.githubusercontent.com/nathanmcnulty/nodoc/main/postman/collections/exchange-beta.collection.json",
+  },
+  {
     title: "M365 Apps Config",
     slug: "/m-365-apps-config",
     family: "M365 Apps admin center",
@@ -304,6 +322,12 @@ export const accessModels: AccessModel[] = [
     portals: ["Defender", "Purview"],
   },
   {
+    title: "Portal session + same-origin XHR",
+    description:
+      "Exchange Beta uses the authenticated Exchange admin center browser session with `.AspNetCore.Cookies` and same-origin `x-requested-with: XMLHttpRequest` requests.",
+    portals: ["Exchange Beta"],
+  },
+  {
     title: "Portal session + same-origin context",
     description:
       "Purview Portal uses the same `sccauth` browser session, but its same-origin `/api/` calls also depend on portal bootstrap state and are where Purview mints downstream bearer tokens.",
@@ -460,6 +484,31 @@ export const gettingStartedGuides: GettingStartedGuide[] = [
       "Missing one of the custom admin headers can look like a generic auth or routing failure.",
       "Some data comes through federated Graph proxies and can differ from the shared Graph proxy behavior in Defender or Purview.",
       "Header values can change as the admin shell bootstraps or refreshes.",
+    ],
+  },
+  {
+    title: "Exchange admin center",
+    portals: ["Exchange Beta"],
+    authModel: "Portal session cookie + same-origin `x-requested-with`",
+    baseUrls: ["https://admin.exchange.microsoft.com/beta"],
+    confirmedDetails: [
+      "Observed Exchange calls were same-origin `/beta/` routes on `admin.exchange.microsoft.com`, not Microsoft Graph.",
+      "The published spec models the live Exchange browser session with `.AspNetCore.Cookies` plus companion chunk cookies and same-origin `x-requested-with: XMLHttpRequest` requests.",
+      "Shared `admin.microsoft.com` support, SharePoint, and feedback traffic appeared in the same browsing session but was excluded from Exchange coverage because it was generic shell traffic or already documented elsewhere.",
+    ],
+    practicalGuidance: [
+      "Start from a real signed-in Exchange admin center tab and capture same-origin XHR/fetch requests instead of trying to replay the surface with a guessed token alone.",
+      "Treat the OData-style `ExchangeAdminCenter.*` routes as parameterized functions, not as fixed timestamped paths copied straight out of one capture.",
+      "Validate access with read-only bootstrap and list operations such as `GET /beta/Shell`, `GET /beta/UserProfile`, `GET /beta/AcceptedDomainFullListIC`, and `GET /beta/MigrationBatch` before mapping writes.",
+    ],
+    mutationGuidance: [
+      "The only write-shaped Exchange route confirmed in this pass was `POST /beta/UserPreference`; treat additional POST, PUT, PATCH, or DELETE flows as live writes until you have captured and reviewed them carefully.",
+      "If you need mailbox, connector, or rule mutations, capture the browser request body and original state first, then replay only in a disposable tenant.",
+    ],
+    pitfalls: [
+      "Exchange pages also load generic Microsoft 365 shell, support, and feedback traffic from `admin.microsoft.com` and `portal.office.com`; do not confuse those hosts with the Exchange beta surface.",
+      "A same-origin telemetry POST to `/api/instrument/logclient` returned `404` during live capture and was intentionally left out of published coverage.",
+      "Many useful Exchange routes are OData function calls with embedded parameters, so literal timestamped paths from one capture will be brittle when replayed later.",
     ],
   },
   {

@@ -1,0 +1,1691 @@
+openapi: 3.0.1
+info:
+  title: Exchange Beta
+  x-nodoc-category: Exchange
+  description: |
+    The Exchange Beta API is used by the Exchange admin center (`admin.exchange.microsoft.com`)
+    for same-origin shell bootstrap, user preference storage, mailbox and recipient detail
+    blades, role administration, mobile device management, organization sharing, mail flow
+    administration, migration state, public folder inventory, and report widgets.
+
+    The operations below were confirmed while browsing the Exchange admin center with a real
+    authenticated Edge session. They were observed on routes including:
+
+      - Home/dashboard
+      - Accepted domains
+      - Admin roles
+      - Alert policies
+      - Connectors
+      - Contacts
+      - Groups
+      - High Volume Email
+      - Mobile device access
+      - Mobile device mailbox policy
+      - Mail flow reports
+      - Migration
+      - Organization sharing
+      - Public folders
+      - Resources
+      - Remote domains
+      - Settings
+      - Troubleshoot
+      - User roles
+
+    Requests relied on the authenticated Exchange admin center browser session, same-origin
+    `fetch`/XHR traffic, and `x-requested-with: XMLHttpRequest`. The observed cookie set
+    included `.AspNetCore.Cookies` plus companion chunk cookies on `admin.exchange.microsoft.com`.
+
+    Shared `admin.microsoft.com` support, SharePoint, and feedback calls were also present in the
+    live session, but those were not modeled here because they are either generic Microsoft 365
+    admin shell dependencies or already documented elsewhere in the repository.
+
+    Documentation and specifications have been provided on a best-efforts basis and may not be
+    100% accurate.
+  version: 0.1.0
+  contact:
+    name: nodoc
+    url: https://github.com/nathanmcnulty/nodoc
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+servers:
+  - url: https://admin.exchange.microsoft.com
+    description: Exchange admin center same-origin beta API
+security:
+  - PortalSession: []
+components:
+  securitySchemes:
+    PortalSession:
+      type: apiKey
+      in: cookie
+      name: .AspNetCore.Cookies
+      description: |
+        Authenticated Exchange admin center browser session cookie. Observed requests also
+        relied on companion chunk cookies such as `.AspNetCore.CookiesC1` and
+        `.AspNetCore.CookiesC2` together with same-origin `x-requested-with: XMLHttpRequest`.
+  parameters:
+    primaryKey:
+      name: primaryKey
+      in: path
+      required: true
+      description: Preference bucket key used by the Exchange admin center.
+      schema:
+        type: string
+        example: App
+    subKey:
+      name: subKey
+      in: path
+      required: true
+      description: Preference item key within the selected preference bucket.
+      schema:
+        type: string
+        example: IsDarkMode
+    reportType:
+      name: reportType
+      in: path
+      required: true
+      description: Connector report type requested by the mail flow reports blade.
+      schema:
+        type: string
+        example: MailFlow
+    insightType:
+      name: insightType
+      in: path
+      required: true
+      description: Customer insight variant requested by the Exchange dashboard.
+      schema:
+        type: string
+        enum:
+          - CertExpiry
+          - HotRecipient
+          - MailLoop
+          - NewDomainsForwarding
+          - SlowTransportRule
+          - NewUsersForwarding
+        example: MailLoop
+    startDate:
+      name: startDate
+      in: path
+      required: true
+      description: Inclusive report window start observed as a Unix epoch timestamp in milliseconds.
+      schema:
+        type: integer
+        format: int64
+        example: 1774661157045
+    endDate:
+      name: endDate
+      in: path
+      required: true
+      description: Inclusive report window end observed as a Unix epoch timestamp in milliseconds.
+      schema:
+        type: integer
+        format: int64
+        example: 1775265957045
+    mailboxId:
+      name: mailboxId
+      in: path
+      required: true
+      description: Exchange mailbox object identifier observed in mailbox and resource detail routes.
+      schema:
+        type: string
+        format: uuid
+        example: f1fa286e-213e-40b2-af24-77ea529a0ad9
+    groupId:
+      name: groupId
+      in: path
+      required: true
+      description: Exchange group object identifier used by group detail and moderation routes.
+      schema:
+        type: string
+        format: uuid
+        example: 684682f9-7856-42b7-966d-fa8b6f58ddd0
+    roleGroupId:
+      name: roleGroupId
+      in: path
+      required: true
+      description: Exchange role group identifier surfaced by the Admin roles page.
+      schema:
+        type: string
+        format: uuid
+        example: c9b156d0-f6a1-4922-b58f-4903f6bb8cb7
+    resourceMailboxId:
+      name: resourceMailboxId
+      in: path
+      required: true
+      description: Exchange resource mailbox identifier used by the Resources page detail blades.
+      schema:
+        type: string
+        format: uuid
+        example: f72eabc0-8fe1-420f-ad6d-383e116b63bd
+    organizationRelationshipId:
+      name: organizationRelationshipId
+      in: path
+      required: true
+      description: Exchange organization relationship identifier used by organization sharing detail routes.
+      schema:
+        type: string
+        format: uuid
+        example: eab4eb60-d819-4309-9f24-15ccc74dba47
+    individualSharingId:
+      name: individualSharingId
+      in: path
+      required: true
+      description: Exchange individual sharing policy identifier used by the Organization sharing page.
+      schema:
+        type: string
+        format: uuid
+        example: 573ce33e-b80e-4933-b597-dbe11bc28399
+  responses:
+    Unauthorized:
+      description: Authentication is required or the active Exchange admin center browser session is no longer valid.
+    Forbidden:
+      description: The authenticated principal does not have access to the requested Exchange portal data.
+    BadRequest:
+      description: The supplied route parameters or request body were invalid.
+    NotFound:
+      description: The requested Exchange portal route was not available for the current tenant or UI state.
+  schemas:
+    GenericObject:
+      type: object
+      additionalProperties: true
+    ODataCollectionResponse:
+      type: object
+      description: Generic OData collection envelope observed throughout the Exchange admin center beta surface.
+      properties:
+        '@odata.context':
+          type: string
+          example: https://admin.exchange.microsoft.com/beta/$metadata#Collection(Microsoft.Exchange.AdminCenter.Model)
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/GenericObject'
+      additionalProperties: true
+    ODataStringResponse:
+      type: object
+      description: Primitive OData value envelope returned by some preference lookups.
+      properties:
+        '@odata.context':
+          type: string
+          example: https://admin.exchange.microsoft.com/beta/$metadata#Edm.String
+        value:
+          type: string
+          example: "false"
+      additionalProperties: true
+    ExchangeAcceptedDomain:
+      type: object
+      description: Accepted domain record surfaced by the Exchange admin center.
+      properties:
+        ObjectId:
+          type: string
+          format: uuid
+          example: b958d823-221c-4ad8-9c7e-966066aecfa9
+        DomainName:
+          type: string
+          example: sharemylabs.com
+        Name:
+          type: string
+          example: sharemylabs.com
+        DomainType:
+          type: string
+          example: Authoritative
+        Default:
+          type: boolean
+          example: true
+        IsCoexistenceDomain:
+          type: boolean
+          example: false
+        MatchSubDomains:
+          type: boolean
+          example: false
+        SendingFromDomainDisabled:
+          type: boolean
+          example: false
+        AuthenticationType:
+          type: string
+          example: Managed
+      additionalProperties: true
+    ExchangeAcceptedDomainCollectionResponse:
+      type: object
+      description: Accepted domains returned by the Accepted domains page.
+      properties:
+        '@odata.context':
+          type: string
+          example: https://admin.exchange.microsoft.com/beta/$metadata#AcceptedDomainFullListIC
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExchangeAcceptedDomain'
+      additionalProperties: true
+    ExchangeUserPreferenceWriteRequest:
+      type: object
+      description: |
+        Preference write payload posted by the Exchange admin center during session startup and
+        user-state persistence flows.
+      required:
+        - PrimaryKey
+        - SubKey
+        - Value
+      properties:
+        PrimaryKey:
+          type: string
+          example: App
+        SubKey:
+          type: string
+          example: LastLogonInfo
+        Value:
+          type: string
+          description: JSON-encoded preference payload stored by the portal.
+          example: "{\"LastLogonInfo\":\"1775265940091\",\"TeachingCounter\":\"0\"}"
+      additionalProperties: true
+    ExchangeLastExecutionData:
+      type: object
+      description: Transport rule last-execution state used by Exchange report widgets.
+      properties:
+        RuleId:
+          type: string
+          format: uuid
+          example: 17608bbc-407f-4905-bc66-35adf84996c3
+        LastExecution:
+          type: string
+          format: date-time
+          example: 2026-03-31T18:34:18Z
+      additionalProperties: true
+    ExchangeLastExecutionDataCollectionResponse:
+      type: object
+      description: Collection of transport-rule last-execution records.
+      properties:
+        '@odata.context':
+          type: string
+          example: https://admin.exchange.microsoft.com/beta/$metadata#Collection(ExchangeAdminCenter.EtrLastExecutionDataModel)
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExchangeLastExecutionData'
+      additionalProperties: true
+    ExchangeMailbox:
+      type: object
+      description: Exchange mailbox entity returned by mailbox and related permission helper routes.
+      properties:
+        ObjectId:
+          type: string
+          format: uuid
+          example: fe803726-2568-407e-945d-2f6d185a5753
+        DisplayName:
+          type: string
+          example: Access-Notifications
+        PrimarySmtpAddress:
+          type: string
+          example: Access-Notifications@sharemylabs.com
+        RecipientTypeDetails:
+          type: string
+          example: SharedMailbox
+        Alias:
+          type: string
+          example: Access-Notifications
+        Name:
+          type: string
+          example: Access-Notifications
+      additionalProperties: true
+    ExchangeMailboxStatistics:
+      type: object
+      description: Mailbox statistics payload surfaced by the mailbox detail blade.
+      properties:
+        '@odata.context':
+          type: string
+          example: https://admin.exchange.microsoft.com/beta/$metadata#ExchangeAdminCenter.MailboxStatistics
+        LastLogonTime:
+          type: string
+          format: date-time
+          nullable: true
+        TotalItemSizeInMB:
+          type: number
+          format: double
+          example: 0.044
+        TotalItemSize:
+          type: integer
+          format: int64
+          example: 45630
+      additionalProperties: true
+tags:
+  - name: Bootstrap
+    description: Shell bootstrap, tenant boundary, monitoring, and time zone helpers.
+  - name: Preferences
+    description: Same-origin user profile and preference storage used by the Exchange admin center shell.
+  - name: MailFlow
+    description: Accepted domains, connectors, transport rules, remote domains, alert policies, and mail flow reports.
+  - name: Objects
+    description: Recipient, mailbox, resource, contact, and policy inventory surfaced by Exchange admin pages.
+  - name: Roles
+    description: Role groups, role assignments, management roles, and related group moderation helpers.
+  - name: Mobile
+    description: ActiveSync and mobile device inventory, access rules, and mailbox policies.
+  - name: Sharing
+    description: Organization relationships and individual sharing policies.
+  - name: Migration
+    description: Migration batches and endpoint inventory used by migration blades.
+  - name: Folders
+    description: Public folder and public folder mailbox inventory.
+x-tagGroups:
+  - name: Portal bootstrap and session
+    tags: [Bootstrap, Preferences]
+  - name: Exchange administration
+    tags: [MailFlow, Objects, Roles, Mobile, Sharing, Migration, Folders]
+paths:
+  /beta/Shell:
+    get:
+      tags: [Bootstrap]
+      summary: Get Exchange shell bootstrap
+      description: |
+        Returns the Exchange admin center shell bootstrap payload used during dashboard load and
+        route transitions. Confirmed live from the home, settings, migration, report, and public
+        folder pages.
+      operationId: ExchangeBeta.Bootstrap.GetShell
+      responses:
+        '200':
+          description: Exchange shell bootstrap returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /beta/CmdletInfo:
+    get:
+      tags: [Bootstrap]
+      summary: Get cmdlet metadata
+      description: |
+        Returns Exchange cmdlet and capability metadata consulted by multiple admin center blades
+        during startup and page rendering.
+      operationId: ExchangeBeta.Bootstrap.GetCmdletInfo
+      responses:
+        '200':
+          description: Cmdlet metadata returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /beta/TenantDataBoundary:
+    get:
+      tags: [Bootstrap]
+      summary: Get tenant data boundary settings
+      description: |
+        Retrieves tenant data-boundary information evaluated by the Exchange admin center shell
+        during startup and route changes.
+      operationId: ExchangeBeta.Bootstrap.GetTenantDataBoundary
+      responses:
+        '200':
+          description: Tenant data-boundary information returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /beta/TenantMonitoring:
+    get:
+      tags: [Bootstrap]
+      summary: Get tenant monitoring status
+      description: |
+        Retrieves monitoring and service-state information surfaced by the dashboard and selected
+        report experiences.
+      operationId: ExchangeBeta.Bootstrap.GetTenantMonitoring
+      responses:
+        '200':
+          description: Tenant monitoring state returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /beta/TimeZone:
+    get:
+      tags: [Bootstrap]
+      summary: List available Exchange time zones
+      description: |
+        Returns the time zone values used by Exchange settings and localized report experiences.
+      operationId: ExchangeBeta.Bootstrap.ListTimeZones
+      responses:
+        '200':
+          description: Exchange time zones returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataCollectionResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /beta/TimeZone/ExchangeAdminCenter.MyTimeZone:
+    get:
+      tags: [Bootstrap]
+      summary: Get the current user's Exchange time zone
+      description: |
+        Returns the caller's active time zone selection for the Exchange admin center.
+      operationId: ExchangeBeta.Bootstrap.GetMyTimeZone
+      responses:
+        '200':
+          description: Current Exchange time zone returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /beta/UserProfile:
+    get:
+      tags: [Preferences]
+      summary: Get the Exchange portal user profile
+      description: |
+        Returns the caller's Exchange admin center user profile and shell context.
+      operationId: ExchangeBeta.Preferences.GetUserProfile
+      responses:
+        '200':
+          description: User profile returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /beta/UserProfile/ExchangeAdminCenter.GetFeedbackAccessToken():
+    get:
+      tags: [Preferences]
+      summary: Get a feedback access token
+      description: |
+        Retrieves the Exchange admin center token used to launch the portal feedback experience.
+      operationId: ExchangeBeta.Preferences.GetFeedbackAccessToken
+      responses:
+        '200':
+          description: Feedback token payload returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /beta/UserProfile/ExchangeAdminCenter.GetFeedbackAttribute():
+    get:
+      tags: [Preferences]
+      summary: Get feedback attributes
+      description: |
+        Returns Exchange admin center feedback attributes paired with the portal feedback workflow.
+      operationId: ExchangeBeta.Preferences.GetFeedbackAttribute
+      responses:
+        '200':
+          description: Feedback attribute payload returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /beta/UserProfile/ExchangeAdminCenter.GetOCPSAccessToken():
+    get:
+      tags: [Preferences]
+      summary: Get an OCPS access token
+      description: |
+        Retrieves the OCPS token requested by the Exchange admin center shell during startup.
+      operationId: ExchangeBeta.Preferences.GetOCPSAccessToken
+      responses:
+        '200':
+          description: OCPS token payload returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /beta/UserPreference:
+    post:
+      tags: [Preferences]
+      summary: Upsert a portal user preference
+      description: |
+        Persists a portal preference record. The observed request updated the `App` / `LastLogonInfo`
+        preference during dashboard load with a JSON-encoded value containing `LastLogonInfo` and
+        `TeachingCounter`. Treat additional writes under this route as real state changes.
+      operationId: ExchangeBeta.Preferences.UpsertUserPreference
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExchangeUserPreferenceWriteRequest'
+      responses:
+        '204':
+          description: Preference updated successfully.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  "/beta/UserPreference(PrimaryKey='{primaryKey}')/ExchangeAdminCenter.GetAll()":
+    get:
+      tags: [Preferences]
+      summary: Get all values for a preference bucket
+      description: |
+        Returns every stored value for a portal preference bucket. Observed primary keys included
+        `App`, `DASH`, `APCF`, `CCF`, `Mailboxes`, and `MCF`.
+      operationId: ExchangeBeta.Preferences.GetAllForPrimaryKey
+      parameters:
+        - $ref: '#/components/parameters/primaryKey'
+      responses:
+        '200':
+          description: Preference collection returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataCollectionResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  "/beta/UserPreference(PrimaryKey='{primaryKey}')/ExchangeAdminCenter.GetItemInCollection(SubKey='{subKey}')":
+    get:
+      tags: [Preferences]
+      summary: Get a single value from a preference bucket
+      description: |
+        Returns one stored item from a portal preference collection. Observed combinations included
+        `DM` / `IsDarkMode`, `LNP` / `PinnedItems`, and `LPREF` / `LM`.
+      operationId: ExchangeBeta.Preferences.GetItemInCollection
+      parameters:
+        - $ref: '#/components/parameters/primaryKey'
+        - $ref: '#/components/parameters/subKey'
+      responses:
+        '200':
+          description: Preference item returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataStringResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  "/beta/UserPreference(PrimaryKey='{primaryKey}')":
+    get:
+      tags: [Preferences]
+      summary: Get a raw preference record
+      description: |
+        Returns a raw preference entity for a given primary key. Confirmed live for the `MCC`
+        preference bucket while browsing the Mailboxes page.
+      operationId: ExchangeBeta.Preferences.GetRawPreference
+      parameters:
+        - $ref: '#/components/parameters/primaryKey'
+      responses:
+        '200':
+          description: Preference entity returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /beta/AcceptedDomain:
+    get:
+      tags: [MailFlow]
+      summary: List accepted domains
+      description: |
+        Returns accepted domain records used by the Accepted domains administration page.
+      operationId: ExchangeBeta.MailFlow.ListAcceptedDomains
+      responses:
+        '200':
+          description: Accepted domains returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExchangeAcceptedDomainCollectionResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /beta/AcceptedDomainFullListIC:
+    get:
+      tags: [MailFlow]
+      summary: List accepted domains with full portal details
+      description: |
+        Returns the richer accepted-domain collection used by the Exchange admin center list view,
+        including domain type, default status, coexistence flags, and authentication type.
+      operationId: ExchangeBeta.MailFlow.ListAcceptedDomainsFull
+      responses:
+        '200':
+          description: Full accepted-domain list returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExchangeAcceptedDomainCollectionResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /beta/RemoteDomain:
+    get:
+      tags: [MailFlow]
+      summary: List remote domains
+      description: |
+        Returns remote domain configuration surfaced by the Remote domains page, including
+        domain name, auto-reply behavior, forwarding settings, and NDR options.
+      operationId: ExchangeBeta.MailFlow.ListRemoteDomains
+      responses:
+        '200':
+          description: Remote domains returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataCollectionResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /beta/InboundConnector:
+    get:
+      tags: [MailFlow]
+      summary: List inbound connectors
+      description: |
+        Returns inbound connector configuration surfaced by the Connectors page.
+      operationId: ExchangeBeta.MailFlow.ListInboundConnectors
+      responses:
+        '200':
+          description: Inbound connectors returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataCollectionResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /beta/OutboundConnector:
+    get:
+      tags: [MailFlow]
+      summary: List outbound connectors
+      description: |
+        Returns outbound connector configuration surfaced by the Connectors page.
+      operationId: ExchangeBeta.MailFlow.ListOutboundConnectors
+      responses:
+        '200':
+          description: Outbound connectors returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataCollectionResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /beta/TransportRule:
+    get:
+      tags: [MailFlow]
+      summary: List transport rules
+      description: |
+        Returns transport rules used by the Rules page and paired reporting widgets.
+      operationId: ExchangeBeta.MailFlow.ListTransportRules
+      responses:
+        '200':
+          description: Transport rules returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataCollectionResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  "/beta/MailflowReport/ExchangeAdminCenter.ConnectorReport(ReportType='{reportType}',StartDate={startDate},EndDate={endDate})":
+    get:
+      tags: [MailFlow]
+      summary: Get connector report data
+      description: |
+        Returns connector report data for the Exchange dashboard and Mail flow reports blade.
+        The observed report type was `MailFlow`.
+      operationId: ExchangeBeta.MailFlow.GetConnectorReport
+      parameters:
+        - $ref: '#/components/parameters/reportType'
+        - $ref: '#/components/parameters/startDate'
+        - $ref: '#/components/parameters/endDate'
+      responses:
+        '200':
+          description: Connector report data returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataCollectionResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  "/beta/MailflowReport/ExchangeAdminCenter.MailflowForwarding(StartDate={startDate},EndDate={endDate})":
+    get:
+      tags: [MailFlow]
+      summary: Get auto-forwarding report data
+      description: |
+        Returns dashboard and report data for Exchange mail forwarding activity over the requested
+        time window.
+      operationId: ExchangeBeta.MailFlow.GetMailflowForwardingReport
+      parameters:
+        - $ref: '#/components/parameters/startDate'
+        - $ref: '#/components/parameters/endDate'
+      responses:
+        '200':
+          description: Mail forwarding report data returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataCollectionResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  "/beta/MailflowReport/ExchangeAdminCenter.RecentAlertsReport(StartDate={startDate},EndDate={endDate})":
+    get:
+      tags: [MailFlow]
+      summary: Get recent alerts report data
+      description: |
+        Returns the recent alerts widget data shown by the Exchange home dashboard and the
+        Recent alerts blade.
+      operationId: ExchangeBeta.MailFlow.GetRecentAlertsReport
+      parameters:
+        - $ref: '#/components/parameters/startDate'
+        - $ref: '#/components/parameters/endDate'
+      responses:
+        '200':
+          description: Recent alerts report data returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataCollectionResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /beta/MailflowReport/ExchangeAdminCenter.EtrLastExecutionData:
+    get:
+      tags: [MailFlow]
+      summary: Get transport rule last-execution data
+      description: |
+        Returns the last execution timestamp for transport rules shown by Exchange admin center
+        reporting widgets.
+      operationId: ExchangeBeta.MailFlow.GetTransportRuleLastExecutionData
+      responses:
+        '200':
+          description: Transport rule last-execution data returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExchangeLastExecutionDataCollectionResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  "/beta/MailflowReportTDP/ExchangeAdminCenter.CustomerInsight(StartDate={startDate},EndDate={endDate},InsightType='{insightType}')":
+    get:
+      tags: [MailFlow]
+      summary: Get Exchange customer insight data
+      description: |
+        Returns the customer insight widgets shown on the Exchange dashboard. Observed insight
+        types were `CertExpiry`, `HotRecipient`, `MailLoop`, `NewDomainsForwarding`,
+        `SlowTransportRule`, and `NewUsersForwarding`.
+      operationId: ExchangeBeta.MailFlow.GetCustomerInsight
+      parameters:
+        - $ref: '#/components/parameters/startDate'
+        - $ref: '#/components/parameters/endDate'
+        - $ref: '#/components/parameters/insightType'
+      responses:
+        '200':
+          description: Customer insight data returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataCollectionResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /beta/ProtectionAlert/ExchangeAdminCenter.GetAlertPolicies():
+    get:
+      tags: [MailFlow]
+      summary: Get Exchange alert policies
+      description: |
+        Returns the alert policy payload used by the Exchange admin center Alert policies page.
+      operationId: ExchangeBeta.MailFlow.GetAlertPolicies
+      responses:
+        '200':
+          description: Alert policies returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataCollectionResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /beta/HistoricalSearch:
+    get:
+      tags: [MailFlow]
+      summary: List historical message trace searches
+      description: |
+        Returns the historical search jobs surfaced by the Exchange message trace and report
+        workflows. The observed tenant response was an empty OData collection.
+      operationId: ExchangeBeta.MailFlow.ListHistoricalSearches
+      responses:
+        '200':
+          description: Historical searches returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataCollectionResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /beta/Recipient/ExchangeAdminCenter.GetRecipientsIC:
+    get:
+      tags: [Objects]
+      summary: Get recipient inventory for the Exchange list view
+      description: |
+        Returns the recipient collection used by Exchange list experiences such as Groups and
+        related recipient-driven blades.
+      operationId: ExchangeBeta.Objects.GetRecipientsIC
+      responses:
+        '200':
+          description: Recipient list returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataCollectionResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /beta/Recipient:
+    get:
+      tags: [Objects]
+      summary: List recipients for mailbox detail selectors
+      description: |
+        Returns the recipient picker inventory used by mailbox detail blades and Exchange
+        selector experiences. Observed requests selected core identity fields and filtered by
+        recipient type.
+      operationId: ExchangeBeta.Objects.ListRecipients
+      responses:
+        '200':
+          description: Recipients returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataCollectionResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  "/beta/Mailbox({mailboxId})":
+    get:
+      tags: [Objects]
+      summary: Get mailbox details
+      description: |
+        Returns the mailbox entity loaded by mailbox detail blades, including identity,
+        addressing, recipient type, and mailbox configuration fields.
+      operationId: ExchangeBeta.Objects.GetMailbox
+      parameters:
+        - $ref: '#/components/parameters/mailboxId'
+      responses:
+        '200':
+          description: Mailbox details returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExchangeMailbox'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  "/beta/Mailbox({mailboxId})/ExchangeAdminCenter.GetMailboxStatistics(Archive=false)":
+    get:
+      tags: [Objects]
+      summary: Get mailbox statistics
+      description: |
+        Returns mailbox statistics for the primary mailbox, including last logon time and total
+        item size. Observed from mailbox detail blades with `Archive=false`.
+      operationId: ExchangeBeta.Objects.GetMailboxStatistics
+      parameters:
+        - $ref: '#/components/parameters/mailboxId'
+      responses:
+        '200':
+          description: Mailbox statistics returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExchangeMailboxStatistics'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  "/beta/Mailbox({mailboxId})/FullAccessPermission":
+    get:
+      tags: [Objects]
+      summary: Get mailbox full-access permissions
+      description: |
+        Returns the permission helper payload used by the mailbox detail blade to inspect
+        full-access delegates.
+      operationId: ExchangeBeta.Objects.GetMailboxFullAccessPermissions
+      parameters:
+        - $ref: '#/components/parameters/mailboxId'
+      responses:
+        '200':
+          description: Mailbox full-access permissions returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExchangeMailbox'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  "/beta/Mailbox({mailboxId})/SendAsPermission":
+    get:
+      tags: [Objects]
+      summary: Get mailbox send-as permissions
+      description: |
+        Returns the permission helper payload used by mailbox detail blades to inspect send-as
+        delegates.
+      operationId: ExchangeBeta.Objects.GetMailboxSendAsPermissions
+      parameters:
+        - $ref: '#/components/parameters/mailboxId'
+      responses:
+        '200':
+          description: Mailbox send-as permissions returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExchangeMailbox'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  "/beta/Mailbox({mailboxId})/SendOnBehalfPermission":
+    get:
+      tags: [Objects]
+      summary: Get mailbox send-on-behalf permissions
+      description: |
+        Returns the permission helper payload used by mailbox detail blades to inspect
+        send-on-behalf delegates.
+      operationId: ExchangeBeta.Objects.GetMailboxSendOnBehalfPermissions
+      parameters:
+        - $ref: '#/components/parameters/mailboxId'
+      responses:
+        '200':
+          description: Mailbox send-on-behalf permissions returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExchangeMailbox'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  "/beta/MailboxAutoReplyConfiguration('{mailboxId}')":
+    get:
+      tags: [Objects]
+      summary: Get mailbox auto-reply configuration
+      description: |
+        Returns the automatic reply settings loaded by mailbox detail blades, including reply
+        state, internal and external messages, and audience settings.
+      operationId: ExchangeBeta.Objects.GetMailboxAutoReplyConfiguration
+      parameters:
+        - $ref: '#/components/parameters/mailboxId'
+      responses:
+        '200':
+          description: Mailbox auto-reply configuration returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /beta/DynamicDistributionGroupIC:
+    get:
+      tags: [Objects]
+      summary: List dynamic distribution groups
+      description: |
+        Returns dynamic distribution groups surfaced by the Groups page in the Exchange admin
+        center.
+      operationId: ExchangeBeta.Objects.ListDynamicDistributionGroups
+      responses:
+        '200':
+          description: Dynamic distribution groups returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataCollectionResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /beta/MailContact:
+    get:
+      tags: [Objects]
+      summary: List mail contacts
+      description: |
+        Returns the mail contact collection used by the Contacts page.
+      operationId: ExchangeBeta.Objects.ListMailContacts
+      responses:
+        '200':
+          description: Mail contacts returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataCollectionResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /beta/MailUserIC:
+    get:
+      tags: [Objects]
+      summary: List high-volume email mail users
+      description: |
+        Returns the mail-user collection used by the High volume email page. The observed tenant
+        response was an empty OData collection.
+      operationId: ExchangeBeta.Objects.ListMailUsersIC
+      responses:
+        '200':
+          description: Mail users returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataCollectionResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /beta/AddressBookPolicy:
+    get:
+      tags: [Objects]
+      summary: List address book policies
+      description: |
+        Returns the address book policies surfaced by Exchange resource and policy blades. The
+        observed tenant response was an empty OData collection.
+      operationId: ExchangeBeta.Objects.ListAddressBookPolicies
+      responses:
+        '200':
+          description: Address book policies returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataCollectionResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /beta/ResourceMailbox:
+    get:
+      tags: [Objects]
+      summary: List resource mailboxes
+      description: |
+        Returns room and equipment mailbox inventory surfaced by the Resources page.
+      operationId: ExchangeBeta.Objects.ListResourceMailboxes
+      responses:
+        '200':
+          description: Resource mailboxes returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataCollectionResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  "/beta/ResourceMailbox('{resourceMailboxId}')":
+    get:
+      tags: [Objects]
+      summary: Get resource mailbox details
+      description: |
+        Returns the resource mailbox entity loaded by the Resources page detail blades.
+      operationId: ExchangeBeta.Objects.GetResourceMailbox
+      parameters:
+        - $ref: '#/components/parameters/resourceMailboxId'
+      responses:
+        '200':
+          description: Resource mailbox details returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /beta/OwaMailboxPolicy:
+    get:
+      tags: [Objects]
+      summary: List Outlook on the web mailbox policies
+      description: |
+        Returns the Outlook on the web mailbox policies surfaced by the OWA policies page.
+      operationId: ExchangeBeta.Objects.ListOwaMailboxPolicies
+      responses:
+        '200':
+          description: OWA mailbox policies returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataCollectionResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  "/beta/Groupv05('{groupId}')/AcceptMessagesOnlyFromSendersOrMembers":
+    get:
+      tags: [Objects]
+      summary: List approved senders for a group
+      description: |
+        Returns the allowed senders and members collection used by group delivery-management
+        settings in Exchange group detail blades.
+      operationId: ExchangeBeta.Objects.ListGroupApprovedSenders
+      parameters:
+        - $ref: '#/components/parameters/groupId'
+      responses:
+        '200':
+          description: Approved group senders returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataCollectionResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  "/beta/Groupv05('{groupId}')/BypassModerationFromSendersOrMembers":
+    get:
+      tags: [Objects]
+      summary: List moderation bypass senders for a group
+      description: |
+        Returns the senders and members that bypass moderation for a group detail blade.
+      operationId: ExchangeBeta.Objects.ListGroupModerationBypassSenders
+      parameters:
+        - $ref: '#/components/parameters/groupId'
+      responses:
+        '200':
+          description: Group moderation bypass senders returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataCollectionResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  "/beta/Groupv05('{groupId}')/ModeratedBy":
+    get:
+      tags: [Objects]
+      summary: List moderators for a group
+      description: |
+        Returns the moderator collection used by Exchange group detail blades.
+      operationId: ExchangeBeta.Objects.ListGroupModerators
+      parameters:
+        - $ref: '#/components/parameters/groupId'
+      responses:
+        '200':
+          description: Group moderators returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataCollectionResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /beta/RoleGroup:
+    get:
+      tags: [Roles]
+      summary: List Exchange role groups
+      description: |
+        Returns Exchange role groups used by the Admin roles page.
+      operationId: ExchangeBeta.Roles.ListRoleGroups
+      responses:
+        '200':
+          description: Role groups returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataCollectionResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /beta/ManagementRoleV2:
+    get:
+      tags: [Roles]
+      summary: List management roles
+      description: |
+        Returns the management role catalog surfaced by Exchange admin role assignment pages.
+      operationId: ExchangeBeta.Roles.ListManagementRoles
+      responses:
+        '200':
+          description: Management roles returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataCollectionResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /beta/RoleAssignments:
+    get:
+      tags: [Roles]
+      summary: List role assignments
+      description: |
+        Returns role assignment entities used by the User roles and Admin roles pages. Observed
+        requests filtered assignments by principal identifier.
+      operationId: ExchangeBeta.Roles.ListRoleAssignments
+      responses:
+        '200':
+          description: Role assignments returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataCollectionResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  "/beta/RoleGroup('{roleGroupId}')/ExchangeAdminCenter.GetRoleGroupMembers()":
+    get:
+      tags: [Roles]
+      summary: Get role group members
+      description: |
+        Returns the member inventory for a specific Exchange role group detail blade.
+      operationId: ExchangeBeta.Roles.GetRoleGroupMembers
+      parameters:
+        - $ref: '#/components/parameters/roleGroupId'
+      responses:
+        '200':
+          description: Role group members returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataCollectionResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /beta/ActiveSyncDeviceClass:
+    get:
+      tags: [Mobile]
+      summary: List ActiveSync device classes
+      description: |
+        Returns device class definitions surfaced by the Mobile device access page.
+      operationId: ExchangeBeta.Mobile.ListActiveSyncDeviceClasses
+      responses:
+        '200':
+          description: ActiveSync device classes returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataCollectionResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /beta/ActiveSyncDeviceAccessRule:
+    get:
+      tags: [Mobile]
+      summary: List ActiveSync device access rules
+      description: |
+        Returns ActiveSync access rules surfaced by the Mobile device access page.
+      operationId: ExchangeBeta.Mobile.ListActiveSyncDeviceAccessRules
+      responses:
+        '200':
+          description: ActiveSync device access rules returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataCollectionResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /beta/MobileDevice:
+    get:
+      tags: [Mobile]
+      summary: List mobile devices
+      description: |
+        Returns mobile device inventory surfaced by Exchange device-management pages. The observed
+        tenant response was an empty OData collection.
+      operationId: ExchangeBeta.Mobile.ListMobileDevices
+      responses:
+        '200':
+          description: Mobile devices returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataCollectionResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /beta/MobileDeviceMailboxPolicy:
+    get:
+      tags: [Mobile]
+      summary: List mobile device mailbox policies
+      description: |
+        Returns mobile device mailbox policies surfaced by the Mobile device mailbox policy page.
+      operationId: ExchangeBeta.Mobile.ListMobileDeviceMailboxPolicies
+      responses:
+        '200':
+          description: Mobile device mailbox policies returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataCollectionResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /beta/OrganizationRelationship:
+    get:
+      tags: [Sharing]
+      summary: List organization relationships
+      description: |
+        Returns organization relationships surfaced by the Organization sharing page.
+      operationId: ExchangeBeta.Sharing.ListOrganizationRelationships
+      responses:
+        '200':
+          description: Organization relationships returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataCollectionResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  "/beta/OrganizationRelationship('{organizationRelationshipId}')":
+    get:
+      tags: [Sharing]
+      summary: Get organization relationship details
+      description: |
+        Returns a single organization relationship entity loaded by the Organization sharing
+        detail blade.
+      operationId: ExchangeBeta.Sharing.GetOrganizationRelationship
+      parameters:
+        - $ref: '#/components/parameters/organizationRelationshipId'
+      responses:
+        '200':
+          description: Organization relationship returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /beta/IndividualSharing:
+    get:
+      tags: [Sharing]
+      summary: List individual sharing policies
+      description: |
+        Returns the individual sharing policy inventory surfaced by the Organization sharing page.
+      operationId: ExchangeBeta.Sharing.ListIndividualSharingPolicies
+      responses:
+        '200':
+          description: Individual sharing policies returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataCollectionResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  "/beta/IndividualSharing({individualSharingId})":
+    get:
+      tags: [Sharing]
+      summary: Get individual sharing policy details
+      description: |
+        Returns a single individual sharing policy entity loaded by the Organization sharing
+        detail blade.
+      operationId: ExchangeBeta.Sharing.GetIndividualSharingPolicy
+      parameters:
+        - $ref: '#/components/parameters/individualSharingId'
+      responses:
+        '200':
+          description: Individual sharing policy returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /beta/MigrationBatch:
+    get:
+      tags: [Migration]
+      summary: List migration batches
+      description: |
+        Returns migration batches displayed by the Exchange migration experience. The observed
+        tenant response was an empty OData collection.
+      operationId: ExchangeBeta.Migration.ListMigrationBatches
+      responses:
+        '200':
+          description: Migration batches returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataCollectionResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /beta/MigrationEndpoint:
+    get:
+      tags: [Migration]
+      summary: List migration endpoints
+      description: |
+        Returns migration endpoints surfaced by the Exchange migration experience.
+      operationId: ExchangeBeta.Migration.ListMigrationEndpoints
+      responses:
+        '200':
+          description: Migration endpoints returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataCollectionResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /beta/PublicFolder:
+    get:
+      tags: [Folders]
+      summary: List public folders
+      description: |
+        Returns the public folder inventory surfaced by the Public folders page.
+      operationId: ExchangeBeta.Folders.ListPublicFolders
+      responses:
+        '200':
+          description: Public folders returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataCollectionResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /beta/PublicFolderMailbox:
+    get:
+      tags: [Folders]
+      summary: List public folder mailboxes
+      description: |
+        Returns the public folder mailbox inventory surfaced by the Public folders page.
+      operationId: ExchangeBeta.Folders.ListPublicFolderMailboxes
+      responses:
+        '200':
+          description: Public folder mailboxes returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataCollectionResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

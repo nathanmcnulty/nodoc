@@ -5,7 +5,7 @@ import type * as Preset from "@docusaurus/preset-classic";
 const siteTitle = "nodoc";
 const siteTagline = "documenting undocumented interfaces";
 const siteDescription =
-  "OpenAPI specs and checked-in Postman collections for undocumented Microsoft portal APIs across Defender XDR, Intune, M365 Admin, M365 Apps, Purview, Purview Portal, and Entra surfaces.";
+  "OpenAPI specs and checked-in Postman collections for undocumented Microsoft portal APIs across Defender XDR, Exchange, Intune, M365 Admin, M365 Apps, Purview, Purview Portal, and Entra surfaces.";
 const siteUrl = "https://nodoc.nathanmcnulty.com";
 
 const config: Config = {
@@ -91,11 +91,11 @@ const config: Config = {
   themeConfig: {
     image: "img/nodoc-social-card.svg",
     metadata: [
-      {
-        name: "keywords",
-        content:
-          "undocumented APIs, Microsoft portal APIs, Defender XDR API, Intune API, Windows Autopatch API, Microsoft 365 admin API, M365 Apps API, Purview API, Entra API, OpenAPI, Postman",
-      },
+        {
+          name: "keywords",
+          content:
+            "undocumented APIs, Microsoft portal APIs, Defender XDR API, Exchange admin center API, Intune API, Windows Autopatch API, Microsoft 365 admin API, M365 Apps API, Purview API, Entra API, OpenAPI, Postman",
+        },
       {
         property: "og:type",
         content: "website",
