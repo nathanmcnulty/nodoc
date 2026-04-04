@@ -683,6 +683,10 @@ Current takeaway:
 - Only launch another crawl when the remaining gaps are still broad or ambiguous; if the
   tail is already concentrated into a few confirmed families, extract exact shapes directly
   from the existing artifacts first.
+- If the remaining tail collapses into one large feature family, prefer a focused active
+  pass on the implicated pages before relying on passive recorder captures alone. Passive
+  gathering is useful for ambient confirmation, but it is weaker for dormant detail routes,
+  deliberate row/tab drill-ins, and exact UI-state attribution.
 
 ### 2026-04-03 — Purview portal split and generation hygiene
 
