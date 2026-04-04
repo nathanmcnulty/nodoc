@@ -79,8 +79,8 @@ export const apiCatalog: ApiCatalogItem[] = [
       "https://raw.githubusercontent.com/nathanmcnulty/nodoc/main/postman/collections/m365-admin.collection.json",
   },
   {
-    title: "Exchange Beta",
-    slug: "/exchange-beta",
+    title: "Exchange",
+    slug: "/exchange",
     family: "Exchange admin center",
     operations: 61,
     authModel: "Portal session cookie + same-origin `x-requested-with`",
@@ -342,8 +342,8 @@ export const accessModels: AccessModel[] = [
   {
     title: "Portal session + same-origin XHR",
     description:
-      "Exchange Beta uses the authenticated Exchange admin center browser session with `.AspNetCore.Cookies` and same-origin `x-requested-with: XMLHttpRequest` requests.",
-    portals: ["Exchange Beta"],
+      "Exchange uses the authenticated Exchange admin center browser session with `.AspNetCore.Cookies` and same-origin `x-requested-with: XMLHttpRequest` requests.",
+    portals: ["Exchange"],
   },
   {
     title: "Portal session + same-origin context",
@@ -512,7 +512,7 @@ export const gettingStartedGuides: GettingStartedGuide[] = [
   },
   {
     title: "Exchange admin center",
-    portals: ["Exchange Beta"],
+    portals: ["Exchange"],
     authModel: "Portal session cookie + same-origin `x-requested-with`",
     baseUrls: ["https://admin.exchange.microsoft.com/beta"],
     confirmedDetails: [

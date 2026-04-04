@@ -710,6 +710,7 @@ Add new ideas here before trying them, then move the result into the experiment 
 - New spec and collection files included when a portal was split or added, especially `specifications/nodoc-{portal}/specification/openapi.yml` and `postman/collections/{portal}.collection.json`
 - Checked-in Postman collections regenerated
 - README/site metadata updated when counts or highlights changed
+- Tenant-specific examples, domains, and email addresses sanitized to neutral placeholders such as `contoso` before merge
 - Validation commands completed
 - Unrelated churn removed
 - PR summary explains the scope decision clearly, including which portal-specific host/path family is documented and which shared shell, support, auth, or telemetry traffic was intentionally excluded
