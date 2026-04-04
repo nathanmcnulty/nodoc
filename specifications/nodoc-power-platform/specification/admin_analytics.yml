@@ -1,0 +1,361 @@
+paths:
+  /api/v1/cds/CategorySeries/Organizations/{organizationId}:
+    servers:
+      - url: "https://{region}.adminanalytics.powerplatform.microsoft.com"
+        description: "Regional Power Platform admin analytics API"
+        variables:
+          region:
+            default: "na"
+            description: "Regional shard observed in live Power Platform admin center traffic."
+    get:
+      operationId: AdminAnalytics_get_api_v1_cds_CategorySeries_Organizations_organizationId
+      summary: "GET /api/v1/cds/CategorySeries/Organizations/{organizationId}"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/manage/dataverse/621c0f33-3fd1-f011-83fb-000d3a106b3b/accessmode, https://admin.powerplatform.microsoft.com/manage/dataverse/621c0f33-3fd1-f011-83fb-000d3a106b3b/apis, https://admin.powerplatform.microsoft.com/manage/dataverse/621c0f33-3fd1-f011-83fb-000d3a106b3b/contentusage, https://admin.powerplatform.microsoft.com/manage/dataverse/621c0f33-3fd1-f011-83fb-000d3a106b3b/plugins, and 2 more routes."
+      tags:
+        - AdminAnalytics
+      parameters:
+        - name: "organizationId"
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "621c0f33-3fd1-f011-83fb-000d3a106b3b"
+        - name: "EndTime"
+          in: query
+          required: false
+          schema:
+            type: integer
+            example: 639108864000000000
+        - name: "Metrics"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "numberofcreatesbymostactiveusers;numberofupdatesbymostactiveusers;numberofdeletesbymostactiveusers;numberofreadsbymos..."
+        - name: "Rollups"
+          in: query
+          required: false
+          schema:
+            type: integer
+            example: 2
+        - name: "StartTime"
+          in: query
+          required: false
+          schema:
+            type: integer
+            example: 639107999999990000
+      responses:
+        '200':
+          description: "200 captured response"
+  /api/v1/cds/OrgInsightsMetrics/List:
+    servers:
+      - url: "https://{region}.adminanalytics.powerplatform.microsoft.com"
+        description: "Regional Power Platform admin analytics API"
+        variables:
+          region:
+            default: "na"
+            description: "Regional shard observed in live Power Platform admin center traffic."
+    get:
+      operationId: AdminAnalytics_get_api_v1_cds_OrgInsightsMetrics_List
+      summary: "GET /api/v1/cds/OrgInsightsMetrics/List"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/manage/dataverse/621c0f33-3fd1-f011-83fb-000d3a106b3b/accessmode, https://admin.powerplatform.microsoft.com/manage/dataverse/621c0f33-3fd1-f011-83fb-000d3a106b3b/apis, https://admin.powerplatform.microsoft.com/manage/dataverse/621c0f33-3fd1-f011-83fb-000d3a106b3b/contentusage, https://admin.powerplatform.microsoft.com/manage/dataverse/621c0f33-3fd1-f011-83fb-000d3a106b3b/plugins, and 2 more routes."
+      tags:
+        - AdminAnalytics
+      parameters:
+        - name: "languageCode"
+          in: query
+          required: false
+          schema:
+            type: integer
+            example: 1033
+        - name: "OrganizationVersion"
+          in: query
+          required: false
+          schema:
+            type: number
+            example: 8.2
+      responses:
+        '200':
+          description: "200 captured response"
+  /api/v1/cds/TimeSeries/Organizations/{organizationId}:
+    servers:
+      - url: "https://{region}.adminanalytics.powerplatform.microsoft.com"
+        description: "Regional Power Platform admin analytics API"
+        variables:
+          region:
+            default: "na"
+            description: "Regional shard observed in live Power Platform admin center traffic."
+    get:
+      operationId: AdminAnalytics_get_api_v1_cds_TimeSeries_Organizations_organizationId
+      summary: "GET /api/v1/cds/TimeSeries/Organizations/{organizationId}"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/manage/dataverse/621c0f33-3fd1-f011-83fb-000d3a106b3b/apis, https://admin.powerplatform.microsoft.com/manage/dataverse/621c0f33-3fd1-f011-83fb-000d3a106b3b/plugins, https://admin.powerplatform.microsoft.com/manage/dataverse/621c0f33-3fd1-f011-83fb-000d3a106b3b/systemjobs, https://admin.powerplatform.microsoft.com/manage/dataverse/621c0f33-3fd1-f011-83fb-000d3a106b3b/users."
+      tags:
+        - AdminAnalytics
+      parameters:
+        - name: "organizationId"
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "621c0f33-3fd1-f011-83fb-000d3a106b3b"
+        - name: "EndTime"
+          in: query
+          required: false
+          schema:
+            type: integer
+            example: 639108864000000000
+        - name: "Metrics"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "activeusers"
+        - name: "Rollups"
+          in: query
+          required: false
+          schema:
+            type: integer
+            example: 2
+        - name: "StartTime"
+          in: query
+          required: false
+          schema:
+            type: integer
+            example: 639107999999990000
+      responses:
+        '200':
+          description: "200 captured response"
+  /api/v1/metrics/resourceType/copilotstudio/resourceSubType/agent/latest:
+    servers:
+      - url: "https://{region}.adminanalytics.powerplatform.microsoft.com"
+        description: "Regional Power Platform admin analytics API"
+        variables:
+          region:
+            default: "na"
+            description: "Regional shard observed in live Power Platform admin center traffic."
+    post:
+      operationId: AdminAnalytics_post_api_v1_metrics_resourceType_copilotstudio_resourceSubType_agent_latest
+      summary: "POST /api/v1/metrics/resourceType/copilotstudio/resourceSubType/agent/latest"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/monitoring/copilotstudio."
+      tags:
+        - AdminAnalytics
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                metricName:
+                  type: string
+                  example: "copilotstudio.agent_session"
+                metricType:
+                  type: string
+                  example: "DailyAvailabilityMetric"
+                startTime:
+                  type: string
+                  format: date-time
+                  example: "2026-03-21T10:30:25.755Z"
+                endTime:
+                  type: string
+                  format: date-time
+                  example: "2026-04-04T10:30:25.755Z"
+                limit:
+                  type: integer
+                  example: 1000
+                offset:
+                  type: integer
+                  example: 0
+                preAggregateName:
+                  type: string
+                  example: ""
+                dimensionFilters:
+                  type: array
+                  items:
+                    type: object
+                    additionalProperties: true
+                excludeToday:
+                  type: boolean
+                  example: true
+                includePreviousMetricValue:
+                  type: boolean
+                  example: true
+      responses:
+        '200':
+          description: "200 captured response"
+  /api/v1/metrics/resourceType/powerautomate/resourceSubType/cloudflow/latest:
+    servers:
+      - url: "https://{region}.adminanalytics.powerplatform.microsoft.com"
+        description: "Regional Power Platform admin analytics API"
+        variables:
+          region:
+            default: "na"
+            description: "Regional shard observed in live Power Platform admin center traffic."
+    post:
+      operationId: AdminAnalytics_post_api_v1_metrics_resourceType_powerautomate_resourceSubType_cloudflow_latest
+      summary: "POST /api/v1/metrics/resourceType/powerautomate/resourceSubType/cloudflow/latest"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/monitoring/powerautomate."
+      tags:
+        - AdminAnalytics
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                metricName:
+                  type: string
+                  example: "cloudflow.run"
+                metricType:
+                  type: string
+                  example: "DailyAvailabilityMetric"
+                startTime:
+                  type: string
+                  format: date-time
+                  example: "2026-03-21T09:16:34.299Z"
+                endTime:
+                  type: string
+                  format: date-time
+                  example: "2026-04-04T09:16:34.299Z"
+                limit:
+                  type: integer
+                  example: 25000
+                offset:
+                  type: integer
+                  example: 0
+                preAggregateName:
+                  type: string
+                  example: ""
+                dimensionFilters:
+                  type: array
+                  items:
+                    type: object
+                    additionalProperties: true
+                excludeToday:
+                  type: boolean
+                  example: true
+                includePreviousMetricValue:
+                  type: boolean
+                  example: true
+      responses:
+        '200':
+          description: "200 captured response"
+  /api/v1/metrics/resourceType/powerautomate/resourceSubType/desktopflow/latest:
+    servers:
+      - url: "https://{region}.adminanalytics.powerplatform.microsoft.com"
+        description: "Regional Power Platform admin analytics API"
+        variables:
+          region:
+            default: "na"
+            description: "Regional shard observed in live Power Platform admin center traffic."
+    post:
+      operationId: AdminAnalytics_post_api_v1_metrics_resourceType_powerautomate_resourceSubType_desktopflow_latest
+      summary: "POST /api/v1/metrics/resourceType/powerautomate/resourceSubType/desktopflow/latest"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/monitoring/powerautomate."
+      tags:
+        - AdminAnalytics
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                metricName:
+                  type: string
+                  example: "desktopflow.run"
+                metricType:
+                  type: string
+                  example: "DailyAvailabilityMetric"
+                startTime:
+                  type: string
+                  format: date-time
+                  example: "2026-03-21T09:16:34.300Z"
+                endTime:
+                  type: string
+                  format: date-time
+                  example: "2026-04-04T09:16:34.300Z"
+                limit:
+                  type: integer
+                  example: 25000
+                offset:
+                  type: integer
+                  example: 0
+                preAggregateName:
+                  type: string
+                  example: ""
+                dimensionFilters:
+                  type: array
+                  items:
+                    type: object
+                    additionalProperties: true
+                excludeToday:
+                  type: boolean
+                  example: true
+                includePreviousMetricValue:
+                  type: boolean
+                  example: true
+      responses:
+        '200':
+          description: "200 captured response"
+  /api/v1/metrics/resourceType/powerautomate/resourceSubType/workqueue/latest:
+    servers:
+      - url: "https://{region}.adminanalytics.powerplatform.microsoft.com"
+        description: "Regional Power Platform admin analytics API"
+        variables:
+          region:
+            default: "na"
+            description: "Regional shard observed in live Power Platform admin center traffic."
+    post:
+      operationId: AdminAnalytics_post_api_v1_metrics_resourceType_powerautomate_resourceSubType_workqueue_latest
+      summary: "POST /api/v1/metrics/resourceType/powerautomate/resourceSubType/workqueue/latest"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/monitoring/powerautomate."
+      tags:
+        - AdminAnalytics
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                metricName:
+                  type: string
+                  example: "workqueue.out_of_sla"
+                metricType:
+                  type: string
+                  example: "DailyAvailabilityMetric"
+                startTime:
+                  type: string
+                  format: date-time
+                  example: "2026-03-21T09:17:10.412Z"
+                endTime:
+                  type: string
+                  format: date-time
+                  example: "2026-04-04T09:17:10.412Z"
+                limit:
+                  type: integer
+                  example: 25000
+                offset:
+                  type: integer
+                  example: 0
+                preAggregateName:
+                  type: string
+                  example: ""
+                dimensionFilters:
+                  type: array
+                  items:
+                    type: object
+                    additionalProperties: true
+                excludeToday:
+                  type: boolean
+                  example: true
+                includePreviousMetricValue:
+                  type: boolean
+                  example: false
+      responses:
+        '200':
+          description: "200 captured response"

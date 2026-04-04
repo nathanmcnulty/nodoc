@@ -89,6 +89,8 @@ Practical notes:
 - Best-known flow: start or reuse the signed-in Edge Work profile with `--remote-debugging-port=9222`, then attach over CDP instead of launching an automation-owned browser.
 - Avoid cloning the user profile unless CDP attach is impossible; copied profiles can lose auth or drift from the live browser state.
 - If you must fall back to a copied profile, make a **fresh copy for each run**. Reusing an older copied profile later in the session redirected back to Microsoft login even though a fresh copy still worked.
+- If browser-level `connectOverCDP(...)` starts timing out after the websocket connects, keep the live browser open and fall back to a fresh same-origin tab opened through the CDP HTTP `/json/new?...` endpoint, then drive that page target directly over its `webSocketDebuggerUrl` with raw CDP.
+- Prefer one fresh investigation tab per portal family when using the raw page-target fallback. Stale same-origin tabs can poison browser-level attach or leave you attached to the wrong target.
 - Once the page is live, capture at least one real backend request from the target feature family and preserve its auth + portal headers. That header set is often enough to power later safe probes without reopening the UI for every candidate.
 - Do **not** close the user’s browser when the script ends; open a fresh page or tab for the investigation, close only that page, and disconnect by exiting the script.
 - If direct inline one-liners get messy, move the logic into a scratch `.mjs` file in the artifacts directory and keep raw captures there as well.
@@ -142,10 +144,14 @@ Recommended pattern:
 - If a page exposes a very large set of safe same-origin detail links, split the work into phases:
   nav/list discovery first, then a direct-link or entity replay pass sourced from the recorded page-state
   artifacts. This is often faster and more reliable than serial row-click replay on the live grid.
+- For same-origin admin portals, left-nav coverage is only the floor: open every reachable same-origin route, drill into visible list rows/items so detail blades load, click every visible read-only tab or pivot, and follow safe same-origin content links.
+- Canonicalize equivalent routes before queueing them. Portals often expose the same surface through aliases or parallel route trees, and unnormalized queue keys will waste time replaying the same detail page.
+- When a list/detail family fans out into many nearly identical row routes, fully exercise one representative detail page first, then treat sibling detail pages as first-paint verification unless they reveal new tabs, links, or request shapes.
 - For report or dashboard blades, do two passes: initial-load traffic first, then a second pass that changes one safe control at a time.
 - During the interaction pass, prefer safe state changes such as filters, date range, grouping, row drill-ins, tabs, sort, paging, and export preflight so each new request can be tied back to the triggering UI state.
 - Record a page-state checklist alongside each request set: selected tab, filter chips, date range, business group or release selection, tenant scope, and any report-mode toggles.
 - If a report blade uses virtualization, shadow DOM, or a delayed/hidden grid, do not block on the DOM becoming rich. Traffic is the primary evidence; DOM and accessibility snapshots are still useful for control attribution and UI-state labeling.
+- If you need to resume a long crawl, seed from previously visited routes plus crawl-phase page states rather than every interaction snapshot; replaying interaction-state links can explode the queue with duplicate detail routes.
 
 #### Exhaustive portal crawl depth
 
@@ -306,6 +312,9 @@ Before finishing:
 - make sure checked-in Postman collections were not hand-edited
 - update README/site metadata counts if the operation count changed
 - if only one surface changed, use a targeted Postman regeneration pass (for example `NODOC_COLLECTIONS=purview,purview-portal npm run generate:postman`) before the final full validation sweep so unrelated collections stay stable during iteration
+- if you added a brand-new portal family, make sure the diff includes both `specifications/nodoc-{portal}/specification/openapi.yml` and `postman/collections/{portal}.collection.json`; new tracked files are easier to miss than modified ones
+- in the change summary or PR, call out the scope decision explicitly: which portal-specific same-origin or `/beta` host families were documented, and which shared shell, support, or telemetry traffic was intentionally excluded
+- if confirmed endpoints returned empty collections or null payloads in the current tenant, say so directly so reviewers know those routes are still real portal endpoints and not dead captures
 
 ## Data model for research artifacts
 

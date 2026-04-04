@@ -1,0 +1,519 @@
+paths:
+  /providers/Microsoft.BusinessAppPlatform/environmentGroups:
+    servers:
+      - url: "https://api.bap.microsoft.com"
+        description: "Business App Platform resource provider"
+    get:
+      operationId: BusinessAppPlatform_get_providers_Microsoft_BusinessAppPlatform_environmentGroups
+      summary: "GET /providers/Microsoft.BusinessAppPlatform/environmentGroups"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/deployment/overview, https://admin.powerplatform.microsoft.com/deployment/pipelines, https://admin.powerplatform.microsoft.com/deployment/settings."
+      tags:
+        - BusinessAppPlatform
+      parameters:
+        - name: "$top"
+          in: query
+          required: false
+          schema:
+            type: integer
+            example: 100
+        - name: "api-version"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "2021-04-01"
+      responses:
+        '200':
+          description: "200 captured response"
+  /providers/Microsoft.BusinessAppPlatform/environmentLocations:
+    servers:
+      - url: "https://api.bap.microsoft.com"
+        description: "Business App Platform resource provider"
+    get:
+      operationId: BusinessAppPlatform_get_providers_Microsoft_BusinessAppPlatform_environmentLocations
+      summary: "GET /providers/Microsoft.BusinessAppPlatform/environmentLocations"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/billing/licenses/powerPages/overview, https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/Share%20My%20Labs%20(default)/portals, https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub."
+      tags:
+        - BusinessAppPlatform
+      parameters:
+        - name: "api-version"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "2020-06-01"
+      responses:
+        '200':
+          description: "200 captured response"
+  /providers/Microsoft.BusinessAppPlatform/environments:
+    servers:
+      - url: "https://api.bap.microsoft.com"
+        description: "Business App Platform resource provider"
+    get:
+      operationId: BusinessAppPlatform_get_providers_Microsoft_BusinessAppPlatform_environments
+      summary: "GET /providers/Microsoft.BusinessAppPlatform/environments"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/deployment/catalogs."
+      tags:
+        - BusinessAppPlatform
+      parameters:
+        - name: "$filter"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "properties/applications/any(app:app/id eq 83a35943-cb41-4266-b7d2-81d60f383695)"
+        - name: "$select"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "id,name,properties.displayName,properties.createdTime,properties.linkedEnvironmentMetadata.instanceUrl"
+        - name: "api-version"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "2020-06-01"
+      responses:
+        '200':
+          description: "200 captured response"
+  /providers/Microsoft.BusinessAppPlatform/environments/{environmentId}/checkAccess:
+    servers:
+      - url: "https://api.bap.microsoft.com"
+        description: "Business App Platform resource provider"
+    post:
+      operationId: BusinessAppPlatform_post_providers_Microsoft_BusinessAppPlatform_environments_environmentId_checkAccess
+      summary: "POST /providers/Microsoft.BusinessAppPlatform/environments/{environmentId}/checkAccess"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/applications, https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub, https://admin.powerplatform.microsoft.com/manage/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/applications."
+      tags:
+        - BusinessAppPlatform
+      parameters:
+        - name: "environmentId"
+          in: path
+          required: true
+          schema:
+            type: string
+            example: "Default-847b5907-ca15-40f4-b171-eb18619dbfab"
+        - name: "api-version"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "2021-04-01"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                accessPermissions:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                        example: "AdminReadEnvironment"
+      responses:
+        '200':
+          description: "200 captured response"
+  /providers/Microsoft.BusinessAppPlatform/environments/~default:
+    servers:
+      - url: "https://api.bap.microsoft.com"
+        description: "Business App Platform resource provider"
+    get:
+      operationId: BusinessAppPlatform_get_providers_Microsoft_BusinessAppPlatform_environments_default
+      summary: "GET /providers/Microsoft.BusinessAppPlatform/environments/~default"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/billing/licenses/PowerApps/overview, https://admin.powerplatform.microsoft.com/billing/licenses/PowerApps/recommendations, https://admin.powerplatform.microsoft.com/billing/licenses/copilotStudio/overview, https://admin.powerplatform.microsoft.com/billing/licenses/dataverse/overview, and 83 more routes."
+      tags:
+        - BusinessAppPlatform
+      parameters:
+        - name: "api-version"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "2021-04-01"
+      responses:
+        '200':
+          description: "200 captured response"
+  /providers/Microsoft.BusinessAppPlatform/environments/getOrCreate:
+    servers:
+      - url: "https://api.bap.microsoft.com"
+        description: "Business App Platform resource provider"
+    post:
+      operationId: BusinessAppPlatform_post_providers_Microsoft_BusinessAppPlatform_environments_getOrCreate
+      summary: "POST /providers/Microsoft.BusinessAppPlatform/environments/getOrCreate"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/deployment/overview, https://admin.powerplatform.microsoft.com/deployment/pipelines, https://admin.powerplatform.microsoft.com/deployment/settings, https://admin.powerplatform.microsoft.com/monitoring/copilotstudio, and 1 more route."
+      tags:
+        - BusinessAppPlatform
+      parameters:
+        - name: "api-version"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "2021-04-01"
+        - name: "getEnvironmentOnly"
+          in: query
+          required: false
+          schema:
+            type: boolean
+            example: true
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                properties:
+                  type: object
+                  properties:
+                    environmentSku:
+                      type: string
+                      example: "Platform"
+                    linkedEnvironmentMetadata:
+                      type: object
+                      properties:
+                        templates:
+                          type: array
+                          items:
+                            type: string
+                            example: "D365_1stPartyAdminApps"
+      responses:
+        '200':
+          description: "200 captured response"
+  /providers/Microsoft.BusinessAppPlatform/lifecycleOperations:
+    servers:
+      - url: "https://api.bap.microsoft.com"
+        description: "Business App Platform resource provider"
+    get:
+      operationId: BusinessAppPlatform_get_providers_Microsoft_BusinessAppPlatform_lifecycleOperations
+      summary: "GET /providers/Microsoft.BusinessAppPlatform/lifecycleOperations"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub."
+      tags:
+        - BusinessAppPlatform
+      parameters:
+        - name: "$filter"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "environment eq 'Default-847b5907-ca15-40f4-b171-eb18619dbfab'"
+        - name: "api-version"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "2024-05-01"
+      responses:
+        '200':
+          description: "200 captured response"
+  /providers/Microsoft.BusinessAppPlatform/listTenantSettings:
+    servers:
+      - url: "https://api.bap.microsoft.com"
+        description: "Business App Platform resource provider"
+    post:
+      operationId: BusinessAppPlatform_post_providers_Microsoft_BusinessAppPlatform_listTenantSettings
+      summary: "POST /providers/Microsoft.BusinessAppPlatform/listTenantSettings"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/billing/licenses/PowerApps/overview, https://admin.powerplatform.microsoft.com/billing/licenses/PowerApps/recommendations, https://admin.powerplatform.microsoft.com/billing/licenses/copilotStudio/overview, https://admin.powerplatform.microsoft.com/billing/licenses/dataverse/overview, and 83 more routes."
+      tags:
+        - BusinessAppPlatform
+      parameters:
+        - name: "api-version"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "2021-04-01"
+      responses:
+        '200':
+          description: "200 captured response"
+  /providers/Microsoft.BusinessAppPlatform/locations:
+    servers:
+      - url: "https://api.bap.microsoft.com"
+        description: "Business App Platform resource provider"
+    get:
+      operationId: BusinessAppPlatform_get_providers_Microsoft_BusinessAppPlatform_locations
+      summary: "GET /providers/Microsoft.BusinessAppPlatform/locations"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/billing/licenses/powerPages/overview, https://admin.powerplatform.microsoft.com/deployment/overview, https://admin.powerplatform.microsoft.com/deployment/pipelines, https://admin.powerplatform.microsoft.com/deployment/settings, and 2 more routes."
+      tags:
+        - BusinessAppPlatform
+      parameters:
+        - name: "api-version"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "2021-04-01"
+      responses:
+        '200':
+          description: "200 captured response"
+  /providers/Microsoft.BusinessAppPlatform/locations/{locationName}/environmentCurrencies:
+    servers:
+      - url: "https://api.bap.microsoft.com"
+        description: "Business App Platform resource provider"
+    get:
+      operationId: BusinessAppPlatform_get_providers_Microsoft_BusinessAppPlatform_locations_locationName_environmentCurrencies
+      summary: "GET /providers/Microsoft.BusinessAppPlatform/locations/{locationName}/environmentCurrencies"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub."
+      tags:
+        - BusinessAppPlatform
+      parameters:
+        - name: "locationName"
+          in: path
+          required: true
+          schema:
+            type: string
+            example: "unitedstates"
+        - name: "api-version"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "2021-04-01"
+      responses:
+        '200':
+          description: "200 captured response"
+  /providers/Microsoft.BusinessAppPlatform/locations/{locationName}/environmentLanguages:
+    servers:
+      - url: "https://api.bap.microsoft.com"
+        description: "Business App Platform resource provider"
+    get:
+      operationId: BusinessAppPlatform_get_providers_Microsoft_BusinessAppPlatform_locations_locationName_environmentLanguages
+      summary: "GET /providers/Microsoft.BusinessAppPlatform/locations/{locationName}/environmentLanguages"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub."
+      tags:
+        - BusinessAppPlatform
+      parameters:
+        - name: "locationName"
+          in: path
+          required: true
+          schema:
+            type: string
+            example: "unitedstates"
+        - name: "api-version"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "2021-04-01"
+      responses:
+        '200':
+          description: "200 captured response"
+  /providers/Microsoft.BusinessAppPlatform/locations/unitedstates/templates:
+    servers:
+      - url: "https://api.bap.microsoft.com"
+        description: "Business App Platform resource provider"
+    get:
+      operationId: BusinessAppPlatform_get_providers_Microsoft_BusinessAppPlatform_locations_unitedstates_templates
+      summary: "GET /providers/Microsoft.BusinessAppPlatform/locations/unitedstates/templates"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub."
+      tags:
+        - BusinessAppPlatform
+      parameters:
+        - name: "api-version"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "2020-05-01"
+      responses:
+        '200':
+          description: "200 captured response"
+  /providers/Microsoft.BusinessAppPlatform/scopes/admin/enroll:
+    servers:
+      - url: "https://api.bap.microsoft.com"
+        description: "Business App Platform resource provider"
+    post:
+      operationId: BusinessAppPlatform_post_providers_Microsoft_BusinessAppPlatform_scopes_admin_enroll
+      summary: "POST /providers/Microsoft.BusinessAppPlatform/scopes/admin/enroll"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/billing/licenses/PowerApps/overview, https://admin.powerplatform.microsoft.com/billing/licenses/PowerApps/recommendations, https://admin.powerplatform.microsoft.com/billing/licenses/copilotStudio/overview, https://admin.powerplatform.microsoft.com/billing/licenses/dataverse/overview, and 83 more routes."
+      tags:
+        - BusinessAppPlatform
+      parameters:
+        - name: "action"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "SkipDevEnvironment"
+        - name: "api-version"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "2021-04-01"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: "200 captured response"
+  /providers/Microsoft.BusinessAppPlatform/scopes/admin/environments:
+    servers:
+      - url: "https://api.bap.microsoft.com"
+        description: "Business App Platform resource provider"
+    get:
+      operationId: BusinessAppPlatform_get_providers_Microsoft_BusinessAppPlatform_scopes_admin_environments
+      summary: "GET /providers/Microsoft.BusinessAppPlatform/scopes/admin/environments"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/billing/licenses/PowerApps/overview, https://admin.powerplatform.microsoft.com/billing/licenses/PowerApps/recommendations, https://admin.powerplatform.microsoft.com/billing/licenses/copilotStudio/overview, https://admin.powerplatform.microsoft.com/billing/licenses/dataverse/overview, and 83 more routes."
+      tags:
+        - BusinessAppPlatform
+      parameters:
+        - name: "$expand"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "properties/copilotPolicies"
+        - name: "$filter"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "properties/linkedEnvironmentMetadata/resourceId eq 621c0f33-3fd1-f011-83fb-000d3a106b3b"
+        - name: "$top"
+          in: query
+          required: false
+          schema:
+            type: integer
+            example: 1
+        - name: "api-version"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "2021-04-01"
+      responses:
+        '200':
+          description: "200 captured response"
+  /providers/Microsoft.BusinessAppPlatform/scopes/admin/environments/{environmentId}:
+    servers:
+      - url: "https://api.bap.microsoft.com"
+        description: "Business App Platform resource provider"
+    get:
+      operationId: BusinessAppPlatform_get_providers_Microsoft_BusinessAppPlatform_scopes_admin_environments_environmentId
+      summary: "GET /providers/Microsoft.BusinessAppPlatform/scopes/admin/environments/{environmentId}"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/environments/default-847b5907-ca15-40f4-b171-eb18619dbfab/flows, https://admin.powerplatform.microsoft.com/environments/default-847b5907-ca15-40f4-b171-eb18619dbfab/powerapps, https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub, https://admin.powerplatform.microsoft.com/manage/environments/default-847b5907-ca15-40f4-b171-eb18619dbfab/flows, and 1 more route."
+      tags:
+        - BusinessAppPlatform
+      parameters:
+        - name: "environmentId"
+          in: path
+          required: true
+          schema:
+            type: string
+            example: "Default-847b5907-ca15-40f4-b171-eb18619dbfab"
+        - name: "$expand"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "properties/copilotPolicies"
+        - name: "$select"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "name,properties.scheduledLifecycleOperations,properties.linkedEnvironmentMetadata.securityGroupId,properties.bingChat..."
+        - name: "api-version"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "2021-04-01"
+      responses:
+        '200':
+          description: "200 captured response"
+  /providers/Microsoft.BusinessAppPlatform/scopes/admin/environments/{environmentId}/lastActivity:
+    servers:
+      - url: "https://api.bap.microsoft.com"
+        description: "Business App Platform resource provider"
+    get:
+      operationId: BusinessAppPlatform_get_providers_Microsoft_BusinessAppPlatform_scopes_admin_environments_environmentId_lastActivity
+      summary: "GET /providers/Microsoft.BusinessAppPlatform/scopes/admin/environments/{environmentId}/lastActivity"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub."
+      tags:
+        - BusinessAppPlatform
+      parameters:
+        - name: "environmentId"
+          in: path
+          required: true
+          schema:
+            type: string
+            example: "Default-847b5907-ca15-40f4-b171-eb18619dbfab"
+        - name: "api-version"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "2021-04-01"
+      responses:
+        '200':
+          description: "200 captured response"
+  /providers/Microsoft.BusinessAppPlatform/t2tmigrationapprovals:
+    servers:
+      - url: "https://api.bap.microsoft.com"
+        description: "Business App Platform resource provider"
+    get:
+      operationId: BusinessAppPlatform_get_providers_Microsoft_BusinessAppPlatform_t2tmigrationapprovals
+      summary: "GET /providers/Microsoft.BusinessAppPlatform/t2tmigrationapprovals"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub."
+      tags:
+        - BusinessAppPlatform
+      parameters:
+        - name: "api-version"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "2021-04-01"
+      responses:
+        '200':
+          description: "200 captured response"
+  /providers/Microsoft.BusinessAppPlatform/t2tmigrations:
+    servers:
+      - url: "https://api.bap.microsoft.com"
+        description: "Business App Platform resource provider"
+    get:
+      operationId: BusinessAppPlatform_get_providers_Microsoft_BusinessAppPlatform_t2tmigrations
+      summary: "GET /providers/Microsoft.BusinessAppPlatform/t2tmigrations"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub."
+      tags:
+        - BusinessAppPlatform
+      parameters:
+        - name: "api-version"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "2021-04-01"
+      responses:
+        '200':
+          description: "200 captured response"
+  /providers/Microsoft.BusinessAppPlatform/tenant:
+    servers:
+      - url: "https://api.bap.microsoft.com"
+        description: "Business App Platform resource provider"
+    get:
+      operationId: BusinessAppPlatform_get_providers_Microsoft_BusinessAppPlatform_tenant
+      summary: "GET /providers/Microsoft.BusinessAppPlatform/tenant"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/billing/licenses/PowerApps/overview, https://admin.powerplatform.microsoft.com/billing/licenses/PowerApps/recommendations, https://admin.powerplatform.microsoft.com/billing/licenses/copilotStudio/overview, https://admin.powerplatform.microsoft.com/billing/licenses/dataverse/overview, and 83 more routes."
+      tags:
+        - BusinessAppPlatform
+      parameters:
+        - name: "api-version"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "2020-08-01"
+      responses:
+        '200':
+          description: "200 captured response"

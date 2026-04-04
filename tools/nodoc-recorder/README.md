@@ -8,8 +8,9 @@ A Chrome/Edge DevTools extension that captures API traffic from Microsoft portal
 |--------|--------|----------|
 | Defender | `security.microsoft.com` | `/apiproxy/*` |
 | M365 Admin | `admin.cloud.microsoft` | `/admin/api/*` |
-| SharePoint Admin | `{tenant}-admin.sharepoint.com` | `/_api/*` |
+| SharePoint | `{tenant}-admin.sharepoint.com` | `/_api/*` |
 | Teams | `admin.teams.microsoft.com` + related Teams/Office hosts | `/api/*`, `/admin/api/*`, `/amer/api/*`, `/data/*`, `/Teams.*`, `/Skype.*`, `/config/*`, `/repository/*`, and related report/app-catalog paths |
+| Power Platform | `api.bap.microsoft.com`, `api.admin.powerplatform.microsoft.com`, `licensing.powerplatform.microsoft.com`, `*.adminanalytics.powerplatform.microsoft.com`, `*.csanalytics.powerplatform.microsoft.com`, `*.tenant.api.powerplatform.com`, `*.crm.dynamics.com`, `*.portal-infra.dynamics.com` | `/providers/*`, `/api/*`, `/analytics/*`, `/governance/*`, `/notificationservice/*`, `/v0.1*`, `/v0.1-alpha*`, `/v1.0*`, `/api/data/*`, `/api/nosql/*`, `/api/v1/*` |
 | Purview | `purview.microsoft.com` | `/apiproxy/*` |
 | Purview Portal | `purview.microsoft.com` | `/api/*` |
 | Entra IAM | `main.iam.ad.ext.azure.com` | `/api/*` |
@@ -56,4 +57,4 @@ panel.js             → Capture logic, rendering, deduplication, and export
 
 ## Adding New Portals
 
-Edit the `portalConfig` array in both `background.js` and `panel.js`, then update `host_permissions` in `manifest.json` with the new URL patterns.
+Edit the `portalConfig` array in both `background.js` and `panel.js`, including any exact `hostnames`, wildcard `hostSuffixes`, and `pathPrefixes`, then update `host_permissions` in `manifest.json` with the new URL patterns.

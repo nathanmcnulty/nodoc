@@ -1,0 +1,592 @@
+openapi: 3.0.1
+info:
+  title: Power Platform
+  x-nodoc-category: Power Platform
+  description: |
+    The Power Platform API is used by the Power Platform admin center (`admin.powerplatform.microsoft.com`) for tenant administration across environment management, analytics, licensing, governance, tenant settings, notifications, and application inventory.
+
+      - Business App Platform resource provider (`api.bap.microsoft.com`)
+      - Admin analytics (`{region}.adminanalytics.powerplatform.microsoft.com`)
+      - Config analytics (`{region}.csanalytics.powerplatform.microsoft.com`)
+      - Licensing (`licensing.powerplatform.microsoft.com`)
+      - Admin portal helpers (`api.admin.powerplatform.microsoft.com`)
+      - Tenant-scoped APIs (`{tenantHost}.tenant.api.powerplatform.com`)
+      - Tenant island notification APIs (`{tenantIslandHost}.tenant.api.powerplatform.com`)
+      - Dynamics CRM Web API (`{organizationHost}.crm.dynamics.com`)
+      - Power Pages portal infrastructure (`{portalInfraHost}.portal-infra.dynamics.com`)
+
+    Requests were live-captured from exhaustive same-origin browsing of left-nav routes, list/detail drill-ins, read-only pivots, and safe report interactions across home, manage, security, Copilot, monitor, deployment, licensing, capacity, support, and environment hub surfaces.
+
+    Most backend families use browser-obtained bearer tokens with service-specific audiences plus correlation and session headers such as `X-Correlation-ID`, `x-ms-client-request-id`, `x-ms-client-session-id`, `x-ms-client-tenant-id`, and `x-ms-client-principal-id`.
+    Some families add service-specific headers such as `x-ms-organization-id` for Dataverse analytics or `x-ms-mac-*` headers for tenant-scoped Power Platform APIs.
+
+    Some same-origin routes remained tenant-dependent in this capture set: `copilot/getstarted` and `copilot/copilotstudio` were feature-limited, `manage/usage`, `security/portals`, and `copilot/dynamics365-sales` stayed no-data, several Dataverse user and security-role detail blades were permission-limited, and one Copilot Studio resource row exposed a missing same-origin link.
+
+    The operations below exclude `graph.microsoft.com` traffic and static locale assets. The admin health ping is unauthenticated; most other operations require a portal-derived bearer token.
+
+    Documentation and specifications have been provided on a best-effort basis and may not be 100% accurate.
+  version: '1.0'
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+servers:
+  - url: https://admin.powerplatform.microsoft.com
+    description: Power Platform admin center portal shell. Individual operations override this with the live backend host that served the request.
+security:
+  - BearerToken: []
+components:
+  securitySchemes:
+    BearerToken:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        Browser-obtained bearer token used by the Power Platform admin center.
+        Different backend families use service-specific audiences such as `https://service.powerapps.com/`, `https://adminanalytics.powerplatform.microsoft.com`, `https://licensing.powerplatform.microsoft.com`, `https://api.powerplatform.com`, or the PPAC admin application ID audience.
+tags:
+  - name: BusinessAppPlatform
+    description: |
+      Environment inventory, tenant settings, environment groups, regional metadata, migrations, and governance policy operations served from the Business App Platform resource provider.
+  - name: AdminAnalytics
+    description: |
+      Dataverse org insights, analytics user settings, Power BI dashboard discovery, and embed-token issuance used by PPAC analytics blades.
+  - name: ConfigAnalytics
+    description: |
+      Tenant-consent, connection, and out-of-box analytics configuration operations used by data export and analytics setup flows.
+  - name: Licensing
+    description: |
+      Tenant capacity, billing policy, entitlement, allocation, and managed-environment licensing operations.
+  - name: AdminPortal
+    description: |
+      Power Platform admin portal helper endpoints, including health checks and tenant product inventory for the Dynamics 365 apps view.
+  - name: TenantApi
+    description: |
+      Tenant-scoped analytics and governance endpoints backed by tenant-specific `*.tenant.api.powerplatform.com` hosts.
+  - name: NotificationService
+    description: |
+      Tenant island notification metadata endpoints used by the Power Platform admin center notification hub.
+  - name: DynamicsCrm
+    description: |
+      Dataverse environment security, alerting, application-user, business-unit, team, and feature-control operations served from organization-scoped `*.crm.dynamics.com` hosts.
+  - name: PowerPagesPortalInfra
+    description: |
+      Power Pages portal inventory, provisioning, certificate, DLP, package, and tenant security operations served from `*.portal-infra.dynamics.com` hosts.
+
+x-tagGroups:
+  - name: Business App Platform
+    tags:
+      - BusinessAppPlatform
+  - name: Admin Analytics
+    tags:
+      - AdminAnalytics
+  - name: Config Analytics
+    tags:
+      - ConfigAnalytics
+  - name: Licensing
+    tags:
+      - Licensing
+  - name: Admin Portal
+    tags:
+      - AdminPortal
+  - name: Tenant API
+    tags:
+      - TenantApi
+  - name: Notification Service
+    tags:
+      - NotificationService
+  - name: Dynamics CRM
+    tags:
+      - DynamicsCrm
+  - name: Power Pages Portal Infra
+    tags:
+      - PowerPagesPortalInfra
+
+paths:
+  /providers/Microsoft.BusinessAppPlatform/environmentGroups:
+    $ref: "business_app_platform.yml#/paths/~1providers~1Microsoft.BusinessAppPlatform~1environmentGroups"
+  /providers/Microsoft.BusinessAppPlatform/environmentLocations:
+    $ref: "business_app_platform.yml#/paths/~1providers~1Microsoft.BusinessAppPlatform~1environmentLocations"
+  /providers/Microsoft.BusinessAppPlatform/environments:
+    $ref: "business_app_platform.yml#/paths/~1providers~1Microsoft.BusinessAppPlatform~1environments"
+  /providers/Microsoft.BusinessAppPlatform/environments/{environmentId}/checkAccess:
+    $ref: "business_app_platform.yml#/paths/~1providers~1Microsoft.BusinessAppPlatform~1environments~1{environmentId}~1checkAccess"
+  /providers/Microsoft.BusinessAppPlatform/environments/~default:
+    $ref: "business_app_platform.yml#/paths/~1providers~1Microsoft.BusinessAppPlatform~1environments~1~0default"
+  /providers/Microsoft.BusinessAppPlatform/environments/getOrCreate:
+    $ref: "business_app_platform.yml#/paths/~1providers~1Microsoft.BusinessAppPlatform~1environments~1getOrCreate"
+  /providers/Microsoft.BusinessAppPlatform/lifecycleOperations:
+    $ref: "business_app_platform.yml#/paths/~1providers~1Microsoft.BusinessAppPlatform~1lifecycleOperations"
+  /providers/Microsoft.BusinessAppPlatform/listTenantSettings:
+    $ref: "business_app_platform.yml#/paths/~1providers~1Microsoft.BusinessAppPlatform~1listTenantSettings"
+  /providers/Microsoft.BusinessAppPlatform/locations:
+    $ref: "business_app_platform.yml#/paths/~1providers~1Microsoft.BusinessAppPlatform~1locations"
+  /providers/Microsoft.BusinessAppPlatform/locations/{locationName}/environmentCurrencies:
+    $ref: "business_app_platform.yml#/paths/~1providers~1Microsoft.BusinessAppPlatform~1locations~1{locationName}~1environmentCurrencies"
+  /providers/Microsoft.BusinessAppPlatform/locations/{locationName}/environmentLanguages:
+    $ref: "business_app_platform.yml#/paths/~1providers~1Microsoft.BusinessAppPlatform~1locations~1{locationName}~1environmentLanguages"
+  /providers/Microsoft.BusinessAppPlatform/locations/unitedstates/templates:
+    $ref: "business_app_platform.yml#/paths/~1providers~1Microsoft.BusinessAppPlatform~1locations~1unitedstates~1templates"
+  /providers/Microsoft.BusinessAppPlatform/scopes/admin/enroll:
+    $ref: "business_app_platform.yml#/paths/~1providers~1Microsoft.BusinessAppPlatform~1scopes~1admin~1enroll"
+  /providers/Microsoft.BusinessAppPlatform/scopes/admin/environments:
+    $ref: "business_app_platform.yml#/paths/~1providers~1Microsoft.BusinessAppPlatform~1scopes~1admin~1environments"
+  /providers/Microsoft.BusinessAppPlatform/scopes/admin/environments/{environmentId}:
+    $ref: "business_app_platform.yml#/paths/~1providers~1Microsoft.BusinessAppPlatform~1scopes~1admin~1environments~1{environmentId}"
+  /providers/Microsoft.BusinessAppPlatform/scopes/admin/environments/{environmentId}/lastActivity:
+    $ref: "business_app_platform.yml#/paths/~1providers~1Microsoft.BusinessAppPlatform~1scopes~1admin~1environments~1{environmentId}~1lastActivity"
+  /providers/Microsoft.BusinessAppPlatform/t2tmigrationapprovals:
+    $ref: "business_app_platform.yml#/paths/~1providers~1Microsoft.BusinessAppPlatform~1t2tmigrationapprovals"
+  /providers/Microsoft.BusinessAppPlatform/t2tmigrations:
+    $ref: "business_app_platform.yml#/paths/~1providers~1Microsoft.BusinessAppPlatform~1t2tmigrations"
+  /providers/Microsoft.BusinessAppPlatform/tenant:
+    $ref: "business_app_platform.yml#/paths/~1providers~1Microsoft.BusinessAppPlatform~1tenant"
+  /api/v1/cds/CategorySeries/Organizations/{organizationId}:
+    $ref: "admin_analytics.yml#/paths/~1api~1v1~1cds~1CategorySeries~1Organizations~1{organizationId}"
+  /api/v1/cds/OrgInsightsMetrics/List:
+    $ref: "admin_analytics.yml#/paths/~1api~1v1~1cds~1OrgInsightsMetrics~1List"
+  /api/v1/cds/TimeSeries/Organizations/{organizationId}:
+    $ref: "admin_analytics.yml#/paths/~1api~1v1~1cds~1TimeSeries~1Organizations~1{organizationId}"
+  /api/v1/metrics/resourceType/copilotstudio/resourceSubType/agent/latest:
+    $ref: "admin_analytics.yml#/paths/~1api~1v1~1metrics~1resourceType~1copilotstudio~1resourceSubType~1agent~1latest"
+  /api/v1/metrics/resourceType/powerautomate/resourceSubType/cloudflow/latest:
+    $ref: "admin_analytics.yml#/paths/~1api~1v1~1metrics~1resourceType~1powerautomate~1resourceSubType~1cloudflow~1latest"
+  /api/v1/metrics/resourceType/powerautomate/resourceSubType/desktopflow/latest:
+    $ref: "admin_analytics.yml#/paths/~1api~1v1~1metrics~1resourceType~1powerautomate~1resourceSubType~1desktopflow~1latest"
+  /api/v1/metrics/resourceType/powerautomate/resourceSubType/workqueue/latest:
+    $ref: "admin_analytics.yml#/paths/~1api~1v1~1metrics~1resourceType~1powerautomate~1resourceSubType~1workqueue~1latest"
+  /api/v1/tenants/{tenantId}/tenantconsent:
+    $ref: "config_analytics.yml#/paths/~1api~1v1~1tenants~1{tenantId}~1tenantconsent"
+  /licensing/tenants/{tenantId}/UserPerFlowCapacitySource/TenantContextSummary:
+    $ref: "licensing.yml#/paths/~1licensing~1tenants~1{tenantId}~1UserPerFlowCapacitySource~1TenantContextSummary"
+  /licensing/tenants/{tenantId}/UserPerFlowCapacitySource/UserContextSummary:
+    $ref: "licensing.yml#/paths/~1licensing~1tenants~1{tenantId}~1UserPerFlowCapacitySource~1UserContextSummary"
+  /v0.1-alpha/tenants/{tenantId}/BillingPolicies:
+    $ref: "licensing.yml#/paths/~1v0.1-alpha~1tenants~1{tenantId}~1BillingPolicies"
+  /v0.1-alpha/tenants/{tenantId}/BillingPolicies/getEnvironmentMap:
+    $ref: "licensing.yml#/paths/~1v0.1-alpha~1tenants~1{tenantId}~1BillingPolicies~1getEnvironmentMap"
+  /v0.1-alpha/tenants/{tenantId}/CurrencyReports:
+    $ref: "licensing.yml#/paths/~1v0.1-alpha~1tenants~1{tenantId}~1CurrencyReports"
+  /v0.1-alpha/tenants/{tenantId}/entitlements/AppPass/trends:
+    $ref: "licensing.yml#/paths/~1v0.1-alpha~1tenants~1{tenantId}~1entitlements~1AppPass~1trends"
+  /v0.1-alpha/tenants/{tenantId}/entitlements/Database/trends:
+    $ref: "licensing.yml#/paths/~1v0.1-alpha~1tenants~1{tenantId}~1entitlements~1Database~1trends"
+  /v0.1-alpha/tenants/{tenantId}/entitlements/extension:
+    $ref: "licensing.yml#/paths/~1v0.1-alpha~1tenants~1{tenantId}~1entitlements~1extension"
+  /v0.1-alpha/tenants/{tenantId}/entitlements/File/trends:
+    $ref: "licensing.yml#/paths/~1v0.1-alpha~1tenants~1{tenantId}~1entitlements~1File~1trends"
+  /v0.1-alpha/tenants/{tenantId}/entitlements/FinOpsDatabase/trends:
+    $ref: "licensing.yml#/paths/~1v0.1-alpha~1tenants~1{tenantId}~1entitlements~1FinOpsDatabase~1trends"
+  /v0.1-alpha/tenants/{tenantId}/entitlements/FinOpsFile/trends:
+    $ref: "licensing.yml#/paths/~1v0.1-alpha~1tenants~1{tenantId}~1entitlements~1FinOpsFile~1trends"
+  /v0.1-alpha/tenants/{tenantId}/entitlements/Log/trends:
+    $ref: "licensing.yml#/paths/~1v0.1-alpha~1tenants~1{tenantId}~1entitlements~1Log~1trends"
+  /v0.1-alpha/tenants/{tenantId}/entitlements/MCSMessages/snapshot/product:
+    $ref: "licensing.yml#/paths/~1v0.1-alpha~1tenants~1{tenantId}~1entitlements~1MCSMessages~1snapshot~1product"
+  /v0.1-alpha/tenants/{tenantId}/entitlements/MCSMessages/trends:
+    $ref: "licensing.yml#/paths/~1v0.1-alpha~1tenants~1{tenantId}~1entitlements~1MCSMessages~1trends"
+  /v0.1-alpha/tenants/{tenantId}/environments/capacityTypes/PowerPagesAnonymous/trends:
+    $ref: "licensing.yml#/paths/~1v0.1-alpha~1tenants~1{tenantId}~1environments~1capacityTypes~1PowerPagesAnonymous~1trends"
+  /v0.1-alpha/tenants/{tenantId}/environments/capacityTypes/PowerPagesAuthenticated/trends:
+    $ref: "licensing.yml#/paths/~1v0.1-alpha~1tenants~1{tenantId}~1environments~1capacityTypes~1PowerPagesAuthenticated~1trends"
+  /v0.1-alpha/tenants/{tenantId}/licenseRequests/all:
+    $ref: "licensing.yml#/paths/~1v0.1-alpha~1tenants~1{tenantId}~1licenseRequests~1all"
+  /v0.1-alpha/tenants/{tenantId}/TenantCapacity:
+    $ref: "licensing.yml#/paths/~1v0.1-alpha~1tenants~1{tenantId}~1TenantCapacity"
+  /v0.1-alpha/tenants/{tenantId}/TenantConsumptionReport/GetAllReports:
+    $ref: "licensing.yml#/paths/~1v0.1-alpha~1tenants~1{tenantId}~1TenantConsumptionReport~1GetAllReports"
+  /v0.1-alpha/tenants/{tenantId}/TenantLicenseModel:
+    $ref: "licensing.yml#/paths/~1v0.1-alpha~1tenants~1{tenantId}~1TenantLicenseModel"
+  /v0.1/tenants/{tenantId}/allocationsV2/getmany:
+    $ref: "licensing.yml#/paths/~1v0.1~1tenants~1{tenantId}~1allocationsV2~1getmany"
+  /v0.1/tenants/{tenantId}/allocationsV2/overage/getmany:
+    $ref: "licensing.yml#/paths/~1v0.1~1tenants~1{tenantId}~1allocationsV2~1overage~1getmany"
+  /v0.1/tenants/{tenantId}/allocationsV2/sum:
+    $ref: "licensing.yml#/paths/~1v0.1~1tenants~1{tenantId}~1allocationsV2~1sum"
+  /v1.0/tenants/{tenantId}/capacityTypes/MCSMessages/trends:
+    $ref: "licensing.yml#/paths/~1v1.0~1tenants~1{tenantId}~1capacityTypes~1MCSMessages~1trends"
+  /v1.0/tenants/{tenantId}/capacityTypes/MCSSessions/trends:
+    $ref: "licensing.yml#/paths/~1v1.0~1tenants~1{tenantId}~1capacityTypes~1MCSSessions~1trends"
+  /v1.0/tenants/{tenantId}/CurrencyReports:
+    $ref: "licensing.yml#/paths/~1v1.0~1tenants~1{tenantId}~1CurrencyReports"
+  /v1.0/tenants/{tenantId}/Downloads/getAll/EntitlementConsumptionTenantDetailsReport:
+    $ref: "licensing.yml#/paths/~1v1.0~1tenants~1{tenantId}~1Downloads~1getAll~1EntitlementConsumptionTenantDetailsReport"
+  /v1.0/tenants/{tenantId}/Downloads/getAll/PowerAppsTenantLicenseDetailsDownload:
+    $ref: "licensing.yml#/paths/~1v1.0~1tenants~1{tenantId}~1Downloads~1getAll~1PowerAppsTenantLicenseDetailsDownload"
+  /v1.0/tenants/{tenantId}/FinOpsLicensing/GetLicenseSummaryV2:
+    $ref: "licensing.yml#/paths/~1v1.0~1tenants~1{tenantId}~1FinOpsLicensing~1GetLicenseSummaryV2"
+  /v1.0/tenants/{tenantId}/FinOpsLicensing/GetUserLicenseDetailsV2:
+    $ref: "licensing.yml#/paths/~1v1.0~1tenants~1{tenantId}~1FinOpsLicensing~1GetUserLicenseDetailsV2"
+  /v1.0/tenants/{tenantId}/FinOpsLicensing/GetUsersExemptFromLicensing:
+    $ref: "licensing.yml#/paths/~1v1.0~1tenants~1{tenantId}~1FinOpsLicensing~1GetUsersExemptFromLicensing"
+  /v1.0/tenants/{tenantId}/FinOpsLicensing/GetUsersExemptFromLicensing/Count:
+    $ref: "licensing.yml#/paths/~1v1.0~1tenants~1{tenantId}~1FinOpsLicensing~1GetUsersExemptFromLicensing~1Count"
+  /v1.0/tenants/{tenantId}/ManagedEnvironment/GetAllProductSkus:
+    $ref: "licensing.yml#/paths/~1v1.0~1tenants~1{tenantId}~1ManagedEnvironment~1GetAllProductSkus"
+  /v1.0/tenants/{tenantId}/ManagedEnvironment/PowerApps/GetAppPassEnvironments:
+    $ref: "licensing.yml#/paths/~1v1.0~1tenants~1{tenantId}~1ManagedEnvironment~1PowerApps~1GetAppPassEnvironments"
+  /v1.0/tenants/{tenantId}/ManagedEnvironment/PowerApps/GetLicenseSummary:
+    $ref: "licensing.yml#/paths/~1v1.0~1tenants~1{tenantId}~1ManagedEnvironment~1PowerApps~1GetLicenseSummary"
+  /v1.0/tenants/{tenantId}/ManagedEnvironment/PowerAutomate/GetComplianceSummary:
+    $ref: "licensing.yml#/paths/~1v1.0~1tenants~1{tenantId}~1ManagedEnvironment~1PowerAutomate~1GetComplianceSummary"
+  /v1.0/tenants/{tenantId}/ManagedEnvironment/PowerAutomate/GetLicenseSummary:
+    $ref: "licensing.yml#/paths/~1v1.0~1tenants~1{tenantId}~1ManagedEnvironment~1PowerAutomate~1GetLicenseSummary"
+  /v1.0/tenants/{tenantId}/productCategories/PowerApps/userSubscribedLicenseSummary:
+    $ref: "licensing.yml#/paths/~1v1.0~1tenants~1{tenantId}~1productCategories~1PowerApps~1userSubscribedLicenseSummary"
+  /v1.0/tenants/{tenantId}/productCategories/PowerApps/userSubscribedLicenseTrends:
+    $ref: "licensing.yml#/paths/~1v1.0~1tenants~1{tenantId}~1productCategories~1PowerApps~1userSubscribedLicenseTrends"
+  /v1.0/tenants/{tenantId}/recommendations/PowerAppsUnderlicensedUsers:
+    $ref: "licensing.yml#/paths/~1v1.0~1tenants~1{tenantId}~1recommendations~1PowerAppsUnderlicensedUsers"
+  /v2.0/tenants/{tenantId}/BillingPolicies:
+    $ref: "licensing.yml#/paths/~1v2.0~1tenants~1{tenantId}~1BillingPolicies"
+  /v2.0/tenants/{tenantId}/entitlements/AppPass:
+    $ref: "licensing.yml#/paths/~1v2.0~1tenants~1{tenantId}~1entitlements~1AppPass"
+  /v2.0/tenants/{tenantId}/entitlements/Database:
+    $ref: "licensing.yml#/paths/~1v2.0~1tenants~1{tenantId}~1entitlements~1Database"
+  /v2.0/tenants/{tenantId}/entitlements/File:
+    $ref: "licensing.yml#/paths/~1v2.0~1tenants~1{tenantId}~1entitlements~1File"
+  /v2.0/tenants/{tenantId}/entitlements/FinOpsDatabase:
+    $ref: "licensing.yml#/paths/~1v2.0~1tenants~1{tenantId}~1entitlements~1FinOpsDatabase"
+  /v2.0/tenants/{tenantId}/entitlements/FinOpsFile:
+    $ref: "licensing.yml#/paths/~1v2.0~1tenants~1{tenantId}~1entitlements~1FinOpsFile"
+  /v2.0/tenants/{tenantId}/entitlements/Log:
+    $ref: "licensing.yml#/paths/~1v2.0~1tenants~1{tenantId}~1entitlements~1Log"
+  /v2.0/tenants/{tenantId}/entitlements/MCSMessages:
+    $ref: "licensing.yml#/paths/~1v2.0~1tenants~1{tenantId}~1entitlements~1MCSMessages"
+  /v2.0/tenants/{tenantId}/entitlements/MCSSessions:
+    $ref: "licensing.yml#/paths/~1v2.0~1tenants~1{tenantId}~1entitlements~1MCSSessions"
+  /v2.0/tenants/{tenantId}/environments/entitlementConsumptions/AppPass:
+    $ref: "licensing.yml#/paths/~1v2.0~1tenants~1{tenantId}~1environments~1entitlementConsumptions~1AppPass"
+  /v2.0/tenants/{tenantId}/environments/entitlementConsumptions/Database:
+    $ref: "licensing.yml#/paths/~1v2.0~1tenants~1{tenantId}~1environments~1entitlementConsumptions~1Database"
+  /v2.0/tenants/{tenantId}/environments/entitlementConsumptions/File:
+    $ref: "licensing.yml#/paths/~1v2.0~1tenants~1{tenantId}~1environments~1entitlementConsumptions~1File"
+  /v2.0/tenants/{tenantId}/environments/entitlementConsumptions/FinOpsDatabase:
+    $ref: "licensing.yml#/paths/~1v2.0~1tenants~1{tenantId}~1environments~1entitlementConsumptions~1FinOpsDatabase"
+  /v2.0/tenants/{tenantId}/environments/entitlementConsumptions/FinOpsFile:
+    $ref: "licensing.yml#/paths/~1v2.0~1tenants~1{tenantId}~1environments~1entitlementConsumptions~1FinOpsFile"
+  /v2.0/tenants/{tenantId}/environments/entitlementConsumptions/Log:
+    $ref: "licensing.yml#/paths/~1v2.0~1tenants~1{tenantId}~1environments~1entitlementConsumptions~1Log"
+  /v2.0/tenants/{tenantId}/environments/entitlementConsumptions/MCSMessages:
+    $ref: "licensing.yml#/paths/~1v2.0~1tenants~1{tenantId}~1environments~1entitlementConsumptions~1MCSMessages"
+  /v2.0/tenants/{tenantId}/environments/entitlementConsumptions/MCSSessions:
+    $ref: "licensing.yml#/paths/~1v2.0~1tenants~1{tenantId}~1environments~1entitlementConsumptions~1MCSSessions"
+  /v2.0/tenants/{tenantId}/environments/entitlements/AppPass:
+    $ref: "licensing.yml#/paths/~1v2.0~1tenants~1{tenantId}~1environments~1entitlements~1AppPass"
+  /v2.0/tenants/{tenantId}/environments/entitlements/Database:
+    $ref: "licensing.yml#/paths/~1v2.0~1tenants~1{tenantId}~1environments~1entitlements~1Database"
+  /v2.0/tenants/{tenantId}/environments/entitlements/File:
+    $ref: "licensing.yml#/paths/~1v2.0~1tenants~1{tenantId}~1environments~1entitlements~1File"
+  /v2.0/tenants/{tenantId}/environments/entitlements/FinOpsDatabase:
+    $ref: "licensing.yml#/paths/~1v2.0~1tenants~1{tenantId}~1environments~1entitlements~1FinOpsDatabase"
+  /v2.0/tenants/{tenantId}/environments/entitlements/FinOpsFile:
+    $ref: "licensing.yml#/paths/~1v2.0~1tenants~1{tenantId}~1environments~1entitlements~1FinOpsFile"
+  /v2.0/tenants/{tenantId}/environments/entitlements/Log:
+    $ref: "licensing.yml#/paths/~1v2.0~1tenants~1{tenantId}~1environments~1entitlements~1Log"
+  /v2.0/tenants/{tenantId}/environments/entitlements/MCSMessages:
+    $ref: "licensing.yml#/paths/~1v2.0~1tenants~1{tenantId}~1environments~1entitlements~1MCSMessages"
+  /v2.0/tenants/{tenantId}/environments/entitlements/MCSSessions:
+    $ref: "licensing.yml#/paths/~1v2.0~1tenants~1{tenantId}~1environments~1entitlements~1MCSSessions"
+  /api/AppManagement/TenantProducts:
+    $ref: "admin_portal.yml#/paths/~1api~1AppManagement~1TenantProducts"
+  /api/environments/{environmentsId}/features:
+    $ref: "admin_portal.yml#/paths/~1api~1environments~1{environmentsId}~1features"
+  /api/health/ping:
+    $ref: "admin_portal.yml#/paths/~1api~1health~1ping"
+  /appmanagement/environments/{environmentId}/AvailablePackages/Microsoft.Crm.Cloud.Pes.Tps.UserGetAvailableInstancePackages(Lcid='1033',InstanceCountryCode='US',CrmVersion='9.2.26031.180'):
+    $ref: "tenant_api.yml#/paths/~1appmanagement~1environments~1{environmentId}~1AvailablePackages~1Microsoft.Crm.Cloud.Pes.Tps.UserGetAvailableInstancePackages(Lcid='1033',InstanceCountryCode='US',CrmVersion='9.2.26031.180')"
+  /appmanagement/environments/{environmentId}/InstancePackages/Microsoft.Crm.Cloud.Pes.Tps.UserGetInstancePackages(Lcid='1033'):
+    $ref: "tenant_api.yml#/paths/~1appmanagement~1environments~1{environmentId}~1InstancePackages~1Microsoft.Crm.Cloud.Pes.Tps.UserGetInstancePackages(Lcid='1033')"
+  /licensing/autoClaimPolicies:
+    $ref: "tenant_api.yml#/paths/~1licensing~1autoClaimPolicies"
+  /notificationservice/notifications/metadata:
+    $ref: "notification_service.yml#/paths/~1notificationservice~1notifications~1metadata"
+  /api/data/v9.0/$batch:
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1$batch"
+  /api/data/v9.0/applicationusers:
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1applicationusers"
+  /api/data/v9.0/appmodules/Microsoft.Dynamics.CRM.RetrieveUnpublishedMultiple():
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1appmodules~1Microsoft.Dynamics.CRM.RetrieveUnpublishedMultiple()"
+  /api/data/v9.0/audits:
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1audits"
+  /api/data/v9.0/businessunits:
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1businessunits"
+  /api/data/v9.0/businessunits({businessunitId}):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1businessunits({businessunitId})"
+  /api/data/v9.0/deploymentpipelines:
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1deploymentpipelines"
+  /api/data/v9.0/deploymentstageruns:
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1deploymentstageruns"
+  /api/data/v9.0/EntityDefinitions:
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1EntityDefinitions"
+  /api/data/v9.0/EntityDefinitions(LogicalName='businessunit'):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1EntityDefinitions(LogicalName='businessunit')"
+  /api/data/v9.0/EntityDefinitions(LogicalName='role')/Attributes(LogicalName='issytemgenerated'):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1EntityDefinitions(LogicalName='role')~1Attributes(LogicalName='issytemgenerated')"
+  /api/data/v9.0/EntityDefinitions(LogicalName='systemuser'):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1EntityDefinitions(LogicalName='systemuser')"
+  /api/data/v9.0/EntityDefinitions(LogicalName='systemuser')/Attributes(LogicalName='systemmanagedusertype'):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1EntityDefinitions(LogicalName='systemuser')~1Attributes(LogicalName='systemmanagedusertype')"
+  /api/data/v9.0/EntityDefinitions(LogicalName='team'):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1EntityDefinitions(LogicalName='team')"
+  /api/data/v9.0/GetClientMetadata(ClientMetadataQuery=@ClientMetadataQuery):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1GetClientMetadata(ClientMetadataQuery=@ClientMetadataQuery)"
+  /api/data/v9.0/GetFeatureEnabledState:
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1GetFeatureEnabledState"
+  /api/data/v9.0/organizations:
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1organizations"
+  /api/data/v9.0/privileges:
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1privileges"
+  /api/data/v9.0/RetrieveFeatureControlSettingsByNamespace:
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1RetrieveFeatureControlSettingsByNamespace"
+  /api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=0002921c-d1d0-f011-8543-7c1e52689cc6):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1RetrieveRolePrivilegesRole(RoleId=0002921c-d1d0-f011-8543-7c1e52689cc6)"
+  /api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=02123b67-66ae-4a69-8cdc-6473b94ad1a9):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1RetrieveRolePrivilegesRole(RoleId=02123b67-66ae-4a69-8cdc-6473b94ad1a9)"
+  /api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=169ead94-a7e8-42c5-9ae8-d81205dfee77):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1RetrieveRolePrivilegesRole(RoleId=169ead94-a7e8-42c5-9ae8-d81205dfee77)"
+  /api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=1a6feece-0ba1-4739-8dee-eb83b1b591ea):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1RetrieveRolePrivilegesRole(RoleId=1a6feece-0ba1-4739-8dee-eb83b1b591ea)"
+  /api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=1bb44f6d-15a5-48aa-a2f2-8d2cb0095d2d):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1RetrieveRolePrivilegesRole(RoleId=1bb44f6d-15a5-48aa-a2f2-8d2cb0095d2d)"
+  /api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=1f6c957f-9851-4dbe-ab1c-508c06faa8be):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1RetrieveRolePrivilegesRole(RoleId=1f6c957f-9851-4dbe-ab1c-508c06faa8be)"
+  /api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=20902168-ee38-ea11-a81c-000d3ac3e6d8):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1RetrieveRolePrivilegesRole(RoleId=20902168-ee38-ea11-a81c-000d3ac3e6d8)"
+  /api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=25f9a5ed-60fd-4bcf-bf4b-b40296410bf4):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1RetrieveRolePrivilegesRole(RoleId=25f9a5ed-60fd-4bcf-bf4b-b40296410bf4)"
+  /api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=2c321cf0-f096-ea11-a81a-000d3a6ecd99):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1RetrieveRolePrivilegesRole(RoleId=2c321cf0-f096-ea11-a81a-000d3a6ecd99)"
+  /api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=2fe4d72e-e538-ea11-a81c-000d3ac3e6d8):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1RetrieveRolePrivilegesRole(RoleId=2fe4d72e-e538-ea11-a81c-000d3ac3e6d8)"
+  /api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=313995f9-4a4a-4d4a-afd1-c892da78e13e):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1RetrieveRolePrivilegesRole(RoleId=313995f9-4a4a-4d4a-afd1-c892da78e13e)"
+  /api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=3f199ebd-977e-43e5-abe5-fe865a1f2904):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1RetrieveRolePrivilegesRole(RoleId=3f199ebd-977e-43e5-abe5-fe865a1f2904)"
+  /api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=4931681d-8163-e811-a965-000d3a11fe32):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1RetrieveRolePrivilegesRole(RoleId=4931681d-8163-e811-a965-000d3a11fe32)"
+  /api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=4f9dbfce-f797-40d8-a8ac-902e441e371b):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1RetrieveRolePrivilegesRole(RoleId=4f9dbfce-f797-40d8-a8ac-902e441e371b)"
+  /api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=500073fc-54f7-429b-822e-f28b01fa5148):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1RetrieveRolePrivilegesRole(RoleId=500073fc-54f7-429b-822e-f28b01fa5148)"
+  /api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=5225adeb-859b-42f3-8289-a399e47512d5):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1RetrieveRolePrivilegesRole(RoleId=5225adeb-859b-42f3-8289-a399e47512d5)"
+  /api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=6b860c71-0e4e-ec11-b1b5-000d3a6ed5b3):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1RetrieveRolePrivilegesRole(RoleId=6b860c71-0e4e-ec11-b1b5-000d3a6ed5b3)"
+  /api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=726d11d6-d9cf-4503-ade9-d6a4be7fa095):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1RetrieveRolePrivilegesRole(RoleId=726d11d6-d9cf-4503-ade9-d6a4be7fa095)"
+  /api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=7be5a395-6b58-4f8c-908f-97dc8810fc50):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1RetrieveRolePrivilegesRole(RoleId=7be5a395-6b58-4f8c-908f-97dc8810fc50)"
+  /api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=854af338-f3c5-e711-8122-000d3aa01c52):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1RetrieveRolePrivilegesRole(RoleId=854af338-f3c5-e711-8122-000d3aa01c52)"
+  /api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=88b87c37-1472-4798-ac48-d56509eb6e1d):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1RetrieveRolePrivilegesRole(RoleId=88b87c37-1472-4798-ac48-d56509eb6e1d)"
+  /api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=896a28e5-678d-4fa8-ad59-c606d1aa98ce):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1RetrieveRolePrivilegesRole(RoleId=896a28e5-678d-4fa8-ad59-c606d1aa98ce)"
+  /api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=8a2f35d9-e447-4285-974c-81382317ca21):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1RetrieveRolePrivilegesRole(RoleId=8a2f35d9-e447-4285-974c-81382317ca21)"
+  /api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=95aa4c68-04e0-4982-b994-7b5ed6c0771d):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1RetrieveRolePrivilegesRole(RoleId=95aa4c68-04e0-4982-b994-7b5ed6c0771d)"
+  /api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=979144c2-989b-41a5-a146-6b3ea4130e8c):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1RetrieveRolePrivilegesRole(RoleId=979144c2-989b-41a5-a146-6b3ea4130e8c)"
+  /api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=987674dd-f4a4-45a8-a1f7-f2cce1cf87f8):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1RetrieveRolePrivilegesRole(RoleId=987674dd-f4a4-45a8-a1f7-f2cce1cf87f8)"
+  /api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=99b7f9c4-5c1e-4b9a-b756-fdfa137b6f85):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1RetrieveRolePrivilegesRole(RoleId=99b7f9c4-5c1e-4b9a-b756-fdfa137b6f85)"
+  /api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=9f572d55-6090-493b-904a-3956bdc55343):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1RetrieveRolePrivilegesRole(RoleId=9f572d55-6090-493b-904a-3956bdc55343)"
+  /api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=a0537877-879d-4b70-a391-bb07b94fbba2):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1RetrieveRolePrivilegesRole(RoleId=a0537877-879d-4b70-a391-bb07b94fbba2)"
+  /api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=a0a59a4a-b5a8-4e6f-a094-a866573c17d4):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1RetrieveRolePrivilegesRole(RoleId=a0a59a4a-b5a8-4e6f-a094-a866573c17d4)"
+  /api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=a1801436-efd6-e811-a96e-000d3a3ab886):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1RetrieveRolePrivilegesRole(RoleId=a1801436-efd6-e811-a96e-000d3a3ab886)"
+  /api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=ab8b8c58-1f50-4037-8b26-7523d6145cc3):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1RetrieveRolePrivilegesRole(RoleId=ab8b8c58-1f50-4037-8b26-7523d6145cc3)"
+  /api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=b21a7144-299d-4c21-a116-30f60e9c159a):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1RetrieveRolePrivilegesRole(RoleId=b21a7144-299d-4c21-a116-30f60e9c159a)"
+  /api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=b9b08637-acf6-e711-a95a-000d3a11f5ee):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1RetrieveRolePrivilegesRole(RoleId=b9b08637-acf6-e711-a95a-000d3a11f5ee)"
+  /api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=bdf1780b-2867-4c3e-8957-dce785eac543):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1RetrieveRolePrivilegesRole(RoleId=bdf1780b-2867-4c3e-8957-dce785eac543)"
+  /api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=c95980b3-97dc-4762-a037-c15fe02dae8c):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1RetrieveRolePrivilegesRole(RoleId=c95980b3-97dc-4762-a037-c15fe02dae8c)"
+  /api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=d19d7df9-96e3-440a-ada1-7f469d2a00d1):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1RetrieveRolePrivilegesRole(RoleId=d19d7df9-96e3-440a-ada1-7f469d2a00d1)"
+  /api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=d58407f2-48d5-e711-a82c-000d3a37c848):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1RetrieveRolePrivilegesRole(RoleId=d58407f2-48d5-e711-a82c-000d3a37c848)"
+  /api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=d6e926ad-4afc-42fb-97f1-6e50c2ef174e):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1RetrieveRolePrivilegesRole(RoleId=d6e926ad-4afc-42fb-97f1-6e50c2ef174e)"
+  /api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=e0d2794e-82f3-e811-a951-000d3a1bcf17):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1RetrieveRolePrivilegesRole(RoleId=e0d2794e-82f3-e811-a951-000d3a1bcf17)"
+  /api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=e389a4a6-b53b-4828-bca9-4b5d25f1763b):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1RetrieveRolePrivilegesRole(RoleId=e389a4a6-b53b-4828-bca9-4b5d25f1763b)"
+  /api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=e57bff35-58b4-4725-aee2-40fb18f4c8bd):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1RetrieveRolePrivilegesRole(RoleId=e57bff35-58b4-4725-aee2-40fb18f4c8bd)"
+  /api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=edfcbfd2-358f-ea11-a81f-000d3a6eafd3):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1RetrieveRolePrivilegesRole(RoleId=edfcbfd2-358f-ea11-a81f-000d3a6eafd3)"
+  /api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=ee18dcf2-6f83-4cd7-aa5c-1d8a88947d51):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1RetrieveRolePrivilegesRole(RoleId=ee18dcf2-6f83-4cd7-aa5c-1d8a88947d51)"
+  /api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=ee2c8e11-6d57-4c5d-9f84-659c0db132bb):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1RetrieveRolePrivilegesRole(RoleId=ee2c8e11-6d57-4c5d-9f84-659c0db132bb)"
+  /api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=ee7bc749-3dd6-45ac-b95d-a3031463380b):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1RetrieveRolePrivilegesRole(RoleId=ee7bc749-3dd6-45ac-b95d-a3031463380b)"
+  /api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=f600921c-d1d0-f011-8543-7c1e52689cc6):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1RetrieveRolePrivilegesRole(RoleId=f600921c-d1d0-f011-8543-7c1e52689cc6)"
+  /api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=f9e46d0f-d53e-4d5c-b06b-24948b4606ed):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1RetrieveRolePrivilegesRole(RoleId=f9e46d0f-d53e-4d5c-b06b-24948b4606ed)"
+  /api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=fc3e65d9-450a-4301-933b-f9bcaee20521):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1RetrieveRolePrivilegesRole(RoleId=fc3e65d9-450a-4301-933b-f9bcaee20521)"
+  /api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=ffadce64-3542-4bf1-a83a-ac9941104680):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1RetrieveRolePrivilegesRole(RoleId=ffadce64-3542-4bf1-a83a-ac9941104680)"
+  /api/data/v9.0/RetrieveSetting(SettingName='CrossRegionDeploymentEnabled'):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1RetrieveSetting(SettingName='CrossRegionDeploymentEnabled')"
+  /api/data/v9.0/RetrieveSetting(SettingName='DefaultCustomPipelinesHostEnvForTenant'):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1RetrieveSetting(SettingName='DefaultCustomPipelinesHostEnvForTenant')"
+  /api/data/v9.0/RetrieveSetting(SettingName='EnablePipelinesManagedEnvironmentCompliance'):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1RetrieveSetting(SettingName='EnablePipelinesManagedEnvironmentCompliance')"
+  /api/data/v9.0/RetrieveSetting(SettingName='EnableSolutionImportFromPipelineHost'):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1RetrieveSetting(SettingName='EnableSolutionImportFromPipelineHost')"
+  /api/data/v9.0/roleeditorlayouts:
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1roleeditorlayouts"
+  /api/data/v9.0/roles:
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1roles"
+  /api/data/v9.0/roles(roleid = 0002921c-d1d0-f011-8543-7c1e52689cc6):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1roles(roleid = 0002921c-d1d0-f011-8543-7c1e52689cc6)"
+  /api/data/v9.0/roles(roleid = 02123b67-66ae-4a69-8cdc-6473b94ad1a9):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1roles(roleid = 02123b67-66ae-4a69-8cdc-6473b94ad1a9)"
+  /api/data/v9.0/roles(roleid = 169ead94-a7e8-42c5-9ae8-d81205dfee77):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1roles(roleid = 169ead94-a7e8-42c5-9ae8-d81205dfee77)"
+  /api/data/v9.0/roles(roleid = 1a6feece-0ba1-4739-8dee-eb83b1b591ea):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1roles(roleid = 1a6feece-0ba1-4739-8dee-eb83b1b591ea)"
+  /api/data/v9.0/roles(roleid = 1bb44f6d-15a5-48aa-a2f2-8d2cb0095d2d):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1roles(roleid = 1bb44f6d-15a5-48aa-a2f2-8d2cb0095d2d)"
+  /api/data/v9.0/roles(roleid = 1f6c957f-9851-4dbe-ab1c-508c06faa8be):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1roles(roleid = 1f6c957f-9851-4dbe-ab1c-508c06faa8be)"
+  /api/data/v9.0/roles(roleid = 20902168-ee38-ea11-a81c-000d3ac3e6d8):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1roles(roleid = 20902168-ee38-ea11-a81c-000d3ac3e6d8)"
+  /api/data/v9.0/roles(roleid = 25f9a5ed-60fd-4bcf-bf4b-b40296410bf4):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1roles(roleid = 25f9a5ed-60fd-4bcf-bf4b-b40296410bf4)"
+  /api/data/v9.0/roles(roleid = 2c321cf0-f096-ea11-a81a-000d3a6ecd99):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1roles(roleid = 2c321cf0-f096-ea11-a81a-000d3a6ecd99)"
+  /api/data/v9.0/roles(roleid = 2fe4d72e-e538-ea11-a81c-000d3ac3e6d8):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1roles(roleid = 2fe4d72e-e538-ea11-a81c-000d3ac3e6d8)"
+  /api/data/v9.0/roles(roleid = 313995f9-4a4a-4d4a-afd1-c892da78e13e):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1roles(roleid = 313995f9-4a4a-4d4a-afd1-c892da78e13e)"
+  /api/data/v9.0/roles(roleid = 3f199ebd-977e-43e5-abe5-fe865a1f2904):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1roles(roleid = 3f199ebd-977e-43e5-abe5-fe865a1f2904)"
+  /api/data/v9.0/roles(roleid = 4931681d-8163-e811-a965-000d3a11fe32):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1roles(roleid = 4931681d-8163-e811-a965-000d3a11fe32)"
+  /api/data/v9.0/roles(roleid = 4f9dbfce-f797-40d8-a8ac-902e441e371b):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1roles(roleid = 4f9dbfce-f797-40d8-a8ac-902e441e371b)"
+  /api/data/v9.0/roles(roleid = 500073fc-54f7-429b-822e-f28b01fa5148):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1roles(roleid = 500073fc-54f7-429b-822e-f28b01fa5148)"
+  /api/data/v9.0/roles(roleid = 5225adeb-859b-42f3-8289-a399e47512d5):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1roles(roleid = 5225adeb-859b-42f3-8289-a399e47512d5)"
+  /api/data/v9.0/roles(roleid = 6b860c71-0e4e-ec11-b1b5-000d3a6ed5b3):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1roles(roleid = 6b860c71-0e4e-ec11-b1b5-000d3a6ed5b3)"
+  /api/data/v9.0/roles(roleid = 726d11d6-d9cf-4503-ade9-d6a4be7fa095):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1roles(roleid = 726d11d6-d9cf-4503-ade9-d6a4be7fa095)"
+  /api/data/v9.0/roles(roleid = 7be5a395-6b58-4f8c-908f-97dc8810fc50):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1roles(roleid = 7be5a395-6b58-4f8c-908f-97dc8810fc50)"
+  /api/data/v9.0/roles(roleid = 854af338-f3c5-e711-8122-000d3aa01c52):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1roles(roleid = 854af338-f3c5-e711-8122-000d3aa01c52)"
+  /api/data/v9.0/roles(roleid = 88b87c37-1472-4798-ac48-d56509eb6e1d):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1roles(roleid = 88b87c37-1472-4798-ac48-d56509eb6e1d)"
+  /api/data/v9.0/roles(roleid = 896a28e5-678d-4fa8-ad59-c606d1aa98ce):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1roles(roleid = 896a28e5-678d-4fa8-ad59-c606d1aa98ce)"
+  /api/data/v9.0/roles(roleid = 8a2f35d9-e447-4285-974c-81382317ca21):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1roles(roleid = 8a2f35d9-e447-4285-974c-81382317ca21)"
+  /api/data/v9.0/roles(roleid = 95aa4c68-04e0-4982-b994-7b5ed6c0771d):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1roles(roleid = 95aa4c68-04e0-4982-b994-7b5ed6c0771d)"
+  /api/data/v9.0/roles(roleid = 979144c2-989b-41a5-a146-6b3ea4130e8c):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1roles(roleid = 979144c2-989b-41a5-a146-6b3ea4130e8c)"
+  /api/data/v9.0/roles(roleid = 987674dd-f4a4-45a8-a1f7-f2cce1cf87f8):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1roles(roleid = 987674dd-f4a4-45a8-a1f7-f2cce1cf87f8)"
+  /api/data/v9.0/roles(roleid = 99b7f9c4-5c1e-4b9a-b756-fdfa137b6f85):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1roles(roleid = 99b7f9c4-5c1e-4b9a-b756-fdfa137b6f85)"
+  /api/data/v9.0/roles(roleid = 9f572d55-6090-493b-904a-3956bdc55343):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1roles(roleid = 9f572d55-6090-493b-904a-3956bdc55343)"
+  /api/data/v9.0/roles(roleid = a0537877-879d-4b70-a391-bb07b94fbba2):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1roles(roleid = a0537877-879d-4b70-a391-bb07b94fbba2)"
+  /api/data/v9.0/roles(roleid = a0a59a4a-b5a8-4e6f-a094-a866573c17d4):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1roles(roleid = a0a59a4a-b5a8-4e6f-a094-a866573c17d4)"
+  /api/data/v9.0/roles(roleid = a1801436-efd6-e811-a96e-000d3a3ab886):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1roles(roleid = a1801436-efd6-e811-a96e-000d3a3ab886)"
+  /api/data/v9.0/roles(roleid = ab8b8c58-1f50-4037-8b26-7523d6145cc3):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1roles(roleid = ab8b8c58-1f50-4037-8b26-7523d6145cc3)"
+  /api/data/v9.0/roles(roleid = b21a7144-299d-4c21-a116-30f60e9c159a):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1roles(roleid = b21a7144-299d-4c21-a116-30f60e9c159a)"
+  /api/data/v9.0/roles(roleid = b9b08637-acf6-e711-a95a-000d3a11f5ee):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1roles(roleid = b9b08637-acf6-e711-a95a-000d3a11f5ee)"
+  /api/data/v9.0/roles(roleid = bdf1780b-2867-4c3e-8957-dce785eac543):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1roles(roleid = bdf1780b-2867-4c3e-8957-dce785eac543)"
+  /api/data/v9.0/roles(roleid = c95980b3-97dc-4762-a037-c15fe02dae8c):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1roles(roleid = c95980b3-97dc-4762-a037-c15fe02dae8c)"
+  /api/data/v9.0/roles(roleid = d19d7df9-96e3-440a-ada1-7f469d2a00d1):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1roles(roleid = d19d7df9-96e3-440a-ada1-7f469d2a00d1)"
+  /api/data/v9.0/roles(roleid = d58407f2-48d5-e711-a82c-000d3a37c848):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1roles(roleid = d58407f2-48d5-e711-a82c-000d3a37c848)"
+  /api/data/v9.0/roles(roleid = d6e926ad-4afc-42fb-97f1-6e50c2ef174e):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1roles(roleid = d6e926ad-4afc-42fb-97f1-6e50c2ef174e)"
+  /api/data/v9.0/roles(roleid = e0d2794e-82f3-e811-a951-000d3a1bcf17):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1roles(roleid = e0d2794e-82f3-e811-a951-000d3a1bcf17)"
+  /api/data/v9.0/roles(roleid = e389a4a6-b53b-4828-bca9-4b5d25f1763b):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1roles(roleid = e389a4a6-b53b-4828-bca9-4b5d25f1763b)"
+  /api/data/v9.0/roles(roleid = e57bff35-58b4-4725-aee2-40fb18f4c8bd):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1roles(roleid = e57bff35-58b4-4725-aee2-40fb18f4c8bd)"
+  /api/data/v9.0/roles(roleid = edfcbfd2-358f-ea11-a81f-000d3a6eafd3):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1roles(roleid = edfcbfd2-358f-ea11-a81f-000d3a6eafd3)"
+  /api/data/v9.0/roles(roleid = ee18dcf2-6f83-4cd7-aa5c-1d8a88947d51):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1roles(roleid = ee18dcf2-6f83-4cd7-aa5c-1d8a88947d51)"
+  /api/data/v9.0/roles(roleid = ee2c8e11-6d57-4c5d-9f84-659c0db132bb):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1roles(roleid = ee2c8e11-6d57-4c5d-9f84-659c0db132bb)"
+  /api/data/v9.0/roles(roleid = ee7bc749-3dd6-45ac-b95d-a3031463380b):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1roles(roleid = ee7bc749-3dd6-45ac-b95d-a3031463380b)"
+  /api/data/v9.0/roles(roleid = f600921c-d1d0-f011-8543-7c1e52689cc6):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1roles(roleid = f600921c-d1d0-f011-8543-7c1e52689cc6)"
+  /api/data/v9.0/roles(roleid = f9e46d0f-d53e-4d5c-b06b-24948b4606ed):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1roles(roleid = f9e46d0f-d53e-4d5c-b06b-24948b4606ed)"
+  /api/data/v9.0/roles(roleid = fc3e65d9-450a-4301-933b-f9bcaee20521):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1roles(roleid = fc3e65d9-450a-4301-933b-f9bcaee20521)"
+  /api/data/v9.0/roles(roleid = ffadce64-3542-4bf1-a83a-ac9941104680):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1roles(roleid = ffadce64-3542-4bf1-a83a-ac9941104680)"
+  /api/data/v9.0/savedqueries:
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1savedqueries"
+  /api/data/v9.0/solutions:
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1solutions"
+  /api/data/v9.0/solutions({solutionId}):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1solutions({solutionId})"
+  /api/data/v9.0/systemusers:
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1systemusers"
+  /api/data/v9.0/systemusers({systemuserId})/Microsoft.Dynamics.CRM.RetrieveUserPrivileges:
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1systemusers({systemuserId})~1Microsoft.Dynamics.CRM.RetrieveUserPrivileges"
+  /api/data/v9.0/systemusers({systemuserId})/Microsoft.Dynamics.CRM.RetrieveUsersPrivilegesThroughTeams(ExcludeOrgDisabledPrivileges=true,IncludeSetupUserFiltering=true):
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1systemusers({systemuserId})~1Microsoft.Dynamics.CRM.RetrieveUsersPrivilegesThroughTeams(ExcludeOrgDisabledPrivileges=true,IncludeSetupUserFiltering=true)"
+  /api/data/v9.0/teammemberships:
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1teammemberships"
+  /api/data/v9.0/teams:
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.0~1teams"
+  /api/data/v9.1/systemusers:
+    $ref: "dynamics_crm.yml#/paths/~1api~1data~1v9.1~1systemusers"
+  /api/nosql/audit/isreadenabled:
+    $ref: "dynamics_crm.yml#/paths/~1api~1nosql~1audit~1isreadenabled"
+  /api/v1/powerPortal/environment/CoreEntitiesPackageInstallStatus:
+    $ref: "power_pages_portal_infra.yml#/paths/~1api~1v1~1powerPortal~1environment~1CoreEntitiesPackageInstallStatus"
+  /api/v1/powerPortal/environment/optInStatus:
+    $ref: "power_pages_portal_infra.yml#/paths/~1api~1v1~1powerPortal~1environment~1optInStatus"
+  /api/v1/powerPortal/FeatureConfiguration/GetFeatureControlValues:
+    $ref: "power_pages_portal_infra.yml#/paths/~1api~1v1~1powerPortal~1FeatureConfiguration~1GetFeatureControlValues"
+  /api/v1/powerPortal/GetEnvironment:
+    $ref: "power_pages_portal_infra.yml#/paths/~1api~1v1~1powerPortal~1GetEnvironment"
+  /api/v1/powerPortal/IsCDSOrg:
+    $ref: "power_pages_portal_infra.yml#/paths/~1api~1v1~1powerPortal~1IsCDSOrg"
+  /api/v1/powerPortal/ListPortals:
+    $ref: "power_pages_portal_infra.yml#/paths/~1api~1v1~1powerPortal~1ListPortals"
+  /api/v1/powerPortal/ListPortalsByOrgId:
+    $ref: "power_pages_portal_infra.yml#/paths/~1api~1v1~1powerPortal~1ListPortalsByOrgId"
+  /api/v1/powerPortal/tps/GetAvailablePackages:
+    $ref: "power_pages_portal_infra.yml#/paths/~1api~1v1~1powerPortal~1tps~1GetAvailablePackages"
+  /api/v1/powerPortal/tps/GetInstancePackages:
+    $ref: "power_pages_portal_infra.yml#/paths/~1api~1v1~1powerPortal~1tps~1GetInstancePackages"
+  /api/v1/powerPortal/ZAP/GetDeepScanEnabledPortalByTenant:
+    $ref: "power_pages_portal_infra.yml#/paths/~1api~1v1~1powerPortal~1ZAP~1GetDeepScanEnabledPortalByTenant"
