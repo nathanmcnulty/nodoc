@@ -14,6 +14,20 @@ import {
 } from "../data/siteData";
 import styles from "./index.module.css";
 
+const apiCatalogByFamily = Array.from(
+  apiCatalog.reduce((families, api) => {
+    const familyEntries = families.get(api.family);
+
+    if (familyEntries) {
+      familyEntries.push(api);
+    } else {
+      families.set(api.family, [api]);
+    }
+
+    return families;
+  }, new Map<string, typeof apiCatalog>()),
+);
+
 function HomepageHeader(): ReactElement {
   return (
     <header className={styles.heroBanner}>
@@ -23,8 +37,8 @@ function HomepageHeader(): ReactElement {
           Documenting undocumented Microsoft portal APIs
         </Heading>
         <p className={styles.heroSubtitle}>
-          Browse {apiCatalog.length} portal-backed specs covering Defender XDR, Intune,
-          M365 Admin, M365 Apps, Purview, Purview Portal, and Entra surfaces, with
+          Browse {apiCatalog.length} portal-backed specs covering Defender XDR, Exchange,
+          Intune, M365 Admin, M365 Apps, Purview, Purview Portal, and Entra surfaces, with
           checked-in Postman collections and launch-focused guidance on auth,
           headers, and safe usage.
         </p>
@@ -56,7 +70,7 @@ export default function Home(): ReactElement {
   return (
     <Layout
       title="nodoc | undocumented Microsoft portal APIs"
-      description="OpenAPI specs and checked-in Postman collections for undocumented Microsoft portal APIs across Defender XDR, Intune, M365 Admin, M365 Apps, Purview, Purview Portal, and Entra surfaces."
+      description="OpenAPI specs and checked-in Postman collections for undocumented Microsoft portal APIs across Defender XDR, Exchange, Intune, M365 Admin, M365 Apps, Purview, Purview Portal, and Entra surfaces."
     >
       <HomepageHeader />
       <main>
@@ -79,58 +93,67 @@ export default function Home(): ReactElement {
               <Heading as="h2">Coverage</Heading>
               <p>
                 Every published spec has a matching checked-in Postman collection
-                and a live Scalar page in this site.
+                and is grouped below by portal family.
               </p>
             </div>
-            <div className={styles.cardGrid}>
-              {apiCatalog.map((api) => (
-                <article key={api.title} className={styles.apiCard}>
-                  <div className={styles.apiCardHeader}>
-                    <div>
-                      <span className={styles.apiFamily}>{api.family}</span>
-                      <Heading as="h3" className={styles.apiTitle}>
-                        {api.title}
-                      </Heading>
-                    </div>
-                    <span className={styles.operationsBadge}>
-                      {api.operations} ops
-                    </span>
-                  </div>
-                  <p className={styles.apiSummary}>{api.summary}</p>
-                  <dl className={styles.detailList}>
-                    <div>
-                      <dt>Auth</dt>
-                      <dd>{api.authModel}</dd>
-                    </div>
-                    <div>
-                      <dt>Base URL</dt>
-                      <dd>
-                        <code>{api.baseUrl}</code>
-                      </dd>
-                    </div>
-                    <div>
-                      <dt>Collection</dt>
-                      <dd>
-                        <code>{api.collectionPath}</code>
-                      </dd>
-                    </div>
-                  </dl>
-                  <ul className={styles.highlightList}>
-                    {api.highlights.map((highlight) => (
-                      <li key={highlight}>{highlight}</li>
-                    ))}
-                  </ul>
-                  <div className={styles.cardActions}>
-                    <Link className="button button--primary button--sm" to={api.slug}>
-                      Browse spec
-                    </Link>
-                    <a className="button button--secondary button--sm" href={api.collectionDownloadUrl}>
-                      Download collection
-                    </a>
-                  </div>
-                </article>
-              ))}
-            </div>
+            {apiCatalogByFamily.map(([family, familyApis]) => (
+              <div key={family} className={styles.familyGroup}>
+                <div className={styles.familyHeader}>
+                  <Heading as="h3" className={styles.familyTitle}>
+                    {family}
+                  </Heading>
+                  <p>
+                    {familyApis.length} published {familyApis.length === 1 ? "API" : "APIs"}
+                  </p>
+                </div>
+                <div className={styles.cardGrid}>
+                  {familyApis.map((api) => (
+                    <article key={api.title} className={styles.apiCard}>
+                      <div className={styles.apiCardHeader}>
+                        <Heading as="h4" className={styles.apiTitle}>
+                          {api.title}
+                        </Heading>
+                        <span className={styles.operationsBadge}>
+                          {api.operations} ops
+                        </span>
+                      </div>
+                      <p className={styles.apiSummary}>{api.summary}</p>
+                      <dl className={styles.detailList}>
+                        <div>
+                          <dt>Auth</dt>
+                          <dd>{api.authModel}</dd>
+                        </div>
+                        <div>
+                          <dt>Base URL</dt>
+                          <dd>
+                            <code>{api.baseUrl}</code>
+                          </dd>
+                        </div>
+                        <div>
+                          <dt>Collection</dt>
+                          <dd>
+                            <code>{api.collectionPath}</code>
+                          </dd>
+                        </div>
+                      </dl>
+                      <ul className={styles.highlightList}>
+                        {api.highlights.map((highlight) => (
+                          <li key={highlight}>{highlight}</li>
+                        ))}
+                      </ul>
+                      <div className={styles.cardActions}>
+                        <Link className="button button--primary button--sm" to={api.slug}>
+                          Browse spec
+                        </Link>
+                        <a className="button button--secondary button--sm" href={api.collectionDownloadUrl}>
+                          Download collection
+                        </a>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
         </section>
 

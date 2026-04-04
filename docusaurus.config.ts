@@ -6,7 +6,7 @@ import type * as Preset from "@docusaurus/preset-classic";
 const siteTitle = "nodoc";
 const siteTagline = "documenting undocumented interfaces";
 const siteDescription =
-  "OpenAPI specs and checked-in Postman collections for undocumented Microsoft portal APIs across Defender XDR, Intune, M365 Admin, SharePoint Admin, M365 Apps, Purview, Purview Portal, and Entra surfaces.";
+  "OpenAPI specs and checked-in Postman collections for undocumented Microsoft portal APIs across Defender XDR, Exchange, Intune, M365 Admin, SharePoint Admin, M365 Apps, Purview, Purview Portal, and Entra surfaces.";
 const siteUrl = "https://nodoc.nathanmcnulty.com";
 const aiBrowserEntry = path.resolve(process.cwd(), "node_modules", "ai", "dist", "index.js");
 
@@ -110,7 +110,7 @@ const config: Config = {
         {
           name: "keywords",
           content:
-            "undocumented APIs, Microsoft portal APIs, Defender XDR API, Intune API, Windows Autopatch API, Microsoft 365 admin API, SharePoint admin API, SharePoint Online admin API, M365 Apps API, Purview API, Entra API, OpenAPI, Postman",
+            "undocumented APIs, Microsoft portal APIs, Defender XDR API, Exchange admin center API, Intune API, Windows Autopatch API, Microsoft 365 admin API, SharePoint admin API, SharePoint Online admin API, M365 Apps API, Purview API, Entra API, OpenAPI, Postman",
         },
       {
         property: "og:type",

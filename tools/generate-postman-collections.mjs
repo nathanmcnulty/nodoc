@@ -22,6 +22,11 @@ const collectionDefinitions = [
     output: "postman/collections/m365-admin.collection.json",
   },
   {
+    name: "Exchange Beta",
+    spec: "specifications/nodoc-exchange-beta/specification/openapi.yml",
+    output: "postman/collections/exchange-beta.collection.json",
+  },
+  {
     name: "SharePoint Admin",
     spec: "specifications/nodoc-sharepoint-admin/specification/openapi.yml",
     output: "postman/collections/sharepoint-admin.collection.json",

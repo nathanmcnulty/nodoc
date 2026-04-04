@@ -136,6 +136,26 @@ Recommended pattern:
 - Record a page-state checklist alongside each request set: selected tab, filter chips, date range, business group or release selection, tenant scope, and any report-mode toggles.
 - If a report blade uses virtualization, shadow DOM, or a delayed/hidden grid, do not block on the DOM becoming rich. Traffic is the primary evidence; DOM and accessibility snapshots are still useful for control attribution and UI-state labeling.
 
+#### Exhaustive portal crawl depth
+
+- A portal crawl is **not complete** when it only visits left-nav or landing routes.
+- Treat every list surface as a potential feeder into richer entity/detail APIs:
+  - open visible object rows where it is safe to do so
+  - if row clicks are unreliable, use IDs captured from traffic to open detail routes directly
+  - queue same-origin detail blades separately from nav pages
+- On each entity/detail page or blade, click every visible read-only tab or pivot before moving on.
+- Prefer safe drill-ins such as display-name links, row detail blades, tabs, paging, filters, and same-origin content links over arbitrary action buttons.
+- Record which surfaces could **not** be reached because of missing tenant data, permissions, or feature flags so future agents do not mistake those gaps for completed coverage.
+
+Rule of thumb:
+
+- “Exhaustive discovery” means:
+  1. enumerate the nav surface
+  2. traverse list pages
+  3. open representative object/detail pages
+  4. exercise visible tabs and safe pivots on those pages
+  5. only then decide which APIs are truly part of the portal-specific surface
+
 ### 5. Download and mine the loaded JavaScript
 
 - Save the script URLs loaded by the visited pages.
@@ -686,8 +706,11 @@ Add new ideas here before trying them, then move the result into the experiment 
 
 - Specs updated with clear evidence labels
 - New endpoints placed in coherent sibling files
+- New spec and collection files included when a portal was split or added, especially `specifications/nodoc-{portal}/specification/openapi.yml` and `postman/collections/{portal}.collection.json`
 - Checked-in Postman collections regenerated
 - README/site metadata updated when counts or highlights changed
 - Validation commands completed
 - Unrelated churn removed
+- PR summary explains the scope decision clearly, including which portal-specific host/path family is documented and which shared shell, support, auth, or telemetry traffic was intentionally excluded
+- PR summary calls out confirmed tenant-specific empty or null responses so reviewers do not mistake them for dead endpoints
 - Follow-up opportunities recorded, especially risky writes, hidden hosts, and feature-gated surfaces
