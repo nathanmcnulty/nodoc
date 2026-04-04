@@ -781,6 +781,89 @@ paths:
         '404':
           $ref: common.yml#/components/responses/NotFound
 
+  /mtp/phoenixValueReflectionApi/disrupt:
+    get:
+      summary: Get disruption summary
+      description: >-
+        Retrieve the incident value-reflection summary that highlights disrupted attacks,
+        contained accounts, contained devices, and malicious OAuth apps over the selected
+        lookback window.
+      operationId: Incidents.GetDisruptionSummary
+      tags: [Incidents]
+      parameters:
+        - name: lookbackDays
+          in: query
+          description: The number of days to include in the incident value-reflection summary.
+          schema:
+            type: integer
+            default: 30
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  totalDisruptedAttacks:
+                    type: integer
+                  totalContainedOrDisabledAccounts:
+                    type: integer
+                  totalContainedDevices:
+                    type: integer
+                  totalMaliciousOAuthApps:
+                    type: integer
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/phoenixValueReflectionApi/summary/total:
+    get:
+      summary: Get incident summary totals
+      description: >-
+        Retrieve the high-level alert and incident totals shown on the Defender portal's
+        incident value-reflection summary.
+      operationId: Incidents.GetSummaryTotals
+      tags: [Incidents]
+      parameters:
+        - name: lookbackDays
+          in: query
+          description: The number of days to include in the incident totals summary.
+          schema:
+            type: integer
+            default: 30
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  alerts:
+                    type: object
+                    properties:
+                      total:
+                        type: integer
+                  incidents:
+                    type: object
+                    properties:
+                      total:
+                        type: integer
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
 components:
   schemas:
     Alert:

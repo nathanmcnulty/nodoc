@@ -152,6 +152,7 @@ Recommended pattern:
 - Record a page-state checklist alongside each request set: selected tab, filter chips, date range, business group or release selection, tenant scope, and any report-mode toggles.
 - If a report blade uses virtualization, shadow DOM, or a delayed/hidden grid, do not block on the DOM becoming rich. Traffic is the primary evidence; DOM and accessibility snapshots are still useful for control attribution and UI-state labeling.
 - If you need to resume a long crawl, seed from previously visited routes plus crawl-phase page states rather than every interaction snapshot; replaying interaction-state links can explode the queue with duplicate detail routes.
+- Some entity and detail blades need materially longer settle windows than nav or landing pages. If a page is still stuck on a generic loading state, extend the settle interval before concluding the route is empty or broken; many device, file, and report-detail pivots do not hydrate on the shorter nav timing budget.
 
 #### Exhaustive portal crawl depth
 
@@ -682,6 +683,10 @@ Current takeaway:
 - Only launch another crawl when the remaining gaps are still broad or ambiguous; if the
   tail is already concentrated into a few confirmed families, extract exact shapes directly
   from the existing artifacts first.
+- If the remaining tail collapses into one large feature family, prefer a focused active
+  pass on the implicated pages before relying on passive recorder captures alone. Passive
+  gathering is useful for ambient confirmation, but it is weaker for dormant detail routes,
+  deliberate row/tab drill-ins, and exact UI-state attribution.
 
 ### 2026-04-03 — Purview portal split and generation hygiene
 
@@ -739,4 +744,4 @@ Add new ideas here before trying them, then move the result into the experiment 
 - Unrelated churn removed
 - PR summary explains the scope decision clearly, including which portal-specific host/path family is documented and which shared shell, support, auth, or telemetry traffic was intentionally excluded
 - PR summary calls out confirmed tenant-specific empty or null responses so reviewers do not mistake them for dead endpoints
-- Follow-up opportunities recorded, especially risky writes, hidden hosts, and feature-gated surfaces
+- Follow-up opportunities recorded, especially risky writes, hidden hosts, feature-gated surfaces, and any largest remaining unmatched families intentionally deferred

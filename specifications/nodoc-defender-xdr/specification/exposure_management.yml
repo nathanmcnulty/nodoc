@@ -205,6 +205,36 @@ paths:
         '404':
           $ref: common.yml#/components/responses/NotFound
 
+  /mtp/posture/oversight/initiatives/{InitiativeId}:
+    get:
+      summary: Get posture oversight initiative details
+      description: >-
+        Retrieve the detail payload for a selected posture oversight initiative,
+        including Threat Analytics-backed initiative cards linked from Exposure Management.
+      operationId: ExposureManagement.GetPostureOversightInitiative
+      tags: [Exposure Management]
+      parameters:
+        - name: InitiativeId
+          in: path
+          required: true
+          description: The posture oversight initiative identifier.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - posture oversight initiative detail
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
   /mtp/posture/oversight/initiatives/summarized:
     get:
       summary: Get summarized posture initiatives
@@ -1034,6 +1064,483 @@ paths:
         '404':
           $ref: common.yml#/components/responses/NotFound
 
+  /mdc/views/recommendations/items:
+    post:
+      summary: List MDC recommendation items
+      description: >-
+        Retrieve the Microsoft Defender for Cloud recommendation items rendered by the
+        Defender portal's cloud posture recommendations experience.
+      operationId: ExposureManagement.ListMdcRecommendationItems
+      tags: [Exposure Management]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+              description: pending - MDC recommendations items query payload
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - MDC recommendations items response
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mdc/views/recommendations/recommendationsMetrics:
+    post:
+      summary: Get MDC recommendation metrics
+      description: >-
+        Retrieve aggregate recommendation metrics for the Defender portal's Microsoft
+        Defender for Cloud posture views.
+      operationId: ExposureManagement.GetMdcRecommendationMetrics
+      tags: [Exposure Management]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+              description: pending - MDC recommendation metrics query payload
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - MDC recommendation metrics response
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mdc/views/recommendations/schema:
+    post:
+      summary: Get MDC recommendations schema
+      description: >-
+        Retrieve the schema metadata used by the Defender portal to render Microsoft
+        Defender for Cloud recommendation grids.
+      operationId: ExposureManagement.GetMdcRecommendationSchema
+      tags: [Exposure Management]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+              description: pending - MDC recommendation schema request payload
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - MDC recommendation schema response
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mdc/views/vulnerabilities/allVulnerabilitiesPageItems:
+    post:
+      summary: List MDC all-vulnerabilities page items
+      description: >-
+        Retrieve the all-vulnerabilities page items rendered by the Defender portal's
+        Microsoft Defender for Cloud vulnerability experience.
+      operationId: ExposureManagement.ListMdcAllVulnerabilitiesPageItems
+      tags: [Exposure Management]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+              description: pending - MDC all vulnerabilities page query payload
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - MDC all vulnerabilities page response
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mdc/views/vulnerabilities/getVulnerabilitiesOvertime:
+    post:
+      summary: Get MDC vulnerabilities over time
+      description: >-
+        Retrieve the vulnerability trend series used by the Defender portal's Microsoft
+        Defender for Cloud vulnerability views.
+      operationId: ExposureManagement.GetMdcVulnerabilitiesOverTime
+      tags: [Exposure Management]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+              description: pending - MDC vulnerabilities over time query payload
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - MDC vulnerabilities over time response
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mdc/views/vulnerabilities/items:
+    post:
+      summary: List MDC vulnerability items
+      description: >-
+        Retrieve the vulnerability item records rendered by the Defender portal's
+        Microsoft Defender for Cloud vulnerability views.
+      operationId: ExposureManagement.ListMdcVulnerabilityItems
+      tags: [Exposure Management]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+              description: pending - MDC vulnerability items query payload
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - MDC vulnerability items response
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mdc/views/vulnerabilities/recommendationsByResourceType:
+    post:
+      summary: Get MDC recommendations by resource type
+      description: >-
+        Retrieve the resource-type recommendation aggregates used by the Defender portal's
+        Microsoft Defender for Cloud vulnerability and posture summaries.
+      operationId: ExposureManagement.GetMdcRecommendationsByResourceType
+      tags: [Exposure Management]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+              description: pending - MDC recommendations-by-resource-type query payload
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - MDC recommendations-by-resource-type response
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mdc/views/vulnerabilities/schema:
+    post:
+      summary: Get MDC vulnerabilities schema
+      description: >-
+        Retrieve the schema metadata used by the Defender portal to render Microsoft
+        Defender for Cloud vulnerability grids.
+      operationId: ExposureManagement.GetMdcVulnerabilitySchema
+      tags: [Exposure Management]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+              description: pending - MDC vulnerabilities schema request payload
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - MDC vulnerabilities schema response
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mdc/views/vulnerabilities/statisticsHeader:
+    post:
+      summary: Get MDC vulnerability statistics header
+      description: >-
+        Retrieve the summary header statistics used by the Defender portal's Microsoft
+        Defender for Cloud vulnerability views.
+      operationId: ExposureManagement.GetMdcVulnerabilityStatisticsHeader
+      tags: [Exposure Management]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+              description: pending - MDC vulnerability statistics header query payload
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - MDC vulnerability statistics header response
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mdc/views/vulnerabilities/topCloudCVEsItems:
+    post:
+      summary: List MDC top cloud CVE items
+      description: >-
+        Retrieve the top cloud CVE records shown by the Defender portal's Microsoft
+        Defender for Cloud vulnerability experience.
+      operationId: ExposureManagement.ListMdcTopCloudCvesItems
+      tags: [Exposure Management]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+              description: pending - MDC top cloud CVE items query payload
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - MDC top cloud CVE items response
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mdc/views/vulnerabilities/topCloudCVEsSchema:
+    post:
+      summary: Get MDC top cloud CVE schema
+      description: >-
+        Retrieve the schema metadata for the Defender portal's Microsoft Defender for
+        Cloud top cloud CVE grid.
+      operationId: ExposureManagement.GetMdcTopCloudCvesSchema
+      tags: [Exposure Management]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+              description: pending - MDC top cloud CVE schema request payload
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - MDC top cloud CVE schema response
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mdc/views/vulnerabilities/vulnerabilitiesInsights:
+    post:
+      summary: Get MDC vulnerability insights
+      description: >-
+        Retrieve the insight cards and aggregate insight data used by the Defender portal's
+        Microsoft Defender for Cloud vulnerability views.
+      operationId: ExposureManagement.GetMdcVulnerabilityInsights
+      tags: [Exposure Management]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+              description: pending - MDC vulnerability insights query payload
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - MDC vulnerability insights response
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/posture/oversight/metrics/category_apps_secure_score:
+    get:
+      summary: Get SaaS apps secure score metric
+      description: >-
+        Retrieve the category-specific secure score metric used by the Defender portal's
+        Exposure Management SaaS apps tab.
+      operationId: ExposureManagement.GetAppsSecureScoreMetric
+      tags: [Exposure Management]
+      parameters:
+        - name: fullData
+          in: query
+          description: Return the full metric history and recommendation payload.
+          schema:
+            type: boolean
+            default: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostureSecureScoreMetric'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/posture/oversight/metrics/category_data_secure_score:
+    get:
+      summary: Get data secure score metric
+      description: >-
+        Retrieve the category-specific secure score metric used by the Defender portal's
+        Exposure Management data tab.
+      operationId: ExposureManagement.GetDataSecureScoreMetric
+      tags: [Exposure Management]
+      parameters:
+        - name: fullData
+          in: query
+          description: Return the full metric history and recommendation payload.
+          schema:
+            type: boolean
+            default: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostureSecureScoreMetric'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/posture/oversight/metrics/category_identity_secure_score:
+    get:
+      summary: Get identity secure score metric
+      description: >-
+        Retrieve the category-specific secure score metric used by the Defender portal's
+        Exposure Management identities tab.
+      operationId: ExposureManagement.GetIdentitySecureScoreMetric
+      tags: [Exposure Management]
+      parameters:
+        - name: fullData
+          in: query
+          description: Return the full metric history and recommendation payload.
+          schema:
+            type: boolean
+            default: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostureSecureScoreMetric'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/XspmConnectors/connectors/getAllConnectors:
+    get:
+      summary: List XSPM connectors
+      description: >-
+        Retrieve the exposure data connectors configured for the Defender portal's XSPM
+        and exposure management experiences.
+      operationId: ExposureManagement.ListXspmConnectors
+      tags: [Exposure Management]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      description: pending - XSPM connector entry
+                  recordsCount:
+                    type: integer
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
 components:
   schemas:
     AttackPath:
@@ -1130,6 +1637,93 @@ components:
         maxScore:
           type: number
           format: double
+    PostureSecureScoreMetric:
+      allOf:
+        - $ref: '#/components/schemas/PostureMetric'
+        - type: object
+          description: A category-specific secure score metric with history and recommendation detail.
+          properties:
+            latestCount:
+              type: number
+              format: double
+            latestTotal:
+              type: number
+              format: double
+            latestValue:
+              type: number
+              format: double
+            targetValue:
+              type: number
+              format: double
+            latestCalculatedWeight:
+              type: number
+              format: double
+            latestCalculatedScoreImpact:
+              type: number
+              format: double
+            latestScore:
+              type: number
+              format: double
+            latestCalculationId:
+              type: string
+            sentimentType:
+              type: string
+            weight:
+              type: number
+              format: double
+            supportGetAssets:
+              type: boolean
+            recommendations:
+              type: array
+              items:
+                type: string
+            recommendationsV2:
+              type: object
+              additionalProperties:
+                type: array
+                items:
+                  type: string
+            workloads:
+              type: array
+              items:
+                type: string
+            suggestions:
+              type: array
+              items:
+                type: object
+                additionalProperties: true
+            dataHistory:
+              type: array
+              items:
+                type: object
+                properties:
+                  metricId:
+                    type: string
+                  version:
+                    type: number
+                  count:
+                    type: number
+                    format: double
+                  total:
+                    type: number
+                    format: double
+                  date:
+                    type: string
+                    format: date-time
+                  providerLastUpdate:
+                    type: string
+                    format: date-time
+                  score:
+                    type: number
+                    format: double
+                  weight:
+                    type: number
+                    format: double
+                  calculationId:
+                    type: string
+                  scopingProperties:
+                    type: object
+                    additionalProperties: true
     PostureRecommendation:
       type: object
       description: A posture oversight recommendation.

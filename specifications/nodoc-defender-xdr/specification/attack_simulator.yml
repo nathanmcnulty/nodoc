@@ -166,3 +166,84 @@ paths:
 
         '404':
           $ref: common.yml#/components/responses/NotFound
+
+  /astgws/AttackSimulator/api/v1/GlobalPayloads:
+    get:
+      summary: List global payloads
+      description: >-
+        Retrieve the reusable payload catalog surfaced by the Attack Simulator
+        training and simulation authoring experiences.
+      operationId: AttackSimulator.ListGlobalPayloads
+      tags: [AttackSimulator]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  description: pending - attack simulator global payload
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /astgws/AttackSimulator/api/v1/simulationAutomations:
+    get:
+      summary: List simulation automations
+      description: >-
+        Retrieve the automation rules and schedules shown by the Attack
+        Simulator automation experience.
+      operationId: AttackSimulator.ListSimulationAutomations
+      tags: [AttackSimulator]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  description: pending - attack simulator automation definition
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /astgws/AttackSimulator/api/v1/trainingCampaignsV2:
+    get:
+      summary: List training campaigns
+      description: >-
+        Retrieve the training campaign records displayed by the Attack
+        Simulator campaigns view.
+      operationId: AttackSimulator.ListTrainingCampaignsV2
+      tags: [AttackSimulator]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  description: pending - attack simulator training campaign
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

@@ -735,6 +735,312 @@ paths:
         '404':
           $ref: common.yml#/components/responses/NotFound
 
+  /mtp/urbacConfiguration/gw/unifiedrbac/configuration/permissions:
+    get:
+      summary: Get unified RBAC permissions
+      description: >-
+        Retrieve the unified RBAC permissions catalog displayed on the Defender
+        security permissions page.
+      operationId: Configuration.GetUnifiedRbacPermissions
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - unified RBAC permissions catalog
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/urbacConfiguration/gw/unifiedrbac/configuration/roleDefinitions/{RoleDefinitionId}/roleAssignments:
+    get:
+      summary: List unified RBAC role assignments
+      description: >-
+        Retrieve the role assignments for a selected unified RBAC role definition
+        from the Defender security permissions detail page.
+      operationId: Configuration.ListUnifiedRbacRoleAssignments
+      tags: [Configuration]
+      parameters:
+        - name: RoleDefinitionId
+          in: path
+          required: true
+          description: The unified RBAC role definition identifier.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - unified RBAC role assignments response
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/urbacConfiguration/gw/unifiedrbac/configuration/workspaces:
+    get:
+      summary: List unified RBAC workspaces
+      description: >-
+        Retrieve the Defender workspaces and scope metadata used by the unified RBAC
+        configuration experience.
+      operationId: Configuration.ListUnifiedRbacWorkspaces
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - unified RBAC workspaces response
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/papin/api/cloud/public/internal/indicators/count:
+    get:
+      summary: Get internal indicator count
+      description: >-
+        Retrieve the indicator count used by the internal email and collaboration
+        indicator management views in the Defender portal.
+      operationId: Configuration.GetInternalIndicatorCount
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - internal indicator count response
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/papin/api/cloud/public/internal/indicators/filterValues:
+    get:
+      summary: Get internal indicator filter values
+      description: >-
+        Retrieve the available filter values for the internal email and collaboration
+        indicator management views in the Defender portal.
+      operationId: Configuration.GetInternalIndicatorFilterValues
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - internal indicator filter values
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/licenses/mgmt/aadlicenses/mdc/status:
+    get:
+      summary: Get MDC license status
+      description: >-
+        Retrieve the Microsoft Defender for Cloud licensing status surfaced by the
+        Defender portal's licensing helpers.
+      operationId: Configuration.GetMdcLicenseStatus
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - MDC license status
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/licenses/mgmt/aadlicenses/sums:
+    get:
+      summary: Get license sums
+      description: >-
+        Retrieve the aggregated Entra license counts used by Defender portal
+        licensing checks.
+      operationId: Configuration.GetLicenseSums
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - license sums
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/disrupt/api/exclusions/exclude-all:
+    get:
+      summary: Get all disruption exclusions
+      description: >-
+        Retrieve the aggregate disruption exclusion settings shown by the
+        disruption exclusion experience.
+      operationId: Configuration.GetAllDisruptionExclusions
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - disruption exclusion settings
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/disrupt/api/exclusions/Identity:
+    get:
+      summary: Get identity disruption exclusions
+      description: >-
+        Retrieve the identity-specific disruption exclusions configured in the Defender portal.
+      operationId: Configuration.GetIdentityDisruptionExclusions
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - identity disruption exclusions
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/disrupt/api/exclusions/Identity/global-exclusion:
+    get:
+      summary: Get global identity disruption exclusion
+      description: >-
+        Retrieve the global identity disruption exclusion settings shown by the
+        Defender portal.
+      operationId: Configuration.GetGlobalIdentityDisruptionExclusion
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - global identity disruption exclusion
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/rbacManagementApi/rbac/aad_groups:
+    get:
+      summary: List RBAC Entra groups
+      description: >-
+        Retrieve the Microsoft Entra groups available to the Defender RBAC
+        management experience.
+      operationId: Configuration.ListRbacAadGroups
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - RBAC Entra groups response
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/rbacManagementApi/rbac/user_roles:
+    get:
+      summary: Get current user RBAC roles
+      description: >-
+        Retrieve the RBAC role assignments resolved for the current Defender portal user.
+      operationId: Configuration.GetCurrentUserRbacRoles
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - current user RBAC roles
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
   /mdc/views/inventory/assets:
     post:
       summary: Query cloud asset inventory
@@ -1166,6 +1472,348 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserSettings'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/CustomerSubmissionService/file/enterprise/query/{TenantId}:
+    get:
+      summary: List file submissions
+      description: >-
+        Retrieve the file-submission entries displayed on the Defender portal's
+        submissions experience.
+      operationId: Configuration.ListFileSubmissions
+      tags: [Configuration]
+      parameters:
+        - name: TenantId
+          in: path
+          required: true
+          description: The Microsoft Entra tenant identifier.
+          schema:
+            type: string
+            format: uuid
+        - name: trackingId
+          in: query
+          description: Optional client tracking identifier added by the portal.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  description: pending - file submission record
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/responseApiPortal/apps/all:
+    get:
+      summary: List connected apps
+      description: >-
+        Retrieve the connected application registrations and monthly activity counters
+        shown on the Defender portal's connected apps experience.
+      operationId: Configuration.ListConnectedApps
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    Id:
+                      type: string
+                    DisplayName:
+                      type: string
+                    Enabled:
+                      type: boolean
+                    LatestConnectivity:
+                      type: string
+                      format: date-time
+                    ApplicationSettingsLink:
+                      type: string
+                      nullable: true
+                    MonthlyStatistics:
+                      type: array
+                      items:
+                        type: integer
+                    ImageBase64:
+                      type: string
+                      nullable: true
+                    ImageType:
+                      type: string
+                      nullable: true
+                    ImageUrl:
+                      type: string
+                      nullable: true
+                  additionalProperties: true
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/responseApiPortal/ti/indicators:
+    get:
+      summary: List custom threat indicators
+      description: >-
+        Retrieve the custom threat indicators shown in the Defender portal's
+        configuration management experience.
+      operationId: Configuration.ListThreatIndicators
+      tags: [Configuration]
+      parameters:
+        - name: type
+          in: query
+          description: Indicator type to return.
+          schema:
+            type: string
+            example: url
+        - name: PageIndex
+          in: query
+          description: The page index for pagination.
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    IndicatorId:
+                      type: integer
+                    OrgId:
+                      type: string
+                    IndicatorType:
+                      type: integer
+                    IndicatorValue:
+                      type: string
+                    IoaDefinitionId:
+                      type: string
+                    CreationTime:
+                      type: string
+                      format: date-time
+                    CreatedBy:
+                      type: string
+                    LastUpdateTime:
+                      type: string
+                      format: date-time
+                    IsEnabled:
+                      type: boolean
+                    Action:
+                      type: integer
+                    Severity:
+                      type: integer
+                    Title:
+                      type: string
+                    Category:
+                      type: integer
+                    Description:
+                      type: string
+                    Application:
+                      type: string
+                    EducateUrl:
+                      type: string
+                      nullable: true
+                    GenerateAlert:
+                      type: boolean
+                    CreatedByDisplayName:
+                      type: string
+                    CreatedBySource:
+                      type: integer
+                  additionalProperties: true
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/responseApiPortal/webcategory/policies:
+    get:
+      summary: List web content filtering policies
+      description: >-
+        Retrieve the web content filtering policies configured through the Defender
+        portal's response API portal experience.
+      operationId: Configuration.ListWebCategoryPolicies
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    name:
+                      type: string
+                    blockedCategoryIds:
+                      type: array
+                      items:
+                        type: integer
+                    auditCategoryIds:
+                      type: array
+                      items:
+                        type: integer
+                  additionalProperties: true
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/sccManagement/mgmt/ServicesUrls:
+    get:
+      summary: Get Defender service URLs
+      description: >-
+        Retrieve the backend service URL map used by the Defender portal's
+        configuration experiences.
+      operationId: Configuration.GetServiceUrls
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ServiceUrls:
+                    type: object
+                    additionalProperties:
+                      type: string
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/webThreatProtection/WebContentFiltering/Reports/TopParentCategories:
+    get:
+      summary: Get top web content filtering categories
+      description: >-
+        Retrieve the top parent categories shown in the Defender portal's web content
+        filtering report experience.
+      operationId: Configuration.GetTopWebContentFilteringCategories
+      tags: [Configuration]
+      parameters:
+        - name: includeActivityChange
+          in: query
+          description: Whether to include activity change deltas in the report response.
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  UpdateTime:
+                    type: string
+                    format: date-time
+                  TopParentCategories:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        Name:
+                          type: string
+                        ActivityDeltaPercentage:
+                          type: number
+                          format: double
+                        IsDeltaPercentageValid:
+                          type: boolean
+                        TotalAccessRequests:
+                          type: integer
+                        TotalBlockedCount:
+                          type: integer
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/webThreatProtection/webThreats/reports/webThreatSummary:
+    get:
+      summary: Get web threat summary
+      description: >-
+        Retrieve the aggregate web threat counters shown in the Defender portal's web
+        threat protection reports.
+      operationId: Configuration.GetWebThreatSummary
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  TotalThreats:
+                    type: integer
+                  Phishing:
+                    type: integer
+                  Malicious:
+                    type: integer
+                  CustomIndicator:
+                    type: integer
+                  Unknown:
+                    type: integer
+                  CmdCtrl:
+                    type: integer
+                  TechScam:
+                    type: integer
+                  Untrusted:
+                    type: integer
+                  Exploit:
+                    type: integer
+                  UpdateTime:
+                    type: string
+                    format: date-time
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 

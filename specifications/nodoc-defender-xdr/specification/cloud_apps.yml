@@ -979,6 +979,31 @@ paths:
         '404':
           $ref: common.yml#/components/responses/NotFound
 
+  /mcas/cas/api/v1/discovery/constants:
+    get:
+      summary: Get discovery constants
+      description: >-
+        Retrieve the Cloud Discovery constants, lookup values, and static configuration
+        used by the applications and discovery policy experiences in the Defender portal.
+      operationId: CloudApps.GetDiscoveryConstants
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - Cloud Discovery constants payload
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
   /mcas/cas/api/v1/discovery/app_catalog:
     post:
       summary: List discovery app catalog entries
@@ -2051,6 +2076,239 @@ paths:
               schema:
                 type: object
                 description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /m365appprotection/mapg-glsservice/compliance/appmetadata:
+    post:
+      summary: Get App Governance compliance metadata
+      description: >-
+        Retrieve the metadata envelope used to render the Defender portal's App Governance
+        compliance and non-human identity experiences, including column and label context
+        for the apps list.
+      operationId: AppGovernance.GetComplianceAppMetadata
+      tags: [AppGovernance]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+              description: pending - App Governance compliance metadata request payload
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - App Governance compliance metadata response
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /m365appprotection/mapg-glsservice/compliance/apps:
+    get:
+      summary: List App Governance compliance apps
+      description: >-
+        Retrieve the applications surfaced by the App Governance compliance and non-human
+        identity experience in the Defender portal.
+      operationId: AppGovernance.ListComplianceApps
+      tags: [AppGovernance]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - App Governance compliance apps response
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /m365appprotection/mapg-glsservice/compliance/getLabels:
+    get:
+      summary: List App Governance compliance labels
+      description: >-
+        Retrieve the labels used by the App Governance compliance and non-human identity
+        experiences to classify connected applications.
+      operationId: AppGovernance.ListComplianceLabels
+      tags: [AppGovernance]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - App Governance compliance labels response
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /m365appprotection/mapg-glsservice/compliance/policies:
+    get:
+      summary: List App Governance policies
+      description: >-
+        Retrieve the App Governance policy definitions displayed on the
+        compliance and non-human identities policy surfaces.
+      operationId: AppGovernance.ListPolicies
+      tags: [AppGovernance]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - App Governance policies response
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /m365appprotection/mapg-glsservice/compliance/Policy:
+    get:
+      summary: Get App Governance policy
+      description: >-
+        Retrieve a single App Governance policy record for the Defender portal's
+        policy detail experience.
+      operationId: AppGovernance.GetPolicy
+      tags: [AppGovernance]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - App Governance policy response
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /m365appprotection/mapg-glsservice/compliance/policyinsights:
+    get:
+      summary: Get App Governance policy insights
+      description: >-
+        Retrieve the insight cards and metrics shown for App Governance policies
+        in the Defender portal.
+      operationId: AppGovernance.GetPolicyInsights
+      tags: [AppGovernance]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - App Governance policy insights
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /m365appprotection/mapg-glsservice/compliance/tenantdatatraffic:
+    get:
+      summary: Get App Governance tenant data traffic
+      description: >-
+        Retrieve tenant data-traffic metrics shown by the App Governance
+        compliance dashboards in the Defender portal.
+      operationId: AppGovernance.GetTenantDataTraffic
+      tags: [AppGovernance]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - tenant data traffic
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /m365appprotection/mapg-glsservice/compliance/tenantLabelMetric:
+    get:
+      summary: Get App Governance tenant label metric
+      description: >-
+        Retrieve label distribution metrics used by the App Governance tenant
+        overview in the Defender portal.
+      operationId: AppGovernance.GetTenantLabelMetric
+      tags: [AppGovernance]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - tenant label metric
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /m365appprotection/mapg-glsservice/compliance/tenantmetrics:
+    get:
+      summary: Get App Governance tenant metrics
+      description: >-
+        Retrieve tenant-level App Governance metrics shown on the Defender portal's
+        compliance overview.
+      operationId: AppGovernance.GetTenantMetrics
+      tags: [AppGovernance]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - tenant metrics
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 

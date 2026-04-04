@@ -183,6 +183,474 @@ paths:
         '404':
           $ref: common.yml#/components/responses/NotFound
 
+  /mtp/threatAnalytics/outbreaks/userState:
+    patch:
+      summary: Update outbreak user state
+      description: >-
+        Update per-user Threat Analytics outbreak state such as favorite status and the
+        last visited timestamp from the report detail experience.
+      operationId: ThreatAnalytics.UpdateOutbreakUserState
+      tags: [Threat Analytics]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  IsFavorite:
+                    type: boolean
+                  LastVisitTime:
+                    type: string
+                    format: date-time
+                  OutbreakId:
+                    type: string
+                required:
+                  - IsFavorite
+                  - LastVisitTime
+                  - OutbreakId
+      responses:
+        '204':
+          description: No Content
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/threatAnalytics/outbreaks:
+    get:
+      summary: List threat analytics report cards
+      description: >-
+        Retrieve the Threat Analytics report feed used by the Defender portal's
+        newer report listing experience.
+      operationId: ThreatAnalytics.ListPortalOutbreaks
+      tags: [Threat Analytics]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - threat analytics report feed
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/threatAnalytics/outbreaks/{OutbreakId}/alertsOvertimeSummary:
+    get:
+      summary: Get outbreak alerts over time summary
+      description: >-
+        Retrieve the alerts-over-time chart shown on a Threat Analytics report detail page.
+      operationId: ThreatAnalytics.GetOutbreakAlertsOverTimeSummary
+      tags: [Threat Analytics]
+      parameters:
+        - name: OutbreakId
+          in: path
+          required: true
+          description: The Threat Analytics outbreak identifier.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - outbreak alerts-over-time summary
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/threatAnalytics/outbreaks/{OutbreakId}/overview:
+    get:
+      summary: Get outbreak overview
+      description: >-
+        Retrieve the overview payload for a Threat Analytics report detail page.
+      operationId: ThreatAnalytics.GetOutbreakOverview
+      tags: [Threat Analytics]
+      parameters:
+        - name: OutbreakId
+          in: path
+          required: true
+          description: The Threat Analytics outbreak identifier.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - outbreak overview
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/threatAnalytics/outbreaks/{OutbreakId}/patchdata:
+    get:
+      summary: Get outbreak patch data
+      description: >-
+        Retrieve the patch and mitigation data shown on a Threat Analytics report detail page.
+      operationId: ThreatAnalytics.GetOutbreakPatchData
+      tags: [Threat Analytics]
+      parameters:
+        - name: OutbreakId
+          in: path
+          required: true
+          description: The Threat Analytics outbreak identifier.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - outbreak patch data
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/threatAnalytics/outbreaks/{OutbreakId}/relatedIntelligence:
+    get:
+      summary: Get outbreak related intelligence
+      description: >-
+        Retrieve related intelligence and linked content shown on a Threat Analytics
+        report detail page.
+      operationId: ThreatAnalytics.GetOutbreakRelatedIntelligence
+      tags: [Threat Analytics]
+      parameters:
+        - name: OutbreakId
+          in: path
+          required: true
+          description: The Threat Analytics outbreak identifier.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - outbreak related intelligence
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/threatAnalytics/outbreaks/v2/{OutbreakId}/impactedAssetsOvertime:
+    get:
+      summary: Get outbreak impacted assets over time
+      description: >-
+        Retrieve the impacted-assets-over-time chart shown in the Threat Analytics
+        detail pivots.
+      operationId: ThreatAnalytics.GetOutbreakImpactedAssetsOverTime
+      tags: [Threat Analytics]
+      parameters:
+        - name: OutbreakId
+          in: path
+          required: true
+          description: The Threat Analytics outbreak identifier.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - impacted assets over time
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/threatAnalytics/outbreaks/v2/{OutbreakId}/impactedAssetsSummary:
+    get:
+      summary: Get outbreak impacted assets summary
+      description: >-
+        Retrieve the impacted asset summary tiles for a Threat Analytics report detail page.
+      operationId: ThreatAnalytics.GetOutbreakImpactedAssetsSummary
+      tags: [Threat Analytics]
+      parameters:
+        - name: OutbreakId
+          in: path
+          required: true
+          description: The Threat Analytics outbreak identifier.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - impacted assets summary
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/threatAnalytics/outbreaks/v2/{OutbreakId}/incidentsAlertsSummary:
+    get:
+      summary: Get outbreak incidents and alerts summary
+      description: >-
+        Retrieve the incident and alert summary cards for a Threat Analytics report detail page.
+      operationId: ThreatAnalytics.GetOutbreakIncidentsAlertsSummary
+      tags: [Threat Analytics]
+      parameters:
+        - name: OutbreakId
+          in: path
+          required: true
+          description: The Threat Analytics outbreak identifier.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - incidents and alerts summary
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/threatAnalytics/outbreaks/v2/{OutbreakId}/tvmDetails:
+    get:
+      summary: Get outbreak TVM details
+      description: >-
+        Retrieve TVM detail data associated with a Threat Analytics report.
+      operationId: ThreatAnalytics.GetOutbreakTvmDetails
+      tags: [Threat Analytics]
+      parameters:
+        - name: OutbreakId
+          in: path
+          required: true
+          description: The Threat Analytics outbreak identifier.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - outbreak TVM details
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/threatAnalytics/outbreaks/v2/{OutbreakId}/userExposure:
+    get:
+      summary: Get outbreak user exposure
+      description: >-
+        Retrieve user exposure details shown on the Threat Analytics report detail pivots.
+      operationId: ThreatAnalytics.GetOutbreakUserExposure
+      tags: [Threat Analytics]
+      parameters:
+        - name: OutbreakId
+          in: path
+          required: true
+          description: The Threat Analytics outbreak identifier.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - outbreak user exposure
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/threatAnalyticsIndicators/stix/outbreaks/{OutbreakId}/indicators/count:
+    post:
+      summary: Count outbreak indicators
+      description: >-
+        Retrieve the indicator count for the STIX indicators grid shown on a
+        Threat Analytics report detail page.
+      operationId: ThreatAnalytics.CountOutbreakIndicators
+      tags: [Threat Analytics]
+      parameters:
+        - name: OutbreakId
+          in: path
+          required: true
+          description: The Threat Analytics outbreak identifier.
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+              description: pending - outbreak indicators count request
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - outbreak indicators count response
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/threatAnalyticsIndicators/stix/outbreaks/{OutbreakId}/indicators/query:
+    post:
+      summary: Query outbreak indicators
+      description: >-
+        Retrieve the STIX indicators grid rows shown on a Threat Analytics report detail page.
+      operationId: ThreatAnalytics.QueryOutbreakIndicators
+      tags: [Threat Analytics]
+      parameters:
+        - name: OutbreakId
+          in: path
+          required: true
+          description: The Threat Analytics outbreak identifier.
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+              description: pending - outbreak indicators query request
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - outbreak indicators query response
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/outbreaks/outbreaks/v2/{OutbreakId}/devices:
+    get:
+      summary: Get outbreak devices
+      description: >-
+        Retrieve the impacted devices grid for a Threat Analytics report detail page.
+      operationId: ThreatAnalytics.GetOutbreakDevices
+      tags: [Threat Analytics]
+      parameters:
+        - name: OutbreakId
+          in: path
+          required: true
+          description: The Threat Analytics outbreak identifier.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - outbreak devices response
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
 components:
   schemas:
     Outbreak:

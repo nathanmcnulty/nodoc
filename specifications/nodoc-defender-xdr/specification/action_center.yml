@@ -228,6 +228,198 @@ paths:
         '404':
           $ref: common.yml#/components/responses/NotFound
 
+  /mtp/actionCenter/actioncenterui/history-actions/export:
+    get:
+      summary: Export action center history
+      description: >-
+        Export the filtered Action Center history grid as CSV from the Defender portal.
+      operationId: ActionCenter.ExportHistory
+      tags: [Action Center]
+      parameters:
+        - name: sortByField
+          in: query
+          description: Field to sort the export by.
+          schema:
+            type: string
+        - name: sortOrder
+          in: query
+          description: Sort direction for the export.
+          schema:
+            type: string
+            enum: [Ascending, Descending]
+        - name: type
+          in: query
+          description: The Action Center dataset to export.
+          schema:
+            type: string
+            default: history
+        - name: pageIndex
+          in: query
+          description: The current page index used to scope the export request.
+          schema:
+            type: integer
+            default: 1
+        - name: pageSize
+          in: query
+          description: The current page size used to scope the export request.
+          schema:
+            type: integer
+            default: 9
+        - name: toDate
+          in: query
+          description: End of the exported date range.
+          schema:
+            type: string
+            format: date-time
+        - name: fromDate
+          in: query
+          description: Start of the exported date range.
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: CSV export
+          content:
+            text/csv:
+              schema:
+                type: string
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/automation/internal/automation/{TenantId}/automationRules:
+    get:
+      summary: List automation rules
+      description: >-
+        Retrieve the automation rules displayed on the Defender XDR automation page for
+        the current tenant.
+      operationId: ActionCenter.ListAutomationRules
+      tags: [Action Center]
+      parameters:
+        - name: TenantId
+          in: path
+          required: true
+          description: The Microsoft Entra tenant identifier.
+          schema:
+            type: string
+            format: uuid
+        - name: pageSize
+          in: query
+          description: The number of automation rules to request.
+          schema:
+            type: integer
+            default: 100
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  description: pending - automation rule definition
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/CaseManagement/be/attachments:
+    get:
+      summary: List case attachments
+      description: >-
+        Retrieve the case attachment metadata loaded by the Defender case management experience.
+      operationId: ActionCenter.ListCaseAttachments
+      tags: [Action Center]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - case attachments response
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/CaseManagement/be/cases/{CaseId}:
+    get:
+      summary: Get case details
+      description: >-
+        Retrieve the full case record shown by the Defender case management detail view.
+      operationId: ActionCenter.GetCase
+      tags: [Action Center]
+      parameters:
+        - name: CaseId
+          in: path
+          required: true
+          description: The Defender case identifier.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - case details
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/CaseManagement/be/cases/{CaseId}/activities:
+    get:
+      summary: List case activities
+      description: >-
+        Retrieve the activity timeline for a Defender case detail view.
+      operationId: ActionCenter.ListCaseActivities
+      tags: [Action Center]
+      parameters:
+        - name: CaseId
+          in: path
+          required: true
+          description: The Defender case identifier.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - case activities response
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
 components:
   schemas:
     ActionCenterItem:
