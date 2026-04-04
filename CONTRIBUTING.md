@@ -29,7 +29,7 @@ Checked-in Postman collections live under `postman/collections/` and are generat
 - Do not edit the checked-in collection JSON by hand.
 - Regenerate them with `npm run generate:postman`.
 - When specs change, commit the updated collections alongside the spec changes so the validation workflow stays green.
-- The current 14-spec bundle-and-convert pass benchmarks at roughly **10 seconds per spec** and about **2.5 minutes total** when writing to temp outputs. A real run that also rewrites `postman/collections/` can take a bit longer, but anything that sits well past that without finishing is worth investigating as a likely hang or filesystem-write issue.
+- The current 15-spec bundle-and-convert pass benchmarks at roughly **10 seconds per spec** and about **2.5 minutes total** when writing to temp outputs. A real run that also rewrites `postman/collections/` can take a bit longer, but anything that sits well past that without finishing is worth investigating as a likely hang or filesystem-write issue.
 - For focused local iteration, limit generation to the affected specs with `NODOC_COLLECTIONS=purview,purview-portal npm run generate:postman` (or the PowerShell equivalent with `$env:NODOC_COLLECTIONS = 'purview,purview-portal'`).
 - If long-running commands look stuck in the shell wrapper, redirect stdout/stderr to an artifact log and capture elapsed time separately before assuming the generator or site build is actually hung.
 

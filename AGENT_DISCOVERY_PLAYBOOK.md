@@ -101,14 +101,22 @@ Practical notes:
   - page title
   - URL
   - menu item text
+  - button text, title, and `aria-label` when the nav is button-driven
   - `data-id`
   - `data-automation-id`
   - href
+  - whether an optional expander such as `Show all` was required to reveal deeper items
 
 Rule of thumb:
 
 - Treat IDs like `nav-762` as runtime details.
 - Prefer selectors like `a[data-automation-id^="scc-nav-exposure-"]` over hard-coded `div#nav-*`.
+- Some admin portals expose left-nav items as buttons with no useful `href`. In those cases, inventory
+  the stable button labels first and use exact text/title/ARIA matching rather than fuzzy substring
+  matching; otherwise generic labels like "Teams" can accidentally match dashboard copy or unrelated
+  shell text.
+- Wait for the base nav controls to exist before interacting with optional expanders. If a `Show all`
+  button is present, treat it as a secondary reveal step instead of the primary readiness signal.
 
 ### 4. Capture live traffic page-by-page
 
@@ -131,6 +139,9 @@ Recommended pattern:
 - Keep the browser capture script focused on traffic collection; do bundle download in a separate step.
 - For broad portal passes, use bounded parallel tabs only if you can still attribute requests back to the originating page.
 - If CDP `Page.navigate` stalls on a same-origin SPA hash route, retry that surface in a fresh single tab and fall back to setting `location.href`; do not assume the route itself is invalid just because the first navigation primitive hung.
+- If a page exposes a very large set of safe same-origin detail links, split the work into phases:
+  nav/list discovery first, then a direct-link or entity replay pass sourced from the recorded page-state
+  artifacts. This is often faster and more reliable than serial row-click replay on the live grid.
 - For report or dashboard blades, do two passes: initial-load traffic first, then a second pass that changes one safe control at a time.
 - During the interaction pass, prefer safe state changes such as filters, date range, grouping, row drill-ins, tabs, sort, paging, and export preflight so each new request can be tied back to the triggering UI state.
 - Record a page-state checklist alongside each request set: selected tab, filter chips, date range, business group or release selection, tenant scope, and any report-mode toggles.
@@ -278,6 +289,8 @@ For each added endpoint, preserve:
 - why the endpoint exists
 - what page or workflow uses it
 - whether it was live-captured, probed, or bundle-discovered
+- If the site route slug should not follow automatic title kebab-casing (for example `m365-admin`
+  instead of `m-365-admin`), set `info.x-nodoc-route` in the spec and keep README/site links aligned.
 
 ### 9. Regenerate artifacts and validate
 
@@ -710,6 +723,8 @@ Add new ideas here before trying them, then move the result into the experiment 
 - New spec and collection files included when a portal was split or added, especially `specifications/nodoc-{portal}/specification/openapi.yml` and `postman/collections/{portal}.collection.json`
 - Checked-in Postman collections regenerated
 - README/site metadata updated when counts or highlights changed
+- If a new or renamed spec should use a cleaner site slug, `info.x-nodoc-route`, homepage links, and README browse links were updated together
+- Single-spec nav categories render as direct links rather than one-item dropdowns
 - Tenant-specific examples, domains, and email addresses sanitized to neutral placeholders such as `contoso` before merge
 - Validation commands completed
 - Unrelated churn removed
