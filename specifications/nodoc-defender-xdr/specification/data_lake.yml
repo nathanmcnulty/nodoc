@@ -89,6 +89,156 @@ paths:
         '404':
           $ref: common.yml#/components/responses/NotFound
 
+  /securityplatform/jobs/details:
+    get:
+      summary: Get job details
+      description: >-
+        Retrieve job details for the security data lake and related security platform
+        background jobs.
+      operationId: DataLake.GetJobDetails
+      tags: [Data Lake]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      description: pending - job details entry
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /securityplatform/jobs/runs/summary:
+    get:
+      summary: Get job runs summary
+      description: >-
+        Retrieve aggregate counters for configured jobs and recent job runs in the
+        security platform data lake experience.
+      operationId: DataLake.GetJobRunsSummary
+      tags: [Data Lake]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  totalJobs:
+                    type: integer
+                  enabledJobs:
+                    type: integer
+                  completedRuns:
+                    type: integer
+                  inProgressRuns:
+                    type: integer
+                  recentHealthIssues:
+                    type: integer
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /securityplatform/lake/kql/query-history:
+    get:
+      summary: List KQL query history
+      description: >-
+        Retrieve the recent KQL query history shown by the Defender portal's lake explorer.
+      operationId: DataLake.ListQueryHistory
+      tags: [Data Lake]
+      parameters:
+        - name: querySource
+          in: query
+          description: The originating query experience to filter history by.
+          schema:
+            type: string
+            default: KUSTO_QUERY
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  value:
+                    type: array
+                    items:
+                      type: object
+                      description: pending - saved query history entry
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /securityplatform/sentinelgraph/catalog/tables:
+    get:
+      summary: List Sentinel graph catalog tables
+      description: >-
+        Retrieve the Defender portal's Sentinel graph table catalog, including table
+        metadata and parquet/Kusto schema details used by the lake explorer.
+      operationId: DataLake.ListSentinelGraphCatalogTables
+      tags: [Data Lake]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        tableType:
+                          type: string
+                        provisioningState:
+                          type: string
+                        parquetSchema:
+                          type: array
+                          items:
+                            type: object
+                            additionalProperties: true
+                        kustoSchema:
+                          type: array
+                          items:
+                            type: object
+                            additionalProperties: true
+                      additionalProperties: true
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
 components:
   schemas:
     Database:

@@ -1771,6 +1771,175 @@ paths:
         '404':
           $ref: common.yml#/components/responses/NotFound
 
+  /mtp/getDataSensitivity/machines/{MachineId}/dataSensitivity:
+    get:
+      summary: Get machine data sensitivity
+      description: >-
+        Retrieve the data-sensitivity projection for the selected device from the unified
+        device overview experience.
+      operationId: EndpointDevices.GetDataSensitivity
+      tags: [Endpoint Devices]
+      parameters:
+        - name: MachineId
+          in: path
+          required: true
+          description: The Defender machine identifier.
+          schema:
+            type: string
+        - name: id
+          in: query
+          description: Duplicate machine identifier currently sent by the portal.
+          schema:
+            type: string
+        - name: tenantIds
+          in: query
+          description: Optional cross-tenant context. The portal currently sends an empty value.
+          schema:
+            type: string
+            nullable: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - machine data sensitivity response
+        '204':
+          description: No Content
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/getMachineMarkedEvents/machines/{MachineId}/eventMarks:
+    get:
+      summary: Get machine marked events
+      description: >-
+        Retrieve the marked device timeline events shown on the unified device page.
+      operationId: EndpointDevices.GetMachineMarkedEvents
+      tags: [Endpoint Devices]
+      parameters:
+        - name: MachineId
+          in: path
+          required: true
+          description: The Defender machine identifier.
+          schema:
+            type: string
+        - name: machineId
+          in: query
+          description: Duplicate machine identifier currently sent by the portal.
+          schema:
+            type: string
+        - name: senseMachineId
+          in: query
+          description: The Sense machine identifier for the same device.
+          schema:
+            type: string
+        - name: computerDnsName
+          in: query
+          description: The current DNS name of the device.
+          schema:
+            type: string
+        - name: tenantIds
+          in: query
+          description: Optional cross-tenant context. The portal currently sends an empty value.
+          schema:
+            type: string
+            nullable: true
+        - name: armId
+          in: query
+          description: Optional Azure resource ID context for the device.
+          schema:
+            type: string
+            nullable: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Items:
+                    type: array
+                    items:
+                      type: object
+                      description: pending - marked event entry
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/ndr/machines/commandExport:
+    get:
+      summary: Export NDR machine inventory
+      description: >-
+        Export the filtered Defender NDR machine inventory as CSV from the device
+        inventory experience.
+      operationId: EndpointDevices.ExportNdrMachines
+      tags: [Endpoint Devices]
+      parameters:
+        - name: machinesApiServiceMigration
+          in: query
+          description: Whether the portal is using the migrated machines API service.
+          schema:
+            type: boolean
+            default: true
+        - name: deviceCategories
+          in: query
+          description: Device-category filter applied to the export.
+          schema:
+            type: string
+        - name: lookingBackIndays
+          in: query
+          description: Number of days of NDR history to include.
+          schema:
+            type: integer
+            default: 30
+        - name: paginationGuid
+          in: query
+          description: Pagination cursor. The portal currently sends undefined when absent.
+          schema:
+            type: string
+            nullable: true
+        - name: sortOrder
+          in: query
+          description: Sort direction for the export.
+          schema:
+            type: string
+            enum: [Ascending, Descending]
+            default: Descending
+        - name: sortByField
+          in: query
+          description: Field used to sort the export.
+          schema:
+            type: string
+            default: riskscore
+      responses:
+        '200':
+          description: CSV export
+          content:
+            text/csv:
+              schema:
+                type: string
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
 components:
   schemas:
     Device:

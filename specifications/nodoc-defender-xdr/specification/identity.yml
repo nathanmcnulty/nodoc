@@ -2066,6 +2066,226 @@ paths:
         '404':
           $ref: common.yml#/components/responses/NotFound
 
+  /mdi/identity/userapiservice/pdProtection/reportDefinitions/ExposedPasswords:
+    get:
+      summary: Get exposed-password report definitions
+      description: >-
+        Retrieve the password-protection report definitions used by the Defender portal's
+        Exposed Passwords view.
+      operationId: Identity.GetExposedPasswordReportDefinitions
+      tags: [Identity]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ActiveDirectory:
+                    type: object
+                    additionalProperties:
+                      type: string
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mdi/identity/userapiservice/pdProtection/reportDefinitions/LeakedCredentials:
+    get:
+      summary: Get leaked-credential report definitions
+      description: >-
+        Retrieve the password-protection report definitions used by the Defender portal's
+        Leaked Credentials view.
+      operationId: Identity.GetLeakedCredentialReportDefinitions
+      tags: [Identity]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ActiveDirectory:
+                    type: object
+                    additionalProperties:
+                      type: string
+                  AzureActiveDirectory:
+                    type: object
+                    additionalProperties:
+                      type: string
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/siamApi/domaincontrollers/list:
+    get:
+      summary: List SIAM domain controllers
+      description: >-
+        Retrieve the domain controller inventory displayed by the Defender portal's
+        identity attachment experience.
+      operationId: Identity.ListDomainControllers
+      tags: [Identity]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    deviceId:
+                      type: string
+                    deviceName:
+                      type: string
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/siamApi/MachinesManagedByStatus:
+    get:
+      summary: Get SIAM managed-by status
+      description: >-
+        Retrieve the per-platform counts used by the Defender portal to show how attached
+        machines are managed across MDE, MDM, SCCM, and unknown states.
+      operationId: Identity.GetMachinesManagedByStatus
+      tags: [Identity]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    osFamily:
+                      type: string
+                    mde:
+                      type: integer
+                    mdm:
+                      type: integer
+                    sccm:
+                      type: integer
+                    unknown:
+                      type: integer
+                  additionalProperties: true
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/siamApi/memonboardstatus:
+    get:
+      summary: Get MEM onboarding status
+      description: >-
+        Retrieve whether the Defender portal considers Microsoft Endpoint Manager
+        onboarding complete for the current tenant.
+      operationId: Identity.GetMemOnboardStatus
+      tags: [Identity]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  isOnboarded:
+                    type: boolean
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/siamApi/OnboardedMachinesStatus:
+    get:
+      summary: Get onboarded machines status
+      description: >-
+        Retrieve the onboarding counters and per-OS breakdown shown by the Defender
+        portal's identity attachment experience.
+      operationId: Identity.GetOnboardedMachinesStatus
+      tags: [Identity]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mdeOsFamilyOnboardedMachines:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: true
+                additionalProperties: true
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/siamApi/Onboarding:
+    get:
+      summary: Get SIAM onboarding summary
+      description: >-
+        Retrieve the Defender portal's onboarding summary for the identity attachment
+        experience.
+      operationId: Identity.GetOnboardingSummary
+      tags: [Identity]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  onboarded:
+                    type: integer
+                  notOnboarded:
+                    type: integer
+                  hasPermissions:
+                    type: boolean
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
 components:
   schemas:
     IdentityUser:

@@ -146,6 +146,7 @@ Recommended pattern:
 - During the interaction pass, prefer safe state changes such as filters, date range, grouping, row drill-ins, tabs, sort, paging, and export preflight so each new request can be tied back to the triggering UI state.
 - Record a page-state checklist alongside each request set: selected tab, filter chips, date range, business group or release selection, tenant scope, and any report-mode toggles.
 - If a report blade uses virtualization, shadow DOM, or a delayed/hidden grid, do not block on the DOM becoming rich. Traffic is the primary evidence; DOM and accessibility snapshots are still useful for control attribution and UI-state labeling.
+- Some entity and detail blades need materially longer settle windows than nav or landing pages. If a page is still stuck on a generic loading state, extend the settle interval before concluding the route is empty or broken; many device, file, and report-detail pivots do not hydrate on the shorter nav timing budget.
 
 #### Exhaustive portal crawl depth
 

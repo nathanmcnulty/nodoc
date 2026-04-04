@@ -238,6 +238,10 @@ paths:
     $ref: alerts_incidents.yml#/paths/~1mtp~1autoIr~1incidents~1{IncidentId}~1filters
   /mtp/GAIAMedeinaApi/skills/guidedresponse/{IncidentId}/similarIncidents:
     $ref: alerts_incidents.yml#/paths/~1mtp~1GAIAMedeinaApi~1skills~1guidedresponse~1{IncidentId}~1similarIncidents
+  /mtp/phoenixValueReflectionApi/disrupt:
+    $ref: alerts_incidents.yml#/paths/~1mtp~1phoenixValueReflectionApi~1disrupt
+  /mtp/phoenixValueReflectionApi/summary/total:
+    $ref: alerts_incidents.yml#/paths/~1mtp~1phoenixValueReflectionApi~1summary~1total
 
   # Advanced Hunting
   /mtp/huntingService/schema:
@@ -462,6 +466,12 @@ paths:
     $ref: endpoint_devices.yml#/paths/~1mtp~1ndr~1machines~1deviceTotalCount
   /mtp/ndr/machines/machineTags:
     $ref: endpoint_devices.yml#/paths/~1mtp~1ndr~1machines~1machineTags
+  /mtp/getDataSensitivity/machines/{MachineId}/dataSensitivity:
+    $ref: endpoint_devices.yml#/paths/~1mtp~1getDataSensitivity~1machines~1{MachineId}~1dataSensitivity
+  /mtp/getMachineMarkedEvents/machines/{MachineId}/eventMarks:
+    $ref: endpoint_devices.yml#/paths/~1mtp~1getMachineMarkedEvents~1machines~1{MachineId}~1eventMarks
+  /mtp/ndr/machines/commandExport:
+    $ref: endpoint_devices.yml#/paths/~1mtp~1ndr~1machines~1commandExport
   /mtp/wdatpApi/machines:
     $ref: endpoint_devices.yml#/paths/~1mtp~1wdatpApi~1machines
   /mtp/mdi/tri/defensor/onboarding/devices/sensor_compatible_machines:
@@ -592,6 +602,8 @@ paths:
     $ref: vulnerability_management.yml#/paths/~1mtp~1tvm~1remediation-tasks~1remediationTasks
   /mtp/tvm/remediation-tasks/remediationTasks/top:
     $ref: vulnerability_management.yml#/paths/~1mtp~1tvm~1remediation-tasks~1remediationTasks~1top
+  /mtp/tvm/remediation-tasks/allExceptions/aggregated:
+    $ref: vulnerability_management.yml#/paths/~1mtp~1tvm~1remediation-tasks~1allExceptions~1aggregated
 
   # Identity (MDI)
   /mdi/identity/userapiservice/user/resolve:
@@ -698,10 +710,24 @@ paths:
     $ref: identity.yml#/paths/~1aatp~1api~1ispmReports~1UnsecureDomainConfigurations~1newEntryCount
   /aatp/api/sensors/identityInfrastructuresInfo:
     $ref: identity.yml#/paths/~1aatp~1api~1sensors~1identityInfrastructuresInfo
+  /mdi/identity/userapiservice/pdProtection/reportDefinitions/ExposedPasswords:
+    $ref: identity.yml#/paths/~1mdi~1identity~1userapiservice~1pdProtection~1reportDefinitions~1ExposedPasswords
+  /mdi/identity/userapiservice/pdProtection/reportDefinitions/LeakedCredentials:
+    $ref: identity.yml#/paths/~1mdi~1identity~1userapiservice~1pdProtection~1reportDefinitions~1LeakedCredentials
+  /mtp/siamApi/domaincontrollers/list:
+    $ref: identity.yml#/paths/~1mtp~1siamApi~1domaincontrollers~1list
   /mtp/siamApi/domaincontrollers/totals:
     $ref: identity.yml#/paths/~1mtp~1siamApi~1domaincontrollers~1totals
+  /mtp/siamApi/MachinesManagedByStatus:
+    $ref: identity.yml#/paths/~1mtp~1siamApi~1MachinesManagedByStatus
   /mtp/siamApi/MdeAttachEnabled:
     $ref: identity.yml#/paths/~1mtp~1siamApi~1MdeAttachEnabled
+  /mtp/siamApi/memonboardstatus:
+    $ref: identity.yml#/paths/~1mtp~1siamApi~1memonboardstatus
+  /mtp/siamApi/OnboardedMachinesStatus:
+    $ref: identity.yml#/paths/~1mtp~1siamApi~1OnboardedMachinesStatus
+  /mtp/siamApi/Onboarding:
+    $ref: identity.yml#/paths/~1mtp~1siamApi~1Onboarding
   /aatp/odata/ExclusionEntityDatas/Global:
     $ref: identity.yml#/paths/~1aatp~1odata~1ExclusionEntityDatas~1Global
   /aatp/odata/SecurityAlertExclusionDatas:
@@ -746,6 +772,12 @@ paths:
     $ref: attack_simulator.yml#/paths/~1astgws~1AttackSimulator~1api~1v1~1campaignSettings
   /astgws/AttackSimulator/api/v1/userProfileType:
     $ref: attack_simulator.yml#/paths/~1astgws~1AttackSimulator~1api~1v1~1userProfileType
+  /astgws/AttackSimulator/api/v1/GlobalPayloads:
+    $ref: attack_simulator.yml#/paths/~1astgws~1AttackSimulator~1api~1v1~1GlobalPayloads
+  /astgws/AttackSimulator/api/v1/simulationAutomations:
+    $ref: attack_simulator.yml#/paths/~1astgws~1AttackSimulator~1api~1v1~1simulationAutomations
+  /astgws/AttackSimulator/api/v1/trainingCampaignsV2:
+    $ref: attack_simulator.yml#/paths/~1astgws~1AttackSimulator~1api~1v1~1trainingCampaignsV2
 
   # Configuration
   /mtp/suppressionRulesService/suppressionRules:
@@ -788,6 +820,30 @@ paths:
     $ref: configuration.yml#/paths/~1mtp~1unifiedConnectors~1public~1connectors~1checkrequirements
   /mtp/urbacConfiguration/gw/unifiedrbac/configuration/roleDefinitions:
     $ref: configuration.yml#/paths/~1mtp~1urbacConfiguration~1gw~1unifiedrbac~1configuration~1roleDefinitions
+  /mtp/urbacConfiguration/gw/unifiedrbac/configuration/permissions:
+    $ref: configuration.yml#/paths/~1mtp~1urbacConfiguration~1gw~1unifiedrbac~1configuration~1permissions
+  /mtp/urbacConfiguration/gw/unifiedrbac/configuration/roleDefinitions/{RoleDefinitionId}/roleAssignments:
+    $ref: configuration.yml#/paths/~1mtp~1urbacConfiguration~1gw~1unifiedrbac~1configuration~1roleDefinitions~1{RoleDefinitionId}~1roleAssignments
+  /mtp/urbacConfiguration/gw/unifiedrbac/configuration/workspaces:
+    $ref: configuration.yml#/paths/~1mtp~1urbacConfiguration~1gw~1unifiedrbac~1configuration~1workspaces
+  /mtp/papin/api/cloud/public/internal/indicators/count:
+    $ref: configuration.yml#/paths/~1mtp~1papin~1api~1cloud~1public~1internal~1indicators~1count
+  /mtp/papin/api/cloud/public/internal/indicators/filterValues:
+    $ref: configuration.yml#/paths/~1mtp~1papin~1api~1cloud~1public~1internal~1indicators~1filterValues
+  /mtp/licenses/mgmt/aadlicenses/mdc/status:
+    $ref: configuration.yml#/paths/~1mtp~1licenses~1mgmt~1aadlicenses~1mdc~1status
+  /mtp/licenses/mgmt/aadlicenses/sums:
+    $ref: configuration.yml#/paths/~1mtp~1licenses~1mgmt~1aadlicenses~1sums
+  /mtp/disrupt/api/exclusions/exclude-all:
+    $ref: configuration.yml#/paths/~1mtp~1disrupt~1api~1exclusions~1exclude-all
+  /mtp/disrupt/api/exclusions/Identity:
+    $ref: configuration.yml#/paths/~1mtp~1disrupt~1api~1exclusions~1Identity
+  /mtp/disrupt/api/exclusions/Identity/global-exclusion:
+    $ref: configuration.yml#/paths/~1mtp~1disrupt~1api~1exclusions~1Identity~1global-exclusion
+  /mtp/rbacManagementApi/rbac/aad_groups:
+    $ref: configuration.yml#/paths/~1mtp~1rbacManagementApi~1rbac~1aad_groups
+  /mtp/rbacManagementApi/rbac/user_roles:
+    $ref: configuration.yml#/paths/~1mtp~1rbacManagementApi~1rbac~1user_roles
   /mdc/views/inventory/assets:
     $ref: configuration.yml#/paths/~1mdc~1views~1inventory~1assets
   /mdc/views/inventory/metrics:
@@ -813,6 +869,20 @@ paths:
     $ref: configuration.yml#/paths/~1mtp~1responseApiPortal~1onboarding~1intune~1status
   /mtp/responseApiPortal/senseauth/allownonauthsense:
     $ref: configuration.yml#/paths/~1mtp~1responseApiPortal~1senseauth~1allownonauthsense
+  /mtp/CustomerSubmissionService/file/enterprise/query/{TenantId}:
+    $ref: configuration.yml#/paths/~1mtp~1CustomerSubmissionService~1file~1enterprise~1query~1{TenantId}
+  /mtp/responseApiPortal/apps/all:
+    $ref: configuration.yml#/paths/~1mtp~1responseApiPortal~1apps~1all
+  /mtp/responseApiPortal/ti/indicators:
+    $ref: configuration.yml#/paths/~1mtp~1responseApiPortal~1ti~1indicators
+  /mtp/responseApiPortal/webcategory/policies:
+    $ref: configuration.yml#/paths/~1mtp~1responseApiPortal~1webcategory~1policies
+  /mtp/sccManagement/mgmt/ServicesUrls:
+    $ref: configuration.yml#/paths/~1mtp~1sccManagement~1mgmt~1ServicesUrls
+  /mtp/webThreatProtection/WebContentFiltering/Reports/TopParentCategories:
+    $ref: configuration.yml#/paths/~1mtp~1webThreatProtection~1WebContentFiltering~1Reports~1TopParentCategories
+  /mtp/webThreatProtection/webThreats/reports/webThreatSummary:
+    $ref: configuration.yml#/paths/~1mtp~1webThreatProtection~1webThreats~1reports~1webThreatSummary
 
   # Cloud Apps
   /mcas/api/v1/autocomplete/app-permission-names:
@@ -891,6 +961,8 @@ paths:
     $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1connected_services~1instances
   /mcas/cas/api/v1/discovery/categories:
     $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1discovery~1categories
+  /mcas/cas/api/v1/discovery/constants:
+    $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1discovery~1constants
   /mcas/cas/api/v1/discovery/app_catalog:
     $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1discovery~1app_catalog
   /mcas/cas/api/v1/discovery/app_catalog/categories:
@@ -971,6 +1043,24 @@ paths:
     $ref: cloud_apps.yml#/paths/~1mcas~1cas~1update_usage_info
   /m365appprotection/mapg-glsservice/compliance/getUserProfile:
     $ref: cloud_apps.yml#/paths/~1m365appprotection~1mapg-glsservice~1compliance~1getUserProfile
+  /m365appprotection/mapg-glsservice/compliance/appmetadata:
+    $ref: cloud_apps.yml#/paths/~1m365appprotection~1mapg-glsservice~1compliance~1appmetadata
+  /m365appprotection/mapg-glsservice/compliance/apps:
+    $ref: cloud_apps.yml#/paths/~1m365appprotection~1mapg-glsservice~1compliance~1apps
+  /m365appprotection/mapg-glsservice/compliance/getLabels:
+    $ref: cloud_apps.yml#/paths/~1m365appprotection~1mapg-glsservice~1compliance~1getLabels
+  /m365appprotection/mapg-glsservice/compliance/policies:
+    $ref: cloud_apps.yml#/paths/~1m365appprotection~1mapg-glsservice~1compliance~1policies
+  /m365appprotection/mapg-glsservice/compliance/Policy:
+    $ref: cloud_apps.yml#/paths/~1m365appprotection~1mapg-glsservice~1compliance~1Policy
+  /m365appprotection/mapg-glsservice/compliance/policyinsights:
+    $ref: cloud_apps.yml#/paths/~1m365appprotection~1mapg-glsservice~1compliance~1policyinsights
+  /m365appprotection/mapg-glsservice/compliance/tenantdatatraffic:
+    $ref: cloud_apps.yml#/paths/~1m365appprotection~1mapg-glsservice~1compliance~1tenantdatatraffic
+  /m365appprotection/mapg-glsservice/compliance/tenantLabelMetric:
+    $ref: cloud_apps.yml#/paths/~1m365appprotection~1mapg-glsservice~1compliance~1tenantLabelMetric
+  /m365appprotection/mapg-glsservice/compliance/tenantmetrics:
+    $ref: cloud_apps.yml#/paths/~1m365appprotection~1mapg-glsservice~1compliance~1tenantmetrics
 
   # Exposure Management
   /mtp/k8s/machines/deviceTotals:
@@ -979,6 +1069,8 @@ paths:
     $ref: exposure_management.yml#/paths/~1mtp~1posture~1oversight~1tenants
   /mtp/posture/oversight/initiatives:
     $ref: exposure_management.yml#/paths/~1mtp~1posture~1oversight~1initiatives
+  /mtp/posture/oversight/initiatives/{InitiativeId}:
+    $ref: exposure_management.yml#/paths/~1mtp~1posture~1oversight~1initiatives~1{InitiativeId}
   /mtp/posture/oversight/initiatives/summarized:
     $ref: exposure_management.yml#/paths/~1mtp~1posture~1oversight~1initiatives~1summarized
   /mtp/posture/oversight/metrics:
@@ -1023,6 +1115,38 @@ paths:
     $ref: exposure_management.yml#/paths/~1mtp~1xspm~1hunting
   /mtp/exposureManagement/recommendations:
     $ref: exposure_management.yml#/paths/~1mtp~1exposureManagement~1recommendations
+  /mdc/views/recommendations/items:
+    $ref: exposure_management.yml#/paths/~1mdc~1views~1recommendations~1items
+  /mdc/views/recommendations/recommendationsMetrics:
+    $ref: exposure_management.yml#/paths/~1mdc~1views~1recommendations~1recommendationsMetrics
+  /mdc/views/recommendations/schema:
+    $ref: exposure_management.yml#/paths/~1mdc~1views~1recommendations~1schema
+  /mdc/views/vulnerabilities/allVulnerabilitiesPageItems:
+    $ref: exposure_management.yml#/paths/~1mdc~1views~1vulnerabilities~1allVulnerabilitiesPageItems
+  /mdc/views/vulnerabilities/getVulnerabilitiesOvertime:
+    $ref: exposure_management.yml#/paths/~1mdc~1views~1vulnerabilities~1getVulnerabilitiesOvertime
+  /mdc/views/vulnerabilities/items:
+    $ref: exposure_management.yml#/paths/~1mdc~1views~1vulnerabilities~1items
+  /mdc/views/vulnerabilities/recommendationsByResourceType:
+    $ref: exposure_management.yml#/paths/~1mdc~1views~1vulnerabilities~1recommendationsByResourceType
+  /mdc/views/vulnerabilities/schema:
+    $ref: exposure_management.yml#/paths/~1mdc~1views~1vulnerabilities~1schema
+  /mdc/views/vulnerabilities/statisticsHeader:
+    $ref: exposure_management.yml#/paths/~1mdc~1views~1vulnerabilities~1statisticsHeader
+  /mdc/views/vulnerabilities/topCloudCVEsItems:
+    $ref: exposure_management.yml#/paths/~1mdc~1views~1vulnerabilities~1topCloudCVEsItems
+  /mdc/views/vulnerabilities/topCloudCVEsSchema:
+    $ref: exposure_management.yml#/paths/~1mdc~1views~1vulnerabilities~1topCloudCVEsSchema
+  /mdc/views/vulnerabilities/vulnerabilitiesInsights:
+    $ref: exposure_management.yml#/paths/~1mdc~1views~1vulnerabilities~1vulnerabilitiesInsights
+  /mtp/posture/oversight/metrics/category_apps_secure_score:
+    $ref: exposure_management.yml#/paths/~1mtp~1posture~1oversight~1metrics~1category_apps_secure_score
+  /mtp/posture/oversight/metrics/category_data_secure_score:
+    $ref: exposure_management.yml#/paths/~1mtp~1posture~1oversight~1metrics~1category_data_secure_score
+  /mtp/posture/oversight/metrics/category_identity_secure_score:
+    $ref: exposure_management.yml#/paths/~1mtp~1posture~1oversight~1metrics~1category_identity_secure_score
+  /mtp/XspmConnectors/connectors/getAllConnectors:
+    $ref: exposure_management.yml#/paths/~1mtp~1XspmConnectors~1connectors~1getAllConnectors
 
   # Data Lake
   /securityplatform/lake/databases:
@@ -1032,6 +1156,14 @@ paths:
 
   /securityplatform/sentinelgraph/provisioning/checkTenant:
     $ref: data_lake.yml#/paths/~1securityplatform~1sentinelgraph~1provisioning~1checkTenant
+  /securityplatform/jobs/details:
+    $ref: data_lake.yml#/paths/~1securityplatform~1jobs~1details
+  /securityplatform/jobs/runs/summary:
+    $ref: data_lake.yml#/paths/~1securityplatform~1jobs~1runs~1summary
+  /securityplatform/lake/kql/query-history:
+    $ref: data_lake.yml#/paths/~1securityplatform~1lake~1kql~1query-history
+  /securityplatform/sentinelgraph/catalog/tables:
+    $ref: data_lake.yml#/paths/~1securityplatform~1sentinelgraph~1catalog~1tables
 
   # Threat Analytics
   /mtp/threatAnalyticsAPI/outbreaks:
@@ -1047,10 +1179,40 @@ paths:
     $ref: threat_analytics.yml#/paths/~1mtp~1threatAnalyticsIndicators~1stix~1oneti~1reputation
   /mtp/threatAnalyticsIndicators/stix/oneti/reputation/URL:
     $ref: threat_analytics.yml#/paths/~1mtp~1threatAnalyticsIndicators~1stix~1oneti~1reputation~1URL
+  /mtp/threatAnalytics/outbreaks/userState:
+    $ref: threat_analytics.yml#/paths/~1mtp~1threatAnalytics~1outbreaks~1userState
+  /mtp/threatAnalytics/outbreaks:
+    $ref: threat_analytics.yml#/paths/~1mtp~1threatAnalytics~1outbreaks
+  /mtp/threatAnalytics/outbreaks/{OutbreakId}/alertsOvertimeSummary:
+    $ref: threat_analytics.yml#/paths/~1mtp~1threatAnalytics~1outbreaks~1{OutbreakId}~1alertsOvertimeSummary
+  /mtp/threatAnalytics/outbreaks/{OutbreakId}/overview:
+    $ref: threat_analytics.yml#/paths/~1mtp~1threatAnalytics~1outbreaks~1{OutbreakId}~1overview
+  /mtp/threatAnalytics/outbreaks/{OutbreakId}/patchdata:
+    $ref: threat_analytics.yml#/paths/~1mtp~1threatAnalytics~1outbreaks~1{OutbreakId}~1patchdata
+  /mtp/threatAnalytics/outbreaks/{OutbreakId}/relatedIntelligence:
+    $ref: threat_analytics.yml#/paths/~1mtp~1threatAnalytics~1outbreaks~1{OutbreakId}~1relatedIntelligence
+  /mtp/threatAnalytics/outbreaks/v2/{OutbreakId}/impactedAssetsOvertime:
+    $ref: threat_analytics.yml#/paths/~1mtp~1threatAnalytics~1outbreaks~1v2~1{OutbreakId}~1impactedAssetsOvertime
+  /mtp/threatAnalytics/outbreaks/v2/{OutbreakId}/impactedAssetsSummary:
+    $ref: threat_analytics.yml#/paths/~1mtp~1threatAnalytics~1outbreaks~1v2~1{OutbreakId}~1impactedAssetsSummary
+  /mtp/threatAnalytics/outbreaks/v2/{OutbreakId}/incidentsAlertsSummary:
+    $ref: threat_analytics.yml#/paths/~1mtp~1threatAnalytics~1outbreaks~1v2~1{OutbreakId}~1incidentsAlertsSummary
+  /mtp/threatAnalytics/outbreaks/v2/{OutbreakId}/tvmDetails:
+    $ref: threat_analytics.yml#/paths/~1mtp~1threatAnalytics~1outbreaks~1v2~1{OutbreakId}~1tvmDetails
+  /mtp/threatAnalytics/outbreaks/v2/{OutbreakId}/userExposure:
+    $ref: threat_analytics.yml#/paths/~1mtp~1threatAnalytics~1outbreaks~1v2~1{OutbreakId}~1userExposure
+  /mtp/threatAnalyticsIndicators/stix/outbreaks/{OutbreakId}/indicators/count:
+    $ref: threat_analytics.yml#/paths/~1mtp~1threatAnalyticsIndicators~1stix~1outbreaks~1{OutbreakId}~1indicators~1count
+  /mtp/threatAnalyticsIndicators/stix/outbreaks/{OutbreakId}/indicators/query:
+    $ref: threat_analytics.yml#/paths/~1mtp~1threatAnalyticsIndicators~1stix~1outbreaks~1{OutbreakId}~1indicators~1query
+  /mtp/outbreaks/outbreaks/v2/{OutbreakId}/devices:
+    $ref: threat_analytics.yml#/paths/~1mtp~1outbreaks~1outbreaks~1v2~1{OutbreakId}~1devices
 
   # Action Center
   /mtp/actionCenter/actioncenterui/history-actions:
     $ref: action_center.yml#/paths/~1mtp~1actionCenter~1actioncenterui~1history-actions
+  /mtp/actionCenter/actioncenterui/history-actions/export:
+    $ref: action_center.yml#/paths/~1mtp~1actionCenter~1actioncenterui~1history-actions~1export
   /mtp/actionCenter/actioncenterui/pending-actions:
     $ref: action_center.yml#/paths/~1mtp~1actionCenter~1actioncenterui~1pending-actions
 
@@ -1062,6 +1224,14 @@ paths:
     $ref: action_center.yml#/paths/~1mtp~1actionCenter~1actioncenterui~1tile
   /mtp/actionCenter/actioncenterui/pending-actions/pending-actions-summary:
     $ref: action_center.yml#/paths/~1mtp~1actionCenter~1actioncenterui~1pending-actions~1pending-actions-summary
+  /mtp/automation/internal/automation/{TenantId}/automationRules:
+    $ref: action_center.yml#/paths/~1mtp~1automation~1internal~1automation~1{TenantId}~1automationRules
+  /mtp/CaseManagement/be/attachments:
+    $ref: action_center.yml#/paths/~1mtp~1CaseManagement~1be~1attachments
+  /mtp/CaseManagement/be/cases/{CaseId}:
+    $ref: action_center.yml#/paths/~1mtp~1CaseManagement~1be~1cases~1{CaseId}
+  /mtp/CaseManagement/be/cases/{CaseId}/activities:
+    $ref: action_center.yml#/paths/~1mtp~1CaseManagement~1be~1cases~1{CaseId}~1activities
 
   # Multi-Tenant
   /mtoapi/recentItems:
