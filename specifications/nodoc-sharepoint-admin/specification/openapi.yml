@@ -1,0 +1,1396 @@
+openapi: 3.0.1
+info:
+  title: SharePoint Admin
+  x-nodoc-category: SharePoint
+  description: |
+    The SharePoint Admin API is used by the SharePoint admin center
+    (`https://{tenant}-admin.sharepoint.com`) for tenant bootstrap, storage quota
+    discovery, site inventory, group creation checks, internal admin list reads,
+    and settings workflows.
+
+    The operations below were confirmed while browsing the SharePoint admin center
+    with a real authenticated Edge session on pages such as:
+
+      - Home
+      - Active sites, including site detail membership and settings tabs
+      - Deleted sites
+      - Settings
+      - Migration
+      - More features
+      - Advanced management
+
+    This surface is the tenant-specific same-origin `/_api/*` layer on the
+    SharePoint admin host. The portal also generated generic Microsoft 365 shell
+    traffic to `admin.microsoft.com` and `portal.office.com`, but those routes are
+    not included here because they are not SharePoint-specific.
+
+    Observed POST requests relied on the authenticated SharePoint browser session
+    together with same-origin headers such as `x-requestdigest`, `SdkVersion`,
+    `odata-version`, and a SharePoint admin `Referer`.
+
+    Documentation and specifications have been provided on a best-efforts basis
+    and may not be 100% accurate.
+  version: 0.1.0
+  contact:
+    name: nodoc
+    url: https://github.com/nathanmcnulty/nodoc
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+servers:
+  - url: https://{tenant}-admin.sharepoint.com
+    description: SharePoint Online admin center same-origin API
+    variables:
+      tenant:
+        default: contoso
+        description: Tenant short name used by the SharePoint admin center host.
+security:
+  - PortalSession: []
+components:
+  securitySchemes:
+    PortalSession:
+      type: apiKey
+      in: cookie
+      name: FedAuth
+      description: |
+        Authenticated SharePoint Online admin center browser session.
+        Observed requests also relied on companion cookies such as `rtFa` and
+        same-origin portal headers. POST requests used `x-requestdigest`,
+        `SdkVersion`, `odata-version`, and a SharePoint admin `Referer`.
+  parameters:
+    Select:
+      name: $select
+      in: query
+      description: OData projection used by the admin portal to request specific properties.
+      schema:
+        type: string
+    OrderBy:
+      name: $orderby
+      in: query
+      description: OData expression used to order SharePoint list results.
+      schema:
+        type: string
+    Top:
+      name: $top
+      in: query
+      description: Maximum number of results to return.
+      schema:
+        type: integer
+    Expand:
+      name: $expand
+      in: query
+      description: OData expansion expression used by v2.1 unified storage quota routes.
+      schema:
+        type: string
+    ApiVersion:
+      name: api-version
+      in: query
+      description: Version selector used by the legacy storage quota route.
+      schema:
+        type: string
+        example: 1.3.2
+    CultureName:
+      name: cultureName
+      in: query
+      description: Culture name literal used by the site-template discovery call.
+      schema:
+        type: string
+        example: "'en-US'"
+    CompatibilityLevel:
+      name: compatibilityLevel
+      in: query
+      description: SharePoint compatibility level requested by the admin portal.
+      schema:
+        type: integer
+        example: 0
+    SiteExistsUrl:
+      name: '@v'
+      in: query
+      required: true
+      description: Site URL to test for existence. The portal URL-encodes and quotes this value.
+      schema:
+        type: string
+        format: uri
+        example: https://contoso.sharepoint.com/
+    Licenses:
+      name: licenses
+      in: query
+      required: true
+      description: JSON-encoded array of tenant license identifiers to test.
+      schema:
+        type: string
+        example: '["SPO_Project"]'
+    PrincipalName:
+      name: principalName
+      in: path
+      required: true
+      description: Principal name of the user to resolve through the SharePoint directory session.
+      schema:
+        type: string
+        format: email
+        example: nathan@contoso.com
+    SiteId:
+      name: siteId
+      in: path
+      required: true
+      description: Site collection identifier used by SharePoint site detail and compliance helper routes.
+      schema:
+        type: string
+        format: uuid
+        example: cf3fa8f9-75a4-4ce3-80e4-1b2257f042e7
+    QuotedSiteId:
+      name: siteId
+      in: query
+      required: true
+      description: OData site identifier literal used by the site administrators helper. The portal URL-encodes surrounding single quotes.
+      schema:
+        type: string
+        example: "'cf3fa8f9-75a4-4ce3-80e4-1b2257f042e7'"
+    MigrationPropertyName:
+      name: propertyName
+      in: path
+      required: true
+      description: Migration Manager property key literal requested by the SharePoint admin center.
+      schema:
+        type: string
+        example: a2307c5a-76df-4513-b575-0537842c1d8b_BoxServiceAccount_freKey
+    XRequestDigest:
+      name: x-requestdigest
+      in: header
+      required: true
+      description: SharePoint form digest value issued by the current admin page.
+      schema:
+        type: string
+    SdkVersion:
+      name: SdkVersion
+      in: header
+      required: false
+      description: Portal SDK identifier observed on same-origin SharePoint admin POST requests.
+      schema:
+        type: string
+        example: SPFx/TenantAdmin/6e1c1298-7b8e-4a08-a24f-769aafae45c5/Is3PRequest:0
+    ODataVersion:
+      name: odata-version
+      in: header
+      required: false
+      description: OData protocol version used by the SharePoint admin portal.
+      schema:
+        type: string
+        example: '4.0'
+  responses:
+    Unauthorized:
+      description: Authentication is required or the SharePoint admin browser session is no longer valid.
+    Forbidden:
+      description: The authenticated principal does not have access to the requested SharePoint admin data.
+    NotFound:
+      description: The requested resource was not found.
+    BadRequest:
+      description: The request shape or parameters were invalid.
+  schemas:
+    GenericObject:
+      type: object
+      additionalProperties: true
+    ODataBooleanResponse:
+      type: object
+      properties:
+        '@odata.context':
+          type: string
+        value:
+          type: boolean
+      required:
+        - value
+      additionalProperties: true
+    ODataIntegerResponse:
+      type: object
+      properties:
+        '@odata.context':
+          type: string
+        value:
+          type: integer
+      required:
+        - value
+      additionalProperties: true
+    ODataStringResponse:
+      type: object
+      properties:
+        '@odata.context':
+          type: string
+        value:
+          type: string
+      required:
+        - value
+      additionalProperties: true
+    SiteAdministratorInfo:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        loginName:
+          type: string
+        name:
+          type: string
+        userPrincipalName:
+          type: string
+          format: email
+      additionalProperties: true
+    SiteAdministratorsResponse:
+      type: object
+      properties:
+        '@odata.context':
+          type: string
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/SiteAdministratorInfo'
+      required:
+        - value
+      additionalProperties: true
+    SharePointBooleanSetting:
+      type: object
+      properties:
+        '@odata.context':
+          type: string
+        IsReadOnly:
+          type: boolean
+        Value:
+          type: boolean
+      required:
+        - IsReadOnly
+        - Value
+      additionalProperties: true
+    TenantAdminEndpointsResponse:
+      type: object
+      properties:
+        '@odata.context':
+          type: string
+        AADAdminCenterEndpoint:
+          type: string
+          format: uri
+        CdnDefaultEndpoint:
+          type: string
+          format: uri
+        MicrosoftGraphEndpoint:
+          type: string
+          format: uri
+        MigrationAgentUrl:
+          type: string
+          format: uri
+        O365AdminCenterEndpoint:
+          type: string
+          format: uri
+        SPMigrationToolUrl:
+          type: string
+          format: uri
+      additionalProperties: true
+    UnifiedStorageQuotaEligibleResponse:
+      type: object
+      properties:
+        '@odata.context':
+          type: string
+        isEligible:
+          type: boolean
+        lastUpdated:
+          type: string
+          format: date-time
+        isOverQuota:
+          type: boolean
+        isEligibleFeature:
+          type: string
+      additionalProperties: true
+    SiteStatesRequest:
+      type: object
+      properties:
+        states:
+          type: array
+          items:
+            type: integer
+      required:
+        - states
+    FilteredListItemsRequest:
+      type: object
+      properties:
+        columnName:
+          type: string
+        columnValue:
+          oneOf:
+            - type: string
+            - type: integer
+            - type: boolean
+        columnType:
+          type: string
+        listName:
+          type: string
+      additionalProperties: true
+    ListNameRequest:
+      type: object
+      properties:
+        listName:
+          type: string
+      required:
+        - listName
+    AdminListDataRequest:
+      type: object
+      properties:
+        parameters:
+          type: object
+          properties:
+            ViewXml:
+              type: string
+              description: CAML view used by the admin portal to shape the list response.
+            DatesInUtc:
+              type: boolean
+          additionalProperties: true
+      required:
+        - parameters
+    ExportColumnInfo:
+      type: object
+      properties:
+        columnName:
+          type: string
+        viewFieldName:
+          type: string
+      required:
+        - columnName
+        - viewFieldName
+    ExportToCsvRequest:
+      type: object
+      properties:
+        viewXml:
+          type: string
+          description: CAML view that defines the export query.
+        columnsInfo:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExportColumnInfo'
+      required:
+        - viewXml
+        - columnsInfo
+    UpdateJobsRequest:
+      type: object
+      properties:
+        jobIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+      required:
+        - jobIds
+    ClientSideComponentDescriptor:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        version:
+          type: string
+      required:
+        - id
+        - version
+    ClientSideComponentsRequest:
+      type: object
+      properties:
+        components:
+          type: array
+          items:
+            $ref: '#/components/schemas/ClientSideComponentDescriptor'
+        project:
+          type: string
+          format: uuid
+      required:
+        - components
+        - project
+tags:
+  - name: Tenant
+    description: Tenant bootstrap and identity/context helpers used during admin-center startup.
+  - name: Settings
+    description: Tenant settings, branding, sharing, site-creation, and template discovery helpers.
+  - name: Storage
+    description: Storage quota and unified storage entitlement endpoints.
+  - name: Migration
+    description: Migration-center storage and property helpers used by the Migration landing page.
+  - name: Sites
+    description: Site inventory, internal admin-list views, and export helpers.
+  - name: Groups
+    description: Group-connected site creation checks and hub-site discovery.
+  - name: Internal
+    description: Same-origin component-loading and internal-only tenant helpers observed in the portal.
+x-tagGroups:
+  - name: Tenant
+    tags: [Tenant]
+  - name: Settings
+    tags: [Settings]
+  - name: Storage
+    tags: [Storage]
+  - name: Migration
+    tags: [Migration]
+  - name: Sites & Lists
+    tags: [Sites]
+  - name: Groups
+    tags: [Groups]
+  - name: Internal
+    tags: [Internal]
+paths:
+  /_api/TenantAdminEndpoints:
+    get:
+      tags: [Tenant]
+      summary: Get tenant admin endpoint map
+      description: |
+        Returns the endpoint bundle used by the SharePoint admin center during
+        startup. Observed on the Home blade.
+      operationId: SharePointAdmin.GetTenantAdminEndpoints
+      responses:
+        '200':
+          description: Tenant endpoint map returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantAdminEndpointsResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /_api/TenantInformationCollection:
+    get:
+      tags: [Tenant]
+      summary: Get tenant information collection
+      description: |
+        Returns the multigeo tenant information surfaced by the SharePoint admin
+        center, including tenant, root-site, and MySite domains.
+      operationId: SharePointAdmin.GetTenantInformationCollection
+      responses:
+        '200':
+          description: Tenant information returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /_api/Microsoft.SharePoint.Portal.SuiteNavData.GetSuiteNavData:
+    get:
+      tags: [Tenant]
+      summary: Get suite navigation bootstrap data
+      description: |
+        Returns the SharePoint suite navigation payload used to render shell
+        links and user context for the admin center.
+      operationId: SharePointAdmin.GetSuiteNavData
+      parameters:
+        - name: v
+          in: query
+          description: Navigation schema version.
+          schema:
+            type: integer
+            example: 2
+        - name: Locale
+          in: query
+          description: Locale requested by the current admin session.
+          schema:
+            type: string
+            example: en-US
+      responses:
+        '200':
+          description: Suite navigation payload returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataStringResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /_api/SP_TenantSettings_Current:
+    get:
+      tags: [Tenant]
+      summary: Get current tenant settings summary
+      description: |
+        Returns the current SharePoint tenant settings object as surfaced by the
+        admin center bootstrap flow.
+      operationId: SharePointAdmin.GetCurrentTenantSettings
+      responses:
+        '200':
+          description: Current tenant settings returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /_api/SP.Site.Exists(url=@v):
+    get:
+      tags: [Tenant]
+      summary: Check whether a site exists
+      description: |
+        Tests whether a site URL already exists. Observed during startup checks
+        against the tenant root site.
+      operationId: SharePointAdmin.CheckSiteExists
+      parameters:
+        - $ref: '#/components/parameters/SiteExistsUrl'
+      responses:
+        '200':
+          description: Site existence check completed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataBooleanResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  "/_api/SP.Directory.DirectorySession/User(principalName='{principalName}')":
+    get:
+      tags: [Tenant]
+      summary: Resolve a user through the SharePoint directory session
+      description: |
+        Returns the SharePoint directory-session record for a principal. Observed
+        on the Home blade for the signed-in admin.
+      operationId: SharePointAdmin.GetDirectoryUser
+      parameters:
+        - $ref: '#/components/parameters/PrincipalName'
+      responses:
+        '200':
+          description: User directory record returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /_api/SPO.Tenant:
+    get:
+      tags: [Settings]
+      summary: Get selected SPO tenant properties
+      description: |
+        Returns selected tenant-level properties from the `SPO.Tenant` service.
+        Observed with projections such as `DelayDenyAddAndCustomizePagesEnforcement`
+        and `SyntexBillingSubscriptionSettings`.
+      operationId: SharePointAdmin.GetTenantProperties
+      parameters:
+        - $ref: '#/components/parameters/Select'
+      responses:
+        '200':
+          description: Selected tenant properties returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /_api/TenantAdminSettings:
+    get:
+      tags: [Settings]
+      summary: Get selected tenant admin settings
+      description: |
+        Returns selected properties from the tenant admin settings service.
+        Observed on the Settings blade.
+      operationId: SharePointAdmin.GetTenantAdminSettings
+      parameters:
+        - $ref: '#/components/parameters/Select'
+      responses:
+        '200':
+          description: Tenant admin settings returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /_api/TenantAdminSettings/AutoQuotaEnabled:
+    get:
+      tags: [Settings]
+      summary: Get auto quota setting
+      description: |
+        Returns the SharePoint admin setting that controls automatic storage
+        quota management.
+      operationId: SharePointAdmin.GetAutoQuotaEnabled
+      responses:
+        '200':
+          description: Auto quota setting returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SharePointBooleanSetting'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /_api/TenantAdminSettings/GetTenantSharingStatus:
+    get:
+      tags: [Settings]
+      summary: Get tenant sharing status
+      description: |
+        Returns the current tenant sharing status code surfaced on SharePoint
+        admin settings pages.
+      operationId: SharePointAdmin.GetTenantSharingStatus
+      responses:
+        '200':
+          description: Sharing status returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataIntegerResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /_api/SPO.Tenant/GetBrandCenterConfiguration:
+    get:
+      tags: [Settings]
+      summary: Get Brand Center configuration
+      description: |
+        Returns the Brand Center configuration used by the SharePoint admin
+        center settings experience.
+      operationId: SharePointAdmin.GetBrandCenterConfiguration
+      responses:
+        '200':
+          description: Brand Center configuration returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /_api/SPO.Tenant/GetSPOSiteCreationSources:
+    get:
+      tags: [Settings]
+      summary: Get site creation sources
+      description: |
+        Returns the site creation source identifiers and display names used by
+        the SharePoint admin center when classifying site origins.
+      operationId: SharePointAdmin.GetSiteCreationSources
+      responses:
+        '200':
+          description: Site creation sources returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /_api/SPO.Tenant/GetSPOAllWebTemplates:
+    get:
+      tags: [Settings]
+      summary: Get SharePoint web templates
+      description: |
+        Returns the SharePoint web template catalog used by the admin center
+        site-creation experiences.
+      operationId: SharePointAdmin.GetAllWebTemplates
+      parameters:
+        - $ref: '#/components/parameters/CultureName'
+        - $ref: '#/components/parameters/CompatibilityLevel'
+      responses:
+        '200':
+          description: Web templates returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /_api/SPO.Tenant/GetTrackViewFeatureAlwaysVisible:
+    get:
+      tags: [Settings]
+      summary: Get track-view feature visibility
+      description: |
+        Returns whether the Active sites Track view experience should always be
+        visible in the SharePoint admin center.
+      operationId: SharePointAdmin.GetTrackViewFeatureVisibility
+      responses:
+        '200':
+          description: Track-view visibility returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataBooleanResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /_api/SPO.Tenant/GetHomeSitesDetails:
+    get:
+      tags: [Settings]
+      summary: Get home sites details
+      description: |
+        Returns the configured SharePoint home site details, or a null payload
+        when the tenant has no home site configured.
+      operationId: SharePointAdmin.GetHomeSitesDetails
+      responses:
+        '200':
+          description: Home-site details returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /_api/SPO.Tenant/RestrictedOneDriveLicense:
+    get:
+      tags: [Settings]
+      summary: Get restricted OneDrive license flag
+      description: |
+        Returns whether the tenant is subject to the restricted OneDrive license
+        policy surfaced by the Advanced management blade.
+      operationId: SharePointAdmin.GetRestrictedOneDriveLicense
+      responses:
+        '200':
+          description: Restricted OneDrive license state returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataBooleanResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /_api/StorageQuotas():
+    get:
+      tags: [Storage]
+      summary: Get storage quotas
+      description: |
+        Returns tenant storage quota information by geography. Observed on the
+        Home and Active sites experiences.
+      operationId: SharePointAdmin.GetStorageQuotas
+      parameters:
+        - $ref: '#/components/parameters/ApiVersion'
+      responses:
+        '200':
+          description: Storage quotas returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /_api/v2.1/unifiedStorageQuotaEligible:
+    get:
+      tags: [Storage]
+      summary: Check unified storage quota eligibility
+      description: |
+        Returns the tenant's unified storage quota eligibility and over-quota
+        status as surfaced by the SharePoint admin center.
+      operationId: SharePointAdmin.GetUnifiedStorageQuotaEligibility
+      responses:
+        '200':
+          description: Unified storage quota eligibility returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnifiedStorageQuotaEligibleResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /_api/v2.1/unifiedstoragequota/tenant/services/SPO:
+    get:
+      tags: [Storage]
+      summary: Get unified storage quota service details
+      description: |
+        Returns unified storage quota details for the SharePoint Online service,
+        including per-geo quota usage.
+      operationId: SharePointAdmin.GetUnifiedStorageQuotaService
+      parameters:
+        - $ref: '#/components/parameters/Expand'
+      responses:
+        '200':
+          description: Unified storage quota service details returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /_api/MigrationCenterServices/Storage/TotalDevicesAdded:
+    get:
+      tags: [Migration]
+      summary: Get total migration devices added
+      description: |
+        Returns the total number of devices that have been added to the
+        SharePoint Migration Manager experience.
+      operationId: SharePointAdmin.GetMigrationTotalDevicesAdded
+      responses:
+        '200':
+          description: Migration device count returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataIntegerResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  "/_api/MigrationCenterServices/Properties/GetProperty('{propertyName}')":
+    get:
+      tags: [Migration]
+      summary: Get a migration center property
+      description: |
+        Returns a named Migration Manager property used to light up source-system
+        onboarding cards on the Migration blade. Observed for Box, Dropbox,
+        Egnyte, Google Workspace, and Microsoft Stream property keys.
+      operationId: SharePointAdmin.GetMigrationProperty
+      parameters:
+        - $ref: '#/components/parameters/MigrationPropertyName'
+      responses:
+        '200':
+          description: Migration property returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /_api/HubSites:
+    get:
+      tags: [Groups]
+      summary: Get hub sites
+      description: |
+        Returns the current hub site inventory. Observed during Home and Active
+        sites initialization.
+      operationId: SharePointAdmin.GetHubSites
+      responses:
+        '200':
+          description: Hub sites returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /_api/GroupSiteManager/CanUserCreateGroup:
+    get:
+      tags: [Groups]
+      summary: Check whether the user can create group-connected sites
+      description: |
+        Returns whether the current principal can create a Microsoft 365
+        group-connected site.
+      operationId: SharePointAdmin.CanUserCreateGroup
+      responses:
+        '200':
+          description: Group-creation capability returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /_api/GroupSiteManager/GetGroupCreationContext:
+    get:
+      tags: [Groups]
+      summary: Get group creation context
+      description: |
+        Returns the context block used by SharePoint group-connected site
+        creation, including classification and policy settings.
+      operationId: SharePointAdmin.GetGroupCreationContext
+      responses:
+        '200':
+          description: Group creation context returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /_api/SPO.Tenant/GetSitesByState:
+    post:
+      tags: [Sites]
+      summary: Get sites by state
+      description: |
+        Returns site records matching the requested SharePoint site-state values.
+        Observed on the Active sites and Deleted sites pages.
+      operationId: SharePointAdmin.GetSitesByState
+      parameters:
+        - $ref: '#/components/parameters/XRequestDigest'
+        - $ref: '#/components/parameters/SdkVersion'
+        - $ref: '#/components/parameters/ODataVersion'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SiteStatesRequest'
+      responses:
+        '200':
+          description: Site-state results returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /_api/SPO.Tenant/RenderAdminListData:
+    post:
+      tags: [Sites]
+      summary: Render admin list data
+      description: |
+        Renders the internal admin-list payload used by the Active sites grid.
+        The request body carries the CAML view definition the portal wants to render.
+      operationId: SharePointAdmin.RenderAdminListData
+      parameters:
+        - $ref: '#/components/parameters/XRequestDigest'
+        - $ref: '#/components/parameters/SdkVersion'
+        - $ref: '#/components/parameters/ODataVersion'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminListDataRequest'
+      responses:
+        '200':
+          description: Admin list data returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /_api/SPO.Tenant/ExportToCSV:
+    post:
+      tags: [Sites]
+      summary: Start a CSV export
+      description: |
+        Starts a site inventory CSV export and returns the generated document
+        library path. Observed from the Active sites Export action.
+      operationId: SharePointAdmin.ExportSitesToCsv
+      parameters:
+        - $ref: '#/components/parameters/XRequestDigest'
+        - $ref: '#/components/parameters/SdkVersion'
+        - $ref: '#/components/parameters/ODataVersion'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExportToCsvRequest'
+      responses:
+        '200':
+          description: Export path returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataStringResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /_api/SPO.Tenant/GetAdminListViews:
+    get:
+      tags: [Sites]
+      summary: Get admin list views
+      description: |
+        Returns the internal list views used by the SharePoint admin center to
+        render site inventory data.
+      operationId: SharePointAdmin.GetAdminListViews
+      responses:
+        '200':
+          description: Admin list views returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  "/_api/SPO.Tenant/sites('{siteId}')":
+    get:
+      tags: [Sites]
+      summary: Get site details by id
+      description: |
+        Returns the site-properties entity loaded when the Active sites grid
+        opens a site detail blade. Observed on the detail overview and settings
+        tabs.
+      operationId: SharePointAdmin.GetSiteById
+      parameters:
+        - $ref: '#/components/parameters/SiteId'
+      responses:
+        '200':
+          description: Site detail entity returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /_api/SPO.Tenant/GetSiteAdministrators:
+    post:
+      tags: [Sites]
+      summary: Get site administrators
+      description: |
+        Returns the site administrators displayed on the Membership tab of a
+        SharePoint admin site detail blade.
+      operationId: SharePointAdmin.GetSiteAdministrators
+      parameters:
+        - $ref: '#/components/parameters/QuotedSiteId'
+        - $ref: '#/components/parameters/XRequestDigest'
+        - $ref: '#/components/parameters/SdkVersion'
+        - $ref: '#/components/parameters/ODataVersion'
+      responses:
+        '200':
+          description: Site administrators returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiteAdministratorsResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  "/_api/SP.CompliancePolicy.SPPolicyStoreProxy.CheckSiteIsDeletableById('{siteId}')":
+    get:
+      tags: [Sites]
+      summary: Check whether a site can be deleted
+      description: |
+        Returns whether the selected site is eligible for deletion after the
+        SharePoint admin center runs its compliance-policy checks.
+      operationId: SharePointAdmin.CheckSiteIsDeletableById
+      parameters:
+        - $ref: '#/components/parameters/SiteId'
+      responses:
+        '200':
+          description: Site deletion eligibility returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataBooleanResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /_api/SPO.Tenant/GetSPListRootFolderProperties:
+    post:
+      tags: [Sites]
+      summary: Get admin list root folder properties
+      description: |
+        Returns root-folder metadata for an internal SharePoint admin list.
+        Observed as a body-less POST during Active sites initialization.
+      operationId: SharePointAdmin.GetAdminListRootFolderProperties
+      parameters:
+        - $ref: '#/components/parameters/XRequestDigest'
+        - $ref: '#/components/parameters/SdkVersion'
+        - $ref: '#/components/parameters/ODataVersion'
+      responses:
+        '200':
+          description: Root folder properties returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /_api/SPO.Tenant/GetSPListItemCount:
+    post:
+      tags: [Sites]
+      summary: Get admin list item count
+      description: |
+        Returns the item count for an internal SharePoint admin list.
+      operationId: SharePointAdmin.GetAdminListItemCount
+      parameters:
+        - $ref: '#/components/parameters/XRequestDigest'
+        - $ref: '#/components/parameters/SdkVersion'
+        - $ref: '#/components/parameters/ODataVersion'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ListNameRequest'
+      responses:
+        '200':
+          description: Item count returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataIntegerResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /_api/SPO.Tenant/GetFilteredSPListItems:
+    post:
+      tags: [Sites]
+      summary: Get filtered admin list items
+      description: |
+        Returns items from an internal SharePoint admin list filtered by a single
+        column/value pair. Observed for user-storage and grid bootstrap lookups.
+      operationId: SharePointAdmin.GetFilteredListItems
+      parameters:
+        - $ref: '#/components/parameters/XRequestDigest'
+        - $ref: '#/components/parameters/SdkVersion'
+        - $ref: '#/components/parameters/ODataVersion'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FilteredListItemsRequest'
+      responses:
+        '200':
+          description: Filtered list items returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  "/_api/web/lists/GetByTitle('DO_NOT_DELETE_SPLIST_TENANTADMIN_AGGREGATED_POLICYINSIGHTS_STORAGE')/items":
+    get:
+      tags: [Sites]
+      summary: Get aggregated policy insights items
+      description: |
+        Reads the internal aggregated policy-insights list used by the admin
+        center home cards and tracking widgets.
+      operationId: SharePointAdmin.GetAggregatedPolicyInsightsItems
+      parameters:
+        - $ref: '#/components/parameters/OrderBy'
+        - $ref: '#/components/parameters/Top'
+      responses:
+        '200':
+          description: Aggregated policy insights returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  "/_api/web/lists/GetByTitle('DO_NOT_DELETE_SPLIST_TENANTADMIN_AGGREGATED_SITECOLLECTIONS')/RootFolder/Properties":
+    get:
+      tags: [Sites]
+      summary: Get aggregated site-collections list root properties
+      description: |
+        Returns root-folder properties for the internal aggregated site-collections
+        list, including activity refresh metadata used by the admin center.
+      operationId: SharePointAdmin.GetAggregatedSiteCollectionsRootProperties
+      parameters:
+        - $ref: '#/components/parameters/Select'
+      responses:
+        '200':
+          description: Aggregated site-collections root properties returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /_api/web/GetClientSideComponents:
+    post:
+      tags: [Internal]
+      summary: Get client-side component manifests
+      description: |
+        Returns SPFx component manifests used by the SharePoint admin center to
+        light up internal UI bundles.
+      operationId: SharePointAdmin.GetClientSideComponents
+      parameters:
+        - $ref: '#/components/parameters/XRequestDigest'
+        - $ref: '#/components/parameters/SdkVersion'
+        - $ref: '#/components/parameters/ODataVersion'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClientSideComponentsRequest'
+      responses:
+        '200':
+          description: Component manifests returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /_api/SPO.Tenant/UpdateJobsWorkItems:
+    post:
+      tags: [Internal]
+      summary: Update pending job work items
+      description: |
+        Notifies the portal backend that a batch of admin jobs should be marked
+        as processed or refreshed. Observed during Home blade initialization.
+      operationId: SharePointAdmin.UpdateJobsWorkItems
+      parameters:
+        - $ref: '#/components/parameters/XRequestDigest'
+        - $ref: '#/components/parameters/SdkVersion'
+        - $ref: '#/components/parameters/ODataVersion'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateJobsRequest'
+      responses:
+        '204':
+          description: Work items updated successfully.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /_api/SPOInternalUseOnly.Tenant:
+    get:
+      tags: [Internal]
+      summary: Get internal-only tenant properties
+      description: |
+        Returns internal-only SharePoint tenant properties that the admin center
+        uses for sharing, versioning, expiration, and custom-script controls.
+      operationId: SharePointAdmin.GetInternalTenantProperties
+      parameters:
+        - $ref: '#/components/parameters/Select'
+      responses:
+        '200':
+          description: Internal tenant properties returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /_api/SPOInternalUseOnly.Tenant/CheckTenantLicenses:
+    get:
+      tags: [Internal]
+      summary: Check tenant licenses
+      description: |
+        Returns whether the tenant holds the specified internal SharePoint
+        license set. Observed with `licenses=["SPO_Project"]`.
+      operationId: SharePointAdmin.CheckTenantLicenses
+      parameters:
+        - $ref: '#/components/parameters/Licenses'
+      responses:
+        '200':
+          description: License check completed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /_api/SPOInternalUseOnly.TenantAdminSettings:
+    get:
+      tags: [Internal]
+      summary: Get internal tenant admin settings
+      description: |
+        Returns the internal tenant admin settings service object surfaced by the
+        SharePoint admin center settings experience.
+      operationId: SharePointAdmin.GetInternalTenantAdminSettings
+      responses:
+        '200':
+          description: Internal tenant admin settings returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'

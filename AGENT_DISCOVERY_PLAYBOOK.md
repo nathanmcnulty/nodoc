@@ -130,6 +130,7 @@ Recommended pattern:
 - Write artifacts after each crawl phase instead of only at the very end.
 - Keep the browser capture script focused on traffic collection; do bundle download in a separate step.
 - For broad portal passes, use bounded parallel tabs only if you can still attribute requests back to the originating page.
+- If CDP `Page.navigate` stalls on a same-origin SPA hash route, retry that surface in a fresh single tab and fall back to setting `location.href`; do not assume the route itself is invalid just because the first navigation primitive hung.
 - For report or dashboard blades, do two passes: initial-load traffic first, then a second pass that changes one safe control at a time.
 - During the interaction pass, prefer safe state changes such as filters, date range, grouping, row drill-ins, tabs, sort, paging, and export preflight so each new request can be tied back to the triggering UI state.
 - Record a page-state checklist alongside each request set: selected tab, filter chips, date range, business group or release selection, tenant scope, and any report-mode toggles.
@@ -145,6 +146,7 @@ Recommended pattern:
 - On each entity/detail page or blade, click every visible read-only tab or pivot before moving on.
 - Prefer safe drill-ins such as display-name links, row detail blades, tabs, paging, filters, and same-origin content links over arbitrary action buttons.
 - Record which surfaces could **not** be reached because of missing tenant data, permissions, or feature flags so future agents do not mistake those gaps for completed coverage.
+- Keep those unreachable labels conservative: generic shell banners, dark-mode notices, or marketing copy are not strong evidence of a feature gate on their own.
 
 Rule of thumb:
 
@@ -705,8 +707,12 @@ Add new ideas here before trying them, then move the result into the experiment 
 
 - Specs updated with clear evidence labels
 - New endpoints placed in coherent sibling files
+- New spec and collection files included when a portal was split or added, especially `specifications/nodoc-{portal}/specification/openapi.yml` and `postman/collections/{portal}.collection.json`
 - Checked-in Postman collections regenerated
 - README/site metadata updated when counts or highlights changed
+- Tenant-specific examples, domains, and email addresses sanitized to neutral placeholders such as `contoso` before merge
 - Validation commands completed
 - Unrelated churn removed
+- PR summary explains the scope decision clearly, including which portal-specific host/path family is documented and which shared shell, support, auth, or telemetry traffic was intentionally excluded
+- PR summary calls out confirmed tenant-specific empty or null responses so reviewers do not mistake them for dead endpoints
 - Follow-up opportunities recorded, especially risky writes, hidden hosts, and feature-gated surfaces

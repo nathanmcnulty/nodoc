@@ -64,7 +64,7 @@ export const apiCatalog: ApiCatalogItem[] = [
     title: "M365 Admin",
     slug: "/m-365-admin",
     family: "Admin portal",
-    operations: 218,
+    operations: 213,
     authModel: "Portal session cookie + custom admin headers",
     baseUrl: "https://admin.cloud.microsoft",
     summary:
@@ -79,8 +79,8 @@ export const apiCatalog: ApiCatalogItem[] = [
       "https://raw.githubusercontent.com/nathanmcnulty/nodoc/main/postman/collections/m365-admin.collection.json",
   },
   {
-    title: "Exchange Beta",
-    slug: "/exchange-beta",
+    title: "Exchange",
+    slug: "/exchange",
     family: "Exchange admin center",
     operations: 61,
     authModel: "Portal session cookie + same-origin `x-requested-with`",
@@ -95,6 +95,24 @@ export const apiCatalog: ApiCatalogItem[] = [
     collectionPath: "postman/collections/exchange-beta.collection.json",
     collectionDownloadUrl:
       "https://raw.githubusercontent.com/nathanmcnulty/nodoc/main/postman/collections/exchange-beta.collection.json",
+  },
+  {
+    title: "SharePoint Admin",
+    slug: "/share-point-admin",
+    family: "SharePoint admin center",
+    operations: 41,
+    authModel: "Portal session cookie (`FedAuth`) + SharePoint form digest",
+    baseUrl: "https://{tenant}-admin.sharepoint.com",
+    summary:
+      "Tenant bootstrap, site inventory, site-detail blades, storage quota, migration helpers, and settings workflows from the SharePoint admin center same-origin `/_api` surface.",
+    highlights: [
+      "Tenant admin bootstrap and multigeo discovery",
+      "Site inventory, site-detail membership/settings helpers, deletion checks, and CSV export coverage",
+      "Storage quota, migration-center, OneDrive policy, branding, and internal tenant settings coverage",
+    ],
+    collectionPath: "postman/collections/sharepoint-admin.collection.json",
+    collectionDownloadUrl:
+      "https://raw.githubusercontent.com/nathanmcnulty/nodoc/main/postman/collections/sharepoint-admin.collection.json",
   },
   {
     title: "M365 Apps Config",
@@ -324,8 +342,8 @@ export const accessModels: AccessModel[] = [
   {
     title: "Portal session + same-origin XHR",
     description:
-      "Exchange Beta uses the authenticated Exchange admin center browser session with `.AspNetCore.Cookies` and same-origin `x-requested-with: XMLHttpRequest` requests.",
-    portals: ["Exchange Beta"],
+      "Exchange uses the authenticated Exchange admin center browser session with `.AspNetCore.Cookies` and same-origin `x-requested-with: XMLHttpRequest` requests.",
+    portals: ["Exchange"],
   },
   {
     title: "Portal session + same-origin context",
@@ -338,6 +356,12 @@ export const accessModels: AccessModel[] = [
     description:
       "M365 Admin requires `AjaxSessionKey` plus portal routing and hosting headers extracted from the admin shell.",
     portals: ["M365 Admin"],
+  },
+  {
+    title: "Portal session + SharePoint digest",
+    description:
+      "SharePoint Admin uses the tenant's `-admin.sharepoint.com` browser session together with same-origin SharePoint headers such as `x-requestdigest`, `SdkVersion`, and `odata-version` on POST requests.",
+    portals: ["SharePoint Admin"],
   },
   {
     title: "Portal bearer tokens + diagnostic headers",
@@ -488,7 +512,7 @@ export const gettingStartedGuides: GettingStartedGuide[] = [
   },
   {
     title: "Exchange admin center",
-    portals: ["Exchange Beta"],
+    portals: ["Exchange"],
     authModel: "Portal session cookie + same-origin `x-requested-with`",
     baseUrls: ["https://admin.exchange.microsoft.com/beta"],
     confirmedDetails: [
@@ -509,6 +533,31 @@ export const gettingStartedGuides: GettingStartedGuide[] = [
       "Exchange pages also load generic Microsoft 365 shell, support, and feedback traffic from `admin.microsoft.com` and `portal.office.com`; do not confuse those hosts with the Exchange beta surface.",
       "A same-origin telemetry POST to `/api/instrument/logclient` returned `404` during live capture and was intentionally left out of published coverage.",
       "Many useful Exchange routes are OData function calls with embedded parameters, so literal timestamped paths from one capture will be brittle when replayed later.",
+    ],
+  },
+  {
+    title: "SharePoint Admin",
+    portals: ["SharePoint Admin"],
+    authModel: "Portal session cookie (`FedAuth`) + same-origin SharePoint headers",
+    baseUrls: ["https://{tenant}-admin.sharepoint.com/_api"],
+    confirmedDetails: [
+      "The observed SharePoint-specific surface is same-origin `/_api/*` traffic on the tenant's `-admin.sharepoint.com` host rather than `graph.microsoft.com` or the generic Microsoft 365 shell.",
+      "Observed POST requests included `x-requestdigest`, `SdkVersion`, `odata-version`, and a SharePoint admin `Referer` alongside the authenticated browser cookies.",
+      "The captured routes covered Home, Active sites, Deleted sites, site-detail tabs, Settings, Migration, More features, and Advanced management, with no second SharePoint-specific non-Graph API family beyond `/_api`.",
+    ],
+    practicalGuidance: [
+      "Start from a real authenticated SharePoint admin browser tab and keep the tenant-specific `-admin.sharepoint.com` host intact when replaying requests.",
+      "Validate access with read-only calls such as `/_api/TenantAdminEndpoints`, `/_api/TenantInformationCollection`, `/_api/SPO.Tenant/sites('{siteId}')`, or `/_api/StorageQuotas()` before attempting POST requests.",
+      "Expect many useful routes to expose internal SharePoint list names, migration property keys, and service objects rather than polished public contracts.",
+    ],
+    mutationGuidance: [
+      "Treat POST calls such as `RenderAdminListData`, `ExportToCSV`, `GetSitesByState`, `GetSiteAdministrators`, and `UpdateJobsWorkItems` as live portal operations even when they look report-like or read-heavy.",
+      "If you need more write coverage, capture the exact portal payload first and preserve original state in a safe tenant before replaying anything.",
+    ],
+    pitfalls: [
+      "The portal mixes SharePoint-specific `/_api` traffic with generic shell calls to `admin.microsoft.com`, `portal.office.com`, and telemetry endpoints; only the same-origin SharePoint host belongs in this family.",
+      "Request digests are short-lived and tied to the current page context, so replay can fail even when the browser cookies are still valid.",
+      "Some confirmed routes returned empty or null responses in this tenant, especially migration and settings-adjacent helpers, but they are still real portal endpoints.",
     ],
   },
   {

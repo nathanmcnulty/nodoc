@@ -17,6 +17,13 @@ const portalConfig = [
     urlPatterns: ['https://admin.cloud.microsoft/admin/api/*']
   },
   {
+    id: 'sharepoint-admin',
+    name: 'SharePoint Admin',
+    hostnameSuffixes: ['-admin.sharepoint.com'],
+    pathPrefixes: ['/_api/'],
+    urlPatterns: ['https://*.sharepoint.com/_api/*']
+  },
+  {
     id: 'purview',
     name: 'Purview',
     hostname: 'purview.microsoft.com',
@@ -98,18 +105,27 @@ for (const portal of portalConfig) {
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────
+function matchesPortalHost(portal, hostname) {
+  const hostnames = portal.hostnames || (portal.hostname ? [portal.hostname] : []);
+  if (hostnames.includes(hostname)) {
+    return true;
+  }
+
+  const hostnameSuffixes = portal.hostnameSuffixes || [];
+  return hostnameSuffixes.some(suffix => hostname.endsWith(suffix));
+}
+
 function matchPortal(url) {
   try {
     const parsed = new URL(url);
     for (const portal of portalConfig) {
-      const hostnames = portal.hostnames || (portal.hostname ? [portal.hostname] : []);
-      for (const host of hostnames) {
-        if (parsed.hostname === host) {
-          for (const prefix of portal.pathPrefixes) {
-            if (parsed.pathname.startsWith(prefix)) {
-              return portal;
-            }
-          }
+      if (!matchesPortalHost(portal, parsed.hostname)) {
+        continue;
+      }
+
+      for (const prefix of portal.pathPrefixes) {
+        if (parsed.pathname.startsWith(prefix)) {
+          return portal;
         }
       }
     }
