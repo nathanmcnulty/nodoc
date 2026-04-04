@@ -1,0 +1,2777 @@
+openapi: 3.0.1
+info:
+  title: Teams
+  x-nodoc-category: Teams
+  description: |
+    The Teams specification documents internal APIs exercised by the Microsoft Teams admin center
+    (`admin.teams.microsoft.com`) during an exhaustive crawl of the left nav, detail pages, and
+    report interactions with a real authenticated Edge session.
+
+    The current capture set confirmed multiple distinct backend families behind the portal, including:
+
+      - same-origin admin portal APIs on `admin.teams.microsoft.com` and `noneu-admin.teams.microsoft.com`
+      - cross-origin Teams platform calls on `teams.microsoft.com/api`
+      - user, policy, telephony, CQD, template, and app-instance lookups on
+        `api.interfaces.records.teams.microsoft.com`
+      - frontline orchestration, device management, monetization, monitoring, reports, app catalog,
+        CQD data, and planning backends on additional Teams- and Office-hosted services
+
+    The retained evidence includes explicit notes for feature-, data-, or permission-gated surfaces
+    such as Silent Tests, inactive Teams rule details, workforce hierarchy operations, and device
+    tenant metadata that did not fully resolve in the capture tenant.
+
+    Most cross-origin calls were observed with a browser-acquired bearer token and `X-Requested-With`
+    header. `POST /api/log` was only observed as a same-origin request from the admin portal itself and
+    should be treated as portal-context dependent rather than a general-purpose external API.
+
+    Documentation and specifications have been provided on a best-efforts basis and may not be
+    100% accurate.
+  version: 0.1.0
+  contact:
+    name: nodoc
+    url: https://github.com/nathanmcnulty/nodoc
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+servers:
+  - url: https://admin.teams.microsoft.com
+    description: Teams admin center entrypoint. Most path items override this with the exact host used by the portal.
+security:
+  - TeamsPortalBearer: []
+components:
+  securitySchemes:
+    TeamsPortalBearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        Browser-issued bearer token observed on most Teams admin center cross-origin service calls,
+        typically alongside `X-Requested-With: XMLHttpRequest`.
+    TeamsPortalContext:
+      type: apiKey
+      in: header
+      name: X-Requested-With
+      description: |
+        Same-origin Teams admin center portal context. `POST /api/log` was captured without an explicit
+        `Authorization` header in the exported request headers and should be treated as a portal-context
+        dependent operation.
+  parameters:
+    TenantId:
+      name: tenantId
+      in: path
+      required: true
+      description: Entra tenant identifier for the current Teams admin tenant.
+      schema:
+        type: string
+        format: uuid
+    UserId:
+      name: userId
+      in: path
+      required: true
+      description: Entra object identifier for a Teams user.
+      schema:
+        type: string
+        format: uuid
+    Partition:
+      name: partition
+      in: path
+      required: true
+      description: Teams regional partition returned by `POST /api/authsvc/v1.0/users/region`.
+      schema:
+        type: string
+        example: amer-03
+    Version:
+      name: version
+      in: path
+      required: true
+      description: Configuration schema version requested by the portal.
+      schema:
+        type: string
+        example: 1.0.0.0
+    AppId:
+      name: appId
+      in: query
+      required: false
+      description: Optional virtual appointments application identifier.
+      schema:
+        type: string
+        example: sharedsms
+    Select:
+      name: $select
+      in: query
+      required: false
+      description: Comma-separated property projection.
+      schema:
+        type: string
+        example: usageLocation
+    Locale:
+      name: locale
+      in: query
+      required: false
+      description: Locale requested by the Teams admin portal.
+      schema:
+        type: string
+        example: en-US
+    Aggregate:
+      name: Aggregate
+      in: query
+      required: false
+      description: Reporting aggregation window.
+      schema:
+        type: string
+        example: M7
+    TenantIdQuery:
+      name: tenantId
+      in: query
+      required: true
+      description: Tenant identifier required by report helper endpoints.
+      schema:
+        type: string
+        format: uuid
+    TenantIdLowerQuery:
+      name: tenantid
+      in: query
+      required: true
+      description: Lowercase tenant identifier query parameter used by report bootstrap endpoints.
+      schema:
+        type: string
+        format: uuid
+    Top:
+      name: $top
+      in: query
+      required: false
+      description: Maximum number of items to return.
+      schema:
+        type: integer
+        example: 800
+    OrderBy:
+      name: $orderby
+      in: query
+      required: false
+      description: OData ordering clause.
+      schema:
+        type: string
+        example: AggregationStartTime
+    Filter:
+      name: $filter
+      in: query
+      required: false
+      description: OData-style filter clause.
+      schema:
+        type: string
+        example: AggregationEndTime ge 2026-03-05T00:00:00.000Z
+    Count:
+      name: Count
+      in: query
+      required: false
+      description: Maximum number of available filter values to consider.
+      schema:
+        type: integer
+        example: 20
+    ResultSize:
+      name: ResultSize
+      in: query
+      required: false
+      description: Number of filter rows to return.
+      schema:
+        type: integer
+        example: 10
+    PopulateNumberOfVoiceUsers:
+      name: PopulateNumberOfVoiceUsers
+      in: query
+      required: false
+      description: Include voice user counts in civic-address filter results.
+      schema:
+        type: boolean
+        example: true
+    PopulateNumberOfTelephoneNumbers:
+      name: PopulateNumberOfTelephoneNumbers
+      in: query
+      required: false
+      description: Include telephone number counts in civic-address filter results.
+      schema:
+        type: boolean
+        example: true
+    AgentsMicrosoftTeams:
+      name: agents
+      in: query
+      required: true
+      description: Config workload requested from the Teams config service.
+      schema:
+        type: string
+        example: TeamsClientMwtPackages
+    AgentsSkype:
+      name: agents
+      in: query
+      required: true
+      description: Config workload requested from the Teams Skype virtual visits config service.
+      schema:
+        type: string
+        example: MicrosoftTeamsVVM
+    AudienceGroup:
+      name: AudienceGroup
+      in: query
+      required: false
+      description: Configuration audience ring requested by the portal.
+      schema:
+        type: string
+        example: ring0
+    Debug:
+      name: Debug
+      in: query
+      required: false
+      description: Debug flag used by config service requests.
+      schema:
+        type: boolean
+        example: false
+    Environment:
+      name: Environment
+      in: query
+      required: false
+      description: Requested Teams service environment.
+      schema:
+        type: string
+        example: prod
+    TenantIdUpperQuery:
+      name: TenantID
+      in: query
+      required: true
+      description: Tenant identifier parameter used by Teams config service calls.
+      schema:
+        type: string
+        format: uuid
+    CountryCode:
+      name: countryCode
+      in: path
+      required: true
+      description: Country or market code used by Teams telephony brief endpoints.
+      schema:
+        type: string
+        example: us
+    PolicyType:
+      name: policyType
+      in: path
+      required: true
+      description: Teams policy or configuration family requested from the records service.
+      schema:
+        type: string
+        example: TeamsMeetingPolicy
+    PolicyName:
+      name: policyName
+      in: path
+      required: true
+      description: Specific named policy instance requested from a configuration family.
+      schema:
+        type: string
+        example: Global
+    TelephonyResource:
+      name: telephonyResource
+      in: path
+      required: true
+      description: Tenant telephony resource requested from the telephone-number management service.
+      schema:
+        type: string
+        enum:
+          - kyc-briefs
+          - phone-number-tag
+          - telephone-number-aggregation
+          - telephone-numbers
+        example: telephone-numbers
+    BriefType:
+      name: briefType
+      in: path
+      required: true
+      description: Campaign or brand brief type requested for the selected country.
+      schema:
+        type: string
+        enum:
+          - tendlc-brand-briefs
+          - tendlc-campaign-briefs
+        example: tendlc-brand-briefs
+    CatalogAppId:
+      name: catalogAppId
+      in: path
+      required: true
+      description: Teams app catalog identifier observed on manage-apps detail pages.
+      schema:
+        type: string
+        format: uuid
+    OfferId:
+      name: offerId
+      in: path
+      required: true
+      description: Add-on monetization offer identifier requested by the Teams admin center.
+      schema:
+        type: string
+        example: amplitudenetlda1624641062570.myteamstv
+    LookbackDays:
+      name: lookbackDays
+      in: path
+      required: true
+      description: Real-time analytics lookback interval used by the communications summary route.
+      schema:
+        type: integer
+        example: 7
+    LocaleCode:
+      name: localeCode
+      in: path
+      required: true
+      description: Locale segment requested from the Teams templates API.
+      schema:
+        type: string
+        example: en-US
+  responses:
+    Unauthorized:
+      description: The Teams portal bearer token or session context was invalid or expired.
+    Forbidden:
+      description: The authenticated principal lacks the required Teams admin permissions.
+    BadRequest:
+      description: The request shape or parameters were invalid.
+    NotFound:
+      description: |
+        The route family was live, but the requested tenant slice, entity, or feature-gated resource
+        was unavailable in the current capture tenant.
+    NoContent:
+      description: The request succeeded and intentionally returned no body.
+    InternalServerError:
+      description: The backend returned an unexpected error for the observed tenant state or request.
+    UnprocessableContent:
+      description: |
+        The route was live but rejected the current query shape or contextual state. This was observed
+        on the virtual visits aggregate-records query captured from the dashboard widget.
+  schemas:
+    GenericObject:
+      type: object
+      additionalProperties: true
+    GenericArrayItem:
+      type: object
+      additionalProperties: true
+    TeamsPortalLogRequest:
+      type: object
+      description: Portal telemetry and bootstrap timing payload emitted by the Teams admin shell.
+      properties:
+        duration:
+          type: integer
+          example: 26
+        status:
+          type: string
+          example: Succeed
+        cdnUrl:
+          type: string
+          format: uri
+          example: https://res.cdn.office.net/s01-itpro-tac-ui/1.0.260331.4/
+        uiConfig:
+          $ref: '#/components/schemas/GenericObject'
+      additionalProperties: true
+    TeamsUserPreference:
+      type: object
+      description: Stored dashboard and carousel preferences for the current Teams admin user.
+      properties:
+        carousel:
+          type: array
+          items:
+            $ref: '#/components/schemas/GenericArrayItem'
+        dashboards:
+          $ref: '#/components/schemas/GenericObject'
+      additionalProperties: true
+    TeamsUserSettings:
+      type: object
+      description: Saved column-width, visibility, and grid preferences for Teams admin experiences.
+      properties:
+        tables:
+          $ref: '#/components/schemas/GenericObject'
+      additionalProperties: true
+    TeamsRegionResponse:
+      type: object
+      description: Teams region, partition, and service-discovery hints for the current admin.
+      properties:
+        region:
+          type: string
+          example: amer
+        partition:
+          type: string
+          example: amer03
+        regionGtms:
+          $ref: '#/components/schemas/GenericObject'
+      additionalProperties: true
+    TeamsEngagementSurfacesResponse:
+      type: object
+      description: User engagement state used by the Teams admin portal shell.
+      properties:
+        engagementSurfaces:
+          type: array
+          items:
+            $ref: '#/components/schemas/GenericArrayItem'
+        userState:
+          $ref: '#/components/schemas/GenericObject'
+        displayed:
+          type: array
+          items:
+            $ref: '#/components/schemas/GenericArrayItem'
+      additionalProperties: true
+    AppAccessRequestsResponse:
+      type: object
+      description: Pending Teams app access requests surfaced by the admin center.
+      properties:
+        appAccessRequests:
+          type: array
+          items:
+            $ref: '#/components/schemas/GenericArrayItem'
+      additionalProperties: true
+    TeamsTenantRecord:
+      type: object
+      description: Tenant-wide Teams record returned by the interfaces records service.
+      properties:
+        assignedPlans:
+          type: array
+          items:
+            $ref: '#/components/schemas/GenericArrayItem'
+      additionalProperties: true
+    TeamsUserRecord:
+      type: object
+      description: Teams user record returned by the interfaces records service.
+      properties:
+        assignedPlans:
+          type: array
+          items:
+            $ref: '#/components/schemas/GenericArrayItem'
+      additionalProperties: true
+    TelephoneNumberAggregationResponse:
+      type: object
+      description: Tenant telephone number summary used by Teams telephony views.
+      properties:
+        TotalCount:
+          type: integer
+          example: 0
+        AssignmentAvailability:
+          $ref: '#/components/schemas/GenericObject'
+        AssignmentStatus:
+          $ref: '#/components/schemas/GenericObject'
+        IsoCountryCodes:
+          type: array
+          items:
+            type: string
+      additionalProperties: true
+    TeamsClusterLookupResponse:
+      type: object
+      description: Regional monitoring platform base URL lookup.
+      properties:
+        data:
+          type: object
+          properties:
+            baseUrlList:
+              type: object
+              additionalProperties:
+                type: string
+          additionalProperties: true
+      additionalProperties: true
+    TeamsConfigResponse:
+      type: object
+      description: Feature and flight configuration returned by the Teams config service.
+      properties:
+        Headers:
+          $ref: '#/components/schemas/GenericObject'
+        ConfigIDs:
+          $ref: '#/components/schemas/GenericObject'
+      additionalProperties: true
+    TeamsRegionalHostResponse:
+      type: object
+      description: Resolver response that maps the tenant to a regional Teams service host.
+      properties:
+        '@odata.context':
+          type: string
+          nullable: true
+        value:
+          type: string
+          example: amer-ehrconnectorsvc.teams.microsoft.com
+      additionalProperties: true
+    ReportsHostResponse:
+      type: object
+      description: Report-host bootstrap result used by Teams premium reporting widgets.
+      properties:
+        host:
+          type: string
+          format: uri
+          example: https://REPORTSNCU.OFFICE.COM
+      additionalProperties: true
+    ODataValueCollection:
+      type: object
+      description: Generic OData-style collection wrapper returned by report endpoints.
+      properties:
+        '@odata.context':
+          type: string
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/GenericArrayItem'
+      additionalProperties: true
+    TeamsAppCatalogEntry:
+      type: object
+      description: Teams app catalog assignment and deployment state.
+      properties:
+        id:
+          type: string
+          format: uuid
+        isActive:
+          type: boolean
+        appType:
+          type: string
+          example: GlobalCatalogApp
+        appAssignmentInfo:
+          $ref: '#/components/schemas/GenericObject'
+        appDeploymentInfo:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/GenericObject'
+      additionalProperties: true
+    TeamsAppCatalogEntries:
+      type: array
+      items:
+        $ref: '#/components/schemas/TeamsAppCatalogEntry'
+    TeamsAppCatalogStatusResponse:
+      type: object
+      description: Admin app catalog migration and alignment state.
+      properties:
+        tenantStatus:
+          $ref: '#/components/schemas/GenericObject'
+        acmUiStatus:
+          $ref: '#/components/schemas/GenericObject'
+      additionalProperties: true
+    TeamsJobsResponse:
+      type: object
+      description: Jobs collection used by the Teams tags service.
+      properties:
+        jobs:
+          type: array
+          items:
+            $ref: '#/components/schemas/GenericArrayItem'
+      additionalProperties: true
+    CapabilityRequest:
+      type: object
+      description: Capability lookup body used by Teams virtual appointments monetization checks.
+      required:
+        - Type
+      properties:
+        Type:
+          type: string
+          example: premiumva
+      additionalProperties: true
+tags:
+  - name: AdminTeamsPortal
+    description: Same-origin logging endpoint on `admin.teams.microsoft.com/api`.
+  - name: RegionalAdmin
+    description: User preference and settings endpoints on `noneu-admin.teams.microsoft.com/api`.
+  - name: TeamsCore
+    description: Teams platform endpoints on `teams.microsoft.com/api`.
+  - name: InterfacesRecords
+    description: Tenant, user, telephony, and location lookups on `api.interfaces.records.teams.microsoft.com`.
+  - name: TeamsUsers
+    description: Teams user inventory and detail records on `api.interfaces.records.teams.microsoft.com/Teams.User/users`.
+  - name: TeamsUserPolicies
+    description: Per-user Teams policy reads on `api.interfaces.records.teams.microsoft.com/Skype.User/users`.
+  - name: TeamsRealtimeAnalytics
+    description: User communications summaries on `api.interfaces.records.teams.microsoft.com/Realtime.Analytics/Users`.
+  - name: TeamsPolicyConfigurations
+    description: Teams policy and tenant configuration inventories on `api.interfaces.records.teams.microsoft.com/Skype.Policy/configurations`.
+  - name: TeamsPolicyAssignments
+    description: Policy-assignment operation lookups on `api.interfaces.records.teams.microsoft.com/Skype.Policy/assignments`.
+  - name: TeamsTelephony
+    description: Telephone number management and voice-user routes on `api.interfaces.records.teams.microsoft.com/Skype.TelephoneNumberMgmt`.
+  - name: TeamsCpc
+    description: Common area phone, bridge, language, and application-instance routes on `api.interfaces.records.teams.microsoft.com`.
+  - name: TeamsVoiceApps
+    description: Auto attendant, call queue, schedule, and shared history routes on `api.interfaces.records.teams.microsoft.com/Teams.VoiceApps`.
+  - name: TeamsTemplates
+    description: Team templates, meeting templates, and packaging metadata on `api.interfaces.records.teams.microsoft.com`.
+  - name: TeamsSilentTests
+    description: Silent Tests inventory route on `api.interfaces.records.teams.microsoft.com/Teams.SilentTest`.
+  - name: MonitoringPlatform
+    description: Monitoring cluster bootstrap on `monitoringplatform.teams.microsoft.com/api`.
+  - name: RegionalMonitoring
+    description: Regional monitoring rules on `*.monitoringplatform.teams.microsoft.com/api`.
+  - name: TeamsConfig
+    description: Config and flight payloads from `config.teams.microsoft.com/config/v1`.
+  - name: EhrConnectorResolver
+    description: Virtual visits regional-host resolver on `ehrconnectorsvc.teams.microsoft.com/api`.
+  - name: RegionalEhrConnector
+    description: Regional virtual visits API on `amer-ehrconnectorsvc.teams.microsoft.com/api`.
+  - name: VAMonetizationResolver
+    description: Virtual appointments monetization host resolver on `vamonetization.teams.microsoft.com`.
+  - name: RegionalVAMonetization
+    description: Regional virtual appointments monetization checks on `amer.vamonetization.teams.microsoft.com`.
+  - name: ReportsBootstrap
+    description: Report-host bootstrap API on `reports.office.com/private/intraTenantConfig`.
+  - name: ReportsUx
+    description: Premium usage report endpoints on `reportsncu.office.com/internal/ux`.
+  - name: AppCatalog
+    description: Teams app catalog APIs on `substrate.office.com/AdminAppCatalog/teamsApps`.
+  - name: CQD
+    description: Call Quality Dashboard bootstrap API on `cqd.teams.microsoft.com/repository`.
+  - name: TeamsCQDData
+    description: Regional Call Quality Dashboard data routes on `cqd.teams.cloud.microsoft/data/noam`.
+  - name: TeamsFrontline
+    description: Frontline orchestration and usage routes on `flworchestrator.teams.microsoft.com/amer/api`.
+  - name: TeamsDeviceManagement
+    description: Teams devices inventory and tenant metadata on `admin.devicemgmt.teams.microsoft.com`.
+  - name: TeamsMonetization
+    description: Add-on storefront and billing helper routes on `monet.teams.microsoft.com/api`.
+  - name: TeamsCollaborationInsights
+    description: Inactive Teams security-rule detail routes on `collabinsights.teams.cloud.microsoft/amer/api`.
+  - name: TeamsHierarchy
+    description: Workforce hierarchy routes on `teams.cloud.microsoft/api/ths`.
+  - name: Tags
+    description: Teams tags job status API on `amer.tags.teams.microsoft.com/api`.
+x-tagGroups:
+  - name: admin.teams.microsoft.com/api
+    tags: [AdminTeamsPortal]
+  - name: noneu-admin.teams.microsoft.com/api
+    tags: [RegionalAdmin]
+  - name: teams.microsoft.com/api
+    tags: [TeamsCore]
+  - name: api.interfaces.records.teams.microsoft.com
+    tags: [InterfacesRecords]
+  - name: api.interfaces.records.teams.microsoft.com/Teams.User/users
+    tags: [TeamsUsers]
+  - name: api.interfaces.records.teams.microsoft.com/Skype.User/users
+    tags: [TeamsUserPolicies]
+  - name: api.interfaces.records.teams.microsoft.com/Realtime.Analytics/Users
+    tags: [TeamsRealtimeAnalytics]
+  - name: api.interfaces.records.teams.microsoft.com/Skype.Policy/configurations
+    tags: [TeamsPolicyConfigurations]
+  - name: api.interfaces.records.teams.microsoft.com/Skype.Policy/assignments
+    tags: [TeamsPolicyAssignments]
+  - name: api.interfaces.records.teams.microsoft.com/Skype.TelephoneNumberMgmt
+    tags: [TeamsTelephony]
+  - name: api.interfaces.records.teams.microsoft.com/Teams.Cpc and Teams.PlatformService
+    tags: [TeamsCpc]
+  - name: api.interfaces.records.teams.microsoft.com/Teams.VoiceApps
+    tags: [TeamsVoiceApps]
+  - name: api.interfaces.records.teams.microsoft.com/Templates and packaging
+    tags: [TeamsTemplates]
+  - name: api.interfaces.records.teams.microsoft.com/Teams.SilentTest
+    tags: [TeamsSilentTests]
+  - name: monitoringplatform.teams.microsoft.com/api
+    tags: [MonitoringPlatform]
+  - name: uswest2.monitoringplatform.teams.microsoft.com/api
+    tags: [RegionalMonitoring]
+  - name: config.teams.microsoft.com/config/v1
+    tags: [TeamsConfig]
+  - name: ehrconnectorsvc.teams.microsoft.com/api
+    tags: [EhrConnectorResolver]
+  - name: amer-ehrconnectorsvc.teams.microsoft.com/api
+    tags: [RegionalEhrConnector]
+  - name: vamonetization.teams.microsoft.com
+    tags: [VAMonetizationResolver]
+  - name: amer.vamonetization.teams.microsoft.com
+    tags: [RegionalVAMonetization]
+  - name: reports.office.com/private/intraTenantConfig
+    tags: [ReportsBootstrap]
+  - name: reportsncu.office.com/internal/ux
+    tags: [ReportsUx]
+  - name: substrate.office.com/AdminAppCatalog/teamsApps
+    tags: [AppCatalog]
+  - name: cqd.teams.microsoft.com/repository
+    tags: [CQD]
+  - name: cqd.teams.cloud.microsoft/data/noam
+    tags: [TeamsCQDData]
+  - name: flworchestrator.teams.microsoft.com/amer/api
+    tags: [TeamsFrontline]
+  - name: admin.devicemgmt.teams.microsoft.com
+    tags: [TeamsDeviceManagement]
+  - name: monet.teams.microsoft.com/api
+    tags: [TeamsMonetization]
+  - name: collabinsights.teams.cloud.microsoft/amer/api
+    tags: [TeamsCollaborationInsights]
+  - name: teams.cloud.microsoft/api/ths
+    tags: [TeamsHierarchy]
+  - name: amer.tags.teams.microsoft.com/api
+    tags: [Tags]
+paths:
+  # admin.teams.microsoft.com/api
+  /api/log:
+    servers:
+      - url: https://admin.teams.microsoft.com
+        description: Same-origin Teams admin center host
+    post:
+      security:
+        - TeamsPortalContext: []
+      tags: [AdminTeamsPortal]
+      summary: Record Teams admin portal shell telemetry
+      description: |
+        Same-origin logger observed on the dashboard, users, activity log, usage report, and best-practice
+        routes. The request body carried timing, permissions, flights, and page bootstrap state for the
+        currently rendered admin experience.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TeamsPortalLogRequest'
+      responses:
+        '200':
+          description: Telemetry payload accepted.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  # noneu-admin.teams.microsoft.com/api
+  /api/v1/usersettings:
+    servers:
+      - url: https://noneu-admin.teams.microsoft.com
+        description: Regional Teams admin preference service
+    get:
+      tags: [RegionalAdmin]
+      summary: Get saved Teams admin grid settings
+      description: |
+        Returns saved column widths, visibility preferences, and other table-level settings for Teams admin
+        center pages such as users and activity log.
+      responses:
+        '200':
+          description: User settings payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamsUserSettings'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/v1/userpreference:
+    servers:
+      - url: https://noneu-admin.teams.microsoft.com
+        description: Regional Teams admin preference service
+    get:
+      tags: [RegionalAdmin]
+      summary: Get Teams admin dashboard preferences
+      description: |
+        Retrieves saved dashboard and carousel layout preferences for the signed-in Teams admin.
+      responses:
+        '200':
+          description: User preference payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamsUserPreference'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    put:
+      tags: [RegionalAdmin]
+      summary: Update Teams admin dashboard preferences
+      description: |
+        Persists dashboard layout preferences for the current Teams admin user. Observed during dashboard
+        layout persistence and should be treated as a real write.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TeamsUserPreference'
+      responses:
+        '204':
+          $ref: '#/components/responses/NoContent'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/v1/DeploymentTeams:
+    servers:
+      - url: https://noneu-admin.teams.microsoft.com
+        description: Regional Teams admin preference service
+    get:
+      tags: [RegionalAdmin]
+      summary: Get deployment team records
+      description: |
+        Returns deployment-team records used by the Teams admin dashboard. The captured tenant returned
+        `204 No Content`.
+      responses:
+        '204':
+          $ref: '#/components/responses/NoContent'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/v1/CartService/carts:
+    servers:
+      - url: https://noneu-admin.teams.microsoft.com
+        description: Regional Teams admin service
+    post:
+      tags: [RegionalAdmin]
+      summary: Create a Teams add-on purchase cart
+      description: |
+        Cart-creation route observed from Teams add-on licensing surfaces. This should be treated as a
+        real write.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+      responses:
+        '200':
+          description: Cart creation result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/v1/clientHealth/clientHealthDetails:
+    servers:
+      - url: https://noneu-admin.teams.microsoft.com
+        description: Regional Teams admin service
+    get:
+      tags: [RegionalAdmin]
+      summary: Get Teams client health details
+      description: |
+        Client health detail route observed from `Teams client health`.
+      responses:
+        '200':
+          description: Client health detail payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/v1/clientHealth/clientHealthIssues:
+    servers:
+      - url: https://noneu-admin.teams.microsoft.com
+        description: Regional Teams admin service
+    get:
+      tags: [RegionalAdmin]
+      summary: List Teams client health issues
+      description: |
+        Client health issue inventory observed from `Teams client health`.
+      responses:
+        '200':
+          description: Client health issues payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/v1/clientHealth/clientHealthTopIssues:
+    servers:
+      - url: https://noneu-admin.teams.microsoft.com
+        description: Regional Teams admin service
+    get:
+      tags: [RegionalAdmin]
+      summary: List top Teams client health issues
+      description: |
+        Top-issues summary route observed from `Teams client health`.
+      responses:
+        '200':
+          description: Top client health issues payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/v1/clientHealth/clientHealthUpdateStatus:
+    servers:
+      - url: https://noneu-admin.teams.microsoft.com
+        description: Regional Teams admin service
+    get:
+      tags: [RegionalAdmin]
+      summary: Get Teams client health update status
+      description: |
+        Client update-status route observed from `Teams client health`.
+      responses:
+        '200':
+          description: Client health update status payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/v1/clientHealth/clientHealthUserDevices:
+    servers:
+      - url: https://noneu-admin.teams.microsoft.com
+        description: Regional Teams admin service
+    get:
+      tags: [RegionalAdmin]
+      summary: List Teams client health user devices
+      description: |
+        User-device detail route observed from `Teams client health`. The retained crawl saw both
+        successful `200` responses and a `500` response, suggesting some tenant or device slices can
+        still fail server-side.
+      responses:
+        '200':
+          description: Client health user-device payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/v1/ContentManagementService/BannerApps:
+    servers:
+      - url: https://noneu-admin.teams.microsoft.com
+        description: Regional Teams admin service
+    get:
+      tags: [RegionalAdmin]
+      summary: List Teams banner apps
+      description: |
+        Banner app inventory observed from Teams add-on licensing and promotional surfaces.
+      responses:
+        '200':
+          description: Banner app payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/v1/DeploymentTasks/getdefault:
+    servers:
+      - url: https://noneu-admin.teams.microsoft.com
+        description: Regional Teams admin service
+    get:
+      tags: [RegionalAdmin]
+      summary: Get default Teams deployment tasks
+      description: |
+        Deployment task defaults observed from Teams planning pages.
+      responses:
+        '200':
+          description: Deployment task default payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/v1/NetworkPlans/getplansintenant:
+    servers:
+      - url: https://noneu-admin.teams.microsoft.com
+        description: Regional Teams admin service
+    get:
+      tags: [RegionalAdmin]
+      summary: List tenant network plans
+      description: |
+        Network plan inventory observed from `Planning > Network planner`. The retained tenant returned
+        `204 No Content`.
+      responses:
+        '204':
+          $ref: '#/components/responses/NoContent'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/v1/Persona/GetAll:
+    servers:
+      - url: https://noneu-admin.teams.microsoft.com
+        description: Regional Teams admin service
+    get:
+      tags: [RegionalAdmin]
+      summary: List Teams admin personas
+      description: |
+        Persona inventory observed from planning and policy pages while the Teams admin shell resolved
+        available experiences.
+      responses:
+        '200':
+          description: Persona inventory payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  # teams.microsoft.com/api
+  /api/authsvc/v1.0/users/region:
+    servers:
+      - url: https://teams.microsoft.com
+        description: Teams core service host
+    post:
+      tags: [TeamsCore]
+      summary: Resolve the current user's Teams region and partition
+      description: |
+        Regional bootstrap call used by the Teams admin center before it talks to partitioned
+        `teams.microsoft.com/api/mt/part/{partition}` routes and related regional services.
+      responses:
+        '200':
+          description: Region and partition metadata.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamsRegionResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/mt//beta/me/engagementSurfaces:
+    servers:
+      - url: https://teams.microsoft.com
+        description: Teams core service host
+    get:
+      tags: [TeamsCore]
+      summary: Get admin engagement surface state
+      description: |
+        Returns coaching, guide, and engagement state consumed by the Teams admin shell. The portal
+        requested this path with an empty partition slot, yielding the observed double slash in the URL.
+      responses:
+        '200':
+          description: Engagement state payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamsEngagementSurfacesResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/mt/part/{partition}//beta/me/engagementSurfaces:
+    servers:
+      - url: https://teams.microsoft.com
+        description: Teams core service host
+    get:
+      tags: [TeamsCore]
+      summary: Get regional admin engagement surface state
+      description: |
+        Regionalized engagement surface lookup observed after the portal resolved the current user's
+        partition. The live request preserved the double slash before `beta`.
+      parameters:
+        - $ref: '#/components/parameters/Partition'
+      responses:
+        '200':
+          description: Regional engagement surface payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/mt/part/{partition}//beta/me/engagementSurfaces/displayed:
+    servers:
+      - url: https://teams.microsoft.com
+        description: Teams core service host
+    put:
+      tags: [TeamsCore]
+      summary: Mark an admin engagement surface as displayed
+      description: |
+        Write observed when the Teams admin center acknowledged that a coaching or engagement surface
+        had been shown to the current admin.
+      parameters:
+        - $ref: '#/components/parameters/Partition'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+      responses:
+        '200':
+          description: Engagement state acknowledgement result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/mt/part/{partition}/beta/admin/apps/appAccessRequests:
+    servers:
+      - url: https://teams.microsoft.com
+        description: Teams core service host
+    get:
+      tags: [TeamsCore]
+      summary: List Teams app access requests
+      description: |
+        Returns Teams app access requests from the partitioned Teams admin backend. Observed from the
+        dashboard widget area after the region and partition were resolved.
+      parameters:
+        - $ref: '#/components/parameters/Partition'
+      responses:
+        '200':
+          description: App access request collection.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppAccessRequestsResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/mt/part/{partition}/beta/admin/apps/{catalogAppId}/appAccessRequests:
+    servers:
+      - url: https://teams.microsoft.com
+        description: Teams core service host
+    get:
+      tags: [TeamsCore]
+      summary: Get app-specific Teams app access requests
+      description: |
+        App detail route observed from `Teams apps > Manage apps` pages while drilling into individual
+        app detail records.
+      parameters:
+        - $ref: '#/components/parameters/Partition'
+        - $ref: '#/components/parameters/CatalogAppId'
+      responses:
+        '200':
+          description: App-specific access request collection.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/mt/part/{partition}/beta/admin/deviceStoreSetting:
+    servers:
+      - url: https://teams.microsoft.com
+        description: Teams core service host
+    get:
+      tags: [TeamsCore]
+      summary: Get Teams device store settings
+      description: |
+        Device store configuration read used by the Teams devices admin experience.
+      parameters:
+        - $ref: '#/components/parameters/Partition'
+      responses:
+        '200':
+          description: Device store settings payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/mt/part/{partition}/beta/admin/getAgentSettingsForTAC:
+    servers:
+      - url: https://teams.microsoft.com
+        description: Teams core service host
+    get:
+      tags: [TeamsCore]
+      summary: Get Teams admin center agent settings
+      description: |
+        Portal settings read used by the Teams admin center shell while loading additional agent-backed
+        surfaces.
+      parameters:
+        - $ref: '#/components/parameters/Partition'
+      responses:
+        '200':
+          description: Agent settings payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/mt/part/{partition}/beta/admin/tenantSharedChannelsSettings:
+    servers:
+      - url: https://teams.microsoft.com
+        description: Teams core service host
+    get:
+      tags: [TeamsCore]
+      summary: Get tenant shared channel settings
+      description: |
+        Shared channels configuration lookup observed from Teams app and collaboration administration
+        surfaces.
+      parameters:
+        - $ref: '#/components/parameters/Partition'
+      responses:
+        '200':
+          description: Shared channel settings payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/mt/part/{partition}/beta/admin/tenantStagedApps:
+    servers:
+      - url: https://teams.microsoft.com
+        description: Teams core service host
+    get:
+      tags: [TeamsCore]
+      summary: List tenant staged Teams apps
+      description: |
+        Returns staged app records used by Teams app management surfaces.
+      parameters:
+        - $ref: '#/components/parameters/Partition'
+      responses:
+        '200':
+          description: Staged app collection.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/mt/part/{partition}/beta/users/appsCatalog:
+    servers:
+      - url: https://teams.microsoft.com
+        description: Teams core service host
+    get:
+      tags: [TeamsCore]
+      summary: Get the current user's Teams apps catalog view
+      description: |
+        Partitioned Teams apps catalog lookup used by the admin center. The route was confirmed with a
+        `200` response, but an exact response schema was not preserved in the retained sample body.
+      parameters:
+        - $ref: '#/components/parameters/Partition'
+      responses:
+        '200':
+          description: Apps catalog payload. Exact schema pending.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/mt/part/{partition}/beta/users/apps/store:
+    servers:
+      - url: https://teams.microsoft.com
+        description: Teams core service host
+    post:
+      tags: [TeamsCore]
+      summary: Query the Teams app store from the admin center
+      description: |
+        Search or filter request observed while drilling into Teams app detail pages and related store
+        pivots.
+      parameters:
+        - $ref: '#/components/parameters/Partition'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+      responses:
+        '200':
+          description: App store query result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/mt/part/{partition}/beta/users/tenantWideAppsSettings:
+    servers:
+      - url: https://teams.microsoft.com
+        description: Teams core service host
+    get:
+      tags: [TeamsCore]
+      summary: Get tenant-wide Teams apps settings
+      description: |
+        Tenant-wide apps settings read observed alongside Teams app catalog and app access request
+        detail pages.
+      parameters:
+        - $ref: '#/components/parameters/Partition'
+      responses:
+        '200':
+          description: Tenant-wide apps settings payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/mt/part/{partition}/beta/users/useraggregatesettings:
+    servers:
+      - url: https://teams.microsoft.com
+        description: Teams core service host
+    post:
+      tags: [TeamsCore]
+      summary: Update Teams admin user aggregate settings
+      description: |
+        Write observed while persisting aggregate display or filter settings for user-focused Teams admin
+        experiences.
+      parameters:
+        - $ref: '#/components/parameters/Partition'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+      responses:
+        '200':
+          description: Aggregate settings update result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # api.interfaces.records.teams.microsoft.com
+  /Teams.Tenant/tenants:
+    servers:
+      - url: https://api.interfaces.records.teams.microsoft.com
+        description: Teams interfaces records service
+    get:
+      tags: [InterfacesRecords]
+      summary: Get the current Teams tenant record
+      description: |
+        Tenant-scoped Teams record used by the admin center to understand assigned service plans and
+        feature state across the current tenant.
+      responses:
+        '200':
+          description: Tenant record.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamsTenantRecord'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /Teams.User/users/{userId}:
+    servers:
+      - url: https://api.interfaces.records.teams.microsoft.com
+        description: Teams interfaces records service
+    get:
+      tags: [TeamsUsers]
+      summary: Get a Teams user record
+      description: |
+        User lookup used by the dashboard and user-management surfaces. The retained capture selected
+        `usageLocation`, but the response still included a broader user record payload.
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+        - $ref: '#/components/parameters/Select'
+      responses:
+        '200':
+          description: User record.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamsUserRecord'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /Teams.User/users:
+    servers:
+      - url: https://api.interfaces.records.teams.microsoft.com
+        description: Teams interfaces records service
+    get:
+      tags: [TeamsUsers]
+      summary: List Teams user records
+      description: |
+        User inventory route observed from `Users > Manage users` before drilling into per-user detail
+        pages.
+      responses:
+        '200':
+          description: Teams user inventory payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /Skype.User/users/{userId}/policies:
+    servers:
+      - url: https://api.interfaces.records.teams.microsoft.com
+        description: Teams interfaces records service
+    get:
+      tags: [TeamsUserPolicies]
+      summary: Get Teams user policy assignments
+      description: |
+        Per-user policy payload observed while opening `Manage users` policy detail pages.
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: User policy assignment payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /Realtime.Analytics/Users/{userId}/CommunicationsSummary/{lookbackDays}:
+    servers:
+      - url: https://api.interfaces.records.teams.microsoft.com
+        description: Teams interfaces records service
+    get:
+      tags: [TeamsRealtimeAnalytics]
+      summary: Get Teams user communications summary
+      description: |
+        Real-time communications summary observed while opening Teams user detail pages. The retained
+        detail pass consistently used a seven-day interval.
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+        - $ref: '#/components/parameters/LookbackDays'
+      responses:
+        '200':
+          description: Communications summary payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /Skype.TelephoneNumberMgmt/Tenants/{tenantId}/telephone-number-aggregation:
+    servers:
+      - url: https://api.interfaces.records.teams.microsoft.com
+        description: Teams interfaces records service
+    get:
+      tags: [TeamsTelephony]
+      summary: Get tenant telephone number aggregation
+      description: |
+        Telephony aggregation used by Teams voice administration surfaces.
+      parameters:
+        - $ref: '#/components/parameters/TenantId'
+        - $ref: '#/components/parameters/Locale'
+      responses:
+        '200':
+          description: Telephone number aggregation result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TelephoneNumberAggregationResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /Skype.TelephoneNumberMgmt/Tenants/{tenantId}/{telephonyResource}:
+    servers:
+      - url: https://api.interfaces.records.teams.microsoft.com
+        description: Teams interfaces records service
+    get:
+      tags: [TeamsTelephony]
+      summary: Get tenant telephone-number management resources
+      description: |
+        Generic tenant telephony route used by the Teams voice administration surface for KYC briefs,
+        phone-number tags, aggregation, and raw telephone-number inventory.
+      parameters:
+        - $ref: '#/components/parameters/TenantId'
+        - $ref: '#/components/parameters/TelephonyResource'
+        - $ref: '#/components/parameters/Locale'
+      responses:
+        '200':
+          description: Tenant telephony resource payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /Skype.TelephoneNumberMgmt/tenants/{tenantId}/country/{countryCode}/{briefType}:
+    servers:
+      - url: https://api.interfaces.records.teams.microsoft.com
+        description: Teams interfaces records service
+    get:
+      tags: [TeamsTelephony]
+      summary: Get country-specific Teams telephony briefs
+      description: |
+        Country-scoped tender and campaign brief routes observed while drilling into Teams voice
+        provisioning pages.
+      parameters:
+        - $ref: '#/components/parameters/TenantId'
+        - $ref: '#/components/parameters/CountryCode'
+        - $ref: '#/components/parameters/BriefType'
+      responses:
+        '200':
+          description: Country-specific telephony brief payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /Skype.TelephoneNumberMgmt/tenants/{tenantId}/port-out-pin:
+    servers:
+      - url: https://api.interfaces.records.teams.microsoft.com
+        description: Teams interfaces records service
+    get:
+      tags: [TeamsTelephony]
+      summary: Get the tenant port-out PIN
+      description: |
+        Tenant port-out PIN lookup observed from Teams voice number-management pages.
+      parameters:
+        - $ref: '#/components/parameters/TenantId'
+      responses:
+        '200':
+          description: Port-out PIN payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /Skype.TelephoneNumberMgmt/tenants/{tenantId}/voice-users/{userId}:
+    servers:
+      - url: https://api.interfaces.records.teams.microsoft.com
+        description: Teams interfaces records service
+    get:
+      tags: [TeamsTelephony]
+      summary: Get Teams voice-user number management details
+      description: |
+        Per-user telephone-number management route observed from Teams voice user detail pages.
+      parameters:
+        - $ref: '#/components/parameters/TenantId'
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: Voice-user telephony payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /Skype.Ncs/civicAddresses/filters:
+    servers:
+      - url: https://api.interfaces.records.teams.microsoft.com
+        description: Teams interfaces records service
+    get:
+      tags: [InterfacesRecords]
+      summary: List civic address filters
+      description: |
+        Returns Teams emergency calling civic address filters for the current tenant.
+      parameters:
+        - $ref: '#/components/parameters/Count'
+        - $ref: '#/components/parameters/ResultSize'
+        - $ref: '#/components/parameters/PopulateNumberOfVoiceUsers'
+        - $ref: '#/components/parameters/PopulateNumberOfTelephoneNumbers'
+      responses:
+        '200':
+          description: Civic address filter collection.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GenericArrayItem'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /Skype.Ncs/locations/filters:
+    servers:
+      - url: https://api.interfaces.records.teams.microsoft.com
+        description: Teams interfaces records service
+    get:
+      tags: [InterfacesRecords]
+      summary: List Teams location filters
+      description: |
+        Returns location filters from the Teams network and civic services backend.
+      responses:
+        '200':
+          description: Location filter collection.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GenericArrayItem'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /Skype.Policy/configurations/{policyType}:
+    servers:
+      - url: https://api.interfaces.records.teams.microsoft.com
+        description: Teams interfaces records service
+    get:
+      tags: [TeamsPolicyConfigurations]
+      summary: Get Teams policy or configuration inventory
+      description: |
+        Generic policy-configuration route observed across meeting, calling, channels, targeting, network,
+        federation, external access, guest access, and voice-management pages. Examples included
+        `TeamsMeetingPolicy`, `TeamsCallingPolicy`, `OnlinePSTNGateway`, `OnlineVoiceRoute`,
+        `TeamsUpgradePolicy`, `TenantNetworkRegion`, and `TenantTrustedIPAddress`.
+      parameters:
+        - $ref: '#/components/parameters/PolicyType'
+      responses:
+        '200':
+          description: Policy or configuration inventory payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /Skype.Policy/configurations/{policyType}/configuration/{policyName}:
+    servers:
+      - url: https://api.interfaces.records.teams.microsoft.com
+        description: Teams interfaces records service
+    get:
+      tags: [TeamsPolicyConfigurations]
+      summary: Get a named Teams policy configuration instance
+      description: |
+        Named policy configuration route observed for global policy records such as
+        `OnlineDialInConferencingTenantSettings/configuration/Global`,
+        `OnlineDialOutPolicy/configuration/Global`, and
+        `TeamsAppPermissionPolicy/configuration/Global`.
+      parameters:
+        - $ref: '#/components/parameters/PolicyType'
+        - $ref: '#/components/parameters/PolicyName'
+      responses:
+        '200':
+          description: Named policy configuration payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /Skype.Policy/assignments/operationsall:
+    servers:
+      - url: https://api.interfaces.records.teams.microsoft.com
+        description: Teams interfaces records service
+    get:
+      tags: [TeamsPolicyAssignments]
+      summary: List Teams policy assignment operations
+      description: |
+        Policy-assignment operation metadata observed while drilling into policy assignment and user
+        policy pages.
+      responses:
+        '200':
+          description: Policy-assignment operation metadata.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /Skype.OperatorConnect/operators:
+    servers:
+      - url: https://api.interfaces.records.teams.microsoft.com
+        description: Teams interfaces records service
+    get:
+      tags: [TeamsTelephony]
+      summary: List Operator Connect operators
+      description: |
+        Operator inventory used by Teams voice routing and Operator Connect administration pages.
+      responses:
+        '200':
+          description: Operator collection.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /Skype.OperatorConnect/operator-consents:
+    servers:
+      - url: https://api.interfaces.records.teams.microsoft.com
+        description: Teams interfaces records service
+    get:
+      tags: [TeamsTelephony]
+      summary: List Operator Connect consents
+      description: |
+        Consent inventory used by Teams Operator Connect pages.
+      responses:
+        '200':
+          description: Operator consent collection.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /Teams.Cpc/users/{userId}:
+    servers:
+      - url: https://api.interfaces.records.teams.microsoft.com
+        description: Teams interfaces records service
+    get:
+      tags: [TeamsCpc]
+      summary: Get Teams common area phone user details
+      description: |
+        CPC user detail route observed from Teams voice and shared-device pages.
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: Common area phone user payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /Teams.Cpc/bridges:
+    servers:
+      - url: https://api.interfaces.records.teams.microsoft.com
+        description: Teams interfaces records service
+    get:
+      tags: [TeamsCpc]
+      summary: List Teams CPC bridges
+      description: |
+        Bridge inventory used by shared-device and application-instance administration surfaces.
+      responses:
+        '200':
+          description: CPC bridge collection.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /Teams.Cpc/languagesSupported:
+    servers:
+      - url: https://api.interfaces.records.teams.microsoft.com
+        description: Teams interfaces records service
+    get:
+      tags: [TeamsCpc]
+      summary: List Teams CPC supported languages
+      description: |
+        Supported language inventory used by common area phone and auto attendant setup flows.
+      responses:
+        '200':
+          description: Supported language collection.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /Teams.PlatformService/v2/ApplicationInstances:
+    servers:
+      - url: https://api.interfaces.records.teams.microsoft.com
+        description: Teams interfaces records service
+    get:
+      tags: [TeamsCpc]
+      summary: List Teams application instances
+      description: |
+        Application-instance inventory observed alongside voice app and shared-device administration
+        pages.
+      responses:
+        '200':
+          description: Application-instance inventory payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /Teams.VoiceApps/auto-attendants:
+    servers:
+      - url: https://api.interfaces.records.teams.microsoft.com
+        description: Teams interfaces records service
+    get:
+      tags: [TeamsVoiceApps]
+      summary: List Teams auto attendants
+      description: |
+        Auto attendant inventory route observed from Teams voice administration pages.
+      responses:
+        '200':
+          description: Auto attendant collection.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /Teams.VoiceApps/auto-attendants/count:
+    servers:
+      - url: https://api.interfaces.records.teams.microsoft.com
+        description: Teams interfaces records service
+    get:
+      tags: [TeamsVoiceApps]
+      summary: Get the Teams auto attendant count
+      description: |
+        Count helper used by Teams voice administration pages before loading full auto attendant data.
+      responses:
+        '200':
+          description: Auto attendant count payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /Teams.VoiceApps/callqueues:
+    servers:
+      - url: https://api.interfaces.records.teams.microsoft.com
+        description: Teams interfaces records service
+    get:
+      tags: [TeamsVoiceApps]
+      summary: List Teams call queues
+      description: |
+        Call queue inventory route observed from Teams voice administration pages.
+      responses:
+        '200':
+          description: Call queue collection.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /Teams.VoiceApps/callqueues/count:
+    servers:
+      - url: https://api.interfaces.records.teams.microsoft.com
+        description: Teams interfaces records service
+    get:
+      tags: [TeamsVoiceApps]
+      summary: Get the Teams call queue count
+      description: |
+        Count helper used by Teams voice administration pages before loading full call queue data.
+      responses:
+        '200':
+          description: Call queue count payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /Teams.VoiceApps/schedules:
+    servers:
+      - url: https://api.interfaces.records.teams.microsoft.com
+        description: Teams interfaces records service
+    get:
+      tags: [TeamsVoiceApps]
+      summary: List Teams voice-app schedules
+      description: |
+        Schedule inventory used by Teams auto attendant and call queue administration surfaces.
+      responses:
+        '200':
+          description: Voice-app schedule collection.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /Teams.VoiceApps/shared-call-queue-history:
+    servers:
+      - url: https://api.interfaces.records.teams.microsoft.com
+        description: Teams interfaces records service
+    get:
+      tags: [TeamsVoiceApps]
+      summary: Get shared call queue history
+      description: |
+        Shared call queue history route observed from Teams voice app detail pages.
+      responses:
+        '200':
+          description: Shared call queue history payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /Teams.Templates/api/teamtemplates/v1.0/{localeCode}:
+    servers:
+      - url: https://api.interfaces.records.teams.microsoft.com
+        description: Teams interfaces records service
+    get:
+      tags: [TeamsTemplates]
+      summary: List Teams team templates
+      description: |
+        Team template inventory observed from `Teams > Team templates`.
+      parameters:
+        - $ref: '#/components/parameters/LocaleCode'
+      responses:
+        '200':
+          description: Team template collection.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /Teams.Artifacts/meetingTemplate/admin/descriptions:
+    servers:
+      - url: https://api.interfaces.records.teams.microsoft.com
+        description: Teams interfaces records service
+    get:
+      tags: [TeamsTemplates]
+      summary: List Teams meeting template descriptions
+      description: |
+        Meeting template metadata observed from Teams meeting and template administration pages.
+      responses:
+        '200':
+          description: Meeting template description payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /Teams.VerticalPackaging/package:
+    servers:
+      - url: https://api.interfaces.records.teams.microsoft.com
+        description: Teams interfaces records service
+    get:
+      tags: [TeamsTemplates]
+      summary: Get Teams vertical packaging metadata
+      description: |
+        Vertical packaging metadata observed while drilling into Teams templates and industry packaging
+        surfaces.
+      responses:
+        '200':
+          description: Vertical packaging payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /Teams.SilentTest/list:
+    servers:
+      - url: https://api.interfaces.records.teams.microsoft.com
+        description: Teams interfaces records service
+    get:
+      tags: [TeamsSilentTests]
+      summary: List Silent Tests
+      description: |
+        Silent Tests inventory route reached from `Analytics & reports > Silent Tests`. The retained
+        tenant returned `404 Not Found`, which suggests the route family is real but unavailable in the
+        current tenant or feature slice.
+      responses:
+        '200':
+          description: Silent Tests inventory payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # monitoringplatform.teams.microsoft.com/api
+  /api/v1/mta/TenantclusterLookup:
+    servers:
+      - url: https://monitoringplatform.teams.microsoft.com
+        description: Teams monitoring platform bootstrap host
+    get:
+      tags: [MonitoringPlatform]
+      summary: Resolve the monitoring platform cluster for the tenant
+      description: |
+        Monitoring bootstrap call observed across multiple Teams admin pages. The response returned an
+        `mta` base URL such as `https://useast2.monitoringplatform.teams.microsoft.com`.
+      responses:
+        '200':
+          description: Cluster lookup result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamsClusterLookupResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/v1/mta/rule:
+    servers:
+      - url: https://uswest2.monitoringplatform.teams.microsoft.com
+        description: Regional Teams monitoring platform host
+    get:
+      tags: [RegionalMonitoring]
+      summary: List Teams monitoring rules
+      description: |
+        Regional monitoring rule inventory observed after the portal resolved the tenant monitoring
+        cluster.
+      responses:
+        '200':
+          description: Monitoring rule inventory payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # config.teams.microsoft.com/config/v1
+  /config/v1/MicrosoftTeams/{version}:
+    servers:
+      - url: https://config.teams.microsoft.com
+        description: Teams config service
+    get:
+      tags: [TeamsConfig]
+      summary: Get Microsoft Teams config payload
+      description: |
+        Config service read used by the admin center to retrieve Teams workload settings such as
+        `TeamsClientMwtPackages`.
+      parameters:
+        - $ref: '#/components/parameters/Version'
+        - $ref: '#/components/parameters/AgentsMicrosoftTeams'
+        - $ref: '#/components/parameters/TenantIdUpperQuery'
+      responses:
+        '200':
+          description: Config payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamsConfigResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /config/v1/Skype/{version}:
+    servers:
+      - url: https://config.teams.microsoft.com
+        description: Teams config service
+    get:
+      tags: [TeamsConfig]
+      summary: Get Skype and virtual visits config payload
+      description: |
+        Config service read used by Teams virtual visits surfaces for the `MicrosoftTeamsVVM` workload.
+      parameters:
+        - $ref: '#/components/parameters/Version'
+        - $ref: '#/components/parameters/AgentsSkype'
+        - $ref: '#/components/parameters/TenantIdUpperQuery'
+        - $ref: '#/components/parameters/AudienceGroup'
+        - $ref: '#/components/parameters/Debug'
+        - $ref: '#/components/parameters/Environment'
+      responses:
+        '200':
+          description: Config payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamsConfigResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ehrconnectorsvc.teams.microsoft.com/api
+  /api/v1/regionalDomainNameForTenant:
+    servers:
+      - url: https://ehrconnectorsvc.teams.microsoft.com
+        description: Global virtual visits resolver
+    get:
+      tags: [EhrConnectorResolver]
+      summary: Resolve the virtual visits regional host for the tenant
+      description: |
+        Bootstrap endpoint that maps the current tenant to a regional virtual visits backend such as
+        `amer-ehrconnectorsvc.teams.microsoft.com`.
+      responses:
+        '200':
+          description: Regional host resolver result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamsRegionalHostResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # amer-ehrconnectorsvc.teams.microsoft.com/api
+  /api/user/IsAdminForVirtualVisitsAnalytics:
+    servers:
+      - url: https://amer-ehrconnectorsvc.teams.microsoft.com
+        description: Regional virtual visits backend
+    get:
+      tags: [RegionalEhrConnector]
+      summary: Check whether the current admin can view virtual visits analytics
+      description: |
+        Boolean capability check used by the dashboard virtual visits widget.
+      responses:
+        '200':
+          description: Admin capability flag.
+          content:
+            application/json:
+              schema:
+                type: boolean
+                example: true
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/v1/virtualvisits/aggregaterecords:
+    servers:
+      - url: https://amer-ehrconnectorsvc.teams.microsoft.com
+        description: Regional virtual visits backend
+    get:
+      tags: [RegionalEhrConnector]
+      summary: Query virtual visits aggregate records
+      description: |
+        Virtual visits analytics query observed from the dashboard widget. The retained live request
+        returned `422 Unprocessable Content`, which strongly suggests the route is real but sensitive to
+        exact filter, ordering, or other dashboard context.
+      parameters:
+        - $ref: '#/components/parameters/Filter'
+        - $ref: '#/components/parameters/OrderBy'
+        - $ref: '#/components/parameters/Top'
+      responses:
+        '200':
+          description: Aggregate records result. Exact schema pending.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '422':
+          $ref: '#/components/responses/UnprocessableContent'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # vamonetization.teams.microsoft.com
+  /regionalDomainNameForTenant:
+    servers:
+      - url: https://vamonetization.teams.microsoft.com
+        description: Global virtual appointments monetization resolver
+    get:
+      tags: [VAMonetizationResolver]
+      summary: Resolve the virtual appointments monetization regional host
+      description: |
+        Bootstrap endpoint that maps the current tenant to a regional monetization backend such as
+        `amer.vamonetization.teams.microsoft.com`.
+      responses:
+        '200':
+          description: Regional host resolver result.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  value:
+                    type: string
+                    example: amer.vamonetization.teams.microsoft.com
+                additionalProperties: true
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # amer.vamonetization.teams.microsoft.com
+  /haslicense:
+    servers:
+      - url: https://amer.vamonetization.teams.microsoft.com
+        description: Regional virtual appointments monetization backend
+    get:
+      tags: [RegionalVAMonetization]
+      summary: Check monetization license state
+      description: |
+        Boolean license check used by virtual appointments and SMS-related Teams admin experiences.
+      parameters:
+        - $ref: '#/components/parameters/AppId'
+      responses:
+        '200':
+          description: License state.
+          content:
+            application/json:
+              schema:
+                type: boolean
+                example: false
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /hasActiveCapabilities:
+    servers:
+      - url: https://amer.vamonetization.teams.microsoft.com
+        description: Regional virtual appointments monetization backend
+    post:
+      tags: [RegionalVAMonetization]
+      summary: Check active virtual appointments capabilities
+      description: |
+        Capability lookup observed with `{ "Type": "premiumva" }` in the request body.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CapabilityRequest'
+      responses:
+        '200':
+          description: Capability state.
+          content:
+            application/json:
+              schema:
+                type: boolean
+                example: false
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # monet.teams.microsoft.com/api
+  /api/v1.0/assets:
+    servers:
+      - url: https://monet.teams.microsoft.com
+        description: Teams add-on monetization backend
+    get:
+      tags: [TeamsMonetization]
+      summary: List Teams add-on monetization assets
+      description: |
+        Asset inventory observed from Teams add-on licensing and storefront surfaces.
+      responses:
+        '200':
+          description: Monetization asset payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/v1.0/offers/{offerId}:
+    servers:
+      - url: https://monet.teams.microsoft.com
+        description: Teams add-on monetization backend
+    get:
+      tags: [TeamsMonetization]
+      summary: Get a Teams add-on monetization offer
+      description: |
+        Offer detail route observed from Teams add-on licensing pages. Some captured offer identifiers
+        returned `404 Not Found`, which suggests the route family is live but the requested offer may not
+        be available in the current tenant or region.
+      parameters:
+        - $ref: '#/components/parameters/OfferId'
+      responses:
+        '200':
+          description: Offer detail payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/v2.0/billing-accounts:
+    servers:
+      - url: https://monet.teams.microsoft.com
+        description: Teams add-on monetization backend
+    get:
+      tags: [TeamsMonetization]
+      summary: List Teams add-on billing accounts
+      description: |
+        Billing-account inventory used by Teams add-on licensing and storefront flows.
+      responses:
+        '200':
+          description: Billing-account payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # flworchestrator.teams.microsoft.com/amer/api
+  /amer/api/reports/v1.0/flw/orchestration/usage:
+    servers:
+      - url: https://flworchestrator.teams.microsoft.com
+        description: Frontline orchestration backend
+    post:
+      tags: [TeamsFrontline]
+      summary: Query Frontline orchestration usage
+      description: |
+        Usage report query observed from Frontline usage insights. The body shape depends on the selected
+        report state and should be treated as portal-context dependent.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+      responses:
+        '200':
+          description: Frontline orchestration usage result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /amer/api/reports/v1.0/flw/usage:
+    servers:
+      - url: https://flworchestrator.teams.microsoft.com
+        description: Frontline orchestration backend
+    get:
+      tags: [TeamsFrontline]
+      summary: Get Frontline usage summary
+      description: |
+        Frontline usage summary route observed from `Frontline > Usage insights`. The retained tenant
+        returned `204 No Content`.
+      responses:
+        '204':
+          $ref: '#/components/responses/NoContent'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /amer/api/reports/v1.0/flw/usage/metadata:
+    servers:
+      - url: https://flworchestrator.teams.microsoft.com
+        description: Frontline orchestration backend
+    get:
+      tags: [TeamsFrontline]
+      summary: Get Frontline usage metadata
+      description: |
+        Metadata companion route for Frontline usage reporting. The retained tenant returned
+        `204 No Content`.
+      responses:
+        '204':
+          $ref: '#/components/responses/NoContent'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /amer/api/v1.0/hybridTeams/deployedLocationsCount:
+    servers:
+      - url: https://flworchestrator.teams.microsoft.com
+        description: Frontline orchestration backend
+    get:
+      tags: [TeamsFrontline]
+      summary: Get the Frontline deployed locations count
+      description: |
+        Deployed-location count observed from Frontline hybrid teams administration pages.
+      responses:
+        '200':
+          description: Deployed location count payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /amer/api/v1.0/managementUnits:
+    servers:
+      - url: https://flworchestrator.teams.microsoft.com
+        description: Frontline orchestration backend
+    get:
+      tags: [TeamsFrontline]
+      summary: List Frontline management units
+      description: |
+        Management-unit inventory observed from Frontline planning and orchestration pages.
+      responses:
+        '200':
+          description: Management-unit payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /amer/api/v1.0/orchestrationStatus:
+    servers:
+      - url: https://flworchestrator.teams.microsoft.com
+        description: Frontline orchestration backend
+    get:
+      tags: [TeamsFrontline]
+      summary: Get the Frontline orchestration status
+      description: |
+        Orchestration status lookup used by Frontline setup and insights pages.
+      responses:
+        '200':
+          description: Orchestration status payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /amer/api/v1.0/settings:
+    servers:
+      - url: https://flworchestrator.teams.microsoft.com
+        description: Frontline orchestration backend
+    get:
+      tags: [TeamsFrontline]
+      summary: Get Frontline orchestration settings
+      description: |
+        Frontline settings read observed from orchestration and usage pages.
+      responses:
+        '200':
+          description: Frontline settings payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # admin.devicemgmt.teams.microsoft.com
+  /admin/api/v1/MoPo/metaData:
+    servers:
+      - url: https://admin.devicemgmt.teams.microsoft.com
+        description: Teams device management admin host
+    get:
+      tags: [TeamsDeviceManagement]
+      summary: Get Teams device management metadata
+      description: |
+        Metadata bootstrap route observed before the portal loaded Teams device inventory pages.
+      responses:
+        '200':
+          description: Device management metadata payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/v2/devices:
+    servers:
+      - url: https://admin.devicemgmt.teams.microsoft.com
+        description: Teams device management data host
+    get:
+      tags: [TeamsDeviceManagement]
+      summary: List Teams devices
+      description: |
+        Teams device inventory route observed from `Teams devices` list pages.
+      responses:
+        '200':
+          description: Teams device inventory payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/v2/devices/summary:
+    servers:
+      - url: https://admin.devicemgmt.teams.microsoft.com
+        description: Teams device management data host
+    get:
+      tags: [TeamsDeviceManagement]
+      summary: Get the Teams device inventory summary
+      description: |
+        Device-summary route observed from Teams devices overview pages.
+      responses:
+        '200':
+          description: Device summary payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/v2/tags/enroll:
+    servers:
+      - url: https://admin.devicemgmt.teams.microsoft.com
+        description: Teams device management data host
+    get:
+      tags: [TeamsDeviceManagement]
+      summary: List Teams device enrollment tags
+      description: |
+        Enrollment tag inventory used by Teams devices management pages.
+      responses:
+        '200':
+          description: Device enrollment tag payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/v2/tenants/{tenantId}:
+    servers:
+      - url: https://admin.devicemgmt.teams.microsoft.com
+        description: Teams device management data host
+    get:
+      tags: [TeamsDeviceManagement]
+      summary: Get Teams device management tenant metadata
+      description: |
+        Tenant metadata route observed from Teams devices pages. The retained capture returned
+        `404 Not Found`, which suggests the route family is live but not available for the current tenant
+        or license state.
+      parameters:
+        - $ref: '#/components/parameters/TenantId'
+      responses:
+        '200':
+          description: Device management tenant metadata payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # collabinsights.teams.cloud.microsoft/amer/api
+  /amer/api/v1/Security/Rules/InactiveTeams/View-Details:
+    servers:
+      - url: https://collabinsights.teams.cloud.microsoft
+        description: Teams collaboration insights backend
+    get:
+      tags: [TeamsCollaborationInsights]
+      summary: View inactive Teams rule details
+      description: |
+        Collaboration insight detail route discovered from the Teams security rule surface. The retained
+        tenant returned `403 Forbidden`, which suggests the route requires additional permissions or a
+        feature flag.
+      responses:
+        '200':
+          description: Inactive Teams rule detail payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # teams.cloud.microsoft/api
+  /api/ths/api/v1/hierarchies/{tenantId}/operations:
+    servers:
+      - url: https://teams.cloud.microsoft
+        description: Teams workforce hierarchy backend
+    get:
+      tags: [TeamsHierarchy]
+      summary: List workforce hierarchy operations
+      description: |
+        Workforce hierarchy route discovered from planning and operations pages. The retained tenant
+        returned `404 Not Found`, which suggests the hierarchy feature was unavailable in the current
+        tenant.
+      parameters:
+        - $ref: '#/components/parameters/TenantId'
+      responses:
+        '200':
+          description: Workforce hierarchy operations payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # reports.office.com/private/intraTenantConfig
+  /private/intraTenantConfig/host:
+    servers:
+      - url: https://reports.office.com
+        description: Reports bootstrap host
+    get:
+      tags: [ReportsBootstrap]
+      summary: Resolve the report UX host for the tenant
+      description: |
+        Report bootstrap endpoint used before the Teams admin center calls `reportsncu.office.com`.
+      parameters:
+        - $ref: '#/components/parameters/TenantIdLowerQuery'
+      responses:
+        '200':
+          description: Report host bootstrap result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportsHostResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # reportsncu.office.com/internal/ux
+  /internal/ux/getTeamsPremiumV2ActiveUserCounts:
+    servers:
+      - url: https://reportsncu.office.com
+        description: Teams premium report UX host
+    get:
+      tags: [ReportsUx]
+      summary: Get Teams Premium active user counts
+      description: |
+        Premium reporting endpoint observed from the Teams admin dashboard.
+      parameters:
+        - $ref: '#/components/parameters/TenantIdQuery'
+        - $ref: '#/components/parameters/Aggregate'
+      responses:
+        '200':
+          description: Active user counts.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataValueCollection'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /internal/ux/getTeamsPremiumV2MeetingCounts:
+    servers:
+      - url: https://reportsncu.office.com
+        description: Teams premium report UX host
+    get:
+      tags: [ReportsUx]
+      summary: Get Teams Premium meeting counts
+      description: |
+        Premium reporting endpoint observed from the Teams admin dashboard.
+      parameters:
+        - $ref: '#/components/parameters/TenantIdQuery'
+        - $ref: '#/components/parameters/Aggregate'
+      responses:
+        '200':
+          description: Meeting counts.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataValueCollection'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /internal/ux/getTeamsAppUsageDetail:
+    servers:
+      - url: https://reportsncu.office.com
+        description: Teams premium report UX host
+    get:
+      tags: [ReportsUx]
+      summary: Get Teams app usage detail
+      description: |
+        Detailed app-usage reporting route observed during the second-pass report interaction crawl.
+      parameters:
+        - $ref: '#/components/parameters/TenantIdQuery'
+        - $ref: '#/components/parameters/Aggregate'
+      responses:
+        '200':
+          description: Teams app usage detail payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataValueCollection'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /internal/ux/getTeamsPremiumV2UserDetail:
+    servers:
+      - url: https://reportsncu.office.com
+        description: Teams premium report UX host
+    get:
+      tags: [ReportsUx]
+      summary: Get Teams Premium user detail
+      description: |
+        Detailed per-user Premium reporting route observed during the second-pass report interaction
+        crawl.
+      parameters:
+        - $ref: '#/components/parameters/TenantIdQuery'
+        - $ref: '#/components/parameters/Aggregate'
+      responses:
+        '200':
+          description: Teams Premium user detail payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataValueCollection'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # substrate.office.com/AdminAppCatalog/teamsApps
+  /AdminAppCatalog/teamsApps:
+    servers:
+      - url: https://substrate.office.com
+        description: Teams app catalog backend
+    get:
+      tags: [AppCatalog]
+      summary: List Teams app catalog entries
+      description: |
+        App catalog inventory read observed from the Teams admin dashboard.
+      responses:
+        '200':
+          description: Teams app catalog entries.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamsAppCatalogEntries'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /AdminAppCatalog/teamsApps/acmStatus:
+    servers:
+      - url: https://substrate.office.com
+        description: Teams app catalog backend
+    get:
+      tags: [AppCatalog]
+      summary: Get Teams app catalog migration status
+      description: |
+        Returns app catalog migration, admin alignment, and ACM UI state for the current tenant.
+      responses:
+        '200':
+          description: App catalog status payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamsAppCatalogStatusResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /AdminAppCatalog/teamsApps/{catalogAppId}/appAssignments:
+    servers:
+      - url: https://substrate.office.com
+        description: Teams app catalog backend
+    get:
+      tags: [AppCatalog]
+      summary: List Teams app catalog assignments for an app
+      description: |
+        App-specific assignment route observed while drilling into `Teams apps > Manage apps` detail
+        pages and their security tabs.
+      parameters:
+        - $ref: '#/components/parameters/CatalogAppId'
+      responses:
+        '200':
+          description: App assignment payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # cqd.teams.microsoft.com/repository
+  /repository/tenant/dataservice:
+    servers:
+      - url: https://cqd.teams.microsoft.com
+        description: CQD bootstrap host
+    get:
+      tags: [CQD]
+      summary: Resolve the tenant CQD data service host
+      description: |
+        Returns the regional Call Quality Dashboard data endpoint used by Teams admin center links and
+        report pivots.
+      responses:
+        '200':
+          description: CQD data service URL.
+          content:
+            application/json:
+              schema:
+                type: string
+                format: uri
+                example: https://cqd.teams.cloud.microsoft/data/noam/
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /data/noam/DataUpload/AllTenantDataFiles:
+    servers:
+      - url: https://cqd.teams.cloud.microsoft
+        description: Regional CQD data host
+    get:
+      tags: [TeamsCQDData]
+      summary: List CQD tenant data upload files
+      description: |
+        Regional CQD data route observed after the Teams admin center resolved the tenant-specific CQD
+        data service host.
+      responses:
+        '200':
+          description: CQD tenant data file payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /data/noam/RunQueryDashboard:
+    servers:
+      - url: https://cqd.teams.cloud.microsoft
+        description: Regional CQD data host
+    post:
+      tags: [TeamsCQDData]
+      summary: Run a CQD dashboard query
+      description: |
+        CQD dashboard query route observed from the Call Quality Dashboard surface after regional host
+        resolution.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenericObject'
+      responses:
+        '200':
+          description: CQD dashboard query result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # amer.tags.teams.microsoft.com/api
+  /api/v1/jobs:
+    servers:
+      - url: https://amer.tags.teams.microsoft.com
+        description: Regional Teams tags backend
+    get:
+      tags: [Tags]
+      summary: List Teams tags jobs
+      description: |
+        Returns current or pending jobs for the Teams tags service. The retained capture returned an empty
+        jobs collection.
+      responses:
+        '200':
+          description: Jobs collection.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamsJobsResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'

@@ -54,6 +54,21 @@ function splitPathSegments(value) {
   return (value || "").split(/[\\/]/).filter(Boolean);
 }
 
+function getRouteSegments(config, specification) {
+  if (!config?.route?.routeFromSpec) {
+    return [];
+  }
+
+  const preferredRoute = specification?.info?.["x-nodoc-route"];
+  if (preferredRoute) {
+    return splitPathSegments(preferredRoute);
+  }
+
+  return splitPathSegments(specification?.info?.title || "").map((segment) =>
+    _.kebabCase(segment)
+  );
+}
+
 function cloneObject(value) {
   return value === undefined ? undefined : JSON.parse(JSON.stringify(value));
 }
@@ -302,7 +317,7 @@ async function loadSpecFromContent(config) {
   if (config.content) {
     const { validate } = await getScalarParserModules();
     const validated = await validate(config.content);
-    // Support x-nodoc-category extension field for dropdown nav grouping
+    // Support x-nodoc-category and x-nodoc-route extension fields for nav grouping and stable site slugs
     const specCategory =
       validated.specification?.info?.["x-nodoc-category"] || undefined;
     return {
@@ -317,12 +332,8 @@ async function loadSpecFromContent(config) {
       route: {
         route: path.posix.join(
           "/",
-          ...[
-            config?.route?.route || "",
-            config?.route?.routeFromSpec
-              ? validated.specification?.info?.title || ""
-              : "",
-           ].flatMap((seg) => seg.split("/").map((s) => _.kebabCase(s)))
+          config?.route?.route || "",
+          ...getRouteSegments(config, validated.specification)
         ),
       },
       scalarConfiguration: {
@@ -418,6 +429,25 @@ async function addToNav(context, config) {
   }
 }
 
+function collapseSingleItemDropdowns(context) {
+  const navBar = context.siteConfig.themeConfig.navbar;
+  navBar.items = navBar.items.map((navItem) => {
+    if (
+      navItem.type === "dropdown" &&
+      Array.isArray(navItem.items) &&
+      navItem.items.length === 1 &&
+      navItem.items[0]?.to
+    ) {
+      return {
+        ...navItem.items[0],
+        position: navItem.position ?? navItem.items[0].position,
+      };
+    }
+
+    return navItem;
+  });
+}
+
 const ScalarDocusaurus = (context, userOptions) => {
   const options = mergeConfig(userOptions, DEFAULT_SCALAR_CONFIG);
   return {
@@ -462,6 +492,7 @@ const ScalarDocusaurus = (context, userOptions) => {
           }
         }
       });
+      collapseSingleItemDropdowns(context);
     },
   };
 };

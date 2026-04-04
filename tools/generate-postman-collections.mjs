@@ -32,6 +32,11 @@ const collectionDefinitions = [
     output: "postman/collections/sharepoint-admin.collection.json",
   },
   {
+    name: "Teams",
+    spec: "specifications/nodoc-teams/specification/openapi.yml",
+    output: "postman/collections/teams.collection.json",
+  },
+  {
     name: "M365 Apps Config",
     spec: "specifications/nodoc-m365-apps-config/specification/openapi.yml",
     output: "postman/collections/m365-apps-config.collection.json",

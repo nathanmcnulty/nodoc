@@ -62,7 +62,7 @@ export const apiCatalog: ApiCatalogItem[] = [
   },
   {
     title: "M365 Admin",
-    slug: "/m-365-admin",
+    slug: "/m365-admin",
     family: "Admin portal",
     operations: 213,
     authModel: "Portal session cookie + custom admin headers",
@@ -98,7 +98,7 @@ export const apiCatalog: ApiCatalogItem[] = [
   },
   {
     title: "SharePoint Admin",
-    slug: "/share-point-admin",
+    slug: "/sharepoint-admin",
     family: "SharePoint admin center",
     operations: 41,
     authModel: "Portal session cookie (`FedAuth`) + SharePoint form digest",
@@ -113,6 +113,24 @@ export const apiCatalog: ApiCatalogItem[] = [
     collectionPath: "postman/collections/sharepoint-admin.collection.json",
     collectionDownloadUrl:
       "https://raw.githubusercontent.com/nathanmcnulty/nodoc/main/postman/collections/sharepoint-admin.collection.json",
+  },
+  {
+    title: "Teams",
+    slug: "/teams",
+    family: "Teams admin center",
+    operations: 99,
+    authModel: "Portal bearer token + same-origin portal context",
+    baseUrl: "https://admin.teams.microsoft.com",
+    summary:
+      "Exhaustive Teams admin center coverage spanning left-nav routes, list/detail drill-ins, report interactions, records-backed policy and telephony surfaces, Frontline orchestration, devices, CQD data, app catalog detail pages, monetization, and planning helpers.",
+    highlights: [
+      "Deep crawl covered same-origin nav routes plus safe list/detail and report drill-ins",
+      "Distinct Teams families now include policy configs, telephony, user analytics, Frontline, devices, CQD data, and add-on licensing",
+      "Feature- and tenant-gated surfaces such as Silent Tests, hierarchy operations, and inactive Teams insights are called out explicitly",
+    ],
+    collectionPath: "postman/collections/teams.collection.json",
+    collectionDownloadUrl:
+      "https://raw.githubusercontent.com/nathanmcnulty/nodoc/main/postman/collections/teams.collection.json",
   },
   {
     title: "M365 Apps Config",
@@ -364,6 +382,12 @@ export const accessModels: AccessModel[] = [
     portals: ["SharePoint Admin"],
   },
   {
+    title: "Portal bearer tokens + regional discovery",
+    description:
+      "Teams admin center uses browser-acquired bearer tokens across multiple Teams and Office service hosts, plus same-origin portal context for `/api/log` and resolver calls that map the tenant to regional backends.",
+    portals: ["Teams"],
+  },
+  {
     title: "Portal bearer tokens + diagnostic headers",
     description:
       "M365 Apps uses browser-obtained bearer tokens together with diagnostic headers such as `x-api-name`, `x-correlationid`, `x-manageoffice-client-sid`, and `x-requested-with`.",
@@ -558,6 +582,36 @@ export const gettingStartedGuides: GettingStartedGuide[] = [
       "The portal mixes SharePoint-specific `/_api` traffic with generic shell calls to `admin.microsoft.com`, `portal.office.com`, and telemetry endpoints; only the same-origin SharePoint host belongs in this family.",
       "Request digests are short-lived and tied to the current page context, so replay can fail even when the browser cookies are still valid.",
       "Some confirmed routes returned empty or null responses in this tenant, especially migration and settings-adjacent helpers, but they are still real portal endpoints.",
+    ],
+  },
+  {
+    title: "Teams admin center",
+    portals: ["Teams"],
+    authModel: "Portal bearer token + same-origin portal context",
+    baseUrls: [
+      "https://admin.teams.microsoft.com",
+      "https://teams.microsoft.com/api",
+      "https://api.interfaces.records.teams.microsoft.com",
+      "https://monitoringplatform.teams.microsoft.com/api",
+    ],
+    confirmedDetails: [
+      "Most cross-origin Teams admin calls used browser-acquired bearer tokens, while same-origin `POST /api/log` depended on the active portal context.",
+      "The spec preserves separate sections for each discovered API family, including `teams.microsoft.com/api`, `api.interfaces.records.teams.microsoft.com`, monitoring, config, virtual visits, monetization, reports, CQD bootstrap, tags, and app catalog services.",
+      "Regional discovery is part of normal portal startup via endpoints such as `POST /api/authsvc/v1.0/users/region`, `GET /api/v1/regionalDomainNameForTenant`, and `GET /api/v1/mta/TenantclusterLookup`.",
+    ],
+    practicalGuidance: [
+      "Start from an authenticated `admin.teams.microsoft.com` browser tab and validate access with resolver or lookup endpoints before replaying partitioned or regional service calls.",
+      "Capture the region, partition, tenant ID, and any region-specific host values first; several Teams backends depend on that discovery chain rather than a fixed global host.",
+      "Keep page context in mind when following the portal into reports, app catalog, virtual visits, or telephony flows, because those features fan out to different backend families.",
+    ],
+    mutationGuidance: [
+      "Treat `PUT /api/v1/userpreference` and any future Teams POST or PUT outside the confirmed read-like bootstrap calls as live writes with tenant impact.",
+      "Even read-like POSTs such as `POST /api/authsvc/v1.0/users/region` or `POST /hasActiveCapabilities` should be captured from the portal first so you preserve the exact auth and request shape.",
+    ],
+    pitfalls: [
+      "The Teams admin center mixes same-origin portal routes, partitioned Teams APIs, and region-specific service hosts, so a valid token alone is not enough if you skip the discovery step.",
+      "Some routes, such as virtual visits aggregate records, are real but sensitive to exact query defaults and can return contextual `422` responses when replayed without the right state.",
+      "Dashboard widgets introduce adjacent Office-hosted report and app-catalog APIs that are specific to the Teams admin experience even though they do not live on a `teams.microsoft.com` hostname.",
     ],
   },
   {

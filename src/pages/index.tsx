@@ -38,7 +38,8 @@ function HomepageHeader(): ReactElement {
         </Heading>
         <p className={styles.heroSubtitle}>
           Browse {apiCatalog.length} portal-backed specs covering Defender XDR, Exchange,
-          Intune, M365 Admin, M365 Apps, Purview, Purview Portal, and Entra surfaces, with
+          Teams, Intune, M365 Admin, SharePoint Admin, M365 Apps, Purview, Purview Portal,
+          and Entra surfaces, with
           checked-in Postman collections and launch-focused guidance on auth,
           headers, and safe usage.
         </p>
@@ -70,7 +71,7 @@ export default function Home(): ReactElement {
   return (
     <Layout
       title="nodoc | undocumented Microsoft portal APIs"
-      description="OpenAPI specs and checked-in Postman collections for undocumented Microsoft portal APIs across Defender XDR, Exchange, Intune, M365 Admin, M365 Apps, Purview, Purview Portal, and Entra surfaces."
+      description="OpenAPI specs and checked-in Postman collections for undocumented Microsoft portal APIs across Defender XDR, Exchange, Teams, Intune, M365 Admin, SharePoint Admin, M365 Apps, Purview, Purview Portal, and Entra surfaces."
     >
       <HomepageHeader />
       <main>
