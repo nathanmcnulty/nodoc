@@ -827,3 +827,87 @@ paths:
 
         '404':
           $ref: common.yml#/components/responses/NotFound
+
+  /di/find/AppRetentionCompliancePolicy:
+    get:
+      operationId: getAppRetentionCompliancePolicies
+      summary: Get app retention compliance policies
+      description: >-
+        Retrieve app retention compliance policies surfaced by Purview's
+        Purview for AI policies page.
+      tags: [PurviewForAI]
+      parameters:
+        - name: tenantId
+          in: query
+          required: true
+          description: The unique identifier (GUID) of the tenant.
+          schema:
+            type: string
+            format: uuid
+        - name: filter
+          in: query
+          required: false
+          description: OData-style filter expression to narrow policy results.
+          schema:
+            type: string
+        - name: PageSize
+          in: query
+          required: false
+          description: The number of policy records to return.
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /di/find/InsiderRiskEntityList:
+    get:
+      operationId: getInsiderRiskEntityList
+      summary: Get insider risk entity list
+      description: >-
+        Retrieve Insider Risk entity definitions used by Purview's Insider Risk
+        application settings pages.
+      tags: [InsiderRisk]
+      parameters:
+        - name: tenantId
+          in: query
+          required: true
+          description: The unique identifier (GUID) of the tenant.
+          schema:
+            type: string
+            format: uuid
+        - name: filter
+          in: query
+          required: false
+          description: OData-style filter expression to select a specific entity definition.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

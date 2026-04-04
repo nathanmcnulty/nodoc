@@ -1,0 +1,548 @@
+paths:
+  /cpm/v1.0/Tenant/AIHubActionsStatus:
+    get:
+      operationId: getPurviewAiHubActionsStatus
+      summary: Get AI Hub actions status
+      description: >-
+        Retrieve AI Hub action status used by Purview for AI unified overview
+        cards and onboarding checks.
+      tags: [PurviewForAI]
+      parameters:
+        - name: tenantId
+          in: query
+          required: true
+          description: The tenant GUID used by the Purview for AI service.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /di/find/PurviewForAI:
+    get:
+      operationId: getPurviewForAiInsights
+      summary: Get Purview for AI insight data
+      description: >-
+        Retrieve Purview for AI insight cards and scenario aggregates for the
+        requested time range.
+      tags: [PurviewForAI]
+      parameters:
+        - name: tenantId
+          in: query
+          required: true
+          description: The tenant GUID used by the Purview for AI service.
+          schema:
+            type: string
+            format: uuid
+        - name: filter
+          in: query
+          required: false
+          description: OData-style filter expression used to select the requested AI scenario.
+          schema:
+            type: string
+        - name: startTime
+          in: query
+          required: false
+          description: The start of the requested time range.
+          schema:
+            type: string
+            format: date-time
+        - name: endTime
+          in: query
+          required: false
+          description: The end of the requested time range.
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /di/find/PurviewForAISetting:
+    get:
+      operationId: getPurviewForAiSettings
+      summary: Get Purview for AI settings
+      description: >-
+        Retrieve Purview for AI feature and onboarding settings for the tenant.
+      tags: [PurviewForAI]
+      parameters:
+        - name: tenantId
+          in: query
+          required: true
+          description: The tenant GUID used by the Purview for AI service.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /di/search/PurviewDataAssessmentsInsights:
+    post:
+      operationId: searchPurviewDataAssessmentsInsights
+      summary: Search Purview data assessment insights
+      description: >-
+        Retrieve Purview data assessment insights used by the Purview for AI
+        Explorer experience.
+      tags: [PurviewForAI]
+      parameters:
+        - name: tenantid
+          in: query
+          required: true
+          description: The tenant GUID used by the Purview for AI service.
+          schema:
+            type: string
+            format: uuid
+        - name: startTime
+          in: query
+          required: false
+          description: The start of the requested time range.
+          schema:
+            type: string
+            format: date-time
+        - name: endTime
+          in: query
+          required: false
+          description: The end of the requested time range.
+          schema:
+            type: string
+            format: date-time
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /di/search/PurviewForAIActivityData:
+    post:
+      operationId: searchPurviewForAiActivityData
+      summary: Search Purview for AI activity data
+      description: >-
+        Retrieve Purview for AI activity data and aggregations for overview and
+        report visuals.
+      tags: [PurviewForAI]
+      parameters:
+        - name: tenantid
+          in: query
+          required: true
+          description: The tenant GUID used by the Purview for AI service.
+          schema:
+            type: string
+            format: uuid
+        - name: startTime
+          in: query
+          required: false
+          description: The start of the requested time range.
+          schema:
+            type: string
+            format: date-time
+        - name: endTime
+          in: query
+          required: false
+          description: The end of the requested time range.
+          schema:
+            type: string
+            format: date-time
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /gws/dspmaimtapp/api/v1/Agents:
+    post:
+      operationId: listDspmAiAgents
+      summary: List DSPM for AI agents
+      description: >-
+        Retrieve DSPM for AI agent inventory and observability data from the
+        Agent observability page.
+      tags: [PurviewForAI]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /gws/dspmaimtapp/api/v1/scenariosearch:
+    post:
+      operationId: searchDspmAiScenarios
+      summary: Search DSPM for AI scenarios
+      description: >-
+        Retrieve DSPM for AI scenario records and agent activity used by the
+        Agent observability page.
+      tags: [PurviewForAI]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /medeina/agentDefinitions:
+    get:
+      operationId: listPurviewAgentDefinitions
+      summary: List Purview agent definitions
+      description: >-
+        Retrieve Purview-published Medeina agent definitions displayed in the
+        Agent Library experience.
+      tags: [PurviewForAI]
+      parameters:
+        - name: scope
+          in: query
+          required: false
+          description: The workspace scope used by the agent library query.
+          schema:
+            type: string
+        - name: publisher
+          in: query
+          required: false
+          description: Publisher filter applied by the agent library query.
+          schema:
+            type: string
+        - name: product
+          in: query
+          required: false
+          description: Product filter applied by the agent library query.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /medeina/settings/datashare/defaultWorkspace:
+    get:
+      operationId: getPurviewDefaultDataShareWorkspace
+      summary: Get Purview default Copilot workspace
+      description: >-
+        Retrieve the default Medeina workspace used by Purview AI experiences
+        when data sharing is enabled.
+      tags: [PurviewForAI]
+      parameters:
+        - name: sourceName
+          in: query
+          required: false
+          description: The Purview source identifier used by the workspace query.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /oversharing/api/v1/p4ai/assessment:
+    get:
+      operationId: listPurviewAiOversharingAssessments
+      summary: List Purview for AI oversharing assessments
+      description: >-
+        Retrieve oversharing assessments shown on Purview for AI overview
+        surfaces.
+      tags: [PurviewForAI]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  "/oversharing/api/v1/p4ai/assessment('{assessmentId}')":
+    get:
+      operationId: getPurviewAiOversharingAssessment
+      summary: Get Purview for AI oversharing assessment
+      description: >-
+        Retrieve a single oversharing assessment from the Purview for AI
+        Explorer experience.
+      tags: [PurviewForAI]
+      parameters:
+        - name: assessmentId
+          in: path
+          required: true
+          description: The unique identifier of the oversharing assessment.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /oversharing/api/v1/p4ai/tenant/register:
+    post:
+      operationId: registerPurviewAiTenant
+      summary: Register Purview for AI assessment tenant
+      description: >-
+        Register or initialize the tenant for oversharing assessment workflows
+        from Purview for AI Explorer.
+      tags: [PurviewForAI]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /oversharing/api/v1/p4ai/tenantSettings/validateStored:
+    post:
+      operationId: validatePurviewAiStoredSettings
+      summary: Validate stored oversharing settings
+      description: >-
+        Validate previously stored oversharing settings before running Purview
+        for AI Explorer workflows. Observed returning 404 when no stored
+        configuration existed.
+      tags: [PurviewForAI]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /oversharing/api/v1/p4ai/tenantSettings/validateStored/fabric:
+    post:
+      operationId: validatePurviewAiFabricStoredSettings
+      summary: Validate stored oversharing Fabric settings
+      description: >-
+        Validate previously stored Microsoft Fabric oversharing settings before
+        running Purview for AI Explorer workflows. Observed returning 404 when
+        no stored configuration existed.
+      tags: [PurviewForAI]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /WdatpPublicApi/irm/tenant/status:
+    get:
+      operationId: getPurviewAiIrmTenantStatus
+      summary: Get IRM tenant status
+      description: >-
+        Retrieve tenant-level Information Rights Management status used by
+        Purview for AI overview cards.
+      tags: [PurviewForAI]
+      parameters:
+        - name: tenantId
+          in: query
+          required: true
+          description: The tenant GUID whose IRM status is being queried.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

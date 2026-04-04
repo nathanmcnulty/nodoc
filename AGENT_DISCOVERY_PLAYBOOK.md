@@ -137,7 +137,7 @@ Rule of thumb:
 Recommended pattern:
 
 - Capture page states and API records separately.
-- Write artifacts after each crawl phase instead of only at the very end.
+- Write artifacts after each page or interaction checkpoint instead of only at the very end of a crawl phase.
 - Keep the browser capture script focused on traffic collection; do bundle download in a separate step.
 - For broad portal passes, use bounded parallel tabs only if you can still attribute requests back to the originating page.
 - If CDP `Page.navigate` stalls on a same-origin SPA hash route, retry that surface in a fresh single tab and fall back to setting `location.href`; do not assume the route itself is invalid just because the first navigation primitive hung.
@@ -147,6 +147,9 @@ Recommended pattern:
 - For same-origin admin portals, left-nav coverage is only the floor: open every reachable same-origin route, drill into visible list rows/items so detail blades load, click every visible read-only tab or pivot, and follow safe same-origin content links.
 - Canonicalize equivalent routes before queueing them. Portals often expose the same surface through aliases or parallel route trees, and unnormalized queue keys will waste time replaying the same detail page.
 - When a list/detail family fans out into many nearly identical row routes, fully exercise one representative detail page first, then treat sibling detail pages as first-paint verification unless they reveal new tabs, links, or request shapes.
+- When list/detail drill-ins are button-driven rather than anchor-driven, restore the base page after each visit
+  and reacquire the next control by stable label, automation ID, or other deterministic selector instead of
+  holding stale DOM handles across navigations.
 - For report or dashboard blades, do two passes: initial-load traffic first, then a second pass that changes one safe control at a time.
 - During the interaction pass, prefer safe state changes such as filters, date range, grouping, row drill-ins, tabs, sort, paging, and export preflight so each new request can be tied back to the triggering UI state.
 - Record a page-state checklist alongside each request set: selected tab, filter chips, date range, business group or release selection, tenant scope, and any report-mode toggles.
@@ -672,6 +675,9 @@ What helped:
   and already-modeled parameterized routes.
 - `page-states.json` caught exact tails that the normalized API export could miss, such as
   trailing-slash variants and smaller helper routes.
+- When diffing live captures against checked-in OpenAPI YAML, prefer a real parser or a
+  line-based path-key extraction that tolerates quoted YAML keys. Naive regexes can miss
+  routes with quoted paths or OData-style parameter syntax.
 - Targeted family diffs were enough to close the remaining high-signal gaps for policy
   inventory, AI inventory, unified connectors, SIAM helpers, and ISPM report routes
   without another expensive full crawl.

@@ -60,6 +60,68 @@ paths:
         '404':
           $ref: common.yml#/components/responses/NotFound
 
+  /gws/ComplianceAuthServer/v1.0/GetGrantedPermissions:
+    post:
+      operationId: getGrantedPermissions
+      summary: Get granted permissions
+      description: >-
+        Retrieve granted permissions shown by Purview's Data Loss Prevention
+        role-group drill-in experience.
+      tags: [GovernanceServices]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /gws/ComplianceAuthServer/v1.0/GetUserRoles:
+    post:
+      operationId: getUserRoles
+      summary: Get user roles
+      description: >-
+        Retrieve user role assignments shown by Purview's Data Loss Prevention
+        role-group drill-in experience.
+      tags: [GovernanceServices]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
   /gws/DlmServices/api/v1.0/disposition/DispositionStatistics:
     get:
       operationId: getDispositionStatistics
@@ -92,6 +154,39 @@ paths:
       description: >-
         Retrieve metadata for trainable classifier models. Returns information about
         available classification models including their training status and accuracy.
+      tags: [GovernanceServices]
+      parameters:
+        - name: type
+          in: query
+          required: false
+          description: The type of classifier model to retrieve metadata for.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /gws/ipmlservice/CategoryTrainingModel/ModelMetadata:
+    get:
+      operationId: getTrainableClassifierModelMetadataCanonical
+      summary: Get trainable classifier model metadata
+      description: >-
+        Retrieve metadata for trainable classifier models using the canonical
+        single-slash route observed on the Purview for AI Microsoft 365 Copilot
+        tab.
       tags: [GovernanceServices]
       parameters:
         - name: type
