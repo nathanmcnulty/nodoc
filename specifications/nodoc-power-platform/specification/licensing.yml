@@ -1,0 +1,1768 @@
+paths:
+  /licensing/tenants/{tenantId}/UserPerFlowCapacitySource/TenantContextSummary:
+    servers:
+      - url: "https://licensing.powerplatform.microsoft.com"
+        description: "Power Platform licensing API"
+    get:
+      operationId: Licensing_get_licensing_tenants_tenantId_UserPerFlowCapacitySource_TenantContextSummary
+      summary: "GET /licensing/tenants/{tenantId}/UserPerFlowCapacitySource/TenantContextSummary"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/billing/licenses/powerAutomate/overview."
+      tags:
+        - Licensing
+      parameters:
+        - name: "tenantId"
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "847b5907-ca15-40f4-b171-eb18619dbfab"
+        - name: "startDate"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "2026-03-04"
+      responses:
+        '200':
+          description: "200 captured response"
+  /licensing/tenants/{tenantId}/UserPerFlowCapacitySource/UserContextSummary:
+    servers:
+      - url: "https://licensing.powerplatform.microsoft.com"
+        description: "Power Platform licensing API"
+    get:
+      operationId: Licensing_get_licensing_tenants_tenantId_UserPerFlowCapacitySource_UserContextSummary
+      summary: "GET /licensing/tenants/{tenantId}/UserPerFlowCapacitySource/UserContextSummary"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/billing/licenses/powerAutomate/overview."
+      tags:
+        - Licensing
+      parameters:
+        - name: "tenantId"
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "847b5907-ca15-40f4-b171-eb18619dbfab"
+        - name: "pageNumber"
+          in: query
+          required: false
+          schema:
+            type: integer
+            example: 1
+        - name: "pageSize"
+          in: query
+          required: false
+          schema:
+            type: integer
+            example: 5000
+        - name: "startDate"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "2026-03-04"
+      responses:
+        '200':
+          description: "200 captured response"
+  /v0.1-alpha/tenants/{tenantId}/BillingPolicies:
+    servers:
+      - url: "https://licensing.powerplatform.microsoft.com"
+        description: "Power Platform licensing API"
+    get:
+      operationId: Licensing_get_v0_1_alpha_tenants_tenantId_BillingPolicies
+      summary: "GET /v0.1-alpha/tenants/{tenantId}/BillingPolicies"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/billing/licenses/powerPages/overview."
+      tags:
+        - Licensing
+      parameters:
+        - name: "tenantId"
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "847b5907-ca15-40f4-b171-eb18619dbfab"
+      responses:
+        '200':
+          description: "200 captured response"
+  /v0.1-alpha/tenants/{tenantId}/BillingPolicies/getEnvironmentMap:
+    servers:
+      - url: "https://licensing.powerplatform.microsoft.com"
+        description: "Power Platform licensing API"
+    post:
+      operationId: Licensing_post_v0_1_alpha_tenants_tenantId_BillingPolicies_getEnvironmentMap
+      summary: "POST /v0.1-alpha/tenants/{tenantId}/BillingPolicies/getEnvironmentMap"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/billing/licenses/PowerApps/overview, https://admin.powerplatform.microsoft.com/billing/licenses/copilotStudio/overview, https://admin.powerplatform.microsoft.com/billing/licenses/environmentlist/PowerApps, https://admin.powerplatform.microsoft.com/billing/licenses/powerApps/overview, and 3 more routes."
+      tags:
+        - Licensing
+      parameters:
+        - name: "tenantId"
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "847b5907-ca15-40f4-b171-eb18619dbfab"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                environmentIds:
+                  type: array
+                  items:
+                    type: object
+                    additionalProperties: true
+      responses:
+        '200':
+          description: "200 captured response"
+  /v0.1-alpha/tenants/{tenantId}/CurrencyReports:
+    servers:
+      - url: "https://licensing.powerplatform.microsoft.com"
+        description: "Power Platform licensing API"
+    get:
+      operationId: Licensing_get_v0_1_alpha_tenants_tenantId_CurrencyReports
+      summary: "GET /v0.1-alpha/tenants/{tenantId}/CurrencyReports"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/billing/licenses/PowerApps/overview, https://admin.powerplatform.microsoft.com/billing/licenses/copilotStudio/overview, https://admin.powerplatform.microsoft.com/billing/licenses/powerApps/overview, https://admin.powerplatform.microsoft.com/billing/licenses/powerPages/overview, and 1 more route."
+      tags:
+        - Licensing
+      parameters:
+        - name: "tenantId"
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "847b5907-ca15-40f4-b171-eb18619dbfab"
+      responses:
+        '200':
+          description: "200 captured response"
+  /v0.1-alpha/tenants/{tenantId}/entitlements/AppPass/trends:
+    servers:
+      - url: "https://licensing.powerplatform.microsoft.com"
+        description: "Power Platform licensing API"
+    get:
+      operationId: Licensing_get_v0_1_alpha_tenants_tenantId_entitlements_AppPass_trends
+      summary: "GET /v0.1-alpha/tenants/{tenantId}/entitlements/AppPass/trends"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/billing/licenses/PowerApps/overview, https://admin.powerplatform.microsoft.com/billing/licenses/powerApps/overview."
+      tags:
+        - Licensing
+      parameters:
+        - name: "tenantId"
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "847b5907-ca15-40f4-b171-eb18619dbfab"
+        - name: "fromDate"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "04-01-2025"
+        - name: "interval"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "monthly"
+        - name: "toDate"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "04-04-2026"
+      responses:
+        '200':
+          description: "200 captured response"
+  /v0.1-alpha/tenants/{tenantId}/entitlements/Database/trends:
+    servers:
+      - url: "https://licensing.powerplatform.microsoft.com"
+        description: "Power Platform licensing API"
+    get:
+      operationId: Licensing_get_v0_1_alpha_tenants_tenantId_entitlements_Database_trends
+      summary: "GET /v0.1-alpha/tenants/{tenantId}/entitlements/Database/trends"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/billing/licenses/dataverse/overview, https://admin.powerplatform.microsoft.com/resources/capacity."
+      tags:
+        - Licensing
+      parameters:
+        - name: "tenantId"
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "847b5907-ca15-40f4-b171-eb18619dbfab"
+        - name: "fromDate"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "2026-04-01"
+        - name: "interval"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "Daily"
+        - name: "toDate"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "2026-04-04"
+      responses:
+        '200':
+          description: "200 captured response"
+  /v0.1-alpha/tenants/{tenantId}/entitlements/extension:
+    servers:
+      - url: "https://licensing.powerplatform.microsoft.com"
+        description: "Power Platform licensing API"
+    get:
+      operationId: Licensing_get_v0_1_alpha_tenants_tenantId_entitlements_extension
+      summary: "GET /v0.1-alpha/tenants/{tenantId}/entitlements/extension"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/billing/licenses/PowerApps/overview, https://admin.powerplatform.microsoft.com/billing/licenses/PowerApps/recommendations, https://admin.powerplatform.microsoft.com/billing/licenses/copilotStudio/overview, https://admin.powerplatform.microsoft.com/billing/licenses/dataverse/overview, and 6 more routes."
+      tags:
+        - Licensing
+      parameters:
+        - name: "tenantId"
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "847b5907-ca15-40f4-b171-eb18619dbfab"
+        - name: "entitlements"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "Database,File,Log"
+        - name: "skipSelfServiceEligibilityCheck"
+          in: query
+          required: false
+          schema:
+            type: boolean
+            example: false
+      responses:
+        '200':
+          description: "200 captured response"
+  /v0.1-alpha/tenants/{tenantId}/entitlements/File/trends:
+    servers:
+      - url: "https://licensing.powerplatform.microsoft.com"
+        description: "Power Platform licensing API"
+    get:
+      operationId: Licensing_get_v0_1_alpha_tenants_tenantId_entitlements_File_trends
+      summary: "GET /v0.1-alpha/tenants/{tenantId}/entitlements/File/trends"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/billing/licenses/dataverse/overview, https://admin.powerplatform.microsoft.com/resources/capacity."
+      tags:
+        - Licensing
+      parameters:
+        - name: "tenantId"
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "847b5907-ca15-40f4-b171-eb18619dbfab"
+        - name: "fromDate"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "2026-04-01"
+        - name: "interval"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "Daily"
+        - name: "toDate"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "2026-04-04"
+      responses:
+        '200':
+          description: "200 captured response"
+  /v0.1-alpha/tenants/{tenantId}/entitlements/FinOpsDatabase/trends:
+    servers:
+      - url: "https://licensing.powerplatform.microsoft.com"
+        description: "Power Platform licensing API"
+    get:
+      operationId: Licensing_get_v0_1_alpha_tenants_tenantId_entitlements_FinOpsDatabase_trends
+      summary: "GET /v0.1-alpha/tenants/{tenantId}/entitlements/FinOpsDatabase/trends"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/billing/licenses/dataverse/overview, https://admin.powerplatform.microsoft.com/resources/capacity."
+      tags:
+        - Licensing
+      parameters:
+        - name: "tenantId"
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "847b5907-ca15-40f4-b171-eb18619dbfab"
+        - name: "fromDate"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "2026-04-01"
+        - name: "interval"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "Daily"
+        - name: "toDate"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "2026-04-04"
+      responses:
+        '200':
+          description: "200 captured response"
+  /v0.1-alpha/tenants/{tenantId}/entitlements/FinOpsFile/trends:
+    servers:
+      - url: "https://licensing.powerplatform.microsoft.com"
+        description: "Power Platform licensing API"
+    get:
+      operationId: Licensing_get_v0_1_alpha_tenants_tenantId_entitlements_FinOpsFile_trends
+      summary: "GET /v0.1-alpha/tenants/{tenantId}/entitlements/FinOpsFile/trends"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/billing/licenses/dataverse/overview, https://admin.powerplatform.microsoft.com/resources/capacity."
+      tags:
+        - Licensing
+      parameters:
+        - name: "tenantId"
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "847b5907-ca15-40f4-b171-eb18619dbfab"
+        - name: "fromDate"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "2026-04-01"
+        - name: "interval"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "Daily"
+        - name: "toDate"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "2026-04-04"
+      responses:
+        '200':
+          description: "200 captured response"
+  /v0.1-alpha/tenants/{tenantId}/entitlements/Log/trends:
+    servers:
+      - url: "https://licensing.powerplatform.microsoft.com"
+        description: "Power Platform licensing API"
+    get:
+      operationId: Licensing_get_v0_1_alpha_tenants_tenantId_entitlements_Log_trends
+      summary: "GET /v0.1-alpha/tenants/{tenantId}/entitlements/Log/trends"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/billing/licenses/dataverse/overview, https://admin.powerplatform.microsoft.com/resources/capacity."
+      tags:
+        - Licensing
+      parameters:
+        - name: "tenantId"
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "847b5907-ca15-40f4-b171-eb18619dbfab"
+        - name: "fromDate"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "2026-04-01"
+        - name: "interval"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "Daily"
+        - name: "toDate"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "2026-04-04"
+      responses:
+        '200':
+          description: "200 captured response"
+  /v0.1-alpha/tenants/{tenantId}/entitlements/MCSMessages/snapshot/product:
+    servers:
+      - url: "https://licensing.powerplatform.microsoft.com"
+        description: "Power Platform licensing API"
+    get:
+      operationId: Licensing_get_v0_1_alpha_tenants_tenantId_entitlements_MCSMessages_snapshot_product
+      summary: "GET /v0.1-alpha/tenants/{tenantId}/entitlements/MCSMessages/snapshot/product"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/billing/licenses/copilotStudio/overview."
+      tags:
+        - Licensing
+      parameters:
+        - name: "tenantId"
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "847b5907-ca15-40f4-b171-eb18619dbfab"
+      responses:
+        '200':
+          description: "200 captured response"
+  /v0.1-alpha/tenants/{tenantId}/entitlements/MCSMessages/trends:
+    servers:
+      - url: "https://licensing.powerplatform.microsoft.com"
+        description: "Power Platform licensing API"
+    get:
+      operationId: Licensing_get_v0_1_alpha_tenants_tenantId_entitlements_MCSMessages_trends
+      summary: "GET /v0.1-alpha/tenants/{tenantId}/entitlements/MCSMessages/trends"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/billing/licenses/copilotStudio/overview."
+      tags:
+        - Licensing
+      parameters:
+        - name: "tenantId"
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "847b5907-ca15-40f4-b171-eb18619dbfab"
+        - name: "fromDate"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "04-01-2026"
+        - name: "interval"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "daily"
+        - name: "toDate"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "04-04-2026"
+      responses:
+        '200':
+          description: "200 captured response"
+  /v0.1-alpha/tenants/{tenantId}/environments/capacityTypes/PowerPagesAnonymous/trends:
+    servers:
+      - url: "https://licensing.powerplatform.microsoft.com"
+        description: "Power Platform licensing API"
+    get:
+      operationId: Licensing_get_v0_1_alpha_tenants_tenantId_environments_capacityTypes_PowerPagesAnonymous_trends
+      summary: "GET /v0.1-alpha/tenants/{tenantId}/environments/capacityTypes/PowerPagesAnonymous/trends"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/billing/licenses/powerPages/overview."
+      tags:
+        - Licensing
+      parameters:
+        - name: "tenantId"
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "847b5907-ca15-40f4-b171-eb18619dbfab"
+        - name: "interval"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "monthly"
+      responses:
+        '404':
+          description: "404 captured response"
+  /v0.1-alpha/tenants/{tenantId}/environments/capacityTypes/PowerPagesAuthenticated/trends:
+    servers:
+      - url: "https://licensing.powerplatform.microsoft.com"
+        description: "Power Platform licensing API"
+    get:
+      operationId: Licensing_get_v0_1_alpha_tenants_tenantId_environments_capacityTypes_PowerPagesAuthenticated_trends
+      summary: "GET /v0.1-alpha/tenants/{tenantId}/environments/capacityTypes/PowerPagesAuthenticated/trends"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/billing/licenses/powerPages/overview."
+      tags:
+        - Licensing
+      parameters:
+        - name: "tenantId"
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "847b5907-ca15-40f4-b171-eb18619dbfab"
+        - name: "interval"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "monthly"
+      responses:
+        '404':
+          description: "404 captured response"
+  /v0.1-alpha/tenants/{tenantId}/licenseRequests/all:
+    servers:
+      - url: "https://licensing.powerplatform.microsoft.com"
+        description: "Power Platform licensing API"
+    get:
+      operationId: Licensing_get_v0_1_alpha_tenants_tenantId_licenseRequests_all
+      summary: "GET /v0.1-alpha/tenants/{tenantId}/licenseRequests/all"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/billing/licenses/PowerApps/recommendations."
+      tags:
+        - Licensing
+      parameters:
+        - name: "tenantId"
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "847b5907-ca15-40f4-b171-eb18619dbfab"
+        - name: "state"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "Pending"
+      responses:
+        '200':
+          description: "200 captured response"
+  /v0.1-alpha/tenants/{tenantId}/TenantCapacity:
+    servers:
+      - url: "https://licensing.powerplatform.microsoft.com"
+        description: "Power Platform licensing API"
+    get:
+      operationId: Licensing_get_v0_1_alpha_tenants_tenantId_TenantCapacity
+      summary: "GET /v0.1-alpha/tenants/{tenantId}/TenantCapacity"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/billing/licenses/PowerApps/overview, https://admin.powerplatform.microsoft.com/billing/licenses/PowerApps/recommendations, https://admin.powerplatform.microsoft.com/billing/licenses/copilotStudio/overview, https://admin.powerplatform.microsoft.com/billing/licenses/dataverse/overview, and 83 more routes."
+      tags:
+        - Licensing
+      parameters:
+        - name: "tenantId"
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "847b5907-ca15-40f4-b171-eb18619dbfab"
+      responses:
+        '200':
+          description: "200 captured response"
+  /v0.1-alpha/tenants/{tenantId}/TenantConsumptionReport/GetAllReports:
+    servers:
+      - url: "https://licensing.powerplatform.microsoft.com"
+        description: "Power Platform licensing API"
+    get:
+      operationId: Licensing_get_v0_1_alpha_tenants_tenantId_TenantConsumptionReport_GetAllReports
+      summary: "GET /v0.1-alpha/tenants/{tenantId}/TenantConsumptionReport/GetAllReports"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/resources/capacity."
+      tags:
+        - Licensing
+      parameters:
+        - name: "tenantId"
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "847b5907-ca15-40f4-b171-eb18619dbfab"
+      responses:
+        '200':
+          description: "200 captured response"
+  /v0.1-alpha/tenants/{tenantId}/TenantLicenseModel:
+    servers:
+      - url: "https://licensing.powerplatform.microsoft.com"
+        description: "Power Platform licensing API"
+    get:
+      operationId: Licensing_get_v0_1_alpha_tenants_tenantId_TenantLicenseModel
+      summary: "GET /v0.1-alpha/tenants/{tenantId}/TenantLicenseModel"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/resources/capacity."
+      tags:
+        - Licensing
+      parameters:
+        - name: "tenantId"
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "847b5907-ca15-40f4-b171-eb18619dbfab"
+      responses:
+        '200':
+          description: "200 captured response"
+  /v0.1/tenants/{tenantId}/allocationsV2/getmany:
+    servers:
+      - url: "https://licensing.powerplatform.microsoft.com"
+        description: "Power Platform licensing API"
+    post:
+      operationId: Licensing_post_v0_1_tenants_tenantId_allocationsV2_getmany
+      summary: "POST /v0.1/tenants/{tenantId}/allocationsV2/getmany"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/resources/capacity."
+      tags:
+        - Licensing
+      parameters:
+        - name: "tenantId"
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "847b5907-ca15-40f4-b171-eb18619dbfab"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                Requests:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      Scope:
+                        type: object
+                        properties:
+                          environmentId:
+                            type: string
+                            example: "Default-847b5907-ca15-40f4-b171-eb18619dbfab"
+                      EntitlementIds:
+                        type: array
+                        items:
+                          type: string
+                          example: "Database"
+      responses:
+        '200':
+          description: "200 captured response"
+  /v0.1/tenants/{tenantId}/allocationsV2/overage/getmany:
+    servers:
+      - url: "https://licensing.powerplatform.microsoft.com"
+        description: "Power Platform licensing API"
+    post:
+      operationId: Licensing_post_v0_1_tenants_tenantId_allocationsV2_overage_getmany
+      summary: "POST /v0.1/tenants/{tenantId}/allocationsV2/overage/getmany"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/resources/capacity."
+      tags:
+        - Licensing
+      parameters:
+        - name: "tenantId"
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "847b5907-ca15-40f4-b171-eb18619dbfab"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                Requests:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      Scope:
+                        type: object
+                        properties:
+                          environmentId:
+                            type: string
+                            example: "Default-847b5907-ca15-40f4-b171-eb18619dbfab"
+                      EntitlementIds:
+                        type: array
+                        items:
+                          type: string
+                          example: "Database"
+      responses:
+        '204':
+          description: "204 captured response"
+  /v0.1/tenants/{tenantId}/allocationsV2/sum:
+    servers:
+      - url: "https://licensing.powerplatform.microsoft.com"
+        description: "Power Platform licensing API"
+    get:
+      operationId: Licensing_get_v0_1_tenants_tenantId_allocationsV2_sum
+      summary: "GET /v0.1/tenants/{tenantId}/allocationsV2/sum"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/resources/capacity."
+      tags:
+        - Licensing
+      parameters:
+        - name: "tenantId"
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "847b5907-ca15-40f4-b171-eb18619dbfab"
+        - name: "$filter"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "environmentId eq 'Default-847b5907-ca15-40f4-b171-eb18619dbfab' and EntitlementId in (Database,Log,File)"
+      responses:
+        '200':
+          description: "200 captured response"
+  /v1.0/tenants/{tenantId}/capacityTypes/MCSMessages/trends:
+    servers:
+      - url: "https://licensing.powerplatform.microsoft.com"
+        description: "Power Platform licensing API"
+    get:
+      operationId: Licensing_get_v1_0_tenants_tenantId_capacityTypes_MCSMessages_trends
+      summary: "GET /v1.0/tenants/{tenantId}/capacityTypes/MCSMessages/trends"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/billing/licenses/copilotStudio/overview."
+      tags:
+        - Licensing
+      parameters:
+        - name: "tenantId"
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "847b5907-ca15-40f4-b171-eb18619dbfab"
+        - name: "interval"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "daily"
+      responses:
+        '404':
+          description: "404 captured response"
+  /v1.0/tenants/{tenantId}/capacityTypes/MCSSessions/trends:
+    servers:
+      - url: "https://licensing.powerplatform.microsoft.com"
+        description: "Power Platform licensing API"
+    get:
+      operationId: Licensing_get_v1_0_tenants_tenantId_capacityTypes_MCSSessions_trends
+      summary: "GET /v1.0/tenants/{tenantId}/capacityTypes/MCSSessions/trends"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/billing/licenses/copilotStudio/overview."
+      tags:
+        - Licensing
+      parameters:
+        - name: "tenantId"
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "847b5907-ca15-40f4-b171-eb18619dbfab"
+        - name: "interval"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "daily"
+      responses:
+        '404':
+          description: "404 captured response"
+  /v1.0/tenants/{tenantId}/CurrencyReports:
+    servers:
+      - url: "https://licensing.powerplatform.microsoft.com"
+        description: "Power Platform licensing API"
+    get:
+      operationId: Licensing_get_v1_0_tenants_tenantId_CurrencyReports
+      summary: "GET /v1.0/tenants/{tenantId}/CurrencyReports"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/billing/licenses/PowerApps/overview, https://admin.powerplatform.microsoft.com/billing/licenses/copilotStudio/overview, https://admin.powerplatform.microsoft.com/billing/licenses/powerApps/overview, https://admin.powerplatform.microsoft.com/billing/licenses/powerPages/overview, and 1 more route."
+      tags:
+        - Licensing
+      parameters:
+        - name: "tenantId"
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "847b5907-ca15-40f4-b171-eb18619dbfab"
+        - name: "includeAllocations"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "True"
+        - name: "includeConsumptions"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "True"
+      responses:
+        '200':
+          description: "200 captured response"
+  /v1.0/tenants/{tenantId}/Downloads/getAll/EntitlementConsumptionTenantDetailsReport:
+    servers:
+      - url: "https://licensing.powerplatform.microsoft.com"
+        description: "Power Platform licensing API"
+    get:
+      operationId: Licensing_get_v1_0_tenants_tenantId_Downloads_getAll_EntitlementConsumptionTenantDetailsReport
+      summary: "GET /v1.0/tenants/{tenantId}/Downloads/getAll/EntitlementConsumptionTenantDetailsReport"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/billing/licenses/copilotStudio/overview."
+      tags:
+        - Licensing
+      parameters:
+        - name: "tenantId"
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "847b5907-ca15-40f4-b171-eb18619dbfab"
+      responses:
+        '200':
+          description: "200 captured response"
+  /v1.0/tenants/{tenantId}/Downloads/getAll/PowerAppsTenantLicenseDetailsDownload:
+    servers:
+      - url: "https://licensing.powerplatform.microsoft.com"
+        description: "Power Platform licensing API"
+    get:
+      operationId: Licensing_get_v1_0_tenants_tenantId_Downloads_getAll_PowerAppsTenantLicenseDetailsDownload
+      summary: "GET /v1.0/tenants/{tenantId}/Downloads/getAll/PowerAppsTenantLicenseDetailsDownload"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/billing/licenses/PowerApps/overview, https://admin.powerplatform.microsoft.com/billing/licenses/powerApps/overview."
+      tags:
+        - Licensing
+      parameters:
+        - name: "tenantId"
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "847b5907-ca15-40f4-b171-eb18619dbfab"
+      responses:
+        '200':
+          description: "200 captured response"
+  /v1.0/tenants/{tenantId}/FinOpsLicensing/GetLicenseSummaryV2:
+    servers:
+      - url: "https://licensing.powerplatform.microsoft.com"
+        description: "Power Platform licensing API"
+    get:
+      operationId: Licensing_get_v1_0_tenants_tenantId_FinOpsLicensing_GetLicenseSummaryV2
+      summary: "GET /v1.0/tenants/{tenantId}/FinOpsLicensing/GetLicenseSummaryV2"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/billing/licenses/PowerApps/overview, https://admin.powerplatform.microsoft.com/billing/licenses/PowerApps/recommendations, https://admin.powerplatform.microsoft.com/billing/licenses/copilotStudio/overview, https://admin.powerplatform.microsoft.com/billing/licenses/dataverse/overview, and 6 more routes."
+      tags:
+        - Licensing
+      parameters:
+        - name: "tenantId"
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "847b5907-ca15-40f4-b171-eb18619dbfab"
+      responses:
+        '200':
+          description: "200 captured response"
+  /v1.0/tenants/{tenantId}/FinOpsLicensing/GetUserLicenseDetailsV2:
+    servers:
+      - url: "https://licensing.powerplatform.microsoft.com"
+        description: "Power Platform licensing API"
+    post:
+      operationId: Licensing_post_v1_0_tenants_tenantId_FinOpsLicensing_GetUserLicenseDetailsV2
+      summary: "POST /v1.0/tenants/{tenantId}/FinOpsLicensing/GetUserLicenseDetailsV2"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/billing/licenses/financeAndOperations."
+      tags:
+        - Licensing
+      parameters:
+        - name: "tenantId"
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "847b5907-ca15-40f4-b171-eb18619dbfab"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                pageSize:
+                  type: integer
+                  example: 100
+                pageLevelFilter:
+                  type: object
+                  properties:
+                    userType:
+                      type: string
+                      example: "All"
+                    productType:
+                      type: string
+                      example: "SupplyChainManagement"
+                orderBy:
+                  type: object
+                  properties:
+                    columnName:
+                      type: string
+                      example: "requiredLicenseTypes"
+                    direction:
+                      type: string
+                      example: "Ascending"
+                userLevelFilter:
+                  type: object
+                  properties:
+                    requiredLicensesIn:
+                      type: array
+                      items:
+                        type: string
+                        example: "SupplyChainManagement"
+      responses:
+        '200':
+          description: "200 captured response"
+  /v1.0/tenants/{tenantId}/FinOpsLicensing/GetUsersExemptFromLicensing:
+    servers:
+      - url: "https://licensing.powerplatform.microsoft.com"
+        description: "Power Platform licensing API"
+    get:
+      operationId: Licensing_get_v1_0_tenants_tenantId_FinOpsLicensing_GetUsersExemptFromLicensing
+      summary: "GET /v1.0/tenants/{tenantId}/FinOpsLicensing/GetUsersExemptFromLicensing"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/billing/licenses/financeAndOperations."
+      tags:
+        - Licensing
+      parameters:
+        - name: "tenantId"
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "847b5907-ca15-40f4-b171-eb18619dbfab"
+      responses:
+        '200':
+          description: "200 captured response"
+  /v1.0/tenants/{tenantId}/FinOpsLicensing/GetUsersExemptFromLicensing/Count:
+    servers:
+      - url: "https://licensing.powerplatform.microsoft.com"
+        description: "Power Platform licensing API"
+    get:
+      operationId: Licensing_get_v1_0_tenants_tenantId_FinOpsLicensing_GetUsersExemptFromLicensing_Count
+      summary: "GET /v1.0/tenants/{tenantId}/FinOpsLicensing/GetUsersExemptFromLicensing/Count"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/billing/licenses/financeAndOperations."
+      tags:
+        - Licensing
+      parameters:
+        - name: "tenantId"
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "847b5907-ca15-40f4-b171-eb18619dbfab"
+      responses:
+        '200':
+          description: "200 captured response"
+  /v1.0/tenants/{tenantId}/ManagedEnvironment/GetAllProductSkus:
+    servers:
+      - url: "https://licensing.powerplatform.microsoft.com"
+        description: "Power Platform licensing API"
+    get:
+      operationId: Licensing_get_v1_0_tenants_tenantId_ManagedEnvironment_GetAllProductSkus
+      summary: "GET /v1.0/tenants/{tenantId}/ManagedEnvironment/GetAllProductSkus"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/billing/licenses/PowerApps/overview, https://admin.powerplatform.microsoft.com/billing/licenses/PowerApps/recommendations, https://admin.powerplatform.microsoft.com/billing/licenses/copilotStudio/overview, https://admin.powerplatform.microsoft.com/billing/licenses/dataverse/overview, and 4 more routes."
+      tags:
+        - Licensing
+      parameters:
+        - name: "tenantId"
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "847b5907-ca15-40f4-b171-eb18619dbfab"
+      responses:
+        '200':
+          description: "200 captured response"
+  /v1.0/tenants/{tenantId}/ManagedEnvironment/PowerApps/GetAppPassEnvironments:
+    servers:
+      - url: "https://licensing.powerplatform.microsoft.com"
+        description: "Power Platform licensing API"
+    post:
+      operationId: Licensing_post_v1_0_tenants_tenantId_ManagedEnvironment_PowerApps_GetAppPassEnvironments
+      summary: "POST /v1.0/tenants/{tenantId}/ManagedEnvironment/PowerApps/GetAppPassEnvironments"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/billing/licenses/PowerApps/overview, https://admin.powerplatform.microsoft.com/billing/licenses/powerApps/overview."
+      tags:
+        - Licensing
+      parameters:
+        - name: "tenantId"
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "847b5907-ca15-40f4-b171-eb18619dbfab"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: "200 captured response"
+  /v1.0/tenants/{tenantId}/ManagedEnvironment/PowerApps/GetLicenseSummary:
+    servers:
+      - url: "https://licensing.powerplatform.microsoft.com"
+        description: "Power Platform licensing API"
+    get:
+      operationId: Licensing_get_v1_0_tenants_tenantId_ManagedEnvironment_PowerApps_GetLicenseSummary
+      summary: "GET /v1.0/tenants/{tenantId}/ManagedEnvironment/PowerApps/GetLicenseSummary"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/billing/licenses/PowerApps/overview, https://admin.powerplatform.microsoft.com/billing/licenses/PowerApps/recommendations, https://admin.powerplatform.microsoft.com/billing/licenses/copilotStudio/overview, https://admin.powerplatform.microsoft.com/billing/licenses/dataverse/overview, and 7 more routes."
+      tags:
+        - Licensing
+      parameters:
+        - name: "tenantId"
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "847b5907-ca15-40f4-b171-eb18619dbfab"
+      responses:
+        '200':
+          description: "200 captured response"
+  /v1.0/tenants/{tenantId}/ManagedEnvironment/PowerAutomate/GetComplianceSummary:
+    servers:
+      - url: "https://licensing.powerplatform.microsoft.com"
+        description: "Power Platform licensing API"
+    post:
+      operationId: Licensing_post_v1_0_tenants_tenantId_ManagedEnvironment_PowerAutomate_GetComplianceSummary
+      summary: "POST /v1.0/tenants/{tenantId}/ManagedEnvironment/PowerAutomate/GetComplianceSummary"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/billing/licenses/powerAutomate/overview."
+      tags:
+        - Licensing
+      parameters:
+        - name: "tenantId"
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "847b5907-ca15-40f4-b171-eb18619dbfab"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                isTenantLevel:
+                  type: boolean
+                  example: true
+                pageSize:
+                  type: integer
+                  example: 25
+      responses:
+        '200':
+          description: "200 captured response"
+  /v1.0/tenants/{tenantId}/ManagedEnvironment/PowerAutomate/GetLicenseSummary:
+    servers:
+      - url: "https://licensing.powerplatform.microsoft.com"
+        description: "Power Platform licensing API"
+    get:
+      operationId: Licensing_get_v1_0_tenants_tenantId_ManagedEnvironment_PowerAutomate_GetLicenseSummary
+      summary: "GET /v1.0/tenants/{tenantId}/ManagedEnvironment/PowerAutomate/GetLicenseSummary"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/billing/licenses/powerAutomate/overview."
+      tags:
+        - Licensing
+      parameters:
+        - name: "tenantId"
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "847b5907-ca15-40f4-b171-eb18619dbfab"
+      responses:
+        '200':
+          description: "200 captured response"
+  /v1.0/tenants/{tenantId}/productCategories/PowerApps/userSubscribedLicenseSummary:
+    servers:
+      - url: "https://licensing.powerplatform.microsoft.com"
+        description: "Power Platform licensing API"
+    get:
+      operationId: Licensing_get_v1_0_tenants_tenantId_productCategories_PowerApps_userSubscribedLicenseSummary
+      summary: "GET /v1.0/tenants/{tenantId}/productCategories/PowerApps/userSubscribedLicenseSummary"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/billing/licenses/PowerApps/overview, https://admin.powerplatform.microsoft.com/billing/licenses/powerApps/overview."
+      tags:
+        - Licensing
+      parameters:
+        - name: "tenantId"
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "847b5907-ca15-40f4-b171-eb18619dbfab"
+        - name: "fromDate"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "01-04-2026"
+        - name: "toDate"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "04-04-2026"
+      responses:
+        '200':
+          description: "200 captured response"
+  /v1.0/tenants/{tenantId}/productCategories/PowerApps/userSubscribedLicenseTrends:
+    servers:
+      - url: "https://licensing.powerplatform.microsoft.com"
+        description: "Power Platform licensing API"
+    post:
+      operationId: Licensing_post_v1_0_tenants_tenantId_productCategories_PowerApps_userSubscribedLicenseTrends
+      summary: "POST /v1.0/tenants/{tenantId}/productCategories/PowerApps/userSubscribedLicenseTrends"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/billing/licenses/PowerApps/overview, https://admin.powerplatform.microsoft.com/billing/licenses/powerApps/overview."
+      tags:
+        - Licensing
+      parameters:
+        - name: "tenantId"
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "847b5907-ca15-40f4-b171-eb18619dbfab"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                toDate:
+                  type: string
+                  example: "04-04-2026"
+                fromDate:
+                  type: string
+                  example: "04-01-2025"
+                skuIds:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+                    example: "304b93a3-b1f1-427f-aa02-da21e7c7d675"
+      responses:
+        '200':
+          description: "200 captured response"
+  /v1.0/tenants/{tenantId}/recommendations/PowerAppsUnderlicensedUsers:
+    servers:
+      - url: "https://licensing.powerplatform.microsoft.com"
+        description: "Power Platform licensing API"
+    get:
+      operationId: Licensing_get_v1_0_tenants_tenantId_recommendations_PowerAppsUnderlicensedUsers
+      summary: "GET /v1.0/tenants/{tenantId}/recommendations/PowerAppsUnderlicensedUsers"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/billing/licenses/PowerApps/recommendations."
+      tags:
+        - Licensing
+      parameters:
+        - name: "tenantId"
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "847b5907-ca15-40f4-b171-eb18619dbfab"
+      responses:
+        '200':
+          description: "200 captured response"
+  /v2.0/tenants/{tenantId}/BillingPolicies:
+    servers:
+      - url: "https://licensing.powerplatform.microsoft.com"
+        description: "Power Platform licensing API"
+    get:
+      operationId: Licensing_get_v2_0_tenants_tenantId_BillingPolicies
+      summary: "GET /v2.0/tenants/{tenantId}/BillingPolicies"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/billing/licenses/PowerApps/overview, https://admin.powerplatform.microsoft.com/billing/licenses/PowerApps/recommendations, https://admin.powerplatform.microsoft.com/billing/licenses/copilotStudio/overview, https://admin.powerplatform.microsoft.com/billing/licenses/dataverse/overview, and 7 more routes."
+      tags:
+        - Licensing
+      parameters:
+        - name: "tenantId"
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "847b5907-ca15-40f4-b171-eb18619dbfab"
+      responses:
+        '200':
+          description: "200 captured response"
+  /v2.0/tenants/{tenantId}/entitlements/AppPass:
+    servers:
+      - url: "https://licensing.powerplatform.microsoft.com"
+        description: "Power Platform licensing API"
+    get:
+      operationId: Licensing_get_v2_0_tenants_tenantId_entitlements_AppPass
+      summary: "GET /v2.0/tenants/{tenantId}/entitlements/AppPass"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/billing/licenses/PowerApps/overview, https://admin.powerplatform.microsoft.com/billing/licenses/powerApps/overview."
+      tags:
+        - Licensing
+      parameters:
+        - name: "tenantId"
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "847b5907-ca15-40f4-b171-eb18619dbfab"
+      responses:
+        '404':
+          description: "404 captured response"
+  /v2.0/tenants/{tenantId}/entitlements/Database:
+    servers:
+      - url: "https://licensing.powerplatform.microsoft.com"
+        description: "Power Platform licensing API"
+    get:
+      operationId: Licensing_get_v2_0_tenants_tenantId_entitlements_Database
+      summary: "GET /v2.0/tenants/{tenantId}/entitlements/Database"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/billing/licenses/dataverse/overview, https://admin.powerplatform.microsoft.com/resources/capacity."
+      tags:
+        - Licensing
+      parameters:
+        - name: "tenantId"
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "847b5907-ca15-40f4-b171-eb18619dbfab"
+      responses:
+        '200':
+          description: "200 captured response"
+  /v2.0/tenants/{tenantId}/entitlements/File:
+    servers:
+      - url: "https://licensing.powerplatform.microsoft.com"
+        description: "Power Platform licensing API"
+    get:
+      operationId: Licensing_get_v2_0_tenants_tenantId_entitlements_File
+      summary: "GET /v2.0/tenants/{tenantId}/entitlements/File"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/billing/licenses/dataverse/overview, https://admin.powerplatform.microsoft.com/resources/capacity."
+      tags:
+        - Licensing
+      parameters:
+        - name: "tenantId"
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "847b5907-ca15-40f4-b171-eb18619dbfab"
+      responses:
+        '200':
+          description: "200 captured response"
+  /v2.0/tenants/{tenantId}/entitlements/FinOpsDatabase:
+    servers:
+      - url: "https://licensing.powerplatform.microsoft.com"
+        description: "Power Platform licensing API"
+    get:
+      operationId: Licensing_get_v2_0_tenants_tenantId_entitlements_FinOpsDatabase
+      summary: "GET /v2.0/tenants/{tenantId}/entitlements/FinOpsDatabase"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/billing/licenses/dataverse/overview, https://admin.powerplatform.microsoft.com/resources/capacity."
+      tags:
+        - Licensing
+      parameters:
+        - name: "tenantId"
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "847b5907-ca15-40f4-b171-eb18619dbfab"
+      responses:
+        '200':
+          description: "200 captured response"
+  /v2.0/tenants/{tenantId}/entitlements/FinOpsFile:
+    servers:
+      - url: "https://licensing.powerplatform.microsoft.com"
+        description: "Power Platform licensing API"
+    get:
+      operationId: Licensing_get_v2_0_tenants_tenantId_entitlements_FinOpsFile
+      summary: "GET /v2.0/tenants/{tenantId}/entitlements/FinOpsFile"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/billing/licenses/dataverse/overview, https://admin.powerplatform.microsoft.com/resources/capacity."
+      tags:
+        - Licensing
+      parameters:
+        - name: "tenantId"
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "847b5907-ca15-40f4-b171-eb18619dbfab"
+      responses:
+        '200':
+          description: "200 captured response"
+  /v2.0/tenants/{tenantId}/entitlements/Log:
+    servers:
+      - url: "https://licensing.powerplatform.microsoft.com"
+        description: "Power Platform licensing API"
+    get:
+      operationId: Licensing_get_v2_0_tenants_tenantId_entitlements_Log
+      summary: "GET /v2.0/tenants/{tenantId}/entitlements/Log"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/billing/licenses/dataverse/overview, https://admin.powerplatform.microsoft.com/resources/capacity."
+      tags:
+        - Licensing
+      parameters:
+        - name: "tenantId"
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "847b5907-ca15-40f4-b171-eb18619dbfab"
+      responses:
+        '200':
+          description: "200 captured response"
+  /v2.0/tenants/{tenantId}/entitlements/MCSMessages:
+    servers:
+      - url: "https://licensing.powerplatform.microsoft.com"
+        description: "Power Platform licensing API"
+    get:
+      operationId: Licensing_get_v2_0_tenants_tenantId_entitlements_MCSMessages
+      summary: "GET /v2.0/tenants/{tenantId}/entitlements/MCSMessages"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/billing/licenses/copilotStudio/overview."
+      tags:
+        - Licensing
+      parameters:
+        - name: "tenantId"
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "847b5907-ca15-40f4-b171-eb18619dbfab"
+      responses:
+        '404':
+          description: "404 captured response"
+  /v2.0/tenants/{tenantId}/entitlements/MCSSessions:
+    servers:
+      - url: "https://licensing.powerplatform.microsoft.com"
+        description: "Power Platform licensing API"
+    get:
+      operationId: Licensing_get_v2_0_tenants_tenantId_entitlements_MCSSessions
+      summary: "GET /v2.0/tenants/{tenantId}/entitlements/MCSSessions"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/billing/licenses/copilotStudio/overview."
+      tags:
+        - Licensing
+      parameters:
+        - name: "tenantId"
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "847b5907-ca15-40f4-b171-eb18619dbfab"
+      responses:
+        '404':
+          description: "404 captured response"
+  /v2.0/tenants/{tenantId}/environments/entitlementConsumptions/AppPass:
+    servers:
+      - url: "https://licensing.powerplatform.microsoft.com"
+        description: "Power Platform licensing API"
+    get:
+      operationId: Licensing_get_v2_0_tenants_tenantId_environments_entitlementConsumptions_AppPass
+      summary: "GET /v2.0/tenants/{tenantId}/environments/entitlementConsumptions/AppPass"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/billing/licenses/PowerApps/overview, https://admin.powerplatform.microsoft.com/billing/licenses/powerApps/overview."
+      tags:
+        - Licensing
+      parameters:
+        - name: "tenantId"
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "847b5907-ca15-40f4-b171-eb18619dbfab"
+      responses:
+        '200':
+          description: "200 captured response"
+  /v2.0/tenants/{tenantId}/environments/entitlementConsumptions/Database:
+    servers:
+      - url: "https://licensing.powerplatform.microsoft.com"
+        description: "Power Platform licensing API"
+    get:
+      operationId: Licensing_get_v2_0_tenants_tenantId_environments_entitlementConsumptions_Database
+      summary: "GET /v2.0/tenants/{tenantId}/environments/entitlementConsumptions/Database"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/billing/licenses/dataverse/overview, https://admin.powerplatform.microsoft.com/resources/capacity."
+      tags:
+        - Licensing
+      parameters:
+        - name: "tenantId"
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "847b5907-ca15-40f4-b171-eb18619dbfab"
+      responses:
+        '200':
+          description: "200 captured response"
+  /v2.0/tenants/{tenantId}/environments/entitlementConsumptions/File:
+    servers:
+      - url: "https://licensing.powerplatform.microsoft.com"
+        description: "Power Platform licensing API"
+    get:
+      operationId: Licensing_get_v2_0_tenants_tenantId_environments_entitlementConsumptions_File
+      summary: "GET /v2.0/tenants/{tenantId}/environments/entitlementConsumptions/File"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/billing/licenses/dataverse/overview, https://admin.powerplatform.microsoft.com/resources/capacity."
+      tags:
+        - Licensing
+      parameters:
+        - name: "tenantId"
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "847b5907-ca15-40f4-b171-eb18619dbfab"
+      responses:
+        '200':
+          description: "200 captured response"
+  /v2.0/tenants/{tenantId}/environments/entitlementConsumptions/FinOpsDatabase:
+    servers:
+      - url: "https://licensing.powerplatform.microsoft.com"
+        description: "Power Platform licensing API"
+    get:
+      operationId: Licensing_get_v2_0_tenants_tenantId_environments_entitlementConsumptions_FinOpsDatabase
+      summary: "GET /v2.0/tenants/{tenantId}/environments/entitlementConsumptions/FinOpsDatabase"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/billing/licenses/dataverse/overview, https://admin.powerplatform.microsoft.com/resources/capacity."
+      tags:
+        - Licensing
+      parameters:
+        - name: "tenantId"
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "847b5907-ca15-40f4-b171-eb18619dbfab"
+      responses:
+        '200':
+          description: "200 captured response"
+  /v2.0/tenants/{tenantId}/environments/entitlementConsumptions/FinOpsFile:
+    servers:
+      - url: "https://licensing.powerplatform.microsoft.com"
+        description: "Power Platform licensing API"
+    get:
+      operationId: Licensing_get_v2_0_tenants_tenantId_environments_entitlementConsumptions_FinOpsFile
+      summary: "GET /v2.0/tenants/{tenantId}/environments/entitlementConsumptions/FinOpsFile"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/billing/licenses/dataverse/overview, https://admin.powerplatform.microsoft.com/resources/capacity."
+      tags:
+        - Licensing
+      parameters:
+        - name: "tenantId"
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "847b5907-ca15-40f4-b171-eb18619dbfab"
+      responses:
+        '200':
+          description: "200 captured response"
+  /v2.0/tenants/{tenantId}/environments/entitlementConsumptions/Log:
+    servers:
+      - url: "https://licensing.powerplatform.microsoft.com"
+        description: "Power Platform licensing API"
+    get:
+      operationId: Licensing_get_v2_0_tenants_tenantId_environments_entitlementConsumptions_Log
+      summary: "GET /v2.0/tenants/{tenantId}/environments/entitlementConsumptions/Log"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/billing/licenses/dataverse/overview, https://admin.powerplatform.microsoft.com/resources/capacity."
+      tags:
+        - Licensing
+      parameters:
+        - name: "tenantId"
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "847b5907-ca15-40f4-b171-eb18619dbfab"
+      responses:
+        '200':
+          description: "200 captured response"
+  /v2.0/tenants/{tenantId}/environments/entitlementConsumptions/MCSMessages:
+    servers:
+      - url: "https://licensing.powerplatform.microsoft.com"
+        description: "Power Platform licensing API"
+    get:
+      operationId: Licensing_get_v2_0_tenants_tenantId_environments_entitlementConsumptions_MCSMessages
+      summary: "GET /v2.0/tenants/{tenantId}/environments/entitlementConsumptions/MCSMessages"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/billing/licenses/copilotStudio/overview."
+      tags:
+        - Licensing
+      parameters:
+        - name: "tenantId"
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "847b5907-ca15-40f4-b171-eb18619dbfab"
+      responses:
+        '200':
+          description: "200 captured response"
+  /v2.0/tenants/{tenantId}/environments/entitlementConsumptions/MCSSessions:
+    servers:
+      - url: "https://licensing.powerplatform.microsoft.com"
+        description: "Power Platform licensing API"
+    get:
+      operationId: Licensing_get_v2_0_tenants_tenantId_environments_entitlementConsumptions_MCSSessions
+      summary: "GET /v2.0/tenants/{tenantId}/environments/entitlementConsumptions/MCSSessions"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/billing/licenses/copilotStudio/overview."
+      tags:
+        - Licensing
+      parameters:
+        - name: "tenantId"
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "847b5907-ca15-40f4-b171-eb18619dbfab"
+      responses:
+        '200':
+          description: "200 captured response"
+  /v2.0/tenants/{tenantId}/environments/entitlements/AppPass:
+    servers:
+      - url: "https://licensing.powerplatform.microsoft.com"
+        description: "Power Platform licensing API"
+    get:
+      operationId: Licensing_get_v2_0_tenants_tenantId_environments_entitlements_AppPass
+      summary: "GET /v2.0/tenants/{tenantId}/environments/entitlements/AppPass"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/billing/licenses/PowerApps/overview, https://admin.powerplatform.microsoft.com/billing/licenses/environmentlist/PowerApps, https://admin.powerplatform.microsoft.com/billing/licenses/powerApps/overview."
+      tags:
+        - Licensing
+      parameters:
+        - name: "tenantId"
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "847b5907-ca15-40f4-b171-eb18619dbfab"
+        - name: "searchRequest"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: ""
+      responses:
+        '200':
+          description: "200 captured response"
+  /v2.0/tenants/{tenantId}/environments/entitlements/Database:
+    servers:
+      - url: "https://licensing.powerplatform.microsoft.com"
+        description: "Power Platform licensing API"
+    get:
+      operationId: Licensing_get_v2_0_tenants_tenantId_environments_entitlements_Database
+      summary: "GET /v2.0/tenants/{tenantId}/environments/entitlements/Database"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/billing/licenses/dataverse/overview, https://admin.powerplatform.microsoft.com/resources/capacity."
+      tags:
+        - Licensing
+      parameters:
+        - name: "tenantId"
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "847b5907-ca15-40f4-b171-eb18619dbfab"
+        - name: "searchRequest"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: ""
+      responses:
+        '200':
+          description: "200 captured response"
+  /v2.0/tenants/{tenantId}/environments/entitlements/File:
+    servers:
+      - url: "https://licensing.powerplatform.microsoft.com"
+        description: "Power Platform licensing API"
+    get:
+      operationId: Licensing_get_v2_0_tenants_tenantId_environments_entitlements_File
+      summary: "GET /v2.0/tenants/{tenantId}/environments/entitlements/File"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/billing/licenses/dataverse/overview, https://admin.powerplatform.microsoft.com/resources/capacity."
+      tags:
+        - Licensing
+      parameters:
+        - name: "tenantId"
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "847b5907-ca15-40f4-b171-eb18619dbfab"
+        - name: "searchRequest"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: ""
+      responses:
+        '200':
+          description: "200 captured response"
+  /v2.0/tenants/{tenantId}/environments/entitlements/FinOpsDatabase:
+    servers:
+      - url: "https://licensing.powerplatform.microsoft.com"
+        description: "Power Platform licensing API"
+    get:
+      operationId: Licensing_get_v2_0_tenants_tenantId_environments_entitlements_FinOpsDatabase
+      summary: "GET /v2.0/tenants/{tenantId}/environments/entitlements/FinOpsDatabase"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/billing/licenses/dataverse/overview, https://admin.powerplatform.microsoft.com/resources/capacity."
+      tags:
+        - Licensing
+      parameters:
+        - name: "tenantId"
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "847b5907-ca15-40f4-b171-eb18619dbfab"
+        - name: "searchRequest"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: ""
+      responses:
+        '200':
+          description: "200 captured response"
+  /v2.0/tenants/{tenantId}/environments/entitlements/FinOpsFile:
+    servers:
+      - url: "https://licensing.powerplatform.microsoft.com"
+        description: "Power Platform licensing API"
+    get:
+      operationId: Licensing_get_v2_0_tenants_tenantId_environments_entitlements_FinOpsFile
+      summary: "GET /v2.0/tenants/{tenantId}/environments/entitlements/FinOpsFile"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/billing/licenses/dataverse/overview, https://admin.powerplatform.microsoft.com/resources/capacity."
+      tags:
+        - Licensing
+      parameters:
+        - name: "tenantId"
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "847b5907-ca15-40f4-b171-eb18619dbfab"
+        - name: "searchRequest"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: ""
+      responses:
+        '200':
+          description: "200 captured response"
+  /v2.0/tenants/{tenantId}/environments/entitlements/Log:
+    servers:
+      - url: "https://licensing.powerplatform.microsoft.com"
+        description: "Power Platform licensing API"
+    get:
+      operationId: Licensing_get_v2_0_tenants_tenantId_environments_entitlements_Log
+      summary: "GET /v2.0/tenants/{tenantId}/environments/entitlements/Log"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/billing/licenses/dataverse/overview, https://admin.powerplatform.microsoft.com/resources/capacity."
+      tags:
+        - Licensing
+      parameters:
+        - name: "tenantId"
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "847b5907-ca15-40f4-b171-eb18619dbfab"
+        - name: "searchRequest"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: ""
+      responses:
+        '200':
+          description: "200 captured response"
+  /v2.0/tenants/{tenantId}/environments/entitlements/MCSMessages:
+    servers:
+      - url: "https://licensing.powerplatform.microsoft.com"
+        description: "Power Platform licensing API"
+    get:
+      operationId: Licensing_get_v2_0_tenants_tenantId_environments_entitlements_MCSMessages
+      summary: "GET /v2.0/tenants/{tenantId}/environments/entitlements/MCSMessages"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/billing/licenses/copilotStudio/overview."
+      tags:
+        - Licensing
+      parameters:
+        - name: "tenantId"
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "847b5907-ca15-40f4-b171-eb18619dbfab"
+        - name: "searchRequest"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: ""
+      responses:
+        '200':
+          description: "200 captured response"
+  /v2.0/tenants/{tenantId}/environments/entitlements/MCSSessions:
+    servers:
+      - url: "https://licensing.powerplatform.microsoft.com"
+        description: "Power Platform licensing API"
+    get:
+      operationId: Licensing_get_v2_0_tenants_tenantId_environments_entitlements_MCSSessions
+      summary: "GET /v2.0/tenants/{tenantId}/environments/entitlements/MCSSessions"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/billing/licenses/copilotStudio/overview."
+      tags:
+        - Licensing
+      parameters:
+        - name: "tenantId"
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "847b5907-ca15-40f4-b171-eb18619dbfab"
+        - name: "searchRequest"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: ""
+      responses:
+        '200':
+          description: "200 captured response"

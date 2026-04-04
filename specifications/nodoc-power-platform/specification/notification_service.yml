@@ -1,0 +1,31 @@
+paths:
+  /notificationservice/notifications/metadata:
+    servers:
+      - url: "https://{tenantIslandHost}.tenant.api.powerplatform.com"
+        description: "Tenant-island Power Platform notification host"
+        variables:
+          tenantIslandHost:
+            default: "il-847b5907ca1540f4b171eb18619dbf.ab"
+            description: "Tenant island prefix observed in live Power Platform admin center traffic."
+    get:
+      operationId: NotificationService_get_notificationservice_notifications_metadata
+      summary: "GET /notificationservice/notifications/metadata"
+      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/billing/licenses/PowerApps/overview, https://admin.powerplatform.microsoft.com/billing/licenses/PowerApps/recommendations, https://admin.powerplatform.microsoft.com/billing/licenses/copilotStudio/overview, https://admin.powerplatform.microsoft.com/billing/licenses/dataverse/overview, and 83 more routes."
+      tags:
+        - NotificationService
+      parameters:
+        - name: "api-version"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "2022-03-01-preview"
+        - name: "targetClient"
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "PPAC"
+      responses:
+        '200':
+          description: "200 captured response"
