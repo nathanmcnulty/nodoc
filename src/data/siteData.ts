@@ -82,7 +82,7 @@ export const apiCatalog: ApiCatalogItem[] = [
     title: "Exchange Beta",
     slug: "/exchange-beta",
     family: "Exchange admin center",
-    operations: 31,
+    operations: 61,
     authModel: "Portal session cookie + same-origin `x-requested-with`",
     baseUrl: "https://admin.exchange.microsoft.com/beta",
     summary:
