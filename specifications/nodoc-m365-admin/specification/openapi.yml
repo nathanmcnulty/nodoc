@@ -84,8 +84,6 @@ tags:
     description: Operations relating to integrated apps and add-ins.
   - name: TenantRelationships
     description: Operations relating to multi-tenant organization and tenant relationships.
-  - name: SharePoint
-    description: Operations relating to SharePoint REST API endpoints.
   - name: ContentUnderstanding
     description: Operations relating to content understanding and Syntex.
   - name: Viva
@@ -139,8 +137,6 @@ x-tagGroups:
     tags: [IntegratedApps]
   - name: Tenant Relationships
     tags: [TenantRelationships]
-  - name: SharePoint
-    tags: [SharePoint]
   - name: Content Understanding
     tags: [ContentUnderstanding]
   - name: Viva
@@ -374,18 +370,6 @@ paths:
     $ref: tenant_relationships.yml#/paths/~1admin~1api~1tenantRelationships~1multiTenantOrganization~1tenants
   /admin/api/tenantRelationships/userSyncApps/outboundDetails:
     $ref: tenant_relationships.yml#/paths/~1admin~1api~1tenantRelationships~1userSyncApps~1outboundDetails
-
-  # SharePoint
-  /_api/v2.1/billingPolicies:
-    $ref: sharepoint.yml#/paths/~1_api~1v2.1~1billingPolicies
-  /_api/v2.1/billingFeatures:
-    $ref: sharepoint.yml#/paths/~1_api~1v2.1~1billingFeatures
-  /_api/v2.1/copilot/capacitypack/checkUsage:
-    $ref: sharepoint.yml#/paths/~1_api~1v2.1~1copilot~1capacitypack~1checkUsage
-  /_api/SPOInternalUseOnly.TenantAdminSettings/AutoQuotaEnabled:
-    $ref: sharepoint.yml#/paths/~1_api~1SPOInternalUseOnly.TenantAdminSettings~1AutoQuotaEnabled
-  /_api/spo.tenant/GetBrandCenterConfiguration:
-    $ref: sharepoint.yml#/paths/~1_api~1spo.tenant~1GetBrandCenterConfiguration
 
   # Content Understanding
   /admin/api/contentunderstanding/playbacktranscripttranslationsettings:

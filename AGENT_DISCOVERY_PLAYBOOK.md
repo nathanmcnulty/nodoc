@@ -130,6 +130,7 @@ Recommended pattern:
 - Write artifacts after each crawl phase instead of only at the very end.
 - Keep the browser capture script focused on traffic collection; do bundle download in a separate step.
 - For broad portal passes, use bounded parallel tabs only if you can still attribute requests back to the originating page.
+- If CDP `Page.navigate` stalls on a same-origin SPA hash route, retry that surface in a fresh single tab and fall back to setting `location.href`; do not assume the route itself is invalid just because the first navigation primitive hung.
 - For report or dashboard blades, do two passes: initial-load traffic first, then a second pass that changes one safe control at a time.
 - During the interaction pass, prefer safe state changes such as filters, date range, grouping, row drill-ins, tabs, sort, paging, and export preflight so each new request can be tied back to the triggering UI state.
 - Record a page-state checklist alongside each request set: selected tab, filter chips, date range, business group or release selection, tenant scope, and any report-mode toggles.

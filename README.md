@@ -14,7 +14,8 @@ The project currently publishes the following API definitions:
 | API | Ops | Access model | Site page | Checked-in Postman collection |
 | --- | ---: | --- | --- | --- |
 | Defender | 459 | Portal session cookie (`sccauth`) | [Browse](https://nodoc.nathanmcnulty.com/defender) | `postman/collections/defender.collection.json` |
-| M365 Admin | 218 | Portal session + custom admin headers | [Browse](https://nodoc.nathanmcnulty.com/m-365-admin) | `postman/collections/m365-admin.collection.json` |
+| M365 Admin | 213 | Portal session + custom admin headers | [Browse](https://nodoc.nathanmcnulty.com/m-365-admin) | `postman/collections/m365-admin.collection.json` |
+| SharePoint Admin | 35 | Portal session cookie (`FedAuth`) + SharePoint form digest | [Browse](https://nodoc.nathanmcnulty.com/share-point-admin) | `postman/collections/sharepoint-admin.collection.json` |
 | M365 Apps Config | 23 | Portal bearer token + diagnostic headers | [Browse](https://nodoc.nathanmcnulty.com/m-365-apps-config) | `postman/collections/m365-apps-config.collection.json` |
 | M365 Apps Services | 8 | Portal bearer token + diagnostic headers | [Browse](https://nodoc.nathanmcnulty.com/m-365-apps-services) | `postman/collections/m365-apps-services.collection.json` |
 | M365 Apps Inventory | 27 | Portal bearer token + diagnostic headers | [Browse](https://nodoc.nathanmcnulty.com/m-365-apps-inventory) | `postman/collections/m365-apps-inventory.collection.json` |

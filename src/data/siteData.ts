@@ -64,7 +64,7 @@ export const apiCatalog: ApiCatalogItem[] = [
     title: "M365 Admin",
     slug: "/m-365-admin",
     family: "Admin portal",
-    operations: 218,
+    operations: 213,
     authModel: "Portal session cookie + custom admin headers",
     baseUrl: "https://admin.cloud.microsoft",
     summary:
@@ -77,6 +77,24 @@ export const apiCatalog: ApiCatalogItem[] = [
     collectionPath: "postman/collections/m365-admin.collection.json",
     collectionDownloadUrl:
       "https://raw.githubusercontent.com/nathanmcnulty/nodoc/main/postman/collections/m365-admin.collection.json",
+  },
+  {
+    title: "SharePoint Admin",
+    slug: "/share-point-admin",
+    family: "SharePoint admin center",
+    operations: 35,
+    authModel: "Portal session cookie (`FedAuth`) + SharePoint form digest",
+    baseUrl: "https://{tenant}-admin.sharepoint.com",
+    summary:
+      "Tenant bootstrap, site inventory, storage quota, group creation, internal list reads, and settings workflows from the SharePoint admin center same-origin `/_api` surface.",
+    highlights: [
+      "Tenant admin bootstrap and multigeo discovery",
+      "Site inventory, internal admin-list views, and CSV export helpers",
+      "Storage quota, group creation, branding, and internal tenant settings coverage",
+    ],
+    collectionPath: "postman/collections/sharepoint-admin.collection.json",
+    collectionDownloadUrl:
+      "https://raw.githubusercontent.com/nathanmcnulty/nodoc/main/postman/collections/sharepoint-admin.collection.json",
   },
   {
     title: "M365 Apps Config",
@@ -316,6 +334,12 @@ export const accessModels: AccessModel[] = [
     portals: ["M365 Admin"],
   },
   {
+    title: "Portal session + SharePoint digest",
+    description:
+      "SharePoint Admin uses the tenant's `-admin.sharepoint.com` browser session together with same-origin SharePoint headers such as `x-requestdigest`, `SdkVersion`, and `odata-version` on POST requests.",
+    portals: ["SharePoint Admin"],
+  },
+  {
     title: "Portal bearer tokens + diagnostic headers",
     description:
       "M365 Apps uses browser-obtained bearer tokens together with diagnostic headers such as `x-api-name`, `x-correlationid`, `x-manageoffice-client-sid`, and `x-requested-with`.",
@@ -460,6 +484,31 @@ export const gettingStartedGuides: GettingStartedGuide[] = [
       "Missing one of the custom admin headers can look like a generic auth or routing failure.",
       "Some data comes through federated Graph proxies and can differ from the shared Graph proxy behavior in Defender or Purview.",
       "Header values can change as the admin shell bootstraps or refreshes.",
+    ],
+  },
+  {
+    title: "SharePoint Admin",
+    portals: ["SharePoint Admin"],
+    authModel: "Portal session cookie (`FedAuth`) + same-origin SharePoint headers",
+    baseUrls: ["https://{tenant}-admin.sharepoint.com/_api"],
+    confirmedDetails: [
+      "The observed SharePoint-specific surface is same-origin `/_api/*` traffic on the tenant's `-admin.sharepoint.com` host rather than `graph.microsoft.com` or the generic Microsoft 365 shell.",
+      "Observed POST requests included `x-requestdigest`, `SdkVersion`, `odata-version`, and a SharePoint admin `Referer` alongside the authenticated browser cookies.",
+      "The captured routes covered Home, Active sites, Deleted sites, and Settings, plus internal admin-list reads and CSV export helpers.",
+    ],
+    practicalGuidance: [
+      "Start from a real authenticated SharePoint admin browser tab and keep the tenant-specific `-admin.sharepoint.com` host intact when replaying requests.",
+      "Validate access with read-only calls such as `/_api/TenantAdminEndpoints`, `/_api/TenantInformationCollection`, or `/_api/StorageQuotas()` before attempting POST requests.",
+      "Expect many useful routes to expose internal SharePoint list names and service objects rather than polished public contracts.",
+    ],
+    mutationGuidance: [
+      "Treat POST calls such as `RenderAdminListData`, `ExportToCSV`, `GetSitesByState`, and `UpdateJobsWorkItems` as live portal operations even when they look report-like.",
+      "If you need more write coverage, capture the exact portal payload first and preserve original state in a safe tenant before replaying anything.",
+    ],
+    pitfalls: [
+      "The portal mixes SharePoint-specific `/_api` traffic with generic shell calls to `admin.microsoft.com` and `portal.office.com`; only the same-origin SharePoint host belongs in this family.",
+      "Request digests are short-lived and tied to the current page context, so replay can fail even when the browser cookies are still valid.",
+      "Some responses expose internal SharePoint list names and implementation details that should be sanitized before sharing captures.",
     ],
   },
   {

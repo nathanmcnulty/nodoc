@@ -14,6 +14,13 @@ const portalConfig = [
     urlPatterns: ['https://admin.cloud.microsoft/admin/api/*']
   },
   {
+    id: 'sharepoint-admin',
+    name: 'SharePoint Admin',
+    hostnameSuffixes: ['-admin.sharepoint.com'],
+    pathPrefixes: ['/_api/'],
+    urlPatterns: ['https://*.sharepoint.com/_api/*']
+  },
+  {
     id: 'purview',
     name: 'Purview',
     hostname: 'purview.microsoft.com',
@@ -64,14 +71,6 @@ const portalConfig = [
   }
 ];
 
-// Build a list of tracked URL prefixes from portalConfig
-const trackedPrefixes = [];
-for (const portal of portalConfig) {
-  for (const pattern of portal.urlPatterns) {
-    trackedPrefixes.push(pattern.replace('*', ''));
-  }
-}
-
 // Store intercepted request bodies with a 5-minute TTL
 const requestBodyMap = new Map();
 const BODY_TTL_MS = 5 * 60 * 1000;
@@ -88,13 +87,35 @@ function pruneExpiredBodies() {
 // Prune every 60 seconds
 setInterval(pruneExpiredBodies, 60_000);
 
+function matchesPortalHost(portal, hostname) {
+  const hostnames = portal.hostnames || (portal.hostname ? [portal.hostname] : []);
+  if (hostnames.includes(hostname)) {
+    return true;
+  }
+
+  const hostnameSuffixes = portal.hostnameSuffixes || [];
+  return hostnameSuffixes.some(suffix => hostname.endsWith(suffix));
+}
+
 function isTrackedUrl(url) {
-  return trackedPrefixes.some(prefix => url.startsWith(prefix));
+  try {
+    const parsed = new URL(url);
+    return portalConfig.some(portal =>
+      matchesPortalHost(portal, parsed.hostname) &&
+      portal.pathPrefixes.some(prefix => parsed.pathname.startsWith(prefix))
+    );
+  } catch {
+    return false;
+  }
 }
 
 // Intercept request bodies for tracked URLs
 chrome.webRequest.onBeforeRequest.addListener(
   (details) => {
+    if (!isTrackedUrl(details.url)) {
+      return;
+    }
+
     if (details.requestBody) {
       const body = {};
       if (details.requestBody.raw) {
