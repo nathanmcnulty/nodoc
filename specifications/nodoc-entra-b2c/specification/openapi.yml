@@ -402,3 +402,41 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TenantResource'
+  /api/userAttribute/GetAvailableOutputClaimsList:
+    get:
+      tags: [User Flows]
+      summary: List available output claims for custom user attributes
+      description: |
+        Retrieves the output-claim list used by the External Identities custom user attributes
+        experience. The current tenant returned `AADB2C99039`, confirming the route is feature-gated
+        when self-service sign-up is not enabled.
+      operationId: UserAttributes.ListAvailableOutputClaims
+      parameters:
+        - $ref: '#/components/parameters/tenantId'
+        - name: $orderby
+          in: query
+          required: false
+          description: Optional ordering applied to the returned claim definitions.
+          schema:
+            type: string
+            example: DisplayName
+      responses:
+        '200':
+          description: Available output claims returned successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  additionalProperties: true
+        '400':
+          description: Self-service sign-up is not enabled or the custom user attribute surface is unavailable.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/B2CError'
+              example:
+                message: An error has occurred.
+                exceptionMessage: "The feature self service sign up is not enabled for the tenant 'contoso.onmicrosoft.com'"
+                code: AADB2C99039

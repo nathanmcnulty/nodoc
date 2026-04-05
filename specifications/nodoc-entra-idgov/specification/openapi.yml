@@ -370,6 +370,87 @@ paths:
             application/json:
               schema:
                 type: object
+  /accessReviews/v2.0/approvalWorkflowProviders/{providerId}/businessFlows:
+    get:
+      tags: [Configuration]
+      summary: List business flows for a provider
+      description: |
+        Retrieves access review business flows surfaced by the Access reviews > Programs
+        experience. Confirmed live from the Identity Governance Programs blade.
+      operationId: AccessReviews.ListBusinessFlows
+      parameters:
+        - $ref: '#/components/parameters/providerId'
+        - name: $count
+          in: query
+          required: false
+          description: Include the total count of matching business flows.
+          schema:
+            type: boolean
+        - $ref: '#/components/parameters/$top'
+        - $ref: '#/components/parameters/$skip'
+      responses:
+        '200':
+          description: Business flows returned successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  '@odata.context':
+                    type: string
+                    format: uri
+                  '@odata.count':
+                    type: integer
+                  value:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+                        partnerId:
+                          type: string
+                          format: uuid
+                        displayName:
+                          type: string
+                        description:
+                          type: string
+                        createdDateTime:
+                          type: string
+                          format: date-time
+                        lastUpdatedDateTime:
+                          type: string
+                          format: date-time
+                        deDuplicationId:
+                          type: string
+                        recordVersion:
+                          type: string
+                        customData:
+                          type: object
+                          nullable: true
+                          additionalProperties: true
+                        policyTemplateId:
+                          type: string
+                          nullable: true
+                        isDefault:
+                          type: boolean
+                        schemaId:
+                          type: string
+                          nullable: true
+                        settings:
+                          type: object
+                          nullable: true
+                          additionalProperties: true
+                        policy:
+                          type: object
+                          nullable: true
+                          additionalProperties: true
+                        summary:
+                          type: object
+                          nullable: true
+                          additionalProperties: true
+                      additionalProperties: true
   /accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests:
     get:
       tags: [Requests]
@@ -452,6 +533,35 @@ paths:
                 '@odata.context': "https://api.accessreviews.identitygovernance.azure.com/accessReviews/v2.0/$metadata#approvalWorkflowProviders('00000000-0000-0000-0000-000000000000')/requestsAwaitingMyDecision/Microsoft.Azure.ActiveDirectory.AccessReviews.Api.Models.V2.AccessReview(id,displayName,endDateTime,decisionsCriteria)"
                 '@odata.count': 0
                 value: []
+  /accessReviews/v2.0/reports:
+    get:
+      tags: [Requests]
+      summary: List access review reports
+      description: |
+        Retrieves report rows shown by the Access reviews > Review History experience.
+        Confirmed live from the Identity Governance Review History blade.
+      operationId: AccessReviews.ListReports
+      parameters:
+        - $ref: '#/components/parameters/$filter'
+        - $ref: '#/components/parameters/$top'
+      responses:
+        '200':
+          description: Access review reports returned successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  '@odata.context':
+                    type: string
+                    format: uri
+                  '@odata.count':
+                    type: integer
+                  value:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: true
   /accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests/{requestId}:
     get:
       tags: [Requests]

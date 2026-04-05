@@ -389,3 +389,63 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
+  /api/Report/GetReportSummaryData:
+    post:
+      tags: [Analytics]
+      summary: Get report summary data
+      description: |
+        Retrieves summary data for Purview analytics/report experiences such as Data Loss Prevention
+        encryption reporting. Confirmed live from the Data Loss Prevention surface with
+        `reportId=EncryptionReport` and `dataSourceId=MailTrafficEncryptionReport`.
+      operationId: PurviewPortal.Analytics.GetReportSummaryData
+      parameters:
+        - name: reportId
+          in: query
+          required: true
+          description: Logical report identifier selected by the portal.
+          schema:
+            type: string
+            example: EncryptionReport
+        - name: dataSourceId
+          in: query
+          required: true
+          description: Data source backing the requested Purview report.
+          schema:
+            type: string
+            example: MailTrafficEncryptionReport
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - EventType
+                - StartDate
+                - EndDate
+              properties:
+                EventType:
+                  type: array
+                  items:
+                    type: string
+                StartDate:
+                  type: string
+                  format: date-time
+                EndDate:
+                  type: string
+                  format: date-time
+      responses:
+        '200':
+          description: Report summary data returned successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GenericObject'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
