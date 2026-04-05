@@ -244,7 +244,20 @@ paths:
             application/json:
               schema:
                 type: object
-                description: Common data visualization preferences. Exact schema pending.
+                description: Common dashboard view preferences and teaching-bubble state for the current admin.
+              example:
+                CommonDashboardViewPreferences:
+                  ViewToShow: Default
+                  ShowDashboardSwitcherTeachingBubble: true
+                  EligibleDashboards:
+                    - SimplifiedView
+                    - Health
+                    - Default
+                  DismissProductFeedbackTopActions: null
+                  DismissDashboardHeaderTeachingBubble: null
+                  DismissDynamicCommandBarTeachingBubble: false
+                  ShouldShowDashboardHeaderTeachingBubble: true
+                CurrentViewInfo: null
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -272,7 +285,36 @@ paths:
             application/json:
               schema:
                 type: object
-                description: User products and licenses. Exact schema pending.
+                description: User license inventory with SKU availability and per-plan selection state.
+              example:
+                UserId: 00000000-0000-0000-0000-000000000000
+                Products:
+                  - ProductSkuId: f30db892-07e9-47e9-837c-80727f46fd3d
+                    AccountName: contoso
+                    SkuPartNumber: FLOW_FREE
+                    IsSelected: false
+                    IsPreviouslySelected: false
+                    IsDisabled: false
+                    IsLicenseDisabledState: false
+                    IsAssignable: true
+                    ProductDisplayName: Microsoft Power Automate Free
+                    TotalUnits: 10000
+                    AvailableUnits: 9997
+                    WarningUnits: 0
+                    HasUnlimitedSeats: false
+                    ServicePlans:
+                      - ServicePlan:
+                          ServiceName: DYN365_CDS_VIRAL
+                          ServicePlanId: 17ab22cd-a0b3-4536-910a-cb6eb12696c0
+                          ServiceType: CRM
+                          TargetClass: 1
+                          AppliesTo: null
+                        ServicePlanDisplayName: Common Data Service
+                        IsSelected: true
+                        IsDisabled: false
+                        IsServicePlanTenantLevel: false
+                        HideServicePlan: false
+                        IsGroupBased: false
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -296,7 +338,8 @@ paths:
             application/json:
               schema:
                 type: object
-                description: Dashboard layout preferences. Exact schema pending.
+                description: Dashboard layout preferences stored for the current admin.
+              example: {}
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 

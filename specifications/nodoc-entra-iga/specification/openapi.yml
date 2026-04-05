@@ -26,6 +26,9 @@ info:
   contact:
     name: nodoc
     url: https://github.com/nathanmcnulty/nodoc
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
 servers:
   - url: https://elm.iga.azure.com
     description: Entra Identity Governance Administration API
@@ -68,6 +71,16 @@ tags:
     description: Identity Governance administration settings
   - name: Lifecycle Workflows
     description: Joiner/mover/leaver workflow automation
+x-tagGroups:
+  - name: Governance administration
+    tags: [Billing, Settings]
+  - name: Entitlement management
+    tags: [Entitlement Management, Connected Organizations]
+  - name: Lifecycle automation
+    tags: [Lifecycle Workflows]
+externalDocs:
+  description: Checked-in source specification and supporting modules.
+  url: https://github.com/nathanmcnulty/nodoc/tree/main/specifications/nodoc-entra-iga/specification
 paths:
   /api/v1/billingConfigurations/guestBilling:
     get:
@@ -129,6 +142,7 @@ paths:
                     type: array
                     items:
                       type: object
+              example: {}
   /api/v1/accessPackages/{accessPackageId}:
     get:
       tags: [Entitlement Management]

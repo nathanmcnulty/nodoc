@@ -220,7 +220,35 @@ paths:
             application/json:
               schema:
                 type: object
-                description: pending - tenant context data
+                description: Defender tenant bootstrap with environment, geography, workload, and feature-flight state.
+              example:
+                EnvironmentName: Production
+                OrgId: 00000000-0000-0000-0000-000000000000
+                GeoRegion: Us3
+                DataCenter: EastUs3
+                AccountMode: 1
+                AccountType: Production
+                IsSuspended: false
+                IsDeleted: false
+                IsMdatpLicenseExpired: false
+                IsMtpEligible: true
+                HasMachineGroups: true
+                IsMdatpActive: true
+                IsOatpActive: true
+                IsItpActive: true
+                IsMapgActive: true
+                IsAadIpActive: true
+                IsDlpActive: true
+                IsIrmActive: true
+                IsMdiActive: true
+                IsMdcActive: true
+                IsSentinelActive: false
+                ActiveMtpWorkloads: [1, 2, 3, 4]
+                Features:
+                  MachineHealth: true
+                  CustomerTI: true
+                  'Response-Blacklist': true
+                  ProcessTree: true
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 

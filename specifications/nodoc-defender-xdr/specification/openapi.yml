@@ -51,11 +51,15 @@ info:
     Documentation and specifications have been provided on a best efforts basis and may not be 100% accurate.
 
   version: '1.0'
+  contact:
+    name: nodoc
+    url: https://github.com/nathanmcnulty/nodoc
   license:
     name: Apache 2.0
     url: https://www.apache.org/licenses/LICENSE-2.0.html
 servers:
   - url: https://security.microsoft.com/apiproxy
+    description: Defender XDR API proxy used by the security.microsoft.com portal
 
 security:
   - PortalSession: []
@@ -192,6 +196,10 @@ x-tagGroups:
     tags:
       - CloudApps
       - AppGovernance
+
+externalDocs:
+  description: Checked-in source specification and supporting modules.
+  url: https://github.com/nathanmcnulty/nodoc/tree/main/specifications/nodoc-defender-xdr/specification
 
 paths:
   # Alerts & Incidents

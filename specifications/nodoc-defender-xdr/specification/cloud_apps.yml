@@ -350,7 +350,7 @@ paths:
           application/json:
             schema:
               type: object
-              description: pending
+              description: Activity list query envelope with filter, paging, and sort controls.
       responses:
         '200':
           description: OK
@@ -358,7 +358,7 @@ paths:
             application/json:
               schema:
                 type: object
-                description: pending
+                description: Activity collection returned for the supplied cloud app activity query.
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -388,7 +388,7 @@ paths:
             application/json:
               schema:
                 type: object
-                description: pending
+                description: Aggregate count of activities matching the supplied query.
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -465,7 +465,8 @@ paths:
           application/json:
             schema:
               type: object
-              description: pending
+              description: Connector list query envelope used when the dashboard applies filters, paging, or sorting.
+            example: {}
       responses:
         '200':
           description: OK
@@ -473,7 +474,47 @@ paths:
             application/json:
               schema:
                 type: object
-                description: pending
+                description: Cloud app connector collection with API, proxy, and discovery connection state.
+              example:
+                data:
+                  - appId: 11161
+                    name: Microsoft 365
+                    _id: 63dd5f272b9cbba7bb29d703
+                    instanceName: null
+                    category: SAASDB_CATEGORY_COLLABORATION
+                    api:
+                      lastCheckTime: 1775347859564
+                      isConnected: true
+                      usersCount: 898
+                      creator: user@contoso.com
+                      isEnabled: true
+                      lastConnected: 1773702127907
+                      disabledBy: console
+                      isSSPMEnabled: true
+                    proxy:
+                      status: 0
+                      inDeployment: false
+                      isConnected: false
+                      isInProxyPolicy: null
+                      isSuspended: false
+                      isConfigured: false
+                      isConfiguredInAAD: false
+                      isSessionProxySupported: false
+                      isAppStatusEnabled: false
+                      isSessionProxyDisabled: true
+                      lastConnected: null
+                      proxySettings: null
+                      isOIDCBasedProtocol: true
+                    discovery:
+                      isConnected: false
+                    isOfficeApp: true
+                    isApiConnectable: true
+                    aadInfo: null
+                    lastUsed: null
+                    customData: {}
+                    isCustomApp: false
+                    securityConfiguration: {}
+                    appName: Microsoft 365
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -495,7 +536,28 @@ paths:
             application/json:
               schema:
                 type: object
-                description: pending
+                description: Cloud app connector collection with API, proxy, and discovery connection state.
+              example:
+                data:
+                  - appId: 11161
+                    name: Microsoft 365
+                    _id: 63dd5f272b9cbba7bb29d703
+                    instanceName: null
+                    category: SAASDB_CATEGORY_COLLABORATION
+                    api:
+                      isConnected: true
+                      usersCount: 898
+                      creator: user@contoso.com
+                      isEnabled: true
+                    proxy:
+                      isConnected: false
+                      isConfigured: false
+                      isSessionProxySupported: false
+                    discovery:
+                      isConnected: false
+                    isOfficeApp: true
+                    isApiConnectable: true
+                    appName: Microsoft 365
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -549,6 +611,11 @@ paths:
             application/json:
               schema:
                 $ref: common.yml#/components/schemas/CloudAppsStatusCountResponse
+              example:
+                data:
+                  protected: 2
+                  needAttention: 0
+                  notProtected: 2
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 

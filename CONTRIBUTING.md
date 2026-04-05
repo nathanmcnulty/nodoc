@@ -13,6 +13,25 @@ We welcome a range of contributions including updates to:
 
 Unless otherwise specified, we use OpenAPI 3.0.1. Whilst we have plans to upgrade to 3.1.x, there are compatibility issues with some tools keeping us on this version for now.
 
+## Root spec conventions
+
+Root `openapi.yml` files drive both website presentation and downstream artifacts. Keep them consistent:
+
+- Add `info.contact`, `info.license`, `servers[].description`, and `externalDocs` on every published root spec.
+- Use `x-tagGroups` for user-facing sections in Scalar. Group related tags together; do **not** mirror tags 1:1 into separate sections.
+- Use `x-displayName` when a tag name is technical, camel-cased, or backend-oriented and needs a cleaner label in the navigation tree.
+- Keep group names user-facing. Avoid raw hostnames, internal service names, or API prefixes as section headers unless they are the actual product concept users navigate by.
+- Preserve backend provenance in tag descriptions and operation descriptions rather than the navigation labels.
+
+## Quality metrics
+
+The website now surfaces generated spec-quality metadata from the checked-in OpenAPI files.
+
+- Regenerate it with `npm run generate:site-data`.
+- `npm run build`, `npm run start`, and `npm run typecheck` already regenerate this data automatically.
+- The generator reports navigation consistency, metadata completeness, placeholder debt, and example coverage for every published spec.
+- Treat placeholder markers such as `pending` as real debt to remove with evidence, not as acceptable final-state documentation.
+
 ## Styling
 
 When contributing, please ensure that submissions conform to the linting configured within each corresponding repository. This is typically as follows:

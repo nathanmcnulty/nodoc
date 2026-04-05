@@ -27,6 +27,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Validate spec quality
+        run: npm run validate:spec-quality
+
       - name: Build site
         run: npm run build
 

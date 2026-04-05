@@ -417,20 +417,15 @@ tags:
   - name: Internal
     description: Same-origin component-loading and internal-only tenant helpers observed in the portal.
 x-tagGroups:
-  - name: Tenant
-    tags: [Tenant]
-  - name: Settings
-    tags: [Settings]
-  - name: Storage
-    tags: [Storage]
-  - name: Migration
-    tags: [Migration]
-  - name: Sites & Lists
-    tags: [Sites]
-  - name: Groups
-    tags: [Groups]
-  - name: Internal
-    tags: [Internal]
+  - name: Tenant & settings
+    tags: [Tenant, Settings]
+  - name: Sites & storage
+    tags: [Sites, Storage, Groups]
+  - name: Migration & internal
+    tags: [Migration, Internal]
+externalDocs:
+  description: Checked-in source specification and supporting modules.
+  url: https://github.com/nathanmcnulty/nodoc/tree/main/specifications/nodoc-sharepoint-admin/specification
 paths:
   /_api/TenantAdminEndpoints:
     get:
@@ -816,6 +811,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UnifiedStorageQuotaEligibleResponse'
+              example:
+                '@odata.context': string
+                isEligible: false
+                lastUpdated: '1968-09-02T11:28:11.888Z'
+                isOverQuota: true
+                isEligibleFeature: string
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':

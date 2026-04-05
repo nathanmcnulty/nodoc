@@ -1,3 +1,29 @@
+import { generatedSpecDataByTitle } from "../generated/specQuality";
+
+type QualityMaturity = {
+  label: string;
+  tone: "success" | "neutral" | "warning";
+  description: string;
+};
+
+type GeneratedSpecData = {
+  title: string;
+  specPath: string;
+  specSourceUrl: string;
+  specDownloadUrl: string;
+  operationCount: number;
+  navigationStandardized: boolean;
+  ungroupedTagCount: number;
+  metadataComplete: boolean;
+  contactDefined: boolean;
+  licenseDefined: boolean;
+  externalDocsDefined: boolean;
+  allServersDescribed: boolean;
+  placeholderCount: number;
+  successResponseExampleCount: number;
+  maturity: QualityMaturity;
+};
+
 export type ApiCatalogItem = {
   title: string;
   slug: string;
@@ -9,6 +35,11 @@ export type ApiCatalogItem = {
   highlights: string[];
   collectionPath: string;
   collectionDownloadUrl: string;
+  specPath: string;
+  specSourceUrl: string;
+  specDownloadUrl: string;
+  quality: GeneratedSpecData | null;
+  qualitySummary: string;
 };
 
 export type AccessModel = {
@@ -40,7 +71,12 @@ export const postmanWorkspaceUrl =
   "https://www.postman.com/dolphinlabs/workspace/nodoc";
 export const publishedSiteUrl = "https://nodoc.nathanmcnulty.com";
 
-export const apiCatalog: ApiCatalogItem[] = [
+type ApiCatalogSeed = Omit<
+  ApiCatalogItem,
+  "quality" | "qualitySummary" | "specPath" | "specSourceUrl" | "specDownloadUrl"
+>;
+
+const apiCatalogSeed: ApiCatalogSeed[] = [
   {
     title: "Defender",
     slug: "/defender",
@@ -368,6 +404,54 @@ export const apiCatalog: ApiCatalogItem[] = [
   },
 ];
 
+function getGeneratedSpecData(title: string): GeneratedSpecData | null {
+  return (generatedSpecDataByTitle as Record<string, GeneratedSpecData>)[title] ?? null;
+}
+
+function getMetadataGapCount(quality: GeneratedSpecData): number {
+  return Number(!quality.contactDefined)
+    + Number(!quality.licenseDefined)
+    + Number(!quality.externalDocsDefined)
+    + Number(!quality.allServersDescribed);
+}
+
+function buildQualitySummary(quality: GeneratedSpecData | null): string {
+  if (!quality) {
+    return "Quality data unavailable";
+  }
+
+  const metadataSignal = quality.metadataComplete
+    ? "complete metadata"
+    : `${getMetadataGapCount(quality)} metadata gaps`;
+  const placeholderSignal = quality.placeholderCount === 0
+    ? "no placeholders"
+    : `${quality.placeholderCount} placeholders`;
+  const exampleSignal = quality.successResponseExampleCount === 0
+    ? "no response examples yet"
+    : `${quality.successResponseExampleCount} response examples`;
+
+  return [
+    quality.navigationStandardized ? "standardized nav" : `${quality.ungroupedTagCount} nav gaps`,
+    metadataSignal,
+    placeholderSignal,
+    exampleSignal,
+  ].join(" · ");
+}
+
+export const apiCatalog: ApiCatalogItem[] = apiCatalogSeed.map((api) => {
+  const quality = getGeneratedSpecData(api.title);
+
+  return {
+    ...api,
+    operations: quality?.operationCount ?? api.operations,
+    specPath: quality?.specPath ?? "",
+    specSourceUrl: quality?.specSourceUrl ?? gitHubRepositoryUrl,
+    specDownloadUrl: quality?.specDownloadUrl ?? gitHubRepositoryUrl,
+    quality,
+    qualitySummary: buildQualitySummary(quality),
+  };
+});
+
 export const accessModels: AccessModel[] = [
   {
     title: "Portal session cookies",
@@ -439,10 +523,19 @@ export const accessModels: AccessModel[] = [
 
 const modeledOperationCount = apiCatalog.reduce((total, api) => total + api.operations, 0);
 const checkedInCollectionCount = apiCatalog.length;
+const standardizedNavigationCount = apiCatalog.filter(
+  (api) => api.quality?.navigationStandardized,
+).length;
+const remainingPlaceholderCount = apiCatalog.reduce(
+  (total, api) => total + (api.quality?.placeholderCount ?? 0),
+  0,
+);
 
 export const launchStats = [
   { label: "Published specs", value: String(apiCatalog.length) },
-  { label: "Modeled operations", value: String(modeledOperationCount) },
+  { label: "Modeled operations", value: modeledOperationCount.toLocaleString() },
+  { label: "Standardized nav specs", value: String(standardizedNavigationCount) },
+  { label: "Remaining placeholders", value: remainingPlaceholderCount.toLocaleString() },
   { label: "Access models", value: String(accessModels.length) },
   { label: "Checked-in collections", value: String(checkedInCollectionCount) },
 ];

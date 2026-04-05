@@ -72,12 +72,19 @@ const config: Config = {
     [
       "./plugins/docusaurus-scalar", {
         withDefaultFonts: false,
+        defaultOpenFirstTag: false,
+        hideDarkModeToggle: true,
+        hideTestRequestButton: true,
+        layout: "modern",
         nav: {
           categoryFromPath: false
         },
+        operationTitleSource: "summary",
+        orderSchemaPropertiesBy: "preserve",
         route: {
           route: '/'
         },
+        showDeveloperTools: "never",
         paths: [
           {
             path: "./specifications",

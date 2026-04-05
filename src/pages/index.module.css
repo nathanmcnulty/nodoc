@@ -102,7 +102,7 @@
 }
 
 .statGrid {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
 }
 
 .cardGrid {
@@ -155,6 +155,13 @@
   gap: 1rem;
 }
 
+.apiBadges {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
 .apiFamily {
   display: inline-block;
   margin-bottom: 0.5rem;
@@ -184,6 +191,13 @@
   margin-bottom: 1rem;
 }
 
+.qualitySummary {
+  margin-bottom: 1rem;
+  color: var(--ifm-color-emphasis-700);
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
 .detailList {
   display: grid;
   gap: 0.75rem;
@@ -205,6 +219,10 @@
 
 .detailList dd {
   margin: 0;
+}
+
+.detailList code {
+  overflow-wrap: anywhere;
 }
 
 .highlightList {
@@ -244,5 +262,13 @@
   .modelGrid,
   .principlesGrid {
     grid-template-columns: 1fr;
+  }
+
+  .apiCardHeader {
+    flex-direction: column;
+  }
+
+  .apiBadges {
+    justify-content: flex-start;
   }
 }
