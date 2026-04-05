@@ -81,15 +81,16 @@ const apiCatalogSeed: ApiCatalogSeed[] = [
     title: "Defender",
     slug: "/defender",
     family: "Security portal",
-    operations: 544,
+    operations: 558,
     authModel: "Portal session cookie (`sccauth`)",
     baseUrl: "https://security.microsoft.com/apiproxy",
     summary:
-      "Security operations coverage across alerts, incidents, case management, hunting, cloud apps, investigation pivots, endpoint, identity, vulnerability, configuration, and exposure workflows.",
+      "Security operations coverage across alerts, incidents, case management, hunting, multi-tenant management, cloud apps, investigation pivots, endpoint, identity, vulnerability, configuration, and exposure workflows.",
     highlights: [
       "Alerts, incidents, case management, and AutoIR coverage",
       "Advanced hunting, custom detections, and live response",
       "Cloud Apps discovery, App Governance policies, entity resolution, and device/file-page pivots",
+      "Multi-tenant tenant groups, assignments, and wrapped case, hunting, identity, and configuration reads",
       "Threat Analytics detail pivots, Attack simulation training, XSPM connectors, and Sentinel graph/data lake routes",
     ],
     collectionPath: "postman/collections/defender.collection.json",

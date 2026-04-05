@@ -19,8 +19,10 @@ info:
       - Multi-Tenant Operations
       - Streaming API
 
-    These APIs are accessed through the portal's API proxy layer at `security.microsoft.com/apiproxy` and support delegated authentication flows.
-    They are used internally by the Defender XDR portal and are not officially documented by Microsoft.
+    These APIs are accessed through the portal's API proxy layer at `security.microsoft.com/apiproxy`
+    and `mto.security.microsoft.com/apiproxy` and support delegated authentication flows.
+    They are used internally by the Defender XDR and multi-tenant management portals and are not
+    officially documented by Microsoft.
 
     The proxy layer routes requests to various backend services using path prefixes:
 
@@ -44,6 +46,9 @@ info:
     | `/m365appprotection/` | App Governance |
     | `/ndr/` | Network Detection & Response |
 
+    The multi-tenant management portal at `mto.security.microsoft.com` reuses the same Defender proxy
+    contract and frequently wraps existing `/mtp/` and `/mdi/` reads under `/mtoapi/`.
+
     **Cross-portal shared services:** Several backend services are shared with the Microsoft Purview portal (purview.microsoft.com).
     The `/di/`, `/gws/`, `/medeina/`, `/msgraph/`, and `/shell/` prefixes route to the same backend services in both portals,
     though each portal may expose different subsets of endpoints.
@@ -60,6 +65,8 @@ info:
 servers:
   - url: https://security.microsoft.com/apiproxy
     description: Defender XDR API proxy used by the security.microsoft.com portal
+  - url: https://mto.security.microsoft.com/apiproxy
+    description: Defender multi-tenant management API proxy used by the mto.security.microsoft.com portal
 
 security:
   - PortalSession: []
@@ -127,8 +134,10 @@ tags:
     description: Operations relating to the Action Center, including history and pending actions.
   - name: Multi-Tenant
     description: |
-      Operations relating to multi-tenant management, including tenant listing,
-      workload status, and cross-tenant advanced hunting.
+      Operations relating to Defender multi-tenant management on
+      `mto.security.microsoft.com`, including tenant selection, tenant groups,
+      content distribution assignments, wrapped incidents/cases/hunting/identity
+      reads, and MTO-specific advanced hunting preferences.
   - name: Streaming API
     description: Operations relating to the Streaming API configuration for event export.
   - name: Secure Score
@@ -1246,6 +1255,32 @@ paths:
     $ref: multi_tenant.yml#/paths/~1mtoapi~1recentItems
   /mtoapi/tenants/TenantPicker:
     $ref: multi_tenant.yml#/paths/~1mtoapi~1tenants~1TenantPicker
+  /mtoapi/tenantGroups:
+    $ref: multi_tenant.yml#/paths/~1mtoapi~1tenantGroups
+  /mtoapi/tenantGroups/effective/:
+    $ref: multi_tenant.yml#/paths/~1mtoapi~1tenantGroups~1effective~1
+  /mtoapi/assignments:
+    $ref: multi_tenant.yml#/paths/~1mtoapi~1assignments
+  /mtoapi/mtp/sccManagement/mgmt/TenantContext:
+    $ref: multi_tenant.yml#/paths/~1mtoapi~1mtp~1sccManagement~1mgmt~1TenantContext
+  /mtoapi/mtp/huntingService/queries/:
+    $ref: multi_tenant.yml#/paths/~1mtoapi~1mtp~1huntingService~1queries~1
+  /mtoapi/mtp/userExposedRbacGroups/UserExposedRbacGroups:
+    $ref: multi_tenant.yml#/paths/~1mtoapi~1mtp~1userExposedRbacGroups~1UserExposedRbacGroups
+  /mtp/userPreferences/api/mgmt/userpreferencesservice/userPreference/advanced_hunting_mto:
+    $ref: multi_tenant.yml#/paths/~1mtp~1userPreferences~1api~1mgmt~1userpreferencesservice~1userPreference~1advanced_hunting_mto
+  /mtoapi/mtp/CaseManagement/be/cases:
+    $ref: multi_tenant.yml#/paths/~1mtoapi~1mtp~1CaseManagement~1be~1cases
+  /mtoapi/mtp/CaseManagement/be/templates/{TemplateId}:
+    $ref: multi_tenant.yml#/paths/~1mtoapi~1mtp~1CaseManagement~1be~1templates~1{TemplateId}
+  /mtoapi/mdi/identity/userapiservice/identities:
+    $ref: multi_tenant.yml#/paths/~1mtoapi~1mdi~1identity~1userapiservice~1identities
+  /mtoapi/mdi/identity/userapiservice/identities/aggregatedData:
+    $ref: multi_tenant.yml#/paths/~1mtoapi~1mdi~1identity~1userapiservice~1identities~1aggregatedData
+  /mtoapi/mdi/identity/userapiservice/identities/count:
+    $ref: multi_tenant.yml#/paths/~1mtoapi~1mdi~1identity~1userapiservice~1identities~1count
+  /mtoapi/cdssecuritycopilot/trial:
+    $ref: multi_tenant.yml#/paths/~1mtoapi~1cdssecuritycopilot~1trial
   /mtoapi/tenants/{TenantId}/workloadStatus:
     $ref: multi_tenant.yml#/paths/~1mtoapi~1tenants~1{TenantId}~1workloadStatus
   /mtoapi/tenants/{TenantId}/huntingQueries/run:
@@ -1288,6 +1323,8 @@ paths:
     $ref: portal_services.yml#/paths/~1cdssecuritycopilot~1trial
   /msgraph/v1.0/users:
     $ref: portal_services.yml#/paths/~1msgraph~1v1.0~1users
+  /msgraph/v1.0/users/{UserId}:
+    $ref: portal_services.yml#/paths/~1msgraph~1v1.0~1users~1{UserId}
   /msgraph/v1.0/subscribedSkus:
     $ref: portal_services.yml#/paths/~1msgraph~1v1.0~1subscribedSkus
   /di/Find/TrialOffer:

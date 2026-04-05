@@ -194,6 +194,43 @@ paths:
         '404':
           $ref: common.yml#/components/responses/NotFound
 
+  /msgraph/v1.0/users/{UserId}:
+    get:
+      summary: Get user via Graph proxy
+      description: >-
+        Retrieve a specific user via the Microsoft Graph proxy endpoint in the
+        Defender portal. Confirmed in live traffic from the MTO Cases page using
+        a UPN-style identifier and an explicit `$select` projection.
+      operationId: PortalServices.GetUserGraph
+      tags: [Portal Services]
+      parameters:
+        - name: UserId
+          in: path
+          required: true
+          description: User identifier passed to Graph, such as a UPN or object ID.
+          schema:
+            type: string
+        - name: $select
+          in: query
+          description: Comma-separated Graph fields to project in the response.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/GraphUser
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
   /di/Find/TrialOffer:
     get:
       summary: Find trial offers
