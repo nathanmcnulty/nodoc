@@ -70,11 +70,15 @@ info:
     Documentation and specifications have been provided on a best efforts basis and may not be 100% accurate.
 
   version: '1.0'
+  contact:
+    name: nodoc
+    url: https://github.com/nathanmcnulty/nodoc
   license:
     name: Apache 2.0
     url: https://www.apache.org/licenses/LICENSE-2.0.html
 servers:
   - url: https://purview.microsoft.com/apiproxy
+    description: Purview API proxy used by the purview.microsoft.com portal
 
 security:
   - PortalSession: []
@@ -91,6 +95,7 @@ components:
 
 tags:
   - name: DataInfrastructure
+    x-displayName: Data infrastructure
     description: |
       Operations relating to the Data Infrastructure service, which powers entity discovery
       across all Purview solutions including DLP, sensitivity labels, policies, and compliance tags.
@@ -99,6 +104,7 @@ tags:
       Operations relating to eDiscovery case management via the AEDMCC service,
       including case listing, settings, favorites, view state, and roles mapping.
   - name: ComplianceManager
+    x-displayName: Compliance Manager
     description: |
       Operations relating to Compliance Manager, including compliance posture summaries,
       assessments, user context, filters, and native connector ingestion.
@@ -109,14 +115,17 @@ tags:
   - name: Audit
     description: Operations relating to audit log search and audit enablement status.
   - name: GovernanceServices
+    x-displayName: Governance services
     description: |
       Operations relating to Governance Web Services for authorization, data lifecycle
       management (DLM), and trainable classifier model metadata.
   - name: DataGovernance
+    x-displayName: Data governance
     description: |
       Operations relating to Data Governance Services for aggregates, licensing,
       and classification type definitions.
   - name: DataSecurityInvestigations
+    x-displayName: Data Security Investigations
     description: |
       Operations relating to Data Security Investigations (DSI), including
       investigation inventory and solution bootstrap data.
@@ -129,10 +138,12 @@ tags:
       Operations relating to Security Copilot (Medeina) and CDS Security Copilot,
       including authentication, data sharing settings, agents, and trial status.
   - name: GraphProxy
+    x-displayName: Microsoft Graph proxy
     description: |
       Operations relating to Microsoft Graph API endpoints proxied through Purview,
       including subscribed SKUs, role assignments, conditional access, and service announcements.
   - name: PlatformServices
+    x-displayName: Platform services
     description: |
       Operations relating to Purview Platform infrastructure, portal shell configuration,
       IRIS feature selection, Azure Purview accounts, and Office Configuration policies.
@@ -147,10 +158,12 @@ tags:
       Operations relating to Exchange-backed compliance admin command invocation
       through the Purview portal proxy.
   - name: DLPDevices
+    x-displayName: DLP devices
     description: |
       Operations relating to DLP device management and incident alerts,
       proxied through Microsoft Threat Protection (MTP).
   - name: InsiderRisk
+    x-displayName: Insider risk
     description: Operations relating to Insider Risk Management analytics and insight metadata.
   - name: SharePoint
     description: Operations relating to SharePoint Online tenant settings proxied through Purview.
@@ -186,6 +199,10 @@ x-tagGroups:
       - PlatformServices
       - GraphProxy
       - Billing
+
+externalDocs:
+  description: Checked-in source specification and supporting modules.
+  url: https://github.com/nathanmcnulty/nodoc/tree/main/specifications/nodoc-purview/specification
 
 paths:
   # Data Infrastructure

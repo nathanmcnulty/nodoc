@@ -3,6 +3,7 @@ import Layout from "@theme/Layout";
 import Heading from "@theme/Heading";
 import type { ReactElement } from "react";
 
+import QualityMaturityBadge from "../QualityMaturityBadge";
 import {
   accessModels,
   apiCatalog,
@@ -217,17 +218,24 @@ export default function GettingStarted(): ReactElement {
             <div className={styles.apiGrid}>
               {apiCatalog.map((api) => (
                 <article key={api.title} className={styles.apiCard}>
-                  <Heading as="h3" className={styles.cardTitle}>
-                    {api.title}
-                  </Heading>
+                  <div className={styles.apiCardHeader}>
+                    <Heading as="h3" className={styles.cardTitle}>
+                      {api.title}
+                    </Heading>
+                    <QualityMaturityBadge maturity={api.quality?.maturity} />
+                  </div>
                   <p className={styles.cardMeta}>
                     {api.operations} modeled operations · {api.authModel}
                   </p>
                   <p>{api.summary}</p>
+                  <p className={styles.qualitySummary}>{api.qualitySummary}</p>
                   <div className={styles.cardActions}>
                     <Link className="button button--primary button--sm" to={api.slug}>
                       Open API page
                     </Link>
+                    <a className="button button--secondary button--sm" href={api.specSourceUrl}>
+                      OpenAPI source
+                    </a>
                     <a className="button button--secondary button--sm" href={api.collectionDownloadUrl}>
                       Download collection
                     </a>

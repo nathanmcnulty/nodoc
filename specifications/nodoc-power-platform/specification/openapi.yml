@@ -26,6 +26,9 @@ info:
 
     Documentation and specifications have been provided on a best-effort basis and may not be 100% accurate.
   version: '1.0'
+  contact:
+    name: nodoc
+    url: https://github.com/nathanmcnulty/nodoc
   license:
     name: Apache 2.0
     url: https://www.apache.org/licenses/LICENSE-2.0.html
@@ -45,61 +48,62 @@ components:
         Different backend families use service-specific audiences such as `https://service.powerapps.com/`, `https://adminanalytics.powerplatform.microsoft.com`, `https://licensing.powerplatform.microsoft.com`, `https://api.powerplatform.com`, or the PPAC admin application ID audience.
 tags:
   - name: BusinessAppPlatform
+    x-displayName: Business App Platform
     description: |
       Environment inventory, tenant settings, environment groups, regional metadata, migrations, and governance policy operations served from the Business App Platform resource provider.
   - name: AdminAnalytics
+    x-displayName: Admin analytics
     description: |
       Dataverse org insights, analytics user settings, Power BI dashboard discovery, and embed-token issuance used by PPAC analytics blades.
   - name: ConfigAnalytics
+    x-displayName: Config analytics
     description: |
       Tenant-consent, connection, and out-of-box analytics configuration operations used by data export and analytics setup flows.
   - name: Licensing
     description: |
       Tenant capacity, billing policy, entitlement, allocation, and managed-environment licensing operations.
   - name: AdminPortal
+    x-displayName: Admin portal
     description: |
       Power Platform admin portal helper endpoints, including health checks and tenant product inventory for the Dynamics 365 apps view.
   - name: TenantApi
+    x-displayName: Tenant API
     description: |
       Tenant-scoped analytics and governance endpoints backed by tenant-specific `*.tenant.api.powerplatform.com` hosts.
   - name: NotificationService
+    x-displayName: Notification service
     description: |
       Tenant island notification metadata endpoints used by the Power Platform admin center notification hub.
   - name: DynamicsCrm
+    x-displayName: Dataverse / Dynamics CRM
     description: |
       Dataverse environment security, alerting, application-user, business-unit, team, and feature-control operations served from organization-scoped `*.crm.dynamics.com` hosts.
   - name: PowerPagesPortalInfra
+    x-displayName: Power Pages portal infra
     description: |
       Power Pages portal inventory, provisioning, certificate, DLP, package, and tenant security operations served from `*.portal-infra.dynamics.com` hosts.
 
 x-tagGroups:
-  - name: Business App Platform
+  - name: Admin foundation
     tags:
       - BusinessAppPlatform
-  - name: Admin Analytics
+      - AdminPortal
+  - name: Analytics & licensing
     tags:
       - AdminAnalytics
-  - name: Config Analytics
-    tags:
       - ConfigAnalytics
-  - name: Licensing
-    tags:
       - Licensing
-  - name: Admin Portal
-    tags:
-      - AdminPortal
-  - name: Tenant API
+  - name: Tenant services
     tags:
       - TenantApi
-  - name: Notification Service
-    tags:
       - NotificationService
-  - name: Dynamics CRM
+  - name: Dataverse & portals
     tags:
       - DynamicsCrm
-  - name: Power Pages Portal Infra
-    tags:
       - PowerPagesPortalInfra
+externalDocs:
+  description: Checked-in source specification and supporting modules.
+  url: https://github.com/nathanmcnulty/nodoc/tree/main/specifications/nodoc-power-platform/specification
 
 paths:
   /providers/Microsoft.BusinessAppPlatform/environmentGroups:

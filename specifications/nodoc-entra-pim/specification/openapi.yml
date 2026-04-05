@@ -26,6 +26,9 @@ info:
   contact:
     name: nodoc
     url: https://github.com/nathanmcnulty/nodoc
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
 servers:
   - url: https://api.azrbac.mspim.azure.com
     description: Entra PIM API
@@ -239,6 +242,16 @@ tags:
     description: Check PIM permissions for the current user
   - name: Groups
     description: PIM for Groups (eligible membership/ownership)
+x-tagGroups:
+  - name: Assignments & requests
+    tags: [Role Assignments, Role Assignment Requests]
+  - name: Roles & governance
+    tags: [Role Definitions, Role Settings, Permissions, Alerts, Audit]
+  - name: Resources & groups
+    tags: [Resources, Groups]
+externalDocs:
+  description: Checked-in source specification and supporting modules.
+  url: https://github.com/nathanmcnulty/nodoc/tree/main/specifications/nodoc-entra-pim/specification
 paths:
   /api/v2/privilegedAccess/{provider}/roleAssignments:
     get:
@@ -267,6 +280,41 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GovernanceRoleAssignmentListResponse'
+              example:
+                '@odata.context': "https://api.azrbac.mspim.azure.com/api/v2/$metadata#governanceRoleAssignments(roleDefinition(),subject())"
+                '@odata.count': 3
+                value:
+                  - '@odata.id': "https://api.azrbac.mspim.azure.com/api/v2/privilegedAccess('aadRoles')/roleAssignments('role-assignment-1')"
+                    id: role-assignment-1
+                    resourceId: 00000000-0000-0000-0000-000000000000
+                    roleDefinitionId: 62e90394-69f5-4237-9190-012177145e10
+                    subjectId: 11111111-1111-1111-1111-111111111111
+                    scopedResourceId: null
+                    linkedEligibleRoleAssignmentId: null
+                    externalId: role-assignment-1
+                    isPermanent: true
+                    startDateTime: '2023-11-13T04:42:16.297Z'
+                    endDateTime: null
+                    memberType: Direct
+                    assignmentState: Active
+                    status: Provisioned
+                    condition: null
+                    conditionVersion: null
+                    conditionDescription: null
+                    roleDefinition:
+                      id: 62e90394-69f5-4237-9190-012177145e10
+                      resourceId: 00000000-0000-0000-0000-000000000000
+                      externalId: 62e90394-69f5-4237-9190-012177145e10
+                      templateId: 62e90394-69f5-4237-9190-012177145e10
+                      displayName: Global Administrator
+                      type: BuiltInRole
+                    subject:
+                      id: 11111111-1111-1111-1111-111111111111
+                      type: User
+                      displayName: Breakglass Admin 1
+                      principalName: admin1@contoso.com
+                      email: admin1@contoso.com
+                '@odata.nextLink': "https://api.azrbac.mspim.azure.com/api/v2/privilegedAccess/aadRoles/roleAssignments?$expand=roleDefinition,subject&$filter=resourceId+eq+'00000000-0000-0000-0000-000000000000'+and+assignmentState+eq+'Active'+and+isPermanent+eq+true+and+roleDefinition/templateId+eq+'62e90394-69f5-4237-9190-012177145e10'&$count=true&$top=1&$skip=1"
   /api/v2/privilegedAccess/{provider}/roleAssignmentRequests:
     get:
       tags: [Role Assignment Requests]
@@ -519,6 +567,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GovernancePermissionsResponse'
+              example:
+                '@odata.context': https://api.azrbac.mspim.azure.com/api/v2/$metadata#Collection(Microsoft.Identity.Governance.Common.Data.ExternalModels.V1.governancePermission)
+                value:
+                  - accessLevel: UserRead
+                    isActive: true
+                    isEligible: true
+                  - accessLevel: AdminRead
+                    isActive: true
+                    isEligible: true
+                  - accessLevel: AdminReadWrite
+                    isActive: true
+                    isEligible: false
   /api/v2/privilegedAccess/{provider}/resources/{resourceId}/alerts:
     get:
       tags: [Alerts]

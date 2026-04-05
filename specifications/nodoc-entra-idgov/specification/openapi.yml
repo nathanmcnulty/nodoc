@@ -25,6 +25,9 @@ info:
   contact:
     name: nodoc
     url: https://github.com/nathanmcnulty/nodoc
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
 servers:
   - url: https://api.accessreviews.identitygovernance.azure.com
     description: Entra Access Reviews API
@@ -306,6 +309,14 @@ tags:
     description: Access review decisions
   - name: Configuration
     description: Feature flags and tenant settings
+x-tagGroups:
+  - name: Review configuration
+    tags: [Providers, Configuration]
+  - name: Review execution
+    tags: [Requests, Instances, Decisions]
+externalDocs:
+  description: Checked-in source specification and supporting modules.
+  url: https://github.com/nathanmcnulty/nodoc/tree/main/specifications/nodoc-entra-idgov/specification
 paths:
   /accessReviews/v2.0/approvalWorkflowProviders:
     get:
@@ -399,6 +410,48 @@ paths:
           description: Access review request created
         '400':
           description: Invalid request
+  /accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requestsAwaitingMyDecision:
+    get:
+      tags: [Requests]
+      summary: List access review requests awaiting my decision
+      description: |
+        Retrieves access review definitions currently awaiting a decision from the
+        signed-in reviewer. Confirmed live from the Access Reviews landing page,
+        which filtered the request set by `decisionsCriteria`.
+      parameters:
+        - $ref: '#/components/parameters/providerId'
+        - $ref: '#/components/parameters/$filter'
+        - $ref: '#/components/parameters/$top'
+        - $ref: '#/components/parameters/$skip'
+        - name: $count
+          in: query
+          required: false
+          description: Include the total count of matching access reviews.
+          schema:
+            type: boolean
+        - name: $select
+          in: query
+          required: false
+          description: Comma-separated list of properties to include in the response.
+          schema:
+            type: string
+        - name: $orderby
+          in: query
+          required: false
+          description: OData ordering expression applied to the result set.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Access review requests awaiting the caller's decision
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessReviewRequestListResponse'
+              example:
+                '@odata.context': "https://api.accessreviews.identitygovernance.azure.com/accessReviews/v2.0/$metadata#approvalWorkflowProviders('00000000-0000-0000-0000-000000000000')/requestsAwaitingMyDecision/Microsoft.Azure.ActiveDirectory.AccessReviews.Api.Models.V2.AccessReview(id,displayName,endDateTime,decisionsCriteria)"
+                '@odata.count': 0
+                value: []
   /accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests/{requestId}:
     get:
       tags: [Requests]

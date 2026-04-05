@@ -39,11 +39,15 @@ info:
     Documentation and specifications have been provided on a best efforts basis and may not be 100% accurate.
 
   version: '1.0'
+  contact:
+    name: nodoc
+    url: https://github.com/nathanmcnulty/nodoc
   license:
     name: Apache 2.0
     url: https://www.apache.org/licenses/LICENSE-2.0.html
 servers:
   - url: https://main.iam.ad.ext.azure.com/api
+    description: Entra IAM API used by Azure and Entra administrative portal experiences
 
 security:
   - OAuth2: [74658136-14ec-4630-ad9b-26e160ff0fc6/user_impersonation]
@@ -106,7 +110,7 @@ tags:
   - name: Directory
     description: Operations relating to Directory management.
   - name: Microsoft Entra Connect
-    description: Operations relating to 
+    description: Operations relating to Microsoft Entra Connect synchronization status and directory sync configuration.
 
   - name: Permissions
     description: Read-only operations relating to assigned permissions and roles.
@@ -180,6 +184,10 @@ x-tagGroups:
       - GDPR
       - Licensing
       - Reports
+
+externalDocs:
+  description: Checked-in source specification and supporting modules.
+  url: https://github.com/nathanmcnulty/nodoc/tree/main/specifications/nodoc-ibiza-iam/specification
 
 paths:
   /AccountSkus:

@@ -12,6 +12,17 @@ The goal is to turn real portal behavior into high-quality specs and generated a
 - Checked-in specs, regenerated Postman collections, and metadata updates
 - A clean diff with scratch artifacts kept outside the repository
 
+## Publishing standards for specs and site quality
+
+When promoting discoveries into the repository, aim for more than just path coverage:
+
+- Keep root spec metadata complete: `info.contact`, `info.license`, `servers[].description`, and `externalDocs`.
+- Organize navigation with meaningful `x-tagGroups`; avoid one-section-per-tag layouts and avoid raw backend hosts as group names.
+- Add `x-displayName` when tag identifiers are technical or awkward in Scalar navigation.
+- Preserve evidence provenance in descriptions. If something is bundle-only or only safe-probed, say so explicitly instead of overstating confidence.
+- Leave placeholders visible only when evidence is genuinely missing; otherwise replace `pending` text with observed request, response, auth, or routing details.
+- Regenerate derived artifacts after spec changes so the website, quality data, and Postman collections stay aligned.
+
 ## Core principles
 
 1. **Traffic first.** Start with real browser traffic before relying on bundle mining.
@@ -70,6 +81,7 @@ Treat spidering as a **candidate generator plus prioritization aid**, not as the
 - Inspect the existing spec family, README coverage table, `src/data/siteData.ts`, and Postman generation script.
 - Identify the current file layout so new endpoints land in coherent sibling YAML files.
 - Run the repo validation commands early to understand the baseline:
+  - `npm run generate:site-data`
   - `npm run generate:postman`
   - `npm run typecheck`
   - `npm run build`

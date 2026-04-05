@@ -3,6 +3,7 @@ import Layout from "@theme/Layout";
 import Heading from "@theme/Heading";
 import type { ReactElement } from "react";
 
+import QualityMaturityBadge from "../QualityMaturityBadge";
 import {
   accessModels,
   apiCatalog,
@@ -114,11 +115,17 @@ export default function Home(): ReactElement {
                         <Heading as="h4" className={styles.apiTitle}>
                           {api.title}
                         </Heading>
-                        <span className={styles.operationsBadge}>
-                          {api.operations} ops
-                        </span>
+                        <div className={styles.apiBadges}>
+                          <span className={styles.operationsBadge}>
+                            {api.operations} ops
+                          </span>
+                          <QualityMaturityBadge maturity={api.quality?.maturity} />
+                        </div>
                       </div>
                       <p className={styles.apiSummary}>{api.summary}</p>
+                      <p className={styles.qualitySummary}>
+                        <strong>Quality:</strong> {api.qualitySummary}
+                      </p>
                       <dl className={styles.detailList}>
                         <div>
                           <dt>Auth</dt>
@@ -136,6 +143,12 @@ export default function Home(): ReactElement {
                             <code>{api.collectionPath}</code>
                           </dd>
                         </div>
+                        <div>
+                          <dt>OpenAPI</dt>
+                          <dd>
+                            <code>{api.specPath}</code>
+                          </dd>
+                        </div>
                       </dl>
                       <ul className={styles.highlightList}>
                         {api.highlights.map((highlight) => (
@@ -146,6 +159,9 @@ export default function Home(): ReactElement {
                         <Link className="button button--primary button--sm" to={api.slug}>
                           Browse spec
                         </Link>
+                        <a className="button button--secondary button--sm" href={api.specSourceUrl}>
+                          OpenAPI source
+                        </a>
                         <a className="button button--secondary button--sm" href={api.collectionDownloadUrl}>
                           Download collection
                         </a>

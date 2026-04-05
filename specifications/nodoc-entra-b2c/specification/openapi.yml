@@ -24,6 +24,9 @@ info:
   contact:
     name: nodoc
     url: https://github.com/nathanmcnulty/nodoc
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
 servers:
   - url: https://main.b2cadmin.ext.azure.com
     description: Entra B2C Admin API
@@ -250,6 +253,14 @@ tags:
     description: B2C tenant information, features, and configuration
   - name: Resources
     description: Azure resource and subscription management for B2C tenants
+x-tagGroups:
+  - name: Identity experiences
+    tags: [User Flows, User Journeys]
+  - name: Tenant administration
+    tags: [Tenant, Resources]
+externalDocs:
+  description: Checked-in source specification and supporting modules.
+  url: https://github.com/nathanmcnulty/nodoc/tree/main/specifications/nodoc-entra-b2c/specification
 paths:
   /api/adminflows:
     get:

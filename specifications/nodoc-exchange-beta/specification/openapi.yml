@@ -369,6 +369,10 @@ x-tagGroups:
     tags: [Bootstrap, Preferences]
   - name: Exchange administration
     tags: [MailFlow, Objects, Roles, Mobile, Sharing, Migration, Folders]
+externalDocs:
+  description: Checked-in source specification and supporting modules.
+  url: https://github.com/nathanmcnulty/nodoc/tree/main/specifications/nodoc-exchange-beta/specification
+
 paths:
   /beta/Shell:
     get:
@@ -426,6 +430,11 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GenericObject'
+              example:
+                '@odata.context': https://admin.exchange.microsoft.com/beta/$metadata#TenantDataBoundary/$entity
+                TenantId: 00000000-0000-0000-0000-000000000000
+                DataBoundary: none
+                CountryLetterCode: US
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -446,6 +455,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GenericObject'
+              example:
+                '@odata.context': https://admin.exchange.microsoft.com/beta/$metadata#TenantMonitoring/$entity
+                Id: TenantMonitoringService
+                IsLoggedInTenantAllowed: false
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':

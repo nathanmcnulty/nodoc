@@ -39,11 +39,15 @@ info:
     Documentation and specifications have been provided on a best efforts basis and may not be 100% accurate.
 
   version: '1.0'
+  contact:
+    name: nodoc
+    url: https://github.com/nathanmcnulty/nodoc
   license:
     name: Apache 2.0
     url: https://www.apache.org/licenses/LICENSE-2.0.html
 servers:
   - url: https://admin.cloud.microsoft
+    description: Microsoft 365 admin center API
 
 security:
   - PortalSession: []
@@ -62,30 +66,38 @@ tags:
   - name: Agents
     description: Operations relating to agent management, tools, and frontier access.
   - name: AppSettings
+    x-displayName: App settings
     description: Operations relating to application-level settings (Bookings, Mail, Teams, etc.).
   - name: CompanySettings
+    x-displayName: Company settings
     description: Operations relating to company-level settings (theme, profile, helpdesk, etc.).
   - name: SecuritySettings
+    x-displayName: Security settings
     description: Operations relating to security settings (guest users, sharing policies, etc.).
   - name: Reports
     description: Operations relating to reports and analytics data.
   - name: Search
     description: Operations relating to search configuration and intelligence.
   - name: UsersGroups
+    x-displayName: Users & groups
     description: Operations relating to user and group management.
   - name: Tenant
     description: Operations relating to tenant configuration and billing.
   - name: GraphProxy
+    x-displayName: Microsoft Graph proxy
     description: Operations proxied through to Microsoft Graph for directory, identity, and license management. Uses the /fd/msgraph/ federated proxy (separate from the /apiproxy/msgraph/ used by Defender XDR and Purview).
   - name: Purview
     description: Operations relating to Microsoft Purview and compliance.
   - name: Edge
     description: Operations relating to Microsoft Edge enterprise management.
   - name: IntegratedApps
+    x-displayName: Integrated apps
     description: Operations relating to integrated apps and add-ins.
   - name: TenantRelationships
+    x-displayName: Tenant relationships
     description: Operations relating to multi-tenant organization and tenant relationships.
   - name: ContentUnderstanding
+    x-displayName: Content understanding
     description: Operations relating to content understanding and Syntex.
   - name: Viva
     description: Operations relating to Microsoft Viva settings.
@@ -105,61 +117,26 @@ tags:
   - name: Domains
     description: Operations relating to domain management and configuration.
   - name: MessageCenter
+    x-displayName: Message center
     description: Operations relating to message center messages and preferences.
   - name: ServiceHealth
+    x-displayName: Service health
     description: Operations relating to service health monitoring and status.
 
 x-tagGroups:
-  - name: Copilot
-    tags: [Copilot]
-  - name: Agents
-    tags: [Agents]
-  - name: Application Settings
-    tags: [AppSettings]
-  - name: Company Settings
-    tags: [CompanySettings]
-  - name: Security Settings
-    tags: [SecuritySettings]
-  - name: Reports
-    tags: [Reports]
-  - name: Search
-    tags: [Search]
-  - name: Users & Groups
-    tags: [UsersGroups]
-  - name: Tenant
-    tags: [Tenant]
-  - name: Microsoft Graph Proxy
-    tags: [GraphProxy]
-  - name: Purview
-    tags: [Purview]
-  - name: Microsoft Edge
-    tags: [Edge]
-  - name: Integrated Apps
-    tags: [IntegratedApps]
-  - name: Tenant Relationships
-    tags: [TenantRelationships]
-  - name: Content Understanding
-    tags: [ContentUnderstanding]
-  - name: Viva
-    tags: [Viva]
-  - name: Domains
-    tags: [Domains]
-  - name: Message Center
-    tags: [MessageCenter]
-  - name: Service Health
-    tags: [ServiceHealth]
-  - name: Miscellaneous
-    tags: [Miscellaneous]
-  - name: Navigation
-    tags: [Navigation]
-  - name: Features
-    tags: [Features]
-  - name: Billing
-    tags: [Billing]
-  - name: Identity & Security
-    tags: [IdentitySecurity]
-  - name: Partners
-    tags: [Partners]
+  - name: AI & productivity
+    tags: [Copilot, Agents, Viva, ContentUnderstanding, IntegratedApps]
+  - name: Tenant & workload settings
+    tags: [AppSettings, CompanySettings, Tenant, Domains, Billing]
+  - name: Identity, security & compliance
+    tags: [SecuritySettings, IdentitySecurity, GraphProxy, Purview, Partners, TenantRelationships]
+  - name: Users & communications
+    tags: [UsersGroups, MessageCenter, Navigation]
+  - name: Reporting & operations
+    tags: [Reports, Search, ServiceHealth, Features, Miscellaneous, Edge]
+externalDocs:
+  description: Checked-in source specification and supporting modules.
+  url: https://github.com/nathanmcnulty/nodoc/tree/main/specifications/nodoc-m365-admin/specification
 
 paths:
   # Copilot

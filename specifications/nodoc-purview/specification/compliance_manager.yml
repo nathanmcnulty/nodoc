@@ -20,6 +20,33 @@ paths:
             application/json:
               schema:
                 $ref: common.yml#/components/schemas/CompliancePostureSummaryResponse
+              example:
+                overallScore:
+                  passedActionsCount: 806
+                  pendingActionsCount: 907
+                  notInScopeActionsCount: 25
+                  id: Overall
+                  title: Overall
+                  description: ''
+                  aggregatedAchievedScore: 14503.81
+                  aggregatedMaxScore: 26509
+                  aggregatedScorePercentage: 54.71
+                serviceSummary:
+                  - id: 8c289e92-a159-4ee2-a9a9-c34b4467b952
+                    title: Microsoft 365
+                    description: ''
+                    aggregatedAchievedScore: 14503.81
+                    aggregatedMaxScore: 26509
+                    aggregatedScorePercentage: 54.71
+                regulationSummary:
+                  - id: afc141a2-0a10-4406-b4ba-8c8e323e337c
+                    title: AI Baseline
+                    description: ''
+                    aggregatedAchievedScore: 1738
+                    aggregatedMaxScore: 2674
+                    aggregatedScorePercentage: 64.99
+                solutionCategorySummary: []
+                solutionSummaryMap: []
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -44,6 +71,37 @@ paths:
             application/json:
               schema:
                 $ref: common.yml#/components/schemas/ComplianceApplicationUserContext
+              example:
+                userInfo:
+                  id: 00000000-0000-0000-0000-000000000000
+                  userPrincipalName: ''
+                  anonymousId: anon-00000000000000000000000000000000
+                  primaryText: ''
+                tenantInfo:
+                  hasEnrolledForTrial: false
+                  isInitialSetupCreated: true
+                  hasCopilotLicense: true
+                  isAIBaselineCreated: true
+                  license: E5
+                  isTenantLicenseSuccess: true
+                  isLicenseCheckDisabled: false
+                  isTrialActive: false
+                  trialEnrollmentLink: https://admin.microsoft.com/Adminportal/Home?#/catalog/offer-details/compliance-manager-premium-assessment-add-on/00000000-0000-0000-0000-000000000000
+                  maxTotalEvidenceFileUploadSizeInBytes: 1073741824
+                  tenantContentUpdateState: None
+                scopedAuthorizationRights:
+                  '/ComplianceManagerV3/Master':
+                    - Create
+                    - Modify
+                    - Delete
+                    - Approve
+                  '/ComplianceManager/Customer':
+                    - Delete
+                    - Archive
+                    - Assess
+                    - Create
+                    - Modify
+                    - Read
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -66,7 +124,7 @@ paths:
           application/json:
             schema:
               type: object
-              description: pending
+              description: Assessment list query options. The captured Compliance Manager request succeeded with an empty object body.
       responses:
         '200':
           description: OK
@@ -217,7 +275,7 @@ paths:
             application/json:
               schema:
                 type: object
-                description: pending
+                description: Native connector ingestion job status envelope returned while the portal tracks a correlation ID.
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 

@@ -1848,6 +1848,223 @@
                                                     ]
                                                 }
                                             ]
+                                        },
+                                        {
+                                            "name": "requestsAwaitingMyDecision",
+                                            "description": "",
+                                            "item": [
+                                                {
+                                                    "id": "d7e3c422-ec1a-4573-9db6-decb558360b0",
+                                                    "name": "List access review requests awaiting my decision",
+                                                    "request": {
+                                                        "name": "List access review requests awaiting my decision",
+                                                        "description": {
+                                                            "content": "Retrieves access review definitions currently awaiting a decision from the\nsigned-in reviewer. Confirmed live from the Access Reviews landing page,\nwhich filtered the request set by `decisionsCriteria`.\n",
+                                                            "type": "text/plain"
+                                                        },
+                                                        "url": {
+                                                            "path": [
+                                                                "accessReviews",
+                                                                "v2.0",
+                                                                "approvalWorkflowProviders",
+                                                                ":providerId",
+                                                                "requestsAwaitingMyDecision"
+                                                            ],
+                                                            "host": [
+                                                                "{{baseUrl}}"
+                                                            ],
+                                                            "query": [
+                                                                {
+                                                                    "disabled": false,
+                                                                    "description": {
+                                                                        "content": "OData filter expression",
+                                                                        "type": "text/plain"
+                                                                    },
+                                                                    "key": "$filter",
+                                                                    "value": "string"
+                                                                },
+                                                                {
+                                                                    "disabled": false,
+                                                                    "description": {
+                                                                        "content": "Maximum number of results to return",
+                                                                        "type": "text/plain"
+                                                                    },
+                                                                    "key": "$top",
+                                                                    "value": "7812"
+                                                                },
+                                                                {
+                                                                    "disabled": false,
+                                                                    "description": {
+                                                                        "content": "Number of results to skip",
+                                                                        "type": "text/plain"
+                                                                    },
+                                                                    "key": "$skip",
+                                                                    "value": "7812"
+                                                                },
+                                                                {
+                                                                    "disabled": false,
+                                                                    "description": {
+                                                                        "content": "Include the total count of matching access reviews.",
+                                                                        "type": "text/plain"
+                                                                    },
+                                                                    "key": "$count",
+                                                                    "value": "false"
+                                                                },
+                                                                {
+                                                                    "disabled": false,
+                                                                    "description": {
+                                                                        "content": "Comma-separated list of properties to include in the response.",
+                                                                        "type": "text/plain"
+                                                                    },
+                                                                    "key": "$select",
+                                                                    "value": "string"
+                                                                },
+                                                                {
+                                                                    "disabled": false,
+                                                                    "description": {
+                                                                        "content": "OData ordering expression applied to the result set.",
+                                                                        "type": "text/plain"
+                                                                    },
+                                                                    "key": "$orderby",
+                                                                    "value": "string"
+                                                                }
+                                                            ],
+                                                            "variable": [
+                                                                {
+                                                                    "type": "any",
+                                                                    "value": "c41587fd-6cb8-4e87-858d-1d1993bc2228",
+                                                                    "key": "providerId",
+                                                                    "disabled": false,
+                                                                    "description": {
+                                                                        "content": "(Required) The approval workflow provider ID. Known providers:\n- `F40AE6A6-7BFC-4ABF-9E2A-63120C21A538` — Feature flags / configuration\n- `D5EC9F3B-324E-4F8A-AF55-B69EDD48ECBE` — Access review requests\n",
+                                                                        "type": "text/plain"
+                                                                    }
+                                                                }
+                                                            ]
+                                                        },
+                                                        "header": [
+                                                            {
+                                                                "key": "Accept",
+                                                                "value": "application/json"
+                                                            }
+                                                        ],
+                                                        "method": "GET",
+                                                        "body": {},
+                                                        "auth": null
+                                                    },
+                                                    "response": [
+                                                        {
+                                                            "id": "13336e1d-ea43-4ad2-8b3a-57da367fcc95",
+                                                            "name": "Access review requests awaiting the caller's decision",
+                                                            "originalRequest": {
+                                                                "url": {
+                                                                    "path": [
+                                                                        "accessReviews",
+                                                                        "v2.0",
+                                                                        "approvalWorkflowProviders",
+                                                                        ":providerId",
+                                                                        "requestsAwaitingMyDecision"
+                                                                    ],
+                                                                    "host": [
+                                                                        "{{baseUrl}}"
+                                                                    ],
+                                                                    "query": [
+                                                                        {
+                                                                            "disabled": false,
+                                                                            "description": {
+                                                                                "content": "OData filter expression",
+                                                                                "type": "text/plain"
+                                                                            },
+                                                                            "key": "$filter",
+                                                                            "value": "string"
+                                                                        },
+                                                                        {
+                                                                            "disabled": false,
+                                                                            "description": {
+                                                                                "content": "Maximum number of results to return",
+                                                                                "type": "text/plain"
+                                                                            },
+                                                                            "key": "$top",
+                                                                            "value": "7812"
+                                                                        },
+                                                                        {
+                                                                            "disabled": false,
+                                                                            "description": {
+                                                                                "content": "Number of results to skip",
+                                                                                "type": "text/plain"
+                                                                            },
+                                                                            "key": "$skip",
+                                                                            "value": "7812"
+                                                                        },
+                                                                        {
+                                                                            "disabled": false,
+                                                                            "description": {
+                                                                                "content": "Include the total count of matching access reviews.",
+                                                                                "type": "text/plain"
+                                                                            },
+                                                                            "key": "$count",
+                                                                            "value": "false"
+                                                                        },
+                                                                        {
+                                                                            "disabled": false,
+                                                                            "description": {
+                                                                                "content": "Comma-separated list of properties to include in the response.",
+                                                                                "type": "text/plain"
+                                                                            },
+                                                                            "key": "$select",
+                                                                            "value": "string"
+                                                                        },
+                                                                        {
+                                                                            "disabled": false,
+                                                                            "description": {
+                                                                                "content": "OData ordering expression applied to the result set.",
+                                                                                "type": "text/plain"
+                                                                            },
+                                                                            "key": "$orderby",
+                                                                            "value": "string"
+                                                                        }
+                                                                    ],
+                                                                    "variable": [
+                                                                        {
+                                                                            "disabled": false,
+                                                                            "description": {
+                                                                                "content": "(Required) The approval workflow provider ID. Known providers:\n- `F40AE6A6-7BFC-4ABF-9E2A-63120C21A538` — Feature flags / configuration\n- `D5EC9F3B-324E-4F8A-AF55-B69EDD48ECBE` — Access review requests\n",
+                                                                                "type": "text/plain"
+                                                                            },
+                                                                            "type": "any",
+                                                                            "value": "c41587fd-6cb8-4e87-858d-1d1993bc2228",
+                                                                            "key": "providerId"
+                                                                        }
+                                                                    ]
+                                                                },
+                                                                "header": [
+                                                                    {
+                                                                        "key": "Accept",
+                                                                        "value": "application/json"
+                                                                    }
+                                                                ],
+                                                                "method": "GET",
+                                                                "body": {}
+                                                            },
+                                                            "status": "OK",
+                                                            "code": 200,
+                                                            "header": [
+                                                                {
+                                                                    "key": "Content-Type",
+                                                                    "value": "application/json"
+                                                                }
+                                                            ],
+                                                            "body": "{\n  \"@odata.context\": \"https://api.accessreviews.identitygovernance.azure.com/accessReviews/v2.0/$metadata#approvalWorkflowProviders('00000000-0000-0000-0000-000000000000')/requestsAwaitingMyDecision/Microsoft.Azure.ActiveDirectory.AccessReviews.Api.Models.V2.AccessReview(id,displayName,endDateTime,decisionsCriteria)\",\n  \"@odata.count\": 0,\n  \"value\": []\n}",
+                                                            "cookie": [],
+                                                            "_postman_previewlanguage": "json"
+                                                        }
+                                                    ],
+                                                    "event": [],
+                                                    "protocolProfileBehavior": {
+                                                        "disableBodyPruning": true
+                                                    }
+                                                }
+                                            ]
                                         }
                                     ]
                                 }
