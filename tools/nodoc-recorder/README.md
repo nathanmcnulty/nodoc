@@ -8,8 +8,14 @@ A Chrome/Edge DevTools extension that captures API traffic from Microsoft portal
 |--------|--------|----------|
 | Defender | `security.microsoft.com` | `/apiproxy/*` |
 | M365 Admin | `admin.cloud.microsoft` | `/admin/api/*` |
+| Exchange | `admin.exchange.microsoft.com` | `/beta/*` |
 | SharePoint | `{tenant}-admin.sharepoint.com` | `/_api/*` |
 | Teams | `admin.teams.microsoft.com` + related Teams/Office hosts | `/api/*`, `/admin/api/*`, `/amer/api/*`, `/data/*`, `/Teams.*`, `/Skype.*`, `/config/*`, `/repository/*`, and related report/app-catalog paths |
+| M365 Apps Config | `config.office.com` | `/appConfig/*`, `/endpointprovisionhealth/*`, `/intents/*`, `/policyadmin/*`, `/releases/*`, `/rollout/*`, `/serviceProfile/*`, `/ServiceProfile/*`, `/settings/*` |
+| M365 Apps Services | `clients.config.office.net` | `/intents/*`, `/odbhealth/*`, `/onboarding/*`, `/releases/*` |
+| M365 Apps Inventory | `query.inventory.insights.office.net` | `/inventory/*` |
+| Intune Autopatch | `services.autopatch.microsoft.com` | `/api/*`, `/tenant-management/*`, `/update-management/*`, `/access-control/*`, `/device/*`, `/unified-reporting/*`, `/reporting/*`, `/support/*` |
+| Intune Portal | `intune.microsoft.com` | `/api/*` |
 | Power Platform | `api.bap.microsoft.com`, `api.admin.powerplatform.microsoft.com`, `licensing.powerplatform.microsoft.com`, `*.adminanalytics.powerplatform.microsoft.com`, `*.csanalytics.powerplatform.microsoft.com`, `*.tenant.api.powerplatform.com`, `*.crm.dynamics.com`, `*.portal-infra.dynamics.com` | `/providers/*`, `/api/*`, `/analytics/*`, `/governance/*`, `/notificationservice/*`, `/v0.1*`, `/v0.1-alpha*`, `/v1.0*`, `/api/data/*`, `/api/nosql/*`, `/api/v1/*` |
 | Purview | `purview.microsoft.com` | `/apiproxy/*` |
 | Purview Portal | `purview.microsoft.com` | `/api/*` |
