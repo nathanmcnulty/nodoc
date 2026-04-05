@@ -102,10 +102,11 @@ Practical notes:
 - Avoid cloning the user profile unless CDP attach is impossible; copied profiles can lose auth or drift from the live browser state.
 - If you must fall back to a copied profile, make a **fresh copy for each run**. Reusing an older copied profile later in the session redirected back to Microsoft login even though a fresh copy still worked.
 - If browser-level `connectOverCDP(...)` starts timing out after the websocket connects, keep the live browser open and fall back to a fresh same-origin tab opened through the CDP HTTP `/json/new?...` endpoint, then drive that page target directly over its `webSocketDebuggerUrl` with raw CDP.
+- Prefer the checked-in page-target fallback runner (`npm run capture:deep-crawl -- --portal <name> --url <seed-url> --out <artifact-dir> ...`) before inventing another scratch harness; it already handles child-target attach, SPA/hash fallback, checkpointed artifact writes, and scoped request filtering.
 - Prefer one fresh investigation tab per portal family when using the raw page-target fallback. Stale same-origin tabs can poison browser-level attach or leave you attached to the wrong target.
 - Once the page is live, capture at least one real backend request from the target feature family and preserve its auth + portal headers. That header set is often enough to power later safe probes without reopening the UI for every candidate.
 - Do **not** close the user’s browser when the script ends; open a fresh page or tab for the investigation, close only that page, and disconnect by exiting the script.
-- If direct inline one-liners get messy, move the logic into a scratch `.mjs` file in the artifacts directory and keep raw captures there as well.
+- If you still need a scratch `.mjs` experiment, keep it in the artifacts directory and promote only the pieces that generalize back into the checked-in runner.
 
 ### 3. Inventory the navigation surface
 
@@ -156,6 +157,7 @@ Recommended pattern:
 - If a page exposes a very large set of safe same-origin detail links, split the work into phases:
   nav/list discovery first, then a direct-link or entity replay pass sourced from the recorded page-state
   artifacts. This is often faster and more reliable than serial row-click replay on the live grid.
+- The checked-in runner supports this directly with `--seed-artifacts <artifact-dir>` plus `--action replay-seeded-links=<page-selector>` and optional `--seed-page` / `--seed-link-contains` filters.
 - For same-origin admin portals, left-nav coverage is only the floor: open every reachable same-origin route, drill into visible list rows/items so detail blades load, click every visible read-only tab or pivot, and follow safe same-origin content links.
 - Canonicalize equivalent routes before queueing them. Portals often expose the same surface through aliases or parallel route trees, and unnormalized queue keys will waste time replaying the same detail page.
 - When a list/detail family fans out into many nearly identical row routes, fully exercise one representative detail page first, then treat sibling detail pages as first-paint verification unless they reveal new tabs, links, or request shapes.

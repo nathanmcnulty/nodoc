@@ -25,11 +25,12 @@ Root `openapi.yml` files drive both website presentation and downstream artifact
 
 ## Quality metrics
 
-The website now surfaces generated spec-quality metadata from the checked-in OpenAPI files.
+The website now surfaces generated spec-quality metadata from the checked-in OpenAPI files, and the repo also keeps a machine-readable portal coverage ledger under `src/generated/`.
 
 - Regenerate it with `npm run generate:site-data`.
 - `npm run build`, `npm run start`, and `npm run typecheck` already regenerate this data automatically.
 - The generator reports navigation consistency, metadata completeness, placeholder debt, and example coverage for every published spec.
+- The same pass also refreshes `src/generated/portalCoverageLedger.json`, which captures per-portal seed URLs, observed hosts, promoted discoveries, telemetry exclusions, and open gaps for agent-driven discovery work.
 - Treat placeholder markers such as `pending` as real debt to remove with evidence, not as acceptable final-state documentation.
 
 ## Styling
@@ -59,5 +60,8 @@ For recurring portal research and undocumented API discovery work, use the livin
 It captures the preferred browser/auth workflow, traffic-first discovery process, JavaScript bundle mining guidance, write-shape safety practices, and an experiment log for iterating on better techniques over time.
 
 - Start broad planning runs with `npm run generate:crawl-baseline` to see the current spec inventory, recorder support gaps, and the recommended crawl priority for each published portal.
+- Use `npm run capture:deep-crawl -- --portal <portal-name> --url <seed-url> --out <artifact-dir> ...` for checked-in raw CDP page-target capture. It supports repeated `--action type=value` steps including `click-label`, `click-contains`, `click-href`, `navigate`, `capture`, `wait-ms`, and `replay-seeded-links`.
+- Pair `replay-seeded-links` with `--seed-artifacts <artifact-dir>` and optional `--seed-page <page-substring>` / `--seed-link-contains <substring>` filters when you want to revisit safe same-origin detail links recorded in earlier page-state artifacts instead of re-clicking a live grid.
 - After capturing a portal pass, run `npm run generate:crawl-candidates -- --spec <title-or-spec-id> --artifacts <artifact-dir>` to normalize the captured route families, scope them to the target spec's hosts and path prefixes, diff them against the checked-in spec, and emit a candidate queue tagged as confirmed, probed, or bundle-discovered.
+- Run `npm run generate:coverage-ledger` whenever you want a refreshed machine-readable inventory of portal seeds, pass depth, promoted routes, telemetry exclusions, and still-open discovery gaps.
 - Add `--include-adjacent` when you intentionally want to inspect cross-product shell, support, telemetry, or neighboring portal traffic that falls outside the target spec's own host and path scope.
