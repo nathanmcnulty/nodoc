@@ -12,6 +12,8 @@
     "generate:coverage-ledger": "node tools/generate-portal-coverage-ledger.mjs",
     "generate:postman": "node tools/generate-postman-collections.mjs",
     "generate:site-data": "node tools/generate-spec-quality.mjs && node tools/generate-portal-coverage-ledger.mjs",
+    "validate:portal-discovery": "node tools/validate-portal-discovery-metadata.mjs",
+    "validate:site-data": "npm run generate:site-data && git diff --exit-code -- src/generated/specQuality.ts src/generated/portalCoverageLedger.json",
     "validate:spec-quality": "node tools/validate-spec-quality.mjs",
     "swizzle": "docusaurus swizzle",
     "deploy": "npm run build && wrangler deploy",

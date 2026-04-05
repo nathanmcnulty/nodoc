@@ -41,12 +41,22 @@
     ],
     "operationCount": 558,
     "lastSuccessfulPassDepth": "same-origin-entity-crawl",
+    "captureRecipes": [
+      "tools/capture-recipes/defender-telemetry-verification.json",
+      "tools/capture-recipes/defender-entity-replay.json"
+    ],
     "promotedDiscoveries": [],
-    "knownTelemetryExclusions": [],
+    "knownTelemetryExclusions": [
+      {
+        "method": "POST",
+        "note": "Telemetry and performance sink confirmed during the checked-in Defender verification recipe.",
+        "path": "/api/log/Put"
+      }
+    ],
     "openGaps": [],
     "notes": [
       "The checked-in Defender coverage includes same-origin nav, representative entity pages, and MTO-backed proxy APIs.",
-      "A workspace-wide artifact search did not surface Defender /api/log/Put traffic, so no Defender-specific telemetry suppression is configured yet."
+      "A dedicated live verification pass confirmed Defender also emits POST /api/log/Put, so candidate diffs now suppress it as telemetry-only traffic."
     ]
   },
   {
@@ -73,6 +83,9 @@
     ],
     "operationCount": 6,
     "lastSuccessfulPassDepth": "deep-clickflow",
+    "captureRecipes": [
+      "tools/capture-recipes/entra-b2c-deep.json"
+    ],
     "promotedDiscoveries": [
       {
         "method": "GET",
@@ -102,7 +115,9 @@
     "apiHosts": [
       "https://main.iam.ad.ext.azure.com/api"
     ],
-    "observedHosts": [],
+    "observedHosts": [
+      "entra.microsoft.com"
+    ],
     "pathPrefixes": [
       "/AccountSkus/",
       "/ApplicationInsights/",
@@ -159,11 +174,14 @@
       "/WhatIf/"
     ],
     "operationCount": 286,
-    "lastSuccessfulPassDepth": "untracked",
+    "lastSuccessfulPassDepth": "diff-first",
+    "captureRecipes": [],
     "promotedDiscoveries": [],
     "knownTelemetryExclusions": [],
     "openGaps": [],
-    "notes": []
+    "notes": [
+      "Use child reactblade iframe targets rather than only the top-level shell when planning future Entra IAM follow-up passes."
+    ]
   },
   {
     "title": "Entra IDGov",
@@ -189,6 +207,9 @@
     ],
     "operationCount": 17,
     "lastSuccessfulPassDepth": "deep-clickflow",
+    "captureRecipes": [
+      "tools/capture-recipes/entra-idgov-deep.json"
+    ],
     "promotedDiscoveries": [
       {
         "method": "GET",
@@ -229,6 +250,10 @@
     ],
     "operationCount": 17,
     "lastSuccessfulPassDepth": "seeded-drill-in-no-backend",
+    "captureRecipes": [
+      "tools/capture-recipes/entra-iga-deep.json",
+      "tools/capture-recipes/entra-iga-recovery.json"
+    ],
     "promotedDiscoveries": [],
     "knownTelemetryExclusions": [],
     "openGaps": [
@@ -264,6 +289,9 @@
     ],
     "operationCount": 16,
     "lastSuccessfulPassDepth": "deep-clickflow",
+    "captureRecipes": [
+      "tools/capture-recipes/entra-pim-deep.json"
+    ],
     "promotedDiscoveries": [],
     "knownTelemetryExclusions": [],
     "openGaps": [],
@@ -295,6 +323,9 @@
     ],
     "operationCount": 61,
     "lastSuccessfulPassDepth": "deep-interaction",
+    "captureRecipes": [
+      "tools/capture-recipes/exchange-deep.json"
+    ],
     "promotedDiscoveries": [],
     "knownTelemetryExclusions": [],
     "openGaps": [],
@@ -332,6 +363,9 @@
     ],
     "operationCount": 53,
     "lastSuccessfulPassDepth": "deep-interaction",
+    "captureRecipes": [
+      "tools/capture-recipes/intune-deep.json"
+    ],
     "promotedDiscoveries": [
       {
         "method": "GET",
@@ -367,6 +401,9 @@
     ],
     "operationCount": 5,
     "lastSuccessfulPassDepth": "deep-interaction",
+    "captureRecipes": [
+      "tools/capture-recipes/intune-deep.json"
+    ],
     "promotedDiscoveries": [
       {
         "method": "POST",
@@ -425,18 +462,23 @@
     "apiHosts": [
       "https://admin.cloud.microsoft"
     ],
-    "observedHosts": [],
+    "observedHosts": [
+      "admin.cloud.microsoft"
+    ],
     "pathPrefixes": [
       "/admin/",
       "/adminportal/",
       "/fd/"
     ],
     "operationCount": 213,
-    "lastSuccessfulPassDepth": "untracked",
+    "lastSuccessfulPassDepth": "diff-first",
+    "captureRecipes": [],
     "promotedDiscoveries": [],
     "knownTelemetryExclusions": [],
     "openGaps": [],
-    "notes": []
+    "notes": [
+      "Drive future M365 Admin discovery from candidate diffs before another broad live crawl."
+    ]
   },
   {
     "title": "M365 Apps Config",
@@ -470,6 +512,9 @@
     ],
     "operationCount": 23,
     "lastSuccessfulPassDepth": "deep-interaction",
+    "captureRecipes": [
+      "tools/capture-recipes/m365-apps-deep.json"
+    ],
     "promotedDiscoveries": [],
     "knownTelemetryExclusions": [],
     "openGaps": [],
@@ -501,6 +546,9 @@
     ],
     "operationCount": 27,
     "lastSuccessfulPassDepth": "deep-interaction",
+    "captureRecipes": [
+      "tools/capture-recipes/m365-apps-deep.json"
+    ],
     "promotedDiscoveries": [],
     "knownTelemetryExclusions": [],
     "openGaps": [],
@@ -533,6 +581,9 @@
     ],
     "operationCount": 8,
     "lastSuccessfulPassDepth": "deep-interaction",
+    "captureRecipes": [
+      "tools/capture-recipes/m365-apps-deep.json"
+    ],
     "promotedDiscoveries": [],
     "knownTelemetryExclusions": [],
     "openGaps": [],
@@ -554,7 +605,9 @@
     "apiHosts": [
       "https://admin.powerplatform.microsoft.com"
     ],
-    "observedHosts": [],
+    "observedHosts": [
+      "admin.powerplatform.microsoft.com"
+    ],
     "pathPrefixes": [
       "/api/",
       "/appmanagement/",
@@ -567,11 +620,14 @@
       "/v2.0/"
     ],
     "operationCount": 244,
-    "lastSuccessfulPassDepth": "untracked",
+    "lastSuccessfulPassDepth": "diff-first",
+    "captureRecipes": [],
     "promotedDiscoveries": [],
     "knownTelemetryExclusions": [],
     "openGaps": [],
-    "notes": []
+    "notes": [
+      "Recent discovery already covered many Power Platform host families, so future passes should stay gap-driven."
+    ]
   },
   {
     "title": "Purview",
@@ -589,7 +645,9 @@
     "apiHosts": [
       "https://purview.microsoft.com/apiproxy"
     ],
-    "observedHosts": [],
+    "observedHosts": [
+      "purview.microsoft.com"
+    ],
     "pathPrefixes": [
       "/admin/",
       "/adtsch/",
@@ -622,11 +680,14 @@
       "/WdatpPublicApi/"
     ],
     "operationCount": 124,
-    "lastSuccessfulPassDepth": "untracked",
+    "lastSuccessfulPassDepth": "diff-first",
+    "captureRecipes": [],
     "promotedDiscoveries": [],
     "knownTelemetryExclusions": [],
     "openGaps": [],
-    "notes": []
+    "notes": [
+      "Keep same-origin Purview Portal /api traffic distinct from the broader Purview proxy surface during follow-up diffing."
+    ]
   },
   {
     "title": "Purview Portal",
@@ -652,6 +713,9 @@
     ],
     "operationCount": 7,
     "lastSuccessfulPassDepth": "deep-interaction",
+    "captureRecipes": [
+      "tools/capture-recipes/purview-portal-deep.json"
+    ],
     "promotedDiscoveries": [
       {
         "method": "POST",
@@ -693,6 +757,9 @@
     ],
     "operationCount": 41,
     "lastSuccessfulPassDepth": "deep-interaction",
+    "captureRecipes": [
+      "tools/capture-recipes/sharepoint-admin-deep.json"
+    ],
     "promotedDiscoveries": [],
     "knownTelemetryExclusions": [],
     "openGaps": [],
@@ -714,7 +781,9 @@
     "apiHosts": [
       "https://admin.teams.microsoft.com"
     ],
-    "observedHosts": [],
+    "observedHosts": [
+      "admin.teams.microsoft.com"
+    ],
     "pathPrefixes": [
       "/admin/",
       "/AdminAppCatalog/",
@@ -745,10 +814,13 @@
       "/Teams.VoiceApps/"
     ],
     "operationCount": 99,
-    "lastSuccessfulPassDepth": "untracked",
+    "lastSuccessfulPassDepth": "deep-interaction",
+    "captureRecipes": [],
     "promotedDiscoveries": [],
     "knownTelemetryExclusions": [],
     "openGaps": [],
-    "notes": []
+    "notes": [
+      "Teams already has a deeper capture baseline in the repo, so future follow-up should remain diff-driven."
+    ]
   }
 ]

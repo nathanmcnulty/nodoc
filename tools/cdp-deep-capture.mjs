@@ -5,6 +5,7 @@ import { setTimeout as delay } from "node:timers/promises";
 const apiBase = "http://127.0.0.1:9222";
 const defaultNavigationTimeoutMs = 15000;
 const defaultSeedLinkLimit = 12;
+const defaultSeedRouteLimit = 8;
 const defaultSettleMs = 8000;
 const defaultPostActionSettleMs = 6000;
 const evaluateTimeoutMs = 4000;
@@ -32,6 +33,7 @@ function parseActionSpec(value) {
     "click-label",
     "navigate",
     "replay-seeded-links",
+    "replay-seeded-routes",
     "wait-ms",
   ].includes(type)) {
     throw new Error(`Unsupported action type "${rawType}".`);
@@ -45,7 +47,192 @@ function parseActionSpec(value) {
   };
 }
 
-function parseArgs(argv) {
+function parseVarSpec(value) {
+  const separator = value.indexOf("=");
+  if (separator <= 0) {
+    throw new Error(`Invalid --var value "${value}". Expected name=value.`);
+  }
+
+  return {
+    name: value.slice(0, separator).trim(),
+    value: value.slice(separator + 1),
+  };
+}
+
+function ensureArray(value) {
+  if (Array.isArray(value)) {
+    return value;
+  }
+
+  if (value === undefined || value === null) {
+    return [];
+  }
+
+  return [value];
+}
+
+function ensureGlobalFlag(flags = "gu") {
+  const uniqueFlags = Array.from(new Set(String(flags || "").split("")));
+  if (!uniqueFlags.includes("g")) {
+    uniqueFlags.push("g");
+  }
+  return uniqueFlags.join("");
+}
+
+function expandTemplateVariables(value, variables) {
+  if (typeof value === "string") {
+    return value.replace(/\$\{([^}]+)\}/gu, (_match, variableName) => {
+      if (!Object.prototype.hasOwnProperty.call(variables, variableName)) {
+        throw new Error(`Recipe variable "${variableName}" was not provided.`);
+      }
+
+      return String(variables[variableName]);
+    });
+  }
+
+  if (Array.isArray(value)) {
+    return value.map((item) => expandTemplateVariables(item, variables));
+  }
+
+  if (value && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, entryValue]) => [
+        key,
+        expandTemplateVariables(entryValue, variables),
+      ]),
+    );
+  }
+
+  return value;
+}
+
+function normalizeRecipeAction(action) {
+  if (typeof action === "string") {
+    return parseActionSpec(action);
+  }
+
+  if (!action || typeof action !== "object") {
+    throw new Error("Recipe actions must be strings or objects.");
+  }
+
+  const rawType = String(action.type || "").trim();
+  if (!rawType) {
+    throw new Error("Recipe action objects must include a type.");
+  }
+
+  const scopedType =
+    action.scope && action.scope !== "any"
+      ? `${rawType}-${String(action.scope).trim()}`
+      : rawType;
+  return parseActionSpec(`${scopedType}=${action.value ?? ""}`);
+}
+
+function resolveRecipePath(value, recipeDir) {
+  if (!value) {
+    return null;
+  }
+
+  return path.isAbsolute(value) ? value : path.resolve(recipeDir, value);
+}
+
+function normalizeSeedRouteGroups(groups = {}) {
+  const normalizedGroups = {};
+
+  for (const [groupName, group] of Object.entries(groups)) {
+    const routeTemplates = ensureArray(group?.routeTemplates)
+      .map((template) => String(template || "").trim())
+      .filter(Boolean);
+    const idSources = ensureArray(group?.idSources)
+      .map((source) => ({
+        artifactFile: String(source?.artifactFile || "").trim(),
+        captureGroup:
+          Number.isInteger(source?.captureGroup) && source.captureGroup >= 0
+            ? source.captureGroup
+            : 1,
+        decode: Boolean(source?.decode),
+        flags: ensureGlobalFlag(source?.flags ?? "gu"),
+        pageContains: ensureArray(source?.pageContains)
+          .map((value) => String(value || "").trim().toLowerCase())
+          .filter(Boolean),
+        pattern: String(source?.pattern || "").trim(),
+      }))
+      .filter((source) => source.artifactFile && source.pattern);
+
+    normalizedGroups[groupName] = {
+      idSources,
+      limit:
+        Number.isInteger(group?.limit) && group.limit > 0
+          ? group.limit
+          : defaultSeedRouteLimit,
+      routeTemplates,
+    };
+  }
+
+  return normalizedGroups;
+}
+
+function applyRecipeConfig(args, recipeConfig, recipePath) {
+  const recipeDir = path.dirname(recipePath);
+  if (recipeConfig.url) {
+    args.url = recipeConfig.url;
+  }
+
+  if (recipeConfig.portal) {
+    args.portal = recipeConfig.portal;
+  }
+
+  if (recipeConfig.label) {
+    args.label = recipeConfig.label;
+  }
+
+  if (recipeConfig.out) {
+    args.outDir = resolveRecipePath(recipeConfig.out, recipeDir);
+  }
+
+  if (Array.isArray(recipeConfig.matchHosts)) {
+    args.matchHosts = [...recipeConfig.matchHosts];
+  }
+
+  if (Array.isArray(recipeConfig.matchPathPrefixes)) {
+    args.matchPathPrefixes = recipeConfig.matchPathPrefixes.map((item) => normalizePath(item));
+  }
+
+  if (recipeConfig.seedArtifacts) {
+    args.seedArtifacts = resolveRecipePath(recipeConfig.seedArtifacts, recipeDir);
+  }
+
+  if (Array.isArray(recipeConfig.seedPages)) {
+    args.seedPages = [...recipeConfig.seedPages];
+  }
+
+  if (Array.isArray(recipeConfig.seedLinkContains)) {
+    args.seedLinkContains = [...recipeConfig.seedLinkContains];
+  }
+
+  if (Number.isFinite(Number(recipeConfig.seedLinkLimit))) {
+    args.seedLinkLimit = Number(recipeConfig.seedLinkLimit);
+  }
+
+  if (Number.isFinite(Number(recipeConfig.settleMs))) {
+    args.settleMs = Number(recipeConfig.settleMs);
+  }
+
+  if (Number.isFinite(Number(recipeConfig.postActionSettleMs))) {
+    args.postActionSettleMs = Number(recipeConfig.postActionSettleMs);
+  }
+
+  if (Number.isFinite(Number(recipeConfig.navigationTimeoutMs))) {
+    args.navigationTimeoutMs = Number(recipeConfig.navigationTimeoutMs);
+  }
+
+  if (recipeConfig.actions) {
+    args.actions = ensureArray(recipeConfig.actions).map(normalizeRecipeAction);
+  }
+
+  args.seedRouteGroups = normalizeSeedRouteGroups(recipeConfig.seedRouteGroups);
+}
+
+async function parseArgs(argv) {
   const args = {
     actions: [],
     label: null,
@@ -55,17 +242,80 @@ function parseArgs(argv) {
     outDir: null,
     portal: null,
     postActionSettleMs: defaultPostActionSettleMs,
+    recipePath: null,
     seedArtifacts: null,
     seedLinkContains: [],
     seedLinkLimit: defaultSeedLinkLimit,
     seedPages: [],
+    seedRouteGroups: {},
     settleMs: defaultSettleMs,
     url: null,
+    variables: {},
   };
+
+  let recipePath = null;
+  const cliVariables = {};
 
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index];
     const next = argv[index + 1];
+
+    if (arg === "--recipe" && next) {
+      recipePath = path.resolve(next);
+      index += 1;
+      continue;
+    }
+
+    if (arg.startsWith("--recipe=")) {
+      recipePath = path.resolve(arg.slice("--recipe=".length));
+      continue;
+    }
+
+    if (arg === "--var" && next) {
+      const { name, value } = parseVarSpec(next);
+      cliVariables[name] = value;
+      index += 1;
+      continue;
+    }
+
+    if (arg.startsWith("--var=")) {
+      const { name, value } = parseVarSpec(arg.slice("--var=".length));
+      cliVariables[name] = value;
+      continue;
+    }
+  }
+
+  if (recipePath) {
+    const recipeSource = JSON.parse(await readFile(recipePath, "utf8"));
+    const expandedRecipe = expandTemplateVariables(
+      recipeSource,
+      {
+        ...(recipeSource.variables ?? {}),
+        ...cliVariables,
+      },
+    );
+    applyRecipeConfig(args, expandedRecipe, recipePath);
+    args.recipePath = recipePath;
+    args.variables = cliVariables;
+  }
+
+  for (let index = 0; index < argv.length; index += 1) {
+    const arg = argv[index];
+    const next = argv[index + 1];
+
+    if (arg === "--recipe" || arg.startsWith("--recipe=")) {
+      if (arg === "--recipe") {
+        index += 1;
+      }
+      continue;
+    }
+
+    if (arg === "--var" || arg.startsWith("--var=")) {
+      if (arg === "--var") {
+        index += 1;
+      }
+      continue;
+    }
 
     if (arg === "--url" && next) {
       args.url = next;
@@ -248,8 +498,14 @@ function parseArgs(argv) {
     throw new Error(`Invalid value for seedLinkLimit: "${args.seedLinkLimit}".`);
   }
 
-  if (args.actions.some((action) => action.type === "replay-seeded-links") && !args.seedArtifacts) {
-    throw new Error("The replay-seeded-links action requires --seed-artifacts <directory>.");
+  if (args.actions.some((action) => ["replay-seeded-links", "replay-seeded-routes"].includes(action.type)) && !args.seedArtifacts) {
+    throw new Error("Seeded replay actions require --seed-artifacts <directory>.");
+  }
+
+  for (const action of args.actions.filter((entry) => entry.type === "replay-seeded-routes")) {
+    if (!args.seedRouteGroups[action.value]) {
+      throw new Error(`No seed route group named "${action.value}" was defined in the selected recipe.`);
+    }
   }
 
   return args;
@@ -330,6 +586,102 @@ async function readJsonArray(filePath) {
 
     throw error;
   }
+}
+
+async function loadSeedArtifacts(seedArtifactsDir) {
+  return {
+    actionResults: await readJsonArray(path.join(seedArtifactsDir, "action-results.json")),
+    apiRecords: await readJsonArray(path.join(seedArtifactsDir, "api-records.json")),
+    pageStates: await readJsonArray(path.join(seedArtifactsDir, "page-states.json")),
+    rawRequests: await readJsonArray(path.join(seedArtifactsDir, "raw-requests.json")),
+    sessionSnapshots: await readJsonArray(path.join(seedArtifactsDir, "session-snapshots.json")),
+  };
+}
+
+function getSeedArtifactEntries(seedArtifacts, artifactFile) {
+  const normalized = String(artifactFile || "").trim().toLowerCase();
+  switch (normalized) {
+    case "action-results":
+    case "action-results.json":
+      return seedArtifacts.actionResults ?? [];
+    case "api-records":
+    case "api-records.json":
+      return seedArtifacts.apiRecords ?? [];
+    case "page-states":
+    case "page-states.json":
+      return seedArtifacts.pageStates ?? [];
+    case "raw-requests":
+    case "raw-requests.json":
+      return seedArtifacts.rawRequests ?? [];
+    case "session-snapshots":
+    case "session-snapshots.json":
+      return seedArtifacts.sessionSnapshots ?? [];
+    default:
+      return [];
+  }
+}
+
+function matchesSeedPageFilter(entry, pageContainsFilters) {
+  if (pageContainsFilters.length === 0) {
+    return true;
+  }
+
+  const entryText = [
+    entry?.page,
+    entry?.pageLabel,
+    entry?.sourcePage,
+    entry?.title,
+    entry?.url,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+  return pageContainsFilters.some((value) => entryText.includes(value));
+}
+
+function extractSeedValues(entries, source) {
+  const regex = new RegExp(source.pattern, source.flags);
+  const values = [];
+
+  for (const entry of entries) {
+    if (!matchesSeedPageFilter(entry, source.pageContains)) {
+      continue;
+    }
+
+    const serializedEntry = JSON.stringify(entry);
+    for (const match of serializedEntry.matchAll(regex)) {
+      let value = match[source.captureGroup] ?? match[0];
+      if (typeof value !== "string") {
+        continue;
+      }
+
+      value = value.trim();
+      if (!value) {
+        continue;
+      }
+
+      if (source.decode) {
+        try {
+          value = decodeURIComponent(value);
+        } catch {
+          // Leave the original encoded value in place.
+        }
+      }
+
+      values.push(value);
+    }
+  }
+
+  return values;
+}
+
+function buildSeedRouteUrl(routeTemplate, seedValue, rootOrigin) {
+  const interpolatedTemplate = String(routeTemplate)
+    .replaceAll("{encoded}", encodeURIComponent(seedValue))
+    .replaceAll("{id}", seedValue)
+    .replaceAll("{value}", seedValue);
+  return resolveMaybeRelativeUrl(interpolatedTemplate, `${rootOrigin}/`);
 }
 
 function mergeItems(existing, next) {
@@ -754,11 +1106,65 @@ function collectSeededLinkCandidates(seedPageStates, rootOrigin, args, action) {
   return candidates.slice(0, args.seedLinkLimit);
 }
 
+function collectSeededRouteCandidates(seedArtifacts, rootOrigin, args, action) {
+  const groupName = String(action.value || "").trim();
+  const seedRouteGroup = args.seedRouteGroups[groupName];
+  if (!seedRouteGroup) {
+    return [];
+  }
+
+  const candidates = [];
+  const seenUrls = new Set();
+
+  for (const source of seedRouteGroup.idSources) {
+    const entries = getSeedArtifactEntries(seedArtifacts, source.artifactFile);
+    const seedValues = extractSeedValues(entries, source);
+
+    for (const seedValue of seedValues) {
+      for (const routeTemplate of seedRouteGroup.routeTemplates) {
+        try {
+          const url = buildSeedRouteUrl(routeTemplate, seedValue, rootOrigin);
+          const parsed = new URL(url);
+          if (parsed.origin !== rootOrigin) {
+            continue;
+          }
+
+          const normalizedUrl = parsed.toString();
+          if (seenUrls.has(normalizedUrl)) {
+            continue;
+          }
+
+          seenUrls.add(normalizedUrl);
+          candidates.push({
+            seedValue,
+            sourceArtifact: source.artifactFile,
+            url: normalizedUrl,
+          });
+
+          if (candidates.length >= seedRouteGroup.limit) {
+            return candidates;
+          }
+        } catch {
+          // Ignore malformed seeded route candidates.
+        }
+      }
+    }
+  }
+
+  return candidates;
+}
+
 async function main() {
-  const args = parseArgs(process.argv.slice(2));
-  const seedPageStates = args.seedArtifacts
-    ? await readJsonArray(path.join(args.seedArtifacts, "page-states.json"))
-    : [];
+  const args = await parseArgs(process.argv.slice(2));
+  const seedArtifacts = args.seedArtifacts
+    ? await loadSeedArtifacts(args.seedArtifacts)
+    : {
+        actionResults: [],
+        apiRecords: [],
+        pageStates: [],
+        rawRequests: [],
+        sessionSnapshots: [],
+      };
   await mkdir(args.outDir, { recursive: true });
 
   const target = await createTarget();
@@ -1137,7 +1543,7 @@ async function main() {
   }
 
   async function runSeededReplayAction(action, basePageLabel) {
-    if (seedPageStates.length === 0) {
+    if (seedArtifacts.pageStates.length === 0) {
       return {
         replayedCount: 0,
         seedArtifacts: args.seedArtifacts,
@@ -1146,7 +1552,7 @@ async function main() {
     }
 
     const rootOrigin = new URL(await getRootUrl()).origin;
-    const seededLinks = collectSeededLinkCandidates(seedPageStates, rootOrigin, args, action);
+    const seededLinks = collectSeededLinkCandidates(seedArtifacts.pageStates, rootOrigin, args, action);
     const replayed = [];
 
     for (const [linkIndex, seededLink] of seededLinks.entries()) {
@@ -1178,6 +1584,42 @@ async function main() {
       replayedCount: replayed.length,
       seedArtifacts: args.seedArtifacts,
       sourcePages: uniqueSorted(replayed.map((item) => item.sourcePage)),
+      urls: replayed.map((item) => item.url),
+    };
+  }
+
+  async function runSeededRouteReplayAction(action, basePageLabel) {
+    const rootOrigin = new URL(await getRootUrl()).origin;
+    const seededRoutes = collectSeededRouteCandidates(seedArtifacts, rootOrigin, args, action);
+    const replayed = [];
+
+    for (const [routeIndex, seededRoute] of seededRoutes.entries()) {
+      const routePageLabel = `${basePageLabel}-${String(routeIndex + 1).padStart(2, "0")}-${slugify(seededRoute.url)}`;
+      activePageLabel = routePageLabel;
+      const navigationResult = await navigateRoot(seededRoute.url);
+      actionResults.push({
+        page: routePageLabel,
+        result: {
+          ...navigationResult,
+          seedValue: seededRoute.seedValue,
+          sourceArtifact: seededRoute.sourceArtifact,
+        },
+        scope: action.scope,
+        sourceArtifact: seededRoute.sourceArtifact,
+        type: action.type,
+        value: seededRoute.url,
+      });
+      replayed.push(seededRoute);
+      await captureCheckpoint(routePageLabel);
+    }
+
+    activePageLabel = basePageLabel;
+
+    return {
+      replayedCount: replayed.length,
+      seedArtifacts: args.seedArtifacts,
+      sourceArtifacts: uniqueSorted(replayed.map((item) => item.sourceArtifact)),
+      seedValues: uniqueSorted(replayed.map((item) => item.seedValue)),
       urls: replayed.map((item) => item.url),
     };
   }
@@ -1256,6 +1698,19 @@ async function main() {
         continue;
       }
 
+      if (action.type === "replay-seeded-routes") {
+        const replayResult = await runSeededRouteReplayAction(action, pageLabel);
+        actionResults.push({
+          page: pageLabel,
+          result: replayResult,
+          scope: action.scope,
+          type: action.type,
+          value: action.value,
+        });
+        await flushArtifacts();
+        continue;
+      }
+
       const clickResult = await runClickAction(action);
       actionResults.push({
         page: pageLabel,
@@ -1281,6 +1736,7 @@ async function main() {
       outDir: args.outDir,
       pageCount: pageStates.length,
       portal: args.portal,
+      recipePath: args.recipePath,
       scopedHosts,
       scopedRequestCount: filteredRequests.length,
       seedArtifacts: args.seedArtifacts,

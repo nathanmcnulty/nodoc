@@ -157,7 +157,7 @@ export const recorderIdAliasesBySpecId = {
   "ibiza-iam": ["entra-iam"],
 };
 
-const coverageOverlayByTitle = {
+export const coverageOverlayByTitle = {
   Defender: {
     seedUrls: [
       "https://security.microsoft.com",
@@ -167,9 +167,12 @@ const coverageOverlayByTitle = {
       "mto.security.microsoft.com",
     ],
     lastSuccessfulPassDepth: "same-origin-entity-crawl",
+    knownTelemetryExclusions: [
+      route("POST", "/api/log/Put", "Telemetry and performance sink confirmed during the checked-in Defender verification recipe."),
+    ],
     notes: [
       "The checked-in Defender coverage includes same-origin nav, representative entity pages, and MTO-backed proxy APIs.",
-      "A workspace-wide artifact search did not surface Defender /api/log/Put traffic, so no Defender-specific telemetry suppression is configured yet.",
+      "A dedicated live verification pass confirmed Defender also emits POST /api/log/Put, so candidate diffs now suppress it as telemetry-only traffic.",
     ],
   },
   "Entra B2C": {
@@ -185,6 +188,18 @@ const coverageOverlayByTitle = {
     ],
     notes: [
       "The current tenant returned AADB2C99039 on some External Identities surfaces, but the promoted route is still a confirmed portal endpoint.",
+    ],
+  },
+  "Entra IAM": {
+    seedUrls: [
+      "https://entra.microsoft.com",
+    ],
+    observedHosts: [
+      "entra.microsoft.com",
+    ],
+    lastSuccessfulPassDepth: "diff-first",
+    notes: [
+      "Use child reactblade iframe targets rather than only the top-level shell when planning future Entra IAM follow-up passes.",
     ],
   },
   "Entra IDGov": {
@@ -301,6 +316,42 @@ const coverageOverlayByTitle = {
     ],
     lastSuccessfulPassDepth: "deep-interaction",
   },
+  "M365 Admin": {
+    seedUrls: [
+      "https://admin.cloud.microsoft",
+    ],
+    observedHosts: [
+      "admin.cloud.microsoft",
+    ],
+    lastSuccessfulPassDepth: "diff-first",
+    notes: [
+      "Drive future M365 Admin discovery from candidate diffs before another broad live crawl.",
+    ],
+  },
+  "Power Platform": {
+    seedUrls: [
+      "https://admin.powerplatform.microsoft.com",
+    ],
+    observedHosts: [
+      "admin.powerplatform.microsoft.com",
+    ],
+    lastSuccessfulPassDepth: "diff-first",
+    notes: [
+      "Recent discovery already covered many Power Platform host families, so future passes should stay gap-driven.",
+    ],
+  },
+  Purview: {
+    seedUrls: [
+      "https://purview.microsoft.com",
+    ],
+    observedHosts: [
+      "purview.microsoft.com",
+    ],
+    lastSuccessfulPassDepth: "diff-first",
+    notes: [
+      "Keep same-origin Purview Portal /api traffic distinct from the broader Purview proxy surface during follow-up diffing.",
+    ],
+  },
   "Purview Portal": {
     seedUrls: [
       "https://purview.microsoft.com",
@@ -325,6 +376,62 @@ const coverageOverlayByTitle = {
     ],
     lastSuccessfulPassDepth: "deep-interaction",
   },
+  Teams: {
+    seedUrls: [
+      "https://admin.teams.microsoft.com",
+    ],
+    observedHosts: [
+      "admin.teams.microsoft.com",
+    ],
+    lastSuccessfulPassDepth: "deep-interaction",
+    notes: [
+      "Teams already has a deeper capture baseline in the repo, so future follow-up should remain diff-driven.",
+    ],
+  },
+};
+
+export const captureRecipesByTitle = {
+  Defender: [
+    "tools/capture-recipes/defender-telemetry-verification.json",
+    "tools/capture-recipes/defender-entity-replay.json",
+  ],
+  "Entra B2C": [
+    "tools/capture-recipes/entra-b2c-deep.json",
+  ],
+  "Entra IDGov": [
+    "tools/capture-recipes/entra-idgov-deep.json",
+  ],
+  "Entra IGA": [
+    "tools/capture-recipes/entra-iga-deep.json",
+    "tools/capture-recipes/entra-iga-recovery.json",
+  ],
+  "Entra PIM": [
+    "tools/capture-recipes/entra-pim-deep.json",
+  ],
+  Exchange: [
+    "tools/capture-recipes/exchange-deep.json",
+  ],
+  "Intune Autopatch": [
+    "tools/capture-recipes/intune-deep.json",
+  ],
+  "Intune Portal": [
+    "tools/capture-recipes/intune-deep.json",
+  ],
+  "M365 Apps Config": [
+    "tools/capture-recipes/m365-apps-deep.json",
+  ],
+  "M365 Apps Inventory": [
+    "tools/capture-recipes/m365-apps-deep.json",
+  ],
+  "M365 Apps Services": [
+    "tools/capture-recipes/m365-apps-deep.json",
+  ],
+  "Purview Portal": [
+    "tools/capture-recipes/purview-portal-deep.json",
+  ],
+  SharePoint: [
+    "tools/capture-recipes/sharepoint-admin-deep.json",
+  ],
 };
 
 function normalizeRouteEntry(entry) {
@@ -374,6 +481,10 @@ export function getTelemetrySuppressions(title) {
   return getCoverageOverlay(title).knownTelemetryExclusions;
 }
 
+export function getCaptureRecipes(title) {
+  return [...(captureRecipesByTitle[title] ?? [])];
+}
+
 export function buildCoverageLedgerEntry(specRecord, recorderPortalIds) {
   const crawlMetadata = crawlMetadataByTitle[specRecord.title];
   if (!crawlMetadata) {
@@ -401,6 +512,7 @@ export function buildCoverageLedgerEntry(specRecord, recorderPortalIds) {
     pathPrefixes: [...specRecord.pathPrefixes],
     operationCount: specRecord.operationCount,
     lastSuccessfulPassDepth: coverageOverlay.lastSuccessfulPassDepth ?? "untracked",
+    captureRecipes: getCaptureRecipes(specRecord.title),
     promotedDiscoveries: [...coverageOverlay.promotedDiscoveries],
     knownTelemetryExclusions: [...coverageOverlay.knownTelemetryExclusions],
     openGaps: [...coverageOverlay.openGaps],

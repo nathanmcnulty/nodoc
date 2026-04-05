@@ -30,6 +30,12 @@ jobs:
       - name: Validate spec quality
         run: npm run validate:spec-quality
 
+      - name: Validate portal discovery metadata
+        run: npm run validate:portal-discovery
+
+      - name: Validate generated site data
+        run: npm run validate:site-data
+
       - name: Build site
         run: npm run build
 
