@@ -1,10 +1,11 @@
 paths:
   /mtoapi/tenants/TenantPicker:
     get:
-      summary: List managed tenants
+      summary: Get MTO tenant picker
       description: >-
-        Retrieve a list of tenants available in the multi-tenant management view.
-        Used by the tenant picker in the Defender XDR portal for multi-tenant operations.
+        Retrieve the tenant picker payload used across the Defender multi-tenant
+        management portal. Confirmed in live traffic from the MTO homepage,
+        incidents, hunting, identity inventory, and administration pages.
       operationId: MultiTenant.ListTenants
       tags: [Multi-Tenant]
       responses:
@@ -13,9 +14,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/ManagedTenant'
+                $ref: '#/components/schemas/TenantPickerResponse'
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -43,6 +42,532 @@ paths:
                 items:
                   type: object
                   description: pending - recent item details
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtoapi/tenantGroups:
+    get:
+      summary: List tenant groups
+      description: >-
+        Retrieve tenant groups available in the MTO portal. Confirmed in live
+        traffic from the Tenant groups page.
+      operationId: MultiTenant.ListTenantGroups
+      tags: [Multi-Tenant]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TenantGroup'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtoapi/tenantGroups/effective/:
+    get:
+      summary: Get effective tenant group
+      description: >-
+        Retrieve the effective tenant group resolved for the signed-in user.
+        Confirmed in live traffic across the MTO homepage, incidents, hunting,
+        cases, identity inventory, content distribution, tenant groups, and
+        unified RBAC pages.
+      operationId: MultiTenant.GetEffectiveTenantGroup
+      tags: [Multi-Tenant]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantGroup'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtoapi/assignments:
+    get:
+      summary: List content distribution assignments
+      description: >-
+        Retrieve content distribution assignments from the MTO Content distribution
+        page, including target tenants, synced templates, variable maps, and
+        per-target sync status.
+      operationId: MultiTenant.ListAssignments
+      tags: [Multi-Tenant]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssignmentListResponse'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtoapi/mtp/sccManagement/mgmt/TenantContext:
+    get:
+      summary: Get MTO tenant context
+      description: >-
+        Retrieve the multi-tenant-wrapped Defender tenant bootstrap used across
+        the MTO portal. The response includes the selected tenant context plus
+        per-tenant execution metadata for the current MTO selection.
+      operationId: MultiTenant.GetTenantContext
+      tags: [Multi-Tenant]
+      parameters:
+        - name: realTime
+          in: query
+          description: Whether to fetch real-time context instead of cached data.
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: object
+                    description: >-
+                      MTO-wrapped Defender tenant bootstrap, including environment,
+                      workload activation, directory roles, and MTP permission state.
+                  metadata:
+                    $ref: '#/components/schemas/MtoResponseMetadata'
+                  isMtoResponse:
+                    type: boolean
+                    description: Indicates the response came from the MTO wrapper.
+                required:
+                  - result
+                  - metadata
+                  - isMtoResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtoapi/mtp/huntingService/queries/:
+    get:
+      summary: List MTO hunting queries
+      description: >-
+        Retrieve saved advanced hunting queries in the MTO portal. Confirmed in
+        live traffic from the MTO Advanced hunting page with `type=user`,
+        `type=shared`, and `type=scheduled` query variants.
+      operationId: MultiTenant.ListHuntingQueries
+      tags: [Multi-Tenant]
+      parameters:
+        - name: type
+          in: query
+          description: Query collection type to retrieve.
+          schema:
+            type: string
+            enum: [user, shared, scheduled]
+        - name: tenantIds[]
+          in: query
+          description: Tenant IDs to scope the query collection to.
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+              format: uuid
+        - name: includeUsxQueries
+          in: query
+          description: Whether to include USX queries in the result set.
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: >-
+                  pending - MTO hunting query list; exact response envelope is
+                  still pending because the captured body could not be recovered
+                  from DevTools after navigation.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtoapi/mtp/userExposedRbacGroups/UserExposedRbacGroups:
+    get:
+      summary: Get MTO hunting RBAC groups
+      description: >-
+        Retrieve the RBAC groups exposed to the current user for the MTO Advanced
+        hunting page. Confirmed in live traffic from `mto.security.microsoft.com`.
+      operationId: MultiTenant.GetHuntingRbacGroups
+      tags: [Multi-Tenant]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: >-
+                  pending - MTO hunting RBAC groups; exact body capture could not
+                  be recovered from DevTools after navigation.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/userPreferences/api/mgmt/userpreferencesservice/userPreference/advanced_hunting_mto:
+    get:
+      summary: Get MTO advanced hunting preferences
+      description: >-
+        Retrieve the serialized multi-tenant advanced hunting preference blob.
+        Confirmed in live traffic from the MTO Advanced hunting and Custom detection pages.
+      operationId: MultiTenant.GetAdvancedHuntingPreferences
+      tags: [Multi-Tenant]
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/MtoHuntingPreference'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtoapi/mtp/CaseManagement/be/cases:
+    get:
+      summary: List MTO cases
+      description: >-
+        Retrieve case-management records through the MTO wrapper. Confirmed in
+        live traffic from the MTO Cases page.
+      operationId: MultiTenant.ListCases
+      tags: [Multi-Tenant]
+      parameters:
+        - name: $orderby
+          in: query
+          description: Optional OData sort expression for case rows.
+          schema:
+            type: string
+        - name: paginationGuid
+          in: query
+          description: Optional pagination cursor returned by prior MTO case reads.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: object
+                    properties:
+                      value:
+                        type: array
+                        items:
+                          type: object
+                          description: pending - MTO case record
+                  metadata:
+                    $ref: '#/components/schemas/MtoResponseMetadata'
+                  isMtoResponse:
+                    type: boolean
+                required:
+                  - result
+                  - metadata
+                  - isMtoResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtoapi/mtp/CaseManagement/be/templates/{TemplateId}:
+    get:
+      summary: Get MTO case template
+      description: >-
+        Retrieve a case template through the MTO wrapper. Confirmed in live traffic
+        from the MTO Cases page using the default all-zero template ID.
+      operationId: MultiTenant.GetCaseTemplate
+      tags: [Multi-Tenant]
+      parameters:
+        - name: TemplateId
+          in: path
+          required: true
+          description: The unique identifier of the case template.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    $ref: '#/components/schemas/MtoCaseTemplate'
+                  metadata:
+                    $ref: '#/components/schemas/MtoResponseMetadata'
+                  isMtoResponse:
+                    type: boolean
+                required:
+                  - result
+                  - metadata
+                  - isMtoResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtoapi/mdi/identity/userapiservice/identities:
+    post:
+      summary: List MTO identities
+      description: >-
+        Retrieve identities from the MTO Identity Inventory page with cross-tenant
+        aggregation and MTO response metadata.
+      operationId: MultiTenant.ListIdentities
+      tags: [Multi-Tenant]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                PageSize:
+                  type: integer
+                  description: Number of rows to return.
+                Skip:
+                  type: integer
+                  description: Number of rows to skip.
+                SortBy:
+                  type: object
+                  description: Requested sort field and direction.
+                Filters:
+                  type: object
+                  description: Identity filter set.
+                SearchText:
+                  type: string
+                  description: Free-text search input.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          type: object
+                          description: pending - MTO identity inventory row
+                  metadata:
+                    $ref: '#/components/schemas/MtoResponseMetadata'
+                  isMtoResponse:
+                    type: boolean
+                required:
+                  - result
+                  - metadata
+                  - isMtoResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtoapi/mdi/identity/userapiservice/identities/aggregatedData:
+    post:
+      summary: Get MTO identities aggregated data
+      description: >-
+        Retrieve aggregate identity totals and facets for the MTO Identity Inventory page.
+      operationId: MultiTenant.GetIdentitiesAggregatedData
+      tags: [Multi-Tenant]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                Filters:
+                  type: object
+                  description: Identity filter set.
+                SearchText:
+                  type: string
+                  description: Free-text search input.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    $ref: '#/components/schemas/MtoIdentityAggregate'
+                  metadata:
+                    $ref: '#/components/schemas/MtoResponseMetadata'
+                  isMtoResponse:
+                    type: boolean
+                required:
+                  - result
+                  - metadata
+                  - isMtoResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtoapi/mdi/identity/userapiservice/identities/count:
+    post:
+      summary: Get MTO identities count
+      description: >-
+        Retrieve the total number of identities matching the supplied MTO filters.
+      operationId: MultiTenant.GetIdentitiesCount
+      tags: [Multi-Tenant]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                Filters:
+                  type: object
+                  description: Identity filter set.
+                SearchText:
+                  type: string
+                  description: Free-text search input.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: integer
+                    description: Total number of matching identities.
+                  metadata:
+                    $ref: '#/components/schemas/MtoResponseMetadata'
+                  isMtoResponse:
+                    type: boolean
+                required:
+                  - result
+                  - metadata
+                  - isMtoResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtoapi/cdssecuritycopilot/trial:
+    get:
+      summary: Get MTO Security Copilot trial status
+      description: >-
+        Retrieve the Security Copilot trial status probe used by the MTO Advanced
+        hunting and Custom detection pages. Live traffic in the current tenant
+        returned a contextual `400 InvalidProxyPrefix` response.
+      operationId: MultiTenant.GetSecurityCopilotTrial
+      tags: [Multi-Tenant]
+      parameters:
+        - name: scope
+          in: query
+          required: true
+          description: Requested access scope for the trial probe.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - Security Copilot trial status
+        '400':
+          description: Contextual backend validation error returned by the current tenant.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+                    description: Backend error string.
+                required:
+                  - Error
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -143,23 +668,370 @@ paths:
 
 components:
   schemas:
+    TenantPickerResponse:
+      type: object
+      description: Tenant picker payload returned by the Defender MTO portal.
+      properties:
+        tenantInfoList:
+          type: array
+          items:
+            $ref: '#/components/schemas/ManagedTenant'
+        responseTypes:
+          type: object
+          description: Relationship mode status keyed by access model such as B2B or GDAP.
+          additionalProperties:
+            type: string
+      required:
+        - tenantInfoList
     ManagedTenant:
       type: object
-      description: A tenant in the multi-tenant management view.
+      description: A tenant entry in the Defender MTO tenant picker.
       properties:
+        selected:
+          type: boolean
+          description: Whether the tenant is currently included in the MTO selection.
+        lostAccess:
+          type: boolean
+          description: Whether access to the tenant relationship has been lost.
+        name:
+          type: string
+          description: Display name of the tenant.
         tenantId:
-          description: The unique identifier of the tenant.
           type: string
           format: uuid
-        tenantName:
-          description: The display name of the tenant.
+          description: Tenant identifier.
+        tenantAadEnvironment:
+          type: integer
+          description: Numeric Azure AD environment identifier.
+        addedOn:
           type: string
-        tenantDomain:
-          description: The primary domain of the tenant.
+          format: date-time
+          description: When the tenant was added to the MTO relationship set.
+    ExposedTargetTenant:
+      type: object
+      description: Tenant metadata included in tenant-group and assignment responses.
+      properties:
+        name:
           type: string
+        tenantId:
+          type: string
+          format: uuid
+        tenantAadEnvironment:
+          type: integer
+        addedOn:
+          type: string
+          format: date-time
+    TenantGroup:
+      type: object
+      description: Effective or saved tenant group returned by the Defender MTO portal.
+      properties:
+        entityType:
+          type: string
+        name:
+          type: string
+        tenantGroupId:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+          nullable: true
+        type:
+          type: integer
+        description:
+          type: string
+        allTenantsCount:
+          type: integer
+        exposedTargetTenantsInfo:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExposedTargetTenant'
+        creationTime:
+          type: string
+          format: date-time
+        lastUpdated:
+          type: string
+          format: date-time
+        lastUpdatedByUpn:
+          type: string
+          nullable: true
+        id:
+          type: string
+          nullable: true
+        tenantId:
+          type: string
+          format: uuid
+        _etag:
+          type: string
+          nullable: true
+        ttl:
+          type: integer
+          nullable: true
+    AssignmentListResponse:
+      type: object
+      description: Content distribution assignments returned by the MTO portal.
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContentDistributionAssignment'
+      required:
+        - items
+    ContentDistributionAssignment:
+      type: object
+      description: Assignment definition returned by the MTO Content distribution page.
+      properties:
+        eTag:
+          type: string
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        createdOn:
+          type: string
+          format: date-time
+        createdBy:
+          type: string
+        lastSyncedOn:
+          type: string
+          format: date-time
+        lastSyncedBy:
+          type: string
+        targetTenantIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+        templates:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContentDistributionTemplate'
+        variables:
+          type: object
+          description: Variable values keyed by target tenant and variable name.
+          additionalProperties:
+            type: object
+            additionalProperties:
+              type: array
+              items:
+                type: string
+        templateVariables:
+          type: object
+          description: Variable values keyed by tenant, template, and variable name.
+          additionalProperties:
+            type: object
+            additionalProperties:
+              type: object
+              additionalProperties:
+                type: array
+                items:
+                  type: string
+        syncUnitStatuses:
+          type: array
+          items:
+            $ref: '#/components/schemas/SyncUnitStatus'
+        targetTenantIdsWithoutRelationship:
+          type: integer
+        isVariablePerTemplate:
+          type: boolean
+    ContentDistributionTemplate:
+      type: object
+      description: Template included in an MTO content distribution assignment.
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+        name:
+          type: string
+    SyncUnitStatus:
+      type: object
+      description: Sync status for a single assignment/template/tenant combination.
+      properties:
+        assignmentId:
+          type: string
+        templateId:
+          type: string
+        templateName:
+          type: string
+        contentType:
+          type: string
+        sourceTenantId:
+          type: string
+          format: uuid
+        sourceWorkspaceMetadata:
+          type: object
+          nullable: true
+        targetTenantId:
+          type: string
+          format: uuid
+        lastSyncedOn:
+          type: string
+          format: date-time
+        lastSyncedBy:
+          type: string
+        syncStatus:
+          type: string
+        errorType:
+          type: string
+        syncedVariables:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+        expectedVariables:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+        targetContentId:
+          type: string
+        id:
+          type: string
+    MtoResponseMetadata:
+      type: object
+      description: Per-tenant execution metadata returned by MTO-wrapped reads.
+      properties:
+        responses:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/MtoTenantOutcome'
+        paginationGuid:
+          type: string
+          format: uuid
+          nullable: true
+        chosenItems:
+          type: array
+          items:
+            $ref: '#/components/schemas/MtoChosenItem'
+        completedTenants:
+          type: array
+          items:
+            type: string
+            format: uuid
+        isResultBase64Encoded:
+          type: boolean
+    MtoTenantOutcome:
+      type: object
+      description: Status of a single tenant request inside an MTO aggregate response.
+      properties:
+        latencyInMs:
+          type: integer
         status:
-          description: The tenant status.
+          type: integer
+        errorCode:
           type: string
+        retryCount:
+          type: integer
+    MtoChosenItem:
+      type: object
+      description: Pagination selection metadata for MTO aggregate responses.
+      properties:
+        identifier:
+          type: string
+          format: uuid
+        originalPagePointer:
+          type: string
+          nullable: true
+        originalIndex:
+          type: integer
+        isLastItemInPage:
+          type: boolean
+        nextPagePointer:
+          type: string
+          nullable: true
+    MtoCaseTemplate:
+      type: object
+      description: Case template returned by the MTO wrapper.
+      properties:
+        displayName:
+          type: string
+        templateType:
+          type: string
+        description:
+          type: string
+        defaultStatusId:
+          type: string
+          format: uuid
+        topLevelStatuses:
+          type: array
+          items:
+            $ref: '#/components/schemas/MtoCaseStatus'
+        statusSortOrder:
+          type: object
+          additionalProperties:
+            type: integer
+        uiConfig:
+          type: object
+          nullable: true
+        templateFields:
+          type: object
+        customFields:
+          type: array
+          items:
+            type: object
+        id:
+          type: string
+          format: uuid
+        createdDateTime:
+          type: string
+          format: date-time
+        createdBy:
+          type: string
+        lastModifiedDateTime:
+          type: string
+          format: date-time
+        lastModifiedBy:
+          type: string
+        eTag:
+          type: string
+        tenantId:
+          type: string
+          format: uuid
+    MtoCaseStatus:
+      type: object
+      description: Case top-level status entry returned by an MTO case template read.
+      properties:
+        customStatuses:
+          type: array
+          items:
+            type: object
+        statusId:
+          type: string
+          format: uuid
+        displayName:
+          type: string
+        tenantId:
+          type: string
+          format: uuid
+    MtoIdentityAggregate:
+      type: object
+      description: Aggregate identity totals returned by the MTO Identity Inventory page.
+      properties:
+        total:
+          type: integer
+        disabled:
+          type: integer
+        sensitive:
+          type: integer
+        serviceAccounts:
+          type: integer
+        criticalServiceAccounts:
+          type: integer
+        criticalIdentities:
+          type: integer
+        highlyPrivilegedIdentities:
+          type: integer
+    MtoHuntingPreference:
+      type: string
+      description: JSON-serialized preferences for the MTO advanced hunting experience.
+      example: '{"tabs":{"queryTabs":[]}}'
     WorkloadStatus:
       type: object
       description: The activation status of a Defender XDR workload.
