@@ -2239,6 +2239,58 @@ paths:
         '403':
           $ref: '#/components/responses/Forbidden'
 
+  /unified-reporting/odata/1.0/AutopatchManagementStatusSummary:
+    get:
+      tags: [Reporting]
+      summary: Get Autopatch management status summary via URS
+      description: |
+        Returns tenant-level Autopatch management counts surfaced by device-focused overview
+        experiences in the Intune admin center. Confirmed live from a deeper interaction pass.
+      operationId: IntuneAutopatch.Reporting.GetManagementStatusSummaryOData
+      responses:
+        '200':
+          description: Autopatch management summary returned successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - '@odata.context'
+                  - value
+                properties:
+                  '@odata.context':
+                    type: string
+                    format: uri
+                  value:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        tenantId:
+                          type: string
+                          format: uuid
+                        totalDeviceCount:
+                          type: integer
+                        quManagedCount:
+                          type: integer
+                        fuManagedCount:
+                          type: integer
+                        duManagedCount:
+                          type: integer
+                        updateRingManagedCount:
+                          type: integer
+                        cloudManagedCount:
+                          type: integer
+                        unmanagedCount:
+                          type: integer
+                        totalUpToDateDeviceCount:
+                          type: integer
+                      additionalProperties: true
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
   /reporting/reports/v2/deviceAccounting/wqu/summary/businessgroups:
     post:
       tags: [Reporting]
