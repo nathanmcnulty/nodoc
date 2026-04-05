@@ -162,6 +162,14 @@ function bundleSpecification(fileSystem) {
   return expandNode(entry.specification, ".");
 }
 
+async function loadBundledSpecification(specPath) {
+  const fileSystem = await load(specPath, {
+    plugins: [readFiles()],
+  });
+
+  return bundleSpecification(fileSystem);
+}
+
 function countMatches(text, pattern) {
   return text.match(pattern)?.length ?? 0;
 }
@@ -184,12 +192,31 @@ function hasExamples(content) {
   });
 }
 
-function getOperations(specification) {
-  return Object.values(specification.paths ?? {}).flatMap((pathItem) => (
+function getOperationEntries(specification) {
+  return Object.entries(specification.paths ?? {}).flatMap(([pathname, pathItem]) => (
     Object.entries(pathItem ?? {})
       .filter(([method, operation]) => httpMethods.has(method) && operation && typeof operation === "object")
-      .map(([, operation]) => operation)
+      .map(([method, operation]) => ({
+        method: method.toUpperCase(),
+        operation,
+        path: pathname,
+      }))
   ));
+}
+
+function getOperations(specification) {
+  return getOperationEntries(specification).map(({ operation }) => operation);
+}
+
+function getPathPrefixes(specification) {
+  return Array.from(new Set(
+    Object.keys(specification.paths ?? {})
+      .filter((pathKey) => typeof pathKey === "string" && pathKey.startsWith("/"))
+      .map((pathKey) => {
+        const [firstSegment] = pathKey.slice(1).split("/");
+        return firstSegment ? `/${firstSegment}/` : "/";
+      }),
+  )).sort((left, right) => left.localeCompare(right));
 }
 
 export function getDocumentationMaturity(quality) {
@@ -326,10 +353,7 @@ export async function buildSpecQuality() {
       .join("specifications", entry.name, "specification", "openapi.yml");
     const specPath = path.join(repoRoot, specRelativePath);
     const specificationDir = path.dirname(specPath);
-    const fileSystem = await load(specPath, {
-      plugins: [readFiles()],
-    });
-    const bundledSpecification = bundleSpecification(fileSystem);
+    const bundledSpecification = await loadBundledSpecification(specPath);
     const moduleEntries = await readdir(specificationDir, { withFileTypes: true });
     const rawTextParts = await Promise.all(
       moduleEntries
@@ -341,4 +365,84 @@ export async function buildSpecQuality() {
   }
 
   return qualityByTitle;
+}
+
+export async function buildSpecInventory() {
+  const entries = await readdir(specificationsDir, { withFileTypes: true });
+  const inventory = [];
+
+  for (const entry of entries) {
+    if (!entry.isDirectory()) {
+      continue;
+    }
+
+    const specRelativePath = path
+      .join("specifications", entry.name, "specification", "openapi.yml");
+    const specPath = path.join(repoRoot, specRelativePath);
+    const bundledSpecification = await loadBundledSpecification(specPath);
+
+    inventory.push({
+      title: bundledSpecification.info?.title ?? entry.name,
+      specId: entry.name.replace(/^nodoc-/u, ""),
+      specPath: specRelativePath.replaceAll("\\", "/"),
+      serverUrls: (bundledSpecification.servers ?? [])
+        .map((server) => server?.url)
+        .filter((url) => typeof url === "string"),
+      pathPrefixes: getPathPrefixes(bundledSpecification),
+      operationCount: getOperations(bundledSpecification).length,
+      tagNames: (bundledSpecification.tags ?? [])
+        .map((tag) => tag?.name)
+        .filter((name) => typeof name === "string"),
+      nodocRoute:
+        typeof bundledSpecification.info?.["x-nodoc-route"] === "string"
+          ? bundledSpecification.info["x-nodoc-route"]
+          : null,
+      nodocCategory:
+        typeof bundledSpecification.info?.["x-nodoc-category"] === "string"
+          ? bundledSpecification.info["x-nodoc-category"]
+          : null,
+    });
+  }
+
+  return inventory.sort((left, right) => left.title.localeCompare(right.title));
+}
+
+export async function buildSpecRouteInventory() {
+  const entries = await readdir(specificationsDir, { withFileTypes: true });
+  const inventory = [];
+
+  for (const entry of entries) {
+    if (!entry.isDirectory()) {
+      continue;
+    }
+
+    const specRelativePath = path
+      .join("specifications", entry.name, "specification", "openapi.yml");
+    const specPath = path.join(repoRoot, specRelativePath);
+    const bundledSpecification = await loadBundledSpecification(specPath);
+
+    inventory.push({
+      title: bundledSpecification.info?.title ?? entry.name,
+      specId: entry.name.replace(/^nodoc-/u, ""),
+      specPath: specRelativePath.replaceAll("\\", "/"),
+      nodocRoute:
+        typeof bundledSpecification.info?.["x-nodoc-route"] === "string"
+          ? bundledSpecification.info["x-nodoc-route"]
+          : null,
+      nodocCategory:
+        typeof bundledSpecification.info?.["x-nodoc-category"] === "string"
+          ? bundledSpecification.info["x-nodoc-category"]
+          : null,
+      serverUrls: (bundledSpecification.servers ?? [])
+        .map((server) => server?.url)
+        .filter((url) => typeof url === "string"),
+      pathPrefixes: getPathPrefixes(bundledSpecification),
+      operations: getOperationEntries(bundledSpecification).map((entry) => ({
+        method: entry.method,
+        path: entry.path,
+      })),
+    });
+  }
+
+  return inventory.sort((left, right) => left.title.localeCompare(right.title));
 }

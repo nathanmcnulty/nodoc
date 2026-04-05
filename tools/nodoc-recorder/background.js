@@ -14,6 +14,13 @@ const portalConfig = [
     urlPatterns: ['https://admin.cloud.microsoft/admin/api/*']
   },
   {
+    id: 'exchange-beta',
+    name: 'Exchange',
+    hostname: 'admin.exchange.microsoft.com',
+    pathPrefixes: ['/beta/'],
+    urlPatterns: ['https://admin.exchange.microsoft.com/beta/*']
+  },
+  {
     id: 'sharepoint-admin',
     name: 'SharePoint',
     hostnameSuffixes: ['-admin.sharepoint.com'],
@@ -88,6 +95,60 @@ const portalConfig = [
       'https://teams.cloud.microsoft/api/*',
       'https://amer.tags.teams.microsoft.com/api/*'
     ]
+  },
+  {
+    id: 'm365-apps-config',
+    name: 'M365 Apps Config',
+    hostname: 'config.office.com',
+    pathPrefixes: [
+      '/appConfig/',
+      '/endpointprovisionhealth/',
+      '/intents/',
+      '/policyadmin/',
+      '/releases/',
+      '/rollout/',
+      '/serviceProfile/',
+      '/ServiceProfile/',
+      '/settings/'
+    ],
+    urlPatterns: ['https://config.office.com/*']
+  },
+  {
+    id: 'm365-apps-services',
+    name: 'M365 Apps Services',
+    hostname: 'clients.config.office.net',
+    pathPrefixes: ['/intents/', '/odbhealth/', '/onboarding/', '/releases/'],
+    urlPatterns: ['https://clients.config.office.net/*']
+  },
+  {
+    id: 'm365-apps-inventory',
+    name: 'M365 Apps Inventory',
+    hostname: 'query.inventory.insights.office.net',
+    pathPrefixes: ['/inventory/'],
+    urlPatterns: ['https://query.inventory.insights.office.net/*']
+  },
+  {
+    id: 'intune-autopatch',
+    name: 'Intune Autopatch',
+    hostname: 'services.autopatch.microsoft.com',
+    pathPrefixes: [
+      '/api/',
+      '/tenant-management/',
+      '/update-management/',
+      '/access-control/',
+      '/device/',
+      '/unified-reporting/',
+      '/reporting/',
+      '/support/'
+    ],
+    urlPatterns: ['https://services.autopatch.microsoft.com/*']
+  },
+  {
+    id: 'intune-portal',
+    name: 'Intune Portal',
+    hostname: 'intune.microsoft.com',
+    pathPrefixes: ['/api/'],
+    urlPatterns: ['https://intune.microsoft.com/api/*']
   },
   {
     id: 'power-platform',

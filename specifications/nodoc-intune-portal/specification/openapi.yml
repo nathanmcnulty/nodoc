@@ -91,6 +91,99 @@ components:
         dataVersion:
           type: integer
       additionalProperties: true
+    PortalBootstrapRequest:
+      type: object
+      description: |
+        Common Intune portal bootstrap request envelope observed on portal startup reads.
+        Requests carry an ARM bearer token and may include optional query selection or portal
+        state hints depending on whether the portal is loading early or deferred bootstrap data.
+      properties:
+        queries:
+          type: array
+          description: Early bootstrap sections to materialize immediately.
+          items:
+            type: string
+          example:
+            - whatsNew
+            - tracing
+            - extensionsAuthMetadata
+            - settings
+            - outages
+            - dashboardMetadata
+            - variants
+        portalAuthorization:
+          type: string
+          description: Portal-scoped authorization value when present.
+          example: ""
+        altPortalAuthorization:
+          type: string
+          description: Alternate portal authorization value when present.
+          example: ""
+        dashboardId:
+          type: string
+          nullable: true
+          description: Optional dashboard identifier to hydrate.
+        armAuthorizationHeader:
+          type: string
+          description: ARM bearer token forwarded by the signed-in portal.
+          example: Bearer <ARM token>
+        flightedCustomDomainClientId:
+          type: string
+          nullable: true
+          description: Optional custom-domain client identifier observed on early bootstrap calls.
+        version:
+          type: string
+          description: Deferred bootstrap contract version observed on lazy user data loads.
+          example: "2019-10-01"
+      additionalProperties: true
+    PortalEarlyUserDataResponse:
+      type: object
+      description: |
+        Early portal bootstrap payload returned while the Intune shell hydrates dashboard and
+        extension state. Observed sections included dashboard metadata, portal settings, flight
+        variants, outages, and extension authentication metadata.
+      properties:
+        dashboardMetadata:
+          $ref: '#/components/schemas/GenericObject'
+        settings:
+          $ref: '#/components/schemas/GenericObject'
+        variants:
+          $ref: '#/components/schemas/ExperimentationVariantsResponse'
+        outages:
+          type: array
+          items:
+            $ref: '#/components/schemas/GenericObject'
+      additionalProperties: true
+      example:
+        dashboardMetadata: {}
+        settings: {}
+        variants:
+          assignmentContext: ""
+          flights: []
+          variables: {}
+          dataVersion: 0
+        outages: []
+    PortalLazyUserDataResponse:
+      type: object
+      description: |
+        Deferred portal bootstrap payload returned after the shell finishes first paint. Confirmed
+        sections included subscription summaries, Azure locations, recent resources, and service
+        health alert containers.
+      properties:
+        firstPageSubscriptions:
+          $ref: '#/components/schemas/GenericObject'
+        locations:
+          $ref: '#/components/schemas/GenericObject'
+        recentResources:
+          $ref: '#/components/schemas/GenericObject'
+        serviceHealthAlerts:
+          $ref: '#/components/schemas/GenericObject'
+      additionalProperties: true
+      example:
+        firstPageSubscriptions: {}
+        locations: {}
+        recentResources: {}
+        serviceHealthAlerts: {}
     SettingsSelectRequest:
       type: array
       description: Array of persistent storage namespaces to read.
@@ -129,18 +222,78 @@ components:
             Intune_isCopilotEnabled: "true"
         remove: {}
 tags:
+  - name: Bootstrap
+    description: Portal startup and deferred shell bootstrap helpers.
   - name: Experimentation
     description: Portal extension flighting and experimentation helpers.
   - name: Settings
     description: Persistent client-side portal settings and storage operations.
 x-tagGroups:
   - name: Portal
-    tags: [Experimentation, Settings]
+    tags: [Bootstrap, Experimentation, Settings]
 externalDocs:
   description: Checked-in source specification and supporting modules.
   url: https://github.com/nathanmcnulty/nodoc/tree/main/specifications/nodoc-intune-portal/specification
 
 paths:
+  /api/Portal/GetEarlyUserData:
+    post:
+      tags: [Bootstrap]
+      summary: Get early portal bootstrap data
+      description: |
+        Loads the initial Intune shell bootstrap payload used during first paint. Confirmed live
+        while opening Windows Autopatch report blades, where the request asked for sections such
+        as dashboard metadata, portal settings, outages, and experimentation variants.
+      operationId: IntunePortal.Portal.GetEarlyUserData
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PortalBootstrapRequest'
+      responses:
+        '200':
+          description: Early portal bootstrap data returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PortalEarlyUserDataResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/Portal/GetLazyUserData:
+    post:
+      tags: [Bootstrap]
+      summary: Get deferred portal bootstrap data
+      description: |
+        Loads deferred Intune shell bootstrap data after the initial shell render completes.
+        Confirmed live while opening Windows Autopatch report blades, where the response included
+        subscription summaries, Azure locations, and recent-resource containers.
+      operationId: IntunePortal.Portal.GetLazyUserData
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PortalBootstrapRequest'
+      responses:
+        '200':
+          description: Deferred portal bootstrap data returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PortalLazyUserDataResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
   /api/Experimentation/GetExtensionVariants:
     get:
       tags: [Experimentation]

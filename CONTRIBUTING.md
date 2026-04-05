@@ -57,3 +57,7 @@ Checked-in Postman collections live under `postman/collections/` and are generat
 For recurring portal research and undocumented API discovery work, use the living playbook in [AGENT_DISCOVERY_PLAYBOOK.md](./AGENT_DISCOVERY_PLAYBOOK.md).
 
 It captures the preferred browser/auth workflow, traffic-first discovery process, JavaScript bundle mining guidance, write-shape safety practices, and an experiment log for iterating on better techniques over time.
+
+- Start broad planning runs with `npm run generate:crawl-baseline` to see the current spec inventory, recorder support gaps, and the recommended crawl priority for each published portal.
+- After capturing a portal pass, run `npm run generate:crawl-candidates -- --spec <title-or-spec-id> --artifacts <artifact-dir>` to normalize the captured route families, scope them to the target spec's hosts and path prefixes, diff them against the checked-in spec, and emit a candidate queue tagged as confirmed, probed, or bundle-discovered.
+- Add `--include-adjacent` when you intentionally want to inspect cross-product shell, support, telemetry, or neighboring portal traffic that falls outside the target spec's own host and path scope.

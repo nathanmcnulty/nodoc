@@ -247,8 +247,8 @@ export const generatedSpecDataByTitle = {
     "specPath": "specifications/nodoc-intune-portal/specification/openapi.yml",
     "specSourceUrl": "https://github.com/nathanmcnulty/nodoc/tree/main/specifications/nodoc-intune-portal/specification",
     "specDownloadUrl": "https://raw.githubusercontent.com/nathanmcnulty/nodoc/main/specifications/nodoc-intune-portal/specification/openapi.yml",
-    "operationCount": 3,
-    "tagCount": 2,
+    "operationCount": 5,
+    "tagCount": 3,
     "tagGroupCount": 1,
     "ungroupedTagCount": 0,
     "duplicateGroupedTagCount": 0,
@@ -261,15 +261,15 @@ export const generatedSpecDataByTitle = {
     "licenseDefined": true,
     "externalDocsDefined": true,
     "allServersDescribed": true,
-    "placeholderCount": 0,
+    "placeholderCount": 1,
     "blankDescriptionCount": 0,
     "requestExampleCount": 2,
-    "successResponseExampleCount": 1,
+    "successResponseExampleCount": 3,
     "evidenceMentionCount": 0,
     "maturity": {
-      "label": "Growing",
-      "tone": "warning",
-      "description": "Solid structure with examples, but still meaningful debt to reduce."
+      "label": "Advanced",
+      "tone": "success",
+      "description": "Low placeholder debt with multiple response examples."
     }
   },
   "M365 Admin": {
