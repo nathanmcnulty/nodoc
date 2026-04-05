@@ -497,7 +497,7 @@ function collectScriptUrls(data) {
 }
 
 function pathStartsWithKnownPrefix(value, allowedPrefixes) {
-  return allowedPrefixes.some((prefix) => value.startsWith(prefix));
+  return allowedPrefixes.some((prefix) => matchesPathPrefix(value, prefix));
 }
 
 function collectBundleCandidateStrings(data, allowedPrefixes) {
@@ -542,7 +542,10 @@ function extractBundleMatches(text, allowedPrefixes) {
   const matches = new Set();
 
   for (const prefix of allowedPrefixes) {
-    const matcher = new RegExp(`${escapeRegex(prefix)}[A-Za-z0-9%{}().,'_\\-/]+`, "gu");
+    const matcher = new RegExp(
+      `${escapeRegex(prefix)}(?=$|[/(])[A-Za-z0-9%{}().,'_\\-/]*`,
+      "gu",
+    );
     for (const match of normalizedText.matchAll(matcher)) {
       const cleaned = match[0]
         .split("?")[0]
