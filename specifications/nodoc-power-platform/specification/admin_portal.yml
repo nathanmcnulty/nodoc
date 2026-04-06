@@ -6,7 +6,11 @@ paths:
     get:
       operationId: AdminPortal_get_api_AppManagement_TenantProducts
       summary: "GET /api/AppManagement/TenantProducts"
-      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/applications, https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub."
+      x-nodoc-live-capture:
+        source: "authenticated Power Platform admin center"
+        browsedPages:
+          - "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/applications"
+          - "https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub"
       tags:
         - AdminPortal
       parameters:
@@ -26,7 +30,10 @@ paths:
     get:
       operationId: AdminPortal_get_api_environments_environmentsId_features
       summary: "GET /api/environments/{environmentsId}/features"
-      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub."
+      x-nodoc-live-capture:
+        source: "authenticated Power Platform admin center"
+        browsedPages:
+          - "https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub"
       tags:
         - AdminPortal
       parameters:
@@ -53,7 +60,14 @@ paths:
     get:
       operationId: AdminPortal_get_api_health_ping
       summary: "GET /api/health/ping"
-      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/billing/licenses/PowerApps/overview, https://admin.powerplatform.microsoft.com/billing/licenses/PowerApps/recommendations, https://admin.powerplatform.microsoft.com/billing/licenses/copilotStudio/overview, https://admin.powerplatform.microsoft.com/billing/licenses/dataverse/overview, and 83 more routes."
+      x-nodoc-live-capture:
+        source: "authenticated Power Platform admin center"
+        browsedPages:
+          - "https://admin.powerplatform.microsoft.com/billing/licenses/PowerApps/overview"
+          - "https://admin.powerplatform.microsoft.com/billing/licenses/PowerApps/recommendations"
+          - "https://admin.powerplatform.microsoft.com/billing/licenses/copilotStudio/overview"
+          - "https://admin.powerplatform.microsoft.com/billing/licenses/dataverse/overview"
+        additionalPageCount: 83
       tags:
         - AdminPortal
       security: []
