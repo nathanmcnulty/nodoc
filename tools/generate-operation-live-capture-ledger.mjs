@@ -28,7 +28,11 @@ function parseArgs(argv) {
       continue;
     }
 
-    if (arg === "--output" && next) {
+    if (arg === "--output") {
+      if (!next || next.startsWith("-")) {
+        throw new Error("--output requires a value.");
+      }
+
       args.output = path.resolve(next);
       index += 1;
       continue;

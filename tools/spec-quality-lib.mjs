@@ -23,11 +23,19 @@ const httpMethods = new Set([
 ]);
 
 function uniqueOrdered(values) {
+  if (!Array.isArray(values)) {
+    throw new Error("Expected an array of strings.");
+  }
+
   const seen = new Set();
   const ordered = [];
 
-  for (const value of values ?? []) {
-    const normalized = String(value ?? "").trim();
+  for (const value of values) {
+    if (typeof value !== "string") {
+      throw new Error("Expected an array of strings.");
+    }
+
+    const normalized = value.trim();
     if (!normalized || seen.has(normalized)) {
       continue;
     }
@@ -234,12 +242,26 @@ function normalizeLiveCaptureMetadata(value, context) {
     throw new Error(`${context} has an invalid x-nodoc-live-capture payload.`);
   }
 
-  const source = String(value.source ?? "").trim();
+  if (typeof value.source !== "string") {
+    throw new Error(`${context} has an invalid x-nodoc-live-capture.source value.`);
+  }
+
+  const source = value.source.trim();
   if (!source) {
     throw new Error(`${context} is missing x-nodoc-live-capture.source.`);
   }
 
-  const browsedPages = uniqueOrdered(value.browsedPages ?? []);
+  if (!Array.isArray(value.browsedPages)) {
+    throw new Error(`${context} has an invalid x-nodoc-live-capture.browsedPages value.`);
+  }
+
+  let browsedPages;
+  try {
+    browsedPages = uniqueOrdered(value.browsedPages);
+  } catch {
+    throw new Error(`${context} has an invalid x-nodoc-live-capture.browsedPages value.`);
+  }
+
   if (browsedPages.length === 0) {
     throw new Error(`${context} must include at least one x-nodoc-live-capture.browsedPages entry.`);
   }
@@ -381,10 +403,12 @@ function buildQualityRecord(specRelativePath, bundledSpecification, rawText) {
     ),
     placeholderCount,
     blankDescriptionCount: countMatches(rawText, /description:\s*\n/gu),
-    publicLiveCaptureDescriptionCount: countMatches(
-      rawText,
-      /description:\s*"Live-captured from the authenticated/gu,
-    ),
+    publicLiveCaptureDescriptionCount: operations.filter(
+      (operation) => (
+        typeof operation?.description === "string"
+        && /^Live-captured from the authenticated/iu.test(operation.description.trim())
+      ),
+    ).length,
     requestExampleCount,
     successResponseExampleCount,
     evidenceMentionCount,
