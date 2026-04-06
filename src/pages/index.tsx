@@ -3,6 +3,7 @@ import Layout from "@theme/Layout";
 import Heading from "@theme/Heading";
 import type { ReactElement } from "react";
 
+import InlineCodeText from "../InlineCodeText";
 import QualityMaturityBadge from "../QualityMaturityBadge";
 import {
   accessModels,
@@ -122,14 +123,19 @@ export default function Home(): ReactElement {
                           <QualityMaturityBadge maturity={api.quality?.maturity} />
                         </div>
                       </div>
-                      <p className={styles.apiSummary}>{api.summary}</p>
+                      <p className={styles.apiSummary}>
+                        <InlineCodeText text={api.summary} />
+                      </p>
                       <p className={styles.qualitySummary}>
-                        <strong>Quality:</strong> {api.qualitySummary}
+                        <strong>Quality:</strong>{" "}
+                        <InlineCodeText text={api.qualitySummary} />
                       </p>
                       <dl className={styles.detailList}>
                         <div>
                           <dt>Auth</dt>
-                          <dd>{api.authModel}</dd>
+                          <dd>
+                            <InlineCodeText text={api.authModel} />
+                          </dd>
                         </div>
                         <div>
                           <dt>Base URL</dt>
@@ -152,7 +158,9 @@ export default function Home(): ReactElement {
                       </dl>
                       <ul className={styles.highlightList}>
                         {api.highlights.map((highlight) => (
-                          <li key={highlight}>{highlight}</li>
+                          <li key={highlight}>
+                            <InlineCodeText text={highlight} />
+                          </li>
                         ))}
                       </ul>
                       <div className={styles.cardActions}>
@@ -189,7 +197,9 @@ export default function Home(): ReactElement {
                   <Heading as="h3" className={styles.modelTitle}>
                     {model.title}
                   </Heading>
-                  <p>{model.description}</p>
+                  <p>
+                    <InlineCodeText text={model.description} />
+                  </p>
                   <p className={styles.modelPortals}>
                     <strong>Portals:</strong> {model.portals.join(", ")}
                   </p>
@@ -211,7 +221,7 @@ export default function Home(): ReactElement {
             <div className={styles.principlesGrid}>
               {safeUsePrinciples.map((principle) => (
                 <div key={principle} className={styles.principleCard}>
-                  {principle}
+                  <InlineCodeText text={principle} />
                 </div>
               ))}
             </div>
