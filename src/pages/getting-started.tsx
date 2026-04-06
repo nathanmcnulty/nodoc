@@ -3,6 +3,7 @@ import Layout from "@theme/Layout";
 import Heading from "@theme/Heading";
 import type { ReactElement } from "react";
 
+import InlineCodeText from "../InlineCodeText";
 import QualityMaturityBadge from "../QualityMaturityBadge";
 import {
   accessModels,
@@ -76,7 +77,9 @@ export default function GettingStarted(): ReactElement {
                   <Heading as="h3" className={styles.cardTitle}>
                     {step.title}
                   </Heading>
-                  <p>{step.description}</p>
+                  <p>
+                    <InlineCodeText text={step.description} />
+                  </p>
                 </article>
               ))}
             </div>
@@ -98,7 +101,9 @@ export default function GettingStarted(): ReactElement {
                   <Heading as="h3" className={styles.cardTitle}>
                     {model.title}
                   </Heading>
-                  <p>{model.description}</p>
+                  <p>
+                    <InlineCodeText text={model.description} />
+                  </p>
                   <p className={styles.cardMeta}>
                     <strong>Portals:</strong> {model.portals.join(", ")}
                   </p>
@@ -129,7 +134,9 @@ export default function GettingStarted(): ReactElement {
                         <strong>Portals:</strong> {guide.portals.join(", ")}
                       </p>
                     </div>
-                    <div className={styles.authBadge}>{guide.authModel}</div>
+                    <div className={styles.authBadge}>
+                      <InlineCodeText text={guide.authModel} />
+                    </div>
                   </div>
 
                   <div className={styles.baseUrlRow}>
@@ -147,7 +154,9 @@ export default function GettingStarted(): ReactElement {
                       </Heading>
                       <ul className={styles.list}>
                         {guide.confirmedDetails.map((detail) => (
-                          <li key={detail}>{detail}</li>
+                          <li key={detail}>
+                            <InlineCodeText text={detail} />
+                          </li>
                         ))}
                       </ul>
                     </div>
@@ -157,7 +166,9 @@ export default function GettingStarted(): ReactElement {
                       </Heading>
                       <ul className={styles.list}>
                         {guide.practicalGuidance.map((detail) => (
-                          <li key={detail}>{detail}</li>
+                          <li key={detail}>
+                            <InlineCodeText text={detail} />
+                          </li>
                         ))}
                       </ul>
                     </div>
@@ -167,7 +178,9 @@ export default function GettingStarted(): ReactElement {
                       </Heading>
                       <ul className={styles.list}>
                         {guide.mutationGuidance.map((detail) => (
-                          <li key={detail}>{detail}</li>
+                          <li key={detail}>
+                            <InlineCodeText text={detail} />
+                          </li>
                         ))}
                       </ul>
                     </div>
@@ -177,7 +190,9 @@ export default function GettingStarted(): ReactElement {
                       </Heading>
                       <ul className={styles.list}>
                         {guide.pitfalls.map((detail) => (
-                          <li key={detail}>{detail}</li>
+                          <li key={detail}>
+                            <InlineCodeText text={detail} />
+                          </li>
                         ))}
                       </ul>
                     </div>
@@ -199,7 +214,7 @@ export default function GettingStarted(): ReactElement {
             <div className={styles.principlesGrid}>
               {safeUsePrinciples.map((principle) => (
                 <div key={principle} className={styles.principleCard}>
-                  {principle}
+                  <InlineCodeText text={principle} />
                 </div>
               ))}
             </div>
@@ -225,10 +240,14 @@ export default function GettingStarted(): ReactElement {
                     <QualityMaturityBadge maturity={api.quality?.maturity} />
                   </div>
                   <p className={styles.cardMeta}>
-                    {api.operations} modeled operations · {api.authModel}
+                    {api.operations} modeled operations · <InlineCodeText text={api.authModel} />
                   </p>
-                  <p>{api.summary}</p>
-                  <p className={styles.qualitySummary}>{api.qualitySummary}</p>
+                  <p>
+                    <InlineCodeText text={api.summary} />
+                  </p>
+                  <p className={styles.qualitySummary}>
+                    <InlineCodeText text={api.qualitySummary} />
+                  </p>
                   <div className={styles.cardActions}>
                     <Link className="button button--primary button--sm" to={api.slug}>
                       Open API page
