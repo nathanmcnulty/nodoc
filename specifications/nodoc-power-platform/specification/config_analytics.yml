@@ -10,7 +10,14 @@ paths:
     get:
       operationId: ConfigAnalytics_get_api_v1_tenants_tenantId_tenantconsent
       summary: "GET /api/v1/tenants/{tenantId}/tenantconsent"
-      description: "Live-captured from the authenticated Power Platform admin center while browsing: https://admin.powerplatform.microsoft.com/billing/licenses/PowerApps/overview, https://admin.powerplatform.microsoft.com/billing/licenses/PowerApps/recommendations, https://admin.powerplatform.microsoft.com/billing/licenses/copilotStudio/overview, https://admin.powerplatform.microsoft.com/billing/licenses/dataverse/overview, and 83 more routes."
+      x-nodoc-live-capture:
+        source: "authenticated Power Platform admin center"
+        browsedPages:
+          - "https://admin.powerplatform.microsoft.com/billing/licenses/PowerApps/overview"
+          - "https://admin.powerplatform.microsoft.com/billing/licenses/PowerApps/recommendations"
+          - "https://admin.powerplatform.microsoft.com/billing/licenses/copilotStudio/overview"
+          - "https://admin.powerplatform.microsoft.com/billing/licenses/dataverse/overview"
+        additionalPageCount: 83
       tags:
         - ConfigAnalytics
       parameters:

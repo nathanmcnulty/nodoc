@@ -26,6 +26,14 @@ function collectFailures(qualityByTitle) {
         detail: missing,
       });
     }
+
+    if (quality.publicLiveCaptureDescriptionCount > 0) {
+      failures.push({
+        title: quality.title,
+        issue: "public-live-capture",
+        detail: `${quality.publicLiveCaptureDescriptionCount} live-capture descriptions still render publicly`,
+      });
+    }
   }
 
   return failures;

@@ -22,6 +22,7 @@ Root `openapi.yml` files drive both website presentation and downstream artifact
 - Use `x-displayName` when a tag name is technical, camel-cased, or backend-oriented and needs a cleaner label in the navigation tree.
 - Keep group names user-facing. Avoid raw hostnames, internal service names, or API prefixes as section headers unless they are the actual product concept users navigate by.
 - Preserve backend provenance in tag descriptions and operation descriptions rather than the navigation labels.
+- Keep repo-only live-capture browsing evidence under `x-nodoc-live-capture` instead of public `description` fields so the site does not render environment-specific routes.
 
 ## Quality metrics
 
@@ -31,6 +32,7 @@ The website now surfaces generated spec-quality metadata from the checked-in Ope
 - `npm run build`, `npm run start`, and `npm run typecheck` already regenerate this data automatically.
 - The generator reports navigation consistency, metadata completeness, placeholder debt, and example coverage for every published spec.
 - The same pass also refreshes `src/generated/portalCoverageLedger.json`, which captures per-portal seed URLs, observed hosts, promoted discoveries, telemetry exclusions, and open gaps for agent-driven discovery work.
+- It also refreshes `src/generated/operationLiveCaptureLedger.json`, which indexes repo-only `x-nodoc-live-capture` operation metadata for agents and tooling.
 - Treat placeholder markers such as `pending` as real debt to remove with evidence, not as acceptable final-state documentation.
 
 ## Styling

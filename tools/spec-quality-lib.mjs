@@ -22,6 +22,23 @@ const httpMethods = new Set([
   "trace",
 ]);
 
+function uniqueOrdered(values) {
+  const seen = new Set();
+  const ordered = [];
+
+  for (const value of values ?? []) {
+    const normalized = String(value ?? "").trim();
+    if (!normalized || seen.has(normalized)) {
+      continue;
+    }
+
+    seen.add(normalized);
+    ordered.push(normalized);
+  }
+
+  return ordered;
+}
+
 function cloneObject(value) {
   return value === undefined ? undefined : JSON.parse(JSON.stringify(value));
 }
@@ -208,6 +225,41 @@ function getOperations(specification) {
   return getOperationEntries(specification).map(({ operation }) => operation);
 }
 
+function normalizeLiveCaptureMetadata(value, context) {
+  if (value === undefined) {
+    return null;
+  }
+
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    throw new Error(`${context} has an invalid x-nodoc-live-capture payload.`);
+  }
+
+  const source = String(value.source ?? "").trim();
+  if (!source) {
+    throw new Error(`${context} is missing x-nodoc-live-capture.source.`);
+  }
+
+  const browsedPages = uniqueOrdered(value.browsedPages ?? []);
+  if (browsedPages.length === 0) {
+    throw new Error(`${context} must include at least one x-nodoc-live-capture.browsedPages entry.`);
+  }
+
+  let additionalPageCount = 0;
+  if (value.additionalPageCount !== undefined) {
+    if (!Number.isInteger(value.additionalPageCount) || value.additionalPageCount < 0) {
+      throw new Error(`${context} has an invalid x-nodoc-live-capture.additionalPageCount value.`);
+    }
+
+    additionalPageCount = value.additionalPageCount;
+  }
+
+  return {
+    source,
+    browsedPages,
+    additionalPageCount,
+  };
+}
+
 function getPathPrefixes(specification) {
   return Array.from(new Set(
     Object.keys(specification.paths ?? {})
@@ -329,6 +381,10 @@ function buildQualityRecord(specRelativePath, bundledSpecification, rawText) {
     ),
     placeholderCount,
     blankDescriptionCount: countMatches(rawText, /description:\s*\n/gu),
+    publicLiveCaptureDescriptionCount: countMatches(
+      rawText,
+      /description:\s*"Live-captured from the authenticated/gu,
+    ),
     requestExampleCount,
     successResponseExampleCount,
     evidenceMentionCount,
@@ -445,4 +501,65 @@ export async function buildSpecRouteInventory() {
   }
 
   return inventory.sort((left, right) => left.title.localeCompare(right.title));
+}
+
+export async function buildOperationLiveCaptureLedger() {
+  const entries = await readdir(specificationsDir, { withFileTypes: true });
+  const ledger = [];
+
+  for (const entry of entries) {
+    if (!entry.isDirectory()) {
+      continue;
+    }
+
+    const specRelativePath = path
+      .join("specifications", entry.name, "specification", "openapi.yml");
+    const specPath = path.join(repoRoot, specRelativePath);
+    const bundledSpecification = await loadBundledSpecification(specPath);
+    const title = bundledSpecification.info?.title ?? entry.name;
+    const operations = getOperationEntries(bundledSpecification)
+      .map(({ method, operation, path: operationPath }) => {
+        const liveCapture = normalizeLiveCaptureMetadata(
+          operation["x-nodoc-live-capture"],
+          `${title} ${method} ${operationPath}`,
+        );
+
+        if (!liveCapture) {
+          return null;
+        }
+
+        return {
+          operationId:
+            typeof operation.operationId === "string" ? operation.operationId : null,
+          summary:
+            typeof operation.summary === "string" ? operation.summary : null,
+          method,
+          path: operationPath,
+          ...liveCapture,
+          pageCount: liveCapture.browsedPages.length + liveCapture.additionalPageCount,
+        };
+      })
+      .filter(Boolean);
+
+    if (operations.length === 0) {
+      continue;
+    }
+
+    ledger.push({
+      title,
+      specId: entry.name.replace(/^nodoc-/u, ""),
+      specPath: specRelativePath.replaceAll("\\", "/"),
+      nodocRoute:
+        typeof bundledSpecification.info?.["x-nodoc-route"] === "string"
+          ? bundledSpecification.info["x-nodoc-route"]
+          : null,
+      nodocCategory:
+        typeof bundledSpecification.info?.["x-nodoc-category"] === "string"
+          ? bundledSpecification.info["x-nodoc-category"]
+          : null,
+      operations,
+    });
+  }
+
+  return ledger.sort((left, right) => left.title.localeCompare(right.title));
 }
