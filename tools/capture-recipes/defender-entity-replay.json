@@ -1,0 +1,93 @@
+{
+  "portal": "Defender",
+  "url": "https://security.microsoft.com",
+  "matchHosts": [
+    "security.microsoft.com",
+    "mto.security.microsoft.com"
+  ],
+  "seedLinkContains": [
+    "incident",
+    "machine",
+    "device",
+    "file",
+    "user",
+    "url/overview",
+    "ip/"
+  ],
+  "seedLinkLimit": 4,
+  "seedRouteGroups": {
+    "incident-detail": {
+      "idSources": [
+        {
+          "artifactFile": "page-states.json",
+          "pattern": "https://security\\.microsoft\\.com/incidents/([^\"?#/\\\\s]+)"
+        }
+      ],
+      "limit": 2,
+      "routeTemplates": [
+        "https://security.microsoft.com/incidents/{id}"
+      ]
+    },
+    "machine-overview": {
+      "idSources": [
+        {
+          "artifactFile": "page-states.json",
+          "pattern": "https://security\\.microsoft\\.com/machines(?:/v2)?/([^/?#\"\\\\s]+)/overview"
+        },
+        {
+          "artifactFile": "raw-requests.json",
+          "pattern": "/machines(?:/v2)?/([^/?#\"\\\\s]+)/overview"
+        }
+      ],
+      "limit": 2,
+      "routeTemplates": [
+        "https://security.microsoft.com/machines/v2/{id}/overview"
+      ]
+    },
+    "file-overview": {
+      "idSources": [
+        {
+          "artifactFile": "page-states.json",
+          "pattern": "https://security\\.microsoft\\.com/file/([A-Fa-f0-9]{64})/overview"
+        }
+      ],
+      "limit": 1,
+      "routeTemplates": [
+        "https://security.microsoft.com/file/{id}/overview"
+      ]
+    },
+    "url-overview": {
+      "idSources": [
+        {
+          "artifactFile": "page-states.json",
+          "pattern": "https://security\\.microsoft\\.com/url/overview\\?url=([^\"\\\\s]+)",
+          "decode": true
+        }
+      ],
+      "limit": 1,
+      "routeTemplates": [
+        "https://security.microsoft.com/url/overview?url={encoded}"
+      ]
+    },
+    "ip-overview": {
+      "idSources": [
+        {
+          "artifactFile": "page-states.json",
+          "pattern": "https://security\\.microsoft\\.com/ip/([^/?#\"\\\\s]+)/overview"
+        }
+      ],
+      "limit": 1,
+      "routeTemplates": [
+        "https://security.microsoft.com/ip/{id}/overview"
+      ]
+    }
+  },
+  "actions": [
+    "replay-seeded-links=all",
+    "replay-seeded-routes=incident-detail",
+    "replay-seeded-routes=machine-overview",
+    "replay-seeded-routes=file-overview",
+    "replay-seeded-routes=url-overview",
+    "replay-seeded-routes=ip-overview"
+  ]
+}

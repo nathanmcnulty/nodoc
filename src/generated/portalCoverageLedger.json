@@ -1,0 +1,826 @@
+[
+  {
+    "title": "Defender",
+    "specId": "defender-xdr",
+    "specPath": "specifications/nodoc-defender-xdr/specification/openapi.yml",
+    "portalUrl": "https://security.microsoft.com",
+    "seedUrls": [
+      "https://security.microsoft.com"
+    ],
+    "authModel": "Portal session cookie (`sccauth`)",
+    "recorderSupported": true,
+    "crawlPriority": "diff-first",
+    "nextPass": "normalized-family-diff",
+    "nextPassReason": "Largest surface in the repo; use capture-vs-spec diffs before another broad crawl.",
+    "apiHosts": [
+      "https://security.microsoft.com/apiproxy",
+      "https://mto.security.microsoft.com/apiproxy"
+    ],
+    "observedHosts": [
+      "security.microsoft.com",
+      "mto.security.microsoft.com"
+    ],
+    "pathPrefixes": [
+      "/aatp/",
+      "/admin/",
+      "/astgws/",
+      "/cdssecuritycopilot/",
+      "/di/",
+      "/gws/",
+      "/m365appprotection/",
+      "/mcas/",
+      "/mdc/",
+      "/mdi/",
+      "/medeina/",
+      "/msgraph/",
+      "/mtoapi/",
+      "/mtp/",
+      "/radius/",
+      "/securityplatform/",
+      "/shell/"
+    ],
+    "operationCount": 558,
+    "lastSuccessfulPassDepth": "same-origin-entity-crawl",
+    "captureRecipes": [
+      "tools/capture-recipes/defender-telemetry-verification.json",
+      "tools/capture-recipes/defender-entity-replay.json"
+    ],
+    "promotedDiscoveries": [],
+    "knownTelemetryExclusions": [
+      {
+        "method": "POST",
+        "note": "Telemetry and performance sink confirmed during the checked-in Defender verification recipe.",
+        "path": "/api/log/Put"
+      }
+    ],
+    "openGaps": [],
+    "notes": [
+      "The checked-in Defender coverage includes same-origin nav, representative entity pages, and MTO-backed proxy APIs.",
+      "A dedicated live verification pass confirmed Defender also emits POST /api/log/Put, so candidate diffs now suppress it as telemetry-only traffic."
+    ]
+  },
+  {
+    "title": "Entra B2C",
+    "specId": "entra-b2c",
+    "specPath": "specifications/nodoc-entra-b2c/specification/openapi.yml",
+    "portalUrl": "https://entra.microsoft.com",
+    "seedUrls": [
+      "https://entra.microsoft.com/#blade/Microsoft_AAD_IAM/CompanyRelationshipsMenuBlade/menuId/ExternalIdentitiesGettingStarted"
+    ],
+    "authModel": "Azure AD bearer token + `tenantId` context",
+    "recorderSupported": true,
+    "crawlPriority": "medium",
+    "nextPass": "full-layered-crawl",
+    "nextPassReason": "Feature-gated small surface with recorder support but thin observed coverage.",
+    "apiHosts": [
+      "https://main.b2cadmin.ext.azure.com"
+    ],
+    "observedHosts": [
+      "main.b2cadmin.ext.azure.com"
+    ],
+    "pathPrefixes": [
+      "/api/"
+    ],
+    "operationCount": 6,
+    "lastSuccessfulPassDepth": "deep-clickflow",
+    "captureRecipes": [
+      "tools/capture-recipes/entra-b2c-deep.json"
+    ],
+    "promotedDiscoveries": [
+      {
+        "method": "GET",
+        "note": "Promoted from the External Identities deep pass.",
+        "path": "/api/userAttribute/GetAvailableOutputClaimsList"
+      }
+    ],
+    "knownTelemetryExclusions": [],
+    "openGaps": [],
+    "notes": [
+      "The current tenant returned AADB2C99039 on some External Identities surfaces, but the promoted route is still a confirmed portal endpoint."
+    ]
+  },
+  {
+    "title": "Entra IAM",
+    "specId": "ibiza-iam",
+    "specPath": "specifications/nodoc-ibiza-iam/specification/openapi.yml",
+    "portalUrl": "https://entra.microsoft.com",
+    "seedUrls": [
+      "https://entra.microsoft.com"
+    ],
+    "authModel": "Delegated OAuth2 + `X-Ms-Client-Request-Id`",
+    "recorderSupported": true,
+    "crawlPriority": "diff-first",
+    "nextPass": "normalized-family-diff",
+    "nextPassReason": "Large supported surface; only targeted unresolved families should drive follow-up.",
+    "apiHosts": [
+      "https://main.iam.ad.ext.azure.com/api"
+    ],
+    "observedHosts": [
+      "entra.microsoft.com"
+    ],
+    "pathPrefixes": [
+      "/AccountSkus/",
+      "/ApplicationInsights/",
+      "/ApplicationManagement/",
+      "/ApplicationProxy/",
+      "/Applications/",
+      "/ApplicationSso/",
+      "/AuthenticationMethods/",
+      "/B2B/",
+      "/ClaimProviders/",
+      "/ClassicPolicies/",
+      "/Common/",
+      "/DataInsights/",
+      "/Devices/",
+      "/Directories/",
+      "/DirectoryObjectPicker/",
+      "/directoryObjects/",
+      "/DocumentProcessorTasks/",
+      "/Domains('{domainName}')/",
+      "/EnterpriseApplications/",
+      "/FeatureConfigurations/",
+      "/GDPR/",
+      "/Groups/",
+      "/IntegratedApplications/",
+      "/Licenses/",
+      "/LoginTenantBrandings/",
+      "/ManagedApplications/",
+      "/MdmApplications/",
+      "/MultiFactorAuthentication/",
+      "/NamedNetworks/",
+      "/NamedNetworksV2/",
+      "/PasswordReset/",
+      "/Permissions/",
+      "/Policies/",
+      "/RegisteredApplications/",
+      "/Reports/",
+      "/RequestApprovals/",
+      "/RequireAuthMethodVerification/",
+      "/RevokeMFA/",
+      "/RoamingSettings/",
+      "/Roles/",
+      "/Security/",
+      "/SecurityDefaults/",
+      "/Spotlight/",
+      "/SupportRequestProblemDetails/",
+      "/SyncingDevices/",
+      "/TenantSkuInfo/",
+      "/UpdateUser/",
+      "/User/",
+      "/UserDetails/",
+      "/Users/",
+      "/ViralSku/",
+      "/ViralSubscriptions/",
+      "/WhatIf/"
+    ],
+    "operationCount": 286,
+    "lastSuccessfulPassDepth": "diff-first",
+    "captureRecipes": [],
+    "promotedDiscoveries": [],
+    "knownTelemetryExclusions": [],
+    "openGaps": [],
+    "notes": [
+      "Use child reactblade iframe targets rather than only the top-level shell when planning future Entra IAM follow-up passes."
+    ]
+  },
+  {
+    "title": "Entra IDGov",
+    "specId": "entra-idgov",
+    "specPath": "specifications/nodoc-entra-idgov/specification/openapi.yml",
+    "portalUrl": "https://entra.microsoft.com",
+    "seedUrls": [
+      "https://entra.microsoft.com/#blade/Microsoft_AAD_ERM/DashboardBlade"
+    ],
+    "authModel": "Azure AD bearer token",
+    "recorderSupported": true,
+    "crawlPriority": "medium",
+    "nextPass": "full-layered-crawl",
+    "nextPassReason": "Small access-review surface that likely needs deeper workflow-state coverage.",
+    "apiHosts": [
+      "https://api.accessreviews.identitygovernance.azure.com"
+    ],
+    "observedHosts": [
+      "api.accessreviews.identitygovernance.azure.com"
+    ],
+    "pathPrefixes": [
+      "/accessReviews/"
+    ],
+    "operationCount": 17,
+    "lastSuccessfulPassDepth": "deep-clickflow",
+    "captureRecipes": [
+      "tools/capture-recipes/entra-idgov-deep.json"
+    ],
+    "promotedDiscoveries": [
+      {
+        "method": "GET",
+        "note": "Promoted from the Programs blade.",
+        "path": "/accessReviews/v2.0/approvalWorkflowProviders/{providerId}/businessFlows"
+      },
+      {
+        "method": "GET",
+        "note": "Promoted from the Review History blade.",
+        "path": "/accessReviews/v2.0/reports"
+      }
+    ],
+    "knownTelemetryExclusions": [],
+    "openGaps": [],
+    "notes": []
+  },
+  {
+    "title": "Entra IGA",
+    "specId": "entra-iga",
+    "specPath": "specifications/nodoc-entra-iga/specification/openapi.yml",
+    "portalUrl": "https://entra.microsoft.com",
+    "seedUrls": [
+      "https://entra.microsoft.com/#view/Microsoft_AAD_LifecycleManagement/CommonMenuBlade/~/overview",
+      "https://entra.microsoft.com/#view/Microsoft_AAD_LifecycleManagement/CommonMenuBlade/~/workflows",
+      "https://entra.microsoft.com/#view/Microsoft_AAD_LifecycleManagement/CommonMenuBlade/~/workflowSettings"
+    ],
+    "authModel": "Azure AD bearer token",
+    "recorderSupported": true,
+    "crawlPriority": "medium",
+    "nextPass": "full-layered-crawl",
+    "nextPassReason": "Small governance surface; deeper entitlement and lifecycle navigation is still likely useful.",
+    "apiHosts": [
+      "https://elm.iga.azure.com"
+    ],
+    "observedHosts": [],
+    "pathPrefixes": [
+      "/api/"
+    ],
+    "operationCount": 17,
+    "lastSuccessfulPassDepth": "seeded-drill-in-no-backend",
+    "captureRecipes": [
+      "tools/capture-recipes/entra-iga-deep.json",
+      "tools/capture-recipes/entra-iga-recovery.json"
+    ],
+    "promotedDiscoveries": [],
+    "knownTelemetryExclusions": [],
+    "openGaps": [
+      "Even after the seeded drill-in recovery pass, elm.iga.azure.com still did not wake in the current tenant.",
+      "Lifecycle workflows appears permission-blocked in this tenant for most routes, so future coverage work likely needs a tenant with access or existing workflow objects."
+    ],
+    "notes": [
+      "A seeded replay pass reached audit logs plus the custom extension, deleted workflows, workflows, and workflow settings routes directly from recorded page-state links.",
+      "Audit logs rendered normally, but the custom extension, deleted workflows, workflows, and workflow settings routes all showed a tenant access blocker in the current tenant."
+    ]
+  },
+  {
+    "title": "Entra PIM",
+    "specId": "entra-pim",
+    "specPath": "specifications/nodoc-entra-pim/specification/openapi.yml",
+    "portalUrl": "https://entra.microsoft.com",
+    "seedUrls": [
+      "https://entra.microsoft.com/#blade/Microsoft_Azure_PIMCommon/CommonMenuBlade"
+    ],
+    "authModel": "Azure AD bearer token",
+    "recorderSupported": true,
+    "crawlPriority": "medium",
+    "nextPass": "full-layered-crawl",
+    "nextPassReason": "Supported in the recorder, but the modeled role-management surface is still narrow.",
+    "apiHosts": [
+      "https://api.azrbac.mspim.azure.com"
+    ],
+    "observedHosts": [
+      "api.azrbac.mspim.azure.com"
+    ],
+    "pathPrefixes": [
+      "/api/"
+    ],
+    "operationCount": 16,
+    "lastSuccessfulPassDepth": "deep-clickflow",
+    "captureRecipes": [
+      "tools/capture-recipes/entra-pim-deep.json"
+    ],
+    "promotedDiscoveries": [],
+    "knownTelemetryExclusions": [],
+    "openGaps": [],
+    "notes": [
+      "The deep clickflow pass woke the PIM backend, but the resulting routes were already covered by the checked-in spec."
+    ]
+  },
+  {
+    "title": "Exchange",
+    "specId": "exchange-beta",
+    "specPath": "specifications/nodoc-exchange-beta/specification/openapi.yml",
+    "portalUrl": "https://admin.exchange.microsoft.com",
+    "seedUrls": [
+      "https://admin.exchange.microsoft.com"
+    ],
+    "authModel": "Portal session cookie + same-origin `x-requested-with`",
+    "recorderSupported": true,
+    "crawlPriority": "high",
+    "nextPass": "normalized-family-diff",
+    "nextPassReason": "Recorder support now covers the Exchange beta host; use capture-vs-spec diffs to target remaining unresolved families.",
+    "apiHosts": [
+      "https://admin.exchange.microsoft.com"
+    ],
+    "observedHosts": [
+      "admin.exchange.microsoft.com"
+    ],
+    "pathPrefixes": [
+      "/beta/"
+    ],
+    "operationCount": 61,
+    "lastSuccessfulPassDepth": "deep-interaction",
+    "captureRecipes": [
+      "tools/capture-recipes/exchange-deep.json"
+    ],
+    "promotedDiscoveries": [],
+    "knownTelemetryExclusions": [],
+    "openGaps": [],
+    "notes": []
+  },
+  {
+    "title": "Intune Autopatch",
+    "specId": "intune-autopatch",
+    "specPath": "specifications/nodoc-intune-autopatch/specification/openapi.yml",
+    "portalUrl": "https://intune.microsoft.com",
+    "seedUrls": [
+      "https://intune.microsoft.com"
+    ],
+    "authModel": "Portal bearer token + x-ms portal headers",
+    "recorderSupported": true,
+    "crawlPriority": "high",
+    "nextPass": "full-layered-crawl",
+    "nextPassReason": "High-signal report blades already proved valuable, and recorder support now enables broader workflow-state coverage.",
+    "apiHosts": [
+      "https://services.autopatch.microsoft.com"
+    ],
+    "observedHosts": [
+      "intune.microsoft.com",
+      "services.autopatch.microsoft.com"
+    ],
+    "pathPrefixes": [
+      "/access-control/",
+      "/api/",
+      "/device/",
+      "/reporting/",
+      "/support/",
+      "/tenant-management/",
+      "/unified-reporting/",
+      "/update-management/"
+    ],
+    "operationCount": 53,
+    "lastSuccessfulPassDepth": "deep-interaction",
+    "captureRecipes": [
+      "tools/capture-recipes/intune-deep.json"
+    ],
+    "promotedDiscoveries": [
+      {
+        "method": "GET",
+        "note": "Promoted from the deeper device/report interaction pass.",
+        "path": "/unified-reporting/odata/1.0/AutopatchManagementStatusSummary"
+      }
+    ],
+    "knownTelemetryExclusions": [],
+    "openGaps": [],
+    "notes": []
+  },
+  {
+    "title": "Intune Portal",
+    "specId": "intune-portal",
+    "specPath": "specifications/nodoc-intune-portal/specification/openapi.yml",
+    "portalUrl": "https://intune.microsoft.com",
+    "seedUrls": [
+      "https://intune.microsoft.com"
+    ],
+    "authModel": "Portal bearer token + same-origin portal context",
+    "recorderSupported": true,
+    "crawlPriority": "high",
+    "nextPass": "full-layered-crawl",
+    "nextPassReason": "Very small same-origin surface with recorder support now available; deeper navigation should improve observed coverage.",
+    "apiHosts": [
+      "https://intune.microsoft.com"
+    ],
+    "observedHosts": [
+      "intune.microsoft.com"
+    ],
+    "pathPrefixes": [
+      "/api/"
+    ],
+    "operationCount": 5,
+    "lastSuccessfulPassDepth": "deep-interaction",
+    "captureRecipes": [
+      "tools/capture-recipes/intune-deep.json"
+    ],
+    "promotedDiscoveries": [
+      {
+        "method": "POST",
+        "note": "Promoted from the first-pass portal bootstrap capture.",
+        "path": "/api/Portal/GetEarlyUserData"
+      },
+      {
+        "method": "POST",
+        "note": "Promoted from the first-pass portal bootstrap capture.",
+        "path": "/api/Portal/GetLazyUserData"
+      }
+    ],
+    "knownTelemetryExclusions": [
+      {
+        "method": "POST",
+        "note": "Trace sink captured during deep portal passes.",
+        "path": "/api/ClientTrace"
+      },
+      {
+        "method": "POST",
+        "note": "Extension trace sink captured during deep portal passes.",
+        "path": "/api/extensionclienttrace"
+      },
+      {
+        "method": "POST",
+        "note": "Extension telemetry sink captured during deep portal passes.",
+        "path": "/api/extensiontelemetry"
+      },
+      {
+        "method": "POST",
+        "note": "Portal metrics sink captured during deep portal passes.",
+        "path": "/api/metric"
+      },
+      {
+        "method": "POST",
+        "note": "Portal telemetry sink captured during deep portal passes.",
+        "path": "/api/Telemetry"
+      }
+    ],
+    "openGaps": [],
+    "notes": []
+  },
+  {
+    "title": "M365 Admin",
+    "specId": "m365-admin",
+    "specPath": "specifications/nodoc-m365-admin/specification/openapi.yml",
+    "portalUrl": "https://admin.cloud.microsoft",
+    "seedUrls": [
+      "https://admin.cloud.microsoft"
+    ],
+    "authModel": "Portal session cookie + custom admin headers",
+    "recorderSupported": true,
+    "crawlPriority": "diff-first",
+    "nextPass": "normalized-family-diff",
+    "nextPassReason": "Large admin surface with meaningful debt; follow diffs rather than recrawling blindly.",
+    "apiHosts": [
+      "https://admin.cloud.microsoft"
+    ],
+    "observedHosts": [
+      "admin.cloud.microsoft"
+    ],
+    "pathPrefixes": [
+      "/admin/",
+      "/adminportal/",
+      "/fd/"
+    ],
+    "operationCount": 213,
+    "lastSuccessfulPassDepth": "diff-first",
+    "captureRecipes": [],
+    "promotedDiscoveries": [],
+    "knownTelemetryExclusions": [],
+    "openGaps": [],
+    "notes": [
+      "Drive future M365 Admin discovery from candidate diffs before another broad live crawl."
+    ]
+  },
+  {
+    "title": "M365 Apps Config",
+    "specId": "m365-apps-config",
+    "specPath": "specifications/nodoc-m365-apps-config/specification/openapi.yml",
+    "portalUrl": "https://config.office.com",
+    "seedUrls": [
+      "https://config.office.com/officeSettings"
+    ],
+    "authModel": "Portal bearer token + diagnostic headers",
+    "recorderSupported": true,
+    "crawlPriority": "high",
+    "nextPass": "full-layered-crawl",
+    "nextPassReason": "Recorder support now exists for the configuration surface, so the next step is deeper workflow coverage rather than recorder expansion.",
+    "apiHosts": [
+      "https://config.office.com"
+    ],
+    "observedHosts": [
+      "config.office.com"
+    ],
+    "pathPrefixes": [
+      "/appConfig/",
+      "/endpointprovisionhealth/",
+      "/intents/",
+      "/policyadmin/",
+      "/releases/",
+      "/rollout/",
+      "/serviceProfile/",
+      "/ServiceProfile/",
+      "/settings/"
+    ],
+    "operationCount": 23,
+    "lastSuccessfulPassDepth": "deep-interaction",
+    "captureRecipes": [
+      "tools/capture-recipes/m365-apps-deep.json"
+    ],
+    "promotedDiscoveries": [],
+    "knownTelemetryExclusions": [],
+    "openGaps": [],
+    "notes": [
+      "Use /officeSettings as the live seed URL; the site root is just a sign-in or landing shell."
+    ]
+  },
+  {
+    "title": "M365 Apps Inventory",
+    "specId": "m365-apps-inventory",
+    "specPath": "specifications/nodoc-m365-apps-inventory/specification/openapi.yml",
+    "portalUrl": "https://config.office.com",
+    "seedUrls": [
+      "https://config.office.com/officeSettings"
+    ],
+    "authModel": "Portal bearer token + diagnostic headers",
+    "recorderSupported": true,
+    "crawlPriority": "high",
+    "nextPass": "full-layered-crawl",
+    "nextPassReason": "Recorder support now exists for the inventory host, and the current surface is still relatively small enough to justify a deeper crawl.",
+    "apiHosts": [
+      "https://query.inventory.insights.office.net"
+    ],
+    "observedHosts": [
+      "query.inventory.insights.office.net"
+    ],
+    "pathPrefixes": [
+      "/inventory/"
+    ],
+    "operationCount": 27,
+    "lastSuccessfulPassDepth": "deep-interaction",
+    "captureRecipes": [
+      "tools/capture-recipes/m365-apps-deep.json"
+    ],
+    "promotedDiscoveries": [],
+    "knownTelemetryExclusions": [],
+    "openGaps": [],
+    "notes": []
+  },
+  {
+    "title": "M365 Apps Services",
+    "specId": "m365-apps-services",
+    "specPath": "specifications/nodoc-m365-apps-services/specification/openapi.yml",
+    "portalUrl": "https://config.office.com",
+    "seedUrls": [
+      "https://config.office.com/officeSettings"
+    ],
+    "authModel": "Portal bearer token + diagnostic headers",
+    "recorderSupported": true,
+    "crawlPriority": "high",
+    "nextPass": "full-layered-crawl",
+    "nextPassReason": "Recorder support now exists for the shared services host, so use a broader crawl to expand M365 Apps discovery.",
+    "apiHosts": [
+      "https://clients.config.office.net"
+    ],
+    "observedHosts": [
+      "clients.config.office.net"
+    ],
+    "pathPrefixes": [
+      "/intents/",
+      "/odbhealth/",
+      "/onboarding/",
+      "/releases/"
+    ],
+    "operationCount": 8,
+    "lastSuccessfulPassDepth": "deep-interaction",
+    "captureRecipes": [
+      "tools/capture-recipes/m365-apps-deep.json"
+    ],
+    "promotedDiscoveries": [],
+    "knownTelemetryExclusions": [],
+    "openGaps": [],
+    "notes": []
+  },
+  {
+    "title": "Power Platform",
+    "specId": "power-platform",
+    "specPath": "specifications/nodoc-power-platform/specification/openapi.yml",
+    "portalUrl": "https://admin.powerplatform.microsoft.com",
+    "seedUrls": [
+      "https://admin.powerplatform.microsoft.com"
+    ],
+    "authModel": "Portal bearer tokens + service-specific audiences",
+    "recorderSupported": true,
+    "crawlPriority": "diff-first",
+    "nextPass": "normalized-family-diff",
+    "nextPassReason": "Recent exhaustive crawl already covered many host families, so follow-up should be gap-driven.",
+    "apiHosts": [
+      "https://admin.powerplatform.microsoft.com"
+    ],
+    "observedHosts": [
+      "admin.powerplatform.microsoft.com"
+    ],
+    "pathPrefixes": [
+      "/api/",
+      "/appmanagement/",
+      "/licensing/",
+      "/notificationservice/",
+      "/providers/",
+      "/v0.1-alpha/",
+      "/v0.1/",
+      "/v1.0/",
+      "/v2.0/"
+    ],
+    "operationCount": 244,
+    "lastSuccessfulPassDepth": "diff-first",
+    "captureRecipes": [],
+    "promotedDiscoveries": [],
+    "knownTelemetryExclusions": [],
+    "openGaps": [],
+    "notes": [
+      "Recent discovery already covered many Power Platform host families, so future passes should stay gap-driven."
+    ]
+  },
+  {
+    "title": "Purview",
+    "specId": "purview",
+    "specPath": "specifications/nodoc-purview/specification/openapi.yml",
+    "portalUrl": "https://purview.microsoft.com",
+    "seedUrls": [
+      "https://purview.microsoft.com"
+    ],
+    "authModel": "Portal session cookie (`sccauth`)",
+    "recorderSupported": true,
+    "crawlPriority": "diff-first",
+    "nextPass": "normalized-family-diff",
+    "nextPassReason": "Proxy and same-origin surfaces are already split; diff unresolved families before another broad run.",
+    "apiHosts": [
+      "https://purview.microsoft.com/apiproxy"
+    ],
+    "observedHosts": [
+      "purview.microsoft.com"
+    ],
+    "pathPrefixes": [
+      "/admin/",
+      "/adtsch/",
+      "/aedmcc/",
+      "/aip/",
+      "/arm/",
+      "/azurepurview/",
+      "/cbill/",
+      "/cdssecuritycopilot/",
+      "/cpm/",
+      "/dgs/",
+      "/di/",
+      "/dsi/",
+      "/edlp/",
+      "/gws/",
+      "/Ingestion/",
+      "/insiderrisk/",
+      "/iris/",
+      "/mcas/",
+      "/medeina/",
+      "/msgraph/",
+      "/mtp/",
+      "/ocps/",
+      "/oversharing/",
+      "/purviewplatform/",
+      "/rms/",
+      "/securityplatform/",
+      "/shell/",
+      "/spo/",
+      "/WdatpPublicApi/"
+    ],
+    "operationCount": 124,
+    "lastSuccessfulPassDepth": "diff-first",
+    "captureRecipes": [],
+    "promotedDiscoveries": [],
+    "knownTelemetryExclusions": [],
+    "openGaps": [],
+    "notes": [
+      "Keep same-origin Purview Portal /api traffic distinct from the broader Purview proxy surface during follow-up diffing."
+    ]
+  },
+  {
+    "title": "Purview Portal",
+    "specId": "purview-portal",
+    "specPath": "specifications/nodoc-purview-portal/specification/openapi.yml",
+    "portalUrl": "https://purview.microsoft.com",
+    "seedUrls": [
+      "https://purview.microsoft.com"
+    ],
+    "authModel": "Portal session cookie (`sccauth`) + same-origin portal context",
+    "recorderSupported": true,
+    "crawlPriority": "medium",
+    "nextPass": "full-layered-crawl",
+    "nextPassReason": "Recorder support exists, but the same-origin portal surface is still very small.",
+    "apiHosts": [
+      "https://purview.microsoft.com"
+    ],
+    "observedHosts": [
+      "purview.microsoft.com"
+    ],
+    "pathPrefixes": [
+      "/api/"
+    ],
+    "operationCount": 7,
+    "lastSuccessfulPassDepth": "deep-interaction",
+    "captureRecipes": [
+      "tools/capture-recipes/purview-portal-deep.json"
+    ],
+    "promotedDiscoveries": [
+      {
+        "method": "POST",
+        "note": "Promoted from the deeper report interaction pass.",
+        "path": "/api/Report/GetReportSummaryData"
+      }
+    ],
+    "knownTelemetryExclusions": [
+      {
+        "method": "POST",
+        "note": "Telemetry and performance sink captured from multiple Purview Portal surfaces.",
+        "path": "/api/log/Put"
+      }
+    ],
+    "openGaps": [],
+    "notes": []
+  },
+  {
+    "title": "SharePoint",
+    "specId": "sharepoint-admin",
+    "specPath": "specifications/nodoc-sharepoint-admin/specification/openapi.yml",
+    "portalUrl": "https://{tenant}-admin.sharepoint.com",
+    "seedUrls": [
+      "https://{tenant}-admin.sharepoint.com"
+    ],
+    "authModel": "Portal session cookie (`FedAuth`) + SharePoint form digest",
+    "recorderSupported": true,
+    "crawlPriority": "medium",
+    "nextPass": "full-layered-crawl",
+    "nextPassReason": "Recorder coverage exists, but deeper list/detail and settings pivots are still plausible gaps.",
+    "apiHosts": [
+      "https://{tenant}-admin.sharepoint.com"
+    ],
+    "observedHosts": [
+      "{tenant}-admin.sharepoint.com"
+    ],
+    "pathPrefixes": [
+      "/_api/"
+    ],
+    "operationCount": 41,
+    "lastSuccessfulPassDepth": "deep-interaction",
+    "captureRecipes": [
+      "tools/capture-recipes/sharepoint-admin-deep.json"
+    ],
+    "promotedDiscoveries": [],
+    "knownTelemetryExclusions": [],
+    "openGaps": [],
+    "notes": []
+  },
+  {
+    "title": "Teams",
+    "specId": "teams",
+    "specPath": "specifications/nodoc-teams/specification/openapi.yml",
+    "portalUrl": "https://admin.teams.microsoft.com",
+    "seedUrls": [
+      "https://admin.teams.microsoft.com"
+    ],
+    "authModel": "Portal bearer token + same-origin portal context",
+    "recorderSupported": true,
+    "crawlPriority": "diff-first",
+    "nextPass": "normalized-family-diff",
+    "nextPassReason": "Deep crawl already landed; remaining work should be driven by unresolved route families.",
+    "apiHosts": [
+      "https://admin.teams.microsoft.com"
+    ],
+    "observedHosts": [
+      "admin.teams.microsoft.com"
+    ],
+    "pathPrefixes": [
+      "/admin/",
+      "/AdminAppCatalog/",
+      "/amer/",
+      "/api/",
+      "/config/",
+      "/data/",
+      "/hasActiveCapabilities/",
+      "/haslicense/",
+      "/internal/",
+      "/private/",
+      "/Realtime.Analytics/",
+      "/regionalDomainNameForTenant/",
+      "/repository/",
+      "/Skype.Ncs/",
+      "/Skype.OperatorConnect/",
+      "/Skype.Policy/",
+      "/Skype.TelephoneNumberMgmt/",
+      "/Skype.User/",
+      "/Teams.Artifacts/",
+      "/Teams.Cpc/",
+      "/Teams.PlatformService/",
+      "/Teams.SilentTest/",
+      "/Teams.Templates/",
+      "/Teams.Tenant/",
+      "/Teams.User/",
+      "/Teams.VerticalPackaging/",
+      "/Teams.VoiceApps/"
+    ],
+    "operationCount": 99,
+    "lastSuccessfulPassDepth": "deep-interaction",
+    "captureRecipes": [],
+    "promotedDiscoveries": [],
+    "knownTelemetryExclusions": [],
+    "openGaps": [],
+    "notes": [
+      "Teams already has a deeper capture baseline in the repo, so future follow-up should remain diff-driven."
+    ]
+  }
+]

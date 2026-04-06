@@ -3,6 +3,7 @@ import path from "node:path";
 
 import fg from "fast-glob";
 
+import { getTelemetrySuppressions } from "./portal-discovery-metadata.mjs";
 import { buildSpecRouteInventory } from "./spec-quality-lib.mjs";
 
 const httpMethods = new Set([
@@ -857,6 +858,41 @@ function aggregateCandidates(observations, specContext, includeDocumented) {
     });
 }
 
+function matchesSuppression(candidate, suppression) {
+  if (!suppression?.path) {
+    return false;
+  }
+
+  return candidate.normalizedPath === suppression.path
+    && (!suppression.method || suppression.method === candidate.method);
+}
+
+function partitionSuppressedCandidates(candidates, suppressions) {
+  if (suppressions.length === 0) {
+    return {
+      active: candidates,
+      suppressed: [],
+    };
+  }
+
+  return candidates.reduce((result, candidate) => {
+    const suppression = suppressions.find((entry) => matchesSuppression(candidate, entry));
+    if (suppression) {
+      result.suppressed.push({
+        ...candidate,
+        suppressionNote: suppression.note ?? null,
+      });
+      return result;
+    }
+
+    result.active.push(candidate);
+    return result;
+  }, {
+    active: [],
+    suppressed: [],
+  });
+}
+
 function buildSummary({
   adjacentObservationCount,
   candidates,
@@ -865,6 +901,7 @@ function buildSummary({
   scopedObservationCount,
   specRecord,
   scriptUrls,
+  suppressedCandidateCount,
 }) {
   const countsByEvidence = candidates.reduce((counts, candidate) => ({
     ...counts,
@@ -886,6 +923,7 @@ function buildSummary({
     specId: specRecord.specId,
     specPath: specRecord.specPath,
     specTitle: specRecord.title,
+    suppressedCandidateCount,
   };
 }
 
@@ -901,6 +939,9 @@ function printHumanSummary(summary, candidates) {
     );
   }
   console.log(`Loaded scripts observed: ${summary.scriptUrlCount}`);
+  if (summary.suppressedCandidateCount > 0) {
+    console.log(`Suppressed known telemetry exclusions: ${summary.suppressedCandidateCount}`);
+  }
   console.log(
     `Candidates: ${summary.candidateCount} (confirmed: ${summary.countsByEvidence.confirmed ?? 0}, probed: ${summary.countsByEvidence.probed ?? 0}, bundle-discovered: ${summary.countsByEvidence["bundle-discovered"] ?? 0})`,
   );
@@ -978,11 +1019,13 @@ async function main() {
   ];
   const { adjacent, inScope } = partitionObservationsByScope(observations, specContext);
   const scopedObservations = args.includeAdjacent ? observations : inScope;
-  const candidates = aggregateCandidates(
+  const telemetrySuppressions = getTelemetrySuppressions(specRecord.title);
+  const candidatePartitions = partitionSuppressedCandidates(aggregateCandidates(
     scopedObservations,
     specContext,
     args.includeDocumented,
-  );
+  ), telemetrySuppressions);
+  const candidates = candidatePartitions.active;
   const summary = buildSummary({
     adjacentObservationCount: adjacent.length,
     candidates,
@@ -991,10 +1034,12 @@ async function main() {
     scopedObservationCount: scopedObservations.length,
     specRecord,
     scriptUrls,
+    suppressedCandidateCount: candidatePartitions.suppressed.length,
   });
   const payload = {
     summary,
     candidates,
+    suppressedCandidates: candidatePartitions.suppressed,
   };
 
   await maybeWriteOutput(args.output, payload);
