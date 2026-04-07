@@ -339,6 +339,159 @@ paths:
         '404':
           $ref: common.yml#/components/responses/NotFound
 
+  /di/Search/SubmissionDIESData:
+    post:
+      summary: Search report submission data
+      description: >-
+        Query Data Insights report-submission records for the selected tenant and
+        time window. Observed live on the Report Submission experience, which posts
+        a watermark, page size, and channel filter to retrieve submission records.
+      operationId: PortalServices.SearchSubmissionDiesData
+      tags: [Portal Services]
+      parameters:
+        - name: tenantid
+          in: query
+          required: true
+          description: Tenant ID to query.
+          schema:
+            type: string
+            format: uuid
+        - name: StartTime
+          in: query
+          required: true
+          description: Inclusive lower bound for the submission search interval.
+          schema:
+            type: string
+            format: date-time
+        - name: EndTime
+          in: query
+          required: true
+          description: Inclusive upper bound for the submission search interval.
+          schema:
+            type: string
+            format: date-time
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: >-
+                Data Insights search envelope including watermark, page size, and
+                query filter criteria.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - Data Insights submission search response
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /di/Search/SubmissionDIESDataAggregation:
+    post:
+      summary: Aggregate report submission data
+      description: >-
+        Query aggregated Data Insights report-submission metrics for the selected
+        tenant and time window. Observed live on the Report Submission experience,
+        which posts an aggregation expression set for interval and pivot dimensions.
+      operationId: PortalServices.AggregateSubmissionDiesData
+      tags: [Portal Services]
+      parameters:
+        - name: tenantid
+          in: query
+          required: true
+          description: Tenant ID to query.
+          schema:
+            type: string
+            format: uuid
+        - name: StartTime
+          in: query
+          required: true
+          description: Inclusive lower bound for the aggregation interval.
+          schema:
+            type: string
+            format: date-time
+        - name: EndTime
+          in: query
+          required: true
+          description: Inclusive upper bound for the aggregation interval.
+          schema:
+            type: string
+            format: date-time
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: >-
+                Data Insights aggregation envelope including filter expressions and
+                grouping configuration.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - Data Insights submission aggregation response
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/optimize/OptimizeRecommendation:
+    get:
+      summary: Get optimize recommendations
+      description: >-
+        Retrieve portal optimize recommendation groups for the Defender homepage
+        experience. Observed live with `groupBy=category`, returning a
+        `recommendationGroups` envelope.
+      operationId: PortalServices.GetOptimizeRecommendations
+      tags: [Portal Services]
+      parameters:
+        - name: groupBy
+          in: query
+          description: Grouping to apply to the optimize recommendations feed.
+          schema:
+            type: string
+            default: category
+            example: category
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  recommendationGroups:
+                    type: array
+                    items:
+                      type: object
+                      description: pending - grouped optimize recommendation
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
   /gws/ComplianceAuthServer/v1.0/IsAllowedPermissionWithScopes:
     post:
       summary: Check compliance permissions

@@ -138,6 +138,42 @@ paths:
 
         '404':
           $ref: common.yml#/components/responses/NotFound
+    post:
+      summary: Query incidents with alert context
+      description: >-
+        Retrieve a paged incident list using the incidents experience filter envelope.
+        Observed live on the Incidents page, which posts sorting, paging, lookback,
+        and risk-filter settings and receives incident summary records with alert
+        counts and impacted-entity details.
+      operationId: Incidents.QueryIncidentAlerts
+      tags: [Incidents]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: >-
+                Incident-query envelope including paging, sorting, lookback, and
+                filter settings.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  description: pending - incident summary with associated alert metadata
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/incidentQueue/incidents/update:
     post:

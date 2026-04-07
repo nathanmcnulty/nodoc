@@ -249,6 +249,329 @@ paths:
         '404':
           $ref: common.yml#/components/responses/NotFound
 
+  /apiproxy/arm/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/workbooks:
+    get:
+      summary: List Sentinel workbooks
+      description: >-
+        Retrieve workbook resources associated with the attached Sentinel workspace.
+        Observed live on the Defender Sentinel Workbooks page with a `sourceId`
+        filter and `category=sentinel`.
+      operationId: SentinelPrecision.ListWorkbooks
+      tags: [Sentinel]
+      parameters:
+        - $ref: '#/components/parameters/SubscriptionId'
+        - $ref: '#/components/parameters/ResourceGroupName'
+        - name: api-version
+          in: query
+          description: ARM API version for workbook resources.
+          schema:
+            type: string
+            default: '2018-06-17-preview'
+        - name: canFetchContent
+          in: query
+          description: Whether the workbook content should be expanded inline.
+          schema:
+            type: boolean
+            default: false
+        - name: $filter
+          in: query
+          description: ARM filter expression for the backing workspace source ID.
+          schema:
+            type: string
+        - name: category
+          in: query
+          description: Workbook category to return.
+          schema:
+            type: string
+            default: sentinel
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - workbook resource list
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /apiproxy/arm/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}:
+    get:
+      summary: Get Sentinel workspace
+      description: >-
+        Retrieve the attached Log Analytics workspace details used across the Sentinel
+        experiences surfaced in Defender, including threat intelligence, search,
+        workbooks, and hunting.
+      operationId: SentinelPrecision.GetWorkspace
+      tags: [Sentinel]
+      parameters:
+        - $ref: '#/components/parameters/SubscriptionId'
+        - $ref: '#/components/parameters/ResourceGroupName'
+        - $ref: '#/components/parameters/WorkspaceName'
+        - name: api-version
+          in: query
+          description: ARM API version for the Log Analytics workspace resource.
+          schema:
+            type: string
+            default: '2025-07-01'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - workspace resource
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /apiproxy/arm/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/providers/microsoft.authorization/permissions:
+    get:
+      summary: List Sentinel workspace permissions
+      description: >-
+        Retrieve effective ARM permissions for the attached Sentinel workspace.
+        Observed live across multiple Sentinel pages to determine whether the signed-in
+        user can manage workspace and content resources.
+      operationId: SentinelPrecision.ListWorkspacePermissions
+      tags: [Sentinel]
+      parameters:
+        - $ref: '#/components/parameters/SubscriptionId'
+        - $ref: '#/components/parameters/ResourceGroupName'
+        - $ref: '#/components/parameters/WorkspaceName'
+        - name: api-version
+          in: query
+          description: ARM API version for the permissions action.
+          schema:
+            type: string
+            default: '2018-01-01-preview'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - effective permission list
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /apiproxy/arm/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/contenttemplates:
+    get:
+      summary: List Sentinel content templates
+      description: >-
+        Retrieve Sentinel content-template resources associated with the attached
+        workspace. Observed live on Workbooks and Hunting with `contentKind`
+        filters such as `Workbook` and `HuntingQuery`.
+      operationId: SentinelPrecision.ListContentTemplates
+      tags: [Sentinel]
+      parameters:
+        - $ref: '#/components/parameters/SubscriptionId'
+        - $ref: '#/components/parameters/ResourceGroupName'
+        - $ref: '#/components/parameters/WorkspaceName'
+        - name: api-version
+          in: query
+          description: ARM API version for the content templates resource.
+          schema:
+            type: string
+            default: '2023-10-01-preview'
+        - name: $filter
+          in: query
+          description: ARM filter expression for the desired Sentinel content kind.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - Sentinel content template list
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /apiproxy/arm/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/tables:
+    get:
+      summary: List Sentinel workspace tables
+      description: >-
+        Retrieve Log Analytics tables for the attached Sentinel workspace. Observed
+        live on the Sentinel Search experience, returning table schema and retention
+        metadata for the workspace catalog.
+      operationId: SentinelPrecision.ListWorkspaceTables
+      tags: [Sentinel]
+      parameters:
+        - $ref: '#/components/parameters/SubscriptionId'
+        - $ref: '#/components/parameters/ResourceGroupName'
+        - $ref: '#/components/parameters/WorkspaceName'
+        - name: api-version
+          in: query
+          description: ARM API version for the tables collection.
+          schema:
+            type: string
+            default: '2021-12-01-preview'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - workspace table catalog
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /apiproxy/arm/providers/Microsoft.ResourceGraph/resources:
+    post:
+      summary: Query Azure Resource Graph
+      description: >-
+        Execute Azure Resource Graph queries used by Sentinel pages in Defender to
+        resolve workspace context and content-backed assets such as workbooks and
+        hunting queries.
+      operationId: SentinelPrecision.QueryResourceGraph
+      tags: [Sentinel]
+      parameters:
+        - name: api-version
+          in: query
+          description: ARM API version for the Resource Graph query endpoint.
+          schema:
+            type: string
+            default: '2019-04-01'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                subscriptions:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+                query:
+                  type: string
+              required:
+                - subscriptions
+                - query
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - Resource Graph query result
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /apiproxy/arm/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/threatintelligence/main/count:
+    post:
+      summary: Count Sentinel threat intelligence items
+      description: >-
+        Retrieve the number of Sentinel threat intelligence objects that match the
+        supplied condition. Observed live on the Defender Sentinel threat intelligence
+        page with a condition envelope scoped by STIX object type.
+      operationId: SentinelPrecision.CountThreatIntelligence
+      tags: [Sentinel]
+      parameters:
+        - $ref: '#/components/parameters/SubscriptionId'
+        - $ref: '#/components/parameters/ResourceGroupName'
+        - $ref: '#/components/parameters/WorkspaceName'
+        - name: api-version
+          in: query
+          description: ARM API version for the threat intelligence count action.
+          schema:
+            type: string
+            default: '2024-01-01-preview'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending - threat intelligence count request
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /apiproxy/arm/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/threatintelligence/main/query:
+    post:
+      summary: Query Sentinel threat intelligence items
+      description: >-
+        Retrieve Sentinel threat intelligence objects that match the supplied condition
+        and sort settings. Observed live on the Defender Sentinel threat intelligence
+        page with paging and `sortBy` options.
+      operationId: SentinelPrecision.QueryThreatIntelligence
+      tags: [Sentinel]
+      parameters:
+        - $ref: '#/components/parameters/SubscriptionId'
+        - $ref: '#/components/parameters/ResourceGroupName'
+        - $ref: '#/components/parameters/WorkspaceName'
+        - name: api-version
+          in: query
+          description: ARM API version for the threat intelligence query action.
+          schema:
+            type: string
+            default: '2024-01-01-preview'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending - threat intelligence query request
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - threat intelligence query result
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
 components:
   parameters:
     SubscriptionId:

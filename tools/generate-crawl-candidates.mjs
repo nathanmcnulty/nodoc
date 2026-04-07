@@ -697,6 +697,32 @@ function extractServerHostTemplate(serverUrl) {
   return match?.[1]?.toLowerCase() ?? null;
 }
 
+function extractServerPath(serverUrl) {
+  if (typeof serverUrl !== "string") {
+    return "/";
+  }
+
+  try {
+    return normalizePath(new URL(serverUrl).pathname || "/");
+  } catch {
+    return "/";
+  }
+}
+
+function joinRoutePath(serverPath, routePath) {
+  const normalizedServerPath = normalizePath(serverPath);
+  const normalizedRoutePath = normalizePath(routePath);
+
+  if (
+    normalizedServerPath === "/"
+    || matchesPathPrefix(normalizedRoutePath, normalizedServerPath)
+  ) {
+    return normalizedRoutePath;
+  }
+
+  return normalizePath(`${normalizedServerPath}/${normalizedRoutePath}`);
+}
+
 function hostTemplateToRegex(hostTemplate) {
   return new RegExp(
     `^${escapeRegex(hostTemplate).replace(/\\\{[^}]+\\\}/gu, "[^.]+")}$`,
@@ -705,19 +731,30 @@ function hostTemplateToRegex(hostTemplate) {
 }
 
 function buildSpecContext(specRecord) {
+  const serverPathPrefixes = uniqueSorted(
+    specRecord.serverUrls
+      .map((serverUrl) => extractServerPath(serverUrl))
+      .filter(Boolean),
+  );
   const templateOperations = [];
 
   for (const operation of specRecord.operations) {
-    const normalizedPath = normalizeRoutePath(operation.path);
-    if (!normalizedPath) {
-      continue;
-    }
+    const expandedPaths = uniqueSorted(
+      [
+        normalizeRoutePath(operation.path),
+        ...serverPathPrefixes.map((serverPath) => normalizeRoutePath(
+          joinRoutePath(serverPath, operation.path),
+        )),
+      ].filter(Boolean),
+    );
 
-    templateOperations.push({
-      method: operation.method,
-      path: normalizedPath,
-      pathRegex: pathTemplateToRegex(operation.path),
-    });
+    for (const expandedPath of expandedPaths) {
+      templateOperations.push({
+        method: operation.method,
+        path: expandedPath,
+        pathRegex: pathTemplateToRegex(expandedPath),
+      });
+    }
   }
 
   return {
@@ -726,7 +763,14 @@ function buildSpecContext(specRecord) {
         .map((serverUrl) => extractServerHostTemplate(serverUrl))
         .filter(Boolean),
     ).map((hostname) => hostTemplateToRegex(hostname)),
-    pathPrefixes: specRecord.pathPrefixes.map((prefix) => normalizePath(prefix)),
+    pathPrefixes: uniqueSorted(
+      specRecord.pathPrefixes.flatMap((prefix) => (
+        [
+          normalizePath(prefix),
+          ...serverPathPrefixes.map((serverPath) => joinRoutePath(serverPath, prefix)),
+        ]
+      )),
+    ),
     templateOperations,
     title: specRecord.title,
   };
