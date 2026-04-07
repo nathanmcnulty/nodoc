@@ -232,6 +232,47 @@ paths:
 
         '404':
           $ref: common.yml#/components/responses/NotFound
+    post:
+      summary: Encode hunting query payload
+      description: >-
+        Encode an advanced hunting KQL query submitted in the request body. Observed
+        live on the Exposure Overview experience, which posts a `QueryText` payload
+        and receives a compressed string suitable for deep-linking or client-side
+        reuse.
+      operationId: AdvancedHunting.EncodeQueryBody
+      tags: [Advanced Hunting]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                QueryText:
+                  type: string
+                  description: The KQL query text to encode.
+              required:
+                - QueryText
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: string
+                description: Compressed encoded query payload.
+            application/json:
+              schema:
+                type: string
+                description: Compressed encoded query payload.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /mtp/huntingService/savedfunctions:
     post:

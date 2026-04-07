@@ -1190,6 +1190,130 @@ paths:
         '404':
           $ref: common.yml#/components/responses/NotFound
 
+  /mcas/cas/api/v1/discovery/discovered_apps/metadata:
+    get:
+      summary: Get discovered apps metadata
+      description: >-
+        Retrieve filter and column metadata for the Cloud Discovery discovered-apps
+        grid shown on the Defender Applications page. Observed live returning the
+        `discovered_apps` schema definition, including available filters and operators.
+      operationId: CloudApps.GetDiscoveredAppsMetadata
+      tags: [CloudApps]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - discovered apps metadata
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/discovery/discovered_apps/count:
+    post:
+      summary: Get discovered apps count
+      description: >-
+        Retrieve the total number of discovered apps that match the current Cloud
+        Discovery filter set. Observed live posting paging and stream parameters
+        and returning a `total` count envelope.
+      operationId: CloudApps.GetDiscoveredAppsCount
+      tags: [CloudApps]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending - discovered apps count query
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - discovered apps count response
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/discovery/discovered_apps:
+    post:
+      summary: List discovered apps
+      description: >-
+        Retrieve the paged Cloud Discovery discovered-apps inventory shown on the
+        Defender Applications page. Observed live posting paging, sorting, stream,
+        and timeframe settings and returning a `data` array with `hasNext`.
+      operationId: CloudApps.ListDiscoveredApps
+      tags: [CloudApps]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending - discovered apps query envelope
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - discovered apps page
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/discovery/discovered_apps/categories:
+    post:
+      summary: List discovered app categories
+      description: >-
+        Retrieve category aggregates for the current discovered-apps query. Observed
+        live posting sort and stream context and returning `id`/`total` category buckets.
+      operationId: CloudApps.ListDiscoveredAppCategories
+      tags: [CloudApps]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending - discovered app category aggregation query
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - discovered app category buckets
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
   /mcas/cas/api/v1/discovery/category_stats:
     get:
       summary: Get discovery category stats
