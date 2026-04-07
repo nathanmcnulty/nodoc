@@ -1,0 +1,495 @@
+paths:
+  /apiproxy/arm/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/overview:
+    post:
+      summary: Get Sentinel overview sections
+      description: >-
+        Retrieve selected overview sections for the Defender portal's Microsoft Sentinel
+        Precision experience. Observed live on the `/sentinel/precision` route with the
+        `DataConnectors` section, which returns connector activity, ingestion snapshots,
+        and unhealthy connector state for the attached Sentinel workspace.
+      operationId: SentinelPrecision.GetOverview
+      tags: [Sentinel]
+      parameters:
+        - $ref: '#/components/parameters/SubscriptionId'
+        - $ref: '#/components/parameters/ResourceGroupName'
+        - $ref: '#/components/parameters/WorkspaceName'
+        - name: sections
+          in: query
+          description: Comma-separated overview sections to return.
+          schema:
+            type: string
+            default: DataConnectors
+          example: DataConnectors
+        - name: api-version
+          in: query
+          description: ARM API version for the Sentinel overview resource.
+          schema:
+            type: string
+            default: '2022-09-01-preview'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SentinelOverviewRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SentinelOverviewResponse'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /apiproxy/arm/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/recommendations:
+    get:
+      summary: List Sentinel precision recommendations
+      description: >-
+        Retrieve Microsoft Sentinel Precision recommendations for the attached workspace.
+        Observed live on the Defender `/sentinel/precision` page, where the response
+        included coverage-improvement recommendations with suggested analytics rule
+        template IDs and tactic/technique guidance.
+      operationId: SentinelPrecision.ListRecommendations
+      tags: [Sentinel]
+      parameters:
+        - $ref: '#/components/parameters/SubscriptionId'
+        - $ref: '#/components/parameters/ResourceGroupName'
+        - $ref: '#/components/parameters/WorkspaceName'
+        - name: api-version
+          in: query
+          description: ARM API version for the Sentinel recommendations resource.
+          schema:
+            type: string
+            default: '2024-01-01-preview'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SentinelRecommendationListResponse'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /apiproxy/arm/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/settings/{settingName}:
+    get:
+      summary: Get Sentinel workspace setting
+      description: >-
+        Retrieve a Sentinel workspace setting exposed through the Defender Precision
+        experience. Observed live with `EntityAnalytics` and `Ueba`. Newly attached
+        workspaces can return `404 NotFound` for `Ueba` before that setting is provisioned.
+      operationId: SentinelPrecision.GetSetting
+      tags: [Sentinel]
+      parameters:
+        - $ref: '#/components/parameters/SubscriptionId'
+        - $ref: '#/components/parameters/ResourceGroupName'
+        - $ref: '#/components/parameters/WorkspaceName'
+        - $ref: '#/components/parameters/SentinelSettingName'
+        - name: api-version
+          in: query
+          description: ARM API version for the Sentinel settings resource.
+          schema:
+            type: string
+            default: '2022-04-01-preview'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SentinelSettingResource'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          description: Setting not found for this workspace.
+          content:
+            application/json:
+              schema:
+                $ref: common.yml#/components/schemas/ErrorResponse
+
+  /apiproxy/arm/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/metadata:
+    get:
+      summary: List Sentinel content metadata
+      description: >-
+        Retrieve Sentinel metadata resources for the attached workspace from the Defender
+        Precision experience. The observed workspace returned an empty metadata list on first load.
+      operationId: SentinelPrecision.ListMetadata
+      tags: [Sentinel]
+      parameters:
+        - $ref: '#/components/parameters/SubscriptionId'
+        - $ref: '#/components/parameters/ResourceGroupName'
+        - $ref: '#/components/parameters/WorkspaceName'
+        - name: api-version
+          in: query
+          description: ARM API version for the Sentinel metadata resource.
+          schema:
+            type: string
+            default: '2022-11-01-preview'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SentinelMetadataListResponse'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /apiproxy/arm/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/dataConnectorDefinitions:
+    get:
+      summary: List Sentinel data connector definitions
+      description: >-
+        Retrieve the catalog of Sentinel data connector definitions that the Defender
+        Precision experience checks when rendering connector coverage and onboarding state.
+        The observed workspace returned an empty `value` array on first load.
+      operationId: SentinelPrecision.ListDataConnectorDefinitions
+      tags: [Sentinel]
+      parameters:
+        - $ref: '#/components/parameters/SubscriptionId'
+        - $ref: '#/components/parameters/ResourceGroupName'
+        - $ref: '#/components/parameters/WorkspaceName'
+        - name: api-version
+          in: query
+          description: ARM API version for the Sentinel data connector definitions resource.
+          schema:
+            type: string
+            default: '2024-01-01-preview'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SentinelMetadataListResponse'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /apiproxy/arm/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/dataConnectors:
+    get:
+      summary: List Sentinel data connectors
+      description: >-
+        Retrieve the Sentinel data connectors rendered by the Defender Precision
+        experience. Observed live returning both static connector cards and the concrete
+        `MicrosoftThreatProtection` connector resource with enabled alert and incident data types.
+      operationId: SentinelPrecision.ListDataConnectors
+      tags: [Sentinel]
+      parameters:
+        - $ref: '#/components/parameters/SubscriptionId'
+        - $ref: '#/components/parameters/ResourceGroupName'
+        - $ref: '#/components/parameters/WorkspaceName'
+        - name: api-version
+          in: query
+          description: ARM API version for the Sentinel data connectors resource.
+          schema:
+            type: string
+            default: '2021-10-01-preview'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SentinelDataConnectorListResponse'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /apiproxy/arm/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/entities/GetAnomaliesSummary:
+    get:
+      summary: Get Sentinel anomalies summary
+      description: >-
+        Retrieve aggregate anomaly counters for the attached Sentinel workspace from the
+        Defender Precision page. Observed live returning a rolling 14-day summary with
+        anomaly counts grouped by type.
+      operationId: SentinelPrecision.GetAnomaliesSummary
+      tags: [Sentinel]
+      parameters:
+        - $ref: '#/components/parameters/SubscriptionId'
+        - $ref: '#/components/parameters/ResourceGroupName'
+        - $ref: '#/components/parameters/WorkspaceName'
+        - name: api-version
+          in: query
+          description: ARM API version for the anomalies summary action.
+          schema:
+            type: string
+            default: '2025-07-01-preview'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SentinelAnomaliesSummaryResponse'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+components:
+  parameters:
+    SubscriptionId:
+      name: subscriptionId
+      in: path
+      required: true
+      description: Azure subscription ID of the attached Sentinel workspace.
+      schema:
+        type: string
+        format: uuid
+    ResourceGroupName:
+      name: resourceGroupName
+      in: path
+      required: true
+      description: Resource group that contains the Sentinel workspace.
+      schema:
+        type: string
+    WorkspaceName:
+      name: workspaceName
+      in: path
+      required: true
+      description: Log Analytics workspace name attached to Sentinel.
+      schema:
+        type: string
+    SentinelSettingName:
+      name: settingName
+      in: path
+      required: true
+      description: Sentinel setting name requested by the Defender Precision page.
+      schema:
+        type: string
+        enum:
+          - EntityAnalytics
+          - Ueba
+
+  schemas:
+    SentinelOverviewRequest:
+      type: object
+      description: Request wrapper used by the Sentinel overview action.
+      properties:
+        arguments:
+          type: object
+          description: Placeholder argument bag; observed live as an empty object.
+          additionalProperties: true
+      example:
+        arguments: {}
+
+    SentinelOverviewResponse:
+      type: object
+      description: Sentinel overview response for the requested sections.
+      properties:
+        DataConnectors:
+          type: object
+          properties:
+            sectionKind:
+              type: string
+              example: DataConnectors
+            data:
+              type: object
+              properties:
+                ActiveConnectors:
+                  type: object
+                  additionalProperties:
+                    type: string
+                    format: date-time
+                AnomaliesVolume:
+                  type: array
+                  items:
+                    type: object
+                    additionalProperties: true
+                TIByType:
+                  type: object
+                  additionalProperties: true
+                TotalVolume:
+                  type: array
+                  items:
+                    type: string
+                    description: JSON-serialized volume sample as returned by the page.
+                UnhealthyConnectors:
+                  type: object
+                  additionalProperties: true
+            dataQueryTime:
+              type: string
+              format: date-time
+            isFromCache:
+              type: boolean
+
+    SentinelRecommendationListResponse:
+      type: object
+      description: List response returned by Sentinel recommendations.
+      properties:
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/SentinelRecommendation'
+
+    SentinelRecommendation:
+      type: object
+      description: Coverage or posture recommendation returned by Sentinel Precision.
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        type:
+          type: string
+          example: Microsoft.SecurityInsights/Recommendations
+        properties:
+          type: object
+          properties:
+            recommendationTypeId:
+              type: string
+              example: Precision_Coverage
+            state:
+              type: string
+              example: Active
+            title:
+              type: string
+            description:
+              description: Human-readable explanation of the coverage or posture gap.
+              type: string
+            creationTimeUtc:
+              type: string
+              format: date-time
+            lastEvaluatedTimeUtc:
+              type: string
+              format: date-time
+            lastModifiedTimeUtc:
+              type: string
+              format: date-time
+            suggestions:
+              type: array
+              items:
+                type: object
+                properties:
+                  suggestionTypeId:
+                    type: string
+                  title:
+                    type: string
+                  description:
+                    description: Human-readable explanation of the suggested remediation step.
+                    type: string
+                  action:
+                    type: string
+                  additionalProperties:
+                    type: object
+                    additionalProperties: true
+                additionalProperties: true
+          additionalProperties: true
+
+    SentinelSettingResource:
+      type: object
+      description: Sentinel setting resource returned through the ARM proxy.
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        etag:
+          type: string
+        type:
+          type: string
+          example: Microsoft.SecurityInsights/settings
+        kind:
+          type: string
+          example: EntityAnalytics
+        properties:
+          type: object
+          additionalProperties: true
+
+    SentinelMetadataListResponse:
+      type: object
+      description: Generic list response returned by Sentinel metadata-style resources.
+      properties:
+        value:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+
+    SentinelDataConnectorListResponse:
+      type: object
+      description: List response returned by Sentinel data connectors.
+      properties:
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/SentinelDataConnector'
+
+    SentinelDataConnector:
+      type: object
+      description: Sentinel data connector entry returned by the Defender Precision page.
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        etag:
+          type: string
+        type:
+          type: string
+          example: Microsoft.SecurityInsights/dataConnectors
+        kind:
+          type: string
+          example: MicrosoftThreatProtection
+        properties:
+          type: object
+          properties:
+            connectorUiConfig:
+              type: object
+              properties:
+                id:
+                  type: string
+            dataTypes:
+              type: object
+              additionalProperties:
+                type: object
+                additionalProperties: true
+            filteredProviders:
+              type: object
+              additionalProperties:
+                type: array
+                items:
+                  type: string
+            tenantId:
+              type: string
+              format: uuid
+          additionalProperties: true
+
+    SentinelAnomaliesSummaryResponse:
+      type: object
+      description: Aggregate anomaly counters returned by the Sentinel anomalies summary action.
+      properties:
+        TotalAnomaliesCountInWindow:
+          type: integer
+          example: 0
+        TotalAnomaliesTimeRange:
+          type: string
+          example: Last 14 days
+        AnomaliesByType:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
