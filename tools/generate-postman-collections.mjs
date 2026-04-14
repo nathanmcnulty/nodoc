@@ -77,6 +77,11 @@ const collectionDefinitions = [
     output: "postman/collections/purview-portal.collection.json",
   },
   {
+    name: "Security Copilot Portal",
+    spec: "specifications/nodoc-security-copilot/specification/openapi.yml",
+    output: "postman/collections/security-copilot.collection.json",
+  },
+  {
     name: "Entra IAM",
     spec: "specifications/nodoc-ibiza-iam/specification/openapi.yml",
     output: "postman/collections/entra-iam.collection.json",

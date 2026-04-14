@@ -1,0 +1,975 @@
+openapi: 3.0.1
+info:
+  title: Security Copilot Portal
+  x-nodoc-route: security-copilot
+  description: |
+    The Security Copilot Portal API is used by Microsoft Security Copilot (`securitycopilot.microsoft.com`)
+    for portal bootstrap, workspace provisioning, workspace and policy resolution, session and promptbook
+    inventory, agent and builder experiences, and Security Store discovery.
+
+    The operations below were confirmed while browsing the Security Copilot portal with a real
+    authenticated Edge session. Live captures covered these surfaces:
+
+      - Home
+      - Agents
+      - Promptbooks
+      - Manage workspaces
+      - Usage monitoring
+      - Security Store
+      - Build and Builder
+
+    The published scope intentionally focuses on Security Copilot-specific host families and excludes
+    generic Entra login/token traffic, browser telemetry, and shared Azure Resource Manager discovery
+    reads such as `GET /tenants` and `GET /subscriptions`.
+
+    A safe write-shape capture was confirmed for `POST /provisioning/create`: opening the initial
+    create-capacity flow and then canceling it produced `OperationWhatIfSuccess` without completing a
+    real provisioning submission.
+
+    Documentation and specifications have been provided on a best-efforts basis and may not be
+    100% accurate.
+  version: 0.1.0
+  contact:
+    name: nodoc
+    url: https://github.com/nathanmcnulty/nodoc
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+servers:
+  - url: https://api.securitycopilot.microsoft.com
+    description: Security Copilot bootstrap, auth, preference, usage, and directory helper API
+  - url: https://api.securityplatform.microsoft.com
+    description: Global Security Platform provisioning and account control plane used by Security Copilot
+  - url: https://us.api.securityplatform.microsoft.com
+    description: Regional Security Platform workspace content and policy plane observed in the current tenant
+  - url: https://prod.cds.securitycopilot.microsoft.com
+    description: Security Copilot trial-status service used during portal startup
+  - url: https://securitymarketplaceapi-prod.microsoft.com
+    description: Security Store catalog backend
+  - url: https://ecs.office.com
+    description: Security Store client-configuration service
+security:
+  - bearerAuth: []
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        Browser-acquired Entra bearer token used by the Security Copilot portal. Observed requests also
+        depended on active portal state such as the selected workspace, regional Security Platform host,
+        and same-origin navigation context.
+  parameters:
+    WorkspaceAccessCheck:
+      name: CheckWorkspaceAccess
+      in: query
+      required: false
+      description: Whether the portal should validate workspace access as part of the auth probe.
+      schema:
+        type: boolean
+        default: false
+        example: false
+    ApiVersion20230301Preview:
+      name: api-version
+      in: query
+      required: true
+      description: Preview API version observed on workspace list and workspace detail requests.
+      schema:
+        type: string
+        example: 2023-12-01-preview
+    ApiVersion20240301Preview:
+      name: api-version
+      in: query
+      required: true
+      description: Preview API version observed on Security Platform provisioning helpers.
+      schema:
+        type: string
+        example: 2024-03-01-preview
+    ApiVersion20240101Preview:
+      name: api-version
+      in: query
+      required: true
+      description: Preview API version observed on workspace policy reads.
+      schema:
+        type: string
+        example: 2024-01-01-preview
+    PodId:
+      name: podId
+      in: path
+      required: true
+      description: Regional Security Platform pod identifier for the active account.
+      schema:
+        type: string
+        format: uuid
+        example: 11111111-2222-3333-4444-555555555555
+    WorkspaceName:
+      name: workspaceName
+      in: path
+      required: true
+      description: Security Copilot workspace name.
+      schema:
+        type: string
+        example: security-copilot
+    UserId:
+      name: userId
+      in: path
+      required: true
+      description: User object identifier within the current tenant.
+      schema:
+        type: string
+        format: uuid
+        example: 00000000-1111-2222-3333-444444444444
+    SkillsetName:
+      name: skillsetName
+      in: path
+      required: true
+      description: Security Copilot skillset identifier.
+      schema:
+        type: string
+        example: Entra
+    AgentScope:
+      name: scope
+      in: query
+      required: true
+      description: Scope whose agents should be listed.
+      schema:
+        type: string
+        enum: [User, Workspace]
+        example: Workspace
+    AgentDefinitionScope:
+      name: scope
+      in: query
+      required: true
+      description: Scope whose agent definitions should be returned.
+      schema:
+        type: string
+        example: User
+    Expand:
+      name: expand
+      in: query
+      required: false
+      description: Whether to expand related agent details in the response.
+      schema:
+        type: boolean
+        default: true
+        example: true
+    SessionLimit:
+      name: limit
+      in: query
+      required: false
+      description: Maximum number of recent sessions to return.
+      schema:
+        type: integer
+        example: 4
+    SessionSortBy:
+      name: sortBy
+      in: query
+      required: false
+      description: Session field used for ordering.
+      schema:
+        type: string
+        example: UpdatedAt
+    SessionSortDirection:
+      name: sortDirection
+      in: query
+      required: false
+      description: Sort direction for the session list.
+      schema:
+        type: string
+        example: desc
+    EnablePagination:
+      name: enablePagination
+      in: query
+      required: false
+      description: Whether paginated session results should be returned.
+      schema:
+        type: boolean
+        example: true
+    PromptSuggestionPersonasJson:
+      name: personasJson
+      in: query
+      required: false
+      description: JSON-encoded persona filter array.
+      schema:
+        type: string
+        example: '[]'
+    PromptSuggestionSkillsetsJson:
+      name: skillsetsJson
+      in: query
+      required: false
+      description: JSON-encoded skillset filter array.
+      schema:
+        type: string
+        example: '[]'
+    SkillsetConfigurationScope:
+      name: scope
+      in: query
+      required: false
+      description: Scope whose skillset configuration records should be returned.
+      schema:
+        type: string
+        enum: [Workspace, UserWorkspace]
+        example: UserWorkspace
+    IncludeHidden:
+      name: includeHidden
+      in: query
+      required: false
+      description: Whether hidden skills should be included.
+      schema:
+        type: boolean
+        example: true
+    SecurityMarketplaceApiVersion:
+      name: api-version
+      in: query
+      required: true
+      description: Catalog API version observed on Security Store search requests.
+      schema:
+        type: string
+        example: 2025-11-01
+    ProductCapabilities:
+      name: productCapabilities
+      in: query
+      required: false
+      description: Product capability filter used by the Security Store.
+      schema:
+        type: string
+        example: Agent
+    SecurityService:
+      name: SecurityService
+      in: query
+      required: true
+      description: Security service family whose Security Store client settings should be loaded.
+      schema:
+        type: string
+        example: default
+    Environment:
+      name: Environment
+      in: query
+      required: true
+      description: Deployment environment whose Security Store client settings should be loaded.
+      schema:
+        type: string
+        example: Prod
+  responses:
+    Unauthorized:
+      description: Authentication is required or the current browser token is no longer valid.
+    Forbidden:
+      description: The authenticated principal does not have access to the requested portal data.
+    BadRequest:
+      description: The request shape or parameters were invalid.
+    NotFound:
+      description: The requested resource was not found in the current workspace or tenant context.
+  schemas:
+    GenericObject:
+      type: object
+      additionalProperties: true
+    GenericListEnvelope:
+      type: object
+      properties:
+        content:
+          nullable: true
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/GenericObject'
+        nextLink:
+          type: string
+          nullable: true
+        count:
+          type: integer
+          nullable: true
+      additionalProperties: true
+    FeatureFlagsResponse:
+      type: object
+      description: Feature flags and portal capabilities enabled for the current user.
+      properties:
+        featureFlags:
+          type: array
+          items:
+            type: string
+      additionalProperties: true
+    UserInfoResponse:
+      type: object
+      description: Current-user bootstrap payload used to light up Security Copilot features and permissions.
+      properties:
+        statusCode:
+          type: integer
+        isAdmin:
+          type: boolean
+        isGlobalAdmin:
+          type: boolean
+        isOperator:
+          type: boolean
+        featureFlags:
+          type: array
+          items:
+            type: string
+      additionalProperties: true
+    DataShareSettings:
+      type: object
+      description: Tenant-level data-sharing and workspace feature settings shown in Security Copilot administration views.
+      additionalProperties: true
+    WorkspacePreference:
+      type: object
+      description: Current or default workspace preference returned by Security Copilot preference APIs.
+      additionalProperties: true
+    TrialRecord:
+      type: object
+      additionalProperties: true
+    GraphDetailsRequest:
+      type: object
+      description: Batch object-resolution request used by workspace-role and policy views.
+      additionalProperties: true
+    GraphDetailsResponse:
+      type: object
+      additionalProperties: true
+    ProvisioningAccountResponse:
+      type: object
+      description: Security Platform account and pod inventory for the current tenant.
+      additionalProperties: true
+    WorkspaceListResponse:
+      type: object
+      description: Workspace list returned by the Security Platform account control plane.
+      additionalProperties: true
+    ContainerPermissionCheckRequest:
+      type: array
+      description: Container permission names to evaluate for the current principal.
+      items:
+        type: string
+    ContainerPermissionCheckResponse:
+      type: object
+      description: Dictionary of permission evaluation results keyed by container type and permission name.
+      additionalProperties: true
+    PersonaValuesResponse:
+      type: array
+      description: Persona labels used by prompt suggestion and onboarding experiences.
+      items:
+        type: string
+    UserActivityResponse:
+      type: object
+      additionalProperties: true
+    SessionsResponse:
+      type: object
+      additionalProperties: true
+    AgentsResponse:
+      type: object
+      additionalProperties: true
+    MarketplaceClientConfigResponse:
+      type: object
+      description: ECS configuration payload loaded by the Security Store page.
+      additionalProperties: true
+    MarketplaceSearchResponse:
+      type: object
+      description: Security Store agent catalog search response.
+      additionalProperties: true
+tags:
+  - name: Auth
+    description: Portal auth probes, current-user context, workspace preferences, and feature-flight reads.
+  - name: Provisioning
+    description: Security Platform account and workspace provisioning helpers used by create-capacity and workspace setup flows.
+  - name: Workspace
+    description: Workspace metadata, policy, persona, and activity reads.
+  - name: Sessions
+    description: Session inventory and prompt suggestion helpers used by the home and history experiences.
+  - name: Agents
+    description: Agent inventory, agent definitions, and related builder dependency reads.
+  - name: Promptbooks
+    description: Promptbook inventory used by the Promptbooks page and home recommendations.
+  - name: Builder
+    description: Build and Builder skillset inventory, configuration, and requirement-check helpers.
+  - name: Store
+    description: Security Store configuration and catalog discovery requests.
+x-tagGroups:
+  - name: Bootstrap
+    tags: [Auth, Provisioning]
+  - name: Workspace
+    tags: [Workspace, Sessions]
+  - name: Creation
+    tags: [Agents, Promptbooks, Builder]
+  - name: Marketplace
+    tags: [Store]
+externalDocs:
+  description: Checked-in source specification and supporting modules.
+  url: https://github.com/nathanmcnulty/nodoc/tree/main/specifications/nodoc-security-copilot/specification
+
+paths:
+  /auth:
+    get:
+      tags: [Auth]
+      summary: Probe Security Copilot auth readiness
+      description: |
+        Performs the lightweight auth probe used during portal startup. In the captured tenant this
+        returned `204 No Content` when called as `GET /auth?CheckWorkspaceAccess=false`.
+      operationId: SecurityCopilotPortal.Auth.Probe
+      parameters:
+        - $ref: '#/components/parameters/WorkspaceAccessCheck'
+      responses:
+        '204':
+          description: The current browser session is authenticated for the requested probe mode.
+
+  /auth/userInfo:
+    get:
+      tags: [Auth]
+      summary: Get current Security Copilot user context
+      description: |
+        Retrieves the current user's Security Copilot admin and feature context. Confirmed live both
+        with and without `CheckPartnerAccess=true` during portal bootstrap.
+      operationId: SecurityCopilotPortal.Auth.GetUserInfo
+      parameters:
+        - name: CheckPartnerAccess
+          in: query
+          required: false
+          description: Whether partner-access context should also be evaluated.
+          schema:
+            type: boolean
+            example: true
+      responses:
+        '200':
+          description: Current-user context returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserInfoResponse'
+
+  /auth/expiryDate:
+    get:
+      tags: [Auth]
+      summary: Get workspace capacity auth expiry state
+      description: |
+        Retrieves the current workspace capacity-authentication expiry state. In the captured tenant
+        this returned a contextual `404 NotFound` with `capacityResourceNotFound` because no capacity
+        was attached to the workspace, which still confirms the route and its error contract.
+      operationId: SecurityCopilotPortal.Auth.GetExpiryDate
+      responses:
+        '200':
+          description: Capacity-authentication expiry details returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '404':
+          description: No capacity is attached to the current workspace.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+
+  /users/features:
+    get:
+      tags: [Auth]
+      summary: Get Security Copilot feature flags
+      description: Retrieves the feature-flag set used to light up Security Copilot portal capabilities for the current user.
+      operationId: SecurityCopilotPortal.Users.GetFeatures
+      responses:
+        '200':
+          description: Feature flags returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeatureFlagsResponse'
+
+  /settings/datashare:
+    get:
+      tags: [Auth]
+      summary: Get tenant data-sharing settings
+      description: Retrieves tenant-level data-sharing and feature settings used by Security Copilot startup and administration pages.
+      operationId: SecurityCopilotPortal.Settings.GetDataShare
+      responses:
+        '200':
+          description: Data-sharing settings returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataShareSettings'
+
+  /settings/datashare/defaultWorkspace:
+    get:
+      tags: [Auth]
+      summary: Get default workspace preference
+      description: Retrieves the workspace preference used as the portal's default workspace context.
+      operationId: SecurityCopilotPortal.Settings.GetDefaultWorkspace
+      responses:
+        '200':
+          description: Default workspace returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkspacePreference'
+
+  /userPreferences/currentWorkspace:
+    get:
+      tags: [Auth]
+      summary: Get current workspace preference
+      description: Retrieves the workspace currently selected in the active portal session.
+      operationId: SecurityCopilotPortal.UserPreferences.GetCurrentWorkspace
+      responses:
+        '200':
+          description: Current workspace returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkspacePreference'
+
+  /usage/capacities:
+    get:
+      tags: [Auth]
+      summary: List attached Security Copilot capacities
+      description: |
+        Retrieves capacity references available to the current workspace. The captured tenant returned
+        an empty array, which still confirms the route and response shape.
+      operationId: SecurityCopilotPortal.Usage.ListCapacities
+      responses:
+        '200':
+          description: Capacity list returned successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GenericObject'
+
+  /trial:
+    get:
+      tags: [Auth]
+      summary: List Security Copilot trial records
+      description: Retrieves Security Copilot trial records from the CDS-backed trial service used during portal startup.
+      operationId: SecurityCopilotPortal.Trial.List
+      responses:
+        '200':
+          description: Trial records returned successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TrialRecord'
+
+  /graphData/details:
+    post:
+      tags: [Workspace]
+      summary: Resolve Entra object details for workspace policy views
+      description: Resolves user, role, group, and service-principal identifiers into display metadata for the Manage workspaces experience.
+      operationId: SecurityCopilotPortal.GraphData.GetDetails
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GraphDetailsRequest'
+      responses:
+        '200':
+          description: Directory details returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GraphDetailsResponse'
+
+  /provisioning/create:
+    post:
+      tags: [Provisioning]
+      summary: Run Security Copilot create-capacity what-if
+      description: |
+        Triggers the initial Security Platform provisioning preflight used by the create-capacity flow.
+        In the captured run this was opened from the startup dialog and then canceled before submission;
+        the request body was `{}` and the response body was the literal string `OperationWhatIfSuccess`.
+      operationId: SecurityCopilotPortal.Provisioning.CreateWhatIf
+      parameters:
+        - $ref: '#/components/parameters/ApiVersion20240301Preview'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+            example: {}
+      responses:
+        '200':
+          description: The provisioning preflight completed successfully.
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: OperationWhatIfSuccess
+
+  /provisioning/account:
+    get:
+      tags: [Provisioning]
+      summary: Get Security Platform account and pod inventory
+      description: Retrieves the Security Platform account record and regional pod inventory backing the current tenant.
+      operationId: SecurityCopilotPortal.Provisioning.GetAccount
+      parameters:
+        - $ref: '#/components/parameters/ApiVersion20240301Preview'
+      responses:
+        '200':
+          description: Account inventory returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProvisioningAccountResponse'
+
+  /account/workspaces:
+    get:
+      tags: [Provisioning]
+      summary: List Security Copilot workspaces
+      description: Lists Security Copilot workspaces attached to the current Security Platform account.
+      operationId: SecurityCopilotPortal.Account.ListWorkspaces
+      parameters:
+        - $ref: '#/components/parameters/ApiVersion20230301Preview'
+      responses:
+        '200':
+          description: Workspace list returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkspaceListResponse'
+
+  /api/gateway/actions/containers/me:
+    post:
+      tags: [Provisioning]
+      summary: Evaluate current-container permissions
+      description: Evaluates container permissions for the current user during startup and workspace write-light-up checks.
+      operationId: SecurityCopilotPortal.ActionGateway.EvaluateContainerPermissions
+      parameters:
+        - $ref: '#/components/parameters/ApiVersion20240301Preview'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContainerPermissionCheckRequest'
+      responses:
+        '200':
+          description: Permission evaluation returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContainerPermissionCheckResponse'
+
+  /provisioning/checkTenant:
+    get:
+      tags: [Provisioning]
+      summary: Check Security Platform tenant eligibility
+      description: Retrieves the Security Platform tenant account type and tenant geo used during startup and provisioning decisions.
+      operationId: SecurityCopilotPortal.Provisioning.CheckTenant
+      parameters:
+        - $ref: '#/components/parameters/ApiVersion20240301Preview'
+      responses:
+        '200':
+          description: Tenant provisioning context returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+
+  /pods/{podId}/workspaces/{workspaceName}:
+    get:
+      tags: [Workspace]
+      summary: Get workspace metadata
+      description: Retrieves the Security Copilot workspace record from the regional Security Platform content plane.
+      operationId: SecurityCopilotPortal.Workspaces.Get
+      parameters:
+        - $ref: '#/components/parameters/PodId'
+        - $ref: '#/components/parameters/WorkspaceName'
+        - $ref: '#/components/parameters/ApiVersion20230301Preview'
+      responses:
+        '200':
+          description: Workspace metadata returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+
+  /pods/{podId}/policystore/workspaces/{workspaceName}/workspacePolicy:
+    get:
+      tags: [Workspace]
+      summary: Get workspace policy document
+      description: Retrieves the workspace policy document used by the Manage workspaces page to show role and permission assignments.
+      operationId: SecurityCopilotPortal.WorkspacePolicy.Get
+      parameters:
+        - $ref: '#/components/parameters/PodId'
+        - $ref: '#/components/parameters/WorkspaceName'
+        - $ref: '#/components/parameters/ApiVersion20240101Preview'
+      responses:
+        '200':
+          description: Workspace policy returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+
+  /pods/{podId}/workspaces/{workspaceName}/securitycopilot/personas/values:
+    get:
+      tags: [Workspace]
+      summary: List persona labels
+      description: Retrieves the persona values used across onboarding, home suggestions, and filtering.
+      operationId: SecurityCopilotPortal.Personas.ListValues
+      parameters:
+        - $ref: '#/components/parameters/PodId'
+        - $ref: '#/components/parameters/WorkspaceName'
+      responses:
+        '200':
+          description: Persona values returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PersonaValuesResponse'
+
+  /pods/{podId}/workspaces/{workspaceName}/securitycopilot/personas/skillsets:
+    get:
+      tags: [Workspace]
+      summary: List persona skillset mappings
+      description: Retrieves the skillset names associated with current persona configuration.
+      operationId: SecurityCopilotPortal.Personas.ListSkillsets
+      parameters:
+        - $ref: '#/components/parameters/PodId'
+        - $ref: '#/components/parameters/WorkspaceName'
+      responses:
+        '200':
+          description: Persona skillset names returned successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+
+  /pods/{podId}/workspaces/{workspaceName}/securitycopilot/users/{userId}/activities:
+    get:
+      tags: [Workspace]
+      summary: Get recent Security Copilot user activity
+      description: Retrieves recent per-user activity metadata, including the last prompt execution timestamp.
+      operationId: SecurityCopilotPortal.Users.GetActivities
+      parameters:
+        - $ref: '#/components/parameters/PodId'
+        - $ref: '#/components/parameters/WorkspaceName'
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: User activity returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserActivityResponse'
+
+  /pods/{podId}/workspaces/{workspaceName}/securitycopilot/availabletrials:
+    get:
+      tags: [Workspace]
+      summary: List workspace-available trials
+      description: Retrieves Security Copilot trial offers available to the current workspace. The captured tenant returned an empty list.
+      operationId: SecurityCopilotPortal.Workspace.ListAvailableTrials
+      parameters:
+        - $ref: '#/components/parameters/PodId'
+        - $ref: '#/components/parameters/WorkspaceName'
+      responses:
+        '200':
+          description: Available trials returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericListEnvelope'
+
+  /pods/{podId}/workspaces/{workspaceName}/securitycopilot/sessions:
+    get:
+      tags: [Sessions]
+      summary: List recent Security Copilot sessions
+      description: Retrieves recent sessions shown in the home and history experiences.
+      operationId: SecurityCopilotPortal.Sessions.List
+      parameters:
+        - $ref: '#/components/parameters/PodId'
+        - $ref: '#/components/parameters/WorkspaceName'
+        - $ref: '#/components/parameters/SessionLimit'
+        - $ref: '#/components/parameters/SessionSortBy'
+        - $ref: '#/components/parameters/SessionSortDirection'
+        - $ref: '#/components/parameters/EnablePagination'
+      responses:
+        '200':
+          description: Session list returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionsResponse'
+
+  /pods/{podId}/workspaces/{workspaceName}/securitycopilot/promptbooks:
+    get:
+      tags: [Promptbooks]
+      summary: List promptbooks
+      description: Retrieves promptbooks available to the current workspace and portal experience.
+      operationId: SecurityCopilotPortal.Promptbooks.List
+      parameters:
+        - $ref: '#/components/parameters/PodId'
+        - $ref: '#/components/parameters/WorkspaceName'
+      responses:
+        '200':
+          description: Promptbooks returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericListEnvelope'
+
+  /pods/{podId}/workspaces/{workspaceName}/securitycopilot/agents:
+    get:
+      tags: [Agents]
+      summary: List agents
+      description: Retrieves Security Copilot agents for the requested scope.
+      operationId: SecurityCopilotPortal.Agents.List
+      parameters:
+        - $ref: '#/components/parameters/PodId'
+        - $ref: '#/components/parameters/WorkspaceName'
+        - $ref: '#/components/parameters/AgentScope'
+        - $ref: '#/components/parameters/Expand'
+      responses:
+        '200':
+          description: Agent list returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentsResponse'
+
+  /pods/{podId}/workspaces/{workspaceName}/securitycopilot/agentdefinitions:
+    get:
+      tags: [Agents]
+      summary: List agent definitions
+      description: Retrieves agent definitions used to populate the Agents catalog and setup surfaces.
+      operationId: SecurityCopilotPortal.AgentDefinitions.List
+      parameters:
+        - $ref: '#/components/parameters/PodId'
+        - $ref: '#/components/parameters/WorkspaceName'
+        - $ref: '#/components/parameters/AgentDefinitionScope'
+      responses:
+        '200':
+          description: Agent definitions returned successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GenericObject'
+
+  /pods/{podId}/workspaces/{workspaceName}/securitycopilot/prompt-suggestions/personas:
+    get:
+      tags: [Sessions]
+      summary: Get persona-scoped suggested prompts
+      description: Retrieves home-page suggested prompts filtered by persona and optional skillset context.
+      operationId: SecurityCopilotPortal.PromptSuggestions.ListByPersona
+      parameters:
+        - $ref: '#/components/parameters/PodId'
+        - $ref: '#/components/parameters/WorkspaceName'
+        - $ref: '#/components/parameters/PromptSuggestionPersonasJson'
+        - $ref: '#/components/parameters/PromptSuggestionSkillsetsJson'
+      responses:
+        '200':
+          description: Suggested prompts returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+
+  /pods/{podId}/workspaces/{workspaceName}/securitycopilot/skillsets:
+    get:
+      tags: [Builder]
+      summary: List skillsets and plugins
+      description: Retrieves the available skillsets and plugin-like capabilities shown in Promptbooks and Builder.
+      operationId: SecurityCopilotPortal.Skillsets.List
+      parameters:
+        - $ref: '#/components/parameters/PodId'
+        - $ref: '#/components/parameters/WorkspaceName'
+      responses:
+        '200':
+          description: Skillsets returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericListEnvelope'
+
+  /pods/{podId}/workspaces/{workspaceName}/securitycopilot/skillsets/configurations:
+    get:
+      tags: [Builder]
+      summary: List skillset configurations
+      description: Retrieves saved skillset configuration and auth metadata used by Builder onboarding and setup flows.
+      operationId: SecurityCopilotPortal.Skillsets.ListConfigurations
+      parameters:
+        - $ref: '#/components/parameters/PodId'
+        - $ref: '#/components/parameters/WorkspaceName'
+        - $ref: '#/components/parameters/SkillsetConfigurationScope'
+      responses:
+        '200':
+          description: Skillset configurations returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericListEnvelope'
+
+  /pods/{podId}/workspaces/{workspaceName}/securitycopilot/skillsets/checkRequirements:
+    get:
+      tags: [Builder]
+      summary: Check builder requirements for skillsets
+      description: Retrieves builder prerequisite and missing-auth checks for skillsets before setup or agent creation proceeds.
+      operationId: SecurityCopilotPortal.Skillsets.CheckRequirements
+      parameters:
+        - $ref: '#/components/parameters/PodId'
+        - $ref: '#/components/parameters/WorkspaceName'
+      responses:
+        '200':
+          description: Skillset requirement checks returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericListEnvelope'
+
+  /pods/{podId}/workspaces/{workspaceName}/securitycopilot/skillsets/{skillsetName}/skills:
+    get:
+      tags: [Builder]
+      summary: List skills for a skillset
+      description: |
+        Retrieves the skills exposed by a specific Security Copilot skillset. Confirmed live for many
+        skillsets, including `Entra`, `Sentinel`, `Purview`, `M365`, `NL2API.Assistant`,
+        `CodeExecutor`, `Investigation`, and `MCP.Sentinel`.
+      operationId: SecurityCopilotPortal.Skillsets.ListSkills
+      parameters:
+        - $ref: '#/components/parameters/PodId'
+        - $ref: '#/components/parameters/WorkspaceName'
+        - $ref: '#/components/parameters/SkillsetName'
+        - $ref: '#/components/parameters/IncludeHidden'
+      responses:
+        '200':
+          description: Skillset skills returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericListEnvelope'
+
+  /config/v1/SecurityMarketplaceClient/1.0.0:
+    get:
+      tags: [Store]
+      summary: Get Security Store client configuration
+      description: Retrieves ECS configuration used by the Security Store page, including marketplace search and ranking settings.
+      operationId: SecurityCopilotPortal.Store.GetClientConfiguration
+      parameters:
+        - $ref: '#/components/parameters/SecurityService'
+        - $ref: '#/components/parameters/Environment'
+      responses:
+        '200':
+          description: Store client configuration returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MarketplaceClientConfigResponse'
+
+  /catalog/search:
+    get:
+      tags: [Store]
+      summary: Search Security Store catalog
+      description: Searches the Security Store catalog for agents and related marketplace offerings.
+      operationId: SecurityCopilotPortal.Store.SearchCatalog
+      parameters:
+        - $ref: '#/components/parameters/ProductCapabilities'
+        - $ref: '#/components/parameters/SecurityMarketplaceApiVersion'
+      responses:
+        '200':
+          description: Catalog search results returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MarketplaceSearchResponse'

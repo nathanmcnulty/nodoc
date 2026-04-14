@@ -735,6 +735,88 @@
     "notes": []
   },
   {
+    "title": "Security Copilot Portal",
+    "specId": "security-copilot",
+    "specPath": "specifications/nodoc-security-copilot/specification/openapi.yml",
+    "portalUrl": "https://securitycopilot.microsoft.com",
+    "seedUrls": [
+      "https://securitycopilot.microsoft.com"
+    ],
+    "authModel": "Portal bearer tokens + workspace context",
+    "recorderSupported": true,
+    "crawlPriority": "medium",
+    "nextPass": "normalized-family-diff",
+    "nextPassReason": "The first deep pass captured the main host families and read-only blades; follow-up should now stay focused on unresolved builder and safely intercepted write shapes.",
+    "apiHosts": [
+      "https://api.securitycopilot.microsoft.com",
+      "https://api.securityplatform.microsoft.com",
+      "https://us.api.securityplatform.microsoft.com",
+      "https://prod.cds.securitycopilot.microsoft.com",
+      "https://securitymarketplaceapi-prod.microsoft.com",
+      "https://ecs.office.com"
+    ],
+    "observedHosts": [
+      "securitycopilot.microsoft.com",
+      "api.securitycopilot.microsoft.com",
+      "api.securityplatform.microsoft.com",
+      "us.api.securityplatform.microsoft.com",
+      "prod.cds.securitycopilot.microsoft.com",
+      "securitymarketplaceapi-prod.microsoft.com",
+      "ecs.office.com"
+    ],
+    "pathPrefixes": [
+      "/account/",
+      "/api/",
+      "/auth/",
+      "/catalog/",
+      "/config/",
+      "/graphData/",
+      "/pods/",
+      "/provisioning/",
+      "/settings/",
+      "/trial/",
+      "/usage/",
+      "/userPreferences/",
+      "/users/"
+    ],
+    "operationCount": 32,
+    "lastSuccessfulPassDepth": "deep-interaction",
+    "captureRecipes": [
+      "tools/capture-recipes/security-copilot-deep.json"
+    ],
+    "promotedDiscoveries": [
+      {
+        "method": "POST",
+        "note": "Promoted from the canceled create-capacity preflight, which returned OperationWhatIfSuccess without a real submission.",
+        "path": "/provisioning/create"
+      },
+      {
+        "method": "GET",
+        "note": "Promoted from the Agents blade.",
+        "path": "/pods/{podId}/workspaces/{workspaceName}/securitycopilot/agents"
+      },
+      {
+        "method": "GET",
+        "note": "Promoted from the Agents blade.",
+        "path": "/pods/{podId}/workspaces/{workspaceName}/securitycopilot/agentdefinitions"
+      },
+      {
+        "method": "GET",
+        "note": "Promoted from the Security Store blade.",
+        "path": "/catalog/search"
+      }
+    ],
+    "knownTelemetryExclusions": [],
+    "openGaps": [
+      "Builder save flows, agent setup submits, promptbook creation submits, and plugin configuration writes still need intercepted capture before promotion.",
+      "The builder pass also emitted malformed empty-ID requests such as skillsets//authSettings and sessions//prompts/, which should be revisited only after capturing the same family with a concrete selected object."
+    ],
+    "notes": [
+      "The documented scope intentionally excludes generic login, telemetry, and Azure Resource Manager discovery calls even though the portal used them during startup.",
+      "The Build and Builder pass confirmed live configuration and requirement-check reads without submitting any agent or plugin creation changes."
+    ]
+  },
+  {
     "title": "SharePoint",
     "specId": "sharepoint-admin",
     "specPath": "specifications/nodoc-sharepoint-admin/specification/openapi.yml",

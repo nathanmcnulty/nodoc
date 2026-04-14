@@ -498,6 +498,37 @@ export const generatedSpecDataByTitle = {
       "description": "Solid structure with examples, but still meaningful debt to reduce."
     }
   },
+  "Security Copilot Portal": {
+    "title": "Security Copilot Portal",
+    "specPath": "specifications/nodoc-security-copilot/specification/openapi.yml",
+    "specSourceUrl": "https://github.com/nathanmcnulty/nodoc/tree/main/specifications/nodoc-security-copilot/specification",
+    "specDownloadUrl": "https://raw.githubusercontent.com/nathanmcnulty/nodoc/main/specifications/nodoc-security-copilot/specification/openapi.yml",
+    "operationCount": 32,
+    "tagCount": 8,
+    "tagGroupCount": 4,
+    "ungroupedTagCount": 0,
+    "duplicateGroupedTagCount": 0,
+    "singleTagGroupCount": 1,
+    "hostLikeTagGroupCount": 0,
+    "navigationStandardized": true,
+    "displayNameTagCount": 0,
+    "metadataComplete": true,
+    "contactDefined": true,
+    "licenseDefined": true,
+    "externalDocsDefined": true,
+    "allServersDescribed": true,
+    "placeholderCount": 0,
+    "blankDescriptionCount": 0,
+    "publicLiveCaptureDescriptionCount": 0,
+    "requestExampleCount": 1,
+    "successResponseExampleCount": 1,
+    "evidenceMentionCount": 14,
+    "maturity": {
+      "label": "Growing",
+      "tone": "warning",
+      "description": "Solid structure with examples, but still meaningful debt to reduce."
+    }
+  },
   "SharePoint": {
     "title": "SharePoint",
     "specPath": "specifications/nodoc-sharepoint-admin/specification/openapi.yml",

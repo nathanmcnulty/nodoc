@@ -135,6 +135,13 @@ export const crawlMetadataByTitle = {
     nextPass: "full-layered-crawl",
     reason: "Recorder support exists, but the same-origin portal surface is still very small.",
   },
+  "Security Copilot Portal": {
+    portalUrl: "https://securitycopilot.microsoft.com",
+    authModel: "Portal bearer tokens + workspace context",
+    crawlPriority: "medium",
+    nextPass: "normalized-family-diff",
+    reason: "The first deep pass captured the main host families and read-only blades; follow-up should now stay focused on unresolved builder and safely intercepted write shapes.",
+  },
   SharePoint: {
     portalUrl: "https://{tenant}-admin.sharepoint.com",
     authModel: "Portal session cookie (`FedAuth`) + SharePoint form digest",
@@ -367,6 +374,35 @@ export const coverageOverlayByTitle = {
       route("POST", "/api/log/Put", "Telemetry and performance sink captured from multiple Purview Portal surfaces."),
     ],
   },
+  "Security Copilot Portal": {
+    seedUrls: [
+      "https://securitycopilot.microsoft.com",
+    ],
+    observedHosts: [
+      "securitycopilot.microsoft.com",
+      "api.securitycopilot.microsoft.com",
+      "api.securityplatform.microsoft.com",
+      "us.api.securityplatform.microsoft.com",
+      "prod.cds.securitycopilot.microsoft.com",
+      "securitymarketplaceapi-prod.microsoft.com",
+      "ecs.office.com",
+    ],
+    lastSuccessfulPassDepth: "deep-interaction",
+    promotedDiscoveries: [
+      route("POST", "/provisioning/create", "Promoted from the canceled create-capacity preflight, which returned OperationWhatIfSuccess without a real submission."),
+      route("GET", "/pods/{podId}/workspaces/{workspaceName}/securitycopilot/agents", "Promoted from the Agents blade."),
+      route("GET", "/pods/{podId}/workspaces/{workspaceName}/securitycopilot/agentdefinitions", "Promoted from the Agents blade."),
+      route("GET", "/catalog/search", "Promoted from the Security Store blade."),
+    ],
+    notes: [
+      "The documented scope intentionally excludes generic login, telemetry, and Azure Resource Manager discovery calls even though the portal used them during startup.",
+      "The Build and Builder pass confirmed live configuration and requirement-check reads without submitting any agent or plugin creation changes.",
+    ],
+    openGaps: [
+      "Builder save flows, agent setup submits, promptbook creation submits, and plugin configuration writes still need intercepted capture before promotion.",
+      "The builder pass also emitted malformed empty-ID requests such as skillsets//authSettings and sessions//prompts/, which should be revisited only after capturing the same family with a concrete selected object.",
+    ],
+  },
   SharePoint: {
     seedUrls: [
       "https://{tenant}-admin.sharepoint.com",
@@ -428,6 +464,9 @@ export const captureRecipesByTitle = {
   ],
   "Purview Portal": [
     "tools/capture-recipes/purview-portal-deep.json",
+  ],
+  "Security Copilot Portal": [
+    "tools/capture-recipes/security-copilot-deep.json",
   ],
   SharePoint: [
     "tools/capture-recipes/sharepoint-admin-deep.json",
