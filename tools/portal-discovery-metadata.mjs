@@ -135,7 +135,7 @@ export const crawlMetadataByTitle = {
     nextPass: "full-layered-crawl",
     reason: "Recorder support exists, but the same-origin portal surface is still very small.",
   },
-  "Security Copilot Portal": {
+  "Security Copilot": {
     portalUrl: "https://securitycopilot.microsoft.com",
     authModel: "Portal bearer tokens + workspace context",
     crawlPriority: "medium",
@@ -374,7 +374,7 @@ export const coverageOverlayByTitle = {
       route("POST", "/api/log/Put", "Telemetry and performance sink captured from multiple Purview Portal surfaces."),
     ],
   },
-  "Security Copilot Portal": {
+  "Security Copilot": {
     seedUrls: [
       "https://securitycopilot.microsoft.com",
     ],
@@ -465,7 +465,7 @@ export const captureRecipesByTitle = {
   "Purview Portal": [
     "tools/capture-recipes/purview-portal-deep.json",
   ],
-  "Security Copilot Portal": [
+  "Security Copilot": [
     "tools/capture-recipes/security-copilot-deep.json",
   ],
   SharePoint: [

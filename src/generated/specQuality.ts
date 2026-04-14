@@ -498,8 +498,8 @@ export const generatedSpecDataByTitle = {
       "description": "Solid structure with examples, but still meaningful debt to reduce."
     }
   },
-  "Security Copilot Portal": {
-    "title": "Security Copilot Portal",
+  "Security Copilot": {
+    "title": "Security Copilot",
     "specPath": "specifications/nodoc-security-copilot/specification/openapi.yml",
     "specSourceUrl": "https://github.com/nathanmcnulty/nodoc/tree/main/specifications/nodoc-security-copilot/specification",
     "specDownloadUrl": "https://raw.githubusercontent.com/nathanmcnulty/nodoc/main/specifications/nodoc-security-copilot/specification/openapi.yml",

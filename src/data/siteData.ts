@@ -314,7 +314,7 @@ const apiCatalogSeed: ApiCatalogSeed[] = [
       "https://raw.githubusercontent.com/nathanmcnulty/nodoc/main/postman/collections/purview-portal.collection.json",
   },
   {
-    title: "Security Copilot Portal",
+    title: "Security Copilot",
     slug: "/security-copilot",
     family: "Security portal",
     operations: 32,
@@ -646,8 +646,8 @@ export const gettingStartedGuides: GettingStartedGuide[] = [
     ],
   },
   {
-    title: "Security Copilot Portal",
-    portals: ["Security Copilot Portal"],
+    title: "Security Copilot",
+    portals: ["Security Copilot"],
     authModel: "Portal bearer tokens + workspace context",
     baseUrls: [
       "https://api.securitycopilot.microsoft.com",
