@@ -314,6 +314,24 @@ const apiCatalogSeed: ApiCatalogSeed[] = [
       "https://raw.githubusercontent.com/nathanmcnulty/nodoc/main/postman/collections/purview-portal.collection.json",
   },
   {
+    title: "Security Copilot Portal",
+    slug: "/security-copilot",
+    family: "Security portal",
+    operations: 32,
+    authModel: "Portal bearer tokens + workspace context",
+    baseUrl: "https://api.securitycopilot.microsoft.com",
+    summary:
+      "Security Copilot portal coverage for bootstrap and preference reads, workspace provisioning and policy resolution, session and promptbook inventory, agent and builder discovery, and Security Store catalog flows.",
+    highlights: [
+      "Portal bootstrap and workspace-preference helpers across `api.securitycopilot.microsoft.com`",
+      "Security Platform provisioning, policy, session, promptbook, agent, and skillset reads across global and regional control planes",
+      "Security Store client configuration and catalog search, plus a safe what-if capture for the create-capacity flow",
+    ],
+    collectionPath: "postman/collections/security-copilot.collection.json",
+    collectionDownloadUrl:
+      "https://raw.githubusercontent.com/nathanmcnulty/nodoc/main/postman/collections/security-copilot.collection.json",
+  },
+  {
     title: "Entra IAM",
     slug: "/entra-iam",
     family: "Entra portal",
@@ -625,6 +643,37 @@ export const gettingStartedGuides: GettingStartedGuide[] = [
       "`/api/` and `/apiproxy/` are distinct surfaces with different responsibilities, so don't assume routing or auth behavior from one applies cleanly to the other.",
       "Some same-origin responses contain user directory or role data, so sanitize captures before keeping artifacts.",
       "Portal-minted downstream tokens are short-lived and resource-specific, which makes replay brittle if you capture them too early.",
+    ],
+  },
+  {
+    title: "Security Copilot Portal",
+    portals: ["Security Copilot Portal"],
+    authModel: "Portal bearer tokens + workspace context",
+    baseUrls: [
+      "https://api.securitycopilot.microsoft.com",
+      "https://api.securityplatform.microsoft.com",
+      "https://us.api.securityplatform.microsoft.com",
+      "https://prod.cds.securitycopilot.microsoft.com",
+      "https://securitymarketplaceapi-prod.microsoft.com",
+    ],
+    confirmedDetails: [
+      "The live portal used a browser-acquired Entra bearer token across `api.securitycopilot.microsoft.com`, `api.securityplatform.microsoft.com`, and the regional `us.api.securityplatform.microsoft.com` content plane.",
+      "Security Copilot startup resolved the active workspace through `GET /userPreferences/currentWorkspace`, then loaded workspace content from regional `/pods/{podId}/workspaces/{workspaceName}/securitycopilot/*` routes.",
+      "Opening the create-capacity dialog triggered `POST /provisioning/create` and returned `OperationWhatIfSuccess` before any real submission, which makes it a useful safe write-shape capture point.",
+    ],
+    practicalGuidance: [
+      "Capture from an already-authenticated portal tab so the current workspace, regional pod host, and browser bearer token all line up with the requests you observe.",
+      "Treat the global `api.securitycopilot.microsoft.com` bootstrap host and the Security Platform content hosts as one portal family; you need both to understand startup and page-specific reads.",
+      "Use read-only surfaces such as Agents, Promptbooks, Manage workspaces, Usage monitoring, Build, and Security Store to expand coverage before you attempt any setup or save flows.",
+    ],
+    mutationGuidance: [
+      "Treat all POST, PUT, PATCH, and DELETE routes as live writes unless you have concrete evidence they are read-like or what-if only.",
+      "The captured `POST /provisioning/create` call appears to be a safe preflight when the dialog is opened and then canceled, but real provisioning and builder save flows still need separate intercepted capture before publication.",
+    ],
+    pitfalls: [
+      "The portal also touches generic Entra login endpoints, telemetry sinks, and shared Azure Resource Manager reads; keep those out of the published Security Copilot scope unless they become product-specific.",
+      "Some builder traffic used malformed empty identifiers such as `skillsets//authSettings` and `sessions//prompts/`; those are useful artifact clues but not strong enough for direct publication as stable paths.",
+      "Several icon and expiry routes returned contextual `400` or `404` responses in the current workspace, which still confirms the route family but means tenant state matters heavily.",
     ],
   },
   {

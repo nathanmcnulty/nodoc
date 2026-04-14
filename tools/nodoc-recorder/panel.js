@@ -196,6 +196,43 @@ const portalConfig = [
     urlPatterns: ['https://purview.microsoft.com/api/*']
   },
   {
+    id: 'security-copilot',
+    name: 'Security Copilot Portal',
+    hostnames: [
+      'api.securitycopilot.microsoft.com',
+      'api.securityplatform.microsoft.com',
+      'prod.cds.securitycopilot.microsoft.com',
+      'securitymarketplaceapi-prod.microsoft.com',
+      'ecs.office.com'
+    ],
+    hostnameSuffixes: [
+      '.api.securityplatform.microsoft.com'
+    ],
+    pathPrefixes: [
+      '/auth',
+      '/users/',
+      '/settings/',
+      '/userPreferences/',
+      '/usage/',
+      '/graphData/',
+      '/provisioning/',
+      '/account/',
+      '/api/gateway/',
+      '/pods/',
+      '/trial',
+      '/catalog/',
+      '/config/v1/SecurityMarketplaceClient/'
+    ],
+    urlPatterns: [
+      'https://api.securitycopilot.microsoft.com/*',
+      'https://api.securityplatform.microsoft.com/*',
+      'https://*.api.securityplatform.microsoft.com/*',
+      'https://prod.cds.securitycopilot.microsoft.com/*',
+      'https://securitymarketplaceapi-prod.microsoft.com/*',
+      'https://ecs.office.com/config/v1/SecurityMarketplaceClient/*'
+    ]
+  },
+  {
     id: 'entra-iam',
     name: 'Entra IAM',
     hostname: 'main.iam.ad.ext.azure.com',

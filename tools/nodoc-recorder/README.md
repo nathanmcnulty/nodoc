@@ -19,6 +19,7 @@ A Chrome/Edge DevTools extension that captures API traffic from Microsoft portal
 | Power Platform | `api.bap.microsoft.com`, `api.admin.powerplatform.microsoft.com`, `licensing.powerplatform.microsoft.com`, `*.adminanalytics.powerplatform.microsoft.com`, `*.csanalytics.powerplatform.microsoft.com`, `*.tenant.api.powerplatform.com`, `*.crm.dynamics.com`, `*.portal-infra.dynamics.com` | `/providers/*`, `/api/*`, `/analytics/*`, `/governance/*`, `/notificationservice/*`, `/v0.1*`, `/v0.1-alpha*`, `/v1.0*`, `/api/data/*`, `/api/nosql/*`, `/api/v1/*` |
 | Purview | `purview.microsoft.com` | `/apiproxy/*` |
 | Purview Portal | `purview.microsoft.com` | `/api/*` |
+| Security Copilot Portal | `api.securitycopilot.microsoft.com`, `api.securityplatform.microsoft.com`, `*.api.securityplatform.microsoft.com`, `prod.cds.securitycopilot.microsoft.com`, `securitymarketplaceapi-prod.microsoft.com`, `ecs.office.com` | `/auth*`, `/users/*`, `/settings/*`, `/userPreferences/*`, `/usage/*`, `/graphData/*`, `/provisioning/*`, `/account/*`, `/api/gateway/*`, `/pods/*`, `/trial`, `/catalog/*`, `/config/v1/SecurityMarketplaceClient/*` |
 | Entra IAM | `main.iam.ad.ext.azure.com` | `/api/*` |
 | Entra IGA | `elm.iga.azure.com` | `/api/*` |
 | Entra PIM | `api.azrbac.mspim.azure.com` | `/api/*` |
