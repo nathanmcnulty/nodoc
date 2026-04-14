@@ -197,7 +197,7 @@ const portalConfig = [
   },
   {
     id: 'security-copilot',
-    name: 'Security Copilot Portal',
+    name: 'Security Copilot',
     hostnames: [
       'api.securitycopilot.microsoft.com',
       'api.securityplatform.microsoft.com',

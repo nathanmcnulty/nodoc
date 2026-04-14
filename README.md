@@ -26,7 +26,7 @@ The project currently publishes the following API definitions:
 | Power Platform | 244 | Portal bearer tokens + service-specific audiences | [Browse](https://nodoc.nathanmcnulty.com/power-platform) | `postman/collections/power-platform.collection.json` |
 | Purview | 124 | Portal session cookie (`sccauth`) | [Browse](https://nodoc.nathanmcnulty.com/purview) | `postman/collections/purview.collection.json` |
 | Purview Portal | 6 | Portal session cookie (`sccauth`) + same-origin portal context | [Browse](https://nodoc.nathanmcnulty.com/purview-portal) | `postman/collections/purview-portal.collection.json` |
-| Security Copilot Portal | 32 | Portal bearer tokens + workspace context | [Browse](https://nodoc.nathanmcnulty.com/security-copilot) | `postman/collections/security-copilot.collection.json` |
+| Security Copilot | 32 | Portal bearer tokens + workspace context | [Browse](https://nodoc.nathanmcnulty.com/security-copilot) | `postman/collections/security-copilot.collection.json` |
 | Entra IAM | 286 | Delegated OAuth2 + `X-Ms-Client-Request-Id` | [Browse](https://nodoc.nathanmcnulty.com/entra-iam) | `postman/collections/entra-iam.collection.json` |
 | Entra PIM | 16 | Azure AD bearer token | [Browse](https://nodoc.nathanmcnulty.com/entra-pim) | `postman/collections/entra-pim.collection.json` |
 | Entra IGA | 17 | Azure AD bearer token | [Browse](https://nodoc.nathanmcnulty.com/entra-iga) | `postman/collections/entra-iga.collection.json` |

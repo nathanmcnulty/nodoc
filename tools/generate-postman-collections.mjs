@@ -77,7 +77,7 @@ const collectionDefinitions = [
     output: "postman/collections/purview-portal.collection.json",
   },
   {
-    name: "Security Copilot Portal",
+    name: "Security Copilot",
     spec: "specifications/nodoc-security-copilot/specification/openapi.yml",
     output: "postman/collections/security-copilot.collection.json",
   },
