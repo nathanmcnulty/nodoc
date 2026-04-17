@@ -282,6 +282,403 @@ function normalizeLiveCaptureMetadata(value, context) {
   };
 }
 
+function normalizeOperationContextString(value, context, fieldName) {
+  if (value === undefined) {
+    return undefined;
+  }
+
+  if (typeof value !== "string") {
+    throw new Error(`${context} has an invalid ${fieldName} value.`);
+  }
+
+  const normalized = value.trim();
+  if (!normalized) {
+    throw new Error(`${context} is missing ${fieldName}.`);
+  }
+
+  return normalized;
+}
+
+function normalizeOperationContextPath(value, context, fieldName) {
+  const normalized = normalizeOperationContextString(value, context, fieldName);
+  if (normalized === undefined) {
+    return undefined;
+  }
+
+  if (!normalized.startsWith("/")) {
+    throw new Error(`${context} has an invalid ${fieldName} value.`);
+  }
+
+  return normalized;
+}
+
+function normalizeOperationContextStringArray(value, context, fieldName) {
+  if (value === undefined) {
+    return undefined;
+  }
+
+  if (!Array.isArray(value)) {
+    throw new Error(`${context} has an invalid ${fieldName} value.`);
+  }
+
+  let normalized;
+  try {
+    normalized = uniqueOrdered(value);
+  } catch {
+    throw new Error(`${context} has an invalid ${fieldName} value.`);
+  }
+
+  if (normalized.length === 0) {
+    throw new Error(`${context} must include at least one ${fieldName} entry.`);
+  }
+
+  return normalized;
+}
+
+function normalizeHeaderProfileEntries(value, context, fieldName) {
+  if (value === undefined) {
+    return [];
+  }
+
+  if (!Array.isArray(value)) {
+    throw new Error(`${context} has an invalid ${fieldName} value.`);
+  }
+
+  const seenNames = new Set();
+  return value.map((entry, index) => {
+    if (!entry || typeof entry !== "object" || Array.isArray(entry)) {
+      throw new Error(`${context} has an invalid ${fieldName}[${index}] value.`);
+    }
+
+    const name = normalizeOperationContextString(
+      entry.name,
+      `${context} ${fieldName}[${index}]`,
+      "name",
+    );
+
+    const normalizedName = name.toLowerCase();
+    if (seenNames.has(normalizedName)) {
+      throw new Error(`${context} includes duplicate ${fieldName} entries for ${name}.`);
+    }
+
+    seenNames.add(normalizedName);
+
+    const description = normalizeOperationContextString(
+      entry.description,
+      `${context} ${fieldName}[${index}]`,
+      "description",
+    );
+
+    const header = { name };
+    if (description !== undefined) {
+      header.description = description;
+    }
+
+    const headerValue = normalizeOperationContextString(
+      entry.value,
+      `${context} ${fieldName}[${index}]`,
+      "value",
+    );
+    if (headerValue !== undefined) {
+      header.value = headerValue;
+    }
+
+    return header;
+  });
+}
+
+function normalizeHeaderProfiles(value, context) {
+  if (value === undefined) {
+    return {};
+  }
+
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    throw new Error(`${context} has an invalid x-nodoc-headerProfiles payload.`);
+  }
+
+  return Object.fromEntries(
+    Object.entries(value).map(([profileName, profileValue]) => {
+      const profileContext = `${context} header profile ${profileName}`;
+      if (!profileValue || typeof profileValue !== "object" || Array.isArray(profileValue)) {
+        throw new Error(`${profileContext} has an invalid value.`);
+      }
+
+      const description = normalizeOperationContextString(
+        profileValue.description,
+        profileContext,
+        "description",
+      );
+      const notes = normalizeOperationContextStringArray(
+        profileValue.notes,
+        profileContext,
+        "notes",
+      );
+      const requiredHeaders = normalizeHeaderProfileEntries(
+        profileValue.requiredHeaders,
+        profileContext,
+        "requiredHeaders",
+      );
+      const observedHeaders = normalizeHeaderProfileEntries(
+        profileValue.observedHeaders,
+        profileContext,
+        "observedHeaders",
+      );
+
+      if (requiredHeaders.length === 0 && observedHeaders.length === 0) {
+        throw new Error(`${profileContext} must include at least one header entry.`);
+      }
+
+      return [
+        profileName,
+        {
+          description,
+          ...(notes ? { notes } : {}),
+          ...(requiredHeaders.length > 0 ? { requiredHeaders } : {}),
+          ...(observedHeaders.length > 0 ? { observedHeaders } : {}),
+        },
+      ];
+    }),
+  );
+}
+
+function normalizeOperationContext(value, context, headerProfileNames = new Set()) {
+  if (value === undefined) {
+    return null;
+  }
+
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    throw new Error(`${context} has an invalid x-nodoc-operation-context payload.`);
+  }
+
+  const normalized = {};
+  const surface = normalizeOperationContextString(value.surface, context, "surface");
+  if (surface !== undefined) {
+    normalized.surface = surface;
+  }
+
+  const workflows = normalizeOperationContextStringArray(value.workflows, context, "workflows");
+  if (workflows !== undefined) {
+    normalized.workflows = workflows;
+  }
+
+  const headerProfile = normalizeOperationContextString(
+    value.headerProfile,
+    context,
+    "headerProfile",
+  );
+  if (headerProfile !== undefined) {
+    if (headerProfileNames.size > 0 && !headerProfileNames.has(headerProfile)) {
+      throw new Error(`${context} references unknown header profile ${headerProfile}.`);
+    }
+
+    normalized.headerProfile = headerProfile;
+  }
+
+  const canonicalPath = normalizeOperationContextPath(
+    value.canonicalPath,
+    context,
+    "canonicalPath",
+  );
+  if (canonicalPath !== undefined) {
+    normalized.canonicalPath = canonicalPath;
+  }
+
+  const pathAliases = normalizeOperationContextStringArray(value.pathAliases, context, "pathAliases");
+  if (pathAliases !== undefined) {
+    for (const alias of pathAliases) {
+      if (!alias.startsWith("/")) {
+        throw new Error(`${context} has an invalid pathAliases value.`);
+      }
+    }
+
+    normalized.pathAliases = pathAliases;
+  }
+
+  if (value.requestShapes !== undefined) {
+    if (!Array.isArray(value.requestShapes)) {
+      throw new Error(`${context} has an invalid requestShapes value.`);
+    }
+
+    normalized.requestShapes = value.requestShapes.map((shape, index) => {
+      if (!shape || typeof shape !== "object" || Array.isArray(shape)) {
+        throw new Error(`${context} has an invalid requestShapes[${index}] value.`);
+      }
+
+      const shapeContext = `${context} requestShapes[${index}]`;
+      const name = normalizeOperationContextString(shape.name, shapeContext, "name");
+      const notes = normalizeOperationContextString(shape.notes, shapeContext, "notes");
+      const contentType = normalizeOperationContextString(
+        shape.contentType,
+        shapeContext,
+        "contentType",
+      );
+      const bodyKind = normalizeOperationContextString(shape.bodyKind, shapeContext, "bodyKind");
+      const requiredParameters = normalizeOperationContextStringArray(
+        shape.requiredParameters,
+        shapeContext,
+        "requiredParameters",
+      );
+
+      return {
+        name,
+        ...(contentType !== undefined ? { contentType } : {}),
+        ...(bodyKind !== undefined ? { bodyKind } : {}),
+        ...(requiredParameters !== undefined ? { requiredParameters } : {}),
+        ...(notes !== undefined ? { notes } : {}),
+      };
+    });
+  }
+
+  if (value.variants !== undefined) {
+    if (!Array.isArray(value.variants)) {
+      throw new Error(`${context} has an invalid variants value.`);
+    }
+
+    const validVariantLocations = new Set(["query", "body", "header", "path"]);
+    normalized.variants = value.variants.map((variant, index) => {
+      if (!variant || typeof variant !== "object" || Array.isArray(variant)) {
+        throw new Error(`${context} has an invalid variants[${index}] value.`);
+      }
+
+      const variantContext = `${context} variants[${index}]`;
+      const selector = normalizeOperationContextString(variant.selector, variantContext, "selector");
+      const notes = normalizeOperationContextString(variant.notes, variantContext, "notes");
+      const knownValues = normalizeOperationContextStringArray(
+        variant.knownValues,
+        variantContext,
+        "knownValues",
+      );
+      const location = normalizeOperationContextString(
+        variant.location,
+        variantContext,
+        "location",
+      );
+
+      if (location !== undefined && !validVariantLocations.has(location)) {
+        throw new Error(`${variantContext} has an invalid location value.`);
+      }
+
+      return {
+        selector,
+        ...(location !== undefined ? { location } : {}),
+        ...(knownValues !== undefined ? { knownValues } : {}),
+        ...(notes !== undefined ? { notes } : {}),
+      };
+    });
+  }
+
+  if (value.availability !== undefined) {
+    if (!value.availability || typeof value.availability !== "object" || Array.isArray(value.availability)) {
+      throw new Error(`${context} has an invalid availability value.`);
+    }
+
+    const availabilityContext = `${context} availability`;
+    const level = normalizeOperationContextString(
+      value.availability.level,
+      availabilityContext,
+      "level",
+    );
+    const validAvailabilityLevels = new Set([
+      "global",
+      "user-context",
+      "tenant-conditional",
+      "permission-conditional",
+      "feature-gated",
+      "preview",
+      "request-dependent",
+    ]);
+
+    if (!validAvailabilityLevels.has(level)) {
+      throw new Error(`${availabilityContext} has an invalid level value.`);
+    }
+
+    const notes = normalizeOperationContextStringArray(
+      value.availability.notes,
+      availabilityContext,
+      "notes",
+    );
+
+    normalized.availability = {
+      level,
+      ...(notes !== undefined ? { notes } : {}),
+    };
+  }
+
+  if (value.provenance !== undefined) {
+    if (!Array.isArray(value.provenance)) {
+      throw new Error(`${context} has an invalid provenance value.`);
+    }
+
+    const validConfidenceLevels = new Set(["high", "medium", "low"]);
+    normalized.provenance = value.provenance.map((entry, index) => {
+      if (!entry || typeof entry !== "object" || Array.isArray(entry)) {
+        throw new Error(`${context} has an invalid provenance[${index}] value.`);
+      }
+
+      const provenanceContext = `${context} provenance[${index}]`;
+      const source = normalizeOperationContextString(entry.source, provenanceContext, "source");
+      const confidence = normalizeOperationContextString(
+        entry.confidence,
+        provenanceContext,
+        "confidence",
+      );
+
+      if (!validConfidenceLevels.has(confidence)) {
+        throw new Error(`${provenanceContext} has an invalid confidence value.`);
+      }
+
+      const notes = normalizeOperationContextStringArray(entry.notes, provenanceContext, "notes");
+      return {
+        source,
+        confidence,
+        ...(notes !== undefined ? { notes } : {}),
+      };
+    });
+  }
+
+  if (Object.keys(normalized).length === 0) {
+    throw new Error(`${context} must include at least one x-nodoc-operation-context field.`);
+  }
+
+  return normalized;
+}
+
+function getNormalizedHeaderProfiles(specification, title) {
+  return normalizeHeaderProfiles(
+    specification["x-nodoc-headerProfiles"],
+    `${title} specification`,
+  );
+}
+
+function getNormalizedOperationContextRecords(specification, title) {
+  const headerProfiles = getNormalizedHeaderProfiles(specification, title);
+  const headerProfileNames = new Set(Object.keys(headerProfiles));
+
+  return {
+    headerProfiles,
+    operations: getOperationEntries(specification)
+      .map(({ method, operation, path: operationPath }) => {
+        const operationContext = normalizeOperationContext(
+          operation["x-nodoc-operation-context"],
+          `${title} ${method} ${operationPath}`,
+          headerProfileNames,
+        );
+
+        if (!operationContext) {
+          return null;
+        }
+
+        return {
+          method,
+          path: operationPath,
+          operation,
+          operationContext,
+        };
+      })
+      .filter(Boolean),
+  };
+}
+
 function getPathPrefixes(specification) {
   return Array.from(new Set(
     Object.keys(specification.paths ?? {})
@@ -329,6 +726,13 @@ export function getDocumentationMaturity(quality) {
 
 function buildQualityRecord(specRelativePath, bundledSpecification, rawText) {
   const operations = getOperations(bundledSpecification);
+  const {
+    headerProfiles,
+    operations: operationContextRecords,
+  } = getNormalizedOperationContextRecords(
+    bundledSpecification,
+    bundledSpecification.info?.title ?? specRelativePath,
+  );
   const tags = bundledSpecification.tags ?? [];
   const tagGroups = bundledSpecification["x-tagGroups"] ?? [];
   const groupedTags = tagGroups.flatMap((group) => group.tags ?? []);
@@ -409,6 +813,8 @@ function buildQualityRecord(specRelativePath, bundledSpecification, rawText) {
         && /^Live-captured from the authenticated/iu.test(operation.description.trim())
       ),
     ).length,
+    headerProfileCount: Object.keys(headerProfiles).length,
+    operationContextCount: operationContextRecords.length,
     requestExampleCount,
     successResponseExampleCount,
     evidenceMentionCount,
@@ -500,9 +906,20 @@ export async function buildSpecRouteInventory() {
       .join("specifications", entry.name, "specification", "openapi.yml");
     const specPath = path.join(repoRoot, specRelativePath);
     const bundledSpecification = await loadBundledSpecification(specPath);
+    const title = bundledSpecification.info?.title ?? entry.name;
+    const {
+      headerProfiles,
+      operations: operationContextRecords,
+    } = getNormalizedOperationContextRecords(bundledSpecification, title);
+    const operationContextByKey = new Map(
+      operationContextRecords.map((record) => [
+        `${record.method} ${record.path}`,
+        record.operationContext,
+      ]),
+    );
 
     inventory.push({
-      title: bundledSpecification.info?.title ?? entry.name,
+      title,
       specId: entry.name.replace(/^nodoc-/u, ""),
       specPath: specRelativePath.replaceAll("\\", "/"),
       nodocRoute:
@@ -520,7 +937,18 @@ export async function buildSpecRouteInventory() {
       operations: getOperationEntries(bundledSpecification).map((entry) => ({
         method: entry.method,
         path: entry.path,
+        operationId:
+          typeof entry.operation.operationId === "string"
+            ? entry.operation.operationId
+            : null,
+        summary:
+          typeof entry.operation.summary === "string"
+            ? entry.operation.summary
+            : null,
+        operationContext:
+          operationContextByKey.get(`${entry.method} ${entry.path}`) ?? null,
       })),
+      headerProfiles,
     });
   }
 
@@ -582,6 +1010,57 @@ export async function buildOperationLiveCaptureLedger() {
           ? bundledSpecification.info["x-nodoc-category"]
           : null,
       operations,
+    });
+  }
+
+  return ledger.sort((left, right) => left.title.localeCompare(right.title));
+}
+
+export async function buildOperationContextLedger() {
+  const entries = await readdir(specificationsDir, { withFileTypes: true });
+  const ledger = [];
+
+  for (const entry of entries) {
+    if (!entry.isDirectory()) {
+      continue;
+    }
+
+    const specRelativePath = path
+      .join("specifications", entry.name, "specification", "openapi.yml");
+    const specPath = path.join(repoRoot, specRelativePath);
+    const bundledSpecification = await loadBundledSpecification(specPath);
+    const title = bundledSpecification.info?.title ?? entry.name;
+    const {
+      headerProfiles,
+      operations,
+    } = getNormalizedOperationContextRecords(bundledSpecification, title);
+
+    if (Object.keys(headerProfiles).length === 0 && operations.length === 0) {
+      continue;
+    }
+
+    ledger.push({
+      title,
+      specId: entry.name.replace(/^nodoc-/u, ""),
+      specPath: specRelativePath.replaceAll("\\", "/"),
+      nodocRoute:
+        typeof bundledSpecification.info?.["x-nodoc-route"] === "string"
+          ? bundledSpecification.info["x-nodoc-route"]
+          : null,
+      nodocCategory:
+        typeof bundledSpecification.info?.["x-nodoc-category"] === "string"
+          ? bundledSpecification.info["x-nodoc-category"]
+          : null,
+      headerProfiles,
+      operations: operations.map(({ method, operation, path: operationPath, operationContext }) => ({
+        operationId:
+          typeof operation.operationId === "string" ? operation.operationId : null,
+        summary:
+          typeof operation.summary === "string" ? operation.summary : null,
+        method,
+        path: operationPath,
+        operationContext,
+      })),
     });
   }
 

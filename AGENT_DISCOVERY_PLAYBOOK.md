@@ -74,6 +74,25 @@ Treat spidering as a **candidate generator plus prioritization aid**, not as the
 - queue entity pages separately from nav pages
 - never promote write-capable candidates without concrete evidence
 
+### Classify the portal before choosing the next pass
+
+Before scheduling another browser run, put the target surface into one of these buckets:
+
+1. **Diff-first**
+  - Use this when the portal already has a broad nav pass or deep interaction baseline.
+  - Compare the current spec against `api-records.json`, `page-states.json`, `probe-results.json`, and bundle candidates before opening the browser again.
+2. **Full layered crawl**
+  - Use this when the current spec is still small, the portal surface is thin, or only one shallow recipe exists.
+  - Start with nav and landing coverage, then move to entity/detail replay, interaction-state deltas, bundle mining, and safe probing.
+3. **Tenant-blocked or feature-gated**
+  - Use this when the page loads but the backend does not wake, or the current tenant lacks objects, permissions, or feature flags.
+  - Focus on recording the blocker state, harvesting same-origin links and child targets, and identifying the exact prerequisites for a later pass.
+4. **Write-shape follow-up**
+  - Use this when the remaining gaps are mostly save, submit, create, or export-start flows.
+  - Capture request shape through interception before deciding whether a reversible live write is justified.
+
+The goal is to avoid treating every portal as if it needs the same kind of crawl.
+
 ## Recommended workflow
 
 ### 1. Review the current repo baseline
@@ -193,6 +212,52 @@ Rule of thumb:
   4. exercise visible tabs and safe pivots on those pages
   5. only then decide which APIs are truly part of the portal-specific surface
 
+### 4a. Add a deliberate second-pass interaction matrix
+
+Many portals expose their most useful reads only after the first page paint. After the initial capture, rerun the same feature family with one safe control change per checkpoint:
+
+- tabs and pivots
+- first representative row drill-in
+- sort and paging changes
+- filter chips, scope selectors, and date ranges
+- `Show all`, `View details`, and similar read-only expanders
+- export preflight or report-setup steps that stop before a real job is launched
+
+Guidelines:
+
+- Keep the changes isolated so each new request can be attributed to one UI state transition.
+- Label every checkpoint clearly in `page-states.json` so the request inventory can be explained later.
+- If a route repeats with the same method and path but a materially different query or body, preserve the alternate shape instead of treating it as duplicate noise.
+
+### 4b. Treat iframe and child-target blades as first-class surfaces
+
+Several Microsoft admin portals render the real feature surface inside child targets rather than the top-level shell.
+
+- Open the surface from the root shell first, then target the blade content explicitly with iframe-scoped actions such as `click-label-iframe` or `click-contains-iframe` when the runner supports it.
+- Capture page states from both the root page and the child target so shell-only readiness is not mistaken for full feature coverage.
+- If a route appears visually loaded but no backend family wakes, inspect the attached child targets before concluding that the portal section is idle.
+- When future follow-up depends on stable blade routes, prefer seeded replay from prior artifacts over fragile re-clicking through shell chrome.
+
+### 4c. Turn one successful pass into reusable seeded route groups
+
+Do not stop at ad hoc seeded links when a portal exposes stable detail families.
+
+- Promote repeatable entity/detail patterns into checked-in `seedRouteGroups` with explicit `routeTemplates` and `idSources`.
+- Seed values can come from `page-states.json`, `raw-requests.json`, `action-results.json`, or `session-snapshots.json` depending on where the IDs first appeared.
+- Sample a few routes per normalized family instead of replaying every discovered object.
+- Add per-family quotas so high-volume entities do not crowd out lower-frequency but richer surfaces.
+
+This is the fastest way to turn one broad crawl into a repeatable detail-phase recipe.
+
+### 4d. Capture blocked, empty, and dormant states intentionally
+
+A page that looks blocked or empty can still provide useful evidence.
+
+- Record the blocker message, page URL, visible tabs, visible controls, same-origin links, and script URLs even when no backend API family wakes.
+- Preserve empty-array and null-payload responses; they still confirm route existence and response envelope.
+- Separate “tenant blocked”, “feature gated”, “empty data”, and “UI loaded but backend quiet” in your notes so later agents know what kind of follow-up is actually needed.
+- Use blocker-state captures to identify the missing prerequisite: tenant permission, seed object, license, feature flag, or selected workspace.
+
 ### 5. Download and mine the loaded JavaScript
 
 - Save the script URLs loaded by the visited pages.
@@ -253,6 +318,23 @@ When bundle mining exposes likely read routes that the UI did not call directly:
    - alternate OData/URS reads
 4. Match bundle defaults exactly. Empty strings, `includeHistoricalValue`, plan names, and sort-key maps can matter; a guessed summary sort key produced `422` on a live feature-details route until the bundle default was used.
 5. Record the request shape and the outcome for each probe so later spec work can distinguish confirmed routes from stale bundle strings.
+
+### 5c. Diff route families, host families, and recipe coverage together
+
+Before widening a crawl, compare three things side by side:
+
+- the checked-in spec hosts and path prefixes
+- the observed hosts and normalized candidate families from the latest artifacts
+- the current recipe coverage: root clicks, iframe clicks, seeded links, seeded routes, and second-pass interactions
+
+This helps answer the real question:
+
+- Is the gap caused by missing browser coverage?
+- Is the gap caused by weak seeded replay or missing IDs?
+- Is the gap caused by an unmodeled host family that should become its own spec?
+- Or is the gap already narrow enough to solve directly from existing artifacts?
+
+If the answer is “one unresolved family and one thin recipe”, update the recipe before running another broad crawl.
 
 ### 6. Promote discoveries carefully
 
@@ -750,6 +832,9 @@ Add new ideas here before trying them, then move the result into the experiment 
 - Add per-route-family quotas and sampling so the entity queue does not get overwhelmed by repeated machine-page pivots.
 - Add a denylist or lower priority for shared settings routes that are reachable from many entities but rarely add new API families.
 - Flush crawl checkpoints incrementally so long browser-based discovery runs can be monitored safely in real time.
+- Add a recipe audit that scores each portal on root coverage, iframe coverage, seeded link replay, seeded route replay, and second-pass interaction coverage.
+- Add reusable interaction-matrix templates for report blades, list/detail portals, and settings-heavy portals so shallow recipes can be expanded consistently.
+- Add a route-family diversity report that highlights when one entity type or path family is dominating the crawl and suppressing breadth.
 
 ## PR-ready checklist
 

@@ -6,6 +6,15 @@ paths:
         Retrieve the current user's dark mode preference for the admin portal.
       operationId: Navigation.GetDarkMode
       tags: [Navigation]
+      x-nodoc-operation-context:
+        surface: Portal shell
+        workflows:
+          - Open any admin shell page and read the current user's dark mode preference.
+        headerProfile: m365-admin-homepage
+        availability:
+          level: user-context
+          notes:
+            - The value is specific to the signed-in admin's saved shell preferences.
       responses:
         '200':
           description: OK

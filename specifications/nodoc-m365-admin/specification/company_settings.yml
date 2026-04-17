@@ -282,3 +282,140 @@ paths:
 
         '404':
           $ref: common.yml#/components/responses/NotFound
+
+  /_api/spo.tenant/GetBrandCenterConfiguration:
+    get:
+      summary: Get Brand Center configuration
+      description: >-
+        Retrieve the Brand Center configuration used by Org settings > Brand center,
+        including the current design system, publishing state, and tenant-level branding
+        payloads stored behind the SharePoint-backed admin helper.
+      operationId: CompanySettings.GetBrandCenterConfiguration
+      tags: [CompanySettings]
+      x-nodoc-operation-context:
+        surface: Org settings > Brand center
+        workflows:
+          - Open Org settings, then Services, then Brand center.
+        headerProfile: m365-admin-brand-center
+        availability:
+          level: tenant-conditional
+          notes:
+            - A live capture from a tenant without Brand center enabled still returned the configuration object with empty GUIDs and blank site fields.
+        provenance:
+          - source: module-validation
+            confidence: high
+            notes:
+              - Validated against the checked-in M365Internals Brand Center cmdlet.
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Verified against the signed-in `#/brandcenter` route with SharePoint-targeted headers and bearer authorization.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  odata.metadata:
+                    type: string
+                  BrandColorsListId:
+                    type: string
+                  BrandColorsListUrl:
+                    type: string
+                    nullable: true
+                  BrandFontLibraryId:
+                    type: string
+                  BrandFontLibraryUrl:
+                    type: string
+                    nullable: true
+                  IsBrandCenterSiteFeatureEnabled:
+                    type: boolean
+                  IsPublicCdnEnabled:
+                    type: boolean
+                  OrgAssets:
+                    type: object
+                    nullable: true
+                    additionalProperties: true
+                  SiteId:
+                    type: string
+                  SiteUrl:
+                    type: string
+                additionalProperties: true
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /_api/GroupSiteManager/GetValidSiteUrlFromAlias:
+    get:
+      summary: Resolve Brand Center site URL
+      description: >-
+        Resolve the SharePoint site URL used by Brand Center from the fixed alias and
+        managed path values the admin portal requests during Brand Center initialization.
+      operationId: CompanySettings.GetBrandCenterSiteUrl
+      tags: [CompanySettings]
+      parameters:
+        - name: alias
+          in: query
+          required: true
+          description: The SharePoint alias literal to resolve. Brand Center currently uses `'BrandGuide'`.
+          schema:
+            type: string
+            default: '''BrandGuide'''
+        - name: managedPath
+          in: query
+          required: true
+          description: The managed path literal used for the Brand Center site. Brand Center currently uses `'sites'`.
+          schema:
+            type: string
+            default: '''sites'''
+      x-nodoc-operation-context:
+        surface: Org settings > Brand center
+        workflows:
+          - Open Org settings, then Services, then Brand center.
+        headerProfile: m365-admin-brand-center
+        requestShapes:
+          - name: brand-center-site-url
+            bodyKind: none
+            requiredParameters:
+              - alias
+              - managedPath
+            notes: Brand Center currently resolves the quoted alias `'BrandGuide'` under the quoted managed path `'sites'`.
+        provenance:
+          - source: module-validation
+            confidence: high
+            notes:
+              - Validated against the checked-in M365Internals Brand Center cmdlet.
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Verified against the signed-in `#/brandcenter` route with query values `alias='BrandGuide'` and `managedPath='sites'`.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  odata.metadata:
+                    type: string
+                  value:
+                    type: string
+                required:
+                  - value
+                additionalProperties: true
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

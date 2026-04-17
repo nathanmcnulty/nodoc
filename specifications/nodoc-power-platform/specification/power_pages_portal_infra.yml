@@ -104,6 +104,22 @@ paths:
           - "https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub"
       tags:
         - PowerPagesPortalInfra
+      x-nodoc-operation-context:
+        surface: Environments > Hub > Power Pages
+        workflows:
+          - Open an environment hub and let the Power Pages experience resolve the environment-level portal infrastructure context.
+        headerProfile: power-platform-service-bearer
+        requestShapes:
+          - name: power-pages-environment-context
+            bodyKind: none
+            requiredParameters:
+              - orgId
+            notes: The portal uses the Dataverse orgId query selector to resolve Power Pages environment metadata on the regional portal-infra host.
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Verified from authenticated Power Platform environment-hub browsing on the Power Pages blade.
       parameters:
         - name: "orgId"
           in: query

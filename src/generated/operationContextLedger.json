@@ -1,0 +1,2183 @@
+[
+  {
+    "title": "M365 Admin",
+    "specId": "m365-admin",
+    "specPath": "specifications/nodoc-m365-admin/specification/openapi.yml",
+    "nodocRoute": "m365-admin",
+    "nodocCategory": null,
+    "headerProfiles": {
+      "m365-admin-homepage": {
+        "description": "Homepage-backed same-origin M365 Admin profile used for dashboard reads and token-broker traffic.",
+        "requiredHeaders": [
+          {
+            "name": "AjaxSessionKey",
+            "description": "Portal session key captured during admin shell bootstrap."
+          },
+          {
+            "name": "x-portal-routekey",
+            "description": "Route key issued by the admin shell and reused on same-origin requests."
+          },
+          {
+            "name": "x-adminapp-request",
+            "description": "Admin shell context path for homepage-backed requests.",
+            "value": "/homepage"
+          },
+          {
+            "name": "x-ms-mac-appid",
+            "description": "Blade-specific admin portal application identifier. Live captures show that this value changes between portal experiences."
+          },
+          {
+            "name": "x-ms-mac-hostingapp",
+            "description": "Hosting application name emitted by the admin shell.",
+            "value": "M365AdminPortal"
+          }
+        ],
+        "observedHeaders": [
+          {
+            "name": "x-ms-mac-appid",
+            "description": "Observed on live homepage-backed token broker requests.",
+            "value": "050829af-7f24-4897-8f81-732bf47719ad"
+          },
+          {
+            "name": "x-ms-mac-target-app",
+            "description": "Additional routing context observed on same-origin homepage requests.",
+            "value": "MAC"
+          },
+          {
+            "name": "x-ms-mac-version",
+            "description": "Observed shell version header. Treat this as volatile.",
+            "value": "host-mac_2026.4.2.8"
+          },
+          {
+            "name": "Referer",
+            "description": "Root admin referer emitted by the live homepage shell.",
+            "value": "https://admin.cloud.microsoft/"
+          }
+        ]
+      },
+      "m365-admin-microsoft-search": {
+        "description": "Same-origin M365 Admin profile used by Search & intelligence and Search Answers recommendation reads.",
+        "requiredHeaders": [
+          {
+            "name": "AjaxSessionKey",
+            "description": "Portal session key captured during admin shell bootstrap."
+          },
+          {
+            "name": "x-portal-routekey",
+            "description": "Route key issued by the admin shell and reused on same-origin requests."
+          },
+          {
+            "name": "x-adminapp-request",
+            "description": "Admin shell context path for Microsoft Search-backed requests.",
+            "value": "/MicrosoftSearch"
+          },
+          {
+            "name": "x-ms-mac-appid",
+            "description": "Blade-specific admin portal application identifier. Live captures show that this value changes between portal experiences."
+          },
+          {
+            "name": "x-ms-mac-hostingapp",
+            "description": "Hosting application name emitted by the admin shell.",
+            "value": "M365AdminPortal"
+          }
+        ],
+        "observedHeaders": [
+          {
+            "name": "x-ms-mac-appid",
+            "description": "Observed on live Search & intelligence recommendation requests.",
+            "value": "36051945-c7f8-4505-8a9b-23f8ba62271e"
+          },
+          {
+            "name": "x-ms-mac-target-app",
+            "description": "Additional routing context observed on same-origin Microsoft Search requests.",
+            "value": "MAC"
+          },
+          {
+            "name": "x-ms-mac-version",
+            "description": "Observed shell version header. Treat this as volatile.",
+            "value": "host-mac_2026.4.2.8"
+          },
+          {
+            "name": "Referer",
+            "description": "Root admin referer emitted by the live Microsoft Search shell.",
+            "value": "https://admin.cloud.microsoft/"
+          }
+        ]
+      },
+      "m365-admin-viva": {
+        "description": "Same-origin M365 Admin profile used by Viva module and settings calls.",
+        "requiredHeaders": [
+          {
+            "name": "AjaxSessionKey",
+            "description": "Portal session key captured during admin shell bootstrap."
+          },
+          {
+            "name": "x-portal-routekey",
+            "description": "Route key issued by the admin shell and reused on same-origin requests."
+          },
+          {
+            "name": "x-adminapp-request",
+            "description": "Admin shell context path for Viva-backed requests.",
+            "value": "/viva"
+          },
+          {
+            "name": "x-ms-mac-appid",
+            "description": "Blade-specific admin portal application identifier. Captured values are volatile and can change independently from other admin surfaces."
+          },
+          {
+            "name": "x-ms-mac-hostingapp",
+            "description": "Hosting application name emitted by the admin shell.",
+            "value": "M365AdminPortal"
+          }
+        ],
+        "observedHeaders": [
+          {
+            "name": "x-ms-mac-target-app",
+            "description": "Additional routing context observed on same-origin requests.",
+            "value": "MAC"
+          },
+          {
+            "name": "x-ms-mac-version",
+            "description": "Blade-specific shell version header. Treat this as volatile."
+          },
+          {
+            "name": "Referer",
+            "description": "Viva-backed requests were observed with the root admin referer.",
+            "value": "https://admin.cloud.microsoft/"
+          }
+        ]
+      },
+      "m365-admin-data-location": {
+        "description": "Narrow M365 Admin profile used for tenant data-location requests.",
+        "requiredHeaders": [
+          {
+            "name": "AjaxSessionKey",
+            "description": "Portal session key captured during admin shell bootstrap."
+          },
+          {
+            "name": "x-portal-routekey",
+            "description": "Route key issued by the admin shell and reused on same-origin requests."
+          },
+          {
+            "name": "x-adminapp-request",
+            "description": "Admin shell context path for the data-location blade.",
+            "value": "/Settings/OrganizationProfile/:/Settings/L1/DataLocation"
+          }
+        ],
+        "observedHeaders": [
+          {
+            "name": "Referer",
+            "description": "Root admin referer observed on data-location requests.",
+            "value": "https://admin.cloud.microsoft/"
+          }
+        ]
+      },
+      "m365-admin-office-online": {
+        "description": "Same-origin M365 Admin profile used by Org settings > Services > Microsoft 365 on the web.",
+        "requiredHeaders": [
+          {
+            "name": "AjaxSessionKey",
+            "description": "Portal session key captured during admin shell bootstrap."
+          },
+          {
+            "name": "x-portal-routekey",
+            "description": "Route key issued by the admin shell and reused on same-origin requests."
+          },
+          {
+            "name": "x-adminapp-request",
+            "description": "Admin shell context path for the Microsoft 365 on the web blade.",
+            "value": "/Settings/Services/:/Settings/L1/OfficeOnline"
+          },
+          {
+            "name": "x-ms-mac-appid",
+            "description": "Blade-specific admin portal application identifier. Live captures show that this value changes between portal experiences."
+          },
+          {
+            "name": "x-ms-mac-hostingapp",
+            "description": "Hosting application name emitted by the admin shell.",
+            "value": "M365AdminPortal"
+          }
+        ],
+        "observedHeaders": [
+          {
+            "name": "x-ms-mac-appid",
+            "description": "Observed on live Microsoft 365 on the web settings reads.",
+            "value": "3fda709f-4f6c-4ba7-8da3-b3d031a4d675"
+          },
+          {
+            "name": "x-ms-mac-target-app",
+            "description": "Additional routing context observed on same-origin Office Online requests.",
+            "value": "MAC"
+          },
+          {
+            "name": "x-ms-mac-version",
+            "description": "Observed shell version header. Treat this as volatile.",
+            "value": "host-mac_2026.4.2.8"
+          },
+          {
+            "name": "Referer",
+            "description": "Root admin referer emitted by the live services blade.",
+            "value": "https://admin.cloud.microsoft/"
+          }
+        ]
+      },
+      "m365-admin-brand-center": {
+        "description": "SharePoint-backed M365 Admin profile used by the Brand center setup and configuration helpers.",
+        "requiredHeaders": [
+          {
+            "name": "AjaxSessionKey",
+            "description": "Portal session key captured during admin shell bootstrap."
+          },
+          {
+            "name": "x-portal-routekey",
+            "description": "Route key issued by the admin shell and reused on same-origin requests."
+          },
+          {
+            "name": "Authorization",
+            "description": "Brokered SharePoint bearer token observed on live Brand center helper reads."
+          },
+          {
+            "name": "x-adminapp-request",
+            "description": "Admin shell context path for the Brand center experience.",
+            "value": "/brandcenter"
+          },
+          {
+            "name": "x-ms-mac-appid",
+            "description": "Blade-specific admin portal application identifier. Live captures show that this value changes between portal experiences."
+          },
+          {
+            "name": "x-ms-mac-hostingapp",
+            "description": "Hosting application name emitted by the admin shell.",
+            "value": "M365AdminPortal"
+          }
+        ],
+        "observedHeaders": [
+          {
+            "name": "x-ms-mac-appid",
+            "description": "Observed on live Brand center helper requests.",
+            "value": "9f8918eb-b2b7-4b90-b5bd-86b38f6d4d23"
+          },
+          {
+            "name": "x-ms-mac-target-app",
+            "description": "SharePoint-targeted routing context observed on Brand center reads.",
+            "value": "SPO"
+          },
+          {
+            "name": "x-ms-mac-version",
+            "description": "Observed shell version header. Treat this as volatile.",
+            "value": "host-mac_2026.4.2.8"
+          },
+          {
+            "name": "Referer",
+            "description": "Root admin referer emitted by the live Brand center blade.",
+            "value": "https://admin.cloud.microsoft/"
+          }
+        ]
+      },
+      "m365-admin-microsoft-365-backup": {
+        "description": "Same-origin M365 Admin profile used by Settings > Microsoft 365 Backup.",
+        "requiredHeaders": [
+          {
+            "name": "AjaxSessionKey",
+            "description": "Portal session key captured during admin shell bootstrap."
+          },
+          {
+            "name": "x-portal-routekey",
+            "description": "Route key issued by the admin shell and reused on same-origin requests."
+          },
+          {
+            "name": "x-adminapp-request",
+            "description": "Admin shell context path for the Microsoft 365 Backup blade.",
+            "value": "/Settings/enhancedRestore"
+          },
+          {
+            "name": "x-ms-mac-appid",
+            "description": "Blade-specific admin portal application identifier. Live captures show that this value changes between portal experiences."
+          },
+          {
+            "name": "x-ms-mac-hostingapp",
+            "description": "Hosting application name emitted by the admin shell.",
+            "value": "M365AdminPortal"
+          }
+        ],
+        "observedHeaders": [
+          {
+            "name": "x-ms-mac-appid",
+            "description": "Observed on live Microsoft 365 Backup reads.",
+            "value": "08a68b73-8058-4c59-8bd5-7b6833e2af21"
+          },
+          {
+            "name": "x-ms-mac-target-app",
+            "description": "Additional routing context observed on same-origin backup requests.",
+            "value": "MAC"
+          },
+          {
+            "name": "x-ms-mac-version",
+            "description": "Observed shell version header. Treat this as volatile.",
+            "value": "host-mac_2026.4.2.8"
+          },
+          {
+            "name": "Referer",
+            "description": "Root admin referer emitted by the live Microsoft 365 Backup blade.",
+            "value": "https://admin.cloud.microsoft/"
+          }
+        ]
+      }
+    },
+    "operations": [
+      {
+        "operationId": "Agents.GetFrontierAccess",
+        "summary": "Get Frontier access policy",
+        "method": "GET",
+        "path": "/admin/api/settings/company/frontier/access",
+        "operationContext": {
+          "surface": "Copilot > Agents",
+          "workflows": [
+            "Open the Copilot agent administration experience and inspect access controls."
+          ],
+          "headerProfile": "m365-admin-homepage"
+        }
+      },
+      {
+        "operationId": "Agents.SetFrontierAccess",
+        "summary": "Set Frontier access policy",
+        "method": "POST",
+        "path": "/admin/api/settings/company/frontier/access",
+        "operationContext": {
+          "surface": "Copilot > Agents",
+          "workflows": [
+            "Open the Copilot agent administration experience and save access policy changes."
+          ],
+          "headerProfile": "m365-admin-homepage",
+          "requestShapes": [
+            {
+              "name": "merged-frontier-policy",
+              "contentType": "application/json",
+              "bodyKind": "object-merge",
+              "notes": "The portal merges the supplied FrontierPolicy object into the current server document."
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "AppSettings.GetOfficeOnTheWeb",
+        "summary": "Get Office on the Web settings",
+        "method": "GET",
+        "path": "/admin/api/settings/apps/officeontheweb",
+        "operationContext": {
+          "surface": "Org settings > Services > Microsoft 365 on the web",
+          "workflows": [
+            "Open Org settings, then Services, then Microsoft 365 on the web."
+          ],
+          "headerProfile": "m365-admin-office-online",
+          "canonicalPath": "/admin/api/settings/apps/officeonline",
+          "availability": {
+            "level": "request-dependent",
+            "notes": [
+              "The clickable blade routed to `#/Settings/Services/:/Settings/L1/OfficeOnline` during live capture.",
+              "A direct `#/Settings/Services/:/Settings/L1/OfficeOnTheWeb` hash fell back to `#/homepage`, so treat this path as a documented alias until new live evidence appears."
+            ]
+          },
+          "provenance": [
+            {
+              "source": "module-validation",
+              "confidence": "high",
+              "notes": [
+                "The checked-in M365Internals helper resolves this surface to /admin/api/settings/apps/officeonline."
+              ]
+            },
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Live navigation clicked the Microsoft 365 on the web row and the resulting request used `/admin/api/settings/apps/officeonline`."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "AppSettings.SetOfficeOnTheWeb",
+        "summary": "Set Office on the Web settings",
+        "method": "POST",
+        "path": "/admin/api/settings/apps/officeontheweb",
+        "operationContext": {
+          "surface": "Org settings > Services > Microsoft 365 on the web",
+          "workflows": [
+            "Open Org settings, then Services, then Microsoft 365 on the web."
+          ],
+          "headerProfile": "m365-admin-office-online",
+          "canonicalPath": "/admin/api/settings/apps/officeonline",
+          "requestShapes": [
+            {
+              "name": "merged-office-on-the-web-settings",
+              "contentType": "application/json",
+              "bodyKind": "object-merge",
+              "notes": "The portal posts the merged settings document for this surface."
+            }
+          ],
+          "availability": {
+            "level": "request-dependent",
+            "notes": [
+              "The clickable blade routed to `#/Settings/Services/:/Settings/L1/OfficeOnline` during live capture."
+            ]
+          },
+          "provenance": [
+            {
+              "source": "module-validation",
+              "confidence": "high",
+              "notes": [
+                "The checked-in M365Internals helper resolves this surface to /admin/api/settings/apps/officeonline."
+              ]
+            },
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Live navigation confirmed the UI now resolves through the OfficeOnline route family."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "CompanySettings.GetBrandCenterConfiguration",
+        "summary": "Get Brand Center configuration",
+        "method": "GET",
+        "path": "/_api/spo.tenant/GetBrandCenterConfiguration",
+        "operationContext": {
+          "surface": "Org settings > Brand center",
+          "workflows": [
+            "Open Org settings, then Services, then Brand center."
+          ],
+          "headerProfile": "m365-admin-brand-center",
+          "availability": {
+            "level": "tenant-conditional",
+            "notes": [
+              "A live capture from a tenant without Brand center enabled still returned the configuration object with empty GUIDs and blank site fields."
+            ]
+          },
+          "provenance": [
+            {
+              "source": "module-validation",
+              "confidence": "high",
+              "notes": [
+                "Validated against the checked-in M365Internals Brand Center cmdlet."
+              ]
+            },
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Verified against the signed-in `#/brandcenter` route with SharePoint-targeted headers and bearer authorization."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "CompanySettings.GetBrandCenterSiteUrl",
+        "summary": "Resolve Brand Center site URL",
+        "method": "GET",
+        "path": "/_api/GroupSiteManager/GetValidSiteUrlFromAlias",
+        "operationContext": {
+          "surface": "Org settings > Brand center",
+          "workflows": [
+            "Open Org settings, then Services, then Brand center."
+          ],
+          "headerProfile": "m365-admin-brand-center",
+          "requestShapes": [
+            {
+              "name": "brand-center-site-url",
+              "bodyKind": "none",
+              "requiredParameters": [
+                "alias",
+                "managedPath"
+              ],
+              "notes": "Brand Center currently resolves the quoted alias `'BrandGuide'` under the quoted managed path `'sites'`."
+            }
+          ],
+          "provenance": [
+            {
+              "source": "module-validation",
+              "confidence": "high",
+              "notes": [
+                "Validated against the checked-in M365Internals Brand Center cmdlet."
+              ]
+            },
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Verified against the signed-in `#/brandcenter` route with query values `alias='BrandGuide'` and `managedPath='sites'`."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "Reports.GetReportData",
+        "summary": "Get report data",
+        "method": "GET",
+        "path": "/admin/api/reports/GetReportData",
+        "operationContext": {
+          "surface": "Reports",
+          "workflows": [
+            "Open usage, Copilot, or adoption reports that resolve data through GetReportData."
+          ],
+          "headerProfile": "m365-admin-homepage",
+          "requestShapes": [
+            {
+              "name": "query-driven-report",
+              "bodyKind": "none",
+              "requiredParameters": [
+                "entityName"
+              ],
+              "notes": "The response schema changes with the report selector carried in the query string."
+            }
+          ],
+          "variants": [
+            {
+              "selector": "entityName",
+              "location": "query",
+              "notes": "Camel-case selector used by most Copilot and agent reports."
+            },
+            {
+              "selector": "entityname",
+              "location": "query",
+              "notes": "Lowercase selector variant still appears on some report families."
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "Reports.GetSummaryDataV3",
+        "summary": "Get summary report data",
+        "method": "GET",
+        "path": "/admin/api/reports/GetSummaryDataV3",
+        "operationContext": {
+          "surface": "Reports",
+          "workflows": [
+            "Open usage or Copilot summaries that resolve data through GetSummaryDataV3."
+          ],
+          "headerProfile": "m365-admin-homepage",
+          "requestShapes": [
+            {
+              "name": "summary-report",
+              "bodyKind": "none",
+              "requiredParameters": [
+                "ServiceId",
+                "CategoryId",
+                "Report"
+              ],
+              "notes": "The response schema changes with the service, category, report, and active view combination."
+            }
+          ],
+          "variants": [
+            {
+              "selector": "active_view",
+              "location": "query",
+              "notes": "Active view selects the rendered summary slice inside the same report family."
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "Reports.GetAdminDashboardPreferences",
+        "summary": "Get admin dashboard preferences",
+        "method": "GET",
+        "path": "/admin/api/admindashboard/preferences",
+        "operationContext": {
+          "surface": "Dashboard",
+          "workflows": [
+            "Open the admin homepage dashboard and read saved user preferences."
+          ],
+          "headerProfile": "m365-admin-homepage",
+          "availability": {
+            "level": "user-context",
+            "notes": [
+              "Preferences are scoped to the signed-in administrator rather than the whole tenant."
+            ]
+          }
+        }
+      },
+      {
+        "operationId": "Search.GetConfigurations",
+        "summary": "Get search configurations",
+        "method": "GET",
+        "path": "/admin/api/searchadminapi/configurations",
+        "operationContext": {
+          "surface": "Settings > Search & intelligence",
+          "workflows": [
+            "Open Search & intelligence and retrieve configuration-backed settings."
+          ],
+          "headerProfile": "m365-admin-microsoft-search"
+        }
+      },
+      {
+        "operationId": "Search.GetSearchIntelligenceHomeCards",
+        "summary": "Get search intelligence home cards",
+        "method": "GET",
+        "path": "/admin/api/searchadminapi/searchintelligencehome/cards",
+        "operationContext": {
+          "surface": "Settings > Search & intelligence",
+          "workflows": [
+            "Open the Search & intelligence landing page."
+          ],
+          "headerProfile": "m365-admin-microsoft-search",
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Verified on the signed-in `#/MicrosoftSearch` route during initial page load."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "Search.GetFirstRunExperience",
+        "summary": "Get search first-run experience settings",
+        "method": "POST",
+        "path": "/admin/api/searchadminapi/firstrunexperience/get",
+        "operationContext": {
+          "surface": "Settings > Search & intelligence",
+          "workflows": [
+            "Open the Search & intelligence landing page and hydrate the first-run experience banners and cards."
+          ],
+          "headerProfile": "m365-admin-microsoft-search",
+          "requestShapes": [
+            {
+              "name": "search-first-run-experience",
+              "contentType": "application/json",
+              "bodyKind": "string-array",
+              "notes": "The live portal posts an array of first-run experience keys to retrieve in one call."
+            }
+          ],
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Verified on the signed-in `#/MicrosoftSearch` route with a JSON array body."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "Search.GetQnas",
+        "summary": "Get search Q&A answers",
+        "method": "POST",
+        "path": "/admin/api/searchadminapi/Qnas",
+        "operationContext": {
+          "surface": "Settings > Search & intelligence",
+          "workflows": [
+            "Open Microsoft Search Q&A administration and filter the Q&A list."
+          ],
+          "headerProfile": "m365-admin-microsoft-search",
+          "requestShapes": [
+            {
+              "name": "search-qna-filter",
+              "contentType": "application/json",
+              "bodyKind": "query-object",
+              "requiredParameters": [
+                "ServiceType",
+                "Filter"
+              ],
+              "notes": "The search admin surface uses a JSON body for list filters rather than query parameters."
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "Search.GetConnectorsSummary",
+        "summary": "Get connectors summary",
+        "method": "GET",
+        "path": "/admin/api/searchadminapi/UDTConnectorsSummary",
+        "operationContext": {
+          "surface": "Settings > Search & intelligence",
+          "workflows": [
+            "Open Search connectors and retrieve connector summary metrics."
+          ],
+          "headerProfile": "m365-admin-microsoft-search"
+        }
+      },
+      {
+        "operationId": "Search.GetConnectorAdminUxOptions",
+        "summary": "Get search connector admin UX options",
+        "method": "GET",
+        "path": "/fd/mssearchconnectors/v1.0/admin/AdminUxOptions",
+        "operationContext": {
+          "surface": "Settings > Search & intelligence",
+          "workflows": [
+            "Open the Search & intelligence landing page and load connector-related tiles."
+          ],
+          "headerProfile": "m365-admin-microsoft-search",
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Verified on the signed-in `#/MicrosoftSearch` route during initial homepage hydration."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "Search.ListConnectorConnections",
+        "summary": "List search connector connections",
+        "method": "GET",
+        "path": "/fd/mssearchconnectors/v1.0/admin/connections",
+        "operationContext": {
+          "surface": "Settings > Search & intelligence",
+          "workflows": [
+            "Open Search connectors and load the current connector inventory."
+          ],
+          "headerProfile": "m365-admin-microsoft-search",
+          "variants": [
+            {
+              "selector": "useRpcOverRest",
+              "location": "query",
+              "knownValues": [
+                "true"
+              ],
+              "notes": "The live homepage request used the RPC-over-REST projection."
+            }
+          ],
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Verified on the signed-in `#/MicrosoftSearch` route with `useRpcOverRest=true`."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "Search.GetConnectionStatistics",
+        "summary": "Get connection statistics",
+        "method": "GET",
+        "path": "/fd/mssearchconnectors/v1.0/admin/connections/getStatistics",
+        "operationContext": {
+          "surface": "Settings > Search & intelligence",
+          "workflows": [
+            "Open Search connectors and inspect per-connection statistics."
+          ],
+          "headerProfile": "m365-admin-microsoft-search"
+        }
+      },
+      {
+        "operationId": "Search.GetInsightsReportStatus",
+        "summary": "Get search insights report readiness",
+        "method": "GET",
+        "path": "/fd/mssearchinsights/api/v1/{tenantId}/status/reportdata",
+        "operationContext": {
+          "surface": "Settings > Search & intelligence",
+          "workflows": [
+            "Open Search analytics and load report readiness state before rendering analytics cards."
+          ],
+          "headerProfile": "m365-admin-microsoft-search",
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Verified on the signed-in `#/MicrosoftSearch` route using `reports=AdoptionSummary`."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "Search.GetInsightsGenericReport",
+        "summary": "Get a generic search insights report",
+        "method": "POST",
+        "path": "/fd/mssearchinsights/api/v1/{tenantId}/TenantReports/GenericReport",
+        "operationContext": {
+          "surface": "Settings > Search & intelligence",
+          "workflows": [
+            "Open Search analytics and request the summary report payload for the homepage cards."
+          ],
+          "headerProfile": "m365-admin-microsoft-search",
+          "requestShapes": [
+            {
+              "name": "search-analytics-card-report",
+              "contentType": "application/json",
+              "bodyKind": "report-query",
+              "requiredParameters": [
+                "StartDateUtc",
+                "EndDateUtc",
+                "Interval",
+                "Fields"
+              ],
+              "notes": "The live portal requested the `SearchAnalyticsCard` field set over a date range with empty filters."
+            }
+          ],
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Verified on the signed-in `#/MicrosoftSearch` route."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "Search.GetSubstrateBookmarks",
+        "summary": "Get substrate bookmarks",
+        "method": "POST",
+        "path": "/fd/substrateBookmarks/api/v3/management/bookmarks",
+        "operationContext": {
+          "surface": "Settings > Search & intelligence",
+          "workflows": [
+            "Open the Search & intelligence landing page and load bookmark-backed cards."
+          ],
+          "headerProfile": "m365-admin-microsoft-search",
+          "requestShapes": [
+            {
+              "name": "search-bookmarks-default",
+              "contentType": "application/json",
+              "bodyKind": "empty-object",
+              "notes": "The live homepage request posted `{}`."
+            }
+          ],
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Verified on the signed-in `#/MicrosoftSearch` route."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "Search.GetTenantAcronyms",
+        "summary": "Get tenant acronyms from substrate",
+        "method": "POST",
+        "path": "/fd/substrateAcronyms/api/v1.0/GetTenantAdminAcronymsFromSds",
+        "operationContext": {
+          "surface": "Settings > Search & intelligence",
+          "workflows": [
+            "Open the Search & intelligence landing page and load acronym-backed content."
+          ],
+          "headerProfile": "m365-admin-microsoft-search",
+          "requestShapes": [
+            {
+              "name": "search-acronyms-default",
+              "contentType": "application/json",
+              "bodyKind": "empty-object",
+              "notes": "The live homepage request posted `{}`."
+            }
+          ],
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Verified on the signed-in `#/MicrosoftSearch` route."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "UsersGroups.ListUsers",
+        "summary": "List users",
+        "method": "POST",
+        "path": "/admin/api/Users/ListUsers",
+        "operationContext": {
+          "surface": "Users > Active users",
+          "workflows": [
+            "Open Active users and page or filter the tenant user inventory."
+          ],
+          "headerProfile": "m365-admin-homepage",
+          "requestShapes": [
+            {
+              "name": "paginated-user-list",
+              "contentType": "application/json",
+              "bodyKind": "query-object",
+              "requiredParameters": [
+                "ListAction",
+                "SortDirection",
+                "SortPropertyName"
+              ],
+              "notes": "The portal uses body parameters instead of query parameters for paging and filtering."
+            }
+          ],
+          "variants": [
+            {
+              "selector": "SearchText",
+              "location": "body",
+              "notes": "SearchText is used for free-text filtering."
+            },
+            {
+              "selector": "SelectedView",
+              "location": "body",
+              "notes": "SelectedView and SelectedViewType scope the list to saved portal views."
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "UsersGroups.GetGroups",
+        "summary": "Get groups",
+        "method": "POST",
+        "path": "/admin/api/groups/GetGroups",
+        "operationContext": {
+          "surface": "Users > Groups",
+          "workflows": [
+            "Open Groups and page or filter the tenant group inventory."
+          ],
+          "headerProfile": "m365-admin-homepage",
+          "requestShapes": [
+            {
+              "name": "paginated-group-list",
+              "contentType": "application/json",
+              "bodyKind": "query-object",
+              "requiredParameters": [
+                "SearchString",
+                "SortDirection",
+                "SortField"
+              ],
+              "notes": "The portal uses body parameters instead of query parameters for paging and filtering."
+            }
+          ],
+          "variants": [
+            {
+              "selector": "GroupTypes",
+              "location": "body",
+              "notes": "GroupTypes narrows the result set to a specific group family."
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "UsersGroups.GetTokenWithExpiry",
+        "summary": "Get token with expiry",
+        "method": "POST",
+        "path": "/admin/api/users/tokenWithExpiry",
+        "operationContext": {
+          "surface": "Users > Active users",
+          "workflows": [
+            "Open an experience that needs a downstream resource token from the admin portal."
+          ],
+          "headerProfile": "m365-admin-homepage",
+          "requestShapes": [
+            {
+              "name": "downstream-audience-token",
+              "contentType": "application/x-www-form-urlencoded; charset=UTF-8",
+              "bodyKind": "raw-form-urlencoded",
+              "notes": "The portal posts the requested audience as an unnamed form value."
+            }
+          ],
+          "variants": [
+            {
+              "selector": "audience",
+              "location": "body",
+              "knownValues": [
+                "https://management.azure.com/"
+              ],
+              "notes": "The returned token shape depends on the requested audience."
+            }
+          ],
+          "availability": {
+            "level": "request-dependent",
+            "notes": [
+              "Acceptance and returned token content are sensitive to the downstream audience value."
+            ]
+          },
+          "provenance": [
+            {
+              "source": "module-validation",
+              "confidence": "high",
+              "notes": [
+                "Validated against the checked-in M365Internals implementation and known issues notes."
+              ]
+            },
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Verified in the signed-in homepage shell with body `=https://management.azure.com/` and the `/homepage` admin context."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "GraphProxy.BatchV1",
+        "summary": "Graph v1.0 batch request",
+        "method": "POST",
+        "path": "/fd/msgraph/v1.0/$batch",
+        "operationContext": {
+          "surface": "Settings > Microsoft 365 Backup",
+          "workflows": [
+            "Open the Microsoft 365 Backup blade and load the OneDrive and Exchange summary cards."
+          ],
+          "headerProfile": "m365-admin-microsoft-365-backup",
+          "requestShapes": [
+            {
+              "name": "backup-onedrive-summary",
+              "contentType": "application/json",
+              "bodyKind": "batch",
+              "notes": "The live portal batched drive protection unit counts, OneDrive protection policies, and active restore session counts."
+            },
+            {
+              "name": "backup-exchange-summary",
+              "contentType": "application/json",
+              "bodyKind": "batch",
+              "notes": "The live portal batched mailbox protection unit counts, Exchange protection policies, and active restore session counts."
+            }
+          ],
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Verified on the signed-in `#/Settings/enhancedRestore` route."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "GraphProxy.GetBackupProtectionPolicies",
+        "summary": "Get backup protection policies",
+        "method": "GET",
+        "path": "/fd/msgraph/beta/solutions/backupRestore/protectionPolicies",
+        "operationContext": {
+          "surface": "Settings > Microsoft 365 Backup",
+          "workflows": [
+            "Open the Microsoft 365 Backup blade and load the connected protection policy section."
+          ],
+          "headerProfile": "m365-admin-microsoft-365-backup",
+          "availability": {
+            "level": "tenant-conditional",
+            "notes": [
+              "The live tenant returned HTTP 402 when Microsoft 365 Backup was not enabled."
+            ]
+          },
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Verified on the signed-in `#/Settings/enhancedRestore` route."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "GraphProxy.GetBackupEmailNotificationsSetting",
+        "summary": "Get backup email notification settings",
+        "method": "GET",
+        "path": "/fd/msgraph/beta/solutions/backupRestore/emailNotificationsSetting",
+        "operationContext": {
+          "surface": "Settings > Microsoft 365 Backup",
+          "workflows": [
+            "Open the Microsoft 365 Backup blade and load notification-related configuration."
+          ],
+          "headerProfile": "m365-admin-microsoft-365-backup",
+          "availability": {
+            "level": "tenant-conditional",
+            "notes": [
+              "The live tenant returned HTTP 402 when Microsoft 365 Backup was not enabled."
+            ]
+          },
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Verified on the signed-in `#/Settings/enhancedRestore` route."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "GraphProxy.Batch",
+        "summary": "Graph batch request",
+        "method": "POST",
+        "path": "/fd/msgraph/beta/$batch",
+        "operationContext": {
+          "surface": "Settings > Microsoft 365 Backup",
+          "workflows": [
+            "Open the Microsoft 365 Backup blade and load offboarding summary counts."
+          ],
+          "headerProfile": "m365-admin-microsoft-365-backup",
+          "requestShapes": [
+            {
+              "name": "backup-offboarding-counts",
+              "contentType": "application/json",
+              "bodyKind": "batch",
+              "notes": "The live portal batched offboarding count reads for SharePoint site, OneDrive drive, and Exchange mailbox protection units."
+            }
+          ],
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Verified on the signed-in `#/Settings/enhancedRestore` route. Other portal surfaces may also use this generic batch endpoint."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "ContentUnderstanding.GetAutoFill",
+        "summary": "Get autofill settings",
+        "method": "GET",
+        "path": "/admin/api/contentunderstanding/autofillsetting",
+        "operationContext": {
+          "surface": "Copilot > Settings > Content understanding",
+          "workflows": [
+            "Open pay-as-you-go or Content Understanding settings and inspect AutoFill."
+          ],
+          "headerProfile": "m365-admin-homepage",
+          "provenance": [
+            {
+              "source": "module-validation",
+              "confidence": "high",
+              "notes": [
+                "Validated against the checked-in M365Internals Content Understanding cmdlet."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "ContentUnderstanding.GetBillingSettings",
+        "summary": "Get content understanding billing settings",
+        "method": "GET",
+        "path": "/admin/api/contentunderstanding/billingSettings",
+        "operationContext": {
+          "surface": "Copilot > Settings > Content understanding",
+          "workflows": [
+            "Open pay-as-you-go or Content Understanding settings and inspect billing configuration."
+          ],
+          "headerProfile": "m365-admin-homepage",
+          "provenance": [
+            {
+              "source": "module-validation",
+              "confidence": "high",
+              "notes": [
+                "Validated against the checked-in M365Internals Content Understanding cmdlet."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "ContentUnderstanding.GetSetting",
+        "summary": "Get primary content understanding settings",
+        "method": "GET",
+        "path": "/admin/api/contentunderstanding/setting",
+        "operationContext": {
+          "surface": "Copilot > Settings > Content understanding",
+          "workflows": [
+            "Open the main Content Understanding settings experience."
+          ],
+          "headerProfile": "m365-admin-homepage",
+          "provenance": [
+            {
+              "source": "module-validation",
+              "confidence": "high",
+              "notes": [
+                "Validated against the checked-in M365Internals Content Understanding cmdlet."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "Misc.GetEnhancedRestoreSettings",
+        "summary": "Get enhanced restore settings",
+        "method": "GET",
+        "path": "/fd/enhancedRestorev2/v1/featureSetting",
+        "operationContext": {
+          "surface": "Settings > Microsoft 365 Backup",
+          "workflows": [
+            "Open the Microsoft 365 Backup settings experience."
+          ],
+          "headerProfile": "m365-admin-microsoft-365-backup",
+          "availability": {
+            "level": "tenant-conditional",
+            "notes": [
+              "A live capture from a tenant without Microsoft 365 Backup enabled returned `status: disabled` with billing flags still present."
+            ]
+          },
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Verified against the signed-in Settings > Microsoft 365 Backup blade at `#/Settings/enhancedRestore`."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "Misc.GetM365Alerts",
+        "summary": "Get M365 recommendation alerts",
+        "method": "GET",
+        "path": "/admin/api/recommendations/m365alerts",
+        "operationContext": {
+          "surface": "Dashboard > Recommendations",
+          "workflows": [
+            "Open the admin dashboard recommendations area."
+          ],
+          "headerProfile": "m365-admin-homepage",
+          "variants": [
+            {
+              "selector": "referrer",
+              "location": "query",
+              "knownValues": [
+                "M365AdminDashboard"
+              ],
+              "notes": "The portal currently sends the dashboard referrer value on alert reads."
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "Misc.GetM365Suggestions",
+        "summary": "Get M365 search suggestions",
+        "method": "GET",
+        "path": "/admin/api/recommendations/m365suggestions",
+        "operationContext": {
+          "surface": "Microsoft Search > Search answers",
+          "workflows": [
+            "Open the Search & intelligence experience. The portal currently emits this request with the `SearchAnswers` referrer during page load."
+          ],
+          "headerProfile": "m365-admin-microsoft-search",
+          "variants": [
+            {
+              "selector": "referrer",
+              "location": "query",
+              "knownValues": [
+                "SearchAnswers"
+              ],
+              "notes": "The portal currently sends the SearchAnswers referrer on this route."
+            }
+          ],
+          "provenance": [
+            {
+              "source": "module-validation",
+              "confidence": "high",
+              "notes": [
+                "Validated against the checked-in M365Internals recommendation cmdlet."
+              ]
+            },
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Verified on the signed-in `#/MicrosoftSearch` route with `x-adminapp-request: /MicrosoftSearch`."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "Navigation.GetDarkMode",
+        "summary": "Get dark mode preference",
+        "method": "GET",
+        "path": "/admin/api/navigation/darkmode",
+        "operationContext": {
+          "surface": "Portal shell",
+          "workflows": [
+            "Open any admin shell page and read the current user's dark mode preference."
+          ],
+          "headerProfile": "m365-admin-homepage",
+          "availability": {
+            "level": "user-context",
+            "notes": [
+              "The value is specific to the signed-in admin's saved shell preferences."
+            ]
+          }
+        }
+      },
+      {
+        "operationId": "Billing.GetMicrosoft365BackupFeature",
+        "summary": "Get Microsoft 365 Backup billing feature",
+        "method": "GET",
+        "path": "/_api/v2.1/billingFeatures('M365Backup')",
+        "operationContext": {
+          "surface": "Settings > Microsoft 365 Backup",
+          "workflows": [
+            "Open the Microsoft 365 Backup settings experience."
+          ],
+          "headerProfile": "m365-admin-microsoft-365-backup",
+          "availability": {
+            "level": "tenant-conditional",
+            "notes": [
+              "The live tenant returned a populated feature record even though the blade reported `M365 Backup not enabled`."
+            ]
+          },
+          "provenance": [
+            {
+              "source": "module-validation",
+              "confidence": "high",
+              "notes": [
+                "Validated against the checked-in M365Internals Microsoft 365 Backup cmdlet."
+              ]
+            },
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Verified against the signed-in `#/Settings/enhancedRestore` route together with the companion enhanced restore and Graph backup reads."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "Domains.ExportDomainRecords",
+        "summary": "Export domain records",
+        "method": "GET",
+        "path": "/admin/api/Domains/Records/Export",
+        "operationContext": {
+          "surface": "Domains",
+          "workflows": [
+            "Open the Domains experience and export DNS records for a selected domain."
+          ],
+          "headerProfile": "m365-admin-homepage",
+          "requestShapes": [
+            {
+              "name": "export-domain-records",
+              "bodyKind": "none",
+              "requiredParameters": [
+                "format",
+                "domainType",
+                "domainName"
+              ],
+              "notes": "The portal currently uses integer flags for `domainCapabilities` and `mode`."
+            }
+          ],
+          "provenance": [
+            {
+              "source": "module-validation",
+              "confidence": "high",
+              "notes": [
+                "Validated against the checked-in M365Internals domain cmdlet."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "AppSettings.GetOfficeOnline",
+        "summary": "Get M365 on the web settings",
+        "method": "GET",
+        "path": "/admin/api/settings/apps/officeonline",
+        "operationContext": {
+          "surface": "Org settings > Services > Microsoft 365 on the web",
+          "workflows": [
+            "Open Org settings, then Services, then Microsoft 365 on the web."
+          ],
+          "headerProfile": "m365-admin-office-online",
+          "canonicalPath": "/admin/api/settings/apps/officeonline",
+          "pathAliases": [
+            "/admin/api/settings/apps/officeontheweb"
+          ],
+          "provenance": [
+            {
+              "source": "module-validation",
+              "confidence": "high",
+              "notes": [
+                "The checked-in M365Internals helper maps both Microsoft365OnTheWeb and OfficeOnline to this path."
+              ]
+            },
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Live navigation clicked the Microsoft 365 on the web row and issued `GET /admin/api/settings/apps/officeonline` with the OfficeOnline blade context."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "AppSettings.SetOfficeOnline",
+        "summary": "Set M365 on the web settings",
+        "method": "POST",
+        "path": "/admin/api/settings/apps/officeonline",
+        "operationContext": {
+          "surface": "Org settings > Services > Microsoft 365 on the web",
+          "workflows": [
+            "Open Org settings, then Services, then Microsoft 365 on the web."
+          ],
+          "headerProfile": "m365-admin-office-online",
+          "canonicalPath": "/admin/api/settings/apps/officeonline",
+          "pathAliases": [
+            "/admin/api/settings/apps/officeontheweb"
+          ],
+          "requestShapes": [
+            {
+              "name": "merged-office-online-settings",
+              "contentType": "application/json",
+              "bodyKind": "object-merge",
+              "notes": "The portal posts the merged settings document for this surface."
+            }
+          ],
+          "provenance": [
+            {
+              "source": "module-validation",
+              "confidence": "high",
+              "notes": [
+                "The checked-in M365Internals helper maps both Microsoft365OnTheWeb and OfficeOnline to this path."
+              ]
+            },
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "The live blade route was `#/Settings/Services/:/Settings/L1/OfficeOnline`, matching the canonical `officeonline` path."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "Misc.GetM365Recommendations",
+        "summary": "Get M365 recommendations",
+        "method": "GET",
+        "path": "/admin/api/recommendations/m365",
+        "operationContext": {
+          "surface": "Org settings > Briefing email",
+          "workflows": [
+            "Open the recommendations experience rooted in Briefing email or recommendation cards."
+          ],
+          "headerProfile": "m365-admin-homepage"
+        }
+      }
+    ]
+  },
+  {
+    "title": "Power Platform",
+    "specId": "power-platform",
+    "specPath": "specifications/nodoc-power-platform/specification/openapi.yml",
+    "nodocRoute": null,
+    "nodocCategory": "Power Platform",
+    "headerProfiles": {
+      "power-platform-service-bearer": {
+        "description": "Browser-issued bearer profile used by Power Platform service backends such as licensing, portal infrastructure, and shared admin helpers.",
+        "requiredHeaders": [
+          {
+            "name": "Authorization",
+            "description": "Browser-obtained bearer token for the target Power Platform service audience."
+          }
+        ],
+        "observedHeaders": [
+          {
+            "name": "X-Correlation-ID",
+            "description": "Correlation identifier observed on live Power Platform admin center service requests."
+          },
+          {
+            "name": "x-ms-client-request-id",
+            "description": "Client request identifier emitted by the Power Platform admin center."
+          },
+          {
+            "name": "x-ms-client-session-id",
+            "description": "Session identifier emitted by the Power Platform admin center."
+          },
+          {
+            "name": "x-ms-client-tenant-id",
+            "description": "Tenant identifier emitted as a header on live service requests."
+          },
+          {
+            "name": "x-ms-client-principal-id",
+            "description": "Signed-in principal identifier emitted on live service requests."
+          }
+        ]
+      },
+      "power-platform-tenant-api": {
+        "description": "Tenant-scoped profile used by *.tenant.api.powerplatform.com and tenant-island notification hosts.",
+        "notes": [
+          "Tenant-scoped API calls also carried x-ms-mac-* routing headers during live capture; treat those values as experience-dependent rather than globally stable."
+        ],
+        "requiredHeaders": [
+          {
+            "name": "Authorization",
+            "description": "Browser-obtained bearer token for tenant-scoped Power Platform APIs."
+          }
+        ],
+        "observedHeaders": [
+          {
+            "name": "x-ms-client-request-id",
+            "description": "Client request identifier emitted by the Power Platform admin center."
+          },
+          {
+            "name": "x-ms-client-session-id",
+            "description": "Session identifier emitted by the Power Platform admin center."
+          },
+          {
+            "name": "x-ms-client-tenant-id",
+            "description": "Tenant identifier emitted as a header on live tenant-scoped requests."
+          },
+          {
+            "name": "x-ms-client-principal-id",
+            "description": "Signed-in principal identifier emitted on live tenant-scoped requests."
+          }
+        ]
+      }
+    },
+    "operations": [
+      {
+        "operationId": "Licensing_post_v0_1_alpha_tenants_tenantId_BillingPolicies_getEnvironmentMap",
+        "summary": "POST /v0.1-alpha/tenants/{tenantId}/BillingPolicies/getEnvironmentMap",
+        "method": "POST",
+        "path": "/v0.1-alpha/tenants/{tenantId}/BillingPolicies/getEnvironmentMap",
+        "operationContext": {
+          "surface": "Billing > Licenses",
+          "workflows": [
+            "Open billing license overview or environment-list pages that need to resolve environment-to-policy mappings."
+          ],
+          "headerProfile": "power-platform-service-bearer",
+          "requestShapes": [
+            {
+              "name": "billing-policy-environment-map",
+              "contentType": "application/json",
+              "bodyKind": "environment-id-array",
+              "requiredParameters": [
+                "tenantId"
+              ],
+              "notes": "The portal posts an environmentIds array to resolve billing-policy mappings for the selected tenant."
+            }
+          ],
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Verified from authenticated Power Platform billing license overview and environment-list pages."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "TenantApi_get_appmanagement_environments_environmentId_AvailablePackages_Microsoft_Crm_Cloud_Pes_Tps_UserGetAvailableInstancePackages_Lcid_1033_InstanceCountryCode_US_CrmVersion_9_2_26031_180",
+        "summary": "GET /appmanagement/environments/{environmentId}/AvailablePackages/Microsoft.Crm.Cloud.Pes.Tps.UserGetAvailableInstancePackages(Lcid='1033',InstanceCountryCode='US',CrmVersion='9.2.26031.180')",
+        "method": "GET",
+        "path": "/appmanagement/environments/{environmentId}/AvailablePackages/Microsoft.Crm.Cloud.Pes.Tps.UserGetAvailableInstancePackages(Lcid='1033',InstanceCountryCode='US',CrmVersion='9.2.26031.180')",
+        "operationContext": {
+          "surface": "Environments > Applications",
+          "workflows": [
+            "Open an environment hub or manage-environment applications page and inspect the packages that can be provisioned into the selected environment."
+          ],
+          "headerProfile": "power-platform-tenant-api",
+          "requestShapes": [
+            {
+              "name": "available-instance-packages",
+              "bodyKind": "none",
+              "requiredParameters": [
+                "environmentId"
+              ],
+              "notes": "The portal currently inlines Lcid, InstanceCountryCode, and CrmVersion in the function-style path and can add api-version plus geoType in the query string."
+            }
+          ],
+          "availability": {
+            "level": "tenant-conditional",
+            "notes": [
+              "Returned from environment application surfaces that depend on the selected environment and regional tenant host."
+            ]
+          },
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Verified from authenticated Power Platform environment application pages on the tenant-scoped host family."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "TenantApi_get_appmanagement_environments_environmentId_InstancePackages_Microsoft_Crm_Cloud_Pes_Tps_UserGetInstancePackages_Lcid_1033",
+        "summary": "GET /appmanagement/environments/{environmentId}/InstancePackages/Microsoft.Crm.Cloud.Pes.Tps.UserGetInstancePackages(Lcid='1033')",
+        "method": "GET",
+        "path": "/appmanagement/environments/{environmentId}/InstancePackages/Microsoft.Crm.Cloud.Pes.Tps.UserGetInstancePackages(Lcid='1033')",
+        "operationContext": {
+          "surface": "Environments > Applications",
+          "workflows": [
+            "Open an environment hub or manage-environment applications page and inspect the packages already associated with the selected environment."
+          ],
+          "headerProfile": "power-platform-tenant-api",
+          "requestShapes": [
+            {
+              "name": "instance-packages",
+              "bodyKind": "none",
+              "requiredParameters": [
+                "environmentId"
+              ],
+              "notes": "The portal currently inlines the Lcid selector in the function-style path and can add api-version plus geoType in the query string."
+            }
+          ],
+          "availability": {
+            "level": "tenant-conditional",
+            "notes": [
+              "Returned from environment application surfaces that depend on the selected environment and regional tenant host."
+            ]
+          },
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Verified from authenticated Power Platform environment application pages on the tenant-scoped host family."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "TenantApi_get_licensing_autoClaimPolicies",
+        "summary": "GET /licensing/autoClaimPolicies",
+        "method": "GET",
+        "path": "/licensing/autoClaimPolicies",
+        "operationContext": {
+          "surface": "Billing > Licenses",
+          "workflows": [
+            "Open license overview or recommendation pages that need the tenant auto-claim policy state."
+          ],
+          "headerProfile": "power-platform-tenant-api",
+          "variants": [
+            {
+              "selector": "api-version",
+              "location": "query",
+              "knownValues": [
+                "1"
+              ],
+              "notes": "The retained capture used api-version 1 on the tenant-scoped licensing helper."
+            }
+          ],
+          "availability": {
+            "level": "tenant-conditional",
+            "notes": [
+              "The returned policy state is tied to the selected tenant host and licensing experience."
+            ]
+          },
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Verified from authenticated Power Platform billing and licensing pages."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "NotificationService_get_notificationservice_notifications_metadata",
+        "summary": "GET /notificationservice/notifications/metadata",
+        "method": "GET",
+        "path": "/notificationservice/notifications/metadata",
+        "operationContext": {
+          "surface": "Notification hub",
+          "workflows": [
+            "Open Power Platform admin center pages that hydrate the global notification hub and shell metadata."
+          ],
+          "headerProfile": "power-platform-tenant-api",
+          "variants": [
+            {
+              "selector": "api-version",
+              "location": "query",
+              "knownValues": [
+                "2022-03-01-preview"
+              ],
+              "notes": "The notification metadata helper was captured with the preview api-version selector."
+            },
+            {
+              "selector": "targetClient",
+              "location": "query",
+              "knownValues": [
+                "PPAC"
+              ],
+              "notes": "The retained requests identified the Power Platform admin center as the target client."
+            }
+          ],
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Verified repeatedly during authenticated Power Platform admin browsing across licensing, environment, and support surfaces."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "PowerPagesPortalInfra_get_api_v1_powerPortal_GetEnvironment",
+        "summary": "GET /api/v1/powerPortal/GetEnvironment",
+        "method": "GET",
+        "path": "/api/v1/powerPortal/GetEnvironment",
+        "operationContext": {
+          "surface": "Environments > Hub > Power Pages",
+          "workflows": [
+            "Open an environment hub and let the Power Pages experience resolve the environment-level portal infrastructure context."
+          ],
+          "headerProfile": "power-platform-service-bearer",
+          "requestShapes": [
+            {
+              "name": "power-pages-environment-context",
+              "bodyKind": "none",
+              "requiredParameters": [
+                "orgId"
+              ],
+              "notes": "The portal uses the Dataverse orgId query selector to resolve Power Pages environment metadata on the regional portal-infra host."
+            }
+          ],
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Verified from authenticated Power Platform environment-hub browsing on the Power Pages blade."
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "title": "SharePoint",
+    "specId": "sharepoint-admin",
+    "specPath": "specifications/nodoc-sharepoint-admin/specification/openapi.yml",
+    "nodocRoute": "sharepoint-admin",
+    "nodocCategory": "SharePoint",
+    "headerProfiles": {
+      "sharepoint-admin-read": {
+        "description": "Same-origin SharePoint admin browser profile used by read-only tenant and site detail requests.",
+        "notes": [
+          "The FedAuth browser session and same-origin tenant admin host carry the primary auth context for these requests."
+        ],
+        "observedHeaders": [
+          {
+            "name": "Referer",
+            "description": "SharePoint admin referer emitted by the authenticated admin center."
+          }
+        ]
+      },
+      "sharepoint-admin-write": {
+        "description": "Same-origin SharePoint admin write profile used by grid, export, and membership helper POST requests.",
+        "requiredHeaders": [
+          {
+            "name": "x-requestdigest",
+            "description": "SharePoint form digest issued by the current admin page."
+          }
+        ],
+        "observedHeaders": [
+          {
+            "name": "SdkVersion",
+            "description": "Portal SDK identifier observed on SharePoint admin POST requests."
+          },
+          {
+            "name": "odata-version",
+            "description": "OData protocol version emitted by the SharePoint admin portal."
+          },
+          {
+            "name": "Referer",
+            "description": "SharePoint admin referer emitted with same-origin POST requests."
+          }
+        ]
+      }
+    },
+    "operations": [
+      {
+        "operationId": "SharePointAdmin.GetStorageQuotas",
+        "summary": "Get storage quotas",
+        "method": "GET",
+        "path": "/_api/StorageQuotas()",
+        "operationContext": {
+          "surface": "Home / Active sites",
+          "workflows": [
+            "Open the SharePoint admin home or Active sites experiences and inspect tenant storage quota summaries."
+          ],
+          "headerProfile": "sharepoint-admin-read",
+          "variants": [
+            {
+              "selector": "api-version",
+              "location": "query",
+              "knownValues": [
+                "1.3.2"
+              ],
+              "notes": "The legacy storage quota helper was captured with an explicit api-version selector."
+            }
+          ],
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Verified during authenticated SharePoint admin home and Active sites browsing."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "SharePointAdmin.GetMigrationProperty",
+        "summary": "Get a migration center property",
+        "method": "GET",
+        "path": "/_api/MigrationCenterServices/Properties/GetProperty('{propertyName}')",
+        "operationContext": {
+          "surface": "Migration",
+          "workflows": [
+            "Open Migration Manager and inspect source-system onboarding cards on the migration landing page."
+          ],
+          "headerProfile": "sharepoint-admin-read",
+          "requestShapes": [
+            {
+              "name": "migration-property-by-key",
+              "bodyKind": "none",
+              "requiredParameters": [
+                "propertyName"
+              ],
+              "notes": "The propertyName path literal selects the source-system onboarding record the portal wants to load."
+            }
+          ],
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Verified from authenticated SharePoint Migration Manager browsing for Box, Dropbox, Egnyte, Google Workspace, and Microsoft Stream cards."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "SharePointAdmin.GetSitesByState",
+        "summary": "Get sites by state",
+        "method": "POST",
+        "path": "/_api/SPO.Tenant/GetSitesByState",
+        "operationContext": {
+          "surface": "Active sites / Deleted sites",
+          "workflows": [
+            "Open the Active sites or Deleted sites pages and request the site inventory for the selected state set."
+          ],
+          "headerProfile": "sharepoint-admin-write",
+          "requestShapes": [
+            {
+              "name": "site-state-filter",
+              "contentType": "application/json",
+              "bodyKind": "state-array",
+              "notes": "The request body carries the site states the portal wants to enumerate from the internal tenant helper."
+            }
+          ],
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Verified from authenticated SharePoint Active sites and Deleted sites browsing."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "SharePointAdmin.RenderAdminListData",
+        "summary": "Render admin list data",
+        "method": "POST",
+        "path": "/_api/SPO.Tenant/RenderAdminListData",
+        "operationContext": {
+          "surface": "Active sites",
+          "workflows": [
+            "Open the Active sites grid and let the portal render the internal admin-list payload for the current view, filter, and paging state."
+          ],
+          "headerProfile": "sharepoint-admin-write",
+          "requestShapes": [
+            {
+              "name": "admin-list-caml-view",
+              "contentType": "application/json",
+              "bodyKind": "caml-render-request",
+              "notes": "The portal posts the internal CAML view definition plus paging and filter state for the admin grid."
+            }
+          ],
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Verified from authenticated Active sites grid rendering flows."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "SharePointAdmin.ExportSitesToCsv",
+        "summary": "Start a CSV export",
+        "method": "POST",
+        "path": "/_api/SPO.Tenant/ExportToCSV",
+        "operationContext": {
+          "surface": "Active sites > Export",
+          "workflows": [
+            "Use the Active sites export action to generate a CSV from the current inventory selection."
+          ],
+          "headerProfile": "sharepoint-admin-write",
+          "requestShapes": [
+            {
+              "name": "admin-sites-export",
+              "contentType": "application/json",
+              "bodyKind": "export-request",
+              "notes": "The portal posts the current site inventory selection and export options before returning the document library path."
+            }
+          ],
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Verified from authenticated Active sites export flows."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "SharePointAdmin.GetSiteAdministrators",
+        "summary": "Get site administrators",
+        "method": "POST",
+        "path": "/_api/SPO.Tenant/GetSiteAdministrators",
+        "operationContext": {
+          "surface": "Sites > Membership",
+          "workflows": [
+            "Open a site detail blade and switch to the Membership tab to resolve the current site administrators."
+          ],
+          "headerProfile": "sharepoint-admin-write",
+          "variants": [
+            {
+              "selector": "siteId",
+              "location": "query",
+              "notes": "The portal URL-encodes the quoted siteId literal in the query string when it calls the membership helper."
+            }
+          ],
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Verified from authenticated SharePoint site-detail membership browsing."
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "title": "Teams",
+    "specId": "teams",
+    "specPath": "specifications/nodoc-teams/specification/openapi.yml",
+    "nodocRoute": null,
+    "nodocCategory": "Teams",
+    "headerProfiles": {
+      "teams-admin-portal-context": {
+        "description": "Same-origin Teams admin center shell profile used by shell-bound requests on the admin portal hosts.",
+        "notes": [
+          "The authenticated browser session on admin.teams.microsoft.com or noneu-admin.teams.microsoft.com carries the primary portal state for these requests."
+        ],
+        "requiredHeaders": [
+          {
+            "name": "X-Requested-With",
+            "description": "Same-origin AJAX context emitted by the Teams admin portal shell.",
+            "value": "XMLHttpRequest"
+          }
+        ]
+      },
+      "teams-service-bearer": {
+        "description": "Browser-issued Teams service profile used by cross-origin Teams platform and regional admin service calls.",
+        "notes": [
+          "Different backend families can require different bearer audiences even when the portal workflow is the same."
+        ],
+        "requiredHeaders": [
+          {
+            "name": "Authorization",
+            "description": "Browser-issued bearer token for the requested Teams service audience."
+          },
+          {
+            "name": "X-Requested-With",
+            "description": "AJAX context observed on Teams service requests.",
+            "value": "XMLHttpRequest"
+          }
+        ],
+        "observedHeaders": [
+          {
+            "name": "Referer",
+            "description": "Root Teams admin referer emitted by authenticated browsing.",
+            "value": "https://admin.teams.microsoft.com/"
+          }
+        ]
+      }
+    },
+    "operations": [
+      {
+        "operationId": null,
+        "summary": "Record Teams admin portal shell telemetry",
+        "method": "POST",
+        "path": "/api/log",
+        "operationContext": {
+          "surface": "Portal shell",
+          "workflows": [
+            "Open dashboard, users, activity log, usage report, or best-practice pages while the Teams admin shell records bootstrap and timing state."
+          ],
+          "headerProfile": "teams-admin-portal-context",
+          "requestShapes": [
+            {
+              "name": "teams-shell-telemetry",
+              "contentType": "application/json",
+              "bodyKind": "telemetry-envelope",
+              "notes": "The payload carries timing, permission, flight, and rendered-page bootstrap state for the active admin experience."
+            }
+          ],
+          "availability": {
+            "level": "request-dependent",
+            "notes": [
+              "The route was observed as a shell-bound telemetry sink rather than as a reusable tenant data API."
+            ]
+          },
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Verified during authenticated Teams admin browsing on dashboard, users, activity log, usage report, and best-practice routes."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": null,
+        "summary": "Resolve the current user's Teams region and partition",
+        "method": "POST",
+        "path": "/api/authsvc/v1.0/users/region",
+        "operationContext": {
+          "surface": "Portal bootstrap",
+          "workflows": [
+            "Open a Teams admin center route that needs partitioned teams.microsoft.com services before the shell fans out to regional backends."
+          ],
+          "headerProfile": "teams-service-bearer",
+          "availability": {
+            "level": "user-context",
+            "notes": [
+              "The returned region and partition values are specific to the signed-in Teams admin and drive later partitioned service calls."
+            ]
+          },
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Verified during authenticated Teams admin bootstrap before partitioned teams.microsoft.com and related regional service calls."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": null,
+        "summary": "List civic address filters",
+        "method": "GET",
+        "path": "/Skype.Ncs/civicAddresses/filters",
+        "operationContext": {
+          "surface": "Voice > Emergency addresses",
+          "workflows": [
+            "Open Teams emergency calling address management and request filter values for the current tenant."
+          ],
+          "headerProfile": "teams-service-bearer",
+          "variants": [
+            {
+              "selector": "Count",
+              "location": "query",
+              "notes": "Controls how many available filter values the service considers before trimming the result set."
+            },
+            {
+              "selector": "ResultSize",
+              "location": "query",
+              "notes": "Controls how many filter rows the service returns."
+            },
+            {
+              "selector": "PopulateNumberOfVoiceUsers",
+              "location": "query",
+              "notes": "Requests the companion voice-user counts for each civic address filter."
+            },
+            {
+              "selector": "PopulateNumberOfTelephoneNumbers",
+              "location": "query",
+              "notes": "Requests the companion telephone-number counts for each civic address filter."
+            }
+          ],
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Verified from authenticated Teams emergency-calling administration pages."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": null,
+        "summary": "Query Frontline orchestration usage",
+        "method": "POST",
+        "path": "/amer/api/reports/v1.0/flw/orchestration/usage",
+        "operationContext": {
+          "surface": "Frontline > Usage insights",
+          "workflows": [
+            "Open Frontline usage insights and change the selected report state or filters before querying orchestration usage."
+          ],
+          "headerProfile": "teams-service-bearer",
+          "requestShapes": [
+            {
+              "name": "frontline-usage-query",
+              "contentType": "application/json",
+              "bodyKind": "query-object",
+              "notes": "The request body varies with the selected report state, filter set, and time window shown in the Frontline usage experience."
+            }
+          ],
+          "availability": {
+            "level": "request-dependent",
+            "notes": [
+              "The returned data shape depends on the active report slice chosen in the portal."
+            ]
+          },
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Verified from authenticated Frontline usage-insights browsing against the flworchestrator regional backend."
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  }
+]

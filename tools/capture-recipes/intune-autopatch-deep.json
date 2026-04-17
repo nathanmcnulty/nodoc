@@ -1,0 +1,30 @@
+﻿{
+  "portal": "Intune Autopatch",
+  "url": "https://intune.microsoft.com",
+  "matchHosts": [
+    "intune.microsoft.com",
+    "services.autopatch.microsoft.com"
+  ],
+  "postActionSettleMs": 12000,
+  "settleMs": 14000,
+  "actions": [
+    "click-label-root=Update Windows from the cloud",
+    "wait-ms=8000",
+    "capture=autopatch-home",
+    "click-contains-root=Windows quality updates",
+    "wait-ms=8000",
+    "capture=windows-quality-updates",
+    "click-contains-root=Windows feature updates",
+    "wait-ms=8000",
+    "capture=windows-feature-updates",
+    "click-contains-root=Autopatch groups",
+    "wait-ms=8000",
+    "capture=autopatch-groups",
+    "click-contains-root=Roles",
+    "wait-ms=8000",
+    "capture=roles",
+    "click-contains-root=Support",
+    "wait-ms=8000",
+    "capture=support"
+  ]
+}

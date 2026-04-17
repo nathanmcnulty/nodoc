@@ -112,6 +112,23 @@ paths:
         additionalPageCount: 3
       tags:
         - Licensing
+      x-nodoc-operation-context:
+        surface: Billing > Licenses
+        workflows:
+          - Open billing license overview or environment-list pages that need to resolve environment-to-policy mappings.
+        headerProfile: power-platform-service-bearer
+        requestShapes:
+          - name: billing-policy-environment-map
+            contentType: application/json
+            bodyKind: environment-id-array
+            requiredParameters:
+              - tenantId
+            notes: The portal posts an environmentIds array to resolve billing-policy mappings for the selected tenant.
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Verified from authenticated Power Platform billing license overview and environment-list pages.
       parameters:
         - name: "tenantId"
           in: path

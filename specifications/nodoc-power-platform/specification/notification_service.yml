@@ -20,6 +20,27 @@ paths:
         additionalPageCount: 83
       tags:
         - NotificationService
+      x-nodoc-operation-context:
+        surface: Notification hub
+        workflows:
+          - Open Power Platform admin center pages that hydrate the global notification hub and shell metadata.
+        headerProfile: power-platform-tenant-api
+        variants:
+          - location: query
+            selector: api-version
+            knownValues:
+              - 2022-03-01-preview
+            notes: The notification metadata helper was captured with the preview api-version selector.
+          - location: query
+            selector: targetClient
+            knownValues:
+              - PPAC
+            notes: The retained requests identified the Power Platform admin center as the target client.
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Verified repeatedly during authenticated Power Platform admin browsing across licensing, environment, and support surfaces.
       parameters:
         - name: "api-version"
           in: query

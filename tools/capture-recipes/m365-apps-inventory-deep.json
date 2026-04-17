@@ -1,0 +1,27 @@
+﻿{
+  "portal": "M365 Apps Inventory",
+  "url": "https://config.office.com/officeSettings",
+  "matchHosts": [
+    "config.office.com",
+    "query.inventory.insights.office.net"
+  ],
+  "matchPathPrefixes": [
+    "/inventory"
+  ],
+  "postActionSettleMs": 10000,
+  "settleMs": 12000,
+  "actions": [
+    "click-contains-root=Inventory",
+    "wait-ms=6000",
+    "capture=inventory",
+    "click-contains-root=Security Update Status",
+    "wait-ms=6000",
+    "capture=security-update-status",
+    "click-contains-root=Health",
+    "wait-ms=6000",
+    "capture=health",
+    "click-contains-root=Setup",
+    "wait-ms=6000",
+    "capture=setup"
+  ]
+}

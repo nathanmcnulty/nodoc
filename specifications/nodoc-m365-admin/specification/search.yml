@@ -12,6 +12,11 @@ paths:
           description: Search query string.
           schema:
             type: string
+      x-nodoc-operation-context:
+        surface: Settings > Search & intelligence
+        workflows:
+          - Open Search & intelligence and retrieve configuration-backed settings.
+        headerProfile: m365-admin-microsoft-search
       responses:
         '200':
           description: OK
@@ -20,6 +25,90 @@ paths:
               schema:
                 type: object
                 description: Search configurations. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/searchadminapi/searchintelligencehome/cards:
+    get:
+      summary: Get search intelligence home cards
+      description: >-
+        Retrieve the Search & intelligence landing-page card inventory used to render
+        the Microsoft Search admin homepage.
+      operationId: Search.GetSearchIntelligenceHomeCards
+      tags: [Search]
+      x-nodoc-operation-context:
+        surface: Settings > Search & intelligence
+        workflows:
+          - Open the Search & intelligence landing page.
+        headerProfile: m365-admin-microsoft-search
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Verified on the signed-in `#/MicrosoftSearch` route during initial page load.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Search intelligence homepage card inventory. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/searchadminapi/firstrunexperience/get:
+    post:
+      summary: Get search first-run experience settings
+      description: >-
+        Retrieve the first-run experience flags and dismissal state values used by the
+        Search & intelligence homepage.
+      operationId: Search.GetFirstRunExperience
+      tags: [Search]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: string
+              description: The list of first-run experience setting keys to retrieve.
+      x-nodoc-operation-context:
+        surface: Settings > Search & intelligence
+        workflows:
+          - Open the Search & intelligence landing page and hydrate the first-run experience banners and cards.
+        headerProfile: m365-admin-microsoft-search
+        requestShapes:
+          - name: search-first-run-experience
+            contentType: application/json
+            bodyKind: string-array
+            notes: The live portal posts an array of first-run experience keys to retrieve in one call.
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Verified on the signed-in `#/MicrosoftSearch` route with a JSON array body.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: First-run experience settings payload. Exact schema pending.
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -52,6 +141,19 @@ paths:
                   type: string
                   description: Filter for Q&A status (e.g., Published, Draft).
                   default: Published
+      x-nodoc-operation-context:
+        surface: Settings > Search & intelligence
+        workflows:
+          - Open Microsoft Search Q&A administration and filter the Q&A list.
+        headerProfile: m365-admin-microsoft-search
+        requestShapes:
+          - name: search-qna-filter
+            contentType: application/json
+            bodyKind: query-object
+            requiredParameters:
+              - ServiceType
+              - Filter
+            notes: The search admin surface uses a JSON body for list filters rather than query parameters.
       responses:
         '200':
           description: OK
@@ -114,6 +216,11 @@ paths:
           description: Search query string.
           schema:
             type: string
+      x-nodoc-operation-context:
+        surface: Settings > Search & intelligence
+        workflows:
+          - Open Search connectors and retrieve connector summary metrics.
+        headerProfile: m365-admin-microsoft-search
       responses:
         '200':
           description: OK
@@ -145,6 +252,11 @@ paths:
           description: Search query string.
           schema:
             type: string
+      x-nodoc-operation-context:
+        surface: Settings > Search & intelligence
+        workflows:
+          - Open Search connectors and inspect per-connection statistics.
+        headerProfile: m365-admin-microsoft-search
       responses:
         '200':
           description: OK
@@ -153,6 +265,308 @@ paths:
               schema:
                 type: object
                 description: Connection statistics. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /fd/mssearchconnectors/v1.0/admin/AdminUxOptions:
+    get:
+      summary: Get search connector admin UX options
+      description: >-
+        Retrieve connector capability flags and UX options surfaced by the Search & intelligence landing page.
+      operationId: Search.GetConnectorAdminUxOptions
+      tags: [Search]
+      x-nodoc-operation-context:
+        surface: Settings > Search & intelligence
+        workflows:
+          - Open the Search & intelligence landing page and load connector-related tiles.
+        headerProfile: m365-admin-microsoft-search
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Verified on the signed-in `#/MicrosoftSearch` route during initial homepage hydration.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Connector admin UX options payload. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /fd/mssearchconnectors/v1.0/admin/connections:
+    get:
+      summary: List search connector connections
+      description: >-
+        Retrieve the Microsoft Search connector inventory shown by the connectors experience.
+      operationId: Search.ListConnectorConnections
+      tags: [Search]
+      parameters:
+        - name: useRpcOverRest
+          in: query
+          description: Toggle the connector service RPC-over-REST projection used by the portal.
+          schema:
+            type: boolean
+            default: true
+      x-nodoc-operation-context:
+        surface: Settings > Search & intelligence
+        workflows:
+          - Open Search connectors and load the current connector inventory.
+        headerProfile: m365-admin-microsoft-search
+        variants:
+          - location: query
+            selector: useRpcOverRest
+            knownValues:
+              - 'true'
+            notes: The live homepage request used the RPC-over-REST projection.
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Verified on the signed-in `#/MicrosoftSearch` route with `useRpcOverRest=true`.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Connector inventory payload. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /fd/mssearchinsights/api/v1/{tenantId}/status/reportdata:
+    get:
+      summary: Get search insights report readiness
+      description: >-
+        Retrieve readiness and availability status for Search insights reports for the current tenant.
+      operationId: Search.GetInsightsReportStatus
+      tags: [Search]
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          description: The tenant identifier used by the Search insights service.
+          schema:
+            type: string
+            format: uuid
+        - name: reports
+          in: query
+          required: true
+          description: Comma-delimited report names to check.
+          schema:
+            type: string
+        - name: daysToCheck
+          in: query
+          required: false
+          description: Number of trailing days to validate for report readiness.
+          schema:
+            type: integer
+            default: 28
+      x-nodoc-operation-context:
+        surface: Settings > Search & intelligence
+        workflows:
+          - Open Search analytics and load report readiness state before rendering analytics cards.
+        headerProfile: m365-admin-microsoft-search
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Verified on the signed-in `#/MicrosoftSearch` route using `reports=AdoptionSummary`.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Search insights report readiness payload. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /fd/mssearchinsights/api/v1/{tenantId}/TenantReports/GenericReport:
+    post:
+      summary: Get a generic search insights report
+      description: >-
+        Retrieve a Search insights report using the generic report endpoint.
+      operationId: Search.GetInsightsGenericReport
+      tags: [Search]
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          description: The tenant identifier used by the Search insights service.
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                StartDateUtc:
+                  type: string
+                  format: date
+                EndDateUtc:
+                  type: string
+                  format: date
+                Interval:
+                  type: string
+                Filters:
+                  type: object
+                  additionalProperties: true
+                Fields:
+                  type: array
+                  items:
+                    type: string
+      x-nodoc-operation-context:
+        surface: Settings > Search & intelligence
+        workflows:
+          - Open Search analytics and request the summary report payload for the homepage cards.
+        headerProfile: m365-admin-microsoft-search
+        requestShapes:
+          - name: search-analytics-card-report
+            contentType: application/json
+            bodyKind: report-query
+            requiredParameters:
+              - StartDateUtc
+              - EndDateUtc
+              - Interval
+              - Fields
+            notes: The live portal requested the `SearchAnalyticsCard` field set over a date range with empty filters.
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Verified on the signed-in `#/MicrosoftSearch` route.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Search insights report payload. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /fd/substrateBookmarks/api/v3/management/bookmarks:
+    post:
+      summary: Get substrate bookmarks
+      description: >-
+        Retrieve bookmark management data surfaced by the Search & intelligence experience.
+      operationId: Search.GetSubstrateBookmarks
+      tags: [Search]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Bookmark query payload. The live portal posted an empty JSON object.
+      x-nodoc-operation-context:
+        surface: Settings > Search & intelligence
+        workflows:
+          - Open the Search & intelligence landing page and load bookmark-backed cards.
+        headerProfile: m365-admin-microsoft-search
+        requestShapes:
+          - name: search-bookmarks-default
+            contentType: application/json
+            bodyKind: empty-object
+            notes: The live homepage request posted `{}`.
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Verified on the signed-in `#/MicrosoftSearch` route.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Substrate bookmarks payload. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /fd/substrateAcronyms/api/v1.0/GetTenantAdminAcronymsFromSds:
+    post:
+      summary: Get tenant acronyms from substrate
+      description: >-
+        Retrieve tenant-defined acronyms surfaced by the Search & intelligence experience.
+      operationId: Search.GetTenantAcronyms
+      tags: [Search]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Acronym query payload. The live portal posted an empty JSON object.
+      x-nodoc-operation-context:
+        surface: Settings > Search & intelligence
+        workflows:
+          - Open the Search & intelligence landing page and load acronym-backed content.
+        headerProfile: m365-admin-microsoft-search
+        requestShapes:
+          - name: search-acronyms-default
+            contentType: application/json
+            bodyKind: empty-object
+            notes: The live homepage request posted `{}`.
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Verified on the signed-in `#/MicrosoftSearch` route.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Tenant acronym payload. Exact schema pending.
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 

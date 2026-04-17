@@ -433,9 +433,15 @@ export const captureRecipesByTitle = {
   ],
   "Entra B2C": [
     "tools/capture-recipes/entra-b2c-deep.json",
+    "tools/capture-recipes/entra-b2c-seeded-replay.json",
+  ],
+  "Entra IAM": [
+    "tools/capture-recipes/entra-iam-deep.json",
+    "tools/capture-recipes/entra-iam-seeded-replay.json",
   ],
   "Entra IDGov": [
     "tools/capture-recipes/entra-idgov-deep.json",
+    "tools/capture-recipes/entra-idgov-seeded-replay.json",
   ],
   "Entra IGA": [
     "tools/capture-recipes/entra-iga-deep.json",
@@ -443,33 +449,65 @@ export const captureRecipesByTitle = {
   ],
   "Entra PIM": [
     "tools/capture-recipes/entra-pim-deep.json",
+    "tools/capture-recipes/entra-pim-seeded-replay.json",
   ],
   Exchange: [
     "tools/capture-recipes/exchange-deep.json",
+    "tools/capture-recipes/exchange-seeded-replay.json",
   ],
   "Intune Autopatch": [
     "tools/capture-recipes/intune-deep.json",
+    "tools/capture-recipes/intune-autopatch-deep.json",
+    "tools/capture-recipes/intune-seeded-replay.json",
   ],
   "Intune Portal": [
     "tools/capture-recipes/intune-deep.json",
+    "tools/capture-recipes/intune-portal-deep.json",
+    "tools/capture-recipes/intune-seeded-replay.json",
+  ],
+  "M365 Admin": [
+    "tools/capture-recipes/m365-admin-deep.json",
+    "tools/capture-recipes/m365-admin-seeded-replay.json",
   ],
   "M365 Apps Config": [
     "tools/capture-recipes/m365-apps-deep.json",
+    "tools/capture-recipes/m365-apps-config-deep.json",
+    "tools/capture-recipes/m365-apps-seeded-replay.json",
   ],
   "M365 Apps Inventory": [
     "tools/capture-recipes/m365-apps-deep.json",
+    "tools/capture-recipes/m365-apps-inventory-deep.json",
+    "tools/capture-recipes/m365-apps-seeded-replay.json",
   ],
   "M365 Apps Services": [
     "tools/capture-recipes/m365-apps-deep.json",
+    "tools/capture-recipes/m365-apps-services-deep.json",
+    "tools/capture-recipes/m365-apps-seeded-replay.json",
+  ],
+  "Power Platform": [
+    "tools/capture-recipes/power-platform-deep.json",
+    "tools/capture-recipes/power-platform-seeded-replay.json",
+  ],
+  Purview: [
+    "tools/capture-recipes/purview-deep.json",
+    "tools/capture-recipes/purview-seeded-replay.json",
   ],
   "Purview Portal": [
     "tools/capture-recipes/purview-portal-deep.json",
+    "tools/capture-recipes/purview-portal-seeded-replay.json",
   ],
   "Security Copilot": [
     "tools/capture-recipes/security-copilot-deep.json",
+    "tools/capture-recipes/security-copilot-builder-followup.json",
+    "tools/capture-recipes/security-copilot-seeded-replay.json",
   ],
   SharePoint: [
     "tools/capture-recipes/sharepoint-admin-deep.json",
+    "tools/capture-recipes/sharepoint-admin-seeded-replay.json",
+  ],
+  Teams: [
+    "tools/capture-recipes/teams-deep.json",
+    "tools/capture-recipes/teams-seeded-replay.json",
   ],
 };
 

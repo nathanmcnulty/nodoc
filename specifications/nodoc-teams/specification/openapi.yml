@@ -671,6 +671,30 @@ x-tagGroups:
 externalDocs:
   description: Checked-in source specification and supporting modules.
   url: https://github.com/nathanmcnulty/nodoc/tree/main/specifications/nodoc-teams/specification
+
+x-nodoc-headerProfiles:
+  teams-admin-portal-context:
+    description: Same-origin Teams admin center shell profile used by shell-bound requests on the admin portal hosts.
+    requiredHeaders:
+      - name: X-Requested-With
+        value: XMLHttpRequest
+        description: Same-origin AJAX context emitted by the Teams admin portal shell.
+    notes:
+      - The authenticated browser session on admin.teams.microsoft.com or noneu-admin.teams.microsoft.com carries the primary portal state for these requests.
+  teams-service-bearer:
+    description: Browser-issued Teams service profile used by cross-origin Teams platform and regional admin service calls.
+    requiredHeaders:
+      - name: Authorization
+        description: Browser-issued bearer token for the requested Teams service audience.
+      - name: X-Requested-With
+        value: XMLHttpRequest
+        description: AJAX context observed on Teams service requests.
+    observedHeaders:
+      - name: Referer
+        value: https://admin.teams.microsoft.com/
+        description: Root Teams admin referer emitted by authenticated browsing.
+    notes:
+      - Different backend families can require different bearer audiences even when the portal workflow is the same.
 paths:
   # admin.teams.microsoft.com/api
   /api/log:
@@ -692,6 +716,25 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/TeamsPortalLogRequest'
+      x-nodoc-operation-context:
+        surface: Portal shell
+        workflows:
+          - Open dashboard, users, activity log, usage report, or best-practice pages while the Teams admin shell records bootstrap and timing state.
+        headerProfile: teams-admin-portal-context
+        requestShapes:
+          - name: teams-shell-telemetry
+            contentType: application/json
+            bodyKind: telemetry-envelope
+            notes: The payload carries timing, permission, flight, and rendered-page bootstrap state for the active admin experience.
+        availability:
+          level: request-dependent
+          notes:
+            - The route was observed as a shell-bound telemetry sink rather than as a reusable tenant data API.
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Verified during authenticated Teams admin browsing on dashboard, users, activity log, usage report, and best-practice routes.
       responses:
         '200':
           description: Telemetry payload accepted.
@@ -1001,6 +1044,20 @@ paths:
       description: |
         Regional bootstrap call used by the Teams admin center before it talks to partitioned
         `teams.microsoft.com/api/mt/part/{partition}` routes and related regional services.
+      x-nodoc-operation-context:
+        surface: Portal bootstrap
+        workflows:
+          - Open a Teams admin center route that needs partitioned teams.microsoft.com services before the shell fans out to regional backends.
+        headerProfile: teams-service-bearer
+        availability:
+          level: user-context
+          notes:
+            - The returned region and partition values are specific to the signed-in Teams admin and drive later partitioned service calls.
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Verified during authenticated Teams admin bootstrap before partitioned teams.microsoft.com and related regional service calls.
       responses:
         '200':
           description: Region and partition metadata.
@@ -1530,6 +1587,29 @@ paths:
         - $ref: '#/components/parameters/ResultSize'
         - $ref: '#/components/parameters/PopulateNumberOfVoiceUsers'
         - $ref: '#/components/parameters/PopulateNumberOfTelephoneNumbers'
+      x-nodoc-operation-context:
+        surface: Voice > Emergency addresses
+        workflows:
+          - Open Teams emergency calling address management and request filter values for the current tenant.
+        headerProfile: teams-service-bearer
+        variants:
+          - location: query
+            selector: Count
+            notes: Controls how many available filter values the service considers before trimming the result set.
+          - location: query
+            selector: ResultSize
+            notes: Controls how many filter rows the service returns.
+          - location: query
+            selector: PopulateNumberOfVoiceUsers
+            notes: Requests the companion voice-user counts for each civic address filter.
+          - location: query
+            selector: PopulateNumberOfTelephoneNumbers
+            notes: Requests the companion telephone-number counts for each civic address filter.
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Verified from authenticated Teams emergency-calling administration pages.
       responses:
         '200':
           description: Civic address filter collection.
@@ -2241,6 +2321,25 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/GenericObject'
+      x-nodoc-operation-context:
+        surface: Frontline > Usage insights
+        workflows:
+          - Open Frontline usage insights and change the selected report state or filters before querying orchestration usage.
+        headerProfile: teams-service-bearer
+        requestShapes:
+          - name: frontline-usage-query
+            contentType: application/json
+            bodyKind: query-object
+            notes: The request body varies with the selected report state, filter set, and time window shown in the Frontline usage experience.
+        availability:
+          level: request-dependent
+          notes:
+            - The returned data shape depends on the active report slice chosen in the portal.
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Verified from authenticated Frontline usage-insights browsing against the flworchestrator regional backend.
       responses:
         '200':
           description: Frontline orchestration usage result.
