@@ -411,8 +411,29 @@ paths:
       summary: Get Office on the Web settings
       description: >-
         Retrieve the Office on the Web (Office Online) application settings for the tenant.
+        The live portal currently routes this blade through the `officeonline` endpoint family.
       operationId: AppSettings.GetOfficeOnTheWeb
       tags: [AppSettings]
+      x-nodoc-operation-context:
+        surface: Org settings > Services > Microsoft 365 on the web
+        workflows:
+          - Open Org settings, then Services, then Microsoft 365 on the web.
+        headerProfile: m365-admin-office-online
+        canonicalPath: /admin/api/settings/apps/officeonline
+        availability:
+          level: request-dependent
+          notes:
+            - The clickable blade routed to `#/Settings/Services/:/Settings/L1/OfficeOnline` during live capture.
+            - A direct `#/Settings/Services/:/Settings/L1/OfficeOnTheWeb` hash fell back to `#/homepage`, so treat this path as a documented alias until new live evidence appears.
+        provenance:
+          - source: module-validation
+            confidence: high
+            notes:
+              - The checked-in M365Internals helper resolves this surface to /admin/api/settings/apps/officeonline.
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Live navigation clicked the Microsoft 365 on the web row and the resulting request used `/admin/api/settings/apps/officeonline`.
       responses:
         '200':
           description: OK
@@ -420,7 +441,12 @@ paths:
             application/json:
               schema:
                 type: object
-                description: Office on the Web settings. Exact schema pending.
+                required:
+                  - Enabled
+                properties:
+                  Enabled:
+                    type: boolean
+                additionalProperties: true
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -442,6 +468,30 @@ paths:
             schema:
               type: object
               description: Merged Office on the Web settings payload.
+      x-nodoc-operation-context:
+        surface: Org settings > Services > Microsoft 365 on the web
+        workflows:
+          - Open Org settings, then Services, then Microsoft 365 on the web.
+        headerProfile: m365-admin-office-online
+        canonicalPath: /admin/api/settings/apps/officeonline
+        requestShapes:
+          - name: merged-office-on-the-web-settings
+            contentType: application/json
+            bodyKind: object-merge
+            notes: The portal posts the merged settings document for this surface.
+        availability:
+          level: request-dependent
+          notes:
+            - The clickable blade routed to `#/Settings/Services/:/Settings/L1/OfficeOnline` during live capture.
+        provenance:
+          - source: module-validation
+            confidence: high
+            notes:
+              - The checked-in M365Internals helper resolves this surface to /admin/api/settings/apps/officeonline.
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Live navigation confirmed the UI now resolves through the OfficeOnline route family.
       responses:
         '200':
           description: OK
@@ -1062,6 +1112,23 @@ paths:
         Retrieve the Microsoft 365 on the web (Office Online) settings for the tenant (Org Settings > M365 on the web).
       operationId: AppSettings.GetOfficeOnline
       tags: [AppSettings]
+      x-nodoc-operation-context:
+        surface: Org settings > Services > Microsoft 365 on the web
+        workflows:
+          - Open Org settings, then Services, then Microsoft 365 on the web.
+        headerProfile: m365-admin-office-online
+        canonicalPath: /admin/api/settings/apps/officeonline
+        pathAliases:
+          - /admin/api/settings/apps/officeontheweb
+        provenance:
+          - source: module-validation
+            confidence: high
+            notes:
+              - The checked-in M365Internals helper maps both Microsoft365OnTheWeb and OfficeOnline to this path.
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Live navigation clicked the Microsoft 365 on the web row and issued `GET /admin/api/settings/apps/officeonline` with the OfficeOnline blade context.
       responses:
         '200':
           description: OK
@@ -1069,7 +1136,58 @@ paths:
             application/json:
               schema:
                 type: object
-                description: pending
+                required:
+                  - Enabled
+                properties:
+                  Enabled:
+                    type: boolean
+                additionalProperties: true
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+    post:
+      summary: Set M365 on the web settings
+      description: >-
+        Update the Microsoft 365 on the web (Office Online) settings for the tenant.
+      operationId: AppSettings.SetOfficeOnline
+      tags: [AppSettings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Merged Microsoft 365 on the web settings payload.
+      x-nodoc-operation-context:
+        surface: Org settings > Services > Microsoft 365 on the web
+        workflows:
+          - Open Org settings, then Services, then Microsoft 365 on the web.
+        headerProfile: m365-admin-office-online
+        canonicalPath: /admin/api/settings/apps/officeonline
+        pathAliases:
+          - /admin/api/settings/apps/officeontheweb
+        requestShapes:
+          - name: merged-office-online-settings
+            contentType: application/json
+            bodyKind: object-merge
+            notes: The portal posts the merged settings document for this surface.
+        provenance:
+          - source: module-validation
+            confidence: high
+            notes:
+              - The checked-in M365Internals helper maps both Microsoft365OnTheWeb and OfficeOnline to this path.
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - The live blade route was `#/Settings/Services/:/Settings/L1/OfficeOnline`, matching the canonical `officeonline` path.
+      responses:
+        '200':
+          description: OK
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 

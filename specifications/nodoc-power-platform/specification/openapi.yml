@@ -105,6 +105,40 @@ externalDocs:
   description: Checked-in source specification and supporting modules.
   url: https://github.com/nathanmcnulty/nodoc/tree/main/specifications/nodoc-power-platform/specification
 
+x-nodoc-headerProfiles:
+  power-platform-service-bearer:
+    description: Browser-issued bearer profile used by Power Platform service backends such as licensing, portal infrastructure, and shared admin helpers.
+    requiredHeaders:
+      - name: Authorization
+        description: Browser-obtained bearer token for the target Power Platform service audience.
+    observedHeaders:
+      - name: X-Correlation-ID
+        description: Correlation identifier observed on live Power Platform admin center service requests.
+      - name: x-ms-client-request-id
+        description: Client request identifier emitted by the Power Platform admin center.
+      - name: x-ms-client-session-id
+        description: Session identifier emitted by the Power Platform admin center.
+      - name: x-ms-client-tenant-id
+        description: Tenant identifier emitted as a header on live service requests.
+      - name: x-ms-client-principal-id
+        description: Signed-in principal identifier emitted on live service requests.
+  power-platform-tenant-api:
+    description: Tenant-scoped profile used by *.tenant.api.powerplatform.com and tenant-island notification hosts.
+    requiredHeaders:
+      - name: Authorization
+        description: Browser-obtained bearer token for tenant-scoped Power Platform APIs.
+    observedHeaders:
+      - name: x-ms-client-request-id
+        description: Client request identifier emitted by the Power Platform admin center.
+      - name: x-ms-client-session-id
+        description: Session identifier emitted by the Power Platform admin center.
+      - name: x-ms-client-tenant-id
+        description: Tenant identifier emitted as a header on live tenant-scoped requests.
+      - name: x-ms-client-principal-id
+        description: Signed-in principal identifier emitted on live tenant-scoped requests.
+    notes:
+      - Tenant-scoped API calls also carried x-ms-mac-* routing headers during live capture; treat those values as experience-dependent rather than globally stable.
+
 paths:
   /providers/Microsoft.BusinessAppPlatform/environmentGroups:
     $ref: "business_app_platform.yml#/paths/~1providers~1Microsoft.BusinessAppPlatform~1environmentGroups"

@@ -30,6 +30,10 @@ const artifactFiles = {
   bundleDownloads: "bundle-downloads.json",
 };
 
+function stripBom(value) {
+  return typeof value === "string" ? value.replace(/^\uFEFF/u, "") : value;
+}
+
 function parseArgs(argv) {
   const args = {
     artifacts: null,
@@ -123,7 +127,7 @@ function parseArgs(argv) {
 
 async function readJsonIfExists(filePath) {
   try {
-    return JSON.parse(await readFile(filePath, "utf8"));
+    return JSON.parse(stripBom(await readFile(filePath, "utf8")));
   } catch (error) {
     if (error?.code === "ENOENT") {
       return null;

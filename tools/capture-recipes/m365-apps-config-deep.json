@@ -1,0 +1,40 @@
+﻿{
+  "portal": "M365 Apps Config",
+  "url": "https://config.office.com/officeSettings",
+  "matchHosts": [
+    "config.office.com"
+  ],
+  "matchPathPrefixes": [
+    "/appConfig",
+    "/endpointprovisionhealth",
+    "/intents",
+    "/policyadmin",
+    "/releases",
+    "/rollout",
+    "/serviceProfile",
+    "/ServiceProfile",
+    "/settings"
+  ],
+  "postActionSettleMs": 10000,
+  "settleMs": 12000,
+  "actions": [
+    "click-contains-root=Customization",
+    "wait-ms=6000",
+    "capture=customization",
+    "click-contains-root=Policy",
+    "wait-ms=6000",
+    "capture=policies",
+    "click-contains-root=Cloud Update",
+    "wait-ms=6000",
+    "capture=cloud-update",
+    "click-contains-root=Servicing profiles",
+    "wait-ms=6000",
+    "capture=servicing-profiles",
+    "click-contains-root=Device configuration",
+    "wait-ms=6000",
+    "capture=device-configuration",
+    "click-contains-root=Setup",
+    "wait-ms=6000",
+    "capture=setup"
+  ]
+}

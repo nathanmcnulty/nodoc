@@ -63,6 +63,8 @@ nodoc was designed to be fairly agnostic in how you consume the specification. T
 
 Currently, nodoc utilises OpenAPI 3.0.1 for specifications (see note in [roadmap](#roadmap)). These are typically done following a multi-file approach using [`$ref`](https://swagger.io/docs/specification/using-ref/) links. Bundled single-file definitions are produced during validation and collection-generation workflows for convenience and compatibility purposes.
 
+Some specifications also include machine-readable `x-nodoc-*` metadata for developer tooling. These extensions capture things that normal OpenAPI alone does not express well for portal APIs, such as header profiles, canonical route aliases, request-shape variants, and live-capture provenance. Generated ledgers for these extensions are written under `src/generated/` for downstream tools and agents.
+
 To make things easier, we've published the OpenAPI definitions in a couple of different ways as detailed below.
 
 ### Website

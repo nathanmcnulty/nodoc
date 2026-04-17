@@ -80,6 +80,164 @@ paths:
         '404':
           $ref: common.yml#/components/responses/NotFound
 
+  /fd/msgraph/v1.0/$batch:
+    post:
+      summary: Graph v1.0 batch request
+      description: >-
+        Submit a batch of Microsoft Graph v1.0 API requests in a single call,
+        proxied through the M365 Admin Center.
+      operationId: GraphProxy.BatchV1
+      tags: [GraphProxy]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                requests:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        description: Unique identifier for the request in the batch.
+                      method:
+                        type: string
+                        description: HTTP method (GET, POST, PUT, PATCH, DELETE).
+                      url:
+                        type: string
+                        description: Relative Graph API URL.
+      x-nodoc-operation-context:
+        surface: Settings > Microsoft 365 Backup
+        workflows:
+          - Open the Microsoft 365 Backup blade and load the OneDrive and Exchange summary cards.
+        headerProfile: m365-admin-microsoft-365-backup
+        requestShapes:
+          - name: backup-onedrive-summary
+            contentType: application/json
+            bodyKind: batch
+            notes: The live portal batched drive protection unit counts, OneDrive protection policies, and active restore session counts.
+          - name: backup-exchange-summary
+            contentType: application/json
+            bodyKind: batch
+            notes: The live portal batched mailbox protection unit counts, Exchange protection policies, and active restore session counts.
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Verified on the signed-in `#/Settings/enhancedRestore` route.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  responses:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        status:
+                          type: integer
+                        body:
+                          type: object
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /fd/msgraph/beta/solutions/backupRestore/protectionPolicies:
+    get:
+      summary: Get backup protection policies
+      description: >-
+        Retrieve the Microsoft 365 Backup protection policy configuration proxied through Microsoft Graph.
+      operationId: GraphProxy.GetBackupProtectionPolicies
+      tags: [GraphProxy]
+      x-nodoc-operation-context:
+        surface: Settings > Microsoft 365 Backup
+        workflows:
+          - Open the Microsoft 365 Backup blade and load the connected protection policy section.
+        headerProfile: m365-admin-microsoft-365-backup
+        availability:
+          level: tenant-conditional
+          notes:
+            - The live tenant returned HTTP 402 when Microsoft 365 Backup was not enabled.
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Verified on the signed-in `#/Settings/enhancedRestore` route.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Backup protection policy payload. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '402':
+          description: Feature not enabled or billing prerequisites unmet.
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /fd/msgraph/beta/solutions/backupRestore/emailNotificationsSetting:
+    get:
+      summary: Get backup email notification settings
+      description: >-
+        Retrieve the Microsoft 365 Backup email notification configuration proxied through Microsoft Graph.
+      operationId: GraphProxy.GetBackupEmailNotificationsSetting
+      tags: [GraphProxy]
+      x-nodoc-operation-context:
+        surface: Settings > Microsoft 365 Backup
+        workflows:
+          - Open the Microsoft 365 Backup blade and load notification-related configuration.
+        headerProfile: m365-admin-microsoft-365-backup
+        availability:
+          level: tenant-conditional
+          notes:
+            - The live tenant returned HTTP 402 when Microsoft 365 Backup was not enabled.
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Verified on the signed-in `#/Settings/enhancedRestore` route.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Backup email notification settings payload. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '402':
+          description: Feature not enabled or billing prerequisites unmet.
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
   /fd/msgraph/beta/$batch:
     post:
       summary: Graph batch request
@@ -110,6 +268,21 @@ paths:
                       url:
                         type: string
                         description: Relative Graph API URL.
+      x-nodoc-operation-context:
+        surface: Settings > Microsoft 365 Backup
+        workflows:
+          - Open the Microsoft 365 Backup blade and load offboarding summary counts.
+        headerProfile: m365-admin-microsoft-365-backup
+        requestShapes:
+          - name: backup-offboarding-counts
+            contentType: application/json
+            bodyKind: batch
+            notes: The live portal batched offboarding count reads for SharePoint site, OneDrive drive, and Exchange mailbox protection units.
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Verified on the signed-in `#/Settings/enhancedRestore` route. Other portal surfaces may also use this generic batch endpoint.
       responses:
         '200':
           description: OK

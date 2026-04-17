@@ -33,8 +33,11 @@ info:
     | `AjaxSessionKey` | Portal session key | (from portal bootstrap) |
     | `x-portal-routekey` | Portal routing key | (from portal bootstrap) |
     | `x-adminapp-request` | Admin app context path | `/homepage` |
-    | `x-ms-mac-appid` | Admin portal application ID | `f00c5fa5-eee4-4f57-88fa-c082d83b3c94` |
+    | `x-ms-mac-appid` | Page-specific admin portal application ID | `050829af-7f24-4897-8f81-732bf47719ad` |
     | `x-ms-mac-hostingapp` | Hosting application name | `M365AdminPortal` |
+
+    Live portal capture shows that `x-ms-mac-appid` and `x-ms-mac-version` vary by blade.
+    SharePoint-backed helpers such as Brand center also add a brokered SharePoint bearer token.
 
     Documentation and specifications have been provided on a best efforts basis and may not be 100% accurate.
 
@@ -138,6 +141,188 @@ externalDocs:
   description: Checked-in source specification and supporting modules.
   url: https://github.com/nathanmcnulty/nodoc/tree/main/specifications/nodoc-m365-admin/specification
 
+x-nodoc-headerProfiles:
+  m365-admin-homepage:
+    description: Homepage-backed same-origin M365 Admin profile used for dashboard reads and token-broker traffic.
+    requiredHeaders:
+      - name: AjaxSessionKey
+        description: Portal session key captured during admin shell bootstrap.
+      - name: x-portal-routekey
+        description: Route key issued by the admin shell and reused on same-origin requests.
+      - name: x-adminapp-request
+        value: /homepage
+        description: Admin shell context path for homepage-backed requests.
+      - name: x-ms-mac-appid
+        description: Blade-specific admin portal application identifier. Live captures show that this value changes between portal experiences.
+      - name: x-ms-mac-hostingapp
+        value: M365AdminPortal
+        description: Hosting application name emitted by the admin shell.
+    observedHeaders:
+      - name: x-ms-mac-appid
+        value: 050829af-7f24-4897-8f81-732bf47719ad
+        description: Observed on live homepage-backed token broker requests.
+      - name: x-ms-mac-target-app
+        value: MAC
+        description: Additional routing context observed on same-origin homepage requests.
+      - name: x-ms-mac-version
+        value: host-mac_2026.4.2.8
+        description: Observed shell version header. Treat this as volatile.
+      - name: Referer
+        value: https://admin.cloud.microsoft/
+        description: Root admin referer emitted by the live homepage shell.
+  m365-admin-microsoft-search:
+    description: Same-origin M365 Admin profile used by Search & intelligence and Search Answers recommendation reads.
+    requiredHeaders:
+      - name: AjaxSessionKey
+        description: Portal session key captured during admin shell bootstrap.
+      - name: x-portal-routekey
+        description: Route key issued by the admin shell and reused on same-origin requests.
+      - name: x-adminapp-request
+        value: /MicrosoftSearch
+        description: Admin shell context path for Microsoft Search-backed requests.
+      - name: x-ms-mac-appid
+        description: Blade-specific admin portal application identifier. Live captures show that this value changes between portal experiences.
+      - name: x-ms-mac-hostingapp
+        value: M365AdminPortal
+        description: Hosting application name emitted by the admin shell.
+    observedHeaders:
+      - name: x-ms-mac-appid
+        value: 36051945-c7f8-4505-8a9b-23f8ba62271e
+        description: Observed on live Search & intelligence recommendation requests.
+      - name: x-ms-mac-target-app
+        value: MAC
+        description: Additional routing context observed on same-origin Microsoft Search requests.
+      - name: x-ms-mac-version
+        value: host-mac_2026.4.2.8
+        description: Observed shell version header. Treat this as volatile.
+      - name: Referer
+        value: https://admin.cloud.microsoft/
+        description: Root admin referer emitted by the live Microsoft Search shell.
+  m365-admin-viva:
+    description: Same-origin M365 Admin profile used by Viva module and settings calls.
+    requiredHeaders:
+      - name: AjaxSessionKey
+        description: Portal session key captured during admin shell bootstrap.
+      - name: x-portal-routekey
+        description: Route key issued by the admin shell and reused on same-origin requests.
+      - name: x-adminapp-request
+        value: /viva
+        description: Admin shell context path for Viva-backed requests.
+      - name: x-ms-mac-appid
+        description: Blade-specific admin portal application identifier. Captured values are volatile and can change independently from other admin surfaces.
+      - name: x-ms-mac-hostingapp
+        value: M365AdminPortal
+        description: Hosting application name emitted by the admin shell.
+    observedHeaders:
+      - name: x-ms-mac-target-app
+        value: MAC
+        description: Additional routing context observed on same-origin requests.
+      - name: x-ms-mac-version
+        description: Blade-specific shell version header. Treat this as volatile.
+      - name: Referer
+        value: https://admin.cloud.microsoft/
+        description: Viva-backed requests were observed with the root admin referer.
+  m365-admin-data-location:
+    description: Narrow M365 Admin profile used for tenant data-location requests.
+    requiredHeaders:
+      - name: AjaxSessionKey
+        description: Portal session key captured during admin shell bootstrap.
+      - name: x-portal-routekey
+        description: Route key issued by the admin shell and reused on same-origin requests.
+      - name: x-adminapp-request
+        value: /Settings/OrganizationProfile/:/Settings/L1/DataLocation
+        description: Admin shell context path for the data-location blade.
+    observedHeaders:
+      - name: Referer
+        value: https://admin.cloud.microsoft/
+        description: Root admin referer observed on data-location requests.
+  m365-admin-office-online:
+    description: Same-origin M365 Admin profile used by Org settings > Services > Microsoft 365 on the web.
+    requiredHeaders:
+      - name: AjaxSessionKey
+        description: Portal session key captured during admin shell bootstrap.
+      - name: x-portal-routekey
+        description: Route key issued by the admin shell and reused on same-origin requests.
+      - name: x-adminapp-request
+        value: /Settings/Services/:/Settings/L1/OfficeOnline
+        description: Admin shell context path for the Microsoft 365 on the web blade.
+      - name: x-ms-mac-appid
+        description: Blade-specific admin portal application identifier. Live captures show that this value changes between portal experiences.
+      - name: x-ms-mac-hostingapp
+        value: M365AdminPortal
+        description: Hosting application name emitted by the admin shell.
+    observedHeaders:
+      - name: x-ms-mac-appid
+        value: 3fda709f-4f6c-4ba7-8da3-b3d031a4d675
+        description: Observed on live Microsoft 365 on the web settings reads.
+      - name: x-ms-mac-target-app
+        value: MAC
+        description: Additional routing context observed on same-origin Office Online requests.
+      - name: x-ms-mac-version
+        value: host-mac_2026.4.2.8
+        description: Observed shell version header. Treat this as volatile.
+      - name: Referer
+        value: https://admin.cloud.microsoft/
+        description: Root admin referer emitted by the live services blade.
+  m365-admin-brand-center:
+    description: SharePoint-backed M365 Admin profile used by the Brand center setup and configuration helpers.
+    requiredHeaders:
+      - name: AjaxSessionKey
+        description: Portal session key captured during admin shell bootstrap.
+      - name: x-portal-routekey
+        description: Route key issued by the admin shell and reused on same-origin requests.
+      - name: Authorization
+        description: Brokered SharePoint bearer token observed on live Brand center helper reads.
+      - name: x-adminapp-request
+        value: /brandcenter
+        description: Admin shell context path for the Brand center experience.
+      - name: x-ms-mac-appid
+        description: Blade-specific admin portal application identifier. Live captures show that this value changes between portal experiences.
+      - name: x-ms-mac-hostingapp
+        value: M365AdminPortal
+        description: Hosting application name emitted by the admin shell.
+    observedHeaders:
+      - name: x-ms-mac-appid
+        value: 9f8918eb-b2b7-4b90-b5bd-86b38f6d4d23
+        description: Observed on live Brand center helper requests.
+      - name: x-ms-mac-target-app
+        value: SPO
+        description: SharePoint-targeted routing context observed on Brand center reads.
+      - name: x-ms-mac-version
+        value: host-mac_2026.4.2.8
+        description: Observed shell version header. Treat this as volatile.
+      - name: Referer
+        value: https://admin.cloud.microsoft/
+        description: Root admin referer emitted by the live Brand center blade.
+  m365-admin-microsoft-365-backup:
+    description: Same-origin M365 Admin profile used by Settings > Microsoft 365 Backup.
+    requiredHeaders:
+      - name: AjaxSessionKey
+        description: Portal session key captured during admin shell bootstrap.
+      - name: x-portal-routekey
+        description: Route key issued by the admin shell and reused on same-origin requests.
+      - name: x-adminapp-request
+        value: /Settings/enhancedRestore
+        description: Admin shell context path for the Microsoft 365 Backup blade.
+      - name: x-ms-mac-appid
+        description: Blade-specific admin portal application identifier. Live captures show that this value changes between portal experiences.
+      - name: x-ms-mac-hostingapp
+        value: M365AdminPortal
+        description: Hosting application name emitted by the admin shell.
+    observedHeaders:
+      - name: x-ms-mac-appid
+        value: 08a68b73-8058-4c59-8bd5-7b6833e2af21
+        description: Observed on live Microsoft 365 Backup reads.
+      - name: x-ms-mac-target-app
+        value: MAC
+        description: Additional routing context observed on same-origin backup requests.
+      - name: x-ms-mac-version
+        value: host-mac_2026.4.2.8
+        description: Observed shell version header. Treat this as volatile.
+      - name: Referer
+        value: https://admin.cloud.microsoft/
+        description: Root admin referer emitted by the live Microsoft 365 Backup blade.
+
 paths:
   # Copilot
   /admin/api/settings/company/copilotpolicy/pin:
@@ -214,6 +399,10 @@ paths:
     $ref: company_settings.yml#/paths/~1admin~1api~1Settings~1company~1sendfromaddress
   /admin/api/Settings/company/tile:
     $ref: company_settings.yml#/paths/~1admin~1api~1Settings~1company~1tile
+  /_api/spo.tenant/GetBrandCenterConfiguration:
+    $ref: company_settings.yml#/paths/~1_api~1spo.tenant~1GetBrandCenterConfiguration
+  /_api/GroupSiteManager/GetValidSiteUrlFromAlias:
+    $ref: company_settings.yml#/paths/~1_api~1GroupSiteManager~1GetValidSiteUrlFromAlias
 
   # Security Settings
   /admin/api/Settings/security/o365guestuser:
@@ -236,14 +425,30 @@ paths:
   # Search
   /admin/api/searchadminapi/configurations:
     $ref: search.yml#/paths/~1admin~1api~1searchadminapi~1configurations
+  /admin/api/searchadminapi/searchintelligencehome/cards:
+    $ref: search.yml#/paths/~1admin~1api~1searchadminapi~1searchintelligencehome~1cards
+  /admin/api/searchadminapi/firstrunexperience/get:
+    $ref: search.yml#/paths/~1admin~1api~1searchadminapi~1firstrunexperience~1get
   /admin/api/searchadminapi/Qnas:
     $ref: search.yml#/paths/~1admin~1api~1searchadminapi~1Qnas
   /admin/api/searchadminapi/news/options/Bing:
     $ref: search.yml#/paths/~1admin~1api~1searchadminapi~1news~1options~1Bing
   /admin/api/searchadminapi/UDTConnectorsSummary:
     $ref: search.yml#/paths/~1admin~1api~1searchadminapi~1UDTConnectorsSummary
+  /fd/mssearchconnectors/v1.0/admin/AdminUxOptions:
+    $ref: search.yml#/paths/~1fd~1mssearchconnectors~1v1.0~1admin~1AdminUxOptions
+  /fd/mssearchconnectors/v1.0/admin/connections:
+    $ref: search.yml#/paths/~1fd~1mssearchconnectors~1v1.0~1admin~1connections
   /fd/mssearchconnectors/v1.0/admin/connections/getStatistics:
     $ref: search.yml#/paths/~1fd~1mssearchconnectors~1v1.0~1admin~1connections~1getStatistics
+  /fd/mssearchinsights/api/v1/{tenantId}/status/reportdata:
+    $ref: search.yml#/paths/~1fd~1mssearchinsights~1api~1v1~1{tenantId}~1status~1reportdata
+  /fd/mssearchinsights/api/v1/{tenantId}/TenantReports/GenericReport:
+    $ref: search.yml#/paths/~1fd~1mssearchinsights~1api~1v1~1{tenantId}~1TenantReports~1GenericReport
+  /fd/substrateBookmarks/api/v3/management/bookmarks:
+    $ref: search.yml#/paths/~1fd~1substrateBookmarks~1api~1v3~1management~1bookmarks
+  /fd/substrateAcronyms/api/v1.0/GetTenantAdminAcronymsFromSds:
+    $ref: search.yml#/paths/~1fd~1substrateAcronyms~1api~1v1.0~1GetTenantAdminAcronymsFromSds
 
   # Users & Groups
   /admin/api/users/getuserroles:
@@ -304,6 +509,12 @@ paths:
     $ref: graph_proxy.yml#/paths/~1fd~1msgraph~1v1.0~1subscribedSkus
   /fd/msgraph/v1.0/devices:
     $ref: graph_proxy.yml#/paths/~1fd~1msgraph~1v1.0~1devices
+  /fd/msgraph/v1.0/$batch:
+    $ref: graph_proxy.yml#/paths/~1fd~1msgraph~1v1.0~1$batch
+  /fd/msgraph/beta/solutions/backupRestore/protectionPolicies:
+    $ref: graph_proxy.yml#/paths/~1fd~1msgraph~1beta~1solutions~1backupRestore~1protectionPolicies
+  /fd/msgraph/beta/solutions/backupRestore/emailNotificationsSetting:
+    $ref: graph_proxy.yml#/paths/~1fd~1msgraph~1beta~1solutions~1backupRestore~1emailNotificationsSetting
   /fd/msgraph/beta/$batch:
     $ref: graph_proxy.yml#/paths/~1fd~1msgraph~1beta~1$batch
 
@@ -350,8 +561,18 @@ paths:
     $ref: tenant_relationships.yml#/paths/~1admin~1api~1tenantRelationships~1userSyncApps~1outboundDetails
 
   # Content Understanding
+  /admin/api/contentunderstanding/autofillsetting:
+    $ref: content_understanding.yml#/paths/~1admin~1api~1contentunderstanding~1autofillsetting
+  /admin/api/contentunderstanding/billingSettings:
+    $ref: content_understanding.yml#/paths/~1admin~1api~1contentunderstanding~1billingSettings
+  /admin/api/contentunderstanding/imagetaggingsetting:
+    $ref: content_understanding.yml#/paths/~1admin~1api~1contentunderstanding~1imagetaggingsetting
   /admin/api/contentunderstanding/playbacktranscripttranslationsettings:
     $ref: content_understanding.yml#/paths/~1admin~1api~1contentunderstanding~1playbacktranscripttranslationsettings
+  /admin/api/contentunderstanding/powerAppsEnvironments:
+    $ref: content_understanding.yml#/paths/~1admin~1api~1contentunderstanding~1powerAppsEnvironments
+  /admin/api/contentunderstanding/setting:
+    $ref: content_understanding.yml#/paths/~1admin~1api~1contentunderstanding~1setting
   /admin/api/contentunderstanding/taxonomytaggingsetting:
     $ref: content_understanding.yml#/paths/~1admin~1api~1contentunderstanding~1taxonomytaggingsetting
   /admin/api/contentunderstanding/esignaturesettings:
@@ -396,6 +617,8 @@ paths:
     $ref: miscellaneous.yml#/paths/~1admin~1api~1a365conversion
   /admin/api/recommendations/m365alerts:
     $ref: miscellaneous.yml#/paths/~1admin~1api~1recommendations~1m365alerts
+  /admin/api/recommendations/m365suggestions:
+    $ref: miscellaneous.yml#/paths/~1admin~1api~1recommendations~1m365suggestions
 
   # Navigation
   /admin/api/navigation/darkmode:
@@ -418,6 +641,8 @@ paths:
   # Billing
   /admin/api/billing/BillingModel:
     $ref: billing.yml#/paths/~1admin~1api~1billing~1BillingModel
+  /_api/v2.1/billingFeatures('M365Backup'):
+    $ref: "billing.yml#/paths/~1_api~1v2.1~1billingFeatures('M365Backup')"
 
   # Identity & Security
   /admin/api/identitysecurity/securitydefaults:
@@ -478,6 +703,8 @@ paths:
     $ref: domains.yml#/paths/~1admin~1api~1domains~1GetDomainBuyModel
   /admin/api/domains/List:
     $ref: domains.yml#/paths/~1admin~1api~1domains~1List
+  /admin/api/Domains/Records/Export:
+    $ref: domains.yml#/paths/~1admin~1api~1Domains~1Records~1Export
   /admin/api/domains/Verified:
     $ref: domains.yml#/paths/~1admin~1api~1domains~1Verified
 

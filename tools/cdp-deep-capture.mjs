@@ -10,6 +10,10 @@ const defaultSettleMs = 8000;
 const defaultPostActionSettleMs = 6000;
 const evaluateTimeoutMs = 4000;
 
+function stripBom(value) {
+  return typeof value === "string" ? value.replace(/^\uFEFF/u, "") : value;
+}
+
 function parseActionSpec(value) {
   const separator = value.indexOf("=");
   if (separator <= 0) {
@@ -286,7 +290,7 @@ async function parseArgs(argv) {
   }
 
   if (recipePath) {
-    const recipeSource = JSON.parse(await readFile(recipePath, "utf8"));
+    const recipeSource = JSON.parse(stripBom(await readFile(recipePath, "utf8")));
     const expandedRecipe = expandTemplateVariables(
       recipeSource,
       {

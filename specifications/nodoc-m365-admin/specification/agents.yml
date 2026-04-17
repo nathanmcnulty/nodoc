@@ -119,6 +119,11 @@ paths:
         users and groups can access agent capabilities.
       operationId: Agents.GetFrontierAccess
       tags: [Agents]
+      x-nodoc-operation-context:
+        surface: Copilot > Agents
+        workflows:
+          - Open the Copilot agent administration experience and inspect access controls.
+        headerProfile: m365-admin-homepage
       responses:
         '200':
           description: OK
@@ -157,6 +162,16 @@ paths:
                 FrontierPolicy:
                   type: object
                   description: The Frontier access policy configuration to update.
+      x-nodoc-operation-context:
+        surface: Copilot > Agents
+        workflows:
+          - Open the Copilot agent administration experience and save access policy changes.
+        headerProfile: m365-admin-homepage
+        requestShapes:
+          - name: merged-frontier-policy
+            contentType: application/json
+            bodyKind: object-merge
+            notes: The portal merges the supplied FrontierPolicy object into the current server document.
       responses:
         '200':
           description: OK

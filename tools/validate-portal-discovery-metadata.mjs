@@ -21,6 +21,10 @@ const supportedRecipeActionTypes = new Set([
   "wait-ms",
 ]);
 
+function stripBom(value) {
+  return typeof value === "string" ? value.replace(/^\uFEFF/u, "") : value;
+}
+
 function fail(errors, message) {
   errors.push(message);
 }
@@ -121,7 +125,7 @@ async function validateRecipeFile(errors, recipePath) {
   let recipe;
 
   try {
-    recipe = JSON.parse(await readFile(absolutePath, "utf8"));
+    recipe = JSON.parse(stripBom(await readFile(absolutePath, "utf8")));
   } catch (error) {
     fail(errors, `${recipePath}: failed to read or parse recipe JSON (${error.message}).`);
     return;

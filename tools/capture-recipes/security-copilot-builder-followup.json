@@ -1,0 +1,37 @@
+﻿{
+  "portal": "Security Copilot",
+  "url": "https://securitycopilot.microsoft.com",
+  "matchHosts": [
+    "securitycopilot.microsoft.com",
+    "api.securitycopilot.microsoft.com",
+    "api.securityplatform.microsoft.com",
+    "us.api.securityplatform.microsoft.com",
+    "prod.cds.securitycopilot.microsoft.com"
+  ],
+  "matchPathPrefixes": [
+    "/pods",
+    "/provisioning",
+    "/usage",
+    "/graphData"
+  ],
+  "settleMs": 12000,
+  "postActionSettleMs": 10000,
+  "actions": [
+    "click-label-root=Cancel",
+    "click-label-root=BuildPreview",
+    "wait-ms=10000",
+    "capture=build-preview",
+    "click-label-root=Get started",
+    "wait-ms=8000",
+    "capture=builder-start",
+    "click-contains-root=Sentinel",
+    "wait-ms=8000",
+    "capture=builder-sentinel",
+    "click-contains-root=Microsoft Defender",
+    "wait-ms=8000",
+    "capture=builder-defender",
+    "click-contains-root=Requirements",
+    "wait-ms=8000",
+    "capture=builder-requirements"
+  ]
+}

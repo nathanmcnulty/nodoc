@@ -23,6 +23,9 @@ Root `openapi.yml` files drive both website presentation and downstream artifact
 - Keep group names user-facing. Avoid raw hostnames, internal service names, or API prefixes as section headers unless they are the actual product concept users navigate by.
 - Preserve backend provenance in tag descriptions and operation descriptions rather than the navigation labels.
 - Keep repo-only live-capture browsing evidence under `x-nodoc-live-capture` instead of public `description` fields so the site does not render environment-specific routes.
+- Use `x-nodoc-headerProfiles` at the root spec level when a portal requires repeated non-standard header sets that are not fully captured by OpenAPI `securitySchemes` alone.
+- Use `x-nodoc-operation-context` on operations when downstream developers need structured guidance about canonical route aliases, workflow/surface placement, header-profile binding, request-shape variants, conditional availability, or provenance.
+- Keep `x-nodoc-operation-context` language-agnostic. Prefer concepts like canonical paths, request content types, body/query selectors, and availability notes over client-specific implementation advice.
 
 ## Quality metrics
 
@@ -33,6 +36,7 @@ The website now surfaces generated spec-quality metadata from the checked-in Ope
 - The generator reports navigation consistency, metadata completeness, placeholder debt, and example coverage for every published spec.
 - The same pass also refreshes `src/generated/portalCoverageLedger.json`, which captures per-portal seed URLs, observed hosts, promoted discoveries, telemetry exclusions, and open gaps for agent-driven discovery work.
 - It also refreshes `src/generated/operationLiveCaptureLedger.json`, which indexes repo-only `x-nodoc-live-capture` operation metadata for agents and tooling.
+- It also refreshes `src/generated/operationContextLedger.json`, which indexes validated `x-nodoc-headerProfiles` and `x-nodoc-operation-context` metadata for downstream tooling.
 - Treat placeholder markers such as `pending` as real debt to remove with evidence, not as acceptable final-state documentation.
 
 ## Styling
@@ -62,6 +66,7 @@ For recurring portal research and undocumented API discovery work, use the livin
 It captures the preferred browser/auth workflow, traffic-first discovery process, JavaScript bundle mining guidance, write-shape safety practices, and an experiment log for iterating on better techniques over time.
 
 - Start broad planning runs with `npm run generate:crawl-baseline` to see the current spec inventory, recorder support gaps, and the recommended crawl priority for each published portal.
+- Run `npm run generate:recipe-audit` to see which portals still lack checked-in recipes, iframe coverage, seeded replay, or second-pass interaction checkpoints.
 - Use `npm run capture:deep-crawl -- --portal <portal-name> --url <seed-url> --out <artifact-dir> ...` for checked-in raw CDP page-target capture. It supports repeated `--action type=value` steps including `click-label`, `click-contains`, `click-href`, `navigate`, `capture`, `wait-ms`, `replay-seeded-links`, and `replay-seeded-routes`.
 - Prefer `--recipe tools/capture-recipes/<portal>.json` once a portal already has a checked-in flow. Recipes can still be combined with explicit `--action ...` overrides, and variable-backed recipes such as SharePoint can be filled with repeated `--var name=value` arguments.
 - Pair `replay-seeded-links` or `replay-seeded-routes` with `--seed-artifacts <artifact-dir>` when you want to revisit safe same-origin detail links or replay detail routes derived from IDs already present in earlier request/page-state artifacts instead of re-clicking a live grid.

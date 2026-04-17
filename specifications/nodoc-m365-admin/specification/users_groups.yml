@@ -85,6 +85,27 @@ paths:
                   type: string
                   nullable: true
                   description: Server-side continuation context.
+      x-nodoc-operation-context:
+        surface: Users > Active users
+        workflows:
+          - Open Active users and page or filter the tenant user inventory.
+        headerProfile: m365-admin-homepage
+        requestShapes:
+          - name: paginated-user-list
+            contentType: application/json
+            bodyKind: query-object
+            requiredParameters:
+              - ListAction
+              - SortDirection
+              - SortPropertyName
+            notes: The portal uses body parameters instead of query parameters for paging and filtering.
+        variants:
+          - location: body
+            selector: SearchText
+            notes: SearchText is used for free-text filtering.
+          - location: body
+            selector: SelectedView
+            notes: SelectedView and SelectedViewType scope the list to saved portal views.
       responses:
         '200':
           description: OK
@@ -167,6 +188,24 @@ paths:
                   type: string
                   description: Field name to sort by.
                   default: GroupName
+      x-nodoc-operation-context:
+        surface: Users > Groups
+        workflows:
+          - Open Groups and page or filter the tenant group inventory.
+        headerProfile: m365-admin-homepage
+        requestShapes:
+          - name: paginated-group-list
+            contentType: application/json
+            bodyKind: query-object
+            requiredParameters:
+              - SearchString
+              - SortDirection
+              - SortField
+            notes: The portal uses body parameters instead of query parameters for paging and filtering.
+        variants:
+          - location: body
+            selector: GroupTypes
+            notes: GroupTypes narrows the result set to a specific group family.
       responses:
         '200':
           description: OK
@@ -451,16 +490,48 @@ paths:
     post:
       summary: Get token with expiry
       description: >-
-        Retrieve a token with expiry information for the current user.
+        Retrieve a brokered token with expiry information for the current user.
       operationId: UsersGroups.GetTokenWithExpiry
       tags: [UsersGroups]
       requestBody:
         required: true
         content:
-          application/json:
+          application/x-www-form-urlencoded:
             schema:
-              type: object
-              description: Token request payload. Exact schema pending.
+              type: string
+              description: >-
+                Raw form payload posted by the portal, for example
+                `=https://management.azure.com/`.
+            example: =https://management.azure.com/
+      x-nodoc-operation-context:
+        surface: Users > Active users
+        workflows:
+          - Open an experience that needs a downstream resource token from the admin portal.
+        headerProfile: m365-admin-homepage
+        requestShapes:
+          - name: downstream-audience-token
+            contentType: application/x-www-form-urlencoded; charset=UTF-8
+            bodyKind: raw-form-urlencoded
+            notes: The portal posts the requested audience as an unnamed form value.
+        variants:
+          - location: body
+            selector: audience
+            knownValues:
+              - https://management.azure.com/
+            notes: The returned token shape depends on the requested audience.
+        availability:
+          level: request-dependent
+          notes:
+            - Acceptance and returned token content are sensitive to the downstream audience value.
+        provenance:
+          - source: module-validation
+            confidence: high
+            notes:
+              - Validated against the checked-in M365Internals implementation and known issues notes.
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Verified in the signed-in homepage shell with body `=https://management.azure.com/` and the `/homepage` admin context.
       responses:
         '200':
           description: OK
@@ -468,7 +539,17 @@ paths:
             application/json:
               schema:
                 type: object
-                description: Token with expiry information. Exact schema pending.
+                required:
+                  - AccessToken
+                  - Expiry
+                properties:
+                  AccessToken:
+                    type: string
+                    description: Raw JWT access token for the requested downstream audience.
+                  Expiry:
+                    type: string
+                    format: date-time
+                    description: UTC expiry timestamp returned by the portal token broker.
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 

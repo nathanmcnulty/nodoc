@@ -95,3 +95,84 @@ paths:
 
         '404':
           $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/Domains/Records/Export:
+    get:
+      summary: Export domain records
+      description: >-
+        Export domain records in the requested format for a selected domain and capability set.
+        The admin portal uses this helper when the Domains experience exports DNS records.
+      operationId: Domains.ExportDomainRecords
+      tags: [Domains]
+      parameters:
+        - name: format
+          in: query
+          required: true
+          description: Export format requested by the portal, such as `csv`.
+          schema:
+            type: string
+            default: csv
+        - name: domainType
+          in: query
+          required: true
+          description: Domain type sent to the export endpoint.
+          schema:
+            type: string
+        - name: domainName
+          in: query
+          required: true
+          description: Domain name to export records for.
+          schema:
+            type: string
+        - name: domainCapabilities
+          in: query
+          required: false
+          description: Domain capabilities bitmask sent by the portal.
+          schema:
+            type: integer
+            default: 1
+        - name: mode
+          in: query
+          required: false
+          description: Export mode sent by the portal.
+          schema:
+            type: integer
+            default: 0
+      x-nodoc-operation-context:
+        surface: Domains
+        workflows:
+          - Open the Domains experience and export DNS records for a selected domain.
+        headerProfile: m365-admin-homepage
+        requestShapes:
+          - name: export-domain-records
+            bodyKind: none
+            requiredParameters:
+              - format
+              - domainType
+              - domainName
+            notes: The portal currently uses integer flags for `domainCapabilities` and `mode`.
+        provenance:
+          - source: module-validation
+            confidence: high
+            notes:
+              - Validated against the checked-in M365Internals domain cmdlet.
+      responses:
+        '200':
+          description: OK
+          content:
+            text/csv:
+              schema:
+                type: string
+                description: CSV export of domain records when `format=csv`.
+            application/json:
+              schema:
+                type: object
+                description: Alternate export payload when a non-CSV format is requested.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

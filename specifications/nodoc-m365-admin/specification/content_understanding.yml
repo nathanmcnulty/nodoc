@@ -1,4 +1,98 @@
 paths:
+  /admin/api/contentunderstanding/autofillsetting:
+    get:
+      summary: Get autofill settings
+      description: >-
+        Retrieve the auto-fill settings used by Content Understanding and pay-as-you-go
+        experiences.
+      operationId: ContentUnderstanding.GetAutoFill
+      tags: [ContentUnderstanding]
+      x-nodoc-operation-context:
+        surface: Copilot > Settings > Content understanding
+        workflows:
+          - Open pay-as-you-go or Content Understanding settings and inspect AutoFill.
+        headerProfile: m365-admin-homepage
+        provenance:
+          - source: module-validation
+            confidence: high
+            notes:
+              - Validated against the checked-in M365Internals Content Understanding cmdlet.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: AutoFill settings. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/contentunderstanding/billingSettings:
+    get:
+      summary: Get content understanding billing settings
+      description: >-
+        Retrieve billing settings for Content Understanding services, including pay-as-you-go
+        configuration that complements the Syntex billing helpers.
+      operationId: ContentUnderstanding.GetBillingSettings
+      tags: [ContentUnderstanding]
+      x-nodoc-operation-context:
+        surface: Copilot > Settings > Content understanding
+        workflows:
+          - Open pay-as-you-go or Content Understanding settings and inspect billing configuration.
+        headerProfile: m365-admin-homepage
+        provenance:
+          - source: module-validation
+            confidence: high
+            notes:
+              - Validated against the checked-in M365Internals Content Understanding cmdlet.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Content Understanding billing settings. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/contentunderstanding/imagetaggingsetting:
+    get:
+      summary: Get image tagging settings
+      description: >-
+        Retrieve image tagging settings used by Content Understanding classification features.
+      operationId: ContentUnderstanding.GetImageTagging
+      tags: [ContentUnderstanding]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Image tagging settings. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
   /admin/api/contentunderstanding/playbacktranscripttranslationsettings:
     get:
       summary: Get transcript translation settings
@@ -88,6 +182,66 @@ paths:
             application/json:
               schema:
                 $ref: common.yml#/components/schemas/ContentUnderstandingLicensingResponse
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/contentunderstanding/powerAppsEnvironments:
+    get:
+      summary: Get Power Apps environments for content understanding
+      description: >-
+        Retrieve the Power Apps environment inventory surfaced by the Content Understanding
+        settings experience.
+      operationId: ContentUnderstanding.GetPowerAppsEnvironments
+      tags: [ContentUnderstanding]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Power Apps environment payload. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/contentunderstanding/setting:
+    get:
+      summary: Get primary content understanding settings
+      description: >-
+        Retrieve the primary Content Understanding settings payload used to bootstrap the
+        admin experience.
+      operationId: ContentUnderstanding.GetSetting
+      tags: [ContentUnderstanding]
+      x-nodoc-operation-context:
+        surface: Copilot > Settings > Content understanding
+        workflows:
+          - Open the main Content Understanding settings experience.
+        headerProfile: m365-admin-homepage
+        provenance:
+          - source: module-validation
+            confidence: high
+            notes:
+              - Validated against the checked-in M365Internals Content Understanding cmdlet.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Primary Content Understanding settings payload. Exact schema pending.
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 

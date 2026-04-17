@@ -679,16 +679,17 @@ export const gettingStartedGuides: GettingStartedGuide[] = [
   {
     title: "M365 Admin",
     portals: ["M365 Admin"],
-    authModel: "Portal session cookie + custom admin headers",
+    authModel: "Portal session cookie + route-specific admin headers (plus brokered bearer tokens for some SharePoint-backed helpers)",
     baseUrls: ["https://admin.cloud.microsoft"],
     confirmedDetails: [
       "The spec models `AjaxSessionKey` as the session cookie and documents `x-portal-routekey`, `x-adminapp-request`, `x-ms-mac-appid`, and `x-ms-mac-hostingapp` as required headers for most requests.",
-      "The documented application ID is `f00c5fa5-eee4-4f57-88fa-c082d83b3c94`, and the hosting app name is `M365AdminPortal`.",
+      "Live captures showed that `x-ms-mac-appid` is blade-specific rather than globally stable: `/homepage`, `/MicrosoftSearch`, `/brandcenter`, `/Settings/enhancedRestore`, and `/Settings/Services/:/Settings/L1/OfficeOnline` all emitted different GUIDs while reusing `M365AdminPortal`.",
       "M365 Admin uses `/admin/api/` and a separate `/fd/msgraph/` proxy instead of the shared Defender/Purview `/apiproxy` layout.",
     ],
     practicalGuidance: [
       "Capture the portal bootstrap or initial admin-shell requests so you can reproduce the required routing headers alongside the cookie.",
       "Keep request context tied to the admin experience you are using; several endpoints depend on admin-shell state in addition to auth.",
+      "Expect SharePoint-backed helpers such as Brand center and Microsoft 365 Backup billing reads to layer additional SPO-specific routing or bearer-token requirements on top of the shell cookies.",
       "Use GET requests against shell, navigation, and current-user endpoints to confirm your headers before touching tenant settings.",
     ],
     mutationGuidance: [
@@ -698,7 +699,7 @@ export const gettingStartedGuides: GettingStartedGuide[] = [
     pitfalls: [
       "Missing one of the custom admin headers can look like a generic auth or routing failure.",
       "Some data comes through federated Graph proxies and can differ from the shared Graph proxy behavior in Defender or Purview.",
-      "Header values can change as the admin shell bootstraps or refreshes.",
+      "Header values can change as the admin shell bootstraps, refreshes, or switches blades; there is no single durable `x-ms-mac-appid` for the whole portal.",
     ],
   },
   {

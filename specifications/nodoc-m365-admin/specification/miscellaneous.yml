@@ -146,6 +146,20 @@ paths:
         including backup and recovery configurations.
       operationId: Misc.GetEnhancedRestoreSettings
       tags: [Miscellaneous]
+      x-nodoc-operation-context:
+        surface: Settings > Microsoft 365 Backup
+        workflows:
+          - Open the Microsoft 365 Backup settings experience.
+        headerProfile: m365-admin-microsoft-365-backup
+        availability:
+          level: tenant-conditional
+          notes:
+            - 'A live capture from a tenant without Microsoft 365 Backup enabled returned `status: disabled` with billing flags still present.'
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Verified against the signed-in Settings > Microsoft 365 Backup blade at `#/Settings/enhancedRestore`.
       responses:
         '200':
           description: OK
@@ -153,7 +167,25 @@ paths:
             application/json:
               schema:
                 type: object
-                description: Restore feature settings. Exact schema pending.
+                required:
+                  - status
+                  - backupServiceConsumer
+                  - isDepartmentBillingEnabled
+                  - isRbacEnabledForBilling
+                  - hasEXOEUPIAttributionConsent
+                properties:
+                  '@odata.context':
+                    type: string
+                  status:
+                    type: string
+                  backupServiceConsumer:
+                    type: string
+                  isDepartmentBillingEnabled:
+                    type: boolean
+                  isRbacEnabledForBilling:
+                    type: boolean
+                  hasEXOEUPIAttributionConsent:
+                    type: boolean
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -322,6 +354,25 @@ paths:
         Retrieve Microsoft 365 recommendation alerts for the tenant.
       operationId: Misc.GetM365Alerts
       tags: [Miscellaneous]
+      parameters:
+        - name: referrer
+          in: query
+          required: false
+          description: Referring shell surface captured by the portal.
+          schema:
+            type: string
+            default: M365AdminDashboard
+      x-nodoc-operation-context:
+        surface: Dashboard > Recommendations
+        workflows:
+          - Open the admin dashboard recommendations area.
+        headerProfile: m365-admin-homepage
+        variants:
+          - location: query
+            selector: referrer
+            knownValues:
+              - M365AdminDashboard
+            notes: The portal currently sends the dashboard referrer value on alert reads.
       responses:
         '200':
           description: OK
@@ -418,6 +469,11 @@ paths:
         Retrieve Microsoft 365 recommendations for the tenant including feature adoption suggestions (Org Settings > Briefing email).
       operationId: Misc.GetM365Recommendations
       tags: [Miscellaneous]
+      x-nodoc-operation-context:
+        surface: Org settings > Briefing email
+        workflows:
+          - Open the recommendations experience rooted in Briefing email or recommendation cards.
+        headerProfile: m365-admin-homepage
       responses:
         '200':
           description: OK
@@ -426,6 +482,61 @@ paths:
               schema:
                 type: object
                 description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/recommendations/m365suggestions:
+    get:
+      summary: Get M365 search suggestions
+      description: >-
+        Retrieve recommendation suggestions shown in Microsoft Search-backed admin experiences.
+      operationId: Misc.GetM365Suggestions
+      tags: [Miscellaneous]
+      parameters:
+        - name: referrer
+          in: query
+          required: false
+          description: Referring shell surface captured by the portal.
+          schema:
+            type: string
+            default: SearchAnswers
+      x-nodoc-operation-context:
+        surface: Microsoft Search > Search answers
+        workflows:
+          - Open the Search & intelligence experience. The portal currently emits this request with the `SearchAnswers` referrer during page load.
+        headerProfile: m365-admin-microsoft-search
+        variants:
+          - location: query
+            selector: referrer
+            knownValues:
+              - SearchAnswers
+            notes: The portal currently sends the SearchAnswers referrer on this route.
+        provenance:
+          - source: module-validation
+            confidence: high
+            notes:
+              - Validated against the checked-in M365Internals recommendation cmdlet.
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - 'Verified on the signed-in `#/MicrosoftSearch` route with `x-adminapp-request: /MicrosoftSearch`.'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                description: Search-backed M365 recommendation suggestions. The live capture returned an empty array for the current tenant.
+                items:
+                  type: object
+                  additionalProperties: true
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 

@@ -18,6 +18,26 @@ paths:
           - "https://admin.powerplatform.microsoft.com/manage/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/applications"
       tags:
         - TenantApi
+      x-nodoc-operation-context:
+        surface: Environments > Applications
+        workflows:
+          - Open an environment hub or manage-environment applications page and inspect the packages that can be provisioned into the selected environment.
+        headerProfile: power-platform-tenant-api
+        requestShapes:
+          - name: available-instance-packages
+            bodyKind: none
+            requiredParameters:
+              - environmentId
+            notes: The portal currently inlines Lcid, InstanceCountryCode, and CrmVersion in the function-style path and can add api-version plus geoType in the query string.
+        availability:
+          level: tenant-conditional
+          notes:
+            - Returned from environment application surfaces that depend on the selected environment and regional tenant host.
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Verified from authenticated Power Platform environment application pages on the tenant-scoped host family.
       parameters:
         - name: "environmentId"
           in: path
@@ -59,6 +79,26 @@ paths:
           - "https://admin.powerplatform.microsoft.com/manage/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/applications"
       tags:
         - TenantApi
+      x-nodoc-operation-context:
+        surface: Environments > Applications
+        workflows:
+          - Open an environment hub or manage-environment applications page and inspect the packages already associated with the selected environment.
+        headerProfile: power-platform-tenant-api
+        requestShapes:
+          - name: instance-packages
+            bodyKind: none
+            requiredParameters:
+              - environmentId
+            notes: The portal currently inlines the Lcid selector in the function-style path and can add api-version plus geoType in the query string.
+        availability:
+          level: tenant-conditional
+          notes:
+            - Returned from environment application surfaces that depend on the selected environment and regional tenant host.
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Verified from authenticated Power Platform environment application pages on the tenant-scoped host family.
       parameters:
         - name: "environmentId"
           in: path
@@ -102,6 +142,26 @@ paths:
         additionalPageCount: 4
       tags:
         - TenantApi
+      x-nodoc-operation-context:
+        surface: Billing > Licenses
+        workflows:
+          - Open license overview or recommendation pages that need the tenant auto-claim policy state.
+        headerProfile: power-platform-tenant-api
+        variants:
+          - location: query
+            selector: api-version
+            knownValues:
+              - '1'
+            notes: The retained capture used api-version 1 on the tenant-scoped licensing helper.
+        availability:
+          level: tenant-conditional
+          notes:
+            - The returned policy state is tied to the selected tenant host and licensing experience.
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Verified from authenticated Power Platform billing and licensing pages.
       parameters:
         - name: "api-version"
           in: query
