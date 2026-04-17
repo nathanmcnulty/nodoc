@@ -299,6 +299,15 @@ function normalizeOperationContextString(value, context, fieldName) {
   return normalized;
 }
 
+function normalizeRequiredOperationContextString(value, context, fieldName) {
+  const normalized = normalizeOperationContextString(value, context, fieldName);
+  if (normalized === undefined) {
+    throw new Error(`${context} is missing ${fieldName}.`);
+  }
+
+  return normalized;
+}
+
 function normalizeOperationContextPath(value, context, fieldName) {
   const normalized = normalizeOperationContextString(value, context, fieldName);
   if (normalized === undefined) {
@@ -350,7 +359,7 @@ function normalizeHeaderProfileEntries(value, context, fieldName) {
       throw new Error(`${context} has an invalid ${fieldName}[${index}] value.`);
     }
 
-    const name = normalizeOperationContextString(
+    const name = normalizeRequiredOperationContextString(
       entry.name,
       `${context} ${fieldName}[${index}]`,
       "name",
