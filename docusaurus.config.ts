@@ -9,6 +9,7 @@ const siteDescription =
   "OpenAPI specs and checked-in Postman collections for undocumented Microsoft portal APIs across Defender XDR, Exchange, Teams, Intune, M365 Admin, SharePoint, M365 Apps, Power Platform, Purview, Purview Portal, and Entra surfaces.";
 const siteUrl = "https://nodoc.nathanmcnulty.com";
 const aiBrowserEntry = path.resolve(process.cwd(), "node_modules", "ai", "dist", "index.js");
+const postCssPresetEnv = require.resolve("postcss-preset-env");
 
 const config: Config = {
   title: siteTitle,
@@ -66,6 +67,35 @@ const config: Config = {
               },
             },
           };
+        },
+      };
+    },
+    function postCssWarningFixesPlugin() {
+      return {
+        name: "postcss-warning-fixes",
+        configurePostCss(postCssOptions: { plugins: Array<any> }) {
+          postCssOptions.plugins = postCssOptions.plugins.map((plugin) => {
+            if (!Array.isArray(plugin) || plugin[0] !== postCssPresetEnv) {
+              return plugin;
+            }
+
+            const options = (plugin[1] ?? {}) as {
+              features?: Record<string, unknown>;
+            };
+
+            return [
+              plugin[0],
+              {
+                ...options,
+                features: {
+                  ...options.features,
+                  "light-dark-function": false,
+                },
+              },
+            ];
+          });
+
+          return postCssOptions;
         },
       };
     },
