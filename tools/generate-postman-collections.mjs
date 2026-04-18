@@ -8,7 +8,7 @@ import { fileURLToPath } from "node:url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, "..");
 const outputDir = path.join(repoRoot, "postman", "collections");
-const npmCommand = "npm";
+const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
 
 const collectionDefinitions = [
   {
@@ -146,18 +146,9 @@ if (requestedCollectionSelectors.size > 0 && activeCollectionDefinitions.length 
 }
 
 function run(command, args) {
-  const commandLine = [command, ...args.map((arg) => {
-    if (/[\s"]/u.test(arg)) {
-      return `"${arg.replace(/"/g, '\\"')}"`;
-    }
-
-    return arg;
-  })].join(" ");
-
-  const result = spawnSync(commandLine, {
+  const result = spawnSync(command, args, {
     cwd: repoRoot,
     stdio: "inherit",
-    shell: true,
   });
 
   if (result.error) {
