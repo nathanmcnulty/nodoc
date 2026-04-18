@@ -243,8 +243,17 @@ html[data-theme='light'] body .api-client-drawer {
   border: none !important;
 }
 .parameter-item-description-summary .markdown-summary {
-  min-width: 3ch;
+  width: 100%;
+  min-width: 0;
   padding-inline-end: 2px;
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+  -webkit-line-clamp: unset;
+}
+.parameter-item-description-summary .markdown-summary p {
+  display: block;
+  white-space: normal;
 }
 @container narrow-references-container (max-width: 900px) {
   .section {
