@@ -259,6 +259,7 @@ async function parseArgs(argv) {
     seedPages: [],
     seedRouteGroups: {},
     settleMs: defaultSettleMs,
+    targetId: null,
     url: null,
     variables: {},
   };
@@ -357,6 +358,17 @@ async function parseArgs(argv) {
 
     if (arg.startsWith("--label=")) {
       args.label = arg.slice("--label=".length);
+      continue;
+    }
+
+    if (arg === "--target-id" && next) {
+      args.targetId = next.trim();
+      index += 1;
+      continue;
+    }
+
+    if (arg.startsWith("--target-id=")) {
+      args.targetId = arg.slice("--target-id=".length).trim();
       continue;
     }
 
@@ -758,6 +770,41 @@ async function createTarget() {
   return response.json();
 }
 
+async function listTargets() {
+  const response = await fetch(`${apiBase}/json/list`);
+  if (!response.ok) {
+    throw new Error(`Failed to list CDP targets: ${response.status} ${response.statusText}`);
+  }
+
+  return response.json();
+}
+
+async function resolveTarget(args) {
+  if (!args.targetId) {
+    return {
+      ...(await createTarget()),
+      closeWhenDone: true,
+      reusedExistingTarget: false,
+    };
+  }
+
+  const targets = await listTargets();
+  const target = targets.find((entry) => entry.id === args.targetId);
+  if (!target) {
+    throw new Error(`No existing CDP target found for --target-id ${JSON.stringify(args.targetId)}.`);
+  }
+
+  if (!target.webSocketDebuggerUrl) {
+    throw new Error(`CDP target ${JSON.stringify(args.targetId)} does not expose a websocket debugger URL.`);
+  }
+
+  return {
+    ...target,
+    closeWhenDone: false,
+    reusedExistingTarget: true,
+  };
+}
+
 async function closeTarget(targetId) {
   try {
     await fetch(`${apiBase}/json/close/${targetId}`);
@@ -772,13 +819,46 @@ class CdpClient {
     this.pending = new Map();
     this.listeners = new Map();
     this.socket = new WebSocket(wsUrl);
+    this.socketClosed = false;
+  }
+
+  rejectPending(error) {
+    for (const { reject } of this.pending.values()) {
+      reject(error);
+    }
+
+    this.pending.clear();
   }
 
   async connect() {
     await new Promise((resolve, reject) => {
-      this.socket.addEventListener("open", resolve, { once: true });
-      this.socket.addEventListener("error", reject, { once: true });
+      const handleOpen = () => {
+        cleanup();
+        resolve();
+      };
+      const handleError = (event) => {
+        cleanup();
+        reject(event?.error ?? new Error("Failed to open CDP WebSocket."));
+      };
+      const handleClose = () => {
+        cleanup();
+        reject(new Error("CDP WebSocket closed before it opened."));
+      };
+      const cleanup = () => {
+        this.socket.removeEventListener("open", handleOpen);
+        this.socket.removeEventListener("error", handleError);
+        this.socket.removeEventListener("close", handleClose);
+      };
+
+      this.socket.addEventListener("open", handleOpen, { once: true });
+      this.socket.addEventListener("error", handleError, { once: true });
+      this.socket.addEventListener("close", handleClose, { once: true });
     });
+
+    this.socket.addEventListener("close", () => {
+      this.socketClosed = true;
+      this.rejectPending(new Error("CDP WebSocket closed."));
+    }, { once: true });
 
     this.socket.addEventListener("message", (raw) => {
       const message = JSON.parse(String(raw.data));
@@ -815,6 +895,10 @@ class CdpClient {
   }
 
   async send(method, params = {}, sessionId = null) {
+    if (this.socketClosed || this.socket.readyState !== WebSocket.OPEN) {
+      throw new Error("CDP WebSocket is not open.");
+    }
+
     const id = ++this.nextId;
     const payload = JSON.stringify({
       id,
@@ -833,10 +917,19 @@ class CdpClient {
   }
 
   async close() {
+    if (this.socket.readyState === WebSocket.CLOSED) {
+      this.socketClosed = true;
+      return;
+    }
+
     await new Promise((resolve) => {
       this.socket.addEventListener("close", resolve, { once: true });
-      this.socket.close();
+      if (this.socket.readyState !== WebSocket.CLOSING) {
+        this.socket.close();
+      }
     });
+
+    this.socketClosed = true;
   }
 }
 
@@ -1065,6 +1158,15 @@ function resolveMaybeRelativeUrl(value, baseUrl) {
   }
 }
 
+function isAbsoluteUrl(value) {
+  try {
+    new URL(value);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 function slugify(value) {
   const normalized = String(value || "")
     .replace(/^https?:\/\/[^/]+/iu, "")
@@ -1197,7 +1299,7 @@ async function main() {
       };
   await mkdir(args.outDir, { recursive: true });
 
-  const target = await createTarget();
+  const target = await resolveTarget(args);
   const client = new CdpClient(target.webSocketDebuggerUrl);
   const requestMap = new Map();
   const capturedRequests = [];
@@ -1486,7 +1588,9 @@ async function main() {
   }
 
   async function navigateRoot(targetUrl) {
-    const resolvedUrl = resolveMaybeRelativeUrl(targetUrl, await getRootUrl());
+    const resolvedUrl = isAbsoluteUrl(targetUrl)
+      ? String(targetUrl)
+      : resolveMaybeRelativeUrl(targetUrl, await getRootUrl());
     const navigationPromise = new Promise((resolve) => {
       const timeout = setTimeout(() => {
         currentLoadResolver = null;
@@ -1775,10 +1879,12 @@ async function main() {
       pageCount: pageStates.length,
       portal: args.portal,
       recipePath: args.recipePath,
+      reusedExistingTarget: Boolean(target.reusedExistingTarget),
       scopedHosts,
       scopedRequestCount: filteredRequests.length,
       seedArtifacts: args.seedArtifacts,
       startUrl: args.url,
+      targetId: target.id ?? args.targetId ?? null,
     };
 
     await writeFile(
@@ -1789,7 +1895,9 @@ async function main() {
     console.log(JSON.stringify(summary, null, 2));
   } finally {
     await client.close();
-    await closeTarget(target.id);
+    if (target.closeWhenDone) {
+      await closeTarget(target.id);
+    }
   }
 }
 

@@ -371,14 +371,14 @@ const apiCatalogSeed: ApiCatalogSeed[] = [
     title: "Entra IGA",
     slug: "/entra-iga",
     family: "Entra portal",
-    operations: 17,
+    operations: 10,
     authModel: "Azure AD bearer token",
     baseUrl: "https://elm.iga.azure.com",
     summary:
-      "Identity Governance administration coverage for entitlement management, guest billing, settings, and lifecycle workflows.",
+      "Legacy Identity Governance administration coverage for entitlement management, guest billing, connected organizations, and governance settings.",
     highlights: [
-      "Non-Graph governance surfaces observed in the portal",
-      "OData query parameters modeled for list endpoints",
+      "Legacy/non-Graph governance surfaces observed in the portal",
+      "Entitlement management, billing, and governance admin endpoints",
       "License-gated behavior noted in descriptions",
     ],
     collectionPath: "postman/collections/entra-iga.collection.json",

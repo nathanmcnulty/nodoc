@@ -9,6 +9,13 @@ const siteDescription =
   "OpenAPI specs and checked-in Postman collections for undocumented Microsoft portal APIs across Defender XDR, Exchange, Teams, Intune, M365 Admin, SharePoint, M365 Apps, Power Platform, Purview, Purview Portal, and Entra surfaces.";
 const siteUrl = "https://nodoc.nathanmcnulty.com";
 const aiBrowserEntry = path.resolve(process.cwd(), "node_modules", "ai", "dist", "index.js");
+const makeAsynchronousServerShim = path.resolve(
+  process.cwd(),
+  "plugins",
+  "docusaurus-scalar",
+  "src",
+  "makeAsynchronousServerShim.js"
+);
 const postCssPresetEnv = require.resolve("postcss-preset-env");
 
 const config: Config = {
@@ -64,6 +71,24 @@ const config: Config = {
             resolve: {
               alias: {
                 "ai$": aiBrowserEntry,
+              },
+            },
+          };
+        },
+      };
+    },
+    function scalarServerWorkerShimPlugin() {
+      return {
+        name: "scalar-server-worker-shim",
+        configureWebpack(_config, isServer) {
+          if (!isServer) {
+            return undefined;
+          }
+
+          return {
+            resolve: {
+              alias: {
+                "make-asynchronous$": makeAsynchronousServerShim,
               },
             },
           };

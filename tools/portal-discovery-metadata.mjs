@@ -56,7 +56,7 @@ export const crawlMetadataByTitle = {
     authModel: "Azure AD bearer token",
     crawlPriority: "medium",
     nextPass: "full-layered-crawl",
-    reason: "Small governance surface; deeper entitlement and lifecycle navigation is still likely useful.",
+    reason: "Keep follow-up focused on legacy entitlement-management and other non-Graph ELM surfaces; Graph-backed Lifecycle Workflows pages are intentionally out of scope.",
   },
   "Entra PIM": {
     portalUrl: "https://entra.microsoft.com",
@@ -223,20 +223,14 @@ export const coverageOverlayByTitle = {
     ],
   },
   "Entra IGA": {
-    seedUrls: [
-      "https://entra.microsoft.com/#view/Microsoft_AAD_LifecycleManagement/CommonMenuBlade/~/overview",
-      "https://entra.microsoft.com/#view/Microsoft_AAD_LifecycleManagement/CommonMenuBlade/~/workflows",
-      "https://entra.microsoft.com/#view/Microsoft_AAD_LifecycleManagement/CommonMenuBlade/~/workflowSettings",
-    ],
     observedHosts: [],
-    lastSuccessfulPassDepth: "seeded-drill-in-no-backend",
+    lastSuccessfulPassDepth: "scope-correction",
     notes: [
-      "A seeded replay pass reached audit logs plus the custom extension, deleted workflows, workflows, and workflow settings routes directly from recorded page-state links.",
-      "Audit logs rendered normally, but the custom extension, deleted workflows, workflows, and workflow settings routes all showed a tenant access blocker in the current tenant.",
+      "Lifecycle Workflows pages in the Entra admin center are Graph-backed and intentionally out of scope for the legacy Entra IGA ELM spec.",
+      "Future Entra IGA discovery should stay focused on entitlement-management and other non-Graph ELM-backed surfaces.",
     ],
     openGaps: [
-      "Even after the seeded drill-in recovery pass, elm.iga.azure.com still did not wake in the current tenant.",
-      "Lifecycle workflows appears permission-blocked in this tenant for most routes, so future coverage work likely needs a tenant with access or existing workflow objects.",
+      "A fresh non-Graph capture pass is still needed for the legacy Entra IGA entitlement-management surfaces.",
     ],
   },
   "Entra PIM": {
@@ -453,10 +447,7 @@ export const captureRecipesByTitle = {
     "tools/capture-recipes/entra-idgov-deep.json",
     "tools/capture-recipes/entra-idgov-seeded-replay.json",
   ],
-  "Entra IGA": [
-    "tools/capture-recipes/entra-iga-deep.json",
-    "tools/capture-recipes/entra-iga-recovery.json",
-  ],
+  "Entra IGA": [],
   "Entra PIM": [
     "tools/capture-recipes/entra-pim-deep.json",
     "tools/capture-recipes/entra-pim-seeded-replay.json",
