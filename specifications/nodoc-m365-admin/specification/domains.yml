@@ -1,6 +1,6 @@
 paths:
 
-  /admin/api/domainlist/Customization:
+  /admin/api/DomainList/Customization:
     get:
       summary: Get domain list customization
       description: >-
@@ -14,7 +14,18 @@ paths:
             application/json:
               schema:
                 type: object
-                description: pending
+                properties:
+                  IsCompactMode:
+                    type: boolean
+                  ShownColumns:
+                    type: array
+                    items:
+                      type: string
+                    nullable: true
+                  ColumnsWidth:
+                    type: object
+                    additionalProperties: true
+                    nullable: true
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -24,7 +35,7 @@ paths:
         '404':
           $ref: common.yml#/components/responses/NotFound
 
-  /admin/api/domains/GetDomainBuyModel:
+  /admin/api/Domains/GetDomainBuyModel:
     get:
       summary: Get domain buy model
       description: >-
@@ -38,7 +49,23 @@ paths:
             application/json:
               schema:
                 type: object
-                description: pending
+                properties:
+                  CanPurchaseDomain:
+                    type: boolean
+                  PurchaseDomainRequiresUserNotification:
+                    type: boolean
+                  PaidSubscriptionRequired:
+                    type: boolean
+                  BuyFromResellerPartnerRequired:
+                    type: boolean
+                  PurchaseUrl:
+                    type: string
+                  PartnerCompanyName:
+                    type: string
+                    nullable: true
+                  PartnerSupportUrl:
+                    type: string
+                    nullable: true
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -48,21 +75,65 @@ paths:
         '404':
           $ref: common.yml#/components/responses/NotFound
 
-  /admin/api/domains/List:
+  /admin/api/Domains/List:
     get:
       summary: List domains
       description: >-
         Retrieve the list of domains configured for the tenant (Org Settings > Privacy profile).
       operationId: Domains.ListDomains
       tags: [Domains]
+      parameters:
+        - name: filter
+          in: query
+          description: Optional domain filter expression.
+          schema:
+            type: string
+        - name: searchText
+          in: query
+          description: Optional search text applied by the Domains grid.
+          schema:
+            type: string
+        - name: computeDomainRegistrationData
+          in: query
+          description: Whether registration metadata should be included in the response.
+          schema:
+            type: boolean
+            default: true
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                type: object
-                description: pending
+                type: array
+                items:
+                  type: object
+                  properties:
+                    Name:
+                      type: string
+                    IsDefault:
+                      type: boolean
+                    IsInitial:
+                      type: boolean
+                    Capabilities:
+                      type: integer
+                    Authentication:
+                      type: integer
+                    Status:
+                      type: string
+                    DomainType:
+                      type: string
+                    IsReseller:
+                      type: boolean
+                    ShouldSetupDns:
+                      type: boolean
+                    IsSetupCompleted:
+                      type: boolean
+                    DnsHealthStatus:
+                      type: string
+                    DnsProviderName:
+                      type: string
+                  additionalProperties: true
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -72,7 +143,7 @@ paths:
         '404':
           $ref: common.yml#/components/responses/NotFound
 
-  /admin/api/domains/Verified:
+  /admin/api/Domains/Verified:
     get:
       summary: Get verified domains
       description: >-
@@ -85,8 +156,33 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                description: pending
+                type: array
+                items:
+                  type: object
+                  properties:
+                    Name:
+                      type: string
+                    IsDefault:
+                      type: boolean
+                    IsInitial:
+                      type: boolean
+                    Authentication:
+                      type: integer
+                    Capabilities:
+                      type: integer
+                    RootDomain:
+                      type: string
+                    Status:
+                      type: integer
+                    VerificationMethod:
+                      type: integer
+                    PasswordNotificationWindowInDays:
+                      type: integer
+                      nullable: true
+                    PasswordValidityPeriodInDays:
+                      type: integer
+                      nullable: true
+                  additionalProperties: true
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 

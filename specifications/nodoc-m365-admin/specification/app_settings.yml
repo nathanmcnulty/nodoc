@@ -141,6 +141,33 @@ paths:
         '404':
           $ref: common.yml#/components/responses/NotFound
 
+  /fd/IC3Config/Skype.Policy/configurations/TeamsClientConfiguration:
+    get:
+      summary: Get Teams client configuration policy
+      description: >-
+        Retrieve the tenant-scoped Teams client configuration policy used by the
+        admin center to hydrate Teams interoperability and content-sharing settings.
+      operationId: AppSettings.GetTeamsClientConfiguration
+      tags: [AppSettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  description: Teams client configuration policy record. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
   /admin/api/TeamsProvisioning/Customization:
     get:
       summary: Get Teams provisioning customization flag
@@ -1188,6 +1215,47 @@ paths:
       responses:
         '200':
           description: OK
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /fd/ocps/user/v1.0/web/policies:
+    get:
+      summary: Get Office on the web policy projection
+      description: >-
+        Retrieve the Office on the web policy projection keyed by the current policy
+        hash. The admin center homepage prefetch uses this to decide whether refreshed
+        web policy data is available.
+      operationId: AppSettings.GetOfficeOnTheWebPolicies
+      tags: [AppSettings]
+      parameters:
+        - name: PoliciesHash
+          in: query
+          required: true
+          description: The policy hash currently cached by the admin center client.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  policiesHash:
+                    type: string
+                  value:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: true
+                additionalProperties: true
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 

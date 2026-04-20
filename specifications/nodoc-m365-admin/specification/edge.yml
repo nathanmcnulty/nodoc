@@ -51,6 +51,241 @@ paths:
         '404':
           $ref: common.yml#/components/responses/NotFound
 
+  /fd/edgeenterpriseextensionsmanagement/api/config/featureflags:
+    get:
+      summary: Get Edge extension feature flags
+      description: >-
+        Retrieve feature flags used by the Edge enterprise extensions management
+        experience.
+      operationId: Edge.GetExtensionFeatureFlags
+      tags: [Edge]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Edge extension feature flag payload. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /fd/edgeenterpriseextensionsmanagement/api/extensions/extensionFeedback:
+    get:
+      summary: Get Edge extension feedback
+      description: >-
+        Retrieve extension feedback metadata surfaced by the Edge enterprise
+        extensions management experience.
+      operationId: Edge.GetExtensionFeedback
+      tags: [Edge]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Extension feedback payload. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /fd/edgeenterpriseextensionsmanagement/api/featureManagement/profiles:
+    get:
+      summary: List Edge feature management profiles
+      description: >-
+        Retrieve feature management profiles used by the Edge enterprise extensions
+        management experience.
+      operationId: Edge.ListFeatureManagementProfiles
+      tags: [Edge]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Feature management profiles payload. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /fd/edgeenterpriseextensionsmanagement/api/featureManagement/shard:
+    get:
+      summary: Get Edge feature management shard
+      description: >-
+        Retrieve the shard assignment used by the Edge enterprise extensions
+        management feature service.
+      operationId: Edge.GetFeatureManagementShard
+      tags: [Edge]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Feature management shard payload. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /fd/edgeenterpriseextensionsmanagement/api/telemetry/devices/count:
+    get:
+      summary: Get Edge telemetry device count
+      description: >-
+        Retrieve the Edge-managed device count for the requested telemetry lookback window.
+      operationId: Edge.GetTelemetryDeviceCount
+      tags: [Edge]
+      parameters:
+        - name: lookbackHours
+          in: query
+          description: Lookback window, in hours, applied to the device telemetry query.
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Device telemetry count payload. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /fd/edgeenterpriseextensionsmanagement/api/telemetry/devices/reports/versions:
+    get:
+      summary: List Edge telemetry report versions
+      description: >-
+        Retrieve the available device telemetry report versions used by the Edge
+        management reporting experience.
+      operationId: Edge.ListTelemetryDeviceReportVersions
+      tags: [Edge]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Device report version payload. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /fd/edgeenterpriseextensionsmanagement/api/version/releases:
+    get:
+      summary: List Edge release versions
+      description: >-
+        Retrieve release information for the requested Edge channel.
+      operationId: Edge.ListReleaseVersions
+      tags: [Edge]
+      parameters:
+        - name: channel
+          in: query
+          description: Edge release channel requested by the portal.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Edge release version payload. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /fd/edgeenterpriseextensionsmanagement/api/version/update:
+    get:
+      summary: Get Edge update information
+      description: >-
+        Retrieve the current Edge update metadata used by the enterprise extensions
+        management experience.
+      operationId: Edge.GetVersionUpdate
+      tags: [Edge]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Edge update metadata payload. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /fd/edgeenterpriseextensionsmanagement/security-insights/notification-preferences:
+    get:
+      summary: Get Edge security insights notification preferences
+      description: >-
+        Retrieve notification preference settings used by the Edge security insights
+        experience.
+      operationId: Edge.GetSecurityInsightsNotificationPreferences
+      tags: [Edge]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Security insights notification preference payload. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
   /fd/OfficePolicyAdmin/v1.0/edge/policies:
     get:
       summary: Get Edge browser policies
@@ -67,6 +302,37 @@ paths:
               schema:
                 type: object
                 description: pending - Edge browser policies
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /fd/OfficePolicyAdmin/v1.0/edge/policies/{id}/policywithpayload:
+    get:
+      summary: Get Edge policy with payload
+      description: >-
+        Retrieve a specific Edge browser policy together with its payload details.
+      operationId: Edge.GetPolicyWithPayload
+      tags: [Edge]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The Edge policy identifier.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Edge policy payload detail. Exact schema pending.
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 

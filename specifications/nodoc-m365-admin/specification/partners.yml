@@ -22,3 +22,123 @@ paths:
 
         '404':
           $ref: common.yml#/components/responses/NotFound
+
+  /fd/commerceMgmt2/partnermanage/partners:
+    get:
+      summary: List partner-managed partners
+      description: >-
+        Retrieve the partner relationship inventory exposed through the partner
+        management commerce service.
+      operationId: Partners.ListPartnerManagedPartners
+      tags: [Partners]
+      parameters:
+        - name: api-version
+          in: query
+          description: API version requested by the partner management commerce service.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Partner management payload. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /fd/MSGraph/beta/directory/partners:
+    get:
+      summary: List directory partners
+      description: >-
+        Retrieve the Microsoft Graph beta directory partners collection used by the
+        marketplace and partner relationship experiences.
+      operationId: Partners.ListDirectoryPartners
+      tags: [Partners]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  '@odata.context':
+                    type: string
+                  value:
+                    type: array
+                    items:
+                      type: object
+                      description: Directory partner record. Exact schema pending.
+                additionalProperties: true
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /fd/GdapPartnerManage/CustomerServiceAdminApi/Web/v1/CustomerGranularAdminRelationships:
+    get:
+      summary: List GDAP customer granular admin relationships
+      description: >-
+        Retrieve the granular delegated admin privilege relationships available to
+        the current partner tenant.
+      operationId: Partners.ListCustomerGranularAdminRelationships
+      tags: [Partners]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: GDAP customer relationship payload. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /fd/jarvisCM/my-org/profiles:
+    get:
+      summary: List Jarvis commerce profiles
+      description: >-
+        Retrieve commerce-management profiles for the current organization as used
+        by the partner relationships experience.
+      operationId: Partners.ListJarvisCommerceProfiles
+      tags: [Partners]
+      parameters:
+        - name: type
+          in: query
+          description: Profile type filter applied by the commerce management service.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Jarvis commerce profile payload. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound

@@ -22,6 +22,149 @@ paths:
 
         '404':
           $ref: common.yml#/components/responses/NotFound
+
+  /_api/SPO.Tenant/GetSPOSiteCreationSources:
+    get:
+      summary: Get SharePoint site creation sources
+      description: >-
+        Retrieve the SharePoint Online site creation source catalog used by tenant
+        admin experiences to label where a site originated.
+      operationId: CompanySettings.GetSharePointSiteCreationSources
+      tags: [CompanySettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  '@odata.context':
+                    type: string
+                  value:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        DisplayName:
+                          type: string
+                        Id:
+                          type: string
+                          format: uuid
+                        Name:
+                          type: string
+                      additionalProperties: true
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /_api/SPOInternalUseOnly.Tenant:
+    get:
+      summary: Get SharePoint internal tenant settings
+      description: >-
+        Retrieve selected SharePoint Online internal tenant settings, including
+        default sharing link behavior, domain restriction mode, and custom script
+        controls.
+      operationId: CompanySettings.GetSharePointInternalTenantSettings
+      tags: [CompanySettings]
+      parameters:
+        - name: $select
+          in: query
+          required: true
+          description: >-
+            Comma-separated property projection. The observed live request selected
+            sharing, versioning, and custom script fields.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  odata.metadata:
+                    type: string
+                  odata.type:
+                    type: string
+                  odata.id:
+                    type: string
+                  odata.editLink:
+                    type: string
+                  DefaultSharingLinkType:
+                    type: integer
+                  DefaultLinkPermission:
+                    type: integer
+                  EnableAutoExpirationVersionTrim:
+                    type: boolean
+                  EnableRestrictedAccessControl:
+                    type: boolean
+                  ExpireVersionsAfterDays:
+                    type: integer
+                  ExternalUserExpirationRequired:
+                    type: boolean
+                  ExternalUserExpireInDays:
+                    type: integer
+                  MajorVersionLimit:
+                    type: integer
+                  SharingDomainRestrictionMode:
+                    type: integer
+                  SharingAllowedDomainList:
+                    type: string
+                    nullable: true
+                  SharingBlockedDomainList:
+                    type: string
+                    nullable: true
+                  SharingCapability:
+                    type: integer
+                  CustomScriptsRestrictMode:
+                    type: boolean
+                additionalProperties: true
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /_api/SPOInternalUseOnly.TenantAdminSettings/AutoQuotaEnabled:
+    get:
+      summary: Get SharePoint auto-quota setting
+      description: >-
+        Retrieve whether SharePoint Online auto quota assignment is enabled for new
+        site collections.
+      operationId: CompanySettings.GetSharePointAutoQuotaEnabled
+      tags: [CompanySettings]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  '@odata.context':
+                    type: string
+                  IsReadOnly:
+                    type: boolean
+                  Value:
+                    type: boolean
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
     put:
       summary: Set company theme
       description: >-
@@ -297,6 +440,7 @@ paths:
         workflows:
           - Open Org settings, then Services, then Brand center.
         headerProfile: m365-admin-brand-center
+        authProfile: m365-admin-brand-center-spo-token
         availability:
           level: tenant-conditional
           notes:
@@ -380,6 +524,7 @@ paths:
         workflows:
           - Open Org settings, then Services, then Brand center.
         headerProfile: m365-admin-brand-center
+        authProfile: m365-admin-brand-center-spo-token
         requestShapes:
           - name: brand-center-site-url
             bodyKind: none

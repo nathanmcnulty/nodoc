@@ -1,4 +1,44 @@
 paths:
+  /apiproxy/arm/subscriptions:
+    get:
+      summary: List Azure subscriptions
+      description: >-
+        Retrieve Azure subscriptions visible to the Defender Sentinel onboarding and
+        settings experiences. Observed live while resolving attached workspaces for the
+        unified Sentinel configuration flow.
+      operationId: SentinelPrecision.ListSubscriptions
+      tags: [Sentinel]
+      parameters:
+        - name: api-version
+          in: query
+          description: ARM API version for the subscriptions collection.
+          schema:
+            type: string
+            default: '2020-01-01'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  value:
+                    type: array
+                    items:
+                      type: object
+                      description: Azure subscription record. Exact schema pending.
+                  count:
+                    type: object
+                    additionalProperties: true
+                additionalProperties: true
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
   /apiproxy/arm/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/overview:
     post:
       summary: Get Sentinel overview sections

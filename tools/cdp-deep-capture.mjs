@@ -8,7 +8,8 @@ const defaultSeedLinkLimit = 12;
 const defaultSeedRouteLimit = 8;
 const defaultSettleMs = 8000;
 const defaultPostActionSettleMs = 6000;
-const evaluateTimeoutMs = 4000;
+const defaultEvaluateTimeoutMs = 10000;
+let runtimeEvaluateTimeoutMs = defaultEvaluateTimeoutMs;
 
 function stripBom(value) {
   return typeof value === "string" ? value.replace(/^\uFEFF/u, "") : value;
@@ -229,6 +230,10 @@ function applyRecipeConfig(args, recipeConfig, recipePath) {
     args.navigationTimeoutMs = Number(recipeConfig.navigationTimeoutMs);
   }
 
+  if (Number.isFinite(Number(recipeConfig.evaluateTimeoutMs))) {
+    args.evaluateTimeoutMs = Number(recipeConfig.evaluateTimeoutMs);
+  }
+
   if (recipeConfig.actions) {
     args.actions = ensureArray(recipeConfig.actions).map(normalizeRecipeAction);
   }
@@ -239,6 +244,7 @@ function applyRecipeConfig(args, recipeConfig, recipePath) {
 async function parseArgs(argv) {
   const args = {
     actions: [],
+    evaluateTimeoutMs: defaultEvaluateTimeoutMs,
     label: null,
     matchHosts: [],
     matchPathPrefixes: [],
@@ -253,6 +259,7 @@ async function parseArgs(argv) {
     seedPages: [],
     seedRouteGroups: {},
     settleMs: defaultSettleMs,
+    targetId: null,
     url: null,
     variables: {},
   };
@@ -351,6 +358,17 @@ async function parseArgs(argv) {
 
     if (arg.startsWith("--label=")) {
       args.label = arg.slice("--label=".length);
+      continue;
+    }
+
+    if (arg === "--target-id" && next) {
+      args.targetId = next.trim();
+      index += 1;
+      continue;
+    }
+
+    if (arg.startsWith("--target-id=")) {
+      args.targetId = arg.slice("--target-id=".length).trim();
       continue;
     }
 
@@ -468,6 +486,17 @@ async function parseArgs(argv) {
       continue;
     }
 
+    if (arg === "--evaluate-timeout-ms" && next) {
+      args.evaluateTimeoutMs = Number(next);
+      index += 1;
+      continue;
+    }
+
+    if (arg.startsWith("--evaluate-timeout-ms=")) {
+      args.evaluateTimeoutMs = Number(arg.slice("--evaluate-timeout-ms=".length));
+      continue;
+    }
+
     if (arg === "--action" && next) {
       args.actions.push(parseActionSpec(next));
       index += 1;
@@ -492,7 +521,7 @@ async function parseArgs(argv) {
     throw new Error("Missing required --out argument.");
   }
 
-  for (const key of ["navigationTimeoutMs", "postActionSettleMs", "settleMs"]) {
+  for (const key of ["evaluateTimeoutMs", "navigationTimeoutMs", "postActionSettleMs", "settleMs"]) {
     if (!Number.isFinite(args[key]) || args[key] <= 0) {
       throw new Error(`Invalid value for ${key}: "${args[key]}".`);
     }
@@ -741,6 +770,41 @@ async function createTarget() {
   return response.json();
 }
 
+async function listTargets() {
+  const response = await fetch(`${apiBase}/json/list`);
+  if (!response.ok) {
+    throw new Error(`Failed to list CDP targets: ${response.status} ${response.statusText}`);
+  }
+
+  return response.json();
+}
+
+async function resolveTarget(args) {
+  if (!args.targetId) {
+    return {
+      ...(await createTarget()),
+      closeWhenDone: true,
+      reusedExistingTarget: false,
+    };
+  }
+
+  const targets = await listTargets();
+  const target = targets.find((entry) => entry.id === args.targetId);
+  if (!target) {
+    throw new Error(`No existing CDP target found for --target-id ${JSON.stringify(args.targetId)}.`);
+  }
+
+  if (!target.webSocketDebuggerUrl) {
+    throw new Error(`CDP target ${JSON.stringify(args.targetId)} does not expose a websocket debugger URL.`);
+  }
+
+  return {
+    ...target,
+    closeWhenDone: false,
+    reusedExistingTarget: true,
+  };
+}
+
 async function closeTarget(targetId) {
   try {
     await fetch(`${apiBase}/json/close/${targetId}`);
@@ -755,13 +819,46 @@ class CdpClient {
     this.pending = new Map();
     this.listeners = new Map();
     this.socket = new WebSocket(wsUrl);
+    this.socketClosed = false;
+  }
+
+  rejectPending(error) {
+    for (const { reject } of this.pending.values()) {
+      reject(error);
+    }
+
+    this.pending.clear();
   }
 
   async connect() {
     await new Promise((resolve, reject) => {
-      this.socket.addEventListener("open", resolve, { once: true });
-      this.socket.addEventListener("error", reject, { once: true });
+      const handleOpen = () => {
+        cleanup();
+        resolve();
+      };
+      const handleError = (event) => {
+        cleanup();
+        reject(event?.error ?? new Error("Failed to open CDP WebSocket."));
+      };
+      const handleClose = () => {
+        cleanup();
+        reject(new Error("CDP WebSocket closed before it opened."));
+      };
+      const cleanup = () => {
+        this.socket.removeEventListener("open", handleOpen);
+        this.socket.removeEventListener("error", handleError);
+        this.socket.removeEventListener("close", handleClose);
+      };
+
+      this.socket.addEventListener("open", handleOpen, { once: true });
+      this.socket.addEventListener("error", handleError, { once: true });
+      this.socket.addEventListener("close", handleClose, { once: true });
     });
+
+    this.socket.addEventListener("close", () => {
+      this.socketClosed = true;
+      this.rejectPending(new Error("CDP WebSocket closed."));
+    }, { once: true });
 
     this.socket.addEventListener("message", (raw) => {
       const message = JSON.parse(String(raw.data));
@@ -798,6 +895,10 @@ class CdpClient {
   }
 
   async send(method, params = {}, sessionId = null) {
+    if (this.socketClosed || this.socket.readyState !== WebSocket.OPEN) {
+      throw new Error("CDP WebSocket is not open.");
+    }
+
     const id = ++this.nextId;
     const payload = JSON.stringify({
       id,
@@ -816,10 +917,19 @@ class CdpClient {
   }
 
   async close() {
+    if (this.socket.readyState === WebSocket.CLOSED) {
+      this.socketClosed = true;
+      return;
+    }
+
     await new Promise((resolve) => {
       this.socket.addEventListener("close", resolve, { once: true });
-      this.socket.close();
+      if (this.socket.readyState !== WebSocket.CLOSING) {
+        this.socket.close();
+      }
     });
+
+    this.socketClosed = true;
   }
 }
 
@@ -827,7 +937,15 @@ function requestKey(requestId, sessionId = null) {
   return `${sessionId ?? ""}:${requestId}`;
 }
 
-async function evaluateJson(client, expression, sessionId = null, timeoutMs = evaluateTimeoutMs) {
+function isDomCapableTarget(sessionId, targetInfo) {
+  if (sessionId === null) {
+    return true;
+  }
+
+  return ["iframe", "page"].includes(targetInfo?.targetType ?? "");
+}
+
+async function evaluateJson(client, expression, sessionId = null, timeoutMs = runtimeEvaluateTimeoutMs) {
   const result = await Promise.race([
     client.send("Runtime.evaluate", {
       expression,
@@ -1040,6 +1158,15 @@ function resolveMaybeRelativeUrl(value, baseUrl) {
   }
 }
 
+function isAbsoluteUrl(value) {
+  try {
+    new URL(value);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 function slugify(value) {
   const normalized = String(value || "")
     .replace(/^https?:\/\/[^/]+/iu, "")
@@ -1160,6 +1287,7 @@ function collectSeededRouteCandidates(seedArtifacts, rootOrigin, args, action) {
 
 async function main() {
   const args = await parseArgs(process.argv.slice(2));
+  runtimeEvaluateTimeoutMs = args.evaluateTimeoutMs;
   const seedArtifacts = args.seedArtifacts
     ? await loadSeedArtifacts(args.seedArtifacts)
     : {
@@ -1171,7 +1299,7 @@ async function main() {
       };
   await mkdir(args.outDir, { recursive: true });
 
-  const target = await createTarget();
+  const target = await resolveTarget(args);
   const client = new CdpClient(target.webSocketDebuggerUrl);
   const requestMap = new Map();
   const capturedRequests = [];
@@ -1323,6 +1451,10 @@ async function main() {
   async function collectSnapshots() {
     const snapshots = [];
     for (const [sessionId, targetInfo] of sessions.entries()) {
+      if (!isDomCapableTarget(sessionId, targetInfo)) {
+        continue;
+      }
+
       try {
         const snapshot = await evaluateJson(client, buildDomSnapshotExpression(), sessionId);
         if (!snapshot) {
@@ -1456,7 +1588,9 @@ async function main() {
   }
 
   async function navigateRoot(targetUrl) {
-    const resolvedUrl = resolveMaybeRelativeUrl(targetUrl, await getRootUrl());
+    const resolvedUrl = isAbsoluteUrl(targetUrl)
+      ? String(targetUrl)
+      : resolveMaybeRelativeUrl(targetUrl, await getRootUrl());
     const navigationPromise = new Promise((resolve) => {
       const timeout = setTimeout(() => {
         currentLoadResolver = null;
@@ -1496,6 +1630,10 @@ async function main() {
     const entries = Array.from(sessions.entries());
     return entries
       .filter(([sessionId, targetInfo]) => {
+        if (!isDomCapableTarget(sessionId, targetInfo)) {
+          return false;
+        }
+
         if (scope === "root") {
           return sessionId === null;
         }
@@ -1741,10 +1879,12 @@ async function main() {
       pageCount: pageStates.length,
       portal: args.portal,
       recipePath: args.recipePath,
+      reusedExistingTarget: Boolean(target.reusedExistingTarget),
       scopedHosts,
       scopedRequestCount: filteredRequests.length,
       seedArtifacts: args.seedArtifacts,
       startUrl: args.url,
+      targetId: target.id ?? args.targetId ?? null,
     };
 
     await writeFile(
@@ -1755,7 +1895,9 @@ async function main() {
     console.log(JSON.stringify(summary, null, 2));
   } finally {
     await client.close();
-    await closeTarget(target.id);
+    if (target.closeWhenDone) {
+      await closeTarget(target.id);
+    }
   }
 }
 

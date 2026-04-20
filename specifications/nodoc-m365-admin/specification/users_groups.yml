@@ -508,6 +508,7 @@ paths:
         workflows:
           - Open an experience that needs a downstream resource token from the admin portal.
         headerProfile: m365-admin-homepage
+        authProfile: m365-admin-brokered-arm-token
         requestShapes:
           - name: downstream-audience-token
             contentType: application/x-www-form-urlencoded; charset=UTF-8
@@ -720,7 +721,7 @@ paths:
         '404':
           $ref: common.yml#/components/responses/NotFound
 
-  /admin/api/userlist/Customization:
+  /admin/api/UserList/Customization:
     get:
       summary: Get user list customization
       description: >-
@@ -817,6 +818,31 @@ paths:
               schema:
                 type: object
                 description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/rbac/roles:
+    get:
+      summary: List RBAC roles
+      description: >-
+        Retrieve the RBAC role definitions exposed by the admin center role-based
+        access control experience.
+      operationId: UsersGroups.ListRbacRoles
+      tags: [UsersGroups]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: RBAC role definition payload. Exact schema pending.
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 

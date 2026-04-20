@@ -146,7 +146,14 @@ if (requestedCollectionSelectors.size > 0 && activeCollectionDefinitions.length 
 }
 
 function run(command, args) {
-  const result = spawnSync(command, args, {
+  const resolvedCommand = process.platform === "win32" && command === npmCommand
+    ? "cmd.exe"
+    : command;
+  const resolvedArgs = process.platform === "win32" && command === npmCommand
+    ? ["/d", "/s", "/c", "npm", ...args]
+    : args;
+
+  const result = spawnSync(resolvedCommand, resolvedArgs, {
     cwd: repoRoot,
     stdio: "inherit",
   });
@@ -156,7 +163,7 @@ function run(command, args) {
   }
 
   if (result.status !== 0) {
-    throw new Error(`${command} ${args.join(" ")} failed with exit code ${result.status ?? "unknown"}`);
+    throw new Error(`${resolvedCommand} ${resolvedArgs.join(" ")} failed with exit code ${result.status ?? "unknown"}`);
   }
 }
 

@@ -8,6 +8,20 @@ paths:
         incidents, hunting, identity inventory, and administration pages.
       operationId: MultiTenant.ListTenants
       tags: [Multi-Tenant]
+      x-nodoc-operation-context:
+        surface: Multi-tenant shell
+        workflows:
+          - Open the Defender multi-tenant homepage or switch MTO incidents, hunting, identity, or administration views.
+        authProfile: defender-mto-tenant-context
+        availability:
+          level: user-context
+          notes:
+            - Returned tenant choices and the effective selection depend on the signed-in operator and available MTO scope.
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Confirmed in live traffic from the MTO homepage, incidents, hunting, identity inventory, and administration pages.
       responses:
         '200':
           description: OK
@@ -87,6 +101,20 @@ paths:
         unified RBAC pages.
       operationId: MultiTenant.GetEffectiveTenantGroup
       tags: [Multi-Tenant]
+      x-nodoc-operation-context:
+        surface: Multi-tenant shell
+        workflows:
+          - Open or switch MTO homepage, incidents, hunting, cases, identity inventory, content distribution, tenant groups, or unified RBAC views.
+        authProfile: defender-mto-tenant-context
+        availability:
+          level: user-context
+          notes:
+            - Effective tenant-group state depends on the signed-in operator and the current managed-tenant selection.
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Confirmed in live traffic across the MTO homepage, incidents, hunting, cases, identity inventory, content distribution, tenant groups, and unified RBAC pages.
       responses:
         '200':
           description: OK
@@ -144,6 +172,21 @@ paths:
           schema:
             type: boolean
             default: false
+      x-nodoc-operation-context:
+        surface: Multi-tenant shell
+        workflows:
+          - Load MTO pages that need the selected tenant bootstrap before rendering cross-tenant Defender data.
+        authProfile: defender-mto-tenant-context
+        requestShapes:
+          - name: cached-or-realtime-bootstrap
+            bodyKind: none
+            optionalParameters:
+              - realTime
+            notes: Use the realTime flag when the portal needs an uncached tenant bootstrap refresh.
+        availability:
+          level: user-context
+          notes:
+            - Returned tenant bootstrap state depends on the current MTO selection and the operator's allowed tenant scope.
       responses:
         '200':
           description: OK
@@ -548,6 +591,26 @@ paths:
           description: Requested access scope for the trial probe.
           schema:
             type: string
+      x-nodoc-operation-context:
+        surface: Multi-tenant Security Copilot entrypoint
+        workflows:
+          - Open MTO Advanced hunting or Custom detection experiences that probe Security Copilot readiness.
+        authProfile: defender-copilot-entitlement
+        requestShapes:
+          - name: scoped-trial-probe
+            bodyKind: none
+            requiredParameters:
+              - scope
+            notes: The portal submits an access-scope query value while checking multi-tenant Security Copilot readiness.
+        availability:
+          level: tenant-conditional
+          notes:
+            - Trial readiness depends on tenant onboarding, current scope, and whether the MTO wrapper accepts the requested proxy prefix.
+        provenance:
+          - source: live-portal-capture
+            confidence: medium
+            notes:
+              - Live traffic in the current tenant returned a contextual 400 InvalidProxyPrefix response, confirming the probe path and parameter shape.
       responses:
         '200':
           description: OK

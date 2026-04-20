@@ -344,6 +344,69 @@ function normalizeOperationContextStringArray(value, context, fieldName) {
   return normalized;
 }
 
+const authProfileSecretDetectors = [
+  {
+    label: "JWT-like token",
+    pattern: /\beyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\b/u,
+  },
+  {
+    label: "Bearer token",
+    pattern: /\bBearer\s+[A-Za-z0-9._~+/=-]{20,}\b/iu,
+  },
+  {
+    label: "cookie or header assignment",
+    pattern: /\b(?:sccauth|xsrf-token|x-xsrf-token|rootauthtoken|spaauthcookie|oidcauthcookie|ajaxsessionkey|s\.ajaxsessionkey|s\.sessid|s\.usertenantid|x-portal-routekey|userloginref|estsauth|estsauthpersistent|authorization)\b\s*[:=]\s*["']?[A-Za-z0-9%._~+/=-]{20,}/iu,
+  },
+];
+
+function findAuthProfileSecretMaterial(value, currentPath = "") {
+  if (typeof value === "string") {
+    const matchedDetector = authProfileSecretDetectors.find(({ pattern }) => pattern.test(value));
+    return matchedDetector
+      ? {
+          path: currentPath || "value",
+          label: matchedDetector.label,
+        }
+      : null;
+  }
+
+  if (Array.isArray(value)) {
+    for (const [index, item] of value.entries()) {
+      const match = findAuthProfileSecretMaterial(item, `${currentPath}[${index}]`);
+      if (match) {
+        return match;
+      }
+    }
+
+    return null;
+  }
+
+  if (!value || typeof value !== "object") {
+    return null;
+  }
+
+  for (const [key, nestedValue] of Object.entries(value)) {
+    const nextPath = currentPath ? `${currentPath}.${key}` : key;
+    const match = findAuthProfileSecretMaterial(nestedValue, nextPath);
+    if (match) {
+      return match;
+    }
+  }
+
+  return null;
+}
+
+function assertRedactedAuthProfileValue(value, context) {
+  const match = findAuthProfileSecretMaterial(value);
+  if (!match) {
+    return;
+  }
+
+  throw new Error(
+    `${context} ${match.path} contains secret-looking auth material (${match.label}). Store only normalized cookie names, claim summaries, and header names.`,
+  );
+}
+
 function normalizeHeaderProfileEntries(value, context, fieldName) {
   if (value === undefined) {
     return [];
@@ -450,7 +513,363 @@ function normalizeHeaderProfiles(value, context) {
   );
 }
 
-function normalizeOperationContext(value, context, headerProfileNames = new Set()) {
+function normalizeNamedValueEntries(value, context, fieldName) {
+  if (value === undefined) {
+    return [];
+  }
+
+  if (!Array.isArray(value)) {
+    throw new Error(`${context} has an invalid ${fieldName} value.`);
+  }
+
+  const seenNames = new Set();
+  return value.map((entry, index) => {
+    if (!entry || typeof entry !== "object" || Array.isArray(entry)) {
+      throw new Error(`${context} has an invalid ${fieldName}[${index}] value.`);
+    }
+
+    const entryContext = `${context} ${fieldName}[${index}]`;
+    const name = normalizeRequiredOperationContextString(entry.name, entryContext, "name");
+    const normalizedName = name.toLowerCase();
+    if (seenNames.has(normalizedName)) {
+      throw new Error(`${context} includes duplicate ${fieldName} entries for ${name}.`);
+    }
+
+    seenNames.add(normalizedName);
+
+    const description = normalizeOperationContextString(
+      entry.description,
+      entryContext,
+      "description",
+    );
+    const notes = normalizeOperationContextStringArray(entry.notes, entryContext, "notes");
+    const values = normalizeOperationContextStringArray(entry.values, entryContext, "values");
+
+    if (description === undefined && notes === undefined && values === undefined) {
+      throw new Error(`${entryContext} must include at least one descriptive field.`);
+    }
+
+    return {
+      name,
+      ...(description !== undefined ? { description } : {}),
+      ...(values !== undefined ? { values } : {}),
+      ...(notes !== undefined ? { notes } : {}),
+    };
+  });
+}
+
+function normalizeAuthProfilePrincipalContext(value, context) {
+  if (value === undefined) {
+    return undefined;
+  }
+
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    throw new Error(`${context} has an invalid principalContext value.`);
+  }
+
+  const principalContext = `${context} principalContext`;
+  const label = normalizeRequiredOperationContextString(value.label, principalContext, "label");
+  const privilegeLevel = normalizeRequiredOperationContextString(
+    value.privilegeLevel,
+    principalContext,
+    "privilegeLevel",
+  );
+  const validPrivilegeLevels = new Set([
+    "maximum-observed",
+    "representative",
+    "least-privilege",
+    "unknown",
+  ]);
+
+  if (!validPrivilegeLevels.has(privilegeLevel)) {
+    throw new Error(`${principalContext} has an invalid privilegeLevel value.`);
+  }
+
+  const notes = normalizeOperationContextStringArray(value.notes, principalContext, "notes");
+  return {
+    label,
+    privilegeLevel,
+    ...(notes !== undefined ? { notes } : {}),
+  };
+}
+
+function normalizeAuthProfileCookies(value, context) {
+  if (value === undefined) {
+    return [];
+  }
+
+  if (!Array.isArray(value)) {
+    throw new Error(`${context} has an invalid cookies value.`);
+  }
+
+  const seenNames = new Set();
+  return value.map((cookie, index) => {
+    if (!cookie || typeof cookie !== "object" || Array.isArray(cookie)) {
+      throw new Error(`${context} has an invalid cookies[${index}] value.`);
+    }
+
+    const cookieContext = `${context} cookies[${index}]`;
+    const name = normalizeRequiredOperationContextString(cookie.name, cookieContext, "name");
+    const normalizedName = name.toLowerCase();
+    if (seenNames.has(normalizedName)) {
+      throw new Error(`${context} includes duplicate cookies entries for ${name}.`);
+    }
+
+    seenNames.add(normalizedName);
+
+    const description = normalizeOperationContextString(cookie.description, cookieContext, "description");
+    const notes = normalizeOperationContextStringArray(cookie.notes, cookieContext, "notes");
+    const attributes = normalizeNamedValueEntries(cookie.attributes, cookieContext, "attributes");
+
+    if (description === undefined && notes === undefined && attributes.length === 0) {
+      throw new Error(`${cookieContext} must include a description, notes, or attributes.`);
+    }
+
+    return {
+      name,
+      ...(description !== undefined ? { description } : {}),
+      ...(attributes.length > 0 ? { attributes } : {}),
+      ...(notes !== undefined ? { notes } : {}),
+    };
+  });
+}
+
+function normalizeAuthProfileTokens(value, context) {
+  if (value === undefined) {
+    return [];
+  }
+
+  if (!Array.isArray(value)) {
+    throw new Error(`${context} has an invalid tokens value.`);
+  }
+
+  const validTokenTypes = new Set(["jwt", "opaque", "unknown"]);
+  const validCarriers = new Set([
+    "authorization-header",
+    "cookie",
+    "response-body",
+    "query",
+    "request-body",
+    "portal-memory",
+    "unknown",
+  ]);
+  const seenNames = new Set();
+
+  return value.map((token, index) => {
+    if (!token || typeof token !== "object" || Array.isArray(token)) {
+      throw new Error(`${context} has an invalid tokens[${index}] value.`);
+    }
+
+    const tokenContext = `${context} tokens[${index}]`;
+    const name = normalizeRequiredOperationContextString(token.name, tokenContext, "name");
+    const normalizedName = name.toLowerCase();
+    if (seenNames.has(normalizedName)) {
+      throw new Error(`${context} includes duplicate tokens entries for ${name}.`);
+    }
+
+    seenNames.add(normalizedName);
+
+    const description = normalizeOperationContextString(token.description, tokenContext, "description");
+    const tokenType = normalizeOperationContextString(token.tokenType, tokenContext, "tokenType");
+    if (tokenType !== undefined && !validTokenTypes.has(tokenType)) {
+      throw new Error(`${tokenContext} has an invalid tokenType value.`);
+    }
+
+    const carrier = normalizeOperationContextString(token.carrier, tokenContext, "carrier");
+    if (carrier !== undefined && !validCarriers.has(carrier)) {
+      throw new Error(`${tokenContext} has an invalid carrier value.`);
+    }
+
+    const issuer = normalizeOperationContextString(token.issuer, tokenContext, "issuer");
+    const audiences = normalizeOperationContextStringArray(token.audiences, tokenContext, "audiences");
+    const scopes = normalizeOperationContextStringArray(token.scopes, tokenContext, "scopes");
+    const roles = normalizeOperationContextStringArray(token.roles, tokenContext, "roles");
+    const claims = normalizeNamedValueEntries(token.claims, tokenContext, "claims");
+    const notes = normalizeOperationContextStringArray(token.notes, tokenContext, "notes");
+
+    if (
+      description === undefined
+      && tokenType === undefined
+      && carrier === undefined
+      && issuer === undefined
+      && audiences === undefined
+      && scopes === undefined
+      && roles === undefined
+      && claims.length === 0
+      && notes === undefined
+    ) {
+      throw new Error(`${tokenContext} must include at least one token detail.`);
+    }
+
+    return {
+      name,
+      ...(description !== undefined ? { description } : {}),
+      ...(tokenType !== undefined ? { tokenType } : {}),
+      ...(carrier !== undefined ? { carrier } : {}),
+      ...(issuer !== undefined ? { issuer } : {}),
+      ...(audiences !== undefined ? { audiences } : {}),
+      ...(scopes !== undefined ? { scopes } : {}),
+      ...(roles !== undefined ? { roles } : {}),
+      ...(claims.length > 0 ? { claims } : {}),
+      ...(notes !== undefined ? { notes } : {}),
+    };
+  });
+}
+
+function normalizeAuthProfileFlows(value, context, fieldName) {
+  if (value === undefined) {
+    return [];
+  }
+
+  if (!Array.isArray(value)) {
+    throw new Error(`${context} has an invalid ${fieldName} value.`);
+  }
+
+  const seenNames = new Set();
+  return value.map((entry, index) => {
+    if (!entry || typeof entry !== "object" || Array.isArray(entry)) {
+      throw new Error(`${context} has an invalid ${fieldName}[${index}] value.`);
+    }
+
+    const entryContext = `${context} ${fieldName}[${index}]`;
+    const name = normalizeRequiredOperationContextString(entry.name, entryContext, "name");
+    const normalizedName = name.toLowerCase();
+    if (seenNames.has(normalizedName)) {
+      throw new Error(`${context} includes duplicate ${fieldName} entries for ${name}.`);
+    }
+
+    seenNames.add(normalizedName);
+
+    const description = normalizeOperationContextString(entry.description, entryContext, "description");
+    const sourcePath = normalizeOperationContextPath(entry.sourcePath, entryContext, "sourcePath");
+    const targetResources = normalizeOperationContextStringArray(
+      entry.targetResources,
+      entryContext,
+      "targetResources",
+    );
+    const notes = normalizeOperationContextStringArray(entry.notes, entryContext, "notes");
+
+    if (
+      description === undefined
+      && sourcePath === undefined
+      && targetResources === undefined
+      && notes === undefined
+    ) {
+      throw new Error(`${entryContext} must include at least one descriptive field.`);
+    }
+
+    return {
+      name,
+      ...(description !== undefined ? { description } : {}),
+      ...(sourcePath !== undefined ? { sourcePath } : {}),
+      ...(targetResources !== undefined ? { targetResources } : {}),
+      ...(notes !== undefined ? { notes } : {}),
+    };
+  });
+}
+
+function normalizeAuthProfileSignals(value, context) {
+  if (value === undefined) {
+    return [];
+  }
+
+  if (!Array.isArray(value)) {
+    throw new Error(`${context} has an invalid permissionSignals value.`);
+  }
+
+  const seenNames = new Set();
+  return value.map((entry, index) => {
+    if (!entry || typeof entry !== "object" || Array.isArray(entry)) {
+      throw new Error(`${context} has an invalid permissionSignals[${index}] value.`);
+    }
+
+    const entryContext = `${context} permissionSignals[${index}]`;
+    const name = normalizeRequiredOperationContextString(entry.name, entryContext, "name");
+    const normalizedName = name.toLowerCase();
+    if (seenNames.has(normalizedName)) {
+      throw new Error(`${context} includes duplicate permissionSignals entries for ${name}.`);
+    }
+
+    seenNames.add(normalizedName);
+
+    const description = normalizeOperationContextString(entry.description, entryContext, "description");
+    const sourcePath = normalizeOperationContextPath(entry.sourcePath, entryContext, "sourcePath");
+    const notes = normalizeOperationContextStringArray(entry.notes, entryContext, "notes");
+
+    if (sourcePath === undefined) {
+      throw new Error(`${entryContext} is missing sourcePath.`);
+    }
+
+    return {
+      name,
+      ...(description !== undefined ? { description } : {}),
+      sourcePath,
+      ...(notes !== undefined ? { notes } : {}),
+    };
+  });
+}
+
+function normalizeAuthProfiles(value, context) {
+  if (value === undefined) {
+    return {};
+  }
+
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    throw new Error(`${context} has an invalid x-nodoc-authProfiles payload.`);
+  }
+
+  return Object.fromEntries(
+    Object.entries(value).map(([profileName, profileValue]) => {
+      const profileContext = `${context} auth profile ${profileName}`;
+      if (!profileValue || typeof profileValue !== "object" || Array.isArray(profileValue)) {
+        throw new Error(`${profileContext} has an invalid value.`);
+      }
+
+      const description = normalizeOperationContextString(
+        profileValue.description,
+        profileContext,
+        "description",
+      );
+      const notes = normalizeOperationContextStringArray(profileValue.notes, profileContext, "notes");
+      const principalContext = normalizeAuthProfilePrincipalContext(profileValue.principalContext, profileContext);
+      const cookies = normalizeAuthProfileCookies(profileValue.cookies, profileContext);
+      const tokens = normalizeAuthProfileTokens(profileValue.tokens, profileContext);
+      const brokerFlows = normalizeAuthProfileFlows(profileValue.brokerFlows, profileContext, "brokerFlows");
+      const permissionSignals = normalizeAuthProfileSignals(profileValue.permissionSignals, profileContext);
+
+      if (
+        principalContext === undefined
+        && cookies.length === 0
+        && tokens.length === 0
+        && brokerFlows.length === 0
+        && permissionSignals.length === 0
+      ) {
+        throw new Error(`${profileContext} must include at least one structured auth detail.`);
+      }
+
+      const normalizedProfile = {
+        ...(description !== undefined ? { description } : {}),
+        ...(notes !== undefined ? { notes } : {}),
+        ...(principalContext !== undefined ? { principalContext } : {}),
+        ...(cookies.length > 0 ? { cookies } : {}),
+        ...(tokens.length > 0 ? { tokens } : {}),
+        ...(brokerFlows.length > 0 ? { brokerFlows } : {}),
+        ...(permissionSignals.length > 0 ? { permissionSignals } : {}),
+      };
+
+      assertRedactedAuthProfileValue(normalizedProfile, profileContext);
+
+      return [profileName, normalizedProfile];
+    }),
+  );
+}
+
+function normalizeOperationContext(
+  value,
+  context,
+  headerProfileNames = new Set(),
+  authProfileNames = new Set(),
+) {
   if (value === undefined) {
     return null;
   }
@@ -481,6 +900,19 @@ function normalizeOperationContext(value, context, headerProfileNames = new Set(
     }
 
     normalized.headerProfile = headerProfile;
+  }
+
+  const authProfile = normalizeOperationContextString(
+    value.authProfile,
+    context,
+    "authProfile",
+  );
+  if (authProfile !== undefined) {
+    if (authProfileNames.size > 0 && !authProfileNames.has(authProfile)) {
+      throw new Error(`${context} references unknown auth profile ${authProfile}.`);
+    }
+
+    normalized.authProfile = authProfile;
   }
 
   const canonicalPath = normalizeOperationContextPath(
@@ -659,18 +1091,29 @@ function getNormalizedHeaderProfiles(specification, title) {
   );
 }
 
+function getNormalizedAuthProfiles(specification, title) {
+  return normalizeAuthProfiles(
+    specification["x-nodoc-authProfiles"],
+    `${title} specification`,
+  );
+}
+
 function getNormalizedOperationContextRecords(specification, title) {
   const headerProfiles = getNormalizedHeaderProfiles(specification, title);
+  const authProfiles = getNormalizedAuthProfiles(specification, title);
   const headerProfileNames = new Set(Object.keys(headerProfiles));
+  const authProfileNames = new Set(Object.keys(authProfiles));
 
   return {
     headerProfiles,
+    authProfiles,
     operations: getOperationEntries(specification)
       .map(({ method, operation, path: operationPath }) => {
         const operationContext = normalizeOperationContext(
           operation["x-nodoc-operation-context"],
           `${title} ${method} ${operationPath}`,
           headerProfileNames,
+          authProfileNames,
         );
 
         if (!operationContext) {
@@ -1041,10 +1484,15 @@ export async function buildOperationContextLedger() {
     const title = bundledSpecification.info?.title ?? entry.name;
     const {
       headerProfiles,
+      authProfiles,
       operations,
     } = getNormalizedOperationContextRecords(bundledSpecification, title);
 
-    if (Object.keys(headerProfiles).length === 0 && operations.length === 0) {
+    if (
+      Object.keys(headerProfiles).length === 0
+      && Object.keys(authProfiles).length === 0
+      && operations.length === 0
+    ) {
       continue;
     }
 
@@ -1061,6 +1509,7 @@ export async function buildOperationContextLedger() {
           ? bundledSpecification.info["x-nodoc-category"]
           : null,
       headerProfiles,
+      ...(Object.keys(authProfiles).length > 0 ? { authProfiles } : {}),
       operations: operations.map(({ method, operation, path: operationPath, operationContext }) => ({
         operationId:
           typeof operation.operationId === "string" ? operation.operationId : null,

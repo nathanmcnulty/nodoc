@@ -1,4 +1,4 @@
-import { buildSpecQuality } from "./spec-quality-lib.mjs";
+import { buildOperationContextLedger, buildSpecQuality } from "./spec-quality-lib.mjs";
 
 function collectFailures(qualityByTitle) {
   const failures = [];
@@ -39,8 +39,26 @@ function collectFailures(qualityByTitle) {
   return failures;
 }
 
+async function collectOperationContextFailures() {
+  try {
+    await buildOperationContextLedger();
+    return [];
+  } catch (error) {
+    return [
+      {
+        title: "Operation context ledger",
+        issue: "auth-redaction",
+        detail: error instanceof Error ? error.message : String(error),
+      },
+    ];
+  }
+}
+
 const qualityByTitle = await buildSpecQuality();
-const failures = collectFailures(qualityByTitle);
+const failures = [
+  ...collectFailures(qualityByTitle),
+  ...(await collectOperationContextFailures()),
+];
 
 if (failures.length > 0) {
   console.error("Spec quality regression detected:");

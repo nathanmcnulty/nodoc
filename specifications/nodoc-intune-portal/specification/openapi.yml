@@ -244,6 +244,11 @@ paths:
         Loads the initial Intune shell bootstrap payload used during first paint. Confirmed live
         while opening Windows Autopatch report blades, where the request asked for sections such
         as dashboard metadata, portal settings, outages, and experimentation variants.
+      x-nodoc-live-capture:
+        source: "authenticated Intune admin center"
+        browsedPages:
+          - "https://intune.microsoft.com/#view/Microsoft_Intune_Enrollment/ReportingMenu/~/windowsQualityUpdatesReactView"
+          - "https://intune.microsoft.com/#view/Microsoft_Intune_Enrollment/ReportingMenu/~/windowsFeatureUpdatesReactView"
       operationId: IntunePortal.Portal.GetEarlyUserData
       requestBody:
         required: true
@@ -273,6 +278,11 @@ paths:
         Loads deferred Intune shell bootstrap data after the initial shell render completes.
         Confirmed live while opening Windows Autopatch report blades, where the response included
         subscription summaries, Azure locations, and recent-resource containers.
+      x-nodoc-live-capture:
+        source: "authenticated Intune admin center"
+        browsedPages:
+          - "https://intune.microsoft.com/#view/Microsoft_Intune_Enrollment/ReportingMenu/~/windowsQualityUpdatesReactView"
+          - "https://intune.microsoft.com/#view/Microsoft_Intune_Enrollment/ReportingMenu/~/windowsFeatureUpdatesReactView"
       operationId: IntunePortal.Portal.GetLazyUserData
       requestBody:
         required: true
@@ -328,6 +338,11 @@ paths:
         Reads one or more persistent storage namespaces used by Intune portal extensions.
         Confirmed live from the Windows Autopatch groups blade using the
         `Microsoft_EMM_ModernWorkplacePersistentStorage` namespace.
+      x-nodoc-live-capture:
+        source: "authenticated Intune admin center"
+        browsedPages:
+          - "https://intune.microsoft.com/#view/Microsoft_Intune_Enrollment/ReportingMenu/~/windowsQualityUpdatesReactView"
+          - "https://intune.microsoft.com/#view/Microsoft_Intune_Enrollment/ReportingMenu/~/windowsFeatureUpdatesReactView"
       operationId: IntunePortal.Settings.Select
       requestBody:
         required: true

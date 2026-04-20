@@ -24,8 +24,12 @@ Root `openapi.yml` files drive both website presentation and downstream artifact
 - Preserve backend provenance in tag descriptions and operation descriptions rather than the navigation labels.
 - Keep repo-only live-capture browsing evidence under `x-nodoc-live-capture` instead of public `description` fields so the site does not render environment-specific routes.
 - Use `x-nodoc-headerProfiles` at the root spec level when a portal requires repeated non-standard header sets that are not fully captured by OpenAPI `securitySchemes` alone.
+- Use `x-nodoc-authProfiles` at the root spec level when you need structured cookie shape, token-broker flow, downstream audience, claim-summary, or permission-baseline guidance without storing raw secret material.
 - Use `x-nodoc-operation-context` on operations when downstream developers need structured guidance about canonical route aliases, workflow/surface placement, header-profile binding, request-shape variants, conditional availability, or provenance.
+- Use `authProfile` inside `x-nodoc-operation-context` when an operation depends on a documented auth profile or emits auth-context evidence that should be tied back to a root-level auth model.
 - Keep `x-nodoc-operation-context` language-agnostic. Prefer concepts like canonical paths, request content types, body/query selectors, and availability notes over client-specific implementation advice.
+- Never store raw cookie values, bearer tokens, refresh tokens, or JWT signature material in committed specs. Capture normalized claim summaries and cookie attributes instead.
+- Auth-profile content is validated for secret-looking JWTs, bearer strings, and cookie/header assignments during generation and `npm run validate:spec-quality`; replace raw material with normalized summaries if validation fails.
 
 ## Quality metrics
 
@@ -36,7 +40,7 @@ The website now surfaces generated spec-quality metadata from the checked-in Ope
 - The generator reports navigation consistency, metadata completeness, placeholder debt, and example coverage for every published spec.
 - The same pass also refreshes `src/generated/portalCoverageLedger.json`, which captures per-portal seed URLs, observed hosts, promoted discoveries, telemetry exclusions, and open gaps for agent-driven discovery work.
 - It also refreshes `src/generated/operationLiveCaptureLedger.json`, which indexes repo-only `x-nodoc-live-capture` operation metadata for agents and tooling.
-- It also refreshes `src/generated/operationContextLedger.json`, which indexes validated `x-nodoc-headerProfiles` and `x-nodoc-operation-context` metadata for downstream tooling.
+- It also refreshes `src/generated/operationContextLedger.json`, which indexes validated `x-nodoc-headerProfiles`, `x-nodoc-authProfiles`, and `x-nodoc-operation-context` metadata for downstream tooling.
 - Treat placeholder markers such as `pending` as real debt to remove with evidence, not as acceptable final-state documentation.
 
 ## Styling

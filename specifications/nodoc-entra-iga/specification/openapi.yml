@@ -5,7 +5,7 @@ info:
   description: |
     The Entra IGA (Identity Governance and Administration) API is used by the Microsoft
     Entra portal (entra.microsoft.com → Identity Governance) for managing entitlement
-    management, lifecycle workflows, and governance administration, including:
+    management and governance administration, including:
 
       - Entitlement Management (Access Packages, Catalogs, Policies)
       - Connected Organizations
@@ -19,6 +19,9 @@ info:
     Entra portal. Many Identity Governance features use Microsoft Graph APIs directly
     rather than this dedicated ELM API. This spec covers the non-Graph endpoints
     observed during portal interaction.
+
+    Graph-backed Identity Governance features such as Lifecycle Workflows are
+    intentionally excluded from this legacy ELM specification.
 
     Some endpoints may return 404 if the corresponding Entra ID Governance license
     feature has not been enabled for the tenant.
@@ -69,15 +72,11 @@ tags:
     description: External organization connections
   - name: Settings
     description: Identity Governance administration settings
-  - name: Lifecycle Workflows
-    description: Joiner/mover/leaver workflow automation
 x-tagGroups:
   - name: Governance administration
     tags: [Billing, Settings]
   - name: Entitlement management
     tags: [Entitlement Management, Connected Organizations]
-  - name: Lifecycle automation
-    tags: [Lifecycle Workflows]
 externalDocs:
   description: Checked-in source specification and supporting modules.
   url: https://github.com/nathanmcnulty/nodoc/tree/main/specifications/nodoc-entra-iga/specification
@@ -142,7 +141,12 @@ paths:
                     type: array
                     items:
                       type: object
-              example: {}
+              example:
+                value:
+                  - id: 0e69f959-bc56-4bf0-bf0a-20b9d674e9dc
+                    displayName: Contractors - CRM
+                    description: Temporary CRM access for external contractors.
+                    catalogId: 5a501947-3f03-4f4a-b3fb-6d7f9c7656d5
   /api/v1/accessPackages/{accessPackageId}:
     get:
       tags: [Entitlement Management]
@@ -179,6 +183,11 @@ paths:
                     type: array
                     items:
                       type: object
+              example:
+                value:
+                  - id: 5a501947-3f03-4f4a-b3fb-6d7f9c7656d5
+                    displayName: External collaboration
+                    description: Catalog for guest and partner access packages.
   /api/v1/catalogs/{catalogId}:
     get:
       tags: [Entitlement Management]
@@ -235,6 +244,11 @@ paths:
                     type: array
                     items:
                       type: object
+              example:
+                value:
+                  - id: 9d08f505-242b-4a80-9170-2644d4412b17
+                    displayName: Fabrikam
+                    description: Partner organization approved for entitlement requests.
   /api/v1/connectedOrganizations/{connectedOrganizationId}:
     get:
       tags: [Connected Organizations]
@@ -270,98 +284,6 @@ paths:
         Updates the global Identity Governance settings.
 
         **Warning:** This endpoint modifies tenant-level governance settings.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-      responses:
-        '200':
-          description: Settings updated
-  /api/v1/lifecycleWorkflows/workflows:
-    get:
-      tags: [Lifecycle Workflows]
-      summary: List lifecycle workflows
-      description: |
-        Retrieves lifecycle workflows configured for the tenant.
-        Workflows automate joiner, mover, and leaver processes.
-      parameters:
-        - $ref: '#/components/parameters/$filter'
-        - $ref: '#/components/parameters/$top'
-      responses:
-        '200':
-          description: List of lifecycle workflows
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  value:
-                    type: array
-                    items:
-                      type: object
-  /api/v1/lifecycleWorkflows/workflows/{workflowId}:
-    get:
-      tags: [Lifecycle Workflows]
-      summary: Get a specific lifecycle workflow
-      parameters:
-        - name: workflowId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        '200':
-          description: Workflow details
-  /api/v1/lifecycleWorkflows/taskDefinitions:
-    get:
-      tags: [Lifecycle Workflows]
-      summary: List available task definitions
-      description: |
-        Retrieves the built-in task definitions available for use in
-        lifecycle workflows. Tasks include actions like sending email,
-        adding to groups, enabling accounts, etc.
-      responses:
-        '200':
-          description: List of task definitions
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  value:
-                    type: array
-                    items:
-                      type: object
-  /api/v1/lifecycleWorkflows/customTaskExtensions:
-    get:
-      tags: [Lifecycle Workflows]
-      summary: List custom task extensions
-      description: |
-        Retrieves custom task extensions (Logic App integrations)
-        that can be used in lifecycle workflows.
-      responses:
-        '200':
-          description: List of custom task extensions
-  /api/v1/lifecycleWorkflows/settings:
-    get:
-      tags: [Lifecycle Workflows]
-      summary: Get lifecycle workflow settings
-      description: |
-        Retrieves the lifecycle workflow settings including
-        email notification configuration and processing schedule.
-      responses:
-        '200':
-          description: Lifecycle workflow settings
-    patch:
-      tags: [Lifecycle Workflows]
-      summary: Update lifecycle workflow settings
-      description: |
-        Updates lifecycle workflow settings.
-
-        **Warning:** This endpoint modifies workflow configuration.
       requestBody:
         required: true
         content:

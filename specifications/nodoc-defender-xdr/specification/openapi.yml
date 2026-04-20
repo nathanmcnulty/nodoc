@@ -213,6 +213,75 @@ externalDocs:
   description: Checked-in source specification and supporting modules.
   url: https://github.com/nathanmcnulty/nodoc/tree/main/specifications/nodoc-defender-xdr/specification
 
+x-nodoc-authProfiles:
+  defender-session-baseline:
+    description: Authenticated Defender XDR session baseline used across apiproxy calls, shell bootstrap, and same-origin portal helpers.
+    principalContext:
+      label: Global Admin
+      privilegeLevel: maximum-observed
+      notes:
+        - Observed with a Global Admin account holding broad administrative privileges.
+        - Effective permissions, token claims, and route access can vary for users with narrower roles.
+    cookies:
+      - name: sccauth
+        description: Defender XDR portal session cookie required for apiproxy and same-origin portal requests.
+        notes:
+          - Raw cookie values must never be stored in committed specs or generated ledgers.
+      - name: XSRF-TOKEN
+        description: Anti-forgery cookie paired with the X-XSRF-TOKEN request header on same-origin and multi-tenant Defender requests.
+        notes:
+          - The live portal URL-decodes this cookie into the X-XSRF-TOKEN request header when required.
+          - Raw cookie values must never be stored in committed specs or generated ledgers.
+    permissionSignals:
+      - name: shell-info
+        sourcePath: /shell/api/shell/shellinfo
+        notes:
+          - Shell bootstrap responses expose current portal configuration, user context, and enabled surfaces before feature blades fully hydrate.
+  defender-mto-tenant-context:
+    description: Tenant-selection and cross-tenant routing context reused by the Defender multi-tenant management portal.
+    principalContext:
+      label: Global Admin
+      privilegeLevel: maximum-observed
+      notes:
+        - Observed with a Global Admin account holding broad administrative privileges.
+        - Effective permissions and visible tenant scope can vary for users with narrower roles.
+    notes:
+      - MTO requests can depend on the Defender session plus an X-XSRF-TOKEN header and mtoproxyurl=MTO routing hint.
+    permissionSignals:
+      - name: tenant-picker
+        sourcePath: /mtoapi/tenants/TenantPicker
+        notes:
+          - Tenant picker responses enumerate the accessible tenant set and effective selection context for the signed-in operator.
+      - name: effective-tenant-group
+        sourcePath: /mtoapi/tenantGroups/effective/
+        notes:
+          - Effective tenant-group responses show which managed-tenant grouping the current operator is actively scoped to across MTO experiences.
+      - name: tenant-context-bootstrap
+        sourcePath: /mtoapi/mtp/sccManagement/mgmt/TenantContext
+        notes:
+          - Tenant-context bootstrap responses expose the selected tenant, workload state, and MTO execution metadata used before downstream pages load.
+  defender-copilot-entitlement:
+    description: Security Copilot entitlement and readiness checks surfaced through Defender portal service helpers.
+    principalContext:
+      label: Global Admin
+      privilegeLevel: maximum-observed
+      notes:
+        - Observed with a Global Admin account holding broad administrative privileges.
+        - Effective permissions and surfaced Copilot features can vary for users with narrower roles.
+    permissionSignals:
+      - name: medeina-auth
+        sourcePath: /medeina/auth
+        notes:
+          - Medeina auth responses indicate whether Security Copilot authentication and startup prerequisites are satisfied for the current session.
+      - name: security-copilot-trial
+        sourcePath: /cdssecuritycopilot/trial
+        notes:
+          - Trial responses expose tenant-level onboarding and entitlement state for Security Copilot experiences.
+      - name: mto-security-copilot-trial
+        sourcePath: /mtoapi/cdssecuritycopilot/trial
+        notes:
+          - The MTO wrapper probes Security Copilot readiness from multi-tenant hunting and detection experiences and can return contextual proxy-prefix validation errors.
+
 paths:
   # Alerts & Incidents
   /mtp/alertsApiService/alerts:
@@ -242,6 +311,22 @@ paths:
     $ref: alerts_incidents.yml#/paths/~1mtp~1incidents~1{IncidentId}~1outbreaks
   /mtp/incidents/{IncidentId}/riskfactors:
     $ref: alerts_incidents.yml#/paths/~1mtp~1incidents~1{IncidentId}~1riskfactors
+  /mtp/auditHistory/AuditHistory:
+    $ref: alerts_incidents.yml#/paths/~1mtp~1auditHistory~1AuditHistory
+  /mtp/incidentDevices/incidents/{IncidentId}/devices:
+    $ref: alerts_incidents.yml#/paths/~1mtp~1incidentDevices~1incidents~1{IncidentId}~1devices
+  /mtp/incidentUsers/incidents/{IncidentId}/users:
+    $ref: alerts_incidents.yml#/paths/~1mtp~1incidentUsers~1incidents~1{IncidentId}~1users
+  /mtp/useServiceBaseUrl/ine/incidentgraphservice/incidentGraph/{IncidentId}:
+    $ref: alerts_incidents.yml#/paths/~1mtp~1useServiceBaseUrl~1ine~1incidentgraphservice~1incidentGraph~1{IncidentId}
+  /mtp/useServiceBaseUrl/ine/evidenceapiservice/evidence/incident/{IncidentId}:
+    $ref: alerts_incidents.yml#/paths/~1mtp~1useServiceBaseUrl~1ine~1evidenceapiservice~1evidence~1incident~1{IncidentId}
+  /mtp/useServiceBaseUrl/ine/evidenceapiservice/evidence/incident/{IncidentId}/count:
+    $ref: alerts_incidents.yml#/paths/~1mtp~1useServiceBaseUrl~1ine~1evidenceapiservice~1evidence~1incident~1{IncidentId}~1count
+  /mtp/phoenixSocomatApi/activity/list/{IncidentId}:
+    $ref: alerts_incidents.yml#/paths/~1mtp~1phoenixSocomatApi~1activity~1list~1{IncidentId}
+  /mtp/unifiedActions/unifiedactions/Activities/{IncidentId}:
+    $ref: alerts_incidents.yml#/paths/~1mtp~1unifiedActions~1unifiedactions~1Activities~1{IncidentId}
   /mtp/incidents/dsiMessageBarIndicators:
     $ref: alerts_incidents.yml#/paths/~1mtp~1incidents~1dsiMessageBarIndicators
   /mtp/CaseManagement/be/cases:
@@ -804,6 +889,8 @@ paths:
   # Configuration
   /mtp/suppressionRulesService/suppressionRules:
     $ref: configuration.yml#/paths/~1mtp~1suppressionRulesService~1suppressionRules
+  /mtp/suppressionRulesService/suppressionRules/builtInRulesHash:
+    $ref: configuration.yml#/paths/~1mtp~1suppressionRulesService~1suppressionRules~1builtInRulesHash
   /mtp/alertsApiService/workloads/disabled:
     $ref: configuration.yml#/paths/~1mtp~1alertsApiService~1workloads~1disabled
   /mtp/ndr/rulesengine/rules:
@@ -887,6 +974,8 @@ paths:
     $ref: configuration.yml#/paths/~1mtp~1autoIr~1ui~1properties
   /mtp/wdatpInternalApi/compliance/alertSharing/status:
     $ref: configuration.yml#/paths/~1mtp~1wdatpInternalApi~1compliance~1alertSharing~1status
+  /mtp/wdatpApi/dataexportsettings:
+    $ref: configuration.yml#/paths/~1mtp~1wdatpApi~1dataexportsettings
   /mtp/responseApiPortal/onboarding/intune/status:
     $ref: configuration.yml#/paths/~1mtp~1responseApiPortal~1onboarding~1intune~1status
   /mtp/responseApiPortal/senseauth/allownonauthsense:
@@ -1196,6 +1285,8 @@ paths:
     $ref: data_lake.yml#/paths/~1securityplatform~1sentinelgraph~1catalog~1tables
 
   # Sentinel Precision
+  /apiproxy/arm/subscriptions:
+    $ref: sentinel_precision.yml#/paths/~1apiproxy~1arm~1subscriptions
   /apiproxy/arm/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/overview:
     $ref: sentinel_precision.yml#/paths/~1apiproxy~1arm~1subscriptions~1{subscriptionId}~1resourceGroups~1{resourceGroupName}~1providers~1Microsoft.OperationalInsights~1workspaces~1{workspaceName}~1providers~1Microsoft.SecurityInsights~1overview
   /apiproxy/arm/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/recommendations:

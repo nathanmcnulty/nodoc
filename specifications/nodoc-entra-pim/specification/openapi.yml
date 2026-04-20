@@ -321,7 +321,7 @@ paths:
       summary: List role assignment requests
       description: |
         Retrieves role assignment requests (activations, assignments, removals)
-        for the specified provider. Includes pending, approved, denied, and
+        for the specified provider. Includes submitted, approved, denied, and
         completed requests.
       parameters:
         - $ref: '#/components/parameters/provider'
@@ -341,6 +341,20 @@ paths:
                     type: array
                     items:
                       type: object
+              example:
+                value:
+                  - id: 7b3b4f66-5879-4d9d-9a0d-e9b49c718615
+                    resourceId: 847b5907-ca15-40f4-b171-eb18619dbfab
+                    roleDefinitionId: 62e90394-69f5-4237-9190-012177145e10
+                    subjectId: ab69ffc3-e508-4f8e-af8b-8d626d6764c9
+                    assignmentState: Eligible
+                    status: Provisioned
+                    type: AdminAdd
+                    reason: Breakglass renewal
+                    schedule:
+                      type: Once
+                      startDateTime: '2026-02-01T08:00:00Z'
+                      endDateTime: '2026-02-01T16:00:00Z'
     post:
       tags: [Role Assignment Requests]
       summary: Create a role assignment request
@@ -400,7 +414,7 @@ paths:
   /api/v2/privilegedAccess/{provider}/roleAssignmentRequests/{requestId}/cancel:
     post:
       tags: [Role Assignment Requests]
-      summary: Cancel a pending role assignment request
+      summary: Cancel a submitted role assignment request
       parameters:
         - $ref: '#/components/parameters/provider'
         - name: requestId

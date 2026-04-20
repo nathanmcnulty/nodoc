@@ -11,6 +11,7 @@ info:
     Edge session. They were observed during startup and while navigating blades such as:
 
       - Home and solution launcher
+      - Data Security Investigations
       - Agents, Learn, and Usage center
       - Compliance Manager
       - eDiscovery
@@ -74,6 +75,13 @@ components:
           type: integer
           description: Remaining token lifetime observed in portal responses.
           example: 4255
+    PurviewPortalSpaAuthCodeResponse:
+      type: string
+      nullable: true
+      description: |
+        Plain-text SPA auth helper response observed during same-origin Purview shell bootstrap.
+        The captured tenant returned an empty string with HTTP 200.
+      example: ""
     PurviewPortalRoleCheckRequest:
       type: array
       description: |
@@ -214,6 +222,74 @@ externalDocs:
   description: Checked-in source specification and supporting modules.
   url: https://github.com/nathanmcnulty/nodoc/tree/main/specifications/nodoc-purview-portal/specification
 
+x-nodoc-authProfiles:
+  purview-portal-session-baseline:
+    description: Authenticated Purview portal session baseline used by same-origin bootstrap, auth helpers, and related proxy calls.
+    principalContext:
+      label: Global Admin
+      privilegeLevel: maximum-observed
+      notes:
+        - Observed with a Global Admin account holding broad administrative privileges.
+        - Effective permissions, token claims, and route access can vary for users with narrower roles.
+    cookies:
+      - name: sccauth
+        description: Purview portal session cookie required for same-origin portal and related proxy requests.
+        notes:
+          - Raw cookie values must never be stored in committed specs or generated ledgers.
+  purview-portal-downstream-token-broker:
+    description: Downstream token minting flow exposed by the Purview same-origin portal.
+    principalContext:
+      label: Global Admin
+      privilegeLevel: maximum-observed
+      notes:
+        - Observed with a Global Admin account holding broad administrative privileges.
+        - The returned claims and effective permissions can differ for narrower admin roles.
+    tokens:
+      - name: downstream-access-token
+        description: Short-lived access token minted by the portal for Purview-adjacent services and external control planes.
+        tokenType: jwt
+        carrier: response-body
+        audiences:
+          - https://api.purview-service.microsoft.com
+          - https://management.azure.com/
+          - https://graph.microsoft.com/
+        claims:
+          - name: aud
+            values:
+              - https://api.purview-service.microsoft.com
+              - https://management.azure.com/
+              - https://graph.microsoft.com/
+            notes:
+              - Returned audience varies with the requested resource and current portal workflow.
+        notes:
+          - Capture decoded claims such as aud, scp, roles, tid, oid, appid, azp, and expiry for security review without storing the raw token.
+    brokerFlows:
+      - name: purview-portal-get-token
+        sourcePath: /api/Auth/getToken
+        targetResources:
+          - https://api.purview-service.microsoft.com
+          - https://management.azure.com/
+          - https://graph.microsoft.com/
+        notes:
+          - The same-origin portal mints short-lived resource-specific tokens during startup and solution navigation.
+  purview-portal-role-evaluation:
+    description: Same-origin role and feature evaluation helpers used during Purview startup and solution transitions.
+    principalContext:
+      label: Global Admin
+      privilegeLevel: maximum-observed
+      notes:
+        - Observed with a Global Admin account holding broad administrative privileges.
+        - Effective permissions, token claims, and route access can vary for users with narrower roles.
+    permissionSignals:
+      - name: cached-roles
+        sourcePath: /api/v2/auth/GetCachedRoles
+        notes:
+          - Cached role data can include permissions, service plans, and feature-flight state for the current portal session.
+      - name: is-in-roles
+        sourcePath: /api/auth/IsInRoles
+        notes:
+          - Batch role evaluation responses show which requested permissions or features are available to the current portal session.
+
 paths:
   /api/Auth/getToken:
     get:
@@ -240,6 +316,34 @@ paths:
           schema:
             type: string
             example: 73c2949e-da2d-457a-9607-fcc665198967
+      x-nodoc-operation-context:
+        surface: Portal shell
+        workflows:
+          - Load startup or switch Purview solutions that require a downstream resource token.
+        authProfile: purview-portal-downstream-token-broker
+        requestShapes:
+          - name: downstream-resource-token
+            bodyKind: none
+            requiredParameters:
+              - resource
+            notes: Optional serviceType values further scope the requested token for specific portal services.
+        variants:
+          - location: query
+            selector: resource
+            knownValues:
+              - https://api.purview-service.microsoft.com
+              - https://management.azure.com/
+              - https://graph.microsoft.com/
+            notes: The returned token shape and claims vary with the requested resource.
+        availability:
+          level: request-dependent
+          notes:
+            - The portal only requests downstream tokens when a solution or helper needs access to a specific resource.
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Verified during startup and solution navigation flows in a signed-in Purview portal session.
       responses:
         '200':
           description: Downstream token minted successfully.
@@ -249,6 +353,41 @@ paths:
                 $ref: '#/components/schemas/PurviewPortalTokenResponse'
         '400':
           $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/Auth/getSpaAuthCode:
+    get:
+      tags: [Auth]
+      summary: Get the SPA auth helper value
+      description: |
+        Returns the same-origin SPA auth helper value used while bootstrapping the Purview home shell,
+        solution launcher, and Data Security Investigations experience.
+        The captured responses were `text/plain` HTTP 200 with an empty string body.
+      operationId: PurviewPortal.Auth.GetSpaAuthCode
+      x-nodoc-operation-context:
+        surface: Portal shell
+        workflows:
+          - Load the Purview home shell, solution launcher, or Data Security Investigations landing page.
+        authProfile: purview-portal-session-baseline
+        availability:
+          level: request-dependent
+          notes:
+            - The route appeared during home and same-origin solution navigation rather than every portal interaction.
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Verified from authenticated home, solution-launcher, and Data Security Investigations navigation in the Purview portal.
+      responses:
+        '200':
+          description: SPA auth helper returned successfully.
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/PurviewPortalSpaAuthCodeResponse'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -269,6 +408,20 @@ paths:
           description: Force the portal to refresh its cached role state before returning it.
           schema:
             type: boolean
+      x-nodoc-operation-context:
+        surface: Portal shell
+        workflows:
+          - Load startup or switch Purview solutions so cached permissions and feature flights can be evaluated.
+        authProfile: purview-portal-role-evaluation
+        availability:
+          level: user-context
+          notes:
+            - Returned role and feature state is specific to the signed-in principal and current tenant.
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Verified during startup and solution transitions in a signed-in Purview portal session.
       responses:
         '200':
           description: Cached roles returned successfully.
@@ -297,6 +450,25 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/PurviewPortalRoleCheckRequest'
+      x-nodoc-operation-context:
+        surface: Portal shell
+        workflows:
+          - Load startup or switch Purview solutions so the portal can batch-check role, permission, and feature availability.
+        authProfile: purview-portal-role-evaluation
+        requestShapes:
+          - name: role-or-feature-batch
+            contentType: application/json
+            bodyKind: string-array
+            notes: The portal posts an ordered list of permission, role, or feature identifiers and receives positional boolean results.
+        availability:
+          level: user-context
+          notes:
+            - Evaluation results are specific to the signed-in principal and current tenant.
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Verified during startup and solution transitions in a signed-in Purview portal session.
       responses:
         '200':
           description: Role evaluation completed successfully.

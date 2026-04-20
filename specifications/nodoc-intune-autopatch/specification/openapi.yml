@@ -1874,6 +1874,10 @@ paths:
       description: |
         Returns Windows Autopatch feature flags and rollout toggles used across tenant
         administration blades. Confirmed live across every Windows Autopatch-related blade.
+      x-nodoc-live-capture:
+        source: "authenticated Intune admin center"
+        browsedPages:
+          - "https://intune.microsoft.com/#view/Microsoft_Intune_Enrollment/ReportingMenu/~/windowsQualityUpdatesReactView"
       operationId: IntuneAutopatch.Platform.GetFlighting
       responses:
         '200':
@@ -2298,6 +2302,10 @@ paths:
       description: |
         Returns the baseline Windows quality update summary rows grouped by business group for
         `windowsQualityUpdatesReactView`. Confirmed live on the report blade's initial load.
+      x-nodoc-live-capture:
+        source: "authenticated Intune admin center"
+        browsedPages:
+          - "https://intune.microsoft.com/#view/Microsoft_Intune_Enrollment/ReportingMenu/~/windowsQualityUpdatesReactView"
       operationId: IntuneAutopatch.Reporting.ListQualityUpdateBusinessGroups
       parameters:
         - $ref: '#/components/parameters/reportApiVersion2'
@@ -2349,6 +2357,10 @@ paths:
       description: |
         Returns Windows quality update count buckets used by the summary cards on
         `windowsQualityUpdatesReactView`. Confirmed live on the report blade's initial load.
+      x-nodoc-live-capture:
+        source: "authenticated Intune admin center"
+        browsedPages:
+          - "https://intune.microsoft.com/#view/Microsoft_Intune_Enrollment/ReportingMenu/~/windowsQualityUpdatesReactView"
       operationId: IntuneAutopatch.Reporting.GetQualityUpdateSummaryMetrics
       parameters:
         - $ref: '#/components/parameters/reportApiVersion2'
@@ -2384,6 +2396,10 @@ paths:
       description: |
         Returns Windows quality update trend buckets for durations such as `Trend30To0d`.
         Confirmed live on the report blade's initial load.
+      x-nodoc-live-capture:
+        source: "authenticated Intune admin center"
+        browsedPages:
+          - "https://intune.microsoft.com/#view/Microsoft_Intune_Enrollment/ReportingMenu/~/windowsQualityUpdatesReactView"
       operationId: IntuneAutopatch.Reporting.ListQualityUpdateTrending
       parameters:
         - $ref: '#/components/parameters/reportApiVersion2'

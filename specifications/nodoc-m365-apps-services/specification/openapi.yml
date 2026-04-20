@@ -52,13 +52,25 @@ components:
     featureFilter:
       name: $filter
       in: query
-      description: OData filter used to scope feature provisioning records.
+      description: OData filter used to scope onboarding, agreement, or feature provisioning records.
       schema:
         type: string
   schemas:
     GenericObject:
       type: object
       additionalProperties: true
+    AgreementResponse:
+      type: object
+      properties:
+        '@odata.context':
+          type: string
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/GenericObject'
+      required:
+        - '@odata.context'
+        - value
     EligibilityRecord:
       type: object
       properties:
@@ -278,6 +290,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EligibilityRecord'
+  /onboarding/odata/v1.0/Agreementdata:
+    get:
+      tags: [Onboarding]
+      summary: List feature-ring agreement records
+      description: |
+        Returns agreement records that gate preview or ring-based onboarding
+        experiences. The observed live request filtered the collection with
+        `$filter=FeatureRing eq 'Preview'` and returned an empty `value` array
+        for the current tenant.
+      parameters:
+        - $ref: '#/components/parameters/featureFilter'
+      responses:
+        '200':
+          description: Agreement records
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgreementResponse'
   /onboarding/odata/v1.0/FeatureData:
     get:
       tags: [Onboarding]

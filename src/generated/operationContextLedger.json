@@ -1,5 +1,302 @@
 [
   {
+    "title": "Defender",
+    "specId": "defender-xdr",
+    "specPath": "specifications/nodoc-defender-xdr/specification/openapi.yml",
+    "nodocRoute": null,
+    "nodocCategory": null,
+    "headerProfiles": {},
+    "authProfiles": {
+      "defender-session-baseline": {
+        "description": "Authenticated Defender XDR session baseline used across apiproxy calls, shell bootstrap, and same-origin portal helpers.",
+        "principalContext": {
+          "label": "Global Admin",
+          "privilegeLevel": "maximum-observed",
+          "notes": [
+            "Observed with a Global Admin account holding broad administrative privileges.",
+            "Effective permissions, token claims, and route access can vary for users with narrower roles."
+          ]
+        },
+        "cookies": [
+          {
+            "name": "sccauth",
+            "description": "Defender XDR portal session cookie required for apiproxy and same-origin portal requests.",
+            "notes": [
+              "Raw cookie values must never be stored in committed specs or generated ledgers."
+            ]
+          },
+          {
+            "name": "XSRF-TOKEN",
+            "description": "Anti-forgery cookie paired with the X-XSRF-TOKEN request header on same-origin and multi-tenant Defender requests.",
+            "notes": [
+              "The live portal URL-decodes this cookie into the X-XSRF-TOKEN request header when required.",
+              "Raw cookie values must never be stored in committed specs or generated ledgers."
+            ]
+          }
+        ],
+        "permissionSignals": [
+          {
+            "name": "shell-info",
+            "sourcePath": "/shell/api/shell/shellinfo",
+            "notes": [
+              "Shell bootstrap responses expose current portal configuration, user context, and enabled surfaces before feature blades fully hydrate."
+            ]
+          }
+        ]
+      },
+      "defender-mto-tenant-context": {
+        "description": "Tenant-selection and cross-tenant routing context reused by the Defender multi-tenant management portal.",
+        "notes": [
+          "MTO requests can depend on the Defender session plus an X-XSRF-TOKEN header and mtoproxyurl=MTO routing hint."
+        ],
+        "principalContext": {
+          "label": "Global Admin",
+          "privilegeLevel": "maximum-observed",
+          "notes": [
+            "Observed with a Global Admin account holding broad administrative privileges.",
+            "Effective permissions and visible tenant scope can vary for users with narrower roles."
+          ]
+        },
+        "permissionSignals": [
+          {
+            "name": "tenant-picker",
+            "sourcePath": "/mtoapi/tenants/TenantPicker",
+            "notes": [
+              "Tenant picker responses enumerate the accessible tenant set and effective selection context for the signed-in operator."
+            ]
+          },
+          {
+            "name": "effective-tenant-group",
+            "sourcePath": "/mtoapi/tenantGroups/effective/",
+            "notes": [
+              "Effective tenant-group responses show which managed-tenant grouping the current operator is actively scoped to across MTO experiences."
+            ]
+          },
+          {
+            "name": "tenant-context-bootstrap",
+            "sourcePath": "/mtoapi/mtp/sccManagement/mgmt/TenantContext",
+            "notes": [
+              "Tenant-context bootstrap responses expose the selected tenant, workload state, and MTO execution metadata used before downstream pages load."
+            ]
+          }
+        ]
+      },
+      "defender-copilot-entitlement": {
+        "description": "Security Copilot entitlement and readiness checks surfaced through Defender portal service helpers.",
+        "principalContext": {
+          "label": "Global Admin",
+          "privilegeLevel": "maximum-observed",
+          "notes": [
+            "Observed with a Global Admin account holding broad administrative privileges.",
+            "Effective permissions and surfaced Copilot features can vary for users with narrower roles."
+          ]
+        },
+        "permissionSignals": [
+          {
+            "name": "medeina-auth",
+            "sourcePath": "/medeina/auth",
+            "notes": [
+              "Medeina auth responses indicate whether Security Copilot authentication and startup prerequisites are satisfied for the current session."
+            ]
+          },
+          {
+            "name": "security-copilot-trial",
+            "sourcePath": "/cdssecuritycopilot/trial",
+            "notes": [
+              "Trial responses expose tenant-level onboarding and entitlement state for Security Copilot experiences."
+            ]
+          },
+          {
+            "name": "mto-security-copilot-trial",
+            "sourcePath": "/mtoapi/cdssecuritycopilot/trial",
+            "notes": [
+              "The MTO wrapper probes Security Copilot readiness from multi-tenant hunting and detection experiences and can return contextual proxy-prefix validation errors."
+            ]
+          }
+        ]
+      }
+    },
+    "operations": [
+      {
+        "operationId": "MultiTenant.ListTenants",
+        "summary": "Get MTO tenant picker",
+        "method": "GET",
+        "path": "/mtoapi/tenants/TenantPicker",
+        "operationContext": {
+          "surface": "Multi-tenant shell",
+          "workflows": [
+            "Open the Defender multi-tenant homepage or switch MTO incidents, hunting, identity, or administration views."
+          ],
+          "authProfile": "defender-mto-tenant-context",
+          "availability": {
+            "level": "user-context",
+            "notes": [
+              "Returned tenant choices and the effective selection depend on the signed-in operator and available MTO scope."
+            ]
+          },
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Confirmed in live traffic from the MTO homepage, incidents, hunting, identity inventory, and administration pages."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "MultiTenant.GetEffectiveTenantGroup",
+        "summary": "Get effective tenant group",
+        "method": "GET",
+        "path": "/mtoapi/tenantGroups/effective/",
+        "operationContext": {
+          "surface": "Multi-tenant shell",
+          "workflows": [
+            "Open or switch MTO homepage, incidents, hunting, cases, identity inventory, content distribution, tenant groups, or unified RBAC views."
+          ],
+          "authProfile": "defender-mto-tenant-context",
+          "availability": {
+            "level": "user-context",
+            "notes": [
+              "Effective tenant-group state depends on the signed-in operator and the current managed-tenant selection."
+            ]
+          },
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Confirmed in live traffic across the MTO homepage, incidents, hunting, cases, identity inventory, content distribution, tenant groups, and unified RBAC pages."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "MultiTenant.GetTenantContext",
+        "summary": "Get MTO tenant context",
+        "method": "GET",
+        "path": "/mtoapi/mtp/sccManagement/mgmt/TenantContext",
+        "operationContext": {
+          "surface": "Multi-tenant shell",
+          "workflows": [
+            "Load MTO pages that need the selected tenant bootstrap before rendering cross-tenant Defender data."
+          ],
+          "authProfile": "defender-mto-tenant-context",
+          "requestShapes": [
+            {
+              "name": "cached-or-realtime-bootstrap",
+              "bodyKind": "none",
+              "notes": "Use the realTime flag when the portal needs an uncached tenant bootstrap refresh."
+            }
+          ],
+          "availability": {
+            "level": "user-context",
+            "notes": [
+              "Returned tenant bootstrap state depends on the current MTO selection and the operator's allowed tenant scope."
+            ]
+          }
+        }
+      },
+      {
+        "operationId": "MultiTenant.GetSecurityCopilotTrial",
+        "summary": "Get MTO Security Copilot trial status",
+        "method": "GET",
+        "path": "/mtoapi/cdssecuritycopilot/trial",
+        "operationContext": {
+          "surface": "Multi-tenant Security Copilot entrypoint",
+          "workflows": [
+            "Open MTO Advanced hunting or Custom detection experiences that probe Security Copilot readiness."
+          ],
+          "authProfile": "defender-copilot-entitlement",
+          "requestShapes": [
+            {
+              "name": "scoped-trial-probe",
+              "bodyKind": "none",
+              "requiredParameters": [
+                "scope"
+              ],
+              "notes": "The portal submits an access-scope query value while checking multi-tenant Security Copilot readiness."
+            }
+          ],
+          "availability": {
+            "level": "tenant-conditional",
+            "notes": [
+              "Trial readiness depends on tenant onboarding, current scope, and whether the MTO wrapper accepts the requested proxy prefix."
+            ]
+          },
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "medium",
+              "notes": [
+                "Live traffic in the current tenant returned a contextual 400 InvalidProxyPrefix response, confirming the probe path and parameter shape."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "PortalServices.GetShellInfo",
+        "summary": "Get shell info",
+        "method": "GET",
+        "path": "/shell/api/shell/shellinfo",
+        "operationContext": {
+          "surface": "Portal shell",
+          "workflows": [
+            "Load or refresh the Defender XDR shell before feature blades and cross-solution entry points fully hydrate."
+          ],
+          "authProfile": "defender-session-baseline",
+          "availability": {
+            "level": "user-context",
+            "notes": [
+              "Returned shell state reflects the signed-in operator, current tenant, and enabled Defender surfaces."
+            ]
+          }
+        }
+      },
+      {
+        "operationId": "PortalServices.GetMedeinaAuth",
+        "summary": "Get Medeina (Copilot) auth",
+        "method": "GET",
+        "path": "/medeina/auth",
+        "operationContext": {
+          "surface": "Security Copilot entrypoint",
+          "workflows": [
+            "Open Security Copilot entry points or related Defender experiences that check Copilot readiness."
+          ],
+          "authProfile": "defender-copilot-entitlement",
+          "availability": {
+            "level": "tenant-conditional",
+            "notes": [
+              "Returned auth and readiness state depends on tenant enablement and the signed-in operator."
+            ]
+          }
+        }
+      },
+      {
+        "operationId": "PortalServices.GetSecurityCopilotTrial",
+        "summary": "Get Security Copilot trial status",
+        "method": "GET",
+        "path": "/cdssecuritycopilot/trial",
+        "operationContext": {
+          "surface": "Security Copilot entrypoint",
+          "workflows": [
+            "Load trial, onboarding, or entitlement UX for Security Copilot from the Defender portal."
+          ],
+          "authProfile": "defender-copilot-entitlement",
+          "availability": {
+            "level": "tenant-conditional",
+            "notes": [
+              "Trial state is specific to the current tenant and may be absent where Security Copilot onboarding is disabled."
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
     "title": "M365 Admin",
     "specId": "m365-admin",
     "specPath": "specifications/nodoc-m365-admin/specification/openapi.yml",
@@ -324,6 +621,111 @@
         ]
       }
     },
+    "authProfiles": {
+      "m365-admin-session-baseline": {
+        "description": "Authenticated admin-shell session baseline used to bootstrap same-origin M365 Admin requests and broker downstream access.",
+        "principalContext": {
+          "label": "Global Admin",
+          "privilegeLevel": "maximum-observed",
+          "notes": [
+            "Observed with a Global Admin account holding broad administrative privileges.",
+            "Effective permissions, token claims, and route access can vary for users with narrower roles."
+          ]
+        },
+        "cookies": [
+          {
+            "name": "AjaxSessionKey",
+            "description": "Session cookie required for same-origin admin-shell requests.",
+            "notes": [
+              "Raw cookie values must never be stored in committed specs or generated ledgers."
+            ]
+          }
+        ]
+      },
+      "m365-admin-brokered-arm-token": {
+        "description": "Downstream resource token brokered by the admin portal for Azure-backed helpers and related experiences.",
+        "principalContext": {
+          "label": "Global Admin",
+          "privilegeLevel": "maximum-observed",
+          "notes": [
+            "Observed with a Global Admin account holding broad administrative privileges.",
+            "The returned claims and effective permissions can differ for narrower admin roles."
+          ]
+        },
+        "tokens": [
+          {
+            "name": "downstream-arm-access-token",
+            "description": "JWT access token returned by the admin portal token broker.",
+            "tokenType": "jwt",
+            "carrier": "response-body",
+            "audiences": [
+              "https://management.azure.com/"
+            ],
+            "claims": [
+              {
+                "name": "aud",
+                "values": [
+                  "https://management.azure.com/"
+                ],
+                "notes": [
+                  "The returned audience depends on the requested resource value submitted to the token broker."
+                ]
+              }
+            ],
+            "notes": [
+              "Capture decoded claims such as scp, roles, tid, oid, appid, azp, and expiry for security review without storing the raw token."
+            ]
+          }
+        ],
+        "brokerFlows": [
+          {
+            "name": "users-token-with-expiry",
+            "sourcePath": "/admin/api/users/tokenWithExpiry",
+            "targetResources": [
+              "https://management.azure.com/"
+            ],
+            "notes": [
+              "The live portal posts the requested downstream audience as an unnamed form value and receives a token plus expiry metadata."
+            ]
+          }
+        ]
+      },
+      "m365-admin-brand-center-spo-token": {
+        "description": "SharePoint-targeted bearer token observed on Brand center helper requests.",
+        "principalContext": {
+          "label": "Global Admin",
+          "privilegeLevel": "maximum-observed",
+          "notes": [
+            "Observed with a Global Admin account holding broad administrative privileges.",
+            "Effective permissions, token claims, and route access can vary for users with narrower roles."
+          ]
+        },
+        "tokens": [
+          {
+            "name": "brand-center-sharepoint-token",
+            "description": "Bearer token supplied on SharePoint-backed Brand center requests.",
+            "tokenType": "jwt",
+            "carrier": "authorization-header",
+            "audiences": [
+              "https://{tenant}.sharepoint.com"
+            ],
+            "notes": [
+              "Treat tenant-specific audiences and decoded claims as observed auth evidence rather than stable public examples.",
+              "Do not store the raw Authorization header or token string."
+            ]
+          }
+        ],
+        "permissionSignals": [
+          {
+            "name": "brand-center-configuration",
+            "sourcePath": "/_api/spo.tenant/GetBrandCenterConfiguration",
+            "notes": [
+              "SharePoint-backed helper responses expose whether Brand center is configured, tenant-gated, or empty for the current tenant."
+            ]
+          }
+        ]
+      }
+    },
     "operations": [
       {
         "operationId": "Agents.GetFrontierAccess",
@@ -451,6 +853,7 @@
             "Open Org settings, then Services, then Brand center."
           ],
           "headerProfile": "m365-admin-brand-center",
+          "authProfile": "m365-admin-brand-center-spo-token",
           "availability": {
             "level": "tenant-conditional",
             "notes": [
@@ -486,6 +889,7 @@
             "Open Org settings, then Services, then Brand center."
           ],
           "headerProfile": "m365-admin-brand-center",
+          "authProfile": "m365-admin-brand-center-spo-token",
           "requestShapes": [
             {
               "name": "brand-center-site-url",
@@ -971,6 +1375,7 @@
             "Open an experience that needs a downstream resource token from the admin portal."
           ],
           "headerProfile": "m365-admin-homepage",
+          "authProfile": "m365-admin-brokered-arm-token",
           "requestShapes": [
             {
               "name": "downstream-audience-token",
@@ -1752,6 +2157,261 @@
               "confidence": "high",
               "notes": [
                 "Verified from authenticated Power Platform environment-hub browsing on the Power Pages blade."
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "title": "Purview Portal",
+    "specId": "purview-portal",
+    "specPath": "specifications/nodoc-purview-portal/specification/openapi.yml",
+    "nodocRoute": null,
+    "nodocCategory": "Purview",
+    "headerProfiles": {},
+    "authProfiles": {
+      "purview-portal-session-baseline": {
+        "description": "Authenticated Purview portal session baseline used by same-origin bootstrap, auth helpers, and related proxy calls.",
+        "principalContext": {
+          "label": "Global Admin",
+          "privilegeLevel": "maximum-observed",
+          "notes": [
+            "Observed with a Global Admin account holding broad administrative privileges.",
+            "Effective permissions, token claims, and route access can vary for users with narrower roles."
+          ]
+        },
+        "cookies": [
+          {
+            "name": "sccauth",
+            "description": "Purview portal session cookie required for same-origin portal and related proxy requests.",
+            "notes": [
+              "Raw cookie values must never be stored in committed specs or generated ledgers."
+            ]
+          }
+        ]
+      },
+      "purview-portal-downstream-token-broker": {
+        "description": "Downstream token minting flow exposed by the Purview same-origin portal.",
+        "principalContext": {
+          "label": "Global Admin",
+          "privilegeLevel": "maximum-observed",
+          "notes": [
+            "Observed with a Global Admin account holding broad administrative privileges.",
+            "The returned claims and effective permissions can differ for narrower admin roles."
+          ]
+        },
+        "tokens": [
+          {
+            "name": "downstream-access-token",
+            "description": "Short-lived access token minted by the portal for Purview-adjacent services and external control planes.",
+            "tokenType": "jwt",
+            "carrier": "response-body",
+            "audiences": [
+              "https://api.purview-service.microsoft.com",
+              "https://management.azure.com/",
+              "https://graph.microsoft.com/"
+            ],
+            "claims": [
+              {
+                "name": "aud",
+                "values": [
+                  "https://api.purview-service.microsoft.com",
+                  "https://management.azure.com/",
+                  "https://graph.microsoft.com/"
+                ],
+                "notes": [
+                  "Returned audience varies with the requested resource and current portal workflow."
+                ]
+              }
+            ],
+            "notes": [
+              "Capture decoded claims such as aud, scp, roles, tid, oid, appid, azp, and expiry for security review without storing the raw token."
+            ]
+          }
+        ],
+        "brokerFlows": [
+          {
+            "name": "purview-portal-get-token",
+            "sourcePath": "/api/Auth/getToken",
+            "targetResources": [
+              "https://api.purview-service.microsoft.com",
+              "https://management.azure.com/",
+              "https://graph.microsoft.com/"
+            ],
+            "notes": [
+              "The same-origin portal mints short-lived resource-specific tokens during startup and solution navigation."
+            ]
+          }
+        ]
+      },
+      "purview-portal-role-evaluation": {
+        "description": "Same-origin role and feature evaluation helpers used during Purview startup and solution transitions.",
+        "principalContext": {
+          "label": "Global Admin",
+          "privilegeLevel": "maximum-observed",
+          "notes": [
+            "Observed with a Global Admin account holding broad administrative privileges.",
+            "Effective permissions, token claims, and route access can vary for users with narrower roles."
+          ]
+        },
+        "permissionSignals": [
+          {
+            "name": "cached-roles",
+            "sourcePath": "/api/v2/auth/GetCachedRoles",
+            "notes": [
+              "Cached role data can include permissions, service plans, and feature-flight state for the current portal session."
+            ]
+          },
+          {
+            "name": "is-in-roles",
+            "sourcePath": "/api/auth/IsInRoles",
+            "notes": [
+              "Batch role evaluation responses show which requested permissions or features are available to the current portal session."
+            ]
+          }
+        ]
+      }
+    },
+    "operations": [
+      {
+        "operationId": "PurviewPortal.Auth.GetToken",
+        "summary": "Mint a downstream bearer token",
+        "method": "GET",
+        "path": "/api/Auth/getToken",
+        "operationContext": {
+          "surface": "Portal shell",
+          "workflows": [
+            "Load startup or switch Purview solutions that require a downstream resource token."
+          ],
+          "authProfile": "purview-portal-downstream-token-broker",
+          "requestShapes": [
+            {
+              "name": "downstream-resource-token",
+              "bodyKind": "none",
+              "requiredParameters": [
+                "resource"
+              ],
+              "notes": "Optional serviceType values further scope the requested token for specific portal services."
+            }
+          ],
+          "variants": [
+            {
+              "selector": "resource",
+              "location": "query",
+              "knownValues": [
+                "https://api.purview-service.microsoft.com",
+                "https://management.azure.com/",
+                "https://graph.microsoft.com/"
+              ],
+              "notes": "The returned token shape and claims vary with the requested resource."
+            }
+          ],
+          "availability": {
+            "level": "request-dependent",
+            "notes": [
+              "The portal only requests downstream tokens when a solution or helper needs access to a specific resource."
+            ]
+          },
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Verified during startup and solution navigation flows in a signed-in Purview portal session."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "PurviewPortal.Auth.GetSpaAuthCode",
+        "summary": "Get the SPA auth helper value",
+        "method": "GET",
+        "path": "/api/Auth/getSpaAuthCode",
+        "operationContext": {
+          "surface": "Portal shell",
+          "workflows": [
+            "Load the Purview home shell, solution launcher, or Data Security Investigations landing page."
+          ],
+          "authProfile": "purview-portal-session-baseline",
+          "availability": {
+            "level": "request-dependent",
+            "notes": [
+              "The route appeared during home and same-origin solution navigation rather than every portal interaction."
+            ]
+          },
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Verified from authenticated home, solution-launcher, and Data Security Investigations navigation in the Purview portal."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "PurviewPortal.Auth.GetCachedRoles",
+        "summary": "Get cached Purview roles",
+        "method": "GET",
+        "path": "/api/v2/auth/GetCachedRoles",
+        "operationContext": {
+          "surface": "Portal shell",
+          "workflows": [
+            "Load startup or switch Purview solutions so cached permissions and feature flights can be evaluated."
+          ],
+          "authProfile": "purview-portal-role-evaluation",
+          "availability": {
+            "level": "user-context",
+            "notes": [
+              "Returned role and feature state is specific to the signed-in principal and current tenant."
+            ]
+          },
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Verified during startup and solution transitions in a signed-in Purview portal session."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "PurviewPortal.Auth.IsInRoles",
+        "summary": "Evaluate role and feature membership",
+        "method": "POST",
+        "path": "/api/auth/IsInRoles",
+        "operationContext": {
+          "surface": "Portal shell",
+          "workflows": [
+            "Load startup or switch Purview solutions so the portal can batch-check role, permission, and feature availability."
+          ],
+          "authProfile": "purview-portal-role-evaluation",
+          "requestShapes": [
+            {
+              "name": "role-or-feature-batch",
+              "contentType": "application/json",
+              "bodyKind": "string-array",
+              "notes": "The portal posts an ordered list of permission, role, or feature identifiers and receives positional boolean results."
+            }
+          ],
+          "availability": {
+            "level": "user-context",
+            "notes": [
+              "Evaluation results are specific to the signed-in principal and current tenant."
+            ]
+          },
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Verified during startup and solution transitions in a signed-in Purview portal session."
               ]
             }
           ]
