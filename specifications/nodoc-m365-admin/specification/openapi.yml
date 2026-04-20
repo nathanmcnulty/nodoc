@@ -519,10 +519,16 @@ paths:
     $ref: graph_proxy.yml#/paths/~1fd~1msgraph~1v1.0~1subscribedSkus
   /fd/msgraph/v1.0/devices:
     $ref: graph_proxy.yml#/paths/~1fd~1msgraph~1v1.0~1devices
+  /fd/msgraph/v1.0/devices/$count:
+    $ref: graph_proxy.yml#/paths/~1fd~1msgraph~1v1.0~1devices~1$count
   /fd/msgraph/v1.0/users/{userId}/extensions/commerce.Common.Preferences:
     $ref: graph_proxy.yml#/paths/~1fd~1msgraph~1v1.0~1users~1{userId}~1extensions~1commerce.Common.Preferences
   /fd/msgraph/v1.0/$batch:
     $ref: graph_proxy.yml#/paths/~1fd~1msgraph~1v1.0~1$batch
+  /fd/msgraph/beta/deviceManagement:
+    $ref: graph_proxy.yml#/paths/~1fd~1msgraph~1beta~1deviceManagement
+  /fd/msgraph/beta/deviceManagement/configurationPolicies:
+    $ref: graph_proxy.yml#/paths/~1fd~1msgraph~1beta~1deviceManagement~1configurationPolicies
   /fd/msgraph/beta/solutions/backupRestore:
     $ref: graph_proxy.yml#/paths/~1fd~1msgraph~1beta~1solutions~1backupRestore
   /fd/msgraph/beta/solutions/backupRestore/protectionPolicies:
@@ -553,8 +559,28 @@ paths:
     $ref: edge.yml#/paths/~1fd~1edgeenterprisesitemanagement~1api~1v2~1emiesitelists
   /fd/edgeenterpriseextensionsmanagement/api/policies:
     $ref: edge.yml#/paths/~1fd~1edgeenterpriseextensionsmanagement~1api~1policies
+  /fd/edgeenterpriseextensionsmanagement/api/config/featureflags:
+    $ref: edge.yml#/paths/~1fd~1edgeenterpriseextensionsmanagement~1api~1config~1featureflags
+  /fd/edgeenterpriseextensionsmanagement/api/extensions/extensionFeedback:
+    $ref: edge.yml#/paths/~1fd~1edgeenterpriseextensionsmanagement~1api~1extensions~1extensionFeedback
+  /fd/edgeenterpriseextensionsmanagement/api/featureManagement/profiles:
+    $ref: edge.yml#/paths/~1fd~1edgeenterpriseextensionsmanagement~1api~1featureManagement~1profiles
+  /fd/edgeenterpriseextensionsmanagement/api/featureManagement/shard:
+    $ref: edge.yml#/paths/~1fd~1edgeenterpriseextensionsmanagement~1api~1featureManagement~1shard
+  /fd/edgeenterpriseextensionsmanagement/api/telemetry/devices/count:
+    $ref: edge.yml#/paths/~1fd~1edgeenterpriseextensionsmanagement~1api~1telemetry~1devices~1count
+  /fd/edgeenterpriseextensionsmanagement/api/telemetry/devices/reports/versions:
+    $ref: edge.yml#/paths/~1fd~1edgeenterpriseextensionsmanagement~1api~1telemetry~1devices~1reports~1versions
+  /fd/edgeenterpriseextensionsmanagement/api/version/releases:
+    $ref: edge.yml#/paths/~1fd~1edgeenterpriseextensionsmanagement~1api~1version~1releases
+  /fd/edgeenterpriseextensionsmanagement/api/version/update:
+    $ref: edge.yml#/paths/~1fd~1edgeenterpriseextensionsmanagement~1api~1version~1update
+  /fd/edgeenterpriseextensionsmanagement/security-insights/notification-preferences:
+    $ref: edge.yml#/paths/~1fd~1edgeenterpriseextensionsmanagement~1security-insights~1notification-preferences
   /fd/OfficePolicyAdmin/v1.0/edge/policies:
     $ref: edge.yml#/paths/~1fd~1OfficePolicyAdmin~1v1.0~1edge~1policies
+  /fd/OfficePolicyAdmin/v1.0/edge/policies/{id}/policywithpayload:
+    $ref: edge.yml#/paths/~1fd~1OfficePolicyAdmin~1v1.0~1edge~1policies~1{id}~1policywithpayload
 
   # Integrated Apps
   /fd/addins/api/apps:
@@ -665,6 +691,14 @@ paths:
   # Billing
   /admin/api/billing/BillingModel:
     $ref: billing.yml#/paths/~1admin~1api~1billing~1BillingModel
+  /fd/commerceMgmt/moderncommerce/footprint:
+    $ref: billing.yml#/paths/~1fd~1commerceMgmt~1moderncommerce~1footprint
+  /fd/KeyFulfillment/v3.0/softwareKeys:
+    $ref: billing.yml#/paths/~1fd~1KeyFulfillment~1v3.0~1softwareKeys
+  /fd/m365licensing/v3/licensedProducts:
+    $ref: billing.yml#/paths/~1fd~1m365licensing~1v3~1licensedProducts
+  /fd/storeForBusinessMgmt/bd-prod/agreements/vlpermissions:
+    $ref: billing.yml#/paths/~1fd~1storeForBusinessMgmt~1bd-prod~1agreements~1vlpermissions
   /_api/v2.1/billingFeatures('M365Backup'):
     $ref: "billing.yml#/paths/~1_api~1v2.1~1billingFeatures('M365Backup')"
 
@@ -675,8 +709,14 @@ paths:
   # Partners
   /admin/api/partners/AOBOClients:
     $ref: partners.yml#/paths/~1admin~1api~1partners~1AOBOClients
+  /fd/commerceMgmt2/partnermanage/partners:
+    $ref: partners.yml#/paths/~1fd~1commerceMgmt2~1partnermanage~1partners
   /fd/MSGraph/beta/directory/partners:
     $ref: partners.yml#/paths/~1fd~1MSGraph~1beta~1directory~1partners
+  /fd/GdapPartnerManage/CustomerServiceAdminApi/Web/v1/CustomerGranularAdminRelationships:
+    $ref: partners.yml#/paths/~1fd~1GdapPartnerManage~1CustomerServiceAdminApi~1Web~1v1~1CustomerGranularAdminRelationships
+  /fd/jarvisCM/my-org/profiles:
+    $ref: partners.yml#/paths/~1fd~1jarvisCM~1my-org~1profiles
 
   # Contacts & User Management (new)
   /admin/api/contact/Customization:
@@ -695,6 +735,8 @@ paths:
     $ref: users_groups.yml#/paths/~1admin~1api~1users~1deviceupdatechanneleligibility
   /admin/api/users/getavailableroles:
     $ref: users_groups.yml#/paths/~1admin~1api~1users~1getavailableroles
+  /admin/api/rbac/roles:
+    $ref: users_groups.yml#/paths/~1admin~1api~1rbac~1roles
   /admin/api/users/new/options:
     $ref: users_groups.yml#/paths/~1admin~1api~1users~1new~1options
   /admin/api/users/{userId}:

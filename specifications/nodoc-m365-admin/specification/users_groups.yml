@@ -826,6 +826,31 @@ paths:
         '404':
           $ref: common.yml#/components/responses/NotFound
 
+  /admin/api/rbac/roles:
+    get:
+      summary: List RBAC roles
+      description: >-
+        Retrieve the RBAC role definitions exposed by the admin center role-based
+        access control experience.
+      operationId: UsersGroups.ListRbacRoles
+      tags: [UsersGroups]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: RBAC role definition payload. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
   /admin/api/users/new/options:
     get:
       summary: Get new user options

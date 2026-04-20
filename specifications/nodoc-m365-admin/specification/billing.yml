@@ -22,6 +22,37 @@ paths:
         '404':
           $ref: common.yml#/components/responses/NotFound
 
+  /fd/commerceMgmt/moderncommerce/footprint:
+    get:
+      summary: Get modern commerce footprint
+      description: >-
+        Retrieve the tenant-level modern commerce footprint used by the subscriptions
+        and partner experiences to determine available commerce capabilities.
+      operationId: Billing.GetModernCommerceFootprint
+      tags: [Billing]
+      parameters:
+        - name: api-version
+          in: query
+          description: API version requested by the commerce footprint service.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Modern commerce footprint payload. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
   /fd/arm/providers/Microsoft.Billing/billingAccounts/{billingAccountId}:
     get:
       summary: Get billing account details
@@ -545,6 +576,99 @@ paths:
                   value:
                     type: boolean
                 additionalProperties: true
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /fd/KeyFulfillment/v3.0/softwareKeys:
+    get:
+      summary: List software keys
+      description: >-
+        Retrieve the software key inventory exposed by the subscriptions experience,
+        optionally including detailed product key information.
+      operationId: Billing.ListSoftwareKeys
+      tags: [Billing]
+      parameters:
+        - name: includeProductKeyDetails
+          in: query
+          description: Whether the response should include detailed product key metadata.
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Software key inventory payload. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /fd/m365licensing/v3/licensedProducts:
+    get:
+      summary: List licensed products
+      description: >-
+        Retrieve the licensed product inventory shown by the subscriptions experience,
+        including products allocated by the requested owner type.
+      operationId: Billing.ListLicensedProducts
+      tags: [Billing]
+      parameters:
+        - name: allotmentSourceOwnerType
+          in: query
+          description: Owner type used to scope the licensed product allotment view.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Licensed product inventory payload. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /fd/storeForBusinessMgmt/bd-prod/agreements/vlpermissions:
+    get:
+      summary: Get volume licensing permissions
+      description: >-
+        Retrieve the volume licensing permission set used by the subscriptions
+        experience to determine whether software key and agreement actions are available.
+      operationId: Billing.GetVolumeLicensingPermissions
+      tags: [Billing]
+      parameters:
+        - name: api-version
+          in: query
+          description: API version requested by the Store for Business agreement service.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Volume licensing permission payload. Exact schema pending.
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
