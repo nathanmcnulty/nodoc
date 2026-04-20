@@ -8,7 +8,8 @@ const defaultSeedLinkLimit = 12;
 const defaultSeedRouteLimit = 8;
 const defaultSettleMs = 8000;
 const defaultPostActionSettleMs = 6000;
-const evaluateTimeoutMs = 4000;
+const defaultEvaluateTimeoutMs = 10000;
+let runtimeEvaluateTimeoutMs = defaultEvaluateTimeoutMs;
 
 function stripBom(value) {
   return typeof value === "string" ? value.replace(/^\uFEFF/u, "") : value;
@@ -229,6 +230,10 @@ function applyRecipeConfig(args, recipeConfig, recipePath) {
     args.navigationTimeoutMs = Number(recipeConfig.navigationTimeoutMs);
   }
 
+  if (Number.isFinite(Number(recipeConfig.evaluateTimeoutMs))) {
+    args.evaluateTimeoutMs = Number(recipeConfig.evaluateTimeoutMs);
+  }
+
   if (recipeConfig.actions) {
     args.actions = ensureArray(recipeConfig.actions).map(normalizeRecipeAction);
   }
@@ -239,6 +244,7 @@ function applyRecipeConfig(args, recipeConfig, recipePath) {
 async function parseArgs(argv) {
   const args = {
     actions: [],
+    evaluateTimeoutMs: defaultEvaluateTimeoutMs,
     label: null,
     matchHosts: [],
     matchPathPrefixes: [],
@@ -468,6 +474,17 @@ async function parseArgs(argv) {
       continue;
     }
 
+    if (arg === "--evaluate-timeout-ms" && next) {
+      args.evaluateTimeoutMs = Number(next);
+      index += 1;
+      continue;
+    }
+
+    if (arg.startsWith("--evaluate-timeout-ms=")) {
+      args.evaluateTimeoutMs = Number(arg.slice("--evaluate-timeout-ms=".length));
+      continue;
+    }
+
     if (arg === "--action" && next) {
       args.actions.push(parseActionSpec(next));
       index += 1;
@@ -492,7 +509,7 @@ async function parseArgs(argv) {
     throw new Error("Missing required --out argument.");
   }
 
-  for (const key of ["navigationTimeoutMs", "postActionSettleMs", "settleMs"]) {
+  for (const key of ["evaluateTimeoutMs", "navigationTimeoutMs", "postActionSettleMs", "settleMs"]) {
     if (!Number.isFinite(args[key]) || args[key] <= 0) {
       throw new Error(`Invalid value for ${key}: "${args[key]}".`);
     }
@@ -827,7 +844,15 @@ function requestKey(requestId, sessionId = null) {
   return `${sessionId ?? ""}:${requestId}`;
 }
 
-async function evaluateJson(client, expression, sessionId = null, timeoutMs = evaluateTimeoutMs) {
+function isDomCapableTarget(sessionId, targetInfo) {
+  if (sessionId === null) {
+    return true;
+  }
+
+  return ["iframe", "page"].includes(targetInfo?.targetType ?? "");
+}
+
+async function evaluateJson(client, expression, sessionId = null, timeoutMs = runtimeEvaluateTimeoutMs) {
   const result = await Promise.race([
     client.send("Runtime.evaluate", {
       expression,
@@ -1160,6 +1185,7 @@ function collectSeededRouteCandidates(seedArtifacts, rootOrigin, args, action) {
 
 async function main() {
   const args = await parseArgs(process.argv.slice(2));
+  runtimeEvaluateTimeoutMs = args.evaluateTimeoutMs;
   const seedArtifacts = args.seedArtifacts
     ? await loadSeedArtifacts(args.seedArtifacts)
     : {
@@ -1323,6 +1349,10 @@ async function main() {
   async function collectSnapshots() {
     const snapshots = [];
     for (const [sessionId, targetInfo] of sessions.entries()) {
+      if (!isDomCapableTarget(sessionId, targetInfo)) {
+        continue;
+      }
+
       try {
         const snapshot = await evaluateJson(client, buildDomSnapshotExpression(), sessionId);
         if (!snapshot) {
@@ -1496,6 +1526,10 @@ async function main() {
     const entries = Array.from(sessions.entries());
     return entries
       .filter(([sessionId, targetInfo]) => {
+        if (!isDomCapableTarget(sessionId, targetInfo)) {
+          return false;
+        }
+
         if (scope === "root") {
           return sessionId === null;
         }
