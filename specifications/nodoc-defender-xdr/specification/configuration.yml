@@ -25,6 +25,30 @@ paths:
         '404':
           $ref: common.yml#/components/responses/NotFound
 
+  /mtp/suppressionRulesService/suppressionRules/builtInRulesHash:
+    get:
+      summary: Get built-in suppression rules hash
+      description: >-
+        Retrieve the built-in suppression rules hash used by the portal to detect
+        whether the built-in rule catalog has changed.
+      operationId: Configuration.GetBuiltInSuppressionRulesHash
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: string
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
   /mtp/alertsApiService/workloads/disabled:
     get:
       summary: Get disabled alert service settings
@@ -534,6 +558,31 @@ paths:
               schema:
                 type: object
                 description: pending - alert sharing compliance status
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/wdatpApi/dataexportsettings:
+    get:
+      summary: Get raw data export settings
+      description: >-
+        Retrieve Defender raw data export settings, including attached Log Analytics
+        workspace targets and enabled export categories.
+      operationId: Configuration.GetDataExportSettings
+      tags: [Configuration]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - raw data export settings
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 

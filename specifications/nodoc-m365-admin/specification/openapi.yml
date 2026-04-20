@@ -323,6 +323,74 @@ x-nodoc-headerProfiles:
         value: https://admin.cloud.microsoft/
         description: Root admin referer emitted by the live Microsoft 365 Backup blade.
 
+x-nodoc-authProfiles:
+  m365-admin-session-baseline:
+    description: Authenticated admin-shell session baseline used to bootstrap same-origin M365 Admin requests and broker downstream access.
+    principalContext:
+      label: Global Admin
+      privilegeLevel: maximum-observed
+      notes:
+        - Observed with a Global Admin account holding broad administrative privileges.
+        - Effective permissions, token claims, and route access can vary for users with narrower roles.
+    cookies:
+      - name: AjaxSessionKey
+        description: Session cookie required for same-origin admin-shell requests.
+        notes:
+          - Raw cookie values must never be stored in committed specs or generated ledgers.
+  m365-admin-brokered-arm-token:
+    description: Downstream resource token brokered by the admin portal for Azure-backed helpers and related experiences.
+    principalContext:
+      label: Global Admin
+      privilegeLevel: maximum-observed
+      notes:
+        - Observed with a Global Admin account holding broad administrative privileges.
+        - The returned claims and effective permissions can differ for narrower admin roles.
+    tokens:
+      - name: downstream-arm-access-token
+        description: JWT access token returned by the admin portal token broker.
+        tokenType: jwt
+        carrier: response-body
+        audiences:
+          - https://management.azure.com/
+        claims:
+          - name: aud
+            values:
+              - https://management.azure.com/
+            notes:
+              - The returned audience depends on the requested resource value submitted to the token broker.
+        notes:
+          - Capture decoded claims such as scp, roles, tid, oid, appid, azp, and expiry for security review without storing the raw token.
+    brokerFlows:
+      - name: users-token-with-expiry
+        sourcePath: /admin/api/users/tokenWithExpiry
+        targetResources:
+          - https://management.azure.com/
+        notes:
+          - The live portal posts the requested downstream audience as an unnamed form value and receives a token plus expiry metadata.
+  m365-admin-brand-center-spo-token:
+    description: SharePoint-targeted bearer token observed on Brand center helper requests.
+    principalContext:
+      label: Global Admin
+      privilegeLevel: maximum-observed
+      notes:
+        - Observed with a Global Admin account holding broad administrative privileges.
+        - Effective permissions, token claims, and route access can vary for users with narrower roles.
+    tokens:
+      - name: brand-center-sharepoint-token
+        description: Bearer token supplied on SharePoint-backed Brand center requests.
+        tokenType: jwt
+        carrier: authorization-header
+        audiences:
+          - https://{tenant}.sharepoint.com
+        notes:
+          - Treat tenant-specific audiences and decoded claims as observed auth evidence rather than stable public examples.
+          - Do not store the raw Authorization header or token string.
+    permissionSignals:
+      - name: brand-center-configuration
+        sourcePath: /_api/spo.tenant/GetBrandCenterConfiguration
+        notes:
+          - SharePoint-backed helper responses expose whether Brand center is configured, tenant-gated, or empty for the current tenant.
+
 paths:
   # Copilot
   /admin/api/settings/company/copilotpolicy/pin:

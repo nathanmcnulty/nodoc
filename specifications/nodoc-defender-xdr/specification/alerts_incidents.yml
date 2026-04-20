@@ -526,6 +526,397 @@ paths:
         '404':
           $ref: common.yml#/components/responses/NotFound
 
+  /mtp/auditHistory/AuditHistory:
+    get:
+      summary: Get incident audit history
+      description: >-
+        Retrieve incident audit history and source-audit entries for an incident detail
+        page. Observed live with `entityType=IncidentEntity` and both compact and expanded
+        paging configurations.
+      operationId: Incidents.GetAuditHistory
+      tags: [Incidents]
+      parameters:
+        - name: entityType
+          in: query
+          required: true
+          description: Entity type requested by the audit history client.
+          schema:
+            type: string
+            default: IncidentEntity
+        - name: id
+          in: query
+          required: true
+          description: Incident identifier requested by the audit history client.
+          schema:
+            type: integer
+        - name: auditType
+          in: query
+          description: Optional audit type discriminator.
+          schema:
+            type: integer
+        - name: contentTypes[]
+          in: query
+          description: Optional content-type filters requested by the portal.
+          schema:
+            type: array
+            items:
+              type: string
+        - name: incidentSourceAudits
+          in: query
+          description: Optional incident source audit filter.
+          schema:
+            type: string
+        - name: pageIndex
+          in: query
+          description: The 1-based page index.
+          schema:
+            type: integer
+            default: 1
+        - name: pageSize
+          in: query
+          description: Number of audit rows to return.
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  description: Incident audit entry. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/incidentDevices/incidents/{IncidentId}/devices:
+    get:
+      summary: List incident devices
+      description: >-
+        Retrieve the device rows associated with an incident, including risk score,
+        exposure score, and last-seen metadata.
+      operationId: Incidents.ListIncidentDevices
+      tags: [Incidents]
+      parameters:
+        - name: IncidentId
+          in: path
+          required: true
+          description: The unique identifier of the incident.
+          schema:
+            type: integer
+        - name: IncidentId
+          in: query
+          description: Redundant incident identifier currently sent by the portal.
+          schema:
+            type: integer
+        - name: pageIndex
+          in: query
+          description: The 1-based page index.
+          schema:
+            type: integer
+            default: 1
+        - name: pageSize
+          in: query
+          description: Number of device rows to return.
+          schema:
+            type: integer
+            default: 30
+        - name: sortByField
+          in: query
+          description: Device sort field requested by the client.
+          schema:
+            type: string
+        - name: sortOrder
+          in: query
+          description: Sort order requested by the client.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  description: Incident device row. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/incidentUsers/incidents/{IncidentId}/users:
+    get:
+      summary: List incident users
+      description: >-
+        Retrieve the user rows associated with an incident, including account and
+        directory attributes when present.
+      operationId: Incidents.ListIncidentUsers
+      tags: [Incidents]
+      parameters:
+        - name: IncidentId
+          in: path
+          required: true
+          description: The unique identifier of the incident.
+          schema:
+            type: integer
+        - name: id
+          in: query
+          description: Redundant incident identifier currently sent by the portal.
+          schema:
+            type: integer
+        - name: serviceContext
+          in: query
+          description: Portal service context discriminator.
+          schema:
+            type: string
+            default: Mtp
+        - name: lookBackInDays
+          in: query
+          description: Lookback window for user associations.
+          schema:
+            type: integer
+            default: 180
+        - name: pageIndex
+          in: query
+          description: The 1-based page index.
+          schema:
+            type: integer
+            default: 1
+        - name: pageSize
+          in: query
+          description: Number of user rows to return.
+          schema:
+            type: integer
+            default: 30
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  description: Incident user row. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/useServiceBaseUrl/ine/incidentgraphservice/incidentGraph/{IncidentId}:
+    get:
+      summary: Get incident graph
+      description: >-
+        Retrieve the incident entity graph used by the incident overview experience,
+        including nodes, edges, and summary counts.
+      operationId: Incidents.GetIncidentGraph
+      tags: [Incidents]
+      parameters:
+        - name: IncidentId
+          in: path
+          required: true
+          description: The unique identifier of the incident.
+          schema:
+            type: integer
+        - name: withGraphSimilarity
+          in: query
+          description: Whether graph similarity nodes should be included.
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending - incident graph payload
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/useServiceBaseUrl/ine/evidenceapiservice/evidence/incident/{IncidentId}:
+    post:
+      summary: List incident evidence
+      description: >-
+        Retrieve the evidence rows associated with an incident, including entity data,
+        related assets, and related alerts.
+      operationId: Incidents.ListIncidentEvidence
+      tags: [Incidents]
+      parameters:
+        - name: IncidentId
+          in: path
+          required: true
+          description: The unique identifier of the incident.
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                pageIndex:
+                  type: integer
+                  description: The 1-based page index.
+                pageSize:
+                  type: integer
+                  description: Number of evidence rows to return.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  description: Incident evidence record. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/useServiceBaseUrl/ine/evidenceapiservice/evidence/incident/{IncidentId}/count:
+    post:
+      summary: Count incident evidence by type
+      description: >-
+        Retrieve evidence type counts for an incident, grouped by evidence entity type.
+      operationId: Incidents.CountIncidentEvidence
+      tags: [Incidents]
+      parameters:
+        - name: IncidentId
+          in: path
+          required: true
+          description: The unique identifier of the incident.
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Observed live as an empty object.
+              additionalProperties: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    Count:
+                      type: integer
+                    Type:
+                      type: string
+                  additionalProperties: true
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/phoenixSocomatApi/activity/list/{IncidentId}:
+    get:
+      summary: Get incident activity feed
+      description: >-
+        Retrieve the incident activity feed exposed by the Phoenix SOC operations API.
+      operationId: Incidents.GetIncidentActivityFeed
+      tags: [Incidents]
+      parameters:
+        - name: IncidentId
+          in: path
+          required: true
+          description: The unique identifier of the incident.
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  description: Incident activity item. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mtp/unifiedActions/unifiedactions/Activities/{IncidentId}:
+    get:
+      summary: Get incident unified action activities
+      description: >-
+        Retrieve unified action activity records associated with an incident.
+      operationId: Incidents.GetIncidentUnifiedActionActivities
+      tags: [Incidents]
+      parameters:
+        - name: IncidentId
+          in: path
+          required: true
+          description: The unique identifier of the incident.
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  description: Unified action activity item. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
   /mtp/incidents/dsiMessageBarIndicators:
     post:
       summary: Get incident message bar indicators

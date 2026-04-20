@@ -601,10 +601,12 @@ export const gettingStartedGuides: GettingStartedGuide[] = [
     confirmedDetails: [
       "Both specs model `PortalSession` as an API key in the `sccauth` cookie.",
       "Both portals route through `/apiproxy` and call out shared backend prefixes such as `/di/`, `/gws/`, `/medeina/`, `/msgraph/`, and `/shell/`.",
+      "Defender MTO flows resolve accessible tenants through `GET /mtoapi/tenants/TenantPicker`, which reflects the operator's current multi-tenant scope.",
       "The specs explicitly say these APIs are used internally by the portals and are not officially documented.",
     ],
     practicalGuidance: [
       "Authenticate to the portal in a browser first, then capture the active session context before replaying requests elsewhere.",
+      "For Defender multi-tenant flows, capture the paired `XSRF-TOKEN`/`X-XSRF-TOKEN` context and `mtoproxyurl=MTO` routing hint in addition to the `sccauth` session.",
       "Expect portal-only behavior such as short-lived sessions, backend-specific authorization, and inconsistent errors across different proxy prefixes.",
       "Start with list and lookup operations so you can validate the session cookie and shared-service routing without changing state.",
     ],
@@ -614,6 +616,7 @@ export const gettingStartedGuides: GettingStartedGuide[] = [
     ],
     pitfalls: [
       "Expired portal sessions usually fail without a helpful auth error.",
+      "Multi-tenant Defender routes can require extra XSRF and routing context beyond the session cookie alone.",
       "Shared prefixes can expose different subsets of the same backend depending on the portal you entered through.",
       "Because these APIs are internal, some endpoints can disappear or change shape with little warning.",
     ],

@@ -25,7 +25,7 @@ function uniqueOrdered(values) {
 export const crawlMetadataByTitle = {
   Defender: {
     portalUrl: "https://security.microsoft.com",
-    authModel: "Portal session cookie (`sccauth`)",
+    authModel: "Portal session cookies (`sccauth`, `XSRF-TOKEN`) + MTO routing context",
     crawlPriority: "diff-first",
     nextPass: "normalized-family-diff",
     reason: "Largest surface in the repo; use capture-vs-spec diffs before another broad crawl.",

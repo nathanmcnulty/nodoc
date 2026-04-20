@@ -106,6 +106,15 @@ paths:
         Retrieve shell information for the Defender XDR portal session.
       operationId: PortalServices.GetShellInfo
       tags: [Portal Services]
+      x-nodoc-operation-context:
+        surface: Portal shell
+        workflows:
+          - Load or refresh the Defender XDR shell before feature blades and cross-solution entry points fully hydrate.
+        authProfile: defender-session-baseline
+        availability:
+          level: user-context
+          notes:
+            - Returned shell state reflects the signed-in operator, current tenant, and enabled Defender surfaces.
       responses:
         '200':
           description: OK
@@ -129,6 +138,15 @@ paths:
         Retrieve authentication status for the Medeina (Security Copilot) service.
       operationId: PortalServices.GetMedeinaAuth
       tags: [Portal Services]
+      x-nodoc-operation-context:
+        surface: Security Copilot entrypoint
+        workflows:
+          - Open Security Copilot entry points or related Defender experiences that check Copilot readiness.
+        authProfile: defender-copilot-entitlement
+        availability:
+          level: tenant-conditional
+          notes:
+            - Returned auth and readiness state depends on tenant enablement and the signed-in operator.
       responses:
         '200':
           description: OK
@@ -153,6 +171,15 @@ paths:
         Retrieve the Security Copilot trial status for the tenant.
       operationId: PortalServices.GetSecurityCopilotTrial
       tags: [Portal Services]
+      x-nodoc-operation-context:
+        surface: Security Copilot entrypoint
+        workflows:
+          - Load trial, onboarding, or entitlement UX for Security Copilot from the Defender portal.
+        authProfile: defender-copilot-entitlement
+        availability:
+          level: tenant-conditional
+          notes:
+            - Trial state is specific to the current tenant and may be absent where Security Copilot onboarding is disabled.
       responses:
         '200':
           description: OK
