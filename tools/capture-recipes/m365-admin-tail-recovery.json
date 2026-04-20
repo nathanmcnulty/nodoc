@@ -1,0 +1,27 @@
+﻿{
+  "portal": "M365 Admin",
+  "url": "https://admin.cloud.microsoft",
+  "matchHosts": [
+    "admin.cloud.microsoft"
+  ],
+  "matchPathPrefixes": [
+    "/admin",
+    "/fd"
+  ],
+  "postActionSettleMs": 12000,
+  "settleMs": 14000,
+  "actions": [
+    "navigate=https://admin.cloud.microsoft/#/subscriptions",
+    "wait-ms=8000",
+    "capture=billing",
+    "navigate=https://admin.cloud.microsoft/#/Settings/Services",
+    "wait-ms=8000",
+    "capture=org-settings",
+    "navigate=https://admin.cloud.microsoft/#/partners",
+    "wait-ms=8000",
+    "capture=partner-relationships",
+    "navigate=https://admin.cloud.microsoft/#/Edge",
+    "wait-ms=8000",
+    "capture=edge"
+  ]
+}

@@ -355,6 +355,8 @@ paths:
     $ref: app_settings.yml#/paths/~1admin~1api~1settings~1apps~1mail
   /admin/api/settings/apps/skypeteams:
     $ref: app_settings.yml#/paths/~1admin~1api~1settings~1apps~1skypeteams
+  /fd/IC3Config/Skype.Policy/configurations/TeamsClientConfiguration:
+    $ref: app_settings.yml#/paths/~1fd~1IC3Config~1Skype.Policy~1configurations~1TeamsClientConfiguration
   /admin/api/TeamsProvisioning/Customization:
     $ref: app_settings.yml#/paths/~1admin~1api~1TeamsProvisioning~1Customization
   /admin/api/settings/apps/calendarsharing:
@@ -403,6 +405,12 @@ paths:
     $ref: company_settings.yml#/paths/~1_api~1spo.tenant~1GetBrandCenterConfiguration
   /_api/GroupSiteManager/GetValidSiteUrlFromAlias:
     $ref: company_settings.yml#/paths/~1_api~1GroupSiteManager~1GetValidSiteUrlFromAlias
+  /_api/SPO.Tenant/GetSPOSiteCreationSources:
+    $ref: company_settings.yml#/paths/~1_api~1SPO.Tenant~1GetSPOSiteCreationSources
+  /_api/SPOInternalUseOnly.Tenant:
+    $ref: company_settings.yml#/paths/~1_api~1SPOInternalUseOnly.Tenant
+  /_api/SPOInternalUseOnly.TenantAdminSettings/AutoQuotaEnabled:
+    $ref: company_settings.yml#/paths/~1_api~1SPOInternalUseOnly.TenantAdminSettings~1AutoQuotaEnabled
 
   # Security Settings
   /admin/api/Settings/security/o365guestuser:
@@ -503,18 +511,28 @@ paths:
     $ref: tenant.yml#/paths/~1admin~1api~1tenant~1o365activationusercounts
   /admin/api/tenant/isReportsPrivacyEnabled:
     $ref: tenant.yml#/paths/~1admin~1api~1tenant~1isReportsPrivacyEnabled
+  /_api/v2.1/unifiedStorageQuotaEligible:
+    $ref: tenant.yml#/paths/~1_api~1v2.1~1unifiedStorageQuotaEligible
 
   # Graph Proxy
   /fd/msgraph/v1.0/subscribedSkus:
     $ref: graph_proxy.yml#/paths/~1fd~1msgraph~1v1.0~1subscribedSkus
   /fd/msgraph/v1.0/devices:
     $ref: graph_proxy.yml#/paths/~1fd~1msgraph~1v1.0~1devices
+  /fd/msgraph/v1.0/users/{userId}/extensions/commerce.Common.Preferences:
+    $ref: graph_proxy.yml#/paths/~1fd~1msgraph~1v1.0~1users~1{userId}~1extensions~1commerce.Common.Preferences
   /fd/msgraph/v1.0/$batch:
     $ref: graph_proxy.yml#/paths/~1fd~1msgraph~1v1.0~1$batch
+  /fd/msgraph/beta/solutions/backupRestore:
+    $ref: graph_proxy.yml#/paths/~1fd~1msgraph~1beta~1solutions~1backupRestore
   /fd/msgraph/beta/solutions/backupRestore/protectionPolicies:
     $ref: graph_proxy.yml#/paths/~1fd~1msgraph~1beta~1solutions~1backupRestore~1protectionPolicies
   /fd/msgraph/beta/solutions/backupRestore/emailNotificationsSetting:
     $ref: graph_proxy.yml#/paths/~1fd~1msgraph~1beta~1solutions~1backupRestore~1emailNotificationsSetting
+  /fd/MsGraph/beta/security/dataDiscovery/cloudAppDiscovery/uploadedStreams:
+    $ref: graph_proxy.yml#/paths/~1fd~1MsGraph~1beta~1security~1dataDiscovery~1cloudAppDiscovery~1uploadedStreams
+  /fd/MsGraph/beta/security/dataDiscovery/cloudAppDiscovery/uploadedStreams/{streamId}/microsoft.graph.security.aggregatedAppsDetails(period=duration'P90D'):
+    $ref: "graph_proxy.yml#/paths/~1fd~1MsGraph~1beta~1security~1dataDiscovery~1cloudAppDiscovery~1uploadedStreams~1{streamId}~1microsoft.graph.security.aggregatedAppsDetails(period=duration'P90D')"
   /fd/msgraph/beta/$batch:
     $ref: graph_proxy.yml#/paths/~1fd~1msgraph~1beta~1$batch
 
@@ -601,10 +619,16 @@ paths:
     $ref: miscellaneous.yml#/paths/~1admin~1api~1recommendations~1m365~1ccs
   /admin/api/offerrec/offer/{id}:
     $ref: miscellaneous.yml#/paths/~1admin~1api~1offerrec~1offer~1{id}
+  /admin/api/offerrec/marketplaceoffer:
+    $ref: miscellaneous.yml#/paths/~1admin~1api~1offerrec~1marketplaceoffer
   /fd/enhancedRestorev2/v1/featureSetting:
     $ref: miscellaneous.yml#/paths/~1fd~1enhancedRestorev2~1v1~1featureSetting
   /fd/arm/providers/Microsoft.Billing/billingAccounts:
     $ref: miscellaneous.yml#/paths/~1fd~1arm~1providers~1Microsoft.Billing~1billingAccounts
+  /fd/iris:
+    $ref: miscellaneous.yml#/paths/~1fd~1iris
+  /admin/api/admindashboard/tenantsettings:
+    $ref: miscellaneous.yml#/paths/~1admin~1api~1admindashboard~1tenantsettings
   /admin/api/notifications:
     $ref: miscellaneous.yml#/paths/~1admin~1api~1notifications
   /admin/api/rememberpreferences:
@@ -651,6 +675,8 @@ paths:
   # Partners
   /admin/api/partners/AOBOClients:
     $ref: partners.yml#/paths/~1admin~1api~1partners~1AOBOClients
+  /fd/MSGraph/beta/directory/partners:
+    $ref: partners.yml#/paths/~1fd~1MSGraph~1beta~1directory~1partners
 
   # Contacts & User Management (new)
   /admin/api/contact/Customization:
@@ -661,8 +687,8 @@ paths:
     $ref: users_groups.yml#/paths/~1admin~1api~1guestuserlist~1Customization
   /admin/api/users/ListExternalGuestUsers:
     $ref: users_groups.yml#/paths/~1admin~1api~1users~1ListExternalGuestUsers
-  /admin/api/userlist/Customization:
-    $ref: users_groups.yml#/paths/~1admin~1api~1userlist~1Customization
+  /admin/api/UserList/Customization:
+    $ref: users_groups.yml#/paths/~1admin~1api~1UserList~1Customization
   /admin/api/users/administrativeunits:
     $ref: users_groups.yml#/paths/~1admin~1api~1users~1administrativeunits
   /admin/api/users/deviceupdatechanneleligibility:
@@ -697,16 +723,16 @@ paths:
     $ref: tenant.yml#/paths/~1admin~1api~1tenant~1seatSize
 
   # Domains (new)
-  /admin/api/domainlist/Customization:
-    $ref: domains.yml#/paths/~1admin~1api~1domainlist~1Customization
-  /admin/api/domains/GetDomainBuyModel:
-    $ref: domains.yml#/paths/~1admin~1api~1domains~1GetDomainBuyModel
-  /admin/api/domains/List:
-    $ref: domains.yml#/paths/~1admin~1api~1domains~1List
+  /admin/api/DomainList/Customization:
+    $ref: domains.yml#/paths/~1admin~1api~1DomainList~1Customization
+  /admin/api/Domains/GetDomainBuyModel:
+    $ref: domains.yml#/paths/~1admin~1api~1Domains~1GetDomainBuyModel
+  /admin/api/Domains/List:
+    $ref: domains.yml#/paths/~1admin~1api~1Domains~1List
   /admin/api/Domains/Records/Export:
     $ref: domains.yml#/paths/~1admin~1api~1Domains~1Records~1Export
-  /admin/api/domains/Verified:
-    $ref: domains.yml#/paths/~1admin~1api~1domains~1Verified
+  /admin/api/Domains/Verified:
+    $ref: domains.yml#/paths/~1admin~1api~1Domains~1Verified
 
   # Service Settings (new)
   /admin/api/services/apps/cortana:
@@ -731,6 +757,8 @@ paths:
     $ref: app_settings.yml#/paths/~1admin~1api~1settings~1apps~1o365dataplan
   /admin/api/settings/apps/officeonline:
     $ref: app_settings.yml#/paths/~1admin~1api~1settings~1apps~1officeonline
+  /fd/ocps/user/v1.0/web/policies:
+    $ref: app_settings.yml#/paths/~1fd~1ocps~1user~1v1.0~1web~1policies
   /admin/api/settings/apps/sitessharing:
     $ref: app_settings.yml#/paths/~1admin~1api~1settings~1apps~1sitessharing
   /admin/api/settings/apps/usersoftware:
@@ -789,10 +817,10 @@ paths:
     $ref: agents.yml#/paths/~1admin~1api~1agentusers~1metrics~1agents~1entitiesAtRisk
 
   # Directory Sync & Recommendations (new)
-  /admin/api/dirsyncmanagement/hasobjectswithdirsyncerrors:
-    $ref: miscellaneous.yml#/paths/~1admin~1api~1dirsyncmanagement~1hasobjectswithdirsyncerrors
-  /admin/api/dirsyncmanagement/manage:
-    $ref: miscellaneous.yml#/paths/~1admin~1api~1dirsyncmanagement~1manage
+  /admin/api/DirsyncManagement/hasobjectswithdirsyncerrors:
+    $ref: miscellaneous.yml#/paths/~1admin~1api~1DirsyncManagement~1hasobjectswithdirsyncerrors
+  /admin/api/DirsyncManagement/manage:
+    $ref: miscellaneous.yml#/paths/~1admin~1api~1DirsyncManagement~1manage
   /admin/api/irisrecommendations/v1:
     $ref: miscellaneous.yml#/paths/~1admin~1api~1irisrecommendations~1v1
   /admin/api/recommendations/m365:
@@ -801,6 +829,26 @@ paths:
     $ref: miscellaneous.yml#/paths/~1admin~1api~1recommendations~1m365~1BlockGenAIRecommendation~1view
 
   # Billing (new)
+  /fd/arm/providers/Microsoft.Billing/billingAccounts/{billingAccountId}:
+    $ref: billing.yml#/paths/~1fd~1arm~1providers~1Microsoft.Billing~1billingAccounts~1{billingAccountId}
+  /fd/arm/providers/Microsoft.Billing/billingAccounts/{billingAccountId}/billingProfiles:
+    $ref: billing.yml#/paths/~1fd~1arm~1providers~1Microsoft.Billing~1billingAccounts~1{billingAccountId}~1billingProfiles
+  /fd/arm/providers/Microsoft.Billing/billingAccounts/{billingAccountId}/billingRoleAssignments:
+    $ref: billing.yml#/paths/~1fd~1arm~1providers~1Microsoft.Billing~1billingAccounts~1{billingAccountId}~1billingRoleAssignments
+  /fd/arm/providers/Microsoft.Billing/billingAccounts/{billingAccountId}/billingSubscriptions:
+    $ref: billing.yml#/paths/~1fd~1arm~1providers~1Microsoft.Billing~1billingAccounts~1{billingAccountId}~1billingSubscriptions
+  /fd/bsxcommerce/v1/moderncatalog/listcategories:
+    $ref: billing.yml#/paths/~1fd~1bsxcommerce~1v1~1moderncatalog~1listcategories
+  /fd/bsxcommerce/v1/moderncatalog/browsecatalog:
+    $ref: billing.yml#/paths/~1fd~1bsxcommerce~1v1~1moderncatalog~1browsecatalog
+  /fd/bsxcommerce/v1/moderncatalog/browsecatalogforpreview:
+    $ref: billing.yml#/paths/~1fd~1bsxcommerce~1v1~1moderncatalog~1browsecatalogforpreview
+  /fd/bsxcommerce/v1/moderncatalog/marketinggroups:
+    $ref: billing.yml#/paths/~1fd~1bsxcommerce~1v1~1moderncatalog~1marketinggroups
+  /fd/bsxcommerce/v1/moderncatalog/new/prices:
+    $ref: billing.yml#/paths/~1fd~1bsxcommerce~1v1~1moderncatalog~1new~1prices
+  /fd/commerceapi/my-org/purchaseService.isFieldLedDeschutes:
+    $ref: billing.yml#/paths/~1fd~1commerceapi~1my-org~1purchaseService.isFieldLedDeschutes
   /admin/api/syntexbilling/azureSubscriptions/{subscriptionId}/permissions:
     $ref: billing.yml#/paths/~1admin~1api~1syntexbilling~1azureSubscriptions~1{subscriptionId}~1permissions
 

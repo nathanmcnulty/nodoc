@@ -228,6 +228,44 @@ paths:
         '404':
           $ref: common.yml#/components/responses/NotFound
 
+  /_api/v2.1/unifiedStorageQuotaEligible:
+    get:
+      summary: Get unified storage quota eligibility
+      description: >-
+        Retrieve whether the tenant is eligible for the unified SharePoint and
+        OneDrive storage quota experience, including over-quota state and last
+        refresh time.
+      operationId: Tenant.GetUnifiedStorageQuotaEligibility
+      tags: [Tenant]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  '@odata.context':
+                    type: string
+                  isEligible:
+                    type: boolean
+                  lastUpdated:
+                    type: string
+                    format: date-time
+                  isOverQuota:
+                    type: boolean
+                  isEligibleFeature:
+                    type: string
+                additionalProperties: true
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
   /admin/api/tenant/SACProvisioning:
     post:
       summary: SAC provisioning

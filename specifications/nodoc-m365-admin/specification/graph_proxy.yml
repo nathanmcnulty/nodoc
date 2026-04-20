@@ -80,6 +80,39 @@ paths:
         '404':
           $ref: common.yml#/components/responses/NotFound
 
+  /fd/msgraph/v1.0/users/{userId}/extensions/commerce.Common.Preferences:
+    get:
+      summary: Get user commerce preferences extension
+      description: >-
+        Retrieve the user-scoped `commerce.Common.Preferences` extension via the
+        admin center Graph proxy. The portal probes this extension even when the
+        extension is not provisioned for the user.
+      operationId: GraphProxy.GetUserCommercePreferencesExtension
+      tags: [GraphProxy]
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: The user object identifier targeted by the extension lookup.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: User extension payload. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          description: Extension with the requested identifier was not found for the user.
+
   /fd/msgraph/v1.0/$batch:
     post:
       summary: Graph v1.0 batch request
@@ -147,6 +180,51 @@ paths:
                           type: integer
                         body:
                           type: object
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /fd/msgraph/beta/solutions/backupRestore:
+    get:
+      summary: Get backup restore solution status
+      description: >-
+        Retrieve the root Microsoft 365 Backup solution resource used by the admin
+        portal to determine whether the backup service is enabled and which consumer
+        state is active.
+      operationId: GraphProxy.GetBackupRestoreSolution
+      tags: [GraphProxy]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  '@odata.context':
+                    type: string
+                  serviceStatus:
+                    type: object
+                    properties:
+                      status:
+                        type: string
+                      disableReason:
+                        type: string
+                      backupServiceConsumer:
+                        type: string
+                      lastModifiedDateTime:
+                        type: string
+                        format: date-time
+                      lastModifiedBy:
+                        type: object
+                        additionalProperties: true
+                    additionalProperties: true
+                additionalProperties: true
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -231,6 +309,121 @@ paths:
 
         '402':
           description: Feature not enabled or billing prerequisites unmet.
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /fd/MsGraph/beta/security/dataDiscovery/cloudAppDiscovery/uploadedStreams:
+    get:
+      summary: List cloud app discovery uploaded streams
+      description: >-
+        Retrieve uploaded stream sources exposed by the security data discovery
+        Graph beta API, proxied through the M365 Admin Center.
+      operationId: GraphProxy.ListCloudAppDiscoveryUploadedStreams
+      tags: [GraphProxy]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  '@odata.context':
+                    type: string
+                  value:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        displayName:
+                          type: string
+                        createdDateTime:
+                          type: string
+                          format: date-time
+                        lastDataReceivedDateTime:
+                          type: string
+                          format: date-time
+                          nullable: true
+                        lastModifiedDateTime:
+                          type: string
+                          format: date-time
+                        logDataProvider:
+                          type: string
+                        logFileCount:
+                          type: integer
+                      additionalProperties: true
+                additionalProperties: true
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /fd/MsGraph/beta/security/dataDiscovery/cloudAppDiscovery/uploadedStreams/{streamId}/microsoft.graph.security.aggregatedAppsDetails(period=duration'P90D'):
+    get:
+      summary: Get cloud app discovery aggregated app details
+      description: >-
+        Retrieve the 90-day aggregated app detail set for a specific uploaded stream,
+        optionally filtered by category.
+      operationId: GraphProxy.GetCloudAppDiscoveryAggregatedAppsDetails
+      tags: [GraphProxy]
+      parameters:
+        - name: streamId
+          in: path
+          required: true
+          description: The uploaded stream identifier.
+          schema:
+            type: string
+        - name: $filter
+          in: query
+          description: OData filter expression applied to the aggregated app detail set.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  '@odata.context':
+                    type: string
+                  value:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        displayName:
+                          type: string
+                        category:
+                          type: string
+                        riskScore:
+                          type: integer
+                        lastSeenDateTime:
+                          type: string
+                          format: date-time
+                        userCount:
+                          type: integer
+                        transactionCount:
+                          type: integer
+                        deviceCount:
+                          type: integer
+                      additionalProperties: true
+                additionalProperties: true
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
 
         '403':
           $ref: common.yml#/components/responses/Forbidden

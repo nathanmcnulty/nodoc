@@ -138,6 +138,42 @@ paths:
         '404':
           $ref: common.yml#/components/responses/NotFound
 
+  /admin/api/offerrec/marketplaceoffer:
+    get:
+      summary: Get marketplace offer recommendation
+      description: >-
+        Retrieve the marketplace offer recommendation payload used by the admin center
+        marketplace landing experience.
+      operationId: Misc.GetMarketplaceOfferRecommendation
+      tags: [Billing]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  OfferRecommendationName:
+                    type: integer
+                  Data:
+                    type: object
+                    nullable: true
+                    additionalProperties: true
+                  PersonalizedContent:
+                    type: object
+                    nullable: true
+                    additionalProperties: true
+                additionalProperties: true
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
   /fd/enhancedRestorev2/v1/featureSetting:
     get:
       summary: Get enhanced restore settings
@@ -218,6 +254,75 @@ paths:
               schema:
                 type: object
                 description: ARM billing accounts. Exact schema pending.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /fd/iris:
+    get:
+      summary: Get IRIS placement content
+      description: >-
+        Retrieve IRIS placement content and recommendation payloads used by the admin
+        center homepage. The observed live tenant returned a no-content placement error
+        for the requested slot.
+      operationId: Misc.GetIrisPlacement
+      tags: [Miscellaneous]
+      parameters:
+        - name: placement
+          in: query
+          description: Placement identifier requested by the client. Some homepage probes send `undefined`.
+          schema:
+            type: string
+        - name: nct
+          in: query
+          description: Numeric content type discriminator.
+          schema:
+            type: integer
+        - name: country
+          in: query
+          description: Country code associated with the request context.
+          schema:
+            type: string
+        - name: locale
+          in: query
+          description: Locale associated with the request context.
+          schema:
+            type: string
+        - name: bcnt
+          in: query
+          description: Homepage batch-count discriminator.
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  batchrsp:
+                    type: object
+                    properties:
+                      ver:
+                        type: string
+                      errors:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            code:
+                              type: integer
+                            msg:
+                              type: string
+                          additionalProperties: true
+                    additionalProperties: true
+                additionalProperties: true
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -390,13 +495,15 @@ paths:
         '404':
           $ref: common.yml#/components/responses/NotFound
 
-  /admin/api/dirsyncmanagement/hasobjectswithdirsyncerrors:
+  /admin/api/admindashboard/tenantsettings:
     get:
-      summary: Check for directory sync errors
+      summary: Get admin dashboard tenant settings
       description: >-
-        Check if the tenant has objects with directory sync errors from Entra Connect (Org Settings > Dynamics 365 Customer Voice).
-      operationId: Misc.HasObjectsWithDirSyncErrors
-      tags: [Miscellaneous]
+        Retrieve tenant-scoped dashboard and marketplace preference flags tracked by
+        the admin shell, including whether marketplace left-navigation entry points
+        have already been shown.
+      operationId: Misc.GetAdminDashboardTenantSettings
+      tags: [Billing]
       responses:
         '200':
           description: OK
@@ -404,7 +511,16 @@ paths:
             application/json:
               schema:
                 type: object
-                description: pending
+                properties:
+                  HasSeenMarketplaceLeftNav:
+                    type: integer
+                  HasSeenMarketplaceLeftNavV2:
+                    type: integer
+                  HasSeenMarketplaceLeftNavV3:
+                    type: integer
+                  HasUpgradedToBusinessStandard:
+                    type: integer
+                additionalProperties: true
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -414,11 +530,36 @@ paths:
         '404':
           $ref: common.yml#/components/responses/NotFound
 
-  /admin/api/dirsyncmanagement/manage:
+  /admin/api/DirsyncManagement/hasobjectswithdirsyncerrors:
+    get:
+      summary: Check for directory sync errors
+      description: >-
+        Check whether the tenant currently has Entra Connect objects with directory
+        synchronization errors.
+      operationId: Misc.HasObjectsWithDirSyncErrors
+      tags: [Miscellaneous]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: boolean
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/DirsyncManagement/manage:
     get:
       summary: Get directory sync management
       description: >-
-        Retrieve directory sync management settings and status for Entra Connect (Org Settings > Dynamics 365 Customer Voice).
+        Retrieve directory synchronization management status, warnings, and support
+        links for the tenant's Entra Connect configuration.
       operationId: Misc.GetDirSyncManagement
       tags: [Miscellaneous]
       responses:
@@ -428,7 +569,42 @@ paths:
             application/json:
               schema:
                 type: object
-                description: pending
+                properties:
+                  IsDirSyncEnabled:
+                    type: boolean
+                  IsFederated:
+                    type: boolean
+                  IsPasswordSyncEnabled:
+                    type: boolean
+                  IsSyncNormal:
+                    type: boolean
+                  IsPasswordSyncNormal:
+                    type: boolean
+                  CompanyName:
+                    type: string
+                  DirSyncClientVersion:
+                    type: string
+                  DirSyncClientMachineName:
+                    type: string
+                  DirSyncLastSyncTime:
+                    type: string
+                  PasswordSyncLastSyncTime:
+                    type: string
+                  VerifiedDomainCount:
+                    type: integer
+                  UnverifiedDomainCount:
+                    type: integer
+                  CDNUrls:
+                    type: object
+                    additionalProperties:
+                      type: string
+                  TroubleShootUrl:
+                    type: string
+                  DirSyncObjectErrorsUrl:
+                    type: string
+                  DomainsPageUrl:
+                    type: string
+                additionalProperties: true
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
