@@ -1,5 +1,110 @@
 [
   {
+    "title": "Intune Autopatch",
+    "specId": "intune-autopatch",
+    "specPath": "specifications/nodoc-intune-autopatch/specification/openapi.yml",
+    "nodocRoute": null,
+    "nodocCategory": "Intune",
+    "operations": [
+      {
+        "operationId": "IntuneAutopatch.Platform.GetFlighting",
+        "summary": "Get Autopatch feature flags",
+        "method": "GET",
+        "path": "/api/Flighting",
+        "source": "authenticated Intune admin center",
+        "browsedPages": [
+          "https://intune.microsoft.com/#view/Microsoft_Intune_Enrollment/ReportingMenu/~/windowsQualityUpdatesReactView"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "IntuneAutopatch.Reporting.ListQualityUpdateBusinessGroups",
+        "summary": "List quality update business group summaries",
+        "method": "POST",
+        "path": "/reporting/reports/v2/deviceAccounting/wqu/summary/businessgroups",
+        "source": "authenticated Intune admin center",
+        "browsedPages": [
+          "https://intune.microsoft.com/#view/Microsoft_Intune_Enrollment/ReportingMenu/~/windowsQualityUpdatesReactView"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "IntuneAutopatch.Reporting.GetQualityUpdateSummaryMetrics",
+        "summary": "Get quality update summary metrics",
+        "method": "POST",
+        "path": "/reporting/reports/v2/deviceAccounting/wqu/summaryMetrics",
+        "source": "authenticated Intune admin center",
+        "browsedPages": [
+          "https://intune.microsoft.com/#view/Microsoft_Intune_Enrollment/ReportingMenu/~/windowsQualityUpdatesReactView"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "IntuneAutopatch.Reporting.ListQualityUpdateTrending",
+        "summary": "List quality update trend points",
+        "method": "POST",
+        "path": "/reporting/reports/v2/deviceAccounting/wqu/trending",
+        "source": "authenticated Intune admin center",
+        "browsedPages": [
+          "https://intune.microsoft.com/#view/Microsoft_Intune_Enrollment/ReportingMenu/~/windowsQualityUpdatesReactView"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      }
+    ]
+  },
+  {
+    "title": "Intune Portal",
+    "specId": "intune-portal",
+    "specPath": "specifications/nodoc-intune-portal/specification/openapi.yml",
+    "nodocRoute": null,
+    "nodocCategory": "Intune",
+    "operations": [
+      {
+        "operationId": "IntunePortal.Portal.GetEarlyUserData",
+        "summary": "Get early portal bootstrap data",
+        "method": "POST",
+        "path": "/api/Portal/GetEarlyUserData",
+        "source": "authenticated Intune admin center",
+        "browsedPages": [
+          "https://intune.microsoft.com/#view/Microsoft_Intune_Enrollment/ReportingMenu/~/windowsQualityUpdatesReactView",
+          "https://intune.microsoft.com/#view/Microsoft_Intune_Enrollment/ReportingMenu/~/windowsFeatureUpdatesReactView"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 2
+      },
+      {
+        "operationId": "IntunePortal.Portal.GetLazyUserData",
+        "summary": "Get deferred portal bootstrap data",
+        "method": "POST",
+        "path": "/api/Portal/GetLazyUserData",
+        "source": "authenticated Intune admin center",
+        "browsedPages": [
+          "https://intune.microsoft.com/#view/Microsoft_Intune_Enrollment/ReportingMenu/~/windowsQualityUpdatesReactView",
+          "https://intune.microsoft.com/#view/Microsoft_Intune_Enrollment/ReportingMenu/~/windowsFeatureUpdatesReactView"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 2
+      },
+      {
+        "operationId": "IntunePortal.Settings.Select",
+        "summary": "Read portal persistent settings",
+        "method": "POST",
+        "path": "/api/Settings/Select",
+        "source": "authenticated Intune admin center",
+        "browsedPages": [
+          "https://intune.microsoft.com/#view/Microsoft_Intune_Enrollment/ReportingMenu/~/windowsQualityUpdatesReactView",
+          "https://intune.microsoft.com/#view/Microsoft_Intune_Enrollment/ReportingMenu/~/windowsFeatureUpdatesReactView"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 2
+      }
+    ]
+  },
+  {
     "title": "Power Platform",
     "specId": "power-platform",
     "specPath": "specifications/nodoc-power-platform/specification/openapi.yml",

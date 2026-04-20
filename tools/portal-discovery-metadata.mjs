@@ -368,10 +368,14 @@ export const coverageOverlayByTitle = {
     ],
     lastSuccessfulPassDepth: "deep-interaction",
     promotedDiscoveries: [
+      route("GET", "/api/Auth/getSpaAuthCode", "Promoted from the live home, solution-launcher, and Data Security Investigations route pass."),
       route("POST", "/api/Report/GetReportSummaryData", "Promoted from the deeper report interaction pass."),
     ],
     knownTelemetryExclusions: [
       route("POST", "/api/log/Put", "Telemetry and performance sink captured from multiple Purview Portal surfaces."),
+    ],
+    notes: [
+      "A live April 2026 same-origin route pass confirmed GET /api/Auth/getSpaAuthCode during home, solution-launcher, and Data Security Investigations navigation.",
     ],
   },
   "Security Copilot": {
@@ -411,6 +415,12 @@ export const coverageOverlayByTitle = {
       "{tenant}-admin.sharepoint.com",
     ],
     lastSuccessfulPassDepth: "deep-interaction",
+    notes: [
+      "A live April 2026 tenant shell snapshot confirmed stable admin hash routes for #/home, #/siteManagement, #/recycleBin, #/settings, #/migration, #/classicFeatures, and #/advancedManagement.",
+    ],
+    openGaps: [
+      "The current tenant nav also exposes SharePoint Embedded, Reports subpages such as Data access governance and OneDrive accounts, and Advanced > Script sources; those surfaces still need route-specific capture before promoting any additional same-origin /_api routes.",
+    ],
   },
   Teams: {
     seedUrls: [

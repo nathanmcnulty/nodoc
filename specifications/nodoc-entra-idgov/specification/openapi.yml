@@ -206,7 +206,7 @@ components:
         reviewerType:
           type: string
           example: ''
-        description:
+        'description':
           type: string
           example: ''
         emailFriendlyDescription:
@@ -353,6 +353,11 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AccessReviewFeatureFlagsResponse'
+              example:
+                '@odata.context': "https://api.accessreviews.identitygovernance.azure.com/accessReviews/v2.0/$metadata#approvalWorkflowProviders('F40AE6A6-7BFC-4ABF-9E2A-63120C21A538')/featureFlags/$entity"
+                sqlOutage: false
+                emergencyRAE: none
+                isArFusionAuthorative: false
   /accessReviews/v2.0/approvalWorkflowProviders/{providerId}/partnerTenantSettings:
     get:
       tags: [Configuration]
@@ -414,7 +419,7 @@ paths:
                           format: uuid
                         displayName:
                           type: string
-                        description:
+                        'description':
                           type: string
                         createdDateTime:
                           type: string
@@ -446,11 +451,30 @@ paths:
                           type: object
                           nullable: true
                           additionalProperties: true
-                        summary:
+                        'summary':
                           type: object
                           nullable: true
                           additionalProperties: true
                       additionalProperties: true
+              example:
+                '@odata.context': "https://api.accessreviews.identitygovernance.azure.com/accessReviews/v2.0/$metadata#approvalWorkflowProviders('F40AE6A6-7BFC-4ABF-9E2A-63120C21A538')/businessFlows"
+                '@odata.count': 1
+                value:
+                  - id: 52a2c256-9a91-4f56-9edc-06969fdcc298
+                    partnerId: d5ec9f3b-324e-4f8a-af55-b69edd48ecbe
+                    displayName: Quarterly guest access review
+                    description: Reviews guest access to the CRM application.
+                    createdDateTime: '2026-01-27T18:09:30.2847107Z'
+                    lastUpdatedDateTime: '2026-02-01T14:15:00Z'
+                    deDuplicationId: null
+                    recordVersion: '1'
+                    customData: null
+                    policyTemplateId: null
+                    isDefault: false
+                    schemaId: null
+                    settings: null
+                    policy: null
+                    summary: null
   /accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests:
     get:
       tags: [Requests]
@@ -562,6 +586,16 @@ paths:
                     items:
                       type: object
                       additionalProperties: true
+              example:
+                '@odata.context': "https://api.accessreviews.identitygovernance.azure.com/accessReviews/v2.0/$metadata#reports"
+                '@odata.count': 1
+                value:
+                  - requestId: 52a2c256-9a91-4f56-9edc-06969fdcc298
+                    displayName: Quarterly guest access review
+                    status: Completed
+                    reviewedEntityCount: 42
+                    startDateTime: '2026-01-27T18:09:30.283Z'
+                    endDateTime: '2026-02-10T18:09:30.283Z'
   /accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests/{requestId}:
     get:
       tags: [Requests]

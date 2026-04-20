@@ -2326,6 +2326,34 @@
         }
       },
       {
+        "operationId": "PurviewPortal.Auth.GetSpaAuthCode",
+        "summary": "Get the SPA auth helper value",
+        "method": "GET",
+        "path": "/api/Auth/getSpaAuthCode",
+        "operationContext": {
+          "surface": "Portal shell",
+          "workflows": [
+            "Load the Purview home shell, solution launcher, or Data Security Investigations landing page."
+          ],
+          "authProfile": "purview-portal-session-baseline",
+          "availability": {
+            "level": "request-dependent",
+            "notes": [
+              "The route appeared during home and same-origin solution navigation rather than every portal interaction."
+            ]
+          },
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Verified from authenticated home, solution-launcher, and Data Security Investigations navigation in the Purview portal."
+              ]
+            }
+          ]
+        }
+      },
+      {
         "operationId": "PurviewPortal.Auth.GetCachedRoles",
         "summary": "Get cached Purview roles",
         "method": "GET",

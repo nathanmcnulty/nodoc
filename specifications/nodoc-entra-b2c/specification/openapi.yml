@@ -71,7 +71,7 @@ components:
           description: Human-readable name of the user flow.
           type: string
           example: Sign up and sign in (Recommended)
-        description:
+        'description':
           description: Description of what the user flow does.
           type: string
           example: Lets the user register for or log into their account
@@ -285,6 +285,24 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/AdminFlow'
+              example:
+                - id: AADSignupOrSignIn
+                  displayName: Sign up and sign in (Recommended)
+                  description: Lets the user register for or log into their account
+                  tags:
+                    - TagAAD
+                    - TagType:SignUpOrSignIn
+                    - TagUJ:AADRecommended
+                  enabled: true
+                  availableTemplates: []
+                - id: AADProfileEditing
+                  displayName: Profile editing
+                  description: Lets the user edit their profile after signing in
+                  tags:
+                    - TagAAD
+                    - TagType:ProfileEditing
+                  enabled: true
+                  availableTemplates: []
         '400':
           description: B2C features not enabled for tenant
           content:
@@ -344,6 +362,29 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TenantInfo'
+              example:
+                id: contoso.onmicrosoft.com
+                isB2CTenant: false
+                tenantScaleType: 3
+                features:
+                  - Basic
+                  - AppV2
+                  - EnableResourceCreation
+                  - PasswordReset
+                  - CustomPolicies
+                  - UserJourneys
+                  - EnableUserFlowsGraphApis
+                  - EnableMsGraphApiConnectors
+                featuresCIAM: []
+                clientFeatures:
+                  - EnablePageContract
+                  - EnableUserFlowExperience
+                  - EnableConditionalAccess
+                  - EnableUserJourneyV3
+                  - EnableApiConnector
+                  - EnableUserAttributeV2
+                  - EnablePasswordReset
+                isCiamTenant: false
   /api/tenants/GetAndInitializeTenantPolicy:
     get:
       tags: [Tenant]
@@ -402,6 +443,17 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TenantResource'
+              example:
+                tenantObjectId: 847b5907-ca15-40f4-b171-eb18619dbfab
+                tenantCountryCode: US
+                subscriptionState: 0
+                subscriptionId: 43babb60-9e73-4dc8-b769-4401c01aad73
+                resourceGroupName: rg-contoso-b2c
+                resourceName: contoso.onmicrosoft.com
+                subscriptionTenantId: 847b5907-ca15-40f4-b171-eb18619dbfab
+                billingType: MAU
+                location: United States
+                isGoLocalEnabled: false
   /api/userAttribute/GetAvailableOutputClaimsList:
     get:
       tags: [User Flows]

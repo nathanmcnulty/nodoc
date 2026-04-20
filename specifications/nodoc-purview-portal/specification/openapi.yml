@@ -11,6 +11,7 @@ info:
     Edge session. They were observed during startup and while navigating blades such as:
 
       - Home and solution launcher
+      - Data Security Investigations
       - Agents, Learn, and Usage center
       - Compliance Manager
       - eDiscovery
@@ -74,6 +75,13 @@ components:
           type: integer
           description: Remaining token lifetime observed in portal responses.
           example: 4255
+    PurviewPortalSpaAuthCodeResponse:
+      type: string
+      nullable: true
+      description: |
+        Plain-text SPA auth helper response observed during same-origin Purview shell bootstrap.
+        The captured tenant returned an empty string with HTTP 200.
+      example: ""
     PurviewPortalRoleCheckRequest:
       type: array
       description: |
@@ -345,6 +353,41 @@ paths:
                 $ref: '#/components/schemas/PurviewPortalTokenResponse'
         '400':
           $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/Auth/getSpaAuthCode:
+    get:
+      tags: [Auth]
+      summary: Get the SPA auth helper value
+      description: |
+        Returns the same-origin SPA auth helper value used while bootstrapping the Purview home shell,
+        solution launcher, and Data Security Investigations experience.
+        The captured responses were `text/plain` HTTP 200 with an empty string body.
+      operationId: PurviewPortal.Auth.GetSpaAuthCode
+      x-nodoc-operation-context:
+        surface: Portal shell
+        workflows:
+          - Load the Purview home shell, solution launcher, or Data Security Investigations landing page.
+        authProfile: purview-portal-session-baseline
+        availability:
+          level: request-dependent
+          notes:
+            - The route appeared during home and same-origin solution navigation rather than every portal interaction.
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Verified from authenticated home, solution-launcher, and Data Security Investigations navigation in the Purview portal.
+      responses:
+        '200':
+          description: SPA auth helper returned successfully.
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/PurviewPortalSpaAuthCodeResponse'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':

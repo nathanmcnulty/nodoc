@@ -142,7 +142,12 @@ paths:
                     type: array
                     items:
                       type: object
-              example: {}
+              example:
+                value:
+                  - id: 0e69f959-bc56-4bf0-bf0a-20b9d674e9dc
+                    displayName: Contractors - CRM
+                    description: Temporary CRM access for external contractors.
+                    catalogId: 5a501947-3f03-4f4a-b3fb-6d7f9c7656d5
   /api/v1/accessPackages/{accessPackageId}:
     get:
       tags: [Entitlement Management]
@@ -179,6 +184,11 @@ paths:
                     type: array
                     items:
                       type: object
+              example:
+                value:
+                  - id: 5a501947-3f03-4f4a-b3fb-6d7f9c7656d5
+                    displayName: External collaboration
+                    description: Catalog for guest and partner access packages.
   /api/v1/catalogs/{catalogId}:
     get:
       tags: [Entitlement Management]
@@ -235,6 +245,11 @@ paths:
                     type: array
                     items:
                       type: object
+              example:
+                value:
+                  - id: 9d08f505-242b-4a80-9170-2644d4412b17
+                    displayName: Fabrikam
+                    description: Partner organization approved for entitlement requests.
   /api/v1/connectedOrganizations/{connectedOrganizationId}:
     get:
       tags: [Connected Organizations]
@@ -301,6 +316,12 @@ paths:
                     type: array
                     items:
                       type: object
+              example:
+                value:
+                  - id: e089d0f3-c79c-4a6f-bd7f-55eb34ba4101
+                    displayName: New contractor onboarding
+                    category: joiner
+                    isEnabled: true
   /api/v1/lifecycleWorkflows/workflows/{workflowId}:
     get:
       tags: [Lifecycle Workflows]

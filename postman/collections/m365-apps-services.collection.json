@@ -409,6 +409,109 @@
                                     ]
                                 },
                                 {
+                                    "name": "Agreementdata",
+                                    "description": "",
+                                    "item": [
+                                        {
+                                            "id": "8f50e627-14db-4de6-bd38-781e6a48329e",
+                                            "name": "List feature-ring agreement records",
+                                            "request": {
+                                                "name": "List feature-ring agreement records",
+                                                "description": {
+                                                    "content": "Returns agreement records that gate preview or ring-based onboarding experiences.\nThe observed live request filtered the collection with `$filter=FeatureRing eq 'Preview'` and returned an empty `value` array for the current tenant.\n",
+                                                    "type": "text/plain"
+                                                },
+                                                "url": {
+                                                    "path": [
+                                                        "onboarding",
+                                                        "odata",
+                                                        "v1.0",
+                                                        "Agreementdata"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [
+                                                        {
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "OData filter used to scope onboarding, agreement, or feature provisioning records.",
+                                                                "type": "text/plain"
+                                                            },
+                                                            "key": "$filter",
+                                                            "value": "FeatureRing eq 'Preview'"
+                                                        }
+                                                    ],
+                                                    "variable": []
+                                                },
+                                                "header": [
+                                                    {
+                                                        "key": "Accept",
+                                                        "value": "application/json"
+                                                    }
+                                                ],
+                                                "method": "GET",
+                                                "body": {},
+                                                "auth": null
+                                            },
+                                            "response": [
+                                                {
+                                                    "id": "407f71b0-3c5c-4a4b-9045-52cd74a4a0b3",
+                                                    "name": "Agreement records",
+                                                    "originalRequest": {
+                                                        "url": {
+                                                            "path": [
+                                                                "onboarding",
+                                                                "odata",
+                                                                "v1.0",
+                                                                "Agreementdata"
+                                                            ],
+                                                            "host": [
+                                                                "{{baseUrl}}"
+                                                            ],
+                                                            "query": [
+                                                                {
+                                                                    "disabled": false,
+                                                                    "description": {
+                                                                        "content": "OData filter used to scope onboarding, agreement, or feature provisioning records.",
+                                                                        "type": "text/plain"
+                                                                    },
+                                                                    "key": "$filter",
+                                                                    "value": "FeatureRing eq 'Preview'"
+                                                                }
+                                                            ],
+                                                            "variable": []
+                                                        },
+                                                        "header": [
+                                                            {
+                                                                "key": "Accept",
+                                                                "value": "application/json"
+                                                            }
+                                                        ],
+                                                        "method": "GET",
+                                                        "body": {}
+                                                    },
+                                                    "status": "OK",
+                                                    "code": 200,
+                                                    "header": [
+                                                        {
+                                                            "key": "Content-Type",
+                                                            "value": "application/json"
+                                                        }
+                                                    ],
+                                                    "body": "{\n  \"@odata.context\": \"https://config.office.com/odata/v1.0/$metadata#AgreementData\",\n  \"value\": []\n}",
+                                                    "cookie": [],
+                                                    "_postman_previewlanguage": "json"
+                                                }
+                                            ],
+                                            "event": [],
+                                            "protocolProfileBehavior": {
+                                                "disableBodyPruning": true
+                                            }
+                                        }
+                                    ]
+                                },
+                                {
                                     "name": "FeatureData",
                                     "description": "",
                                     "item": [
@@ -556,7 +659,7 @@
                                                                 {
                                                                     "disabled": false,
                                                                     "description": {
-                                                                        "content": "OData filter used to scope feature provisioning records.",
+                                                                        "content": "OData filter used to scope onboarding, agreement, or feature provisioning records.",
                                                                         "type": "text/plain"
                                                                     },
                                                                     "key": "$filter",
@@ -565,7 +668,7 @@
                                                             ],
                                                             "variable": []
                                                         },
-                                                        "header": [
+                                                                        "content": "OData filter used to scope onboarding, agreement, or feature provisioning records.",
                                                             {
                                                                 "key": "Accept",
                                                                 "value": "application/json"
