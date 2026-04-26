@@ -628,5 +628,38 @@ export const generatedSpecDataByTitle = {
       "tone": "success",
       "description": "Low placeholder debt with multiple response examples."
     }
+  },
+  "Viva Engage": {
+    "title": "Viva Engage",
+    "specPath": "specifications/nodoc-viva-engage/specification/openapi.yml",
+    "specSourceUrl": "https://github.com/nathanmcnulty/nodoc/tree/main/specifications/nodoc-viva-engage/specification",
+    "specDownloadUrl": "https://raw.githubusercontent.com/nathanmcnulty/nodoc/main/specifications/nodoc-viva-engage/specification/openapi.yml",
+    "operationCount": 5,
+    "tagCount": 3,
+    "tagGroupCount": 3,
+    "ungroupedTagCount": 0,
+    "duplicateGroupedTagCount": 0,
+    "singleTagGroupCount": 3,
+    "hostLikeTagGroupCount": 0,
+    "navigationStandardized": false,
+    "displayNameTagCount": 3,
+    "metadataComplete": true,
+    "contactDefined": true,
+    "licenseDefined": true,
+    "externalDocsDefined": true,
+    "allServersDescribed": true,
+    "placeholderCount": 0,
+    "blankDescriptionCount": 0,
+    "publicLiveCaptureDescriptionCount": 0,
+    "headerProfileCount": 3,
+    "operationContextCount": 5,
+    "requestExampleCount": 4,
+    "successResponseExampleCount": 4,
+    "evidenceMentionCount": 45,
+    "maturity": {
+      "label": "Foundational",
+      "tone": "neutral",
+      "description": "Usable structure is in place, but examples or placeholder cleanup still lag."
+    }
   }
 } as const;

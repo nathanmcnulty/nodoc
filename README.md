@@ -18,6 +18,7 @@ The project currently publishes the following API definitions:
 | Exchange | 61 | Portal session cookie + same-origin `x-requested-with` | [Browse](https://nodoc.nathanmcnulty.com/exchange) | `postman/collections/exchange-beta.collection.json` |
 | SharePoint | 41 | Portal session cookie (`FedAuth`) + SharePoint form digest | [Browse](https://nodoc.nathanmcnulty.com/sharepoint-admin) | `postman/collections/sharepoint-admin.collection.json` |
 | Teams | 99 | Portal bearer token + same-origin portal context | [Browse](https://nodoc.nathanmcnulty.com/teams) | `postman/collections/teams.collection.json` |
+| Viva Engage | 5 | MSAL PKCE bearer token + same-origin GraphQL | [Browse](https://nodoc.nathanmcnulty.com/viva-engage) | `postman/collections/viva-engage.collection.json` |
 | M365 Apps Config | 23 | Portal bearer token + diagnostic headers | [Browse](https://nodoc.nathanmcnulty.com/m-365-apps-config) | `postman/collections/m365-apps-config.collection.json` |
 | M365 Apps Services | 9 | Portal bearer token + diagnostic headers | [Browse](https://nodoc.nathanmcnulty.com/m-365-apps-services) | `postman/collections/m365-apps-services.collection.json` |
 | M365 Apps Inventory | 27 | Portal bearer token + diagnostic headers | [Browse](https://nodoc.nathanmcnulty.com/m-365-apps-inventory) | `postman/collections/m365-apps-inventory.collection.json` |

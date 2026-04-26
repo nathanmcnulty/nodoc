@@ -41,7 +41,7 @@ function HomepageHeader(): ReactElement {
         <p className={styles.heroSubtitle}>
           Browse {apiCatalog.length} portal-backed specs covering Defender XDR, Exchange,
           Teams, Intune, M365 Admin, SharePoint, M365 Apps, Power Platform, Purview, Purview Portal,
-          and Entra surfaces, with
+          Viva, and Entra surfaces, with
           checked-in Postman collections and launch-focused guidance on auth,
           headers, and safe usage.
         </p>

@@ -84,6 +84,116 @@ function ensureGlobalFlag(flags = "gu") {
   return uniqueFlags.join("");
 }
 
+function normalizeHeaderEntries(headers = {}) {
+  return Object.entries(headers)
+    .map(([name, value]) => [String(name || "").trim().toLowerCase(), value])
+    .filter(([name]) => Boolean(name));
+}
+
+function normalizeHeaderMap(headers = {}) {
+  return Object.fromEntries(normalizeHeaderEntries(headers));
+}
+
+function toHeaderValues(value) {
+  if (Array.isArray(value)) {
+    return value.map((entry) => String(entry || "")).filter(Boolean);
+  }
+
+  if (typeof value === "string") {
+    return value
+      .split(/\r?\n/gu)
+      .map((entry) => entry.trim())
+      .filter(Boolean);
+  }
+
+  if (value === undefined || value === null) {
+    return [];
+  }
+
+  return [String(value)];
+}
+
+function extractCookieNames(value) {
+  return Array.from(
+    new Set(
+      toHeaderValues(value)
+        .map((entry) => entry.split(";")[0]?.split("=")[0]?.trim())
+        .filter(Boolean),
+    ),
+  ).sort();
+}
+
+function hostnameMatchesPattern(hostname, pattern) {
+  const normalizedHostname = String(hostname || "").trim().toLowerCase();
+  const normalizedPattern = String(pattern || "").trim().toLowerCase();
+
+  if (!normalizedHostname || !normalizedPattern) {
+    return false;
+  }
+
+  if (normalizedPattern.startsWith("*.")) {
+    const suffix = normalizedPattern.slice(1);
+    return normalizedHostname.length > suffix.length && normalizedHostname.endsWith(suffix);
+  }
+
+  return normalizedHostname === normalizedPattern;
+}
+
+function summarizeHeaderMetadata(headers = {}) {
+  const headerKeys = Array.from(new Set(normalizeHeaderEntries(headers).map(([name]) => name))).sort();
+  const headerMap = normalizeHeaderMap(headers);
+  const cookieNames = extractCookieNames(headerMap.cookie);
+  const cookieHeader = toHeaderValues(headerMap.cookie).join("; ");
+  const authorizationValue = typeof headerMap.authorization === "string" ? headerMap.authorization.trim() : "";
+  const authorizationScheme = authorizationValue ? authorizationValue.split(/\s+/u, 1)[0] : null;
+  const yamHeaderNames = headerKeys.filter((name) => name.startsWith("x-yam-"));
+
+  return {
+    authSignals: {
+      authorizationScheme,
+      cookieNames,
+      hasAuthorizationHeader: Boolean(authorizationValue),
+      hasAuthorizationReceiverHeader: headerKeys.includes("authorization-receiver"),
+      hasCookieHeader: Boolean(cookieHeader),
+      hasXRequestIdHeader: headerKeys.includes("x-request-id"),
+      yamHeaderNames,
+    },
+    requestHeaderKeys: headerKeys,
+    selectedRequestHeaders: {
+      "content-type": headerMap["content-type"] ?? null,
+      origin: headerMap.origin ?? null,
+      referer: headerMap.referer ?? null,
+      "x-ecs-etag": headerMap["x-ecs-etag"] ?? null,
+      "x-request-id": headerMap["x-request-id"] ?? null,
+      "x-yammer-oauthtokenexpiration": headerMap["x-yammer-oauthtokenexpiration"] ?? null,
+    },
+  };
+}
+
+function summarizeResponseHeaderMetadata(headers = {}) {
+  const headerKeys = Array.from(new Set(normalizeHeaderEntries(headers).map(([name]) => name))).sort();
+  const headerMap = normalizeHeaderMap(headers);
+  const setCookieNames = extractCookieNames(headerMap["set-cookie"]);
+
+  return {
+    responseAuthSignals: {
+      hasAccessControlAllowCredentialsHeader: headerKeys.includes("access-control-allow-credentials"),
+      hasLocationHeader: headerKeys.includes("location"),
+      hasSetCookieHeader: setCookieNames.length > 0,
+      hasWwwAuthenticateHeader: headerKeys.includes("www-authenticate"),
+      hasXRequestIdHeader: headerKeys.includes("x-request-id"),
+      setCookieNames,
+    },
+    responseHeaderKeys: headerKeys,
+    selectedResponseHeaders: {
+      "content-type": headerMap["content-type"] ?? null,
+      location: headerMap.location ?? null,
+      "www-authenticate": headerMap["www-authenticate"] ?? null,
+      "x-request-id": headerMap["x-request-id"] ?? null,
+    },
+  };
+}
+
 function expandTemplateVariables(value, variables) {
   if (typeof value === "string") {
     return value.replace(/\$\{([^}]+)\}/gu, (_match, variableName) => {
@@ -568,7 +678,8 @@ function shouldMatchRequest(requestUrl, args) {
 
   try {
     const parsed = new URL(requestUrl);
-    const hostMatches = args.matchHosts.length === 0 || args.matchHosts.includes(parsed.hostname);
+    const hostMatches = args.matchHosts.length === 0
+      || args.matchHosts.some((pattern) => hostnameMatchesPattern(parsed.hostname, pattern));
     const pathMatches = args.matchPathPrefixes.length === 0
       || args.matchPathPrefixes.some((prefix) => matchesPathPrefix(parsed.pathname, prefix));
     return hostMatches && pathMatches;
@@ -587,6 +698,100 @@ function truncate(value, maxLength = 5000) {
   }
 
   return `${value.slice(0, maxLength)}\n...[truncated ${value.length - maxLength} chars]`;
+}
+
+const redactedBodyValue = "[redacted]";
+const sensitiveBodyKeys = new Set([
+  "accesstoken",
+  "assertion",
+  "authorization",
+  "authtoken",
+  "clientsecret",
+  "hubtenanttoken",
+  "idtoken",
+  "password",
+  "refreshtoken",
+  "secret",
+  "token",
+]);
+
+function normalizeSensitiveKey(value) {
+  return String(value ?? "").toLowerCase().replace(/[^a-z0-9]/gu, "");
+}
+
+function sanitizeTokenLikeString(value) {
+  if (typeof value !== "string" || !value) {
+    return value;
+  }
+
+  return value
+    .replace(/\b(Bearer)\s+[A-Za-z0-9._~+/=-]+/gu, "$1 [redacted]")
+    .replace(/\beyJ[A-Za-z0-9_-]+\.[A-Za-z0-9._-]+\.[A-Za-z0-9._-]+\b/gu, redactedBodyValue)
+    .replace(
+      /([?&](?:access_token|refresh_token|id_token|client_secret|assertion|token)=)[^&\s]+/giu,
+      `$1${redactedBodyValue}`,
+    );
+}
+
+function redactStructuredBody(value) {
+  if (Array.isArray(value)) {
+    return value.map((entry) => redactStructuredBody(entry));
+  }
+
+  if (value && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, entryValue]) => [
+        key,
+        sensitiveBodyKeys.has(normalizeSensitiveKey(key))
+          ? redactedBodyValue
+          : redactStructuredBody(entryValue),
+      ]),
+    );
+  }
+
+  if (typeof value === "string") {
+    return sanitizeTokenLikeString(value);
+  }
+
+  return value;
+}
+
+function sanitizeCapturedBody(value) {
+  if (typeof value !== "string") {
+    return value;
+  }
+
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return value;
+  }
+
+  try {
+    return JSON.stringify(redactStructuredBody(JSON.parse(trimmed)));
+  } catch {
+    // Try additional body formats.
+  }
+
+  try {
+    const params = new URLSearchParams(trimmed);
+    let changed = false;
+    for (const key of new Set(Array.from(params.keys()))) {
+      if (!sensitiveBodyKeys.has(normalizeSensitiveKey(key))) {
+        continue;
+      }
+
+      params.set(key, redactedBodyValue);
+      changed = true;
+    }
+
+    if (changed) {
+      return params.toString();
+    }
+  } catch {
+    // Fall back to plain string sanitization.
+  }
+
+  return sanitizeTokenLikeString(value);
 }
 
 function uniqueSorted(values) {
@@ -1053,7 +1258,7 @@ function buildClickExpression(action) {
     };
 
     const candidates = Array.from(
-      document.querySelectorAll("a[href], button, [role='button'], [role='tab'], [aria-controls], [data-automation-id]")
+      document.querySelectorAll("a[href], button, [role='button'], [role='tab'], [aria-controls], [aria-label], [data-automation-id], div, span")
     )
       .filter((element) => visible(element))
       .map((element) => ({
@@ -1065,7 +1270,15 @@ function buildClickExpression(action) {
         role: element.getAttribute("role"),
         tag: element.tagName.toLowerCase(),
         text: normalizeText(element.textContent),
-      }));
+      }))
+      .filter((candidate) => (
+        candidate.text
+        || candidate.ariaLabel
+        || candidate.automationId
+      ))
+      .filter((candidate) => [candidate.text, candidate.ariaLabel, candidate.automationId]
+        .filter(Boolean)
+        .every((value) => value.length <= 200));
 
     const matches = candidates.filter((candidate) => {
       if (mode === "click-href") {
@@ -1391,7 +1604,7 @@ async function main() {
       headers: params.request.headers ?? {},
       method: params.request.method,
       pageLabel: activePageLabel,
-      requestBody: truncate(params.request.postData ?? null),
+      requestBody: truncate(sanitizeCapturedBody(params.request.postData ?? null)),
       resourceType,
       sessionId,
       startedAt: params.timestamp,
@@ -1432,9 +1645,11 @@ async function main() {
         requestId: params.requestId,
       }, metadata.sessionId);
       record.responseBody = truncate(
-        body?.base64Encoded
-          ? Buffer.from(body.body, "base64").toString("utf8")
-          : body?.body ?? null,
+        sanitizeCapturedBody(
+          body?.base64Encoded
+            ? Buffer.from(body.body, "base64").toString("utf8")
+            : body?.body ?? null,
+        ),
       );
     } catch {
       record.responseBody = null;
@@ -1491,6 +1706,8 @@ async function main() {
       }));
     const apiRecords = filteredRequests.map((request) => toApiRecord(request, args.portal));
     const rawRequests = filteredRequests.map((request) => ({
+      ...summarizeHeaderMetadata(request.headers ?? {}),
+      ...summarizeResponseHeaderMetadata(request.responseHeaders ?? {}),
       failureText: request.failureText ?? null,
       matchesCurrentSpec: request.matchesCurrentSpec,
       method: request.method,
@@ -1604,7 +1821,15 @@ async function main() {
       };
     });
 
-    await client.send("Page.navigate", { url: resolvedUrl });
+    const navigateIssued = await Promise.race([
+      client.send("Page.navigate", { url: resolvedUrl }).then(() => true).catch(() => false),
+      delay(Math.min(args.navigationTimeoutMs, 5000)).then(() => false),
+    ]);
+
+    if (!navigateIssued) {
+      await evaluateJson(client, `location.href = ${JSON.stringify(resolvedUrl)}`);
+    }
+
     const didLoad = await navigationPromise;
     await delay(args.settleMs);
 
