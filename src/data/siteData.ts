@@ -826,7 +826,7 @@ export const gettingStartedGuides: GettingStartedGuide[] = [
     practicalGuidance: [
       "Start from an already-authenticated `https://engage.cloud.microsoft/main/admin` tab and capture the first hydrated GraphQL requests, especially `RealtimeConnectionSettingsClients`, before chasing bundle-only route hints.",
       "Preserve the MSAL redirect context, requested scope, any `Authorization` or `X-Request-Id` headers, and the redacted Bayeux handshake shape, but never store raw token or cookie values in committed artifacts.",
-      "Treat the visible `Generate code` and `Redeem code` affordances on `/main/admin/setup-external-network` as likely live writes; prefer direct-route capture and bundle inspection before clicking them.",
+      "The live setup page text frames `Generate code` and `Redeem code` as one-time access-code actions used to link an external network, not as a visible billing or purchase flow, but they should still be treated as live writes until the underlying mutation is captured.",
     ],
     mutationGuidance: [
       "Treat future non-telemetry POSTs under `/graphql` or `api.engage.cloud.microsoft` as live writes until the browser flow proves they are read-only.",
@@ -834,7 +834,7 @@ export const gettingStartedGuides: GettingStartedGuide[] = [
     ],
     pitfalls: [
       "Unauthenticated deep crawls fall back immediately to Microsoft Entra sign-in, so bundle analysis alone is not enough to publish field-level GraphQL operations.",
-      "The client bundles also reference legacy Yammer hosts such as `msgraph.yammer.com`, `broadcast.yammer.com`, and transient `*.rt.yammer.com`; only the realtime relay family has direct live-confirmed admin traffic so far.",
+      "The client bundles still declare legacy Yammer hosts such as `msgraph.yammer.com`, `broadcast.yammer.com`, and transient `*.rt.yammer.com`; only the realtime relay family has direct live-confirmed admin traffic so far.",
       "Conditional `X-Yam-*` headers appear to depend on request scope and may not be present on every admin request.",
     ],
   },
