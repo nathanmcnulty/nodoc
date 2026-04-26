@@ -170,6 +170,42 @@ function summarizeHeaderMetadata(headers = {}) {
   };
 }
 
+function sanitizeLocationHeader(value) {
+  if (typeof value !== "string" || value.length === 0) {
+    return null;
+  }
+
+  const sensitiveKeys = new Set([
+    "access_token",
+    "client_info",
+    "code",
+    "id_token",
+    "nonce",
+    "refresh_token",
+    "session_state",
+    "state",
+  ]);
+
+  try {
+    const placeholderOrigin = "https://placeholder.invalid";
+    const parsed = new URL(value, placeholderOrigin);
+
+    for (const [key] of parsed.searchParams) {
+      if (sensitiveKeys.has(key.toLowerCase())) {
+        parsed.searchParams.set(key, "[redacted]");
+      }
+    }
+
+    if (/^[a-z][a-z0-9+.-]*:/iu.test(value)) {
+      return parsed.toString();
+    }
+
+    return `${parsed.pathname}${parsed.search}${parsed.hash}`;
+  } catch {
+    return value;
+  }
+}
+
 function summarizeResponseHeaderMetadata(headers = {}) {
   const headerKeys = Array.from(new Set(normalizeHeaderEntries(headers).map(([name]) => name))).sort();
   const headerMap = normalizeHeaderMap(headers);
@@ -187,7 +223,7 @@ function summarizeResponseHeaderMetadata(headers = {}) {
     responseHeaderKeys: headerKeys,
     selectedResponseHeaders: {
       "content-type": headerMap["content-type"] ?? null,
-      location: headerMap.location ?? null,
+      location: sanitizeLocationHeader(headerMap.location),
       "www-authenticate": headerMap["www-authenticate"] ?? null,
       "x-request-id": headerMap["x-request-id"] ?? null,
     },
@@ -1258,7 +1294,7 @@ function buildClickExpression(action) {
     };
 
     const candidates = Array.from(
-      document.querySelectorAll("a[href], button, [role='button'], [role='tab'], [aria-controls], [aria-label], [data-automation-id], div, span")
+      document.querySelectorAll("a[href], button, [role='button'], [role='tab'], [aria-controls], [aria-label], [data-automation-id]")
     )
       .filter((element) => visible(element))
       .map((element) => ({
@@ -1278,7 +1314,8 @@ function buildClickExpression(action) {
       ))
       .filter((candidate) => [candidate.text, candidate.ariaLabel, candidate.automationId]
         .filter(Boolean)
-        .every((value) => value.length <= 200));
+        .every((value) => value.length <= 200))
+      .slice(0, 300);
 
     const matches = candidates.filter((candidate) => {
       if (mode === "click-href") {

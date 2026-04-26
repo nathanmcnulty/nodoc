@@ -402,6 +402,38 @@ function mergeRequestExamples(currentRequest, previousRequest) {
   return mergedRequest;
 }
 
+function normalizePostmanUrl(url) {
+  if (!url || typeof url !== "object") {
+    return url;
+  }
+
+  const normalizedUrl = {
+    ...url,
+  };
+  const variableName = typeof normalizedUrl.port === "string" ? normalizedUrl.port : null;
+  const variableEntry = variableName
+    ? normalizedUrl.variable?.find((entry) => entry?.key === variableName)
+    : null;
+
+  if (variableEntry && (!Array.isArray(normalizedUrl.host) || normalizedUrl.host.length === 0)) {
+    normalizedUrl.host = [`{{${variableName}}}`];
+    delete normalizedUrl.port;
+
+    const protocol = normalizedUrl.protocol ?? "https";
+    const pathSegments = Array.isArray(normalizedUrl.path) ? normalizedUrl.path : [];
+    const queryEntries = Array.isArray(normalizedUrl.query)
+      ? normalizedUrl.query.filter((entry) => entry?.key)
+      : [];
+    const query = queryEntries.length === 0
+      ? ""
+      : `?${queryEntries.map((entry) => `${entry.key}=${entry.value ?? ""}`).join("&")}`;
+
+    normalizedUrl.raw = `${protocol}://{{${variableName}}}/${pathSegments.join("/")}${query}`;
+  }
+
+  return normalizedUrl;
+}
+
 function getSpecExampleBody(operations, itemRequest, response) {
   const request = response.originalRequest ?? itemRequest;
   const method = request?.method?.toUpperCase();
@@ -453,6 +485,10 @@ function stabilizeCollection(openapiPath, collectionPath, previousCollection) {
       item.id = previousItem.id;
     }
 
+    if (item.request?.url) {
+      item.request.url = normalizePostmanUrl(item.request.url);
+    }
+
     if (previousItem?.request && item.request) {
       item.request = mergeRequestExamples(item.request, previousItem.request);
     }
@@ -464,6 +500,10 @@ function stabilizeCollection(openapiPath, collectionPath, previousCollection) {
 
       if (previousResponse?.id) {
         response.id = previousResponse.id;
+      }
+
+      if (response.originalRequest?.url) {
+        response.originalRequest.url = normalizePostmanUrl(response.originalRequest.url);
       }
 
       if (previousResponse?.originalRequest && response.originalRequest) {
