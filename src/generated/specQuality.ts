@@ -636,12 +636,12 @@ export const generatedSpecDataByTitle = {
     "specDownloadUrl": "https://raw.githubusercontent.com/nathanmcnulty/nodoc/main/specifications/nodoc-viva-engage/specification/openapi.yml",
     "operationCount": 5,
     "tagCount": 3,
-    "tagGroupCount": 3,
+    "tagGroupCount": 2,
     "ungroupedTagCount": 0,
     "duplicateGroupedTagCount": 0,
-    "singleTagGroupCount": 3,
+    "singleTagGroupCount": 1,
     "hostLikeTagGroupCount": 0,
-    "navigationStandardized": false,
+    "navigationStandardized": true,
     "displayNameTagCount": 3,
     "metadataComplete": true,
     "contactDefined": true,
@@ -657,9 +657,9 @@ export const generatedSpecDataByTitle = {
     "successResponseExampleCount": 4,
     "evidenceMentionCount": 45,
     "maturity": {
-      "label": "Foundational",
-      "tone": "neutral",
-      "description": "Usable structure is in place, but examples or placeholder cleanup still lag."
+      "label": "Advanced",
+      "tone": "success",
+      "description": "Low placeholder debt with multiple response examples."
     }
   }
 } as const;
