@@ -170,6 +170,25 @@ const apiCatalogSeed: ApiCatalogSeed[] = [
       "https://raw.githubusercontent.com/nathanmcnulty/nodoc/main/postman/collections/teams.collection.json",
   },
   {
+    title: "Viva Engage",
+    slug: "/viva-engage",
+    family: "Viva",
+    operations: 5,
+    authModel: "MSAL PKCE bearer token + same-origin GraphQL",
+    baseUrl: "https://engage.cloud.microsoft",
+    summary:
+      "Authenticated Viva Engage admin coverage now documents the same-origin persisted GraphQL contract, the bearer-backed token helper observed behind `engage.cloud.microsoft/main/admin`, and the transient Yammer-era realtime relay chain bootstrapped from `RealtimeConnectionSettingsClients`, together with direct-route captures for segmentation and external-network admin pages.",
+    highlights: [
+      "Same-origin `/graphql` admin endpoint documented from authenticated landing and direct-route captures, including `RealtimeConnectionSettingsClients` returning relay base URLs",
+      "Direct-route captures resolved `/main/admin/segmentation`, `/main/admin/external-networks-settings`, and `/main/admin/setup-external-network`",
+      "Cross-host `GET /api/v1/oauth2/aad_access_token` plus transient `*.rt.yammer.com/cometd/handshake`, `/cometd/`, and `/cometd/connect` relay endpoints documented from the live admin session",
+      "Live capture confirmed bearer auth on GraphQL and token-helper requests, while realtime relay auth moved into redacted Bayeux payload fields without cookie headers",
+    ],
+    collectionPath: "postman/collections/viva-engage.collection.json",
+    collectionDownloadUrl:
+      "https://raw.githubusercontent.com/nathanmcnulty/nodoc/main/postman/collections/viva-engage.collection.json",
+  },
+  {
     title: "M365 Apps Config",
     slug: "/m-365-apps-config",
     family: "M365 Apps admin center",
@@ -509,6 +528,12 @@ export const accessModels: AccessModel[] = [
     portals: ["Teams"],
   },
   {
+    title: "MSAL PKCE bearer token + same-origin GraphQL",
+    description:
+      "Viva Engage admin uses a browser-acquired bearer token from the Engage MSAL PKCE flow with the Yammer `user_impersonation` scope, then calls same-origin persisted GraphQL on `engage.cloud.microsoft`, a bearer-backed token helper on `api.engage.cloud.microsoft`, and a transient `*.rt.yammer.com` Bayeux relay chain whose auth material is carried in the handshake body rather than in `Authorization` or cookie headers. No cookie header was observed on the authenticated admin API requests captured for this pass.",
+    portals: ["Viva Engage"],
+  },
+  {
     title: "Portal bearer tokens + diagnostic headers",
     description:
       "M365 Apps uses browser-obtained bearer tokens together with diagnostic headers such as `x-api-name`, `x-correlationid`, `x-manageoffice-client-sid`, and `x-requested-with`.",
@@ -783,6 +808,34 @@ export const gettingStartedGuides: GettingStartedGuide[] = [
       "The Teams admin center mixes same-origin portal routes, partitioned Teams APIs, and region-specific service hosts, so a valid token alone is not enough if you skip the discovery step.",
       "Some routes, such as virtual visits aggregate records, are real but sensitive to exact query defaults and can return contextual `422` responses when replayed without the right state.",
       "Dashboard widgets introduce adjacent Office-hosted report and app-catalog APIs that are specific to the Teams admin experience even though they do not live on a `teams.microsoft.com` hostname.",
+    ],
+  },
+  {
+    title: "Viva Engage admin",
+    portals: ["Viva Engage"],
+    authModel: "MSAL PKCE bearer token + same-origin GraphQL",
+    baseUrls: [
+      "https://engage.cloud.microsoft/graphql",
+      "https://api.engage.cloud.microsoft/api/v1/oauth2/aad_access_token",
+    ],
+    confirmedDetails: [
+      "The first live seed redirected to Microsoft Entra sign-in, which confirmed the MSAL PKCE flow and the `https://www.yammer.com/user_impersonation openid profile offline_access` scope.",
+      "Live capture confirmed same-origin `RealtimeConnectionSettingsClients`, the cross-host `https://api.engage.cloud.microsoft/api/v1/oauth2/aad_access_token` helper, and the transient `*.rt.yammer.com/cometd/` relay chain that the GraphQL response bootstraps.",
+      "Telemetry sinks `/api/v1/yamalytics/webui`, `/api/v2/events`, and `/api/v3/events` were observed in bundles and are intentionally excluded from the published spec.",
+    ],
+    practicalGuidance: [
+      "Start from an already-authenticated `https://engage.cloud.microsoft/main/admin` tab and capture the first hydrated GraphQL requests, especially `RealtimeConnectionSettingsClients`, before chasing bundle-only route hints.",
+      "Preserve the MSAL redirect context, requested scope, any `Authorization` or `X-Request-Id` headers, and the redacted Bayeux handshake shape, but never store raw token or cookie values in committed artifacts.",
+      "The live setup page text frames `Generate code` and `Redeem code` as one-time access-code actions used to link an external network, not as a visible billing or purchase flow, but they should still be treated as live writes until the underlying mutation is captured.",
+    ],
+    mutationGuidance: [
+      "Treat future non-telemetry POSTs under `/graphql` or `api.engage.cloud.microsoft` as live writes until the browser flow proves they are read-only.",
+      "If you map a new admin mutation, capture the full GraphQL document or request body and confirm the rendered page state before replaying anything.",
+    ],
+    pitfalls: [
+      "Unauthenticated deep crawls fall back immediately to Microsoft Entra sign-in, so bundle analysis alone is not enough to publish field-level GraphQL operations.",
+      "The client bundles still declare legacy Yammer hosts such as `msgraph.yammer.com`, `broadcast.yammer.com`, and transient `*.rt.yammer.com`; only the realtime relay family has direct live-confirmed admin traffic so far.",
+      "Conditional `X-Yam-*` headers appear to depend on request scope and may not be present on every admin request.",
     ],
   },
   {

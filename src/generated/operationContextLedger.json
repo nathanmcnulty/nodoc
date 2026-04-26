@@ -2839,5 +2839,270 @@
         }
       }
     ]
+  },
+  {
+    "title": "Viva Engage",
+    "specId": "viva-engage",
+    "specPath": "specifications/nodoc-viva-engage/specification/openapi.yml",
+    "nodocRoute": null,
+    "nodocCategory": "Viva",
+    "headerProfiles": {
+      "viva-engage-graphql": {
+        "description": "Same-origin Viva Engage GraphQL profile confirmed by the authenticated admin landing capture.",
+        "notes": [
+          "No `Cookie`, `Authorization-Receiver`, or `X-Yam-*` request headers were observed on the captured authenticated admin GraphQL calls for this pass.",
+          "The shipped bundle code can also emit `X-Yam-Scope-Type`, `X-Yam-TenantId`, and `X-Yam-Scope-Entity-Id` when a request is scoped to a Teams meeting context, but those headers were not present on the admin landing requests captured here.",
+          "Preserve raw token strings and cookie values outside committed specs and generated ledgers."
+        ],
+        "requiredHeaders": [
+          {
+            "name": "Authorization",
+            "description": "Browser-issued bearer token acquired for the Viva Engage or Yammer resource scope."
+          }
+        ],
+        "observedHeaders": [
+          {
+            "name": "Content-Type",
+            "description": "Observed on the authenticated persisted GraphQL POST requests.",
+            "value": "application/json"
+          },
+          {
+            "name": "Referer",
+            "description": "Admin-surface referer used by the authenticated admin landing flow.",
+            "value": "https://engage.cloud.microsoft/main/admin"
+          },
+          {
+            "name": "X-Request-Id",
+            "description": "Client-generated request correlation header emitted on the captured same-origin GraphQL requests."
+          },
+          {
+            "name": "X-Analytics-Client-Properties",
+            "description": "Client telemetry context header attached to the authenticated GraphQL calls."
+          },
+          {
+            "name": "X-ECS-Etag",
+            "description": "Configuration snapshot header attached to the authenticated GraphQL calls."
+          }
+        ]
+      },
+      "viva-engage-token-helper": {
+        "description": "Cross-host token-helper profile confirmed during the authenticated Viva Engage admin landing capture.",
+        "notes": [
+          "No `Cookie`, `Authorization-Receiver`, or `X-Yam-*` request headers were observed on the captured helper call for this pass.",
+          "The shipped bundle code also supports an optional `X-Yammer-ThirdPartyCookieBlocked` header and requests the helper with `credentials: include`, even though the captured admin request still showed no cookie header.",
+          "Preserve raw token strings and cookie values outside committed specs and generated ledgers."
+        ],
+        "requiredHeaders": [
+          {
+            "name": "Authorization",
+            "description": "Browser-issued bearer token reused for the token-status helper request."
+          }
+        ],
+        "observedHeaders": [
+          {
+            "name": "Referer",
+            "description": "Root Engage referer observed on the helper request.",
+            "value": "https://engage.cloud.microsoft/"
+          },
+          {
+            "name": "X-Yammer-OAuthTokenExpiration",
+            "description": "Token-expiration helper header attached to the cross-host bearer-backed request."
+          }
+        ]
+      },
+      "viva-engage-realtime-relay": {
+        "description": "Transient `*.rt.yammer.com` CometD relay profile derived from the authenticated Viva Engage admin shell.",
+        "notes": [
+          "The captured realtime relay requests did not use `Authorization`, `Cookie`, `X-Request-Id`, or `X-Yam-*` request headers.",
+          "Authentication was carried in the Bayeux handshake payload through redacted `ext.token` and `ext.hub_tenant_token` values.",
+          "The relay host was supplied by the same-origin `RealtimeConnectionSettingsClients` GraphQL response and changed across page loads."
+        ],
+        "observedHeaders": [
+          {
+            "name": "Referer",
+            "description": "Root Engage referer observed on the realtime relay requests.",
+            "value": "https://engage.cloud.microsoft/"
+          },
+          {
+            "name": "Content-Type",
+            "description": "Observed on the initial Bayeux handshake request. Later subscribe and connect posts did not consistently add extra custom request headers.",
+            "value": "application/json;charset=UTF-8"
+          }
+        ]
+      }
+    },
+    "operations": [
+      {
+        "operationId": "AdminGraphQL_PostGraphql",
+        "summary": "Execute Viva Engage admin GraphQL operations",
+        "method": "POST",
+        "path": "/graphql",
+        "operationContext": {
+          "surface": "Admin shell",
+          "workflows": [
+            "Open `https://engage.cloud.microsoft/main/admin`, allow the Viva Engage admin shell to authenticate through MSAL, and wait for the landing view to resolve its persisted GraphQL calls.",
+            "Open `https://engage.cloud.microsoft/main/admin/segmentation` to load the dedicated segmentation admin page and its persisted GraphQL bootstrap query.",
+            "Open `https://engage.cloud.microsoft/main/admin/external-networks-settings` to load the canonical external-networks admin page.",
+            "Open `https://engage.cloud.microsoft/main/admin/setup-external-network` to continue into the external-network setup flow, which reused the external-networks admin bootstrap query during this pass.",
+            "Preserve the `RealtimeConnectionSettingsClients` response if present, because it provides the transient `cometdBaseUrl` used by the Yammer-era realtime relay chain."
+          ],
+          "headerProfile": "viva-engage-graphql",
+          "availability": {
+            "level": "tenant-conditional",
+            "notes": [
+              "The authenticated landing capture confirmed 27 unique persisted query names or aliases, but the exact operation mix remains tenant- and role-dependent.",
+              "The admin landing pass confirmed operations such as `CurrentUserClients`, `FeatureAccessSettingsClients`, `TenantConfigurationAndRoles`, `NavigationGroupsClients`, and `RealtimeConnectionSettingsClients`.",
+              "The segmentation direct-route capture confirmed `NetworkSegmentationQueryClients` together with the dedicated `4-page-admin-segmentation-settings.js` route chunk.",
+              "The external-networks settings and setup direct-route captures confirmed `ExternalNetworksAdminSettingsClients` together with the dedicated `4-page-admin-external-networks-settings.js` route chunk.",
+              "The `RealtimeConnectionSettingsClients` operation returned transient `cometdBaseUrl` values that bootstrapped `*.rt.yammer.com/cometd/handshake`, `/cometd/`, and `/cometd/connect` relay calls without `Authorization` or cookie headers.",
+              "Navigating to `/main/admin/external-networks` updated the URL but rendered the generic admin landing state during this pass, so `external-networks-settings` should be treated as the canonical external-networks route."
+            ]
+          },
+          "provenance": [
+            {
+              "source": "live-authenticated-capture",
+              "confidence": "high",
+              "notes": [
+                "The default Edge profile captured persisted GraphQL POST requests after the Viva Engage admin shell hydrated successfully."
+              ]
+            },
+            {
+              "source": "live-direct-route-capture",
+              "confidence": "high",
+              "notes": [
+                "Direct-route captures validated the segmentation, external-networks settings, and setup-external-network admin pages in the authenticated default Edge profile."
+              ]
+            },
+            {
+              "source": "bundle-analysis",
+              "confidence": "medium",
+              "notes": [
+                "The checked-in bundle set exposed `https://engage.cloud.microsoft/graphql` as the configured GraphQL host."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "AuthHelpers_GetAadAccessToken",
+        "summary": "Probe Viva Engage AAD access-token state",
+        "method": "GET",
+        "path": "/api/v1/oauth2/aad_access_token",
+        "operationContext": {
+          "surface": "Admin shell bootstrap",
+          "workflows": [
+            "Open `https://engage.cloud.microsoft/main/admin` and allow the shell bootstrap flow to initialize cross-host auth helpers after MSAL sign-in completes."
+          ],
+          "headerProfile": "viva-engage-token-helper",
+          "availability": {
+            "level": "tenant-conditional",
+            "notes": [
+              "The authenticated landing capture observed this bearer-backed GET request without a request body.",
+              "The browser aborted the helper response after headers were received, so the response body was not retained in the capture artifacts.",
+              "The shipped bundle still constructs this route through Yammer-named helper code and can add `X-Yammer-ThirdPartyCookieBlocked` when that condition is detected."
+            ]
+          },
+          "provenance": [
+            {
+              "source": "live-authenticated-capture",
+              "confidence": "high",
+              "notes": [
+                "The helper request was captured directly from the default Edge profile during the authenticated admin landing flow."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "RealtimeRelay_PostHandshake",
+        "summary": "Open a Viva Engage realtime relay session",
+        "method": "POST",
+        "path": "/cometd/handshake",
+        "operationContext": {
+          "surface": "Realtime bootstrap",
+          "workflows": [
+            "Open `https://engage.cloud.microsoft/main/admin` or a validated admin sub-route and allow `RealtimeConnectionSettingsClients` to return the transient `cometdBaseUrl`.",
+            "Reuse that `cometdBaseUrl` host to post a Bayeux handshake to `/cometd/handshake`."
+          ],
+          "headerProfile": "viva-engage-realtime-relay",
+          "availability": {
+            "level": "tenant-conditional",
+            "notes": [
+              "The relay host is transient and was observed changing across page loads.",
+              "The handshake request carried redacted auth material in the body and did not include `Authorization` or cookie headers."
+            ]
+          },
+          "provenance": [
+            {
+              "source": "live-authenticated-capture",
+              "confidence": "high",
+              "notes": [
+                "The default Edge profile captured the handshake immediately after `RealtimeConnectionSettingsClients` returned `cometdBaseUrl`."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "RealtimeRelay_PostSubscribe",
+        "summary": "Subscribe to Viva Engage realtime relay channels",
+        "method": "POST",
+        "path": "/cometd/",
+        "operationContext": {
+          "surface": "Realtime subscriptions",
+          "workflows": [
+            "Complete the Bayeux handshake against the relay host returned by `RealtimeConnectionSettingsClients`.",
+            "Post one or more `/meta/subscribe` envelopes to `/cometd/` for the desired user, feed, or broadcast channels."
+          ],
+          "headerProfile": "viva-engage-realtime-relay",
+          "availability": {
+            "level": "tenant-conditional",
+            "notes": [
+              "The observed subscription set was tenant- and user-scoped.",
+              "Captured subscribe posts continued to rely on the relay `clientId` instead of `Authorization` or cookie headers."
+            ]
+          },
+          "provenance": [
+            {
+              "source": "live-authenticated-capture",
+              "confidence": "high",
+              "notes": [
+                "The default Edge profile captured successful relay subscriptions after the handshake completed."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "RealtimeRelay_PostConnect",
+        "summary": "Poll the Viva Engage realtime relay",
+        "method": "POST",
+        "path": "/cometd/connect",
+        "operationContext": {
+          "surface": "Realtime long-poll",
+          "workflows": [
+            "Complete the Bayeux handshake and any required subscriptions against the relay host returned by `RealtimeConnectionSettingsClients`.",
+            "Post `/meta/connect` envelopes to `/cometd/connect` to maintain the realtime channel."
+          ],
+          "headerProfile": "viva-engage-realtime-relay",
+          "availability": {
+            "level": "tenant-conditional",
+            "notes": [
+              "The captured connect requests continued the relay session without `Authorization` or cookie headers.",
+              "The successful response returned relay advice such as reconnect timing on earlier connect cycles."
+            ]
+          },
+          "provenance": [
+            {
+              "source": "live-authenticated-capture",
+              "confidence": "high",
+              "notes": [
+                "The default Edge profile captured repeated successful `/meta/connect` long-polls after the relay subscriptions were established."
+              ]
+            }
+          ]
+        }
+      }
+    ]
   }
 ]

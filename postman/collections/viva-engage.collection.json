@@ -1,0 +1,743 @@
+{
+    "item": [
+        {
+            "name": "graphql",
+            "description": "",
+            "item": [
+                {
+                    "id": "9e9df374-8f78-4abb-950d-3b5a85bfde28",
+                    "name": "Execute Viva Engage admin GraphQL operations",
+                    "request": {
+                        "name": "Execute Viva Engage admin GraphQL operations",
+                        "description": {
+                            "content": "Same-origin persisted GraphQL endpoint exposed by the Viva Engage web application.\n\nThe authenticated admin landing capture observed 27 unique persisted operations on this\nroute, including `CurrentUserClients`, `FeatureAccessSettingsClients`,\n`AdminFeatureAccessSettingsClients`, `TenantConfigurationAndRoles`, and\n`RealtimeConnectionSettingsClients`.\n\nFollow-up direct-route captures on `/main/admin/segmentation`,\n`/main/admin/external-networks-settings`, and\n`/main/admin/setup-external-network` added route-specific operations such as\n`NetworkSegmentationQueryClients` and `ExternalNetworksAdminSettingsClients`.\n\nThe same authenticated admin shell also issued `RealtimeConnectionSettingsClients`, which\nreturned a tenant- and user-scoped `cometdBaseUrl` that the browser immediately used for\ntransient `*.rt.yammer.com` Bayeux relay traffic.\n",
+                            "type": "text/plain"
+                        },
+                        "url": {
+                            "path": [
+                                "graphql"
+                            ],
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "query": [],
+                            "variable": []
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "method": "POST",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"query\": \"string\",\n  \"operationName\": \"string\",\n  \"variables\": {\n    \"key_0\": 4578\n  },\n  \"extensions\": {\n    \"key_0\": 4578.830473562596,\n    \"key_1\": 3953.159555374186\n  }\n}",
+                            "options": {
+                                "raw": {
+                                    "headerFamily": "json",
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "auth": null
+                    },
+                    "response": [
+                        {
+                            "id": "84860877-514e-42aa-9f34-1f58ce071470",
+                            "name": "GraphQL response envelope.",
+                            "originalRequest": {
+                                "url": {
+                                    "path": [
+                                        "graphql"
+                                    ],
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "query": [],
+                                    "variable": []
+                                },
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "method": "POST",
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"query\": \"string\",\n  \"operationName\": \"string\",\n  \"variables\": {\n    \"key_0\": 4578\n  },\n  \"extensions\": {\n    \"key_0\": 4578.830473562596,\n    \"key_1\": 3953.159555374186\n  }\n}",
+                                    "options": {
+                                        "raw": {
+                                            "headerFamily": "json",
+                                            "language": "json"
+                                        }
+                                    }
+                                }
+                            },
+                            "status": "OK",
+                            "code": 200,
+                            "header": [
+                                {
+                                    "key": "Content-Type",
+                                    "value": "application/json"
+                                }
+                            ],
+                            "body": "{\n  \"data\": {\n    \"key_0\": 2498.316407489126,\n    \"key_1\": true\n  },\n  \"errors\": [\n    {\n      \"message\": \"string\",\n      \"path\": [\n        \"string\",\n        \"string\"\n      ],\n      \"locations\": [\n        {\n          \"line\": 5859,\n          \"column\": 1859\n        },\n        {\n          \"line\": 5911,\n          \"column\": 8558\n        }\n      ],\n      \"extensions\": {\n        \"key_0\": true,\n        \"key_1\": 6834\n      }\n    },\n    {\n      \"message\": \"string\",\n      \"path\": [\n        \"string\",\n        \"string\"\n      ],\n      \"locations\": [\n        {\n          \"line\": 8505,\n          \"column\": 7649\n        },\n        {\n          \"line\": 1012,\n          \"column\": 6426\n        }\n      ],\n      \"extensions\": {\n        \"key_0\": false,\n        \"key_1\": 9400\n      }\n    }\n  ],\n  \"extensions\": {\n    \"key_0\": \"string\"\n  }\n}",
+                            "cookie": [],
+                            "_postman_previewlanguage": "json"
+                        },
+                        {
+                            "id": "aa0be1ed-d961-499b-ac26-d6743887fcd0",
+                            "name": "The GraphQL document or variables were rejected by the Viva Engage backend.",
+                            "originalRequest": {
+                                "url": {
+                                    "path": [
+                                        "graphql"
+                                    ],
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "query": [],
+                                    "variable": []
+                                },
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "method": "POST",
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"query\": \"string\",\n  \"operationName\": \"string\",\n  \"variables\": {\n    \"key_0\": 4578\n  },\n  \"extensions\": {\n    \"key_0\": 4578.830473562596,\n    \"key_1\": 3953.159555374186\n  }\n}",
+                                    "options": {
+                                        "raw": {
+                                            "headerFamily": "json",
+                                            "language": "json"
+                                        }
+                                    }
+                                }
+                            },
+                            "status": "Bad Request",
+                            "code": 400,
+                            "header": [],
+                            "cookie": [],
+                            "_postman_previewlanguage": "text"
+                        },
+                        {
+                            "id": "093033df-f2b0-414b-8cb9-e082e6f630cf",
+                            "name": "Authentication is required or the browser-issued bearer token is no longer valid.",
+                            "originalRequest": {
+                                "url": {
+                                    "path": [
+                                        "graphql"
+                                    ],
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "query": [],
+                                    "variable": []
+                                },
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "method": "POST",
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"query\": \"string\",\n  \"operationName\": \"string\",\n  \"variables\": {\n    \"key_0\": 4578\n  },\n  \"extensions\": {\n    \"key_0\": 4578.830473562596,\n    \"key_1\": 3953.159555374186\n  }\n}",
+                                    "options": {
+                                        "raw": {
+                                            "headerFamily": "json",
+                                            "language": "json"
+                                        }
+                                    }
+                                }
+                            },
+                            "status": "Unauthorized",
+                            "code": 401,
+                            "header": [],
+                            "cookie": [],
+                            "_postman_previewlanguage": "text"
+                        },
+                        {
+                            "id": "d357d887-89e1-46b6-bfbd-c5e67139a194",
+                            "name": "The authenticated principal does not have access to the requested Viva Engage admin data.",
+                            "originalRequest": {
+                                "url": {
+                                    "path": [
+                                        "graphql"
+                                    ],
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "query": [],
+                                    "variable": []
+                                },
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "method": "POST",
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"query\": \"string\",\n  \"operationName\": \"string\",\n  \"variables\": {\n    \"key_0\": 4578\n  },\n  \"extensions\": {\n    \"key_0\": 4578.830473562596,\n    \"key_1\": 3953.159555374186\n  }\n}",
+                                    "options": {
+                                        "raw": {
+                                            "headerFamily": "json",
+                                            "language": "json"
+                                        }
+                                    }
+                                }
+                            },
+                            "status": "Forbidden",
+                            "code": 403,
+                            "header": [],
+                            "cookie": [],
+                            "_postman_previewlanguage": "text"
+                        }
+                    ],
+                    "event": [],
+                    "protocolProfileBehavior": {
+                        "disableBodyPruning": true
+                    }
+                }
+            ]
+        },
+        {
+            "name": "api",
+            "description": "",
+            "item": [
+                {
+                    "name": "v1",
+                    "description": "",
+                    "item": [
+                        {
+                            "name": "oauth2",
+                            "description": "",
+                            "item": [
+                                {
+                                    "name": "aad_access_token",
+                                    "description": "",
+                                    "item": [
+                                        {
+                                            "id": "21c95921-e63e-4ada-8935-df20888bfda6",
+                                            "name": "Probe Viva Engage AAD access-token state",
+                                            "request": {
+                                                "name": "Probe Viva Engage AAD access-token state",
+                                                "description": {
+                                                    "content": "Cross-host bearer-backed helper request issued during the authenticated Viva Engage admin\nlanding flow. The route appears to help the shell validate or refresh token state before\nother admin calls proceed.\n",
+                                                    "type": "text/plain"
+                                                },
+                                                "url": {
+                                                    "protocol": "https",
+                                                    "path": [
+                                                        "api",
+                                                        "v1",
+                                                        "oauth2",
+                                                        "aad_access_token"
+                                                    ],
+                                                    "host": [
+                                                        "api",
+                                                        "engage",
+                                                        "cloud",
+                                                        "microsoft"
+                                                    ],
+                                                    "query": [],
+                                                    "variable": []
+                                                },
+                                                "method": "GET",
+                                                "body": {},
+                                                "auth": null
+                                            },
+                                            "response": [
+                                                {
+                                                    "id": "a28c7739-9a3c-4109-84ca-6c3a23c20eb2",
+                                                    "name": "Token-helper response observed, but response content was not retained by the capture after the browser aborted the request.",
+                                                    "originalRequest": {
+                                                        "url": {
+                                                            "protocol": "https",
+                                                            "path": [
+                                                                "api",
+                                                                "v1",
+                                                                "oauth2",
+                                                                "aad_access_token"
+                                                            ],
+                                                            "host": [
+                                                                "api",
+                                                                "engage",
+                                                                "cloud",
+                                                                "microsoft"
+                                                            ],
+                                                            "query": [],
+                                                            "variable": []
+                                                        },
+                                                        "method": "GET",
+                                                        "body": {}
+                                                    },
+                                                    "status": "OK",
+                                                    "code": 200,
+                                                    "header": [],
+                                                    "cookie": [],
+                                                    "_postman_previewlanguage": "text"
+                                                },
+                                                {
+                                                    "id": "8ea6b2f6-c7f4-4cc4-8b3e-025f6c1f001b",
+                                                    "name": "Authentication is required or the browser-issued bearer token is no longer valid.",
+                                                    "originalRequest": {
+                                                        "url": {
+                                                            "protocol": "https",
+                                                            "path": [
+                                                                "api",
+                                                                "v1",
+                                                                "oauth2",
+                                                                "aad_access_token"
+                                                            ],
+                                                            "host": [
+                                                                "api",
+                                                                "engage",
+                                                                "cloud",
+                                                                "microsoft"
+                                                            ],
+                                                            "query": [],
+                                                            "variable": []
+                                                        },
+                                                        "method": "GET",
+                                                        "body": {}
+                                                    },
+                                                    "status": "Unauthorized",
+                                                    "code": 401,
+                                                    "header": [],
+                                                    "cookie": [],
+                                                    "_postman_previewlanguage": "text"
+                                                },
+                                                {
+                                                    "id": "d50cd368-1788-41aa-8bd4-4f917ebf3c76",
+                                                    "name": "The authenticated principal does not have access to the requested Viva Engage admin data.",
+                                                    "originalRequest": {
+                                                        "url": {
+                                                            "protocol": "https",
+                                                            "path": [
+                                                                "api",
+                                                                "v1",
+                                                                "oauth2",
+                                                                "aad_access_token"
+                                                            ],
+                                                            "host": [
+                                                                "api",
+                                                                "engage",
+                                                                "cloud",
+                                                                "microsoft"
+                                                            ],
+                                                            "query": [],
+                                                            "variable": []
+                                                        },
+                                                        "method": "GET",
+                                                        "body": {}
+                                                    },
+                                                    "status": "Forbidden",
+                                                    "code": 403,
+                                                    "header": [],
+                                                    "cookie": [],
+                                                    "_postman_previewlanguage": "text"
+                                                }
+                                            ],
+                                            "event": [],
+                                            "protocolProfileBehavior": {
+                                                "disableBodyPruning": true
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "cometd",
+            "description": "",
+            "item": [
+                {
+                    "name": "handshake",
+                    "description": "",
+                    "item": [
+                        {
+                            "id": "0179da80-57ab-44dd-b570-a9b570b5869b",
+                            "name": "Open a Viva Engage realtime relay session",
+                            "request": {
+                                "name": "Open a Viva Engage realtime relay session",
+                                "description": {
+                                    "content": "Bayeux handshake request sent to the transient `*.rt.yammer.com` relay host returned by\n`RealtimeConnectionSettingsClients`.\n\nThe captured admin session sent redacted `token` and `hub_tenant_token` values in the\nhandshake `ext` payload instead of using `Authorization` or cookie headers.\n",
+                                    "type": "text/plain"
+                                },
+                                "url": {
+                                    "protocol": "https",
+                                    "port": "relayHost",
+                                    "path": [
+                                        "cometd",
+                                        "handshake"
+                                    ],
+                                    "query": [],
+                                    "variable": [
+                                        {
+                                            "type": "any",
+                                            "value": "relay-instance.rt.yammer.com",
+                                            "key": "relayHost"
+                                        }
+                                    ]
+                                },
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "method": "POST",
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "[\n  {\n    \"channel\": \"/meta/handshake\",\n    \"id\": \"1\",\n    \"version\": \"1.0\",\n    \"minimumVersion\": \"1.0\",\n    \"supportedConnectionTypes\": [\n      \"long-polling\"\n    ],\n    \"advice\": {\n      \"timeout\": 60000,\n      \"interval\": 0\n    },\n    \"ext\": {\n      \"auth\": \"oauth\",\n      \"push_message_bodies\": false,\n      \"token\": \"[redacted]\",\n      \"hub_tenant_token\": \"[redacted]\"\n    }\n  }\n]",
+                                    "options": {
+                                        "raw": {
+                                            "headerFamily": "json",
+                                            "language": "json"
+                                        }
+                                    }
+                                },
+                                "auth": null
+                            },
+                            "response": [
+                                {
+                                    "id": "6afe58a5-851a-40e5-860d-078309c00a52",
+                                    "name": "Successful Bayeux handshake response.",
+                                    "originalRequest": {
+                                        "url": {
+                                            "protocol": "https",
+                                            "port": "relayHost",
+                                            "path": [
+                                                "cometd",
+                                                "handshake"
+                                            ],
+                                            "query": [],
+                                            "variable": [
+                                                {
+                                                    "type": "any",
+                                                    "value": "relay-instance.rt.yammer.com",
+                                                    "key": "relayHost"
+                                                }
+                                            ]
+                                        },
+                                        "header": [
+                                            {
+                                                "key": "Content-Type",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            }
+                                        ],
+                                        "method": "POST",
+                                        "body": {
+                                            "mode": "raw",
+                                            "raw": "[\n  {\n    \"channel\": \"/meta/handshake\",\n    \"id\": \"1\",\n    \"version\": \"1.0\",\n    \"minimumVersion\": \"1.0\",\n    \"supportedConnectionTypes\": [\n      \"long-polling\"\n    ],\n    \"advice\": {\n      \"timeout\": 60000,\n      \"interval\": 0\n    },\n    \"ext\": {\n      \"auth\": \"oauth\",\n      \"push_message_bodies\": false,\n      \"token\": \"[redacted]\",\n      \"hub_tenant_token\": \"[redacted]\"\n    }\n  }\n]",
+                                            "options": {
+                                                "raw": {
+                                                    "headerFamily": "json",
+                                                    "language": "json"
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "status": "OK",
+                                    "code": 200,
+                                    "header": [
+                                        {
+                                            "key": "Content-Type",
+                                            "value": "application/json"
+                                        }
+                                    ],
+                                    "body": "[\n  {\n    \"channel\": \"/meta/handshake\",\n    \"id\": \"1\",\n    \"version\": \"1.0\",\n    \"minimumVersion\": \"1.0\",\n    \"successful\": true,\n    \"clientId\": \"relay-client-id\",\n    \"supportedConnectionTypes\": [\n      \"long-polling\"\n    ],\n    \"advice\": {\n      \"interval\": 2000,\n      \"timeout\": 28000,\n      \"reconnect\": \"retry\"\n    }\n  }\n]",
+                                    "cookie": [],
+                                    "_postman_previewlanguage": "json"
+                                }
+                            ],
+                            "event": [],
+                            "protocolProfileBehavior": {
+                                "disableBodyPruning": true
+                            }
+                        }
+                    ]
+                },
+                {
+                    "id": "a2284a1b-e940-4045-ae84-ef78c266d3a5",
+                    "name": "Subscribe to Viva Engage realtime relay channels",
+                    "request": {
+                        "name": "Subscribe to Viva Engage realtime relay channels",
+                        "description": {
+                            "content": "Bayeux subscribe envelope posted to the transient Viva Engage realtime relay after the\nhandshake succeeds.\n\nThe captured admin session subscribed to user, feed, and broadcast channels such as\n`/users/.../actions`, `/feeds/.../primary`, `/networks/.../broadcastNetworkChannel`,\n`/users/.../broadcastUserChannel`, and `/users/.../current`.\n",
+                            "type": "text/plain"
+                        },
+                        "url": {
+                            "protocol": "https",
+                            "port": "relayHost",
+                            "path": [
+                                "cometd",
+                                ""
+                            ],
+                            "query": [],
+                            "variable": [
+                                {
+                                    "type": "any",
+                                    "value": "relay-instance.rt.yammer.com",
+                                    "key": "relayHost"
+                                }
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "method": "POST",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "[\n  {\n    \"id\": \"2\",\n    \"channel\": \"/meta/subscribe\",\n    \"subscription\": \"/users/123456789/actions\",\n    \"clientId\": \"relay-client-id\"\n  },\n  {\n    \"id\": \"3\",\n    \"channel\": \"/meta/subscribe\",\n    \"subscription\": \"/feeds/encoded-feed-id/primary\",\n    \"clientId\": \"relay-client-id\"\n  },\n  {\n    \"id\": \"4\",\n    \"channel\": \"/meta/subscribe\",\n    \"subscription\": \"/networks/123456/broadcastNetworkChannel\",\n    \"clientId\": \"relay-client-id\"\n  },\n  {\n    \"id\": \"5\",\n    \"channel\": \"/meta/subscribe\",\n    \"subscription\": \"/users/123456789/broadcastUserChannel\",\n    \"clientId\": \"relay-client-id\"\n  }\n]",
+                            "options": {
+                                "raw": {
+                                    "headerFamily": "json",
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "auth": null
+                    },
+                    "response": [
+                        {
+                            "id": "1cfa3f73-a42f-4640-9fb2-d30751c64cc3",
+                            "name": "Successful relay subscription response.",
+                            "originalRequest": {
+                                "url": {
+                                    "protocol": "https",
+                                    "port": "relayHost",
+                                    "path": [
+                                        "cometd",
+                                        ""
+                                    ],
+                                    "query": [],
+                                    "variable": [
+                                        {
+                                            "type": "any",
+                                            "value": "relay-instance.rt.yammer.com",
+                                            "key": "relayHost"
+                                        }
+                                    ]
+                                },
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "method": "POST",
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "[\n  {\n    \"id\": \"2\",\n    \"channel\": \"/meta/subscribe\",\n    \"subscription\": \"/users/123456789/actions\",\n    \"clientId\": \"relay-client-id\"\n  },\n  {\n    \"id\": \"3\",\n    \"channel\": \"/meta/subscribe\",\n    \"subscription\": \"/feeds/encoded-feed-id/primary\",\n    \"clientId\": \"relay-client-id\"\n  },\n  {\n    \"id\": \"4\",\n    \"channel\": \"/meta/subscribe\",\n    \"subscription\": \"/networks/123456/broadcastNetworkChannel\",\n    \"clientId\": \"relay-client-id\"\n  },\n  {\n    \"id\": \"5\",\n    \"channel\": \"/meta/subscribe\",\n    \"subscription\": \"/users/123456789/broadcastUserChannel\",\n    \"clientId\": \"relay-client-id\"\n  }\n]",
+                                    "options": {
+                                        "raw": {
+                                            "headerFamily": "json",
+                                            "language": "json"
+                                        }
+                                    }
+                                }
+                            },
+                            "status": "OK",
+                            "code": 200,
+                            "header": [
+                                {
+                                    "key": "Content-Type",
+                                    "value": "application/json"
+                                }
+                            ],
+                            "body": "[\n  {\n    \"channel\": \"/meta/subscribe\",\n    \"id\": \"2\",\n    \"subscription\": \"/users/123456789/actions\",\n    \"successful\": true\n  }\n]",
+                            "cookie": [],
+                            "_postman_previewlanguage": "json"
+                        }
+                    ],
+                    "event": [],
+                    "protocolProfileBehavior": {
+                        "disableBodyPruning": true
+                    }
+                },
+                {
+                    "name": "connect",
+                    "description": "",
+                    "item": [
+                        {
+                            "id": "dbfaa820-9d41-4c6e-9ebe-93966129277b",
+                            "name": "Poll the Viva Engage realtime relay",
+                            "request": {
+                                "name": "Poll the Viva Engage realtime relay",
+                                "description": {
+                                    "content": "Long-poll Bayeux connect request sent after the relay handshake and subscriptions are in\nplace.\n",
+                                    "type": "text/plain"
+                                },
+                                "url": {
+                                    "protocol": "https",
+                                    "port": "relayHost",
+                                    "path": [
+                                        "cometd",
+                                        "connect"
+                                    ],
+                                    "query": [],
+                                    "variable": [
+                                        {
+                                            "type": "any",
+                                            "value": "relay-instance.rt.yammer.com",
+                                            "key": "relayHost"
+                                        }
+                                    ]
+                                },
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "method": "POST",
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "[\n  {\n    \"id\": \"9\",\n    \"channel\": \"/meta/connect\",\n    \"connectionType\": \"long-polling\",\n    \"clientId\": \"relay-client-id\"\n  }\n]",
+                                    "options": {
+                                        "raw": {
+                                            "headerFamily": "json",
+                                            "language": "json"
+                                        }
+                                    }
+                                },
+                                "auth": null
+                            },
+                            "response": [
+                                {
+                                    "id": "40793b64-402c-4a0d-84ec-cb34e1427fe9",
+                                    "name": "Successful relay connect response.",
+                                    "originalRequest": {
+                                        "url": {
+                                            "protocol": "https",
+                                            "port": "relayHost",
+                                            "path": [
+                                                "cometd",
+                                                "connect"
+                                            ],
+                                            "query": [],
+                                            "variable": [
+                                                {
+                                                    "type": "any",
+                                                    "value": "relay-instance.rt.yammer.com",
+                                                    "key": "relayHost"
+                                                }
+                                            ]
+                                        },
+                                        "header": [
+                                            {
+                                                "key": "Content-Type",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            }
+                                        ],
+                                        "method": "POST",
+                                        "body": {
+                                            "mode": "raw",
+                                            "raw": "[\n  {\n    \"id\": \"9\",\n    \"channel\": \"/meta/connect\",\n    \"connectionType\": \"long-polling\",\n    \"clientId\": \"relay-client-id\"\n  }\n]",
+                                            "options": {
+                                                "raw": {
+                                                    "headerFamily": "json",
+                                                    "language": "json"
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "status": "OK",
+                                    "code": 200,
+                                    "header": [
+                                        {
+                                            "key": "Content-Type",
+                                            "value": "application/json"
+                                        }
+                                    ],
+                                    "body": "[\n  {\n    \"channel\": \"/meta/connect\",\n    \"id\": \"9\",\n    \"successful\": true\n  }\n]",
+                                    "cookie": [],
+                                    "_postman_previewlanguage": "json"
+                                }
+                            ],
+                            "event": [],
+                            "protocolProfileBehavior": {
+                                "disableBodyPruning": true
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "auth": {
+        "type": "bearer",
+        "bearer": [
+            {
+                "type": "any",
+                "value": "{{bearerToken}}",
+                "key": "token"
+            }
+        ]
+    },
+    "event": [],
+    "variable": [
+        {
+            "key": "baseUrl",
+            "value": "https://engage.cloud.microsoft"
+        }
+    ],
+    "info": {
+        "_postman_id": "cd0ad7c8-1661-4fc6-8ca0-df191800f4cc",
+        "name": "Viva Engage",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+        "description": {
+            "content": "The Viva Engage specification documents the authenticated backend surface observed while the\nViva Engage admin experience (`https://engage.cloud.microsoft/main/admin`) hydrated in the\ndefault Edge profile.\n\nThe retained evidence confirmed:\n\n  - MSAL PKCE sign-in against `https://login.microsoftonline.com/organizations/oauth2/v2.0/authorize`\n  - redirect URI `https://engage.cloud.microsoft/main/authredirect`\n  - requested scope `https://www.yammer.com/user_impersonation openid profile offline_access`\n  - same-origin persisted GraphQL traffic on `https://engage.cloud.microsoft/graphql`\n  - 27 unique `operationName` or `operationAlias` values during the authenticated admin landing flow\n  - direct-route captures on `/main/admin/segmentation`, `/main/admin/external-networks-settings`, and `/main/admin/setup-external-network`\n  - route-specific persisted GraphQL operations such as `NetworkSegmentationQueryClients` and `ExternalNetworksAdminSettingsClients`\n  - a cross-host bearer-backed token helper on `https://api.engage.cloud.microsoft/api/v1/oauth2/aad_access_token`\n  - a same-origin `RealtimeConnectionSettingsClients` persisted query that returned transient `*.rt.yammer.com/cometd/` relay hosts\n  - relay POSTs on `/cometd/handshake`, `/cometd/`, and `/cometd/connect` that carried redacted `token` and `hub_tenant_token` values in the Bayeux payload instead of `Authorization` or cookie headers\n  - no cookie header on any of the captured authenticated admin API requests for this pass\n  - telemetry-only sinks such as `/api/v1/yamalytics/webui`, `/api/v2/events`, and `/api/v3/events`, which are intentionally excluded from the published surface for now\n\nThe authenticated realtime relay chain was derived from the same-origin\n`RealtimeConnectionSettingsClients` response, which supplied a tenant- and user-scoped\n`cometdBaseUrl` on transient `*.rt.yammer.com` hosts. The captured relay calls used Bayeux\nhandshake, subscribe, and connect envelopes with redacted auth material in the request body.\n\nAdditional Yammer-era hosts such as `msgraph.yammer.com` and `broadcast.yammer.com` still\nrequire direct live confirmation before they should be promoted into the published admin\nsurface.\n\nDocumentation and specifications have been provided on a best-efforts basis and may not be\n100% accurate.\n\n\nContact Support:\n Name: nodoc",
+            "type": "text/plain"
+        }
+    }
+}

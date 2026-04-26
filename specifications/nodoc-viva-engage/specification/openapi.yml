@@ -1,0 +1,688 @@
+openapi: 3.0.1
+info:
+  title: Viva Engage
+  x-nodoc-category: Viva
+  description: |
+    The Viva Engage specification documents the authenticated backend surface observed while the
+    Viva Engage admin experience (`https://engage.cloud.microsoft/main/admin`) hydrated in the
+    default Edge profile.
+
+    The retained evidence confirmed:
+
+      - MSAL PKCE sign-in against `https://login.microsoftonline.com/organizations/oauth2/v2.0/authorize`
+      - redirect URI `https://engage.cloud.microsoft/main/authredirect`
+      - requested scope `https://www.yammer.com/user_impersonation openid profile offline_access`
+      - same-origin persisted GraphQL traffic on `https://engage.cloud.microsoft/graphql`
+      - 27 unique `operationName` or `operationAlias` values during the authenticated admin landing flow
+      - direct-route captures on `/main/admin/segmentation`, `/main/admin/external-networks-settings`, and `/main/admin/setup-external-network`
+      - route-specific persisted GraphQL operations such as `NetworkSegmentationQueryClients` and `ExternalNetworksAdminSettingsClients`
+      - a cross-host bearer-backed token helper on `https://api.engage.cloud.microsoft/api/v1/oauth2/aad_access_token`
+      - a same-origin `RealtimeConnectionSettingsClients` persisted query that returned transient `*.rt.yammer.com/cometd/` relay hosts
+      - relay POSTs on `/cometd/handshake`, `/cometd/`, and `/cometd/connect` that carried redacted `token` and `hub_tenant_token` values in the Bayeux payload instead of `Authorization` or cookie headers
+      - no cookie header on any of the captured authenticated admin API requests for this pass
+      - telemetry-only sinks such as `/api/v1/yamalytics/webui`, `/api/v2/events`, and `/api/v3/events`, which are intentionally excluded from the published surface for now
+
+    The authenticated realtime relay chain was derived from the same-origin
+    `RealtimeConnectionSettingsClients` response, which supplied a tenant- and user-scoped
+    `cometdBaseUrl` on transient `*.rt.yammer.com` hosts. The captured relay calls used Bayeux
+    handshake, subscribe, and connect envelopes with redacted auth material in the request body.
+
+    Additional Yammer-era hosts such as `msgraph.yammer.com` and `broadcast.yammer.com` still
+    require direct live confirmation before they should be promoted into the published admin
+    surface.
+
+    Documentation and specifications have been provided on a best-efforts basis and may not be
+    100% accurate.
+  version: 0.4.0
+  contact:
+    name: nodoc
+    url: https://github.com/nathanmcnulty/nodoc
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+servers:
+  - url: https://engage.cloud.microsoft
+    description: Viva Engage web and same-origin GraphQL host
+security:
+  - VivaEngageBearer: []
+components:
+  securitySchemes:
+    VivaEngageBearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        Browser-issued bearer token acquired through the Viva Engage MSAL PKCE flow.
+        Live redirect evidence showed authorization against
+        `https://login.microsoftonline.com/organizations/oauth2/v2.0/authorize`
+        with redirect URI `https://engage.cloud.microsoft/main/authredirect` and scope
+        `https://www.yammer.com/user_impersonation openid profile offline_access`.
+
+        The authenticated landing capture showed this bearer token on same-origin `/graphql`
+        requests and on the cross-host `/api/v1/oauth2/aad_access_token` helper. No cookie header
+        was observed on the captured authenticated admin API requests for this pass.
+  responses:
+    BadRequest:
+      description: The GraphQL document or variables were rejected by the Viva Engage backend.
+    Unauthorized:
+      description: Authentication is required or the browser-issued bearer token is no longer valid.
+    Forbidden:
+      description: The authenticated principal does not have access to the requested Viva Engage admin data.
+  schemas:
+    GraphQLRequest:
+      type: object
+      description: |
+        Generic GraphQL request envelope used by the Viva Engage web client.
+
+        The authenticated admin landing flow used persisted queries rather than inline GraphQL
+        documents, so `query` was not present on the observed requests. Instead, the browser sent
+        `operationName`, optional `variables`, and `extensions.persistedQuery` together with
+        `extensions.yammerTreatments`.
+      properties:
+        query:
+          type: string
+          nullable: true
+          description: Optional inline GraphQL document string sent by the client.
+        operationName:
+          type: string
+          nullable: true
+          description: Optional named GraphQL operation.
+        variables:
+          type: object
+          nullable: true
+          additionalProperties: true
+          description: GraphQL variables object supplied with the operation.
+        extensions:
+          type: object
+          nullable: true
+          additionalProperties: true
+          description: Optional GraphQL extensions payload, including persisted query and treatment metadata.
+      additionalProperties: false
+    PersistedQueryDescriptor:
+      type: object
+      description: Persisted-query descriptor observed on the authenticated Viva Engage landing flow.
+      required:
+        - version
+        - sha256Hash
+      properties:
+        version:
+          type: integer
+          description: Persisted-query protocol version.
+        sha256Hash:
+          type: string
+          description: SHA-256 hash of the stored GraphQL document.
+      additionalProperties: false
+    YammerTreatment:
+      type: object
+      properties:
+        project:
+          type: string
+        key:
+          type: string
+        value:
+          oneOf:
+            - type: string
+            - type: boolean
+            - type: integer
+            - type: number
+      additionalProperties: false
+    YammerTreatmentsExtension:
+      type: object
+      description: Feature-flight and treatment metadata attached to observed Viva Engage GraphQL calls.
+      properties:
+        version:
+          type: string
+        treatments:
+          type: array
+          items:
+            $ref: '#/components/schemas/YammerTreatment'
+      additionalProperties: true
+    GraphQLErrorLocation:
+      type: object
+      properties:
+        line:
+          type: integer
+        column:
+          type: integer
+      additionalProperties: false
+    GraphQLError:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+        path:
+          type: array
+          items:
+            oneOf:
+              - type: string
+              - type: integer
+        locations:
+          type: array
+          items:
+            $ref: '#/components/schemas/GraphQLErrorLocation'
+        extensions:
+          type: object
+          additionalProperties: true
+      additionalProperties: true
+    GraphQLResponse:
+      type: object
+      description: Generic GraphQL response envelope returned by the Viva Engage admin client.
+      properties:
+        data:
+          type: object
+          nullable: true
+          additionalProperties: true
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/GraphQLError'
+        extensions:
+          type: object
+          additionalProperties: true
+      additionalProperties: true
+    RealtimeCometdMessage:
+      type: object
+      description: Generic Bayeux / CometD message observed on the Viva Engage realtime relay host.
+      properties:
+        id:
+          type: string
+        channel:
+          type: string
+        clientId:
+          type: string
+        version:
+          type: string
+        minimumVersion:
+          type: string
+        connectionType:
+          type: string
+        subscription:
+          type: string
+        successful:
+          type: boolean
+        supportedConnectionTypes:
+          type: array
+          items:
+            type: string
+        advice:
+          type: object
+          additionalProperties: true
+        ext:
+          type: object
+          additionalProperties: true
+          description: Handshake auth material, including redacted `token` and `hub_tenant_token` values.
+      additionalProperties: true
+    RealtimeCometdEnvelope:
+      type: array
+      description: Array envelope used by the Viva Engage CometD relay.
+      items:
+        $ref: '#/components/schemas/RealtimeCometdMessage'
+tags:
+  - name: AdminGraphQL
+    x-displayName: Admin GraphQL
+    description: Same-origin persisted GraphQL endpoint confirmed by the authenticated Viva Engage admin landing flow.
+  - name: AuthHelpers
+    x-displayName: Auth Helpers
+    description: Cross-host authentication helper routes used while the Viva Engage admin shell initializes.
+  - name: RealtimeRelay
+    x-displayName: Realtime Relay
+    description: Transient `*.rt.yammer.com` relay endpoints bootstrapped from the authenticated Viva Engage admin shell.
+x-tagGroups:
+  - name: Admin shell
+    tags: [AdminGraphQL, AuthHelpers]
+  - name: Realtime
+    tags: [RealtimeRelay]
+externalDocs:
+  description: Checked-in source specification and supporting artifacts.
+  url: https://github.com/nathanmcnulty/nodoc/tree/main/specifications/nodoc-viva-engage/specification
+x-nodoc-headerProfiles:
+  viva-engage-graphql:
+    description: Same-origin Viva Engage GraphQL profile confirmed by the authenticated admin landing capture.
+    requiredHeaders:
+      - name: Authorization
+        description: Browser-issued bearer token acquired for the Viva Engage or Yammer resource scope.
+    observedHeaders:
+      - name: Content-Type
+        value: application/json
+        description: Observed on the authenticated persisted GraphQL POST requests.
+      - name: Referer
+        value: https://engage.cloud.microsoft/main/admin
+        description: Admin-surface referer used by the authenticated admin landing flow.
+      - name: X-Request-Id
+        description: Client-generated request correlation header emitted on the captured same-origin GraphQL requests.
+      - name: X-Analytics-Client-Properties
+        description: Client telemetry context header attached to the authenticated GraphQL calls.
+      - name: X-ECS-Etag
+        description: Configuration snapshot header attached to the authenticated GraphQL calls.
+    notes:
+      - No `Cookie`, `Authorization-Receiver`, or `X-Yam-*` request headers were observed on the captured authenticated admin GraphQL calls for this pass.
+      - The shipped bundle code can also emit `X-Yam-Scope-Type`, `X-Yam-TenantId`, and `X-Yam-Scope-Entity-Id` when a request is scoped to a Teams meeting context, but those headers were not present on the admin landing requests captured here.
+      - Preserve raw token strings and cookie values outside committed specs and generated ledgers.
+  viva-engage-token-helper:
+    description: Cross-host token-helper profile confirmed during the authenticated Viva Engage admin landing capture.
+    requiredHeaders:
+      - name: Authorization
+        description: Browser-issued bearer token reused for the token-status helper request.
+    observedHeaders:
+      - name: Referer
+        value: https://engage.cloud.microsoft/
+        description: Root Engage referer observed on the helper request.
+      - name: X-Yammer-OAuthTokenExpiration
+        description: Token-expiration helper header attached to the cross-host bearer-backed request.
+    notes:
+      - No `Cookie`, `Authorization-Receiver`, or `X-Yam-*` request headers were observed on the captured helper call for this pass.
+      - "The shipped bundle code also supports an optional `X-Yammer-ThirdPartyCookieBlocked` header and requests the helper with `credentials: include`, even though the captured admin request still showed no cookie header."
+      - Preserve raw token strings and cookie values outside committed specs and generated ledgers.
+  viva-engage-realtime-relay:
+    description: Transient `*.rt.yammer.com` CometD relay profile derived from the authenticated Viva Engage admin shell.
+    requiredHeaders: []
+    observedHeaders:
+      - name: Referer
+        value: https://engage.cloud.microsoft/
+        description: Root Engage referer observed on the realtime relay requests.
+      - name: Content-Type
+        value: application/json;charset=UTF-8
+        description: Observed on the initial Bayeux handshake request. Later subscribe and connect posts did not consistently add extra custom request headers.
+    notes:
+      - The captured realtime relay requests did not use `Authorization`, `Cookie`, `X-Request-Id`, or `X-Yam-*` request headers.
+      - Authentication was carried in the Bayeux handshake payload through redacted `ext.token` and `ext.hub_tenant_token` values.
+      - The relay host was supplied by the same-origin `RealtimeConnectionSettingsClients` GraphQL response and changed across page loads.
+paths:
+  /graphql:
+    post:
+      tags: [AdminGraphQL]
+      summary: Execute Viva Engage admin GraphQL operations
+      description: |
+        Same-origin persisted GraphQL endpoint exposed by the Viva Engage web application.
+
+        The authenticated admin landing capture observed 27 unique persisted operations on this
+        route, including `CurrentUserClients`, `FeatureAccessSettingsClients`,
+        `AdminFeatureAccessSettingsClients`, `TenantConfigurationAndRoles`, and
+        `RealtimeConnectionSettingsClients`.
+
+        Follow-up direct-route captures on `/main/admin/segmentation`,
+        `/main/admin/external-networks-settings`, and
+        `/main/admin/setup-external-network` added route-specific operations such as
+        `NetworkSegmentationQueryClients` and `ExternalNetworksAdminSettingsClients`.
+
+        The same authenticated admin shell also issued `RealtimeConnectionSettingsClients`, which
+        returned a tenant- and user-scoped `cometdBaseUrl` that the browser immediately used for
+        transient `*.rt.yammer.com` Bayeux relay traffic.
+      operationId: AdminGraphQL_PostGraphql
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GraphQLRequest'
+            examples:
+              observedPersistedQuery:
+                summary: Authenticated landing request using a persisted query
+                value:
+                  operationName: FeatureAccessSettingsClients
+                  extensions:
+                    persistedQuery:
+                      version: 1
+                      sha256Hash: 88293049c2d71d875b2ee6af1de7f8360017fa4ef068d9a81cb8bd79d5adfeb1
+                    yammerTreatments:
+                      version: "1"
+                      treatments:
+                        - project: ClientForward
+                          key: GuidedAdminNotificationsLandingPage
+                          value: "true"
+                        - project: ClientForward
+                          key: InformationBarriersPhase0
+                          value: "true"
+              segmentationPersistedQuery:
+                summary: Direct-route segmentation request
+                value:
+                  operationName: NetworkSegmentationQuery
+                  variables:
+                    first: 50
+                    endCursor: null
+                  extensions:
+                    persistedQuery:
+                      version: 1
+                      sha256Hash: 96ba51f119a8844875395433a65fc18b1c5ecc2e091b54b0bc0ab6dd2d5513c1
+                    yammerTreatments:
+                      version: "1"
+                      treatments:
+                        - project: ClientForward
+                          key: GuidedAdminNotificationsLandingPage
+                          value: "true"
+              externalNetworksPersistedQuery:
+                summary: Direct-route external networks settings request
+                value:
+                  operationName: ExternalNetworksAdminSettingsClients
+                  extensions:
+                    persistedQuery:
+                      version: 1
+                      sha256Hash: 367e072a20056b93d0b58ca17958a3d84fcdc346a0e6cf15b6cbe448f2975527
+                    yammerTreatments:
+                      version: "1"
+                      treatments:
+                        - project: ClientForward
+                          key: GuidedAdminNotificationsLandingPage
+                          value: "true"
+              realtimeConnectionSettingsPersistedQuery:
+                summary: Landing request that returns the realtime relay base URL
+                value:
+                  operationName: RealtimeConnectionSettingsClients
+                  extensions:
+                    persistedQuery:
+                      version: 1
+                      sha256Hash: adc0cb117fbf66b72968bc937c2dc4ba4f22de3185baf3fc34aee2b3f8c3a0b2
+                    yammerTreatments:
+                      version: "1"
+                      treatments:
+                        - project: ClientForward
+                          key: GuidedAdminNotificationsLandingPage
+                          value: "true"
+      x-nodoc-operation-context:
+        surface: Admin shell
+        workflows:
+          - Open `https://engage.cloud.microsoft/main/admin`, allow the Viva Engage admin shell to authenticate through MSAL, and wait for the landing view to resolve its persisted GraphQL calls.
+          - Open `https://engage.cloud.microsoft/main/admin/segmentation` to load the dedicated segmentation admin page and its persisted GraphQL bootstrap query.
+          - Open `https://engage.cloud.microsoft/main/admin/external-networks-settings` to load the canonical external-networks admin page.
+          - Open `https://engage.cloud.microsoft/main/admin/setup-external-network` to continue into the external-network setup flow, which reused the external-networks admin bootstrap query during this pass.
+          - Preserve the `RealtimeConnectionSettingsClients` response if present, because it provides the transient `cometdBaseUrl` used by the Yammer-era realtime relay chain.
+        headerProfile: viva-engage-graphql
+        availability:
+          level: tenant-conditional
+          notes:
+            - The authenticated landing capture confirmed 27 unique persisted query names or aliases, but the exact operation mix remains tenant- and role-dependent.
+            - The admin landing pass confirmed operations such as `CurrentUserClients`, `FeatureAccessSettingsClients`, `TenantConfigurationAndRoles`, `NavigationGroupsClients`, and `RealtimeConnectionSettingsClients`.
+            - The segmentation direct-route capture confirmed `NetworkSegmentationQueryClients` together with the dedicated `4-page-admin-segmentation-settings.js` route chunk.
+            - The external-networks settings and setup direct-route captures confirmed `ExternalNetworksAdminSettingsClients` together with the dedicated `4-page-admin-external-networks-settings.js` route chunk.
+            - The `RealtimeConnectionSettingsClients` operation returned transient `cometdBaseUrl` values that bootstrapped `*.rt.yammer.com/cometd/handshake`, `/cometd/`, and `/cometd/connect` relay calls without `Authorization` or cookie headers.
+            - Navigating to `/main/admin/external-networks` updated the URL but rendered the generic admin landing state during this pass, so `external-networks-settings` should be treated as the canonical external-networks route.
+        provenance:
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - The default Edge profile captured persisted GraphQL POST requests after the Viva Engage admin shell hydrated successfully.
+          - source: live-direct-route-capture
+            confidence: high
+            notes:
+              - Direct-route captures validated the segmentation, external-networks settings, and setup-external-network admin pages in the authenticated default Edge profile.
+          - source: bundle-analysis
+            confidence: medium
+            notes:
+              - The checked-in bundle set exposed `https://engage.cloud.microsoft/graphql` as the configured GraphQL host.
+      responses:
+        '200':
+          description: GraphQL response envelope.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GraphQLResponse'
+              examples:
+                realtimeConnectionSettingsResponse:
+                  summary: GraphQL response that returns the transient realtime relay base URL
+                  value:
+                    data:
+                      settings:
+                        realtimeConnectionSettings:
+                          cometdBaseUrl: https://relay-instance.rt.yammer.com/cometd/
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/v1/oauth2/aad_access_token:
+    get:
+      tags: [AuthHelpers]
+      summary: Probe Viva Engage AAD access-token state
+      description: |
+        Cross-host bearer-backed helper request issued during the authenticated Viva Engage admin
+        landing flow. The route appears to help the shell validate or refresh token state before
+        other admin calls proceed.
+      operationId: AuthHelpers_GetAadAccessToken
+      servers:
+        - url: https://api.engage.cloud.microsoft
+          description: Viva Engage cross-host token helper host
+      x-nodoc-operation-context:
+        surface: Admin shell bootstrap
+        workflows:
+          - Open `https://engage.cloud.microsoft/main/admin` and allow the shell bootstrap flow to initialize cross-host auth helpers after MSAL sign-in completes.
+        headerProfile: viva-engage-token-helper
+        availability:
+          level: tenant-conditional
+          notes:
+            - The authenticated landing capture observed this bearer-backed GET request without a request body.
+            - The browser aborted the helper response after headers were received, so the response body was not retained in the capture artifacts.
+            - The shipped bundle still constructs this route through Yammer-named helper code and can add `X-Yammer-ThirdPartyCookieBlocked` when that condition is detected.
+        provenance:
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - The helper request was captured directly from the default Edge profile during the authenticated admin landing flow.
+      responses:
+        '200':
+          description: Token-helper response observed, but response content was not retained by the capture after the browser aborted the request.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /cometd/handshake:
+    post:
+      tags: [RealtimeRelay]
+      summary: Open a Viva Engage realtime relay session
+      description: |
+        Bayeux handshake request sent to the transient `*.rt.yammer.com` relay host returned by
+        `RealtimeConnectionSettingsClients`.
+
+        The captured admin session sent redacted `token` and `hub_tenant_token` values in the
+        handshake `ext` payload instead of using `Authorization` or cookie headers.
+      operationId: RealtimeRelay_PostHandshake
+      security: []
+      servers:
+        - url: https://{relayHost}
+          description: Tenant- and user-scoped realtime relay host returned by the authenticated Viva Engage shell.
+          variables:
+            relayHost:
+              default: relay-instance.rt.yammer.com
+              description: Placeholder for the transient `*.rt.yammer.com` relay host returned by `RealtimeConnectionSettingsClients`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RealtimeCometdEnvelope'
+            examples:
+              handshakeRequest:
+                summary: Redacted handshake envelope
+                value:
+                  - channel: /meta/handshake
+                    id: "1"
+                    version: "1.0"
+                    minimumVersion: "1.0"
+                    supportedConnectionTypes:
+                      - long-polling
+                    advice:
+                      timeout: 60000
+                      interval: 0
+                    ext:
+                      auth: oauth
+                      push_message_bodies: false
+                      token: "[redacted]"
+                      hub_tenant_token: "[redacted]"
+      x-nodoc-operation-context:
+        surface: Realtime bootstrap
+        workflows:
+          - Open `https://engage.cloud.microsoft/main/admin` or a validated admin sub-route and allow `RealtimeConnectionSettingsClients` to return the transient `cometdBaseUrl`.
+          - Reuse that `cometdBaseUrl` host to post a Bayeux handshake to `/cometd/handshake`.
+        headerProfile: viva-engage-realtime-relay
+        availability:
+          level: tenant-conditional
+          notes:
+            - The relay host is transient and was observed changing across page loads.
+            - The handshake request carried redacted auth material in the body and did not include `Authorization` or cookie headers.
+        provenance:
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - The default Edge profile captured the handshake immediately after `RealtimeConnectionSettingsClients` returned `cometdBaseUrl`.
+      responses:
+        '200':
+          description: Successful Bayeux handshake response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RealtimeCometdEnvelope'
+              examples:
+                handshakeResponse:
+                  summary: Successful handshake response
+                  value:
+                    - channel: /meta/handshake
+                      id: "1"
+                      version: "1.0"
+                      minimumVersion: "1.0"
+                      successful: true
+                      clientId: relay-client-id
+                      supportedConnectionTypes:
+                        - long-polling
+                      advice:
+                        interval: 2000
+                        timeout: 28000
+                        reconnect: retry
+  /cometd/:
+    post:
+      tags: [RealtimeRelay]
+      summary: Subscribe to Viva Engage realtime relay channels
+      description: |
+        Bayeux subscribe envelope posted to the transient Viva Engage realtime relay after the
+        handshake succeeds.
+
+        The captured admin session subscribed to user, feed, and broadcast channels such as
+        `/users/.../actions`, `/feeds/.../primary`, `/networks/.../broadcastNetworkChannel`,
+        `/users/.../broadcastUserChannel`, and `/users/.../current`.
+      operationId: RealtimeRelay_PostSubscribe
+      security: []
+      servers:
+        - url: https://{relayHost}
+          description: Tenant- and user-scoped realtime relay host returned by the authenticated Viva Engage shell.
+          variables:
+            relayHost:
+              default: relay-instance.rt.yammer.com
+              description: Placeholder for the transient `*.rt.yammer.com` relay host returned by `RealtimeConnectionSettingsClients`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RealtimeCometdEnvelope'
+            examples:
+              subscribeRequest:
+                summary: Sample relay subscribe envelope
+                value:
+                  - id: "2"
+                    channel: /meta/subscribe
+                    subscription: /users/123456789/actions
+                    clientId: relay-client-id
+                  - id: "3"
+                    channel: /meta/subscribe
+                    subscription: /feeds/encoded-feed-id/primary
+                    clientId: relay-client-id
+                  - id: "4"
+                    channel: /meta/subscribe
+                    subscription: /networks/123456/broadcastNetworkChannel
+                    clientId: relay-client-id
+                  - id: "5"
+                    channel: /meta/subscribe
+                    subscription: /users/123456789/broadcastUserChannel
+                    clientId: relay-client-id
+      x-nodoc-operation-context:
+        surface: Realtime subscriptions
+        workflows:
+          - Complete the Bayeux handshake against the relay host returned by `RealtimeConnectionSettingsClients`.
+          - Post one or more `/meta/subscribe` envelopes to `/cometd/` for the desired user, feed, or broadcast channels.
+        headerProfile: viva-engage-realtime-relay
+        availability:
+          level: tenant-conditional
+          notes:
+            - The observed subscription set was tenant- and user-scoped.
+            - Captured subscribe posts continued to rely on the relay `clientId` instead of `Authorization` or cookie headers.
+        provenance:
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - The default Edge profile captured successful relay subscriptions after the handshake completed.
+      responses:
+        '200':
+          description: Successful relay subscription response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RealtimeCometdEnvelope'
+              examples:
+                subscribeResponse:
+                  summary: Successful subscription response
+                  value:
+                    - channel: /meta/subscribe
+                      id: "2"
+                      subscription: /users/123456789/actions
+                      successful: true
+  /cometd/connect:
+    post:
+      tags: [RealtimeRelay]
+      summary: Poll the Viva Engage realtime relay
+      description: |
+        Long-poll Bayeux connect request sent after the relay handshake and subscriptions are in
+        place.
+      operationId: RealtimeRelay_PostConnect
+      security: []
+      servers:
+        - url: https://{relayHost}
+          description: Tenant- and user-scoped realtime relay host returned by the authenticated Viva Engage shell.
+          variables:
+            relayHost:
+              default: relay-instance.rt.yammer.com
+              description: Placeholder for the transient `*.rt.yammer.com` relay host returned by `RealtimeConnectionSettingsClients`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RealtimeCometdEnvelope'
+            examples:
+              connectRequest:
+                summary: Relay connect long-poll
+                value:
+                  - id: "9"
+                    channel: /meta/connect
+                    connectionType: long-polling
+                    clientId: relay-client-id
+      x-nodoc-operation-context:
+        surface: Realtime long-poll
+        workflows:
+          - Complete the Bayeux handshake and any required subscriptions against the relay host returned by `RealtimeConnectionSettingsClients`.
+          - Post `/meta/connect` envelopes to `/cometd/connect` to maintain the realtime channel.
+        headerProfile: viva-engage-realtime-relay
+        availability:
+          level: tenant-conditional
+          notes:
+            - The captured connect requests continued the relay session without `Authorization` or cookie headers.
+            - The successful response returned relay advice such as reconnect timing on earlier connect cycles.
+        provenance:
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - The default Edge profile captured repeated successful `/meta/connect` long-polls after the relay subscriptions were established.
+      responses:
+        '200':
+          description: Successful relay connect response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RealtimeCometdEnvelope'
+              examples:
+                connectResponse:
+                  summary: Successful relay connect response
+                  value:
+                    - channel: /meta/connect
+                      id: "9"
+                      successful: true

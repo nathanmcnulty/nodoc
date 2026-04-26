@@ -37,6 +37,11 @@ const collectionDefinitions = [
     output: "postman/collections/teams.collection.json",
   },
   {
+    name: "Viva Engage",
+    spec: "specifications/nodoc-viva-engage/specification/openapi.yml",
+    output: "postman/collections/viva-engage.collection.json",
+  },
+  {
     name: "M365 Apps Config",
     spec: "specifications/nodoc-m365-apps-config/specification/openapi.yml",
     output: "postman/collections/m365-apps-config.collection.json",

@@ -156,6 +156,13 @@ export const crawlMetadataByTitle = {
     nextPass: "normalized-family-diff",
     reason: "Deep crawl already landed; remaining work should be driven by unresolved route families.",
   },
+  "Viva Engage": {
+    portalUrl: "https://engage.cloud.microsoft/main/admin",
+    authModel: "MSAL PKCE bearer token + same-origin GraphQL",
+    crawlPriority: "high",
+    nextPass: "external-network-write-follow-up",
+    reason: "The authenticated landing, direct-route, and realtime relay captures confirmed GraphQL, token-helper, and transient Yammer relay behavior; remaining work is the setup-external-network write path plus any directly product-bound legacy Yammer hosts.",
+  },
 };
 
 export const recorderIdAliasesBySpecId = {
@@ -428,6 +435,46 @@ export const coverageOverlayByTitle = {
       "Teams already has a deeper capture baseline in the repo, so future follow-up should remain diff-driven.",
     ],
   },
+  "Viva Engage": {
+    seedUrls: [
+      "https://engage.cloud.microsoft/main/admin",
+    ],
+    observedHosts: [
+      "engage.cloud.microsoft",
+      "api.engage.cloud.microsoft",
+      "www.yammer.com",
+      "*.rt.yammer.com",
+      "broadcast.yammer.com",
+      "msgraph.yammer.com",
+    ],
+    lastSuccessfulPassDepth: "deep-realtime-relay-capture",
+    promotedDiscoveries: [
+      route("POST", "/graphql", "Promoted from the authenticated Viva Engage admin landing capture, which confirmed persisted GraphQL operations and the live bearer-header profile."),
+      route("GET", "/api/v1/oauth2/aad_access_token", "Observed as a bearer-backed cross-host helper during the authenticated admin landing flow."),
+      route("POST", "/cometd/handshake", "Observed on transient `*.rt.yammer.com` relay hosts after `RealtimeConnectionSettingsClients` returned the realtime `cometdBaseUrl`."),
+      route("POST", "/cometd/", "Observed as Bayeux subscribe traffic on transient `*.rt.yammer.com` relay hosts after the realtime handshake completed."),
+      route("POST", "/cometd/connect", "Observed as Bayeux long-poll traffic on transient `*.rt.yammer.com` relay hosts after the realtime subscriptions were established."),
+    ],
+    knownTelemetryExclusions: [
+      route("POST", "/api/v1/yamalytics/webui", "Telemetry sink exposed by the shipped client bundle and excluded from the published admin surface."),
+      route("POST", "/api/v2/events", "Telemetry sink exposed by the shipped client bundle and excluded from the published admin surface."),
+      route("POST", "/api/v3/events", "Telemetry sink exposed by the shipped client bundle and excluded from the published admin surface."),
+      route("POST", "/OneCollector/1.0/", "Microsoft browser telemetry collector observed during the authenticated admin landing flow and excluded from the published admin surface."),
+    ],
+    notes: [
+      "The authenticated default-Edge landing capture confirmed 27 unique persisted GraphQL operations, including `RealtimeConnectionSettingsClients`, plus a stable bearer-plus-`x-request-id` GraphQL header profile and no cookie header on the captured authenticated admin API requests for this pass.",
+      "Direct-route captures validated `/main/admin/segmentation`, `/main/admin/external-networks-settings`, and `/main/admin/setup-external-network`, adding route-specific GraphQL operations `NetworkSegmentationQueryClients` and `ExternalNetworksAdminSettingsClients`.",
+      "The `setup-external-network` page text described `Generate code` and `Redeem code` as one-time access-code actions used to link an external network to the current Engage network, which makes the visible flow look more like network-link setup than billing or add-on procurement.",
+      "The same-origin `RealtimeConnectionSettingsClients` response returned transient `*.rt.yammer.com/cometd/` relay hosts, after which the browser performed Bayeux handshake, subscribe, and connect POSTs with redacted `token` and `hub_tenant_token` fields in the body rather than `Authorization` or cookie headers.",
+      "A bearer-backed GET `/api/v1/oauth2/aad_access_token` helper was also observed on `api.engage.cloud.microsoft`; bundle code still requests it through Yammer-named helper logic with `X-Yammer-OAuthTokenExpiration` and optional `X-Yammer-ThirdPartyCookieBlocked` headers.",
+      "Captured runtime config still declared `broadcast.yammer.com` and `msgraph.yammer.com`, but no raw admin request in the April 2026 Viva Engage captures hit either host directly.",
+      "The guessed `/main/admin/external-networks` path changed the URL but rendered the generic admin landing state during this pass; the canonical external admin surface resolved under `external-networks-settings` instead.",
+    ],
+    openGaps: [
+      "Exercise the `setup-external-network` workflow far enough to capture any write mutations or redemption flows behind the visible `Generate code` and `Redeem code` affordances, beyond the shared `ExternalNetworksAdminSettingsClients` bootstrap query.",
+      "Confirm whether `msgraph.yammer.com` or `broadcast.yammer.com` ever move beyond runtime host-config references into stable non-telemetry admin route families before publishing them.",
+    ],
+  },
 };
 
 export const captureRecipesByTitle = {
@@ -509,6 +556,14 @@ export const captureRecipesByTitle = {
   Teams: [
     "tools/capture-recipes/teams-deep.json",
     "tools/capture-recipes/teams-seeded-replay.json",
+  ],
+  "Viva Engage": [
+    "tools/capture-recipes/viva-engage-admin-roles-deep.json",
+    "tools/capture-recipes/viva-engage-admin-deep.json",
+    "tools/capture-recipes/viva-engage-external-networks-deep.json",
+    "tools/capture-recipes/viva-engage-segmentation-deep.json",
+    "tools/capture-recipes/viva-engage-setup-external-network-deep.json",
+    "tools/capture-recipes/viva-engage-tenant-settings-deep.json",
   ],
 };
 
