@@ -464,15 +464,16 @@ export const coverageOverlayByTitle = {
     notes: [
       "The authenticated default-Edge landing capture confirmed 27 unique persisted GraphQL operations, including `RealtimeConnectionSettingsClients`, plus a stable bearer-plus-`x-request-id` GraphQL header profile and no cookie header on the captured authenticated admin API requests for this pass.",
       "Direct-route captures validated `/main/admin/segmentation`, `/main/admin/external-networks-settings`, and `/main/admin/setup-external-network`, adding route-specific GraphQL operations `NetworkSegmentationQueryClients` and `ExternalNetworksAdminSettingsClients`.",
+      "Repeated admin captures also observed `UniversalCreateButtonQueryClients`, which returned create-capability flags and dismissable prompt state for the shell `Create new` affordance.",
       "The `setup-external-network` page text described `Generate code` and `Redeem code` as one-time access-code actions used to link an external network to the current Engage network, which makes the visible flow look more like network-link setup than billing or add-on procurement.",
+      "A final no-submit probe of a visible access-code control on `/main/admin/setup-external-network` kept the browser on the same route and did not emit a distinct write or redemption request before the next user-input step.",
       "The same-origin `RealtimeConnectionSettingsClients` response returned transient `*.rt.yammer.com/cometd/` relay hosts, after which the browser performed Bayeux handshake, subscribe, and connect POSTs with redacted `token` and `hub_tenant_token` fields in the body rather than `Authorization` or cookie headers.",
       "A bearer-backed GET `/api/v1/oauth2/aad_access_token` helper was also observed on `api.engage.cloud.microsoft`; bundle code still requests it through Yammer-named helper logic with `X-Yammer-OAuthTokenExpiration` and optional `X-Yammer-ThirdPartyCookieBlocked` headers.",
-      "Captured runtime config still declared `broadcast.yammer.com` and `msgraph.yammer.com`, but no raw admin request in the April 2026 Viva Engage captures hit either host directly.",
+      "A review of the checked-in April 2026 raw-request artifacts still found no direct admin request to `broadcast.yammer.com` or `msgraph.yammer.com`, so both hosts remain unpromoted config references.",
       "The guessed `/main/admin/external-networks` path changed the URL but rendered the generic admin landing state during this pass; the canonical external admin surface resolved under `external-networks-settings` instead.",
     ],
     openGaps: [
-      "Exercise the `setup-external-network` workflow far enough to capture any write mutations or redemption flows behind the visible `Generate code` and `Redeem code` affordances, beyond the shared `ExternalNetworksAdminSettingsClients` bootstrap query.",
-      "Confirm whether `msgraph.yammer.com` or `broadcast.yammer.com` ever move beyond runtime host-config references into stable non-telemetry admin route families before publishing them.",
+      "Intercept the next step after code generation or code entry if `setup-external-network` ever advances beyond the shared `ExternalNetworksAdminSettingsClients` bootstrap query and shell-state reads, because the no-submit access-code control probe did not emit a distinct write or redemption family.",
     ],
   },
 };

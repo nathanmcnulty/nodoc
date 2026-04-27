@@ -16,6 +16,7 @@ info:
       - 27 unique `operationName` or `operationAlias` values during the authenticated admin landing flow
       - direct-route captures on `/main/admin/segmentation`, `/main/admin/external-networks-settings`, and `/main/admin/setup-external-network`
       - route-specific persisted GraphQL operations such as `NetworkSegmentationQueryClients` and `ExternalNetworksAdminSettingsClients`
+      - repeated admin captures also observed `UniversalCreateButtonQueryClients`, which returned create-capability flags and dismissable prompt state for the shell `Create new` affordance
       - a cross-host bearer-backed token helper on `https://api.engage.cloud.microsoft/api/v1/oauth2/aad_access_token`
       - a same-origin `RealtimeConnectionSettingsClients` persisted query that returned transient `*.rt.yammer.com/cometd/` relay hosts
       - relay POSTs on `/cometd/handshake`, `/cometd/`, and `/cometd/connect` that carried redacted `token` and `hub_tenant_token` values in the Bayeux payload instead of `Authorization` or cookie headers
@@ -27,13 +28,13 @@ info:
     `cometdBaseUrl` on transient `*.rt.yammer.com` hosts. The captured relay calls used Bayeux
     handshake, subscribe, and connect envelopes with redacted auth material in the request body.
 
-    Additional Yammer-era hosts such as `msgraph.yammer.com` and `broadcast.yammer.com` still
-    require direct live confirmation before they should be promoted into the published admin
-    surface.
+    A review of the checked-in April 2026 raw-request artifacts still found no direct admin
+    request to `msgraph.yammer.com` or `broadcast.yammer.com`, so those hosts remain unpromoted
+    config references rather than published admin routes.
 
     Documentation and specifications have been provided on a best-efforts basis and may not be
     100% accurate.
-  version: 0.4.0
+  version: 0.4.1
   contact:
     name: nodoc
     url: https://github.com/nathanmcnulty/nodoc
@@ -307,6 +308,14 @@ paths:
         `/main/admin/setup-external-network` added route-specific operations such as
         `NetworkSegmentationQueryClients` and `ExternalNetworksAdminSettingsClients`.
 
+        Repeated admin captures also observed `UniversalCreateButtonQueryClients`, which returned
+        create-capability flags and dismissable prompt state for the shell `Create new`
+        affordance.
+
+        A no-submit probe of a visible access-code control such as `Generate code` or
+        `Redeem code` stayed on `/main/admin/setup-external-network` and did not emit a
+        distinct write or redemption request before the next user-input step.
+
         The same authenticated admin shell also issued `RealtimeConnectionSettingsClients`, which
         returned a tenant- and user-scoped `cometdBaseUrl` that the browser immediately used for
         transient `*.rt.yammer.com` Bayeux relay traffic.
@@ -366,6 +375,25 @@ paths:
                         - project: ClientForward
                           key: GuidedAdminNotificationsLandingPage
                           value: "true"
+              universalCreateButtonPersistedQuery:
+                summary: Admin shell create-button state request
+                value:
+                  operationName: UniversalCreateButtonQuery
+                  variables:
+                    dismissablePromptKey: universal-create-button-state
+                  extensions:
+                    persistedQuery:
+                      version: 1
+                      sha256Hash: e4de6b9cacea631a44f327c9facb52acdf822275b0a0f6d94c79b0e682a6ab07
+                    yammerTreatments:
+                      version: "1"
+                      treatments:
+                        - project: ClientForward
+                          key: GuidedAdminNotificationsLandingPage
+                          value: "true"
+                        - project: ClientForward
+                          key: MultiTenantOrganization
+                          value: "true"
               realtimeConnectionSettingsPersistedQuery:
                 summary: Landing request that returns the realtime relay base URL
                 value:
@@ -387,6 +415,7 @@ paths:
           - Open `https://engage.cloud.microsoft/main/admin/segmentation` to load the dedicated segmentation admin page and its persisted GraphQL bootstrap query.
           - Open `https://engage.cloud.microsoft/main/admin/external-networks-settings` to load the canonical external-networks admin page.
           - Open `https://engage.cloud.microsoft/main/admin/setup-external-network` to continue into the external-network setup flow, which reused the external-networks admin bootstrap query during this pass.
+          - Click a visible access-code control such as `Generate code` or `Redeem code` without submitting or entering a code to confirm that the flow stays on the same route and does not emit a distinct write or redemption family before the next user-input step.
           - Preserve the `RealtimeConnectionSettingsClients` response if present, because it provides the transient `cometdBaseUrl` used by the Yammer-era realtime relay chain.
         headerProfile: viva-engage-graphql
         availability:
@@ -394,8 +423,10 @@ paths:
           notes:
             - The authenticated landing capture confirmed 27 unique persisted query names or aliases, but the exact operation mix remains tenant- and role-dependent.
             - The admin landing pass confirmed operations such as `CurrentUserClients`, `FeatureAccessSettingsClients`, `TenantConfigurationAndRoles`, `NavigationGroupsClients`, and `RealtimeConnectionSettingsClients`.
+            - Repeated admin captures also observed `UniversalCreateButtonQueryClients`, which returned create-capability flags and dismissable prompt state for the shell `Create new` affordance.
             - The segmentation direct-route capture confirmed `NetworkSegmentationQueryClients` together with the dedicated `4-page-admin-segmentation-settings.js` route chunk.
             - The external-networks settings and setup direct-route captures confirmed `ExternalNetworksAdminSettingsClients` together with the dedicated `4-page-admin-external-networks-settings.js` route chunk.
+            - A no-submit probe of a visible access-code control such as `Generate code` or `Redeem code` stayed on `/main/admin/setup-external-network` and did not emit a distinct write or redemption request before the next user-input step.
             - The `RealtimeConnectionSettingsClients` operation returned transient `cometdBaseUrl` values that bootstrapped `*.rt.yammer.com/cometd/handshake`, `/cometd/`, and `/cometd/connect` relay calls without `Authorization` or cookie headers.
             - Navigating to `/main/admin/external-networks` updated the URL but rendered the generic admin landing state during this pass, so `external-networks-settings` should be treated as the canonical external-networks route.
         provenance:
@@ -426,6 +457,26 @@ paths:
                       settings:
                         realtimeConnectionSettings:
                           cometdBaseUrl: https://relay-instance.rt.yammer.com/cometd/
+                universalCreateButtonResponse:
+                  summary: GraphQL response describing create-button and dismissable prompt state
+                  value:
+                    data:
+                      viewer:
+                        isRestrictedToViewOnlyMode: false
+                        canCreateGroup: true
+                        dismissablePrompts:
+                          - isDismissed: false
+                            promptKey: universal-create-button-state
+                        canScheduleAndCreateTeamsMeeting: true
+                        user:
+                          wallFeed:
+                            viewerCanStartThread: true
+                          id: "[redacted-user-id]"
+                      settings:
+                        article:
+                          viewerCanCreateArticle: false
+                        campaigns:
+                          viewerCanCreateCampaigns: false
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
