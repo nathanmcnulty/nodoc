@@ -2944,6 +2944,7 @@
             "Open `https://engage.cloud.microsoft/main/admin/segmentation` to load the dedicated segmentation admin page and its persisted GraphQL bootstrap query.",
             "Open `https://engage.cloud.microsoft/main/admin/external-networks-settings` to load the canonical external-networks admin page.",
             "Open `https://engage.cloud.microsoft/main/admin/setup-external-network` to continue into the external-network setup flow, which reused the external-networks admin bootstrap query during this pass.",
+            "Click a visible access-code control such as `Generate code` or `Redeem code` without submitting or entering a code to confirm that the flow stays on the same route and does not emit a distinct write or redemption family before the next user-input step.",
             "Preserve the `RealtimeConnectionSettingsClients` response if present, because it provides the transient `cometdBaseUrl` used by the Yammer-era realtime relay chain."
           ],
           "headerProfile": "viva-engage-graphql",
@@ -2952,8 +2953,10 @@
             "notes": [
               "The authenticated landing capture confirmed 27 unique persisted query names or aliases, but the exact operation mix remains tenant- and role-dependent.",
               "The admin landing pass confirmed operations such as `CurrentUserClients`, `FeatureAccessSettingsClients`, `TenantConfigurationAndRoles`, `NavigationGroupsClients`, and `RealtimeConnectionSettingsClients`.",
+              "Repeated admin captures also observed `UniversalCreateButtonQueryClients`, which returned create-capability flags and dismissable prompt state for the shell `Create new` affordance.",
               "The segmentation direct-route capture confirmed `NetworkSegmentationQueryClients` together with the dedicated `4-page-admin-segmentation-settings.js` route chunk.",
               "The external-networks settings and setup direct-route captures confirmed `ExternalNetworksAdminSettingsClients` together with the dedicated `4-page-admin-external-networks-settings.js` route chunk.",
+              "A no-submit probe of a visible access-code control such as `Generate code` or `Redeem code` stayed on `/main/admin/setup-external-network` and did not emit a distinct write or redemption request before the next user-input step.",
               "The `RealtimeConnectionSettingsClients` operation returned transient `cometdBaseUrl` values that bootstrapped `*.rt.yammer.com/cometd/handshake`, `/cometd/`, and `/cometd/connect` relay calls without `Authorization` or cookie headers.",
               "Navigating to `/main/admin/external-networks` updated the URL but rendered the generic admin landing state during this pass, so `external-networks-settings` should be treated as the canonical external-networks route."
             ]

@@ -655,7 +655,7 @@ export const generatedSpecDataByTitle = {
     "operationContextCount": 5,
     "requestExampleCount": 4,
     "successResponseExampleCount": 4,
-    "evidenceMentionCount": 45,
+    "evidenceMentionCount": 50,
     "maturity": {
       "label": "Advanced",
       "tone": "success",
