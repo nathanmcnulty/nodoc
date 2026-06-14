@@ -191,12 +191,6 @@ const config: Config = {
           position: "left",
         },
         {
-          href: "https://www.postman.com/dolphinlabs/workspace/nodoc",
-          className: "icon--postman navbar--icon-link",
-          "aria-label": "Postman collection",
-          position: "right",
-        },
-        {
           href: "https://github.com/nathanmcnulty/nodoc",
           className: "icon--github navbar--icon-link",
           "aria-label": "GitHub repository",
