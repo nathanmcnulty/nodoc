@@ -411,8 +411,9 @@ function normalizePostmanUrl(url) {
     ...url,
   };
   const variableName = typeof normalizedUrl.port === "string" ? normalizedUrl.port : null;
+  const urlVariables = Array.isArray(normalizedUrl.variable) ? normalizedUrl.variable : [];
   const variableEntry = variableName
-    ? normalizedUrl.variable?.find((entry) => entry?.key === variableName)
+    ? urlVariables.find((entry) => entry?.key === variableName)
     : null;
 
   if (variableEntry && (!Array.isArray(normalizedUrl.host) || normalizedUrl.host.length === 0)) {

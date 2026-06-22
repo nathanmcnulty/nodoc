@@ -171,10 +171,6 @@ function summarizeHeaderMetadata(headers = {}) {
 }
 
 function sanitizeLocationHeader(value) {
-  if (typeof value !== "string" || value.length === 0) {
-    return null;
-  }
-
   const sensitiveKeys = new Set([
     "access_token",
     "client_info",
@@ -185,10 +181,17 @@ function sanitizeLocationHeader(value) {
     "session_state",
     "state",
   ]);
+  const locationValue = toHeaderValues(value)
+    .map((entry) => entry.trim())
+    .find(Boolean);
+
+  if (!locationValue) {
+    return null;
+  }
 
   try {
     const placeholderOrigin = "https://placeholder.invalid";
-    const parsed = new URL(value, placeholderOrigin);
+    const parsed = new URL(locationValue, placeholderOrigin);
 
     for (const [key] of parsed.searchParams) {
       if (sensitiveKeys.has(key.toLowerCase())) {
@@ -196,13 +199,38 @@ function sanitizeLocationHeader(value) {
       }
     }
 
-    if (/^[a-z][a-z0-9+.-]*:/iu.test(value)) {
+    if (/^[a-z][a-z0-9+.-]*:/iu.test(locationValue)) {
       return parsed.toString();
     }
 
     return `${parsed.pathname}${parsed.search}${parsed.hash}`;
   } catch {
-    return value;
+    const hashIndex = locationValue.indexOf("#");
+    const withoutHash = hashIndex === -1 ? locationValue : locationValue.slice(0, hashIndex);
+    const hash = hashIndex === -1 ? "" : locationValue.slice(hashIndex);
+    const queryIndex = withoutHash.indexOf("?");
+
+    if (queryIndex === -1) {
+      return locationValue;
+    }
+
+    const prefix = withoutHash.slice(0, queryIndex);
+    const params = new URLSearchParams(withoutHash.slice(queryIndex + 1));
+    let redacted = false;
+
+    for (const [key] of params) {
+      if (sensitiveKeys.has(key.toLowerCase())) {
+        params.set(key, "[redacted]");
+        redacted = true;
+      }
+    }
+
+    if (!redacted) {
+      return locationValue;
+    }
+
+    const query = params.toString();
+    return query ? `${prefix}?${query}${hash}` : `${prefix}${hash}`;
   }
 }
 
