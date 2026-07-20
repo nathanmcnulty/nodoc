@@ -65,13 +65,16 @@ Checked-in Postman collections live under `postman/collections/` and are generat
 
 ## Discovery workflow
 
-For recurring portal research and undocumented API discovery work, use the living playbook in [AGENT_DISCOVERY_PLAYBOOK.md](./AGENT_DISCOVERY_PLAYBOOK.md).
+For agent execution, start with the bounded [AGENT_DISCOVERY_RUNBOOK.md](./AGENT_DISCOVERY_RUNBOOK.md). Use the deeper [AGENT_DISCOVERY_PLAYBOOK.md](./AGENT_DISCOVERY_PLAYBOOK.md) for background, selector repair, and research decisions.
 
 It captures the preferred browser/auth workflow, traffic-first discovery process, JavaScript bundle mining guidance, write-shape safety practices, and an experiment log for iterating on better techniques over time.
 
 - Start broad planning runs with `npm run generate:crawl-baseline` to see the current spec inventory, recorder support gaps, and the recommended crawl priority for each published portal.
+- Use `npm run discover:portal -- --portal <spec-id> --phase plan --json` to generate the exact portal brief, then rerun it with `--phase all --artifacts <artifact-dir>` for deterministic capture and candidate analysis.
 - Run `npm run generate:recipe-audit` to see which portals still lack checked-in recipes, iframe coverage, seeded replay, or second-pass interaction checkpoints.
-- Use `npm run capture:deep-crawl -- --portal <portal-name> --url <seed-url> --out <artifact-dir> ...` for checked-in raw CDP page-target capture. It supports repeated `--action type=value` steps including `click-label`, `click-contains`, `click-href`, `navigate`, `capture`, `wait-ms`, `replay-seeded-links`, and `replay-seeded-routes`.
+- Use `npm run capture:deep-crawl -- --portal <portal-name> --url <seed-url> --out <artifact-dir> ...` for checked-in raw CDP page-target capture. It supports repeated `--action type=value` steps including `click-label`, `click-contains`, `click-href`, `navigate`, `capture`, `wait-ms`, `crawl-links`, `probe-get`, `replay-seeded-links`, and `replay-seeded-routes`.
+- Capture now waits for bounded network-idle signals instead of always consuming the full settle window, fingerprints page and API shapes, downloads loaded JavaScript through the authenticated CDP session, and emits parsed `bundle-candidates.json` evidence automatically.
+- Use `npm run mine:javascript -- --artifacts <artifact-dir> --prefix /api/ ...` to reprocess downloaded bundles without another browser pass.
 - Prefer `--recipe tools/capture-recipes/<portal>.json` once a portal already has a checked-in flow. Recipes can still be combined with explicit `--action ...` overrides, and variable-backed recipes such as SharePoint can be filled with repeated `--var name=value` arguments.
 - Pair `replay-seeded-links` or `replay-seeded-routes` with `--seed-artifacts <artifact-dir>` when you want to revisit safe same-origin detail links or replay detail routes derived from IDs already present in earlier request/page-state artifacts instead of re-clicking a live grid.
 - After capturing a portal pass, run `npm run generate:crawl-candidates -- --spec <title-or-spec-id> --artifacts <artifact-dir>` to normalize the captured route families, scope them to the target spec's hosts and path prefixes, diff them against the checked-in spec, and emit a candidate queue tagged as confirmed, probed, or bundle-discovered.

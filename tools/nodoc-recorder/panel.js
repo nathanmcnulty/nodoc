@@ -339,14 +339,57 @@ function getPath(url) {
   }
 }
 
-function dedupeKey(method, url) {
-  // Normalize: strip query params and trailing slashes for dedup
+function valueShape(value, depth = 0) {
+  if (depth >= 8) return 'max-depth';
+  if (value === null) return 'null';
+  if (Array.isArray(value)) {
+    return {
+      array: Array.from(new Set(
+        value.slice(0, 20).map(item => JSON.stringify(valueShape(item, depth + 1)))
+      )).sort()
+    };
+  }
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.keys(value)
+        .sort()
+        .map(key => [key, valueShape(value[key], depth + 1)])
+    );
+  }
+  return typeof value;
+}
+
+function bodyShape(value) {
+  if (!value) return 'none';
   try {
-    const parsed = new URL(url);
-    const path = parsed.pathname.replace(/\/+$/, '');
-    return `${method} ${path}`;
+    const parsed = typeof value === 'string' ? JSON.parse(value) : value;
+    return JSON.stringify(valueShape(parsed));
   } catch {
-    return `${method} ${url}`;
+    let hash = 2166136261;
+    const normalized = String(value).replace(/\s+/g, ' ').trim();
+    for (let index = 0; index < normalized.length; index++) {
+      hash ^= normalized.charCodeAt(index);
+      hash = Math.imul(hash, 16777619);
+    }
+    return `non-json:${typeof value}:${normalized.length}:${(hash >>> 0).toString(16)}`;
+  }
+}
+
+function dedupeKey(entry) {
+  try {
+    const parsed = new URL(entry.url);
+    const path = parsed.pathname.replace(/\/+$/, '');
+    const queryKeys = Array.from(new Set(parsed.searchParams.keys())).sort().join(',');
+    return [
+      entry.method,
+      path,
+      `query=${queryKeys}`,
+      `status=${entry.statusCode ?? 'unknown'}`,
+      `request=${bodyShape(entry.requestBody)}`,
+      `response=${bodyShape(entry.responseBody)}`,
+    ].join(' ');
+  } catch {
+    return `${entry.method} ${entry.url} status=${entry.statusCode ?? 'unknown'}`;
   }
 }
 
@@ -705,7 +748,7 @@ function finishCapture(entry) {
   }
 
   // Deduplication
-  const dk = dedupeKey(entry.method, entry.url);
+  const dk = dedupeKey(entry);
   if (deduplicationMap.has(dk)) {
     const existing = deduplicationMap.get(dk);
     existing.count++;
@@ -815,7 +858,7 @@ function renderList() {
       tr.dataset.id = entry.id;
       if (entry.id === selectedId) tr.className = 'selected';
 
-      const dk = dedupeKey(entry.method, entry.url);
+      const dk = dedupeKey(entry);
       const dedupInfo = deduplicationMap.get(dk);
       const count = dedupInfo ? dedupInfo.count : 1;
       const countBadge = count > 1 ? `<span class="occurrence-count">×${count}</span>` : '';

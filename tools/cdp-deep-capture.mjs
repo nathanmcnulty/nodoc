@@ -1,9 +1,19 @@
+import { createHash } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
 
+import { mineJavascriptBundles } from "./mine-javascript-bundles.mjs";
+import {
+  activeGetPathPattern,
+  activeGetQueryPattern,
+  classifyGetProbeUrl,
+  sanitizeObservedTransportUrl,
+} from "./discovery-safety.mjs";
+
 const apiBase = "http://127.0.0.1:9222";
 const defaultNavigationTimeoutMs = 15000;
+const defaultNetworkIdleMs = 750;
 const defaultSeedLinkLimit = 12;
 const defaultSeedRouteLimit = 8;
 const defaultSettleMs = 8000;
@@ -36,7 +46,9 @@ function parseActionSpec(value) {
     "click-contains",
     "click-href",
     "click-label",
+    "crawl-links",
     "navigate",
+    "probe-get",
     "replay-seeded-links",
     "replay-seeded-routes",
     "wait-ms",
@@ -82,6 +94,76 @@ function ensureGlobalFlag(flags = "gu") {
     uniqueFlags.push("g");
   }
   return uniqueFlags.join("");
+}
+
+function sha256(value) {
+  return createHash("sha256").update(String(value ?? "")).digest("hex");
+}
+
+function shapeOf(value, depth = 0) {
+  if (depth >= 8) {
+    return "max-depth";
+  }
+  if (value === null) {
+    return "null";
+  }
+  if (Array.isArray(value)) {
+    const shapes = uniqueSorted(value.slice(0, 20).map((item) => JSON.stringify(shapeOf(item, depth + 1))));
+    return { array: shapes.map((item) => JSON.parse(item)) };
+  }
+  if (typeof value === "object") {
+    return Object.fromEntries(
+      Object.keys(value)
+        .sort((left, right) => left.localeCompare(right))
+        .map((key) => [key, shapeOf(value[key], depth + 1)]),
+    );
+  }
+  return typeof value;
+}
+
+function bodyShapeFingerprint(value) {
+  if (!value) {
+    return null;
+  }
+  try {
+    const parsed = typeof value === "string" ? JSON.parse(value) : value;
+    return sha256(JSON.stringify(shapeOf(parsed)));
+  } catch {
+    return sha256(`non-json:${typeof value}:${String(value)}`);
+  }
+}
+
+function requestEvidence(request) {
+  try {
+    const parsed = new URL(request.url);
+    const queryParameterNames = uniqueSorted(Array.from(parsed.searchParams.keys()));
+    const requestShapeFingerprint =
+      request.requestShapeFingerprint ?? bodyShapeFingerprint(request.requestBody);
+    const responseShapeFingerprint =
+      request.responseShapeFingerprint ?? bodyShapeFingerprint(request.responseBody);
+    return {
+      queryParameterNames,
+      requestFingerprint: sha256(JSON.stringify({
+        method: request.method,
+        path: parsed.pathname,
+        queryParameterNames,
+        requestShapeFingerprint,
+        responseShapeFingerprint,
+        status: request.status ?? null,
+      })),
+      requestShapeFingerprint,
+      responseShapeFingerprint,
+    };
+  } catch {
+    return {
+      queryParameterNames: [],
+      requestFingerprint: sha256(`${request.method} ${request.url}`),
+      requestShapeFingerprint:
+        request.requestShapeFingerprint ?? bodyShapeFingerprint(request.requestBody),
+      responseShapeFingerprint:
+        request.responseShapeFingerprint ?? bodyShapeFingerprint(request.responseBody),
+    };
+  }
 }
 
 function normalizeHeaderEntries(headers = {}) {
@@ -404,6 +486,10 @@ function applyRecipeConfig(args, recipeConfig, recipePath) {
     args.navigationTimeoutMs = Number(recipeConfig.navigationTimeoutMs);
   }
 
+  if (Number.isFinite(Number(recipeConfig.networkIdleMs))) {
+    args.networkIdleMs = Number(recipeConfig.networkIdleMs);
+  }
+
   if (Number.isFinite(Number(recipeConfig.evaluateTimeoutMs))) {
     args.evaluateTimeoutMs = Number(recipeConfig.evaluateTimeoutMs);
   }
@@ -423,6 +509,7 @@ async function parseArgs(argv) {
     matchHosts: [],
     matchPathPrefixes: [],
     navigationTimeoutMs: defaultNavigationTimeoutMs,
+    networkIdleMs: defaultNetworkIdleMs,
     outDir: null,
     portal: null,
     postActionSettleMs: defaultPostActionSettleMs,
@@ -655,6 +742,17 @@ async function parseArgs(argv) {
       continue;
     }
 
+    if (arg === "--network-idle-ms" && next) {
+      args.networkIdleMs = Number(next);
+      index += 1;
+      continue;
+    }
+
+    if (arg.startsWith("--network-idle-ms=")) {
+      args.networkIdleMs = Number(arg.slice("--network-idle-ms=".length));
+      continue;
+    }
+
     if (arg.startsWith("--navigation-timeout-ms=")) {
       args.navigationTimeoutMs = Number(arg.slice("--navigation-timeout-ms=".length));
       continue;
@@ -695,7 +793,7 @@ async function parseArgs(argv) {
     throw new Error("Missing required --out argument.");
   }
 
-  for (const key of ["evaluateTimeoutMs", "navigationTimeoutMs", "postActionSettleMs", "settleMs"]) {
+  for (const key of ["evaluateTimeoutMs", "navigationTimeoutMs", "networkIdleMs", "postActionSettleMs", "settleMs"]) {
     if (!Number.isFinite(args[key]) || args[key] <= 0) {
       throw new Error(`Invalid value for ${key}: "${args[key]}".`);
     }
@@ -1217,6 +1315,7 @@ function isDomCapableTarget(sessionId, targetInfo) {
 async function evaluateJson(client, expression, sessionId = null, timeoutMs = runtimeEvaluateTimeoutMs) {
   const result = await Promise.race([
     client.send("Runtime.evaluate", {
+      awaitPromise: true,
       expression,
       returnByValue: true,
     }, sessionId),
@@ -1390,11 +1489,113 @@ function buildClickExpression(action) {
   })()`;
 }
 
+function buildProbeExpression(value) {
+  const encodedValue = JSON.stringify(String(value || ""));
+  const encodedPathPattern = JSON.stringify(activeGetPathPattern.source);
+  const encodedQueryPattern = JSON.stringify(activeGetQueryPattern.source);
+  return `(async () => {
+    const url = new URL(${encodedValue}, location.href).toString();
+    const target = new URL(url);
+    const riskyRoute = new RegExp(${encodedPathPattern}, "iu");
+    const riskyQuery = new RegExp(${encodedQueryPattern}, "iu");
+    let canonicalPath = target.pathname;
+    let canonicalFragment = target.hash;
+    try {
+      for (let pass = 0; pass < 3 && canonicalPath.includes("%"); pass += 1) {
+        canonicalPath = decodeURIComponent(canonicalPath);
+      }
+      for (let pass = 0; pass < 3 && canonicalFragment.includes("%"); pass += 1) {
+        canonicalFragment = decodeURIComponent(canonicalFragment);
+      }
+    } catch {
+      return {
+        error: "The route contains unsafe URL encoding.",
+        ok: false,
+        rejected: true,
+        status: null,
+        url,
+      };
+    }
+    if (
+      !["http:", "https:"].includes(target.protocol)
+      || target.origin !== location.origin
+      || target.username
+      || target.password
+    ) {
+      return {
+        error: "Only same-origin HTTP(S) probes are permitted.",
+        ok: false,
+        rejected: true,
+        status: null,
+        url,
+      };
+    }
+    let riskyQueryValue = false;
+    try {
+      riskyQueryValue = Array.from(target.searchParams).some(([key, rawValue]) => {
+        let queryKey = key;
+        let queryValue = rawValue;
+        for (let pass = 0; pass < 3 && queryKey.includes("%"); pass += 1) {
+          queryKey = decodeURIComponent(queryKey);
+        }
+        for (let pass = 0; pass < 3 && queryValue.includes("%"); pass += 1) {
+          queryValue = decodeURIComponent(queryValue);
+        }
+        return ["action", "command", "operation"].includes(queryKey.toLowerCase())
+          && riskyRoute.test("/" + queryValue);
+      });
+    } catch {
+      riskyQueryValue = true;
+    }
+    if (
+      riskyRoute.test(canonicalPath)
+      || riskyRoute.test(canonicalFragment.replace(/^#/, "/"))
+      || riskyQuery.test(target.search)
+      || riskyQuery.test(canonicalFragment)
+      || riskyQueryValue
+    ) {
+      return {
+        error: "The route matches the active-GET deny rules.",
+        ok: false,
+        rejected: true,
+        status: null,
+        url,
+      };
+    }
+    try {
+      const response = await fetch(url, {
+        credentials: "include",
+        headers: { accept: "application/json, text/plain, */*" },
+        method: "GET",
+        redirect: "manual",
+      });
+      const body = await response.text();
+      return {
+        body: body.slice(0, 5000),
+        contentType: response.headers.get("content-type"),
+        ok: response.ok,
+        redirected: response.type === "opaqueredirect" || (response.status >= 300 && response.status < 400),
+        status: response.status,
+        statusText: response.statusText,
+        url: response.url || url,
+      };
+    } catch (error) {
+      return {
+        error: error instanceof Error ? error.message : String(error),
+        ok: false,
+        status: null,
+        url,
+      };
+    }
+  })()`;
+}
+
 function toApiRecord(request, portalName) {
   try {
     const parsed = new URL(request.url);
     const querySample = parsed.search ? parsed.search : null;
     return {
+      ...requestEvidence(request),
       confidence: "confirmed-traffic",
       method: request.method,
       path: parsed.pathname,
@@ -1407,6 +1608,7 @@ function toApiRecord(request, portalName) {
     };
   } catch {
     return {
+      ...requestEvidence(request),
       confidence: "confirmed-traffic",
       method: request.method,
       path: request.url,
@@ -1457,7 +1659,36 @@ function slugify(value) {
   return (normalized || "seeded-link").slice(0, 60);
 }
 
-function collectSeededLinkCandidates(seedPageStates, rootOrigin, args, action) {
+function bundleFilename(scriptUrl, contentHash) {
+  let basename = "bundle";
+  try {
+    basename = path.posix.basename(new URL(scriptUrl).pathname) || basename;
+  } catch {
+    basename = path.basename(String(scriptUrl || "")) || basename;
+  }
+  const safeBasename = basename
+    .replace(/\.(?:m?js)$/iu, "")
+    .replace(/[^A-Za-z0-9._-]+/gu, "-")
+    .slice(0, 80) || "bundle";
+  return `${safeBasename}-${contentHash.slice(0, 12)}.js`;
+}
+
+function sourceMapUrlForScript(source, scriptUrl) {
+  const matches = Array.from(
+    String(source || "").matchAll(/(?:\/\/[#@]|\/\*[#@])\s*sourceMappingURL=([^\s*]+)/gu),
+  );
+  const sourceMapReference = matches.at(-1)?.[1];
+  if (!sourceMapReference || sourceMapReference.startsWith("data:")) {
+    return null;
+  }
+  try {
+    return new URL(sourceMapReference, scriptUrl).toString();
+  } catch {
+    return sourceMapReference;
+  }
+}
+
+function collectSeededLinkCandidates(seedPageStates, rootOrigin, args, action, limit = args.seedLinkLimit) {
   const explicitPageFilters = args.seedPages.map((value) => String(value).trim().toLowerCase()).filter(Boolean);
   const sourcePageSelector = String(action.value || "all").trim().toLowerCase();
   const linkContainsFilters = args.seedLinkContains.map((value) => String(value).trim().toLowerCase()).filter(Boolean);
@@ -1489,7 +1720,11 @@ function collectSeededLinkCandidates(seedPageStates, rootOrigin, args, action) {
         const parsed = new URL(resolvedUrl);
         const normalizedUrl = parsed.toString();
         const normalizedUrlLower = normalizedUrl.toLowerCase();
-        if (parsed.origin !== rootOrigin || excludedLinks.has(normalizedUrlLower)) {
+        if (
+          parsed.origin !== rootOrigin
+          || excludedLinks.has(normalizedUrlLower)
+          || !classifyGetProbeUrl(normalizedUrl, rootOrigin).allowed
+        ) {
           continue;
         }
 
@@ -1512,7 +1747,7 @@ function collectSeededLinkCandidates(seedPageStates, rootOrigin, args, action) {
     }
   }
 
-  return candidates.slice(0, args.seedLinkLimit);
+  return candidates.slice(0, limit);
 }
 
 function collectSeededRouteCandidates(seedArtifacts, rootOrigin, args, action) {
@@ -1539,7 +1774,10 @@ function collectSeededRouteCandidates(seedArtifacts, rootOrigin, args, action) {
           }
 
           const normalizedUrl = parsed.toString();
-          if (seenUrls.has(normalizedUrl)) {
+          if (
+            seenUrls.has(normalizedUrl)
+            || !classifyGetProbeUrl(normalizedUrl, rootOrigin).allowed
+          ) {
             continue;
           }
 
@@ -1580,18 +1818,27 @@ async function main() {
   const target = await resolveTarget(args);
   const client = new CdpClient(target.webSocketDebuggerUrl);
   const requestMap = new Map();
+  const scriptRequestMap = new Map();
+  const scriptBodies = new Map();
+  const inFlightRequests = new Set();
+  const pendingBodyCaptures = new Set();
   const capturedRequests = [];
   const pageStates = [];
   const sessionSnapshots = [];
   const scriptPages = [];
   const scriptRecords = [];
+  const probeResults = [];
+  const probeOutcomes = new Map();
+  const passiveTransports = [];
   const actionResults = [];
   const configuredSessions = new Set();
   const sessions = new Map([
     [null, { targetTitle: target.title ?? null, targetType: "page", targetUrl: target.url ?? null }],
   ]);
   let activePageLabel = args.label ?? "seed-00";
+  let activeProbe = null;
   let currentLoadResolver = null;
+  let lastNetworkActivityAt = Date.now();
 
   async function configureSession(sessionId = null) {
     const key = sessionId ?? "root";
@@ -1652,6 +1899,12 @@ async function main() {
     const resourceType = params.type ?? params.initiator?.type ?? "";
     const requestUrl = params.request?.url;
     const sessionId = metadata.sessionId ?? null;
+    const key = requestKey(params.requestId, sessionId);
+
+    if (requestUrl && !["EventSource", "WebSocket"].includes(resourceType)) {
+      inFlightRequests.add(key);
+      lastNetworkActivityAt = Date.now();
+    }
 
     if (resourceType === "Script" && requestUrl) {
       scriptRecords.push({
@@ -1659,17 +1912,40 @@ async function main() {
         sessionId,
         url: requestUrl,
       });
+      scriptRequestMap.set(key, {
+        mimeType: null,
+        page: activePageLabel,
+        sessionId,
+        status: null,
+        url: requestUrl,
+      });
+    }
+
+    if (["EventSource", "Ping"].includes(resourceType) && requestUrl) {
+      const sanitizedUrl = sanitizeObservedTransportUrl(requestUrl);
+      if (!sanitizedUrl) {
+        return;
+      }
+      passiveTransports.push({
+        method: params.request?.method ?? "GET",
+        page: activePageLabel,
+        transport: resourceType === "Ping" ? "beacon" : "event-source",
+        url: sanitizedUrl,
+      });
     }
 
     if (!["Fetch", "XHR"].includes(resourceType) || !requestUrl) {
       return;
     }
 
-    requestMap.set(requestKey(params.requestId, sessionId), {
+    const sanitizedRequestBody = sanitizeCapturedBody(params.request.postData ?? null);
+    requestMap.set(key, {
       headers: params.request.headers ?? {},
       method: params.request.method,
       pageLabel: activePageLabel,
-      requestBody: truncate(sanitizeCapturedBody(params.request.postData ?? null)),
+      probeId: activeProbe?.url === requestUrl ? activeProbe.id : null,
+      requestBody: truncate(sanitizedRequestBody),
+      requestShapeFingerprint: bodyShapeFingerprint(sanitizedRequestBody),
       resourceType,
       sessionId,
       startedAt: params.timestamp,
@@ -1678,51 +1954,139 @@ async function main() {
   });
 
   client.on("Network.responseReceived", (params, metadata) => {
-    const record = requestMap.get(requestKey(params.requestId, metadata.sessionId));
-    if (!record) {
-      return;
+    const key = requestKey(params.requestId, metadata.sessionId);
+    const scriptRecord = scriptRequestMap.get(key);
+    if (scriptRecord) {
+      scriptRecord.mimeType = params.response?.mimeType ?? null;
+      scriptRecord.status = params.response?.status ?? null;
     }
 
-    record.mimeType = params.response?.mimeType ?? null;
-    record.responseHeaders = params.response?.headers ?? {};
-    record.status = params.response?.status ?? null;
+    const record = requestMap.get(key);
+    if (record) {
+      record.mimeType = params.response?.mimeType ?? null;
+      record.responseHeaders = params.response?.headers ?? {};
+      record.status = params.response?.status ?? null;
+    }
+  });
+
+  client.on("Network.webSocketCreated", (params) => {
+    const sanitizedUrl = sanitizeObservedTransportUrl(params.url);
+    if (!sanitizedUrl) {
+      return;
+    }
+    passiveTransports.push({
+      method: "GET",
+      page: activePageLabel,
+      transport: "websocket",
+      url: sanitizedUrl,
+    });
+  });
+
+  client.on("Network.webTransportCreated", (params) => {
+    const sanitizedUrl = sanitizeObservedTransportUrl(params.url);
+    if (!sanitizedUrl) {
+      return;
+    }
+    passiveTransports.push({
+      method: "CONNECT",
+      page: activePageLabel,
+      transport: "webtransport",
+      url: sanitizedUrl,
+    });
   });
 
   client.on("Network.loadingFailed", (params, metadata) => {
-    const record = requestMap.get(requestKey(params.requestId, metadata.sessionId));
+    const key = requestKey(params.requestId, metadata.sessionId);
+    inFlightRequests.delete(key);
+    lastNetworkActivityAt = Date.now();
+    scriptRequestMap.delete(key);
+    const record = requestMap.get(key);
     if (!record) {
       return;
     }
 
     record.failureText = params.errorText ?? "loading failed";
     capturedRequests.push(record);
-    requestMap.delete(requestKey(params.requestId, metadata.sessionId));
+    requestMap.delete(key);
   });
 
-  client.on("Network.loadingFinished", async (params, metadata) => {
-    const record = requestMap.get(requestKey(params.requestId, metadata.sessionId));
-    if (!record) {
-      return;
-    }
+  client.on("Network.loadingFinished", (params, metadata) => {
+    const key = requestKey(params.requestId, metadata.sessionId);
+    const bodyCapture = (async () => {
+      const scriptRecord = scriptRequestMap.get(key);
+      if (scriptRecord) {
+        try {
+          const scriptBody = await client.send("Network.getResponseBody", {
+            requestId: params.requestId,
+          }, metadata.sessionId);
+          const source = scriptBody?.base64Encoded
+            ? Buffer.from(scriptBody.body, "base64").toString("utf8")
+            : scriptBody?.body ?? "";
+          if (source) {
+            scriptBodies.set(scriptRecord.url, {
+              ...scriptRecord,
+              source,
+            });
+          }
+        } catch {
+          // Some cross-process scripts do not expose their bodies through CDP.
+        }
+        scriptRequestMap.delete(key);
+      }
 
-    try {
-      const body = await client.send("Network.getResponseBody", {
-        requestId: params.requestId,
-      }, metadata.sessionId);
-      record.responseBody = truncate(
-        sanitizeCapturedBody(
-          body?.base64Encoded
-            ? Buffer.from(body.body, "base64").toString("utf8")
-            : body?.body ?? null,
-        ),
-      );
-    } catch {
-      record.responseBody = null;
-    }
+      const record = requestMap.get(key);
+      if (record) {
+        try {
+          const body = await client.send("Network.getResponseBody", {
+            requestId: params.requestId,
+          }, metadata.sessionId);
+          const sanitizedResponseBody = sanitizeCapturedBody(
+            body?.base64Encoded
+              ? Buffer.from(body.body, "base64").toString("utf8")
+              : body?.body ?? null,
+          );
+          record.responseBody = truncate(sanitizedResponseBody);
+          record.responseShapeFingerprint = bodyShapeFingerprint(sanitizedResponseBody);
+        } catch {
+          record.responseBody = null;
+        }
 
-    capturedRequests.push(record);
-    requestMap.delete(requestKey(params.requestId, metadata.sessionId));
+        capturedRequests.push(record);
+        requestMap.delete(key);
+      }
+    })().finally(() => {
+      inFlightRequests.delete(key);
+      lastNetworkActivityAt = Date.now();
+      pendingBodyCaptures.delete(bodyCapture);
+    });
+    pendingBodyCaptures.add(bodyCapture);
   });
+
+  async function waitForNetworkIdle(maxWaitMs) {
+    const startedAt = Date.now();
+    await delay(Math.min(200, args.networkIdleMs));
+    while (Date.now() - startedAt < maxWaitMs) {
+      const idleForMs = Date.now() - lastNetworkActivityAt;
+      if (
+        inFlightRequests.size === 0
+        && pendingBodyCaptures.size === 0
+        && idleForMs >= args.networkIdleMs
+      ) {
+        return {
+          idleForMs,
+          settled: true,
+          waitedMs: Date.now() - startedAt,
+        };
+      }
+      await delay(Math.min(100, args.networkIdleMs));
+    }
+    return {
+      inFlightRequestCount: inFlightRequests.size,
+      pendingBodyCaptureCount: pendingBodyCaptures.size,
+      settled: false,
+      waitedMs: Date.now() - startedAt,
+    };
+  }
 
   async function getRootUrl() {
     return evaluateJson(client, "location.href");
@@ -1762,15 +2126,80 @@ async function main() {
     return snapshots;
   }
 
+  let latestBundleSummary = {
+    bundleCount: 0,
+    candidateCount: 0,
+    graphqlOperationCount: 0,
+    parseFailureCount: 0,
+  };
+
+  async function writeBundleArtifacts() {
+    const bundleDir = path.join(args.outDir, "bundles");
+    await mkdir(bundleDir, { recursive: true });
+    const downloads = [];
+    const bundleFiles = [];
+
+    for (const script of scriptBodies.values()) {
+      const contentHash = sha256(script.source);
+      const filename = bundleFilename(script.url, contentHash);
+      const absolutePath = path.join(bundleDir, filename);
+      await writeFile(absolutePath, script.source, "utf8");
+      bundleFiles.push(absolutePath);
+      downloads.push({
+        byteLength: Buffer.byteLength(script.source, "utf8"),
+        contentHash,
+        localPath: path.relative(args.outDir, absolutePath).replaceAll("\\", "/"),
+        mimeType: script.mimeType,
+        page: script.page,
+        sourceMapUrl: sourceMapUrlForScript(script.source, script.url),
+        status: script.status,
+        url: script.url,
+      });
+    }
+
+    await writeFile(
+      path.join(args.outDir, "bundle-downloads.json"),
+      `${JSON.stringify(downloads, null, 2)}\n`,
+      "utf8",
+    );
+
+    const bundleCandidates = await mineJavascriptBundles({
+      bundleFiles,
+      prefixes: uniqueSorted([
+        ...args.matchPathPrefixes,
+        "/_api/",
+        "/admin/",
+        "/api/",
+        "/apiproxy/",
+        "/beta/",
+      ]),
+    });
+    await writeFile(
+      path.join(args.outDir, "bundle-candidates.json"),
+      `${JSON.stringify(bundleCandidates, null, 2)}\n`,
+      "utf8",
+    );
+    latestBundleSummary = {
+      bundleCount: bundleCandidates.bundleCount,
+      candidateCount: bundleCandidates.candidates.length,
+      graphqlOperationCount: bundleCandidates.graphqlOperations.length,
+      parseFailureCount: bundleCandidates.parseFailures.length,
+    };
+  }
+
   async function flushArtifacts() {
+    await Promise.allSettled(Array.from(pendingBodyCaptures));
     const filteredRequests = capturedRequests
       .filter((request) => request.url && request.method)
       .map((request) => ({
         ...request,
         matchesCurrentSpec: shouldMatchRequest(request.url, args),
       }));
-    const apiRecords = filteredRequests.map((request) => toApiRecord(request, args.portal));
+    const apiRecords = filteredRequests
+      .filter((request) => !request.probeId)
+      .map((request) => toApiRecord(request, args.portal));
     const rawRequests = filteredRequests.map((request) => ({
+      ...requestEvidence(request),
       ...summarizeHeaderMetadata(request.headers ?? {}),
       ...summarizeResponseHeaderMetadata(request.responseHeaders ?? {}),
       failureText: request.failureText ?? null,
@@ -1778,16 +2207,19 @@ async function main() {
       method: request.method,
       mimeType: request.mimeType ?? null,
       pageLabel: request.pageLabel,
+      probeId: request.probeId ?? null,
+      probeOutcome: request.probeId ? probeOutcomes.get(request.probeId) ?? null : null,
       requestBody: request.requestBody ?? null,
       responseBody: request.responseBody ?? null,
       status: request.status ?? null,
       url: request.url,
     }));
 
+    await writeBundleArtifacts();
     await writeMergedArray(
       path.join(args.outDir, "api-records.json"),
       apiRecords,
-      (item) => `${item.method} ${item.path}`,
+      (item) => `${item.method} ${item.path} ${item.requestFingerprint}`,
     );
     await writeMergedArray(
       path.join(args.outDir, "page-states.json"),
@@ -1812,7 +2244,17 @@ async function main() {
     await writeMergedArray(
       path.join(args.outDir, "raw-requests.json"),
       rawRequests,
-      (item) => `${item.method} ${item.url} ${item.pageLabel}`,
+      (item) => `${item.requestFingerprint} ${item.pageLabel}`,
+    );
+    await writeMergedArray(
+      path.join(args.outDir, "probe-results.json"),
+      probeResults,
+      (item) => `${item.method} ${item.url} ${item.page}`,
+    );
+    await writeMergedArray(
+      path.join(args.outDir, "stream-records.json"),
+      passiveTransports,
+      (item) => `${item.transport} ${item.url} ${item.page}`,
     );
   }
 
@@ -1821,7 +2263,7 @@ async function main() {
     const snapshots = await collectSnapshots();
     const rootSnapshot = snapshots.find((snapshot) => snapshot.sessionId === "root" && !snapshot.error) ?? snapshots[0] ?? {};
     const requestInventory = capturedRequests
-      .filter((request) => request.pageLabel === pageLabel)
+      .filter((request) => request.pageLabel === pageLabel && !request.probeId)
       .map((request) => ({
         matchesCurrentSpec: shouldMatchRequest(request.url, args),
         method: request.method,
@@ -1843,6 +2285,13 @@ async function main() {
         .filter((record) => record.page === pageLabel)
         .map((record) => record.url),
     );
+    const stateFingerprint = sha256(JSON.stringify({
+      controls: combinedControls,
+      links: combinedLinks,
+      tabs: combinedTabs,
+      title: rootSnapshot.title ?? null,
+      url: rootSnapshot.url ?? null,
+    }));
 
     pageStates.push({
       page: pageLabel,
@@ -1850,6 +2299,7 @@ async function main() {
       requestInventory,
       sameOriginLinks: combinedLinks,
       scriptUrls: combinedScriptUrls,
+      stateFingerprint,
       title: rootSnapshot.title ?? null,
       url: rootSnapshot.url ?? null,
       visibleControls: combinedControls,
@@ -1896,7 +2346,7 @@ async function main() {
     }
 
     const didLoad = await navigationPromise;
-    await delay(args.settleMs);
+    let settleResult = await waitForNetworkIdle(args.settleMs);
 
     let currentUrl = await getRootUrl();
     if (currentUrl !== resolvedUrl) {
@@ -1904,7 +2354,7 @@ async function main() {
       const targetOrigin = new URL(resolvedUrl).origin;
       if (currentOrigin === targetOrigin) {
         await evaluateJson(client, `location.href = ${JSON.stringify(resolvedUrl)}`);
-        await delay(args.settleMs);
+        settleResult = await waitForNetworkIdle(args.settleMs);
         currentUrl = await getRootUrl();
       }
     }
@@ -1912,6 +2362,7 @@ async function main() {
     return {
       didLoad,
       resolvedUrl,
+      settleResult,
       url: currentUrl,
     };
   }
@@ -1952,12 +2403,13 @@ async function main() {
           continue;
         }
 
-        await delay(args.postActionSettleMs);
+        const settleResult = await waitForNetworkIdle(args.postActionSettleMs);
         return {
           ...result,
           afterUrl: await getRootUrl(),
           beforeUrl,
           sessionId: sessionId ?? "root",
+          settleResult,
           targetTitle: targetInfo?.targetTitle ?? null,
           targetType: targetInfo?.targetType ?? "page",
           targetUrl: targetInfo?.targetUrl ?? null,
@@ -2056,6 +2508,169 @@ async function main() {
     };
   }
 
+  async function runCurrentLinkCrawlAction(action, basePageLabel) {
+    const rootOrigin = new URL(await getRootUrl()).origin;
+    const linkFilters = String(action.value || "")
+      .split(",")
+      .map((value) => value.trim())
+      .filter((value) => value && value.toLowerCase() !== "all");
+    const crawlArgs = {
+      ...args,
+      seedLinkContains: linkFilters.length > 0 ? linkFilters : args.seedLinkContains,
+      seedPages: [],
+    };
+    const visitedUrls = new Set(
+      pageStates.map((pageState) => pageState.url).filter(Boolean),
+    );
+    const visitedStates = new Set(
+      pageStates.map((pageState) => pageState.stateFingerprint).filter(Boolean),
+    );
+    const queuedUrls = new Set();
+    const queue = [];
+    const replayed = [];
+
+    function enqueueFrom(states) {
+      const candidates = collectSeededLinkCandidates(
+        states,
+        rootOrigin,
+        crawlArgs,
+        { ...action, value: "all" },
+        Number.MAX_SAFE_INTEGER,
+      );
+      for (const candidate of candidates) {
+        if (
+          visitedUrls.has(candidate.url)
+          || queuedUrls.has(candidate.url)
+          || /(?:log-?out|sign-?out|logoff)/iu.test(candidate.url)
+        ) {
+          continue;
+        }
+        queuedUrls.add(candidate.url);
+        queue.push(candidate);
+      }
+    }
+
+    enqueueFrom(pageStates);
+    while (queue.length > 0 && replayed.length < args.seedLinkLimit) {
+      const candidate = queue.shift();
+      queuedUrls.delete(candidate.url);
+      visitedUrls.add(candidate.url);
+      const pageLabel = `${basePageLabel}-${String(replayed.length + 1).padStart(2, "0")}-${slugify(candidate.url)}`;
+      activePageLabel = pageLabel;
+      const navigationResult = await navigateRoot(candidate.url);
+      await captureCheckpoint(pageLabel);
+      const currentState = pageStates.at(-1);
+      const repeatedState = currentState?.stateFingerprint
+        ? visitedStates.has(currentState.stateFingerprint)
+        : false;
+      if (currentState?.stateFingerprint) {
+        visitedStates.add(currentState.stateFingerprint);
+      }
+      replayed.push({
+        page: pageLabel,
+        repeatedState,
+        sourcePage: candidate.sourcePage,
+        url: candidate.url,
+      });
+      actionResults.push({
+        page: pageLabel,
+        result: {
+          ...navigationResult,
+          repeatedState,
+          sourcePage: candidate.sourcePage,
+        },
+        scope: action.scope,
+        sourcePage: candidate.sourcePage,
+        type: action.type,
+        value: candidate.url,
+      });
+      if (!repeatedState) {
+        enqueueFrom([currentState]);
+      }
+    }
+
+    activePageLabel = basePageLabel;
+    return {
+      replayedCount: replayed.length,
+      repeatedStateCount: replayed.filter((item) => item.repeatedState).length,
+      urls: replayed.map((item) => item.url),
+    };
+  }
+
+  async function runProbeGetAction(action, pageLabel) {
+    for (const [sessionId, targetInfo] of getOrderedSessions(action.scope)) {
+      const probeId = `${pageLabel}:${sessionId ?? "root"}:${Date.now()}`;
+      try {
+        const probeUrl = await evaluateJson(
+          client,
+          `new URL(${JSON.stringify(String(action.value || ""))}, location.href).toString()`,
+          sessionId,
+        );
+        activeProbe = { id: probeId, url: probeUrl };
+        let result;
+        try {
+          result = await evaluateJson(
+            client,
+            buildProbeExpression(action.value),
+            sessionId,
+            Math.max(runtimeEvaluateTimeoutMs, args.navigationTimeoutMs),
+          );
+        } finally {
+          activeProbe = null;
+        }
+        if (!result?.url) {
+          probeOutcomes.set(probeId, "probe-failed");
+          continue;
+        }
+        const sanitizedResult = {
+          ...result,
+          body: truncate(sanitizeCapturedBody(result.body ?? null)),
+        };
+        const outcome = result.rejected
+          ? "rejected"
+          : result.redirected
+            ? "redirect-blocked"
+            : result.ok
+              ? "confirmed"
+              : result.status === 401 || result.status === 403
+                ? "auth-blocked"
+                : result.status === 404
+                  ? "not-found"
+                  : result.error
+                    ? "probe-failed"
+                    : "http-error";
+        probeOutcomes.set(probeId, outcome);
+        const parsed = new URL(result.url);
+        probeResults.push({
+          method: "GET",
+          outcome,
+          page: pageLabel,
+          path: parsed.pathname,
+          probeId,
+          querySamples: parsed.search ? [parsed.search] : [],
+          responseBodySample: sanitizedResult.body,
+          status: result.status,
+          url: result.url,
+        });
+        return {
+          ...sanitizedResult,
+          outcome,
+          sessionId: sessionId ?? "root",
+          targetTitle: targetInfo?.targetTitle ?? null,
+          targetType: targetInfo?.targetType ?? "page",
+        };
+      } catch {
+        activeProbe = null;
+        probeOutcomes.set(probeId, "probe-failed");
+        // Try another DOM-capable target.
+      }
+    }
+    return {
+      outcome: "probe-failed",
+      url: action.value,
+    };
+  }
+
   await client.connect();
   await configureSession();
   await client.send("Target.setAutoAttach", {
@@ -2117,6 +2732,33 @@ async function main() {
         continue;
       }
 
+      if (action.type === "probe-get") {
+        const probeResult = await runProbeGetAction(action, pageLabel);
+        actionResults.push({
+          page: pageLabel,
+          result: probeResult,
+          scope: action.scope,
+          type: action.type,
+          value: action.value,
+        });
+        await waitForNetworkIdle(args.postActionSettleMs);
+        await captureCheckpoint(pageLabel);
+        continue;
+      }
+
+      if (action.type === "crawl-links") {
+        const crawlResult = await runCurrentLinkCrawlAction(action, pageLabel);
+        actionResults.push({
+          page: pageLabel,
+          result: crawlResult,
+          scope: action.scope,
+          type: action.type,
+          value: action.value,
+        });
+        await flushArtifacts();
+        continue;
+      }
+
       if (action.type === "replay-seeded-links") {
         const replayResult = await runSeededReplayAction(action, pageLabel);
         actionResults.push({
@@ -2154,6 +2796,8 @@ async function main() {
       await captureCheckpoint(pageLabel);
     }
 
+    await waitForNetworkIdle(args.postActionSettleMs);
+    await flushArtifacts();
     const filteredRequests = capturedRequests.filter((request) => shouldMatchRequest(request.url, args));
     const scopedHosts = uniqueSorted(filteredRequests.map((request) => {
       try {
@@ -2164,9 +2808,12 @@ async function main() {
     }));
     const summary = {
       actions: actionResults.length,
+      bundleDiscovery: latestBundleSummary,
       capturedApiRequests: capturedRequests.length,
+      finalUrl: await getRootUrl(),
       outDir: args.outDir,
       pageCount: pageStates.length,
+      passiveTransportCount: passiveTransports.length,
       portal: args.portal,
       recipePath: args.recipePath,
       reusedExistingTarget: Boolean(target.reusedExistingTarget),

@@ -41,6 +41,8 @@ A Chrome/Edge DevTools extension that captures API traffic from Microsoft portal
 4. Use the **portal filter** dropdown to focus on a specific portal.
 5. Click any request to view full details (URL, headers, request/response bodies).
 
+Requests are deduplicated by method, normalized path, query-key set, status, request shape, and response shape. This preserves materially different API variants instead of replacing them with the latest response for a method/path pair.
+
 ### Export Options
 
 - **Export YAML** — Generates an OpenAPI 3.0.3 spec fragment with inferred server URLs, query parameters, request/response schemas, primitive formats, and scalar examples.
