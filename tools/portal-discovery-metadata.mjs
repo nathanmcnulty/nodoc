@@ -480,6 +480,7 @@ export const coverageOverlayByTitle = {
 
 export const captureRecipesByTitle = {
   Defender: [
+    "tools/capture-recipes/defender-deep.json",
     "tools/capture-recipes/defender-telemetry-verification.json",
     "tools/capture-recipes/defender-entity-replay.json",
   ],

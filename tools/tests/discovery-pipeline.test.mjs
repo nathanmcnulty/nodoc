@@ -87,6 +87,21 @@ test("portal driver emits a deterministic M365 Admin brief", async () => {
   assert.equal(result.brief.safety.writeActions, false);
 });
 
+test("portal driver prefers the bounded Defender deep recipe", async () => {
+  const { stdout } = await execFileAsync(process.execPath, [
+    path.join(repoRoot, "tools", "run-portal-discovery.mjs"),
+    "--portal",
+    "defender-xdr",
+    "--phase",
+    "plan",
+    "--json",
+  ], { cwd: repoRoot });
+  const result = JSON.parse(stdout);
+
+  assert.equal(result.status, "planned");
+  assert.equal(result.brief.recipe, "tools/capture-recipes/defender-deep.json");
+});
+
 test("portal driver rejects unsupported profiles", async () => {
   await assert.rejects(
     execFileAsync(process.execPath, [

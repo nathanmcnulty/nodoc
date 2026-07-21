@@ -1,0 +1,34 @@
+{
+  "portal": "Defender",
+  "url": "https://security.microsoft.com",
+  "matchHosts": [
+    "security.microsoft.com",
+    "mto.security.microsoft.com"
+  ],
+  "seedLinkContains": [
+    "incident",
+    "machine",
+    "device",
+    "file",
+    "user",
+    "url/overview",
+    "ip/"
+  ],
+  "seedLinkLimit": 8,
+  "postActionSettleMs": 10000,
+  "settleMs": 12000,
+  "actions": [
+    {
+      "type": "navigate",
+      "value": "https://security.microsoft.com/incidents",
+      "required": true
+    },
+    {
+      "type": "navigate",
+      "value": "https://security.microsoft.com/threatpolicy",
+      "required": true
+    },
+    "crawl-links=all",
+    "capture=defender-bounded-complete"
+  ]
+}

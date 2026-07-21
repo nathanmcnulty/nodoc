@@ -442,6 +442,20 @@ async function main() {
         console.error(JSON.stringify(runState, null, 2));
         return;
       }
+      if (captureSummary.actionValidation?.requiredActionFailureCount > 0) {
+        runState.status = "blocked";
+        runState.blocker = {
+          code: "recipe-actions-incomplete",
+          detail: "One or more required recipe actions did not complete.",
+          failures: captureSummary.actionValidation.requiredActionFailures,
+          remediation:
+            "Repair the checked-in recipe or confirm the portal route is available, then rerun with a new empty artifact directory.",
+        };
+        await writeRunState(args.artifacts, runState);
+        process.exitCode = 2;
+        console.error(JSON.stringify(runState, null, 2));
+        return;
+      }
     }
 
     if (["all", "analyze"].includes(args.phase)) {

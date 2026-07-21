@@ -126,6 +126,7 @@ Return the blocker code and remediation:
 | `recipe-missing` | No checked-in deterministic recipe exists |
 | `feature-gated` | The tenant, role, license, or feature flag blocks the surface |
 | `unsafe-action-required` | Further discovery requires a write or potentially active GET |
+| `recipe-actions-incomplete` | A required navigation or selector in the checked-in recipe failed |
 | `pipeline-failed` | A deterministic command failed |
 
 Escalate to a stronger model only for selector repair, scope classification,

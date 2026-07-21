@@ -10,6 +10,12 @@ import {
   classifyGetProbeUrl,
   sanitizeObservedTransportUrl,
 } from "./discovery-safety.mjs";
+import {
+  decodeBoundedCdpBody,
+  responseBodyCaptureLimit,
+  shouldRequestResponseBody,
+  summarizeActionResults,
+} from "./discovery-capture-policy.mjs";
 
 const apiBase = "http://127.0.0.1:9222";
 const defaultNavigationTimeoutMs = 15000;
@@ -385,7 +391,10 @@ function normalizeRecipeAction(action) {
     action.scope && action.scope !== "any"
       ? `${rawType}-${String(action.scope).trim()}`
       : rawType;
-  return parseActionSpec(`${scopedType}=${action.value ?? ""}`);
+  return {
+    ...parseActionSpec(`${scopedType}=${action.value ?? ""}`),
+    required: Boolean(action.required),
+  };
 }
 
 function resolveRecipePath(value, recipeDir) {
@@ -1839,7 +1848,6 @@ async function main() {
   const scriptBodies = new Map();
   const inFlightRequests = new Set();
   const pendingBodyCaptures = new Set();
-  const responseBodyCaptureLimit = 512 * 1024;
   let responseBodyTail = Promise.resolve();
   const capturedRequests = [];
   const pageStates = [];
@@ -1850,6 +1858,7 @@ async function main() {
   const probeOutcomes = new Map();
   const passiveTransports = [];
   const actionResults = [];
+  const boundedNetworkSessions = new Set();
   const configuredSessions = new Set();
   const sessions = new Map([
     [null, { targetTitle: target.title ?? null, targetType: "page", targetUrl: target.url ?? null }],
@@ -1865,9 +1874,19 @@ async function main() {
       return;
     }
 
+    try {
+      await client.send("Network.enable", {
+        maxPostDataSize: 1024 * 128,
+        maxResourceBufferSize: responseBodyCaptureLimit,
+        maxTotalBufferSize: responseBodyCaptureLimit * 32,
+      }, sessionId);
+      boundedNetworkSessions.add(key);
+    } catch {
+      await client.send("Network.enable", { maxPostDataSize: 1024 * 128 }, sessionId);
+    }
+
     for (const [method, params] of [
       ["Runtime.enable", {}],
-      ["Network.enable", { maxPostDataSize: 1024 * 128 }],
       ["Network.setCacheDisabled", { cacheDisabled: true }],
       ["Page.enable", {}],
       ["DOM.enable", {}],
@@ -2036,17 +2055,16 @@ async function main() {
 
       const record = requestMap.get(key);
       if (record) {
-        const encodedDataLength = Number(params.encodedDataLength);
-        if (encodedDataLength <= responseBodyCaptureLimit || !Number.isFinite(encodedDataLength)) {
+        const sessionKey = metadata.sessionId ?? "root";
+        if (
+          boundedNetworkSessions.has(sessionKey)
+          && shouldRequestResponseBody(params.encodedDataLength)
+        ) {
           try {
             const body = await client.send("Network.getResponseBody", {
               requestId: params.requestId,
             }, metadata.sessionId);
-            const sanitizedResponseBody = sanitizeCapturedBody(
-              body?.base64Encoded
-                ? Buffer.from(body.body, "base64").toString("utf8")
-                : body?.body ?? null,
-            );
+            const sanitizedResponseBody = sanitizeCapturedBody(decodeBoundedCdpBody(body));
             record.responseBody = truncate(sanitizedResponseBody);
             record.responseShapeFingerprint = bodyShapeFingerprint(sanitizedResponseBody);
           } catch {
@@ -2266,59 +2284,65 @@ async function main() {
   }
 
   async function capturePageScriptBodies(pageLabel) {
-    let resourceTree;
-    try {
-      resourceTree = await client.send("Page.getResourceTree");
-    } catch {
-      return;
-    }
-
-    const frames = [];
-    const visitFrame = (frameTree) => {
-      if (!frameTree?.frame?.id) {
-        return;
+    for (const [sessionId, targetInfo] of sessions.entries()) {
+      if (!isDomCapableTarget(sessionId, targetInfo)) {
+        continue;
       }
-      frames.push(frameTree);
-      for (const childFrame of frameTree.childFrames ?? []) {
-        visitFrame(childFrame);
-      }
-    };
-    visitFrame(resourceTree.frameTree);
 
-    for (const frameTree of frames) {
-      for (const resource of frameTree.resources ?? []) {
-        if (
-          resource.type !== "Script"
-          || !resource.url
-          || (Number.isFinite(Number(resource.contentSize))
-            && Number(resource.contentSize) > responseBodyCaptureLimit)
-        ) {
-          continue;
+      let resourceTree;
+      try {
+        resourceTree = await client.send("Page.getResourceTree", {}, sessionId);
+      } catch {
+        continue;
+      }
+
+      const frames = [];
+      const visitFrame = (frameTree) => {
+        if (!frameTree?.frame?.id) {
+          return;
         }
-        const scriptRecord = [...scriptRecords]
-          .reverse()
-          .find((record) => record.page === pageLabel && record.url === resource.url);
-        if (!scriptRecord || scriptBodies.has(resource.url)) {
-          continue;
+        frames.push(frameTree);
+        for (const childFrame of frameTree.childFrames ?? []) {
+          visitFrame(childFrame);
         }
-        try {
-          const content = await client.send("Page.getResourceContent", {
-            frameId: frameTree.frame.id,
-            url: resource.url,
-          });
-          const source = content?.base64Encoded
-            ? Buffer.from(content.content, "base64").toString("utf8")
-            : content?.content ?? "";
-          if (source) {
-            scriptBodies.set(resource.url, {
-              ...scriptRecord,
-              mimeType: resource.mimeType ?? scriptRecord.mimeType,
-              source,
-              status: scriptRecord.status ?? 200,
-            });
+      };
+      visitFrame(resourceTree.frameTree);
+
+      for (const frameTree of frames) {
+        for (const resource of frameTree.resources ?? []) {
+          if (
+            resource.type !== "Script"
+            || !resource.url
+            || !shouldRequestResponseBody(resource.contentSize)
+          ) {
+            continue;
           }
-        } catch {
-          // Some cross-origin or browser-managed scripts do not expose resource content.
+          const scriptRecord = [...scriptRecords]
+            .reverse()
+            .find((record) =>
+              record.page === pageLabel
+              && record.sessionId === sessionId
+              && record.url === resource.url);
+          if (!scriptRecord || scriptBodies.has(resource.url)) {
+            continue;
+          }
+          try {
+            const content = await client.send("Page.getResourceContent", {
+              frameId: frameTree.frame.id,
+              url: resource.url,
+            }, sessionId);
+            const source = decodeBoundedCdpBody(content);
+            if (source) {
+              scriptBodies.set(resource.url, {
+                ...scriptRecord,
+                mimeType: resource.mimeType ?? scriptRecord.mimeType,
+                source,
+                status: scriptRecord.status ?? 200,
+              });
+            }
+          } catch {
+            // Some cross-origin or browser-managed scripts do not expose resource content.
+          }
         }
       }
     }
@@ -2751,6 +2775,7 @@ async function main() {
     const initialNavigation = await navigateRoot(args.url);
     actionResults.push({
       page: activePageLabel,
+      required: true,
       result: initialNavigation,
       type: "navigate",
       value: args.url,
@@ -2765,6 +2790,7 @@ async function main() {
         await delay(Number(action.value));
         actionResults.push({
           page: pageLabel,
+          required: action.required,
           result: { waitedMs: Number(action.value) },
           scope: action.scope,
           type: action.type,
@@ -2777,6 +2803,7 @@ async function main() {
       if (action.type === "capture") {
         actionResults.push({
           page: pageLabel,
+          required: action.required,
           result: { capturedOnly: true },
           scope: action.scope,
           type: action.type,
@@ -2790,6 +2817,7 @@ async function main() {
         const navigationResult = await navigateRoot(action.value);
         actionResults.push({
           page: pageLabel,
+          required: action.required,
           result: navigationResult,
           scope: action.scope,
           type: action.type,
@@ -2803,6 +2831,7 @@ async function main() {
         const probeResult = await runProbeGetAction(action, pageLabel);
         actionResults.push({
           page: pageLabel,
+          required: action.required,
           result: probeResult,
           scope: action.scope,
           type: action.type,
@@ -2817,6 +2846,7 @@ async function main() {
         const crawlResult = await runCurrentLinkCrawlAction(action, pageLabel);
         actionResults.push({
           page: pageLabel,
+          required: action.required,
           result: crawlResult,
           scope: action.scope,
           type: action.type,
@@ -2830,6 +2860,7 @@ async function main() {
         const replayResult = await runSeededReplayAction(action, pageLabel);
         actionResults.push({
           page: pageLabel,
+          required: action.required,
           result: replayResult,
           scope: action.scope,
           type: action.type,
@@ -2843,6 +2874,7 @@ async function main() {
         const replayResult = await runSeededRouteReplayAction(action, pageLabel);
         actionResults.push({
           page: pageLabel,
+          required: action.required,
           result: replayResult,
           scope: action.scope,
           type: action.type,
@@ -2855,6 +2887,7 @@ async function main() {
       const clickResult = await runClickAction(action);
       actionResults.push({
         page: pageLabel,
+        required: action.required,
         result: clickResult,
         scope: action.scope,
         type: action.type,
@@ -2874,6 +2907,7 @@ async function main() {
       }
     }));
     const summary = {
+      actionValidation: summarizeActionResults(actionResults),
       actions: actionResults.length,
       bundleDiscovery: latestBundleSummary,
       capturedApiRequests: capturedRequests.length,
