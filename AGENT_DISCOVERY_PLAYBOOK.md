@@ -1,5 +1,9 @@
 # Agent Discovery Playbook
 
+Agents should execute the bounded workflow in
+[AGENT_DISCOVERY_RUNBOOK.md](./AGENT_DISCOVERY_RUNBOOK.md) first. This playbook
+is the deeper reference for blockers, design decisions, and research.
+
 This is a living guide for researching undocumented portal APIs in a way that is repeatable, safe, and useful to future agents.
 
 The goal is to turn real portal behavior into high-quality specs and generated artifacts while preserving tenant safety and recording what did and did not work.
@@ -170,13 +174,14 @@ Recommended pattern:
 
 - Capture page states and API records separately.
 - Write artifacts after each page or interaction checkpoint instead of only at the very end of a crawl phase.
-- Keep the browser capture script focused on traffic collection; do bundle download in a separate step.
+- Keep the browser capture deterministic. The checked-in runner downloads script bodies through the authenticated CDP session and mines them locally without asking an agent to inspect each bundle.
 - For broad portal passes, use bounded parallel tabs only if you can still attribute requests back to the originating page.
 - If CDP `Page.navigate` stalls on a same-origin SPA hash route, retry that surface in a fresh single tab and fall back to setting `location.href`; do not assume the route itself is invalid just because the first navigation primitive hung.
 - If a page exposes a very large set of safe same-origin detail links, split the work into phases:
   nav/list discovery first, then a direct-link or entity replay pass sourced from the recorded page-state
   artifacts. This is often faster and more reliable than serial row-click replay on the live grid.
 - The checked-in runner supports this directly with `--seed-artifacts <artifact-dir>` plus `--action replay-seeded-links=<page-selector>` and optional `--seed-page` / `--seed-link-contains` filters.
+- Use `--action crawl-links=all` for a bounded same-origin breadth-first pass over links discovered during the current run. The crawler skips sign-out routes, deduplicates URLs and page-state fingerprints, and respects `--seed-link-limit`.
 - When the first pass already exposed stable entity IDs in request URLs or same-origin page links, prefer `--action replay-seeded-routes=<group-name>` from a checked-in recipe so detail pages can be revisited without rebuilding the click flow by hand.
 - For same-origin admin portals, left-nav coverage is only the floor: open every reachable same-origin route, drill into visible list rows/items so detail blades load, click every visible read-only tab or pivot, and follow safe same-origin content links.
 - Canonicalize equivalent routes before queueing them. Portals often expose the same surface through aliases or parallel route trees, and unnormalized queue keys will waste time replaying the same detail page.
@@ -260,8 +265,8 @@ A page that looks blocked or empty can still provide useful evidence.
 
 ### 5. Download and mine the loaded JavaScript
 
-- Save the script URLs loaded by the visited pages.
-- Download the bundle corpus to the artifacts directory.
+- The CDP runner saves script URLs and authenticated response bodies under `bundles/`, then writes `bundle-downloads.json` and parsed `bundle-candidates.json` after every checkpoint.
+- Re-run mining offline with `npm run mine:javascript -- --artifacts <artifact-dir> --prefix /api/ --prefix /admin/`.
 - Search bundles for:
   - concrete API paths
   - alternate hosts or proxy prefixes
@@ -281,6 +286,7 @@ What to extract:
 - route candidates for a later safe-probe queue
 - If you have sibling pages in the same feature family, diff their `script-urls.json` sets early so page-specific bundles stand out before you mine generic shell chunks.
 - Prioritize unique or near-unique bundles first; these are often where request factories, enum values, hidden sibling routes, and request-body defaults live.
+- The static miner uses an AST when possible and falls back to bounded string extraction for malformed or non-standard bundles. It preserves inferred HTTP methods, dynamic `{param}` route templates, GraphQL operation names, source locations, source-map references, and parse failures.
 
 ### 5a. Build a candidate queue
 
@@ -318,6 +324,8 @@ When bundle mining exposes likely read routes that the UI did not call directly:
    - alternate OData/URS reads
 4. Match bundle defaults exactly. Empty strings, `includeHistoricalValue`, plan names, and sort-key maps can matter; a guessed summary sort key produced `422` on a live feature-details route until the bundle default was used.
 5. Record the request shape and the outcome for each probe so later spec work can distinguish confirmed routes from stale bundle strings.
+
+For same-origin reads, prefer `--action probe-get=<path-or-url>`. It runs `fetch` inside the authenticated page with credentials included, records a structured outcome such as `confirmed`, `auth-blocked`, or `not-found`, and writes the observation to `probe-results.json`. It never permits a write method.
 
 ### 5c. Diff route families, host families, and recipe coverage together
 
@@ -429,6 +437,9 @@ For scratch JSON files, capture at least:
   "querySamples": ["?..."],
   "requestBodySamples": [],
   "responseBodySample": "{...}",
+  "requestFingerprint": "sha256...",
+  "requestShapeFingerprint": "sha256...",
+  "responseShapeFingerprint": "sha256...",
   "seenOnPages": ["exposure-overview"],
   "confidence": "confirmed-traffic"
 }
@@ -440,7 +451,10 @@ Useful companion artifacts:
 - `api-records.json`
 - `script-urls.json`
 - `bundle-downloads.json`
+- `bundle-candidates.json`
 - `probe-results.json`
+- `action-results.json`
+- `session-snapshots.json`
 - per-feature analysis notes
 
 When the filtered `api-records.json` output appears to miss a route family, cross-check
@@ -453,7 +467,7 @@ subset of those requests or omitted the body shape.
 
 ### Effective
 
-- Attaching Playwright to the already-authenticated Edge session over CDP
+- Attaching a deterministic runner to the already-authenticated Edge session over CDP
 - Splitting the workflow into:
   1. page crawl
   2. bundle download
@@ -465,7 +479,7 @@ subset of those requests or omitted the body shape.
 ### Less effective
 
 - Hard-coding runtime navigation container IDs
-- Combining page crawl, response-body harvesting, and bundle downloading into one long script
+- Asking an agent to coordinate page crawl, response harvesting, bundle downloading, and parsing as separate interactive steps
 - Treating bundle-only routes as ready for full spec modeling without either traffic or safe probe evidence
 
 ## Experiment log
@@ -822,17 +836,13 @@ Current takeaway:
 
 Add new ideas here before trying them, then move the result into the experiment log.
 
-- Build a reusable artifact schema and helper script that tags each endpoint as `confirmed`, `probed`, or `bundle-discovered`.
 - Extract request factory defaults from bundles so probes can include the same query params the UI would send.
 - Capture write payloads by intercepting save requests and returning a synthetic client-safe response after aborting the backend call.
-- Diff the script set between navigation items to identify the most relevant bundles for each page.
 - Record a feature-to-bundle index so future runs can skip generic shell bundles and focus on feature chunks first.
 - Add a repeatable checklist for page-specific state, such as selected tab, filters, and tenant scope, before probing.
-- Build a reusable same-origin spider that consumes DOM routes, bundle-derived routes, and entity seeds from prior traffic, then prioritizes them through a safe-probe queue.
+- Extend the bounded same-origin link crawler with safe semantic button traversal and route-family quotas.
 - Add per-route-family quotas and sampling so the entity queue does not get overwhelmed by repeated machine-page pivots.
 - Add a denylist or lower priority for shared settings routes that are reachable from many entities but rarely add new API families.
-- Flush crawl checkpoints incrementally so long browser-based discovery runs can be monitored safely in real time.
-- Add a recipe audit that scores each portal on root coverage, iframe coverage, seeded link replay, seeded route replay, and second-pass interaction coverage.
 - Add reusable interaction-matrix templates for report blades, list/detail portals, and settings-heavy portals so shallow recipes can be expanded consistently.
 - Add a route-family diversity report that highlights when one entity type or path family is dominating the crawl and suppressing breadth.
 
