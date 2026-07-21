@@ -1187,6 +1187,8 @@ class CdpClient {
     this.listeners = new Map();
     this.socket = new WebSocket(wsUrl);
     this.socketClosed = false;
+    this.closing = false;
+    this.closeDetails = null;
   }
 
   rejectPending(error) {
@@ -1222,9 +1224,20 @@ class CdpClient {
       this.socket.addEventListener("close", handleClose, { once: true });
     });
 
-    this.socket.addEventListener("close", () => {
+    this.socket.addEventListener("close", (event) => {
       this.socketClosed = true;
-      this.rejectPending(new Error("CDP WebSocket closed."));
+      this.closeDetails = {
+        code: event.code ?? null,
+        reason: event.reason ?? null,
+      };
+      if (!this.closing) {
+        console.error(
+          `CDP WebSocket closed unexpectedly (code ${this.closeDetails.code ?? "unknown"}${this.closeDetails.reason ? `: ${this.closeDetails.reason}` : ""}; pending=${this.pending.size}; nextId=${this.nextId}; pendingMethods=${JSON.stringify(Array.from(this.pending.values()).map(({ method, sessionId }) => ({ method, sessionId }))) }).`,
+        );
+      }
+      this.rejectPending(new Error(
+        `CDP WebSocket closed (code ${this.closeDetails.code ?? "unknown"}${this.closeDetails.reason ? `: ${this.closeDetails.reason}` : ""}).`,
+      ));
     }, { once: true });
 
     this.socket.addEventListener("message", (raw) => {
@@ -1263,7 +1276,10 @@ class CdpClient {
 
   async send(method, params = {}, sessionId = null) {
     if (this.socketClosed || this.socket.readyState !== WebSocket.OPEN) {
-      throw new Error("CDP WebSocket is not open.");
+      const detail = this.closeDetails
+        ? ` (code ${this.closeDetails.code ?? "unknown"}${this.closeDetails.reason ? `: ${this.closeDetails.reason}` : ""})`
+        : "";
+      throw new Error(`CDP WebSocket is not open${detail}.`);
     }
 
     const id = ++this.nextId;
@@ -1276,7 +1292,7 @@ class CdpClient {
 
     const key = `${sessionId ?? ""}:${id}`;
     const response = new Promise((resolve, reject) => {
-      this.pending.set(key, { resolve, reject });
+      this.pending.set(key, { method, reject, resolve, sessionId });
     });
 
     this.socket.send(payload);
@@ -1292,6 +1308,7 @@ class CdpClient {
     await new Promise((resolve) => {
       this.socket.addEventListener("close", resolve, { once: true });
       if (this.socket.readyState !== WebSocket.CLOSING) {
+        this.closing = true;
         this.socket.close();
       }
     });
@@ -1822,6 +1839,8 @@ async function main() {
   const scriptBodies = new Map();
   const inFlightRequests = new Set();
   const pendingBodyCaptures = new Set();
+  const responseBodyCaptureLimit = 512 * 1024;
+  let responseBodyTail = Promise.resolve();
   const capturedRequests = [];
   const pageStates = [];
   const sessionSnapshots = [];
@@ -2012,53 +2031,41 @@ async function main() {
 
   client.on("Network.loadingFinished", (params, metadata) => {
     const key = requestKey(params.requestId, metadata.sessionId);
-    const bodyCapture = (async () => {
-      const scriptRecord = scriptRequestMap.get(key);
-      if (scriptRecord) {
-        try {
-          const scriptBody = await client.send("Network.getResponseBody", {
-            requestId: params.requestId,
-          }, metadata.sessionId);
-          const source = scriptBody?.base64Encoded
-            ? Buffer.from(scriptBody.body, "base64").toString("utf8")
-            : scriptBody?.body ?? "";
-          if (source) {
-            scriptBodies.set(scriptRecord.url, {
-              ...scriptRecord,
-              source,
-            });
-          }
-        } catch {
-          // Some cross-process scripts do not expose their bodies through CDP.
-        }
-        scriptRequestMap.delete(key);
-      }
+    const captureResponseBody = async () => {
+      scriptRequestMap.delete(key);
 
       const record = requestMap.get(key);
       if (record) {
-        try {
-          const body = await client.send("Network.getResponseBody", {
-            requestId: params.requestId,
-          }, metadata.sessionId);
-          const sanitizedResponseBody = sanitizeCapturedBody(
-            body?.base64Encoded
-              ? Buffer.from(body.body, "base64").toString("utf8")
-              : body?.body ?? null,
-          );
-          record.responseBody = truncate(sanitizedResponseBody);
-          record.responseShapeFingerprint = bodyShapeFingerprint(sanitizedResponseBody);
-        } catch {
+        const encodedDataLength = Number(params.encodedDataLength);
+        if (encodedDataLength <= responseBodyCaptureLimit || !Number.isFinite(encodedDataLength)) {
+          try {
+            const body = await client.send("Network.getResponseBody", {
+              requestId: params.requestId,
+            }, metadata.sessionId);
+            const sanitizedResponseBody = sanitizeCapturedBody(
+              body?.base64Encoded
+                ? Buffer.from(body.body, "base64").toString("utf8")
+                : body?.body ?? null,
+            );
+            record.responseBody = truncate(sanitizedResponseBody);
+            record.responseShapeFingerprint = bodyShapeFingerprint(sanitizedResponseBody);
+          } catch {
+            record.responseBody = null;
+          }
+        } else {
           record.responseBody = null;
         }
 
         capturedRequests.push(record);
         requestMap.delete(key);
       }
-    })().finally(() => {
+    };
+    const bodyCapture = responseBodyTail.then(captureResponseBody).finally(() => {
       inFlightRequests.delete(key);
       lastNetworkActivityAt = Date.now();
       pendingBodyCaptures.delete(bodyCapture);
     });
+    responseBodyTail = bodyCapture.catch(() => {});
     pendingBodyCaptures.add(bodyCapture);
   });
 
@@ -2258,6 +2265,65 @@ async function main() {
     );
   }
 
+  async function capturePageScriptBodies(pageLabel) {
+    let resourceTree;
+    try {
+      resourceTree = await client.send("Page.getResourceTree");
+    } catch {
+      return;
+    }
+
+    const frames = [];
+    const visitFrame = (frameTree) => {
+      if (!frameTree?.frame?.id) {
+        return;
+      }
+      frames.push(frameTree);
+      for (const childFrame of frameTree.childFrames ?? []) {
+        visitFrame(childFrame);
+      }
+    };
+    visitFrame(resourceTree.frameTree);
+
+    for (const frameTree of frames) {
+      for (const resource of frameTree.resources ?? []) {
+        if (
+          resource.type !== "Script"
+          || !resource.url
+          || (Number.isFinite(Number(resource.contentSize))
+            && Number(resource.contentSize) > responseBodyCaptureLimit)
+        ) {
+          continue;
+        }
+        const scriptRecord = [...scriptRecords]
+          .reverse()
+          .find((record) => record.page === pageLabel && record.url === resource.url);
+        if (!scriptRecord || scriptBodies.has(resource.url)) {
+          continue;
+        }
+        try {
+          const content = await client.send("Page.getResourceContent", {
+            frameId: frameTree.frame.id,
+            url: resource.url,
+          });
+          const source = content?.base64Encoded
+            ? Buffer.from(content.content, "base64").toString("utf8")
+            : content?.content ?? "";
+          if (source) {
+            scriptBodies.set(resource.url, {
+              ...scriptRecord,
+              mimeType: resource.mimeType ?? scriptRecord.mimeType,
+              source,
+              status: scriptRecord.status ?? 200,
+            });
+          }
+        } catch {
+          // Some cross-origin or browser-managed scripts do not expose resource content.
+        }
+      }
+    }
+  }
+
   async function captureCheckpoint(pageLabel) {
     await delay(1000);
     const snapshots = await collectSnapshots();
@@ -2316,6 +2382,7 @@ async function main() {
       url: rootSnapshot.url ?? null,
     });
 
+    await capturePageScriptBodies(pageLabel);
     await flushArtifacts();
   }
 

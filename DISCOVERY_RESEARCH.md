@@ -74,5 +74,8 @@ extraction before persisting frames.
 - Bounded same-origin link crawling
 - Same-origin GET probing with structured outcomes
 - Authenticated JavaScript bundle capture and AST mining
+- Serialized CDP body capture with a 512 KiB safety ceiling and page-resource
+  fallback for smaller JavaScript bundles; oversized responses retain endpoint
+  metadata without persisting their bodies
 - GraphQL operation-name and source-map-reference extraction
 - Candidate evidence separation for confirmed, probed, and bundle-only routes
