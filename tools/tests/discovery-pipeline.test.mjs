@@ -79,11 +79,27 @@ test("portal driver emits a deterministic M365 Admin brief", async () => {
   const result = JSON.parse(stdout);
 
   assert.equal(result.status, "planned");
+  assert.equal(result.brief.profile, "bounded");
   assert.equal(result.brief.portal, "M365 Admin");
   assert.equal(result.brief.recipe, "tools/capture-recipes/m365-admin-deep.json");
   assert.deepEqual(result.brief.safety.allowedProbeMethods, ["GET"]);
   assert.equal(result.brief.safety.crossOriginProbes, false);
   assert.equal(result.brief.safety.writeActions, false);
+});
+
+test("portal driver rejects unsupported profiles", async () => {
+  await assert.rejects(
+    execFileAsync(process.execPath, [
+      path.join(repoRoot, "tools", "run-portal-discovery.mjs"),
+      "--portal",
+      "m365-admin",
+      "--profile",
+      "unbounded",
+      "--phase",
+      "plan",
+    ], { cwd: repoRoot }),
+    /Only the bounded profile is currently supported/u,
+  );
 });
 
 test("portal driver prefers an exact portal recipe over generic recipes", async () => {

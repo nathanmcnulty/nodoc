@@ -18,6 +18,7 @@ function parseArgs(argv) {
     json: false,
     phase: "all",
     portal: null,
+    profile: "bounded",
     recipe: null,
     seedArtifacts: null,
     targetId: null,
@@ -36,6 +37,9 @@ function parseArgs(argv) {
       index += 1;
     } else if (argument === "--phase" && next) {
       args.phase = next;
+      index += 1;
+    } else if (argument === "--profile" && next) {
+      args.profile = next;
       index += 1;
     } else if (argument === "--artifacts" && next) {
       args.artifacts = path.resolve(next);
@@ -60,6 +64,9 @@ function parseArgs(argv) {
   }
   if (!validPhases.has(args.phase)) {
     throw new Error(`Invalid --phase "${args.phase}". Use plan, capture, analyze, or all.`);
+  }
+  if (args.profile !== "bounded") {
+    throw new Error(`Invalid --profile "${args.profile}". Only the bounded profile is currently supported.`);
   }
   if (args.phase !== "plan" && !args.artifacts) {
     throw new Error(`--artifacts <directory> is required for phase "${args.phase}".`);
@@ -227,6 +234,7 @@ function buildBrief(specRecord, recipePath) {
     pathPrefixes: specRecord.pathPrefixes,
     portal: specRecord.title,
     portalUrl: metadata?.portalUrl ?? null,
+    profile: "bounded",
     recipe: recipePath ? path.relative(repoRoot, recipePath).replaceAll("\\", "/") : null,
     safety: {
       allowedProbeMethods: ["GET"],
