@@ -1,4 +1,4 @@
-import { access, readFile, writeFile } from "node:fs/promises";
+import { access, readFile, realpath, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 import fg from "fast-glob";
@@ -501,14 +501,40 @@ function collectScriptUrls(data) {
   return Array.from(scriptUrls).sort((left, right) => left.localeCompare(right));
 }
 
+function collectGraphqlOperations(data) {
+  const operations = new Map();
+  walkArtifact(data, (value) => {
+    if (
+      typeof value?.name !== "string"
+      || !["mutation", "query", "subscription"].includes(value?.operationType)
+    ) {
+      return;
+    }
+    const operation = {
+      name: value.name,
+      operationType: value.operationType,
+      sourceFile:
+        typeof value.sourceFile === "string" ? value.sourceFile : null,
+    };
+    operations.set(
+      `${operation.operationType} ${operation.name} ${operation.sourceFile ?? ""}`,
+      operation,
+    );
+  });
+  return Array.from(operations.values()).sort((left, right) =>
+    `${left.operationType} ${left.name}`.localeCompare(
+      `${right.operationType} ${right.name}`,
+    ));
+}
+
 function pathStartsWithKnownPrefix(value, allowedPrefixes) {
   return allowedPrefixes.some((prefix) => matchesPathPrefix(value, prefix));
 }
 
-function collectBundleCandidateStrings(data, allowedPrefixes) {
-  const candidates = new Set();
+function collectBundleCandidateRecords(data, allowedPrefixes) {
+  const candidates = new Map();
 
-  function addCandidate(value) {
+  function addCandidate(value, record = {}) {
     if (typeof value !== "string") {
       return;
     }
@@ -518,12 +544,20 @@ function collectBundleCandidateStrings(data, allowedPrefixes) {
       return;
     }
 
-    candidates.add(normalizedPath);
+    const method = normalizeMethod(record.method);
+    candidates.set(`${method ?? "ANY"} ${normalizedPath}`, {
+      method,
+      normalizedPath,
+      sourceFile:
+        typeof record.sourceFile === "string" && record.sourceFile.trim()
+          ? record.sourceFile.trim()
+          : null,
+    });
   }
 
   walkArtifact(data, (value) => {
-    addCandidate(value?.candidatePath);
-    addCandidate(value?.path);
+    addCandidate(value?.candidatePath, value);
+    addCandidate(value?.path, value);
 
     for (const key of ["candidatePaths", "routes", "apiPaths", "paths"]) {
       if (!Array.isArray(value?.[key])) {
@@ -531,12 +565,19 @@ function collectBundleCandidateStrings(data, allowedPrefixes) {
       }
 
       for (const item of value[key]) {
-        addCandidate(item);
+        if (typeof item === "string") {
+          addCandidate(item, value);
+        } else {
+          addCandidate(item?.candidatePath ?? item?.path, item);
+        }
       }
     }
   });
 
-  return Array.from(candidates).sort((left, right) => left.localeCompare(right));
+  return Array.from(candidates.values()).sort((left, right) =>
+    `${left.normalizedPath} ${left.method ?? ""}`.localeCompare(
+      `${right.normalizedPath} ${right.method ?? ""}`,
+    ));
 }
 
 function extractBundleMatches(text, allowedPrefixes) {
@@ -574,6 +615,27 @@ async function pathExists(filePath) {
   }
 }
 
+async function resolveContainedFile(rootDirectory, candidatePath) {
+  try {
+    const [realRoot, realCandidate] = await Promise.all([
+      realpath(rootDirectory),
+      realpath(candidatePath),
+    ]);
+    const relativePath = path.relative(realRoot, realCandidate);
+    if (
+      !relativePath
+      || relativePath.startsWith(`..${path.sep}`)
+      || relativePath === ".."
+      || path.isAbsolute(relativePath)
+    ) {
+      return null;
+    }
+    return realCandidate;
+  } catch {
+    return null;
+  }
+}
+
 async function resolveBundleFiles({ artifactDir, bundleDir, bundleDownloads, scriptUrls }) {
   const discovered = new Set();
   const scriptBasenames = new Set(
@@ -593,8 +655,12 @@ async function resolveBundleFiles({ artifactDir, bundleDir, bundleDownloads, scr
       onlyFiles: true,
     });
     for (const filePath of files) {
-      if (scriptBasenames.size === 0 || scriptBasenames.has(path.basename(filePath))) {
-        discovered.add(filePath);
+      const containedFile = await resolveContainedFile(artifactDir, filePath);
+      if (
+        containedFile
+        && (scriptBasenames.size === 0 || scriptBasenames.has(path.basename(containedFile)))
+      ) {
+        discovered.add(containedFile);
       }
     }
   }
@@ -613,10 +679,9 @@ async function resolveBundleFiles({ artifactDir, bundleDir, bundleDownloads, scr
       const resolvedPath = path.isAbsolute(candidatePath)
         ? candidatePath
         : path.join(artifactDir, candidatePath);
-      if (await pathExists(resolvedPath)) {
-        if (scriptBasenames.size === 0 || scriptBasenames.has(path.basename(resolvedPath))) {
-          discovered.add(resolvedPath);
-        }
+      const containedFile = await resolveContainedFile(artifactDir, resolvedPath);
+      if (containedFile) {
+        discovered.add(containedFile);
       }
     }
   }
@@ -634,8 +699,12 @@ async function collectBundleObservations(options) {
     scriptUrls,
   } = options;
   const observations = [];
-  const candidatePaths = new Set(
-    collectBundleCandidateStrings(bundleCandidates, allowedPrefixes),
+  const candidateRecords = new Map(
+    collectBundleCandidateRecords(bundleCandidates, allowedPrefixes)
+      .map((record) => [`${record.method ?? "ANY"} ${record.normalizedPath}`, record]),
+  );
+  const structuredPaths = new Set(
+    Array.from(candidateRecords.values()).map((record) => record.normalizedPath),
   );
   const bundleFiles = await resolveBundleFiles({
     artifactDir,
@@ -647,23 +716,31 @@ async function collectBundleObservations(options) {
   for (const bundleFile of bundleFiles) {
     const text = await readFile(bundleFile, "utf8");
     for (const candidatePath of extractBundleMatches(text, allowedPrefixes)) {
-      candidatePaths.add(candidatePath);
+      const key = `ANY ${candidatePath}`;
+      if (!candidateRecords.has(key) && !structuredPaths.has(candidatePath)) {
+        candidateRecords.set(key, {
+          method: null,
+          normalizedPath: candidatePath,
+          sourceFile: path.basename(bundleFile),
+        });
+      }
     }
   }
 
-  for (const candidatePath of candidatePaths) {
+  for (const record of candidateRecords.values()) {
     observations.push({
       evidence: "bundle-discovered",
-      method: null,
-      normalizedPath: candidatePath,
-      rawPath: candidatePath,
+      method: record.method,
+      normalizedPath: record.normalizedPath,
+      rawPath: record.normalizedPath,
       seenOnPages: [],
       queryParameters: [],
       sourceArtifacts: [
         artifactFiles.bundleCandidates,
+        record.sourceFile,
         ...(bundleFiles.length > 0 ? [artifactFiles.scriptUrls, artifactFiles.bundleDownloads] : []),
       ].filter(Boolean),
-      featureFamily: deriveFeatureFamily(candidatePath),
+      featureFamily: deriveFeatureFamily(record.normalizedPath),
       confidenceScore: confidenceForObservation("bundle-discovered", 0, 0),
     });
   }
@@ -1052,10 +1129,26 @@ async function main() {
   }
 
   const scriptUrls = scriptUrlsData ? collectScriptUrls(scriptUrlsData) : [];
+  const graphqlOperations = bundleCandidates
+    ? collectGraphqlOperations(bundleCandidates)
+    : [];
   const observations = [
     ...(apiRecords ? collectObservations(apiRecords, artifactFiles.apiRecords, "confirmed") : []),
     ...(pageStates ? collectObservations(pageStates, artifactFiles.pageStates, "confirmed") : []),
-    ...(probeResults ? collectObservations(probeResults, artifactFiles.probeResults, "probed") : []),
+    ...(probeResults
+      ? collectObservations(
+          probeResults.filter((record) => (
+            record?.outcome === "confirmed"
+            || (
+              !record?.outcome
+              && Number(record?.status) >= 200
+              && Number(record?.status) < 300
+            )
+          )),
+          artifactFiles.probeResults,
+          "probed",
+        )
+      : []),
     ...await collectBundleObservations({
       allowedPrefixes: specContext.pathPrefixes,
       artifactDir: args.artifacts,
@@ -1087,8 +1180,10 @@ async function main() {
   const payload = {
     summary,
     candidates,
+    graphqlOperations,
     suppressedCandidates: candidatePartitions.suppressed,
   };
+  summary.graphqlOperationCount = graphqlOperations.length;
 
   await maybeWriteOutput(args.output, payload);
 
