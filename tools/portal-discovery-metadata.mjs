@@ -394,7 +394,8 @@ export const coverageOverlayByTitle = {
     ],
     openGaps: [
       "Nine confirmed tenant-island API reads remain adjacent scope-review evidence until their effective host templates are assigned explicitly.",
-      "Twenty-seven shared Microsoft 365, Graph, Azure management, authentication, and Defender-family operations remain for a later cross-spec assignment pass.",
+      "Two ECS routes match the Security Copilot server family and remain for explicit cross-spec assignment.",
+      "Twenty-seven other shared Microsoft 365, Graph, Azure management, authentication, and Defender-family operations remain for a later cross-spec assignment pass.",
     ],
     notes: [
       "A bounded normal-UI pass promoted all four in-scope confirmed GET candidates and did not promote any bundle-only candidate.",
