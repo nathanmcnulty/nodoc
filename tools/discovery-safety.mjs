@@ -96,3 +96,110 @@ export function sanitizeObservedTransportUrl(value) {
     return null;
   }
 }
+
+function hostTemplateToRegex(hostTemplate) {
+  const escaped = hostTemplate.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
+  return new RegExp(
+    `^${escaped
+      .replace(/^\\\*\\\./u, "(?:[^.]+\\.)+")
+      .replace(/\\\{[^}]+\\\}/gu, "[^.]+")}$`,
+    "u",
+  );
+}
+
+const tenantSafeServiceRoots = new Set([
+  "azure.com",
+  "cloud.microsoft",
+  "dynamics.com",
+  "microsoft.com",
+  "microsoftonline.com",
+  "office.com",
+  "office.net",
+  "powerapps.com",
+  "powerplatform.com",
+  "sharepoint.com",
+  "windows.net",
+]);
+const tenantSafeServiceLabels = new Set([
+  "admin",
+  "api",
+  "bap",
+  "content",
+  "crm",
+  "ecs",
+  "ext",
+  "graph",
+  "identitygovernance",
+  "insights",
+  "inventory",
+  "management",
+  "maker",
+  "makerx",
+  "mspim",
+  "portal",
+  "powerapps",
+  "powerplatform",
+  "prod",
+  "security",
+  "securitycopilot",
+  "securityplatform",
+  "services",
+  "static",
+]);
+
+export function sanitizeObservedHostFamily(value, trustedHostTemplates = []) {
+  const hostname = String(value || "").trim().toLowerCase().replace(/\.$/u, "");
+  if (
+    !hostname
+    || hostname.length > 253
+    || !/^[a-z0-9.-]+$/u.test(hostname)
+    || hostname.split(".").some((label) => (
+      !label
+      || label.length > 63
+      || !/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/u.test(label)
+    ))
+  ) {
+    return "[redacted-host]";
+  }
+
+  const trustedTemplates = Array.from(new Set(
+    trustedHostTemplates
+      .map((template) => String(template || "").trim().toLowerCase().replace(/\.$/u, ""))
+      .filter(Boolean),
+  )).sort((left, right) => (
+    right.replace(/\{[^}]+\}|\*/gu, "").length
+    - left.replace(/\{[^}]+\}|\*/gu, "").length
+    || left.localeCompare(right)
+  ));
+  const trustedMatch = trustedTemplates.find((template) => (
+    hostTemplateToRegex(template).test(hostname)
+  ));
+  if (trustedMatch) {
+    return trustedMatch;
+  }
+
+  const labels = hostname.split(".");
+  if (labels.length < 2) {
+    return "[redacted-host]";
+  }
+
+  const serviceRoot = labels.slice(-2).join(".");
+  if (!tenantSafeServiceRoots.has(serviceRoot)) {
+    return "[redacted-host]";
+  }
+
+  const serviceLabels = labels.slice(0, -2);
+  if (serviceLabels.length === 0) {
+    return `*.${serviceRoot}`;
+  }
+
+  return [
+    ...serviceLabels.map((label) => (
+      tenantSafeServiceLabels.has(label)
+      || /^(?:ap|au|ca|eu|in|jp|uk|us)(?:\d+)?$/u.test(label)
+        ? label
+        : "{tenant}"
+    )),
+    serviceRoot,
+  ].join(".");
+}

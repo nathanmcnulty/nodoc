@@ -126,8 +126,14 @@ contains normalized paths and evidence labels only, separated into confirmed
 GET candidates ready for human specification review, confirmed non-GET or
 method-ambiguous candidates requiring safety classification, successful
 probes, bundle-only candidates requiring targeted UI validation, and
-intentionally suppressed candidates. It does not contain request bodies,
-headers, tokens, cookies, raw paths, page labels, or tenant-specific values.
+intentionally suppressed candidates. It also preserves adjacent confirmed
+GETs, adjacent confirmed non-GETs, adjacent successful probes, and adjacent
+bundle-only leads in separate scope-review categories. Those entries include
+only sanitized host-family routing context and trusted matching spec IDs; they
+require explicit specification assignment and cannot be promoted into the
+target spec automatically. The handoff does not contain raw hostnames, URLs,
+IDs, request bodies, headers, tokens, cookies, raw paths, page labels, artifact
+paths, timestamps, or tenant-specific values.
 
 Discovery execution ends when these artifacts are generated. Reviewing and
 landing supported findings is a separate specification PR; the discovery agent
@@ -166,6 +172,10 @@ Confirmed safety-classification candidates:
 Successful probe candidates:
 Bundle-only validation candidates:
 Suppressed candidates:
+Adjacent confirmed reads requiring scope assignment:
+Adjacent confirmed safety-classification candidates:
+Adjacent successful probes requiring scope assignment:
+Adjacent bundle-only leads requiring scope assignment:
 GraphQL/RPC operations:
 Passive streaming endpoints:
 Coverage gaps:

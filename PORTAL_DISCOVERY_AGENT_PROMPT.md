@@ -35,7 +35,10 @@ a separate human-reviewed specification PR.
 
 Return the exact compact completion structure from the runbook. Distinguish
 confirmed reads, confirmed candidates needing safety classification, successful
-probes, bundle-only candidates, and suppressions. Use the driver's
-evidence-driven recommended next action. If the driver emits a blocker, report
-its code and remediation rather than improvising around it.
+probes, bundle-only candidates, suppressions, and adjacent scope-review
+evidence. Report adjacent confirmed reads, confirmed non-GETs, successful
+probes, and bundle-only leads separately; they require explicit specification
+and host-family assignment and are not promotion-ready for the target spec.
+Use the driver's evidence-driven recommended next action. If the driver emits a
+blocker, report its code and remediation rather than improvising around it.
 ```

@@ -3,6 +3,7 @@ import path from "node:path";
 
 import fg from "fast-glob";
 
+import { sanitizeObservedHostFamily } from "./discovery-safety.mjs";
 import { getCandidateSuppressions } from "./portal-discovery-metadata.mjs";
 import { buildSpecRouteInventory } from "./spec-quality-lib.mjs";
 
@@ -249,6 +250,32 @@ function normalizeRoutePath(pathValue) {
   }
 
   return `/${segments.map((segment) => normalizeSegment(segment)).join("/")}`;
+}
+
+const scopeIdentifierParents = new Set([
+  "environments",
+  "organizations",
+  "resourcegroups",
+  "subscriptions",
+  "tenants",
+]);
+
+function sanitizeScopeReviewPath(pathValue) {
+  const segments = String(pathValue || "").replace(/^\/+/u, "").split("/").filter(Boolean);
+  return `/${segments.map((segment, index) => {
+    const normalized = normalizeSegment(segment);
+    const parent = String(segments[index - 1] || "").toLowerCase();
+    if (
+      normalized !== "{id}"
+      && (
+        scopeIdentifierParents.has(parent)
+        || /^[A-Za-z0-9_-]{12,}$/u.test(normalized) && /\d/u.test(normalized)
+      )
+    ) {
+      return "{id}";
+    }
+    return normalized;
+  }).join("/")}`;
 }
 
 function extractHostname(value) {
@@ -545,7 +572,9 @@ function collectBundleCandidateRecords(data, allowedPrefixes) {
     }
 
     const method = normalizeMethod(record.method);
-    candidates.set(`${method ?? "ANY"} ${normalizedPath}`, {
+    const hostname = extractHostname(record.url) ?? extractHostname(value);
+    candidates.set(`${hostname ?? "NO_HOST"} ${method ?? "ANY"} ${normalizedPath}`, {
+      hostname,
       method,
       normalizedPath,
       sourceFile:
@@ -701,7 +730,10 @@ async function collectBundleObservations(options) {
   const observations = [];
   const candidateRecords = new Map(
     collectBundleCandidateRecords(bundleCandidates, allowedPrefixes)
-      .map((record) => [`${record.method ?? "ANY"} ${record.normalizedPath}`, record]),
+      .map((record) => [
+        `${record.hostname ?? "NO_HOST"} ${record.method ?? "ANY"} ${record.normalizedPath}`,
+        record,
+      ]),
   );
   const structuredPaths = new Set(
     Array.from(candidateRecords.values()).map((record) => record.normalizedPath),
@@ -716,7 +748,7 @@ async function collectBundleObservations(options) {
   for (const bundleFile of bundleFiles) {
     const text = await readFile(bundleFile, "utf8");
     for (const candidatePath of extractBundleMatches(text, allowedPrefixes)) {
-      const key = `ANY ${candidatePath}`;
+      const key = `NO_HOST ANY ${candidatePath}`;
       if (!candidateRecords.has(key) && !structuredPaths.has(candidatePath)) {
         candidateRecords.set(key, {
           method: null,
@@ -741,6 +773,7 @@ async function collectBundleObservations(options) {
         ...(bundleFiles.length > 0 ? [artifactFiles.scriptUrls, artifactFiles.bundleDownloads] : []),
       ].filter(Boolean),
       featureFamily: deriveFeatureFamily(record.normalizedPath),
+      hostname: record.hostname,
       confidenceScore: confidenceForObservation("bundle-discovered", 0, 0),
     });
   }
@@ -812,18 +845,33 @@ function hostTemplateToRegex(hostTemplate) {
 }
 
 function buildSpecContext(specRecord) {
+  const scopeServerUrls = Array.isArray(specRecord.scopeServerUrls)
+    ? specRecord.scopeServerUrls
+    : specRecord.serverUrls;
+  const hostTemplates = uniqueSorted(
+    scopeServerUrls
+      .map((serverUrl) => extractServerHostTemplate(serverUrl))
+      .filter(Boolean),
+  );
   const serverPathPrefixes = uniqueSorted(
-    specRecord.serverUrls
+    scopeServerUrls
       .map((serverUrl) => extractServerPath(serverUrl))
       .filter(Boolean),
   );
   const templateOperations = [];
 
   for (const operation of specRecord.operations) {
+    const operationServerPathPrefixes = uniqueSorted(
+      (Array.isArray(operation.serverUrls)
+        ? operation.serverUrls
+        : specRecord.serverUrls)
+        .map((serverUrl) => extractServerPath(serverUrl))
+        .filter(Boolean),
+    );
     const expandedPaths = uniqueSorted(
       [
         normalizeRoutePath(operation.path),
-        ...serverPathPrefixes.map((serverPath) => normalizeRoutePath(
+        ...operationServerPathPrefixes.map((serverPath) => normalizeRoutePath(
           joinRoutePath(serverPath, operation.path),
         )),
       ].filter(Boolean),
@@ -839,11 +887,8 @@ function buildSpecContext(specRecord) {
   }
 
   return {
-    hostPatterns: uniqueSorted(
-      specRecord.serverUrls
-        .map((serverUrl) => extractServerHostTemplate(serverUrl))
-        .filter(Boolean),
-    ).map((hostname) => hostTemplateToRegex(hostname)),
+    hostPatterns: hostTemplates.map((hostname) => hostTemplateToRegex(hostname)),
+    hostTemplates,
     pathPrefixes: uniqueSorted(
       specRecord.pathPrefixes.flatMap((prefix) => (
         [
@@ -852,6 +897,7 @@ function buildSpecContext(specRecord) {
         ]
       )),
     ),
+    specId: specRecord.specId,
     templateOperations,
     title: specRecord.title,
   };
@@ -869,14 +915,22 @@ function matchesPathPrefix(normalizedPath, prefix) {
     || normalizedPath.startsWith(`${prefix}(`);
 }
 
-function isObservationInScope(observation, specContext) {
+function classifyObservationScope(observation, specContext) {
   const matchesHostname = !observation.hostname
     || specContext.hostPatterns.length === 0
     || specContext.hostPatterns.some((pattern) => pattern.test(observation.hostname));
   const matchesPrefix = specContext.pathPrefixes.length === 0
     || specContext.pathPrefixes.some((prefix) => matchesPathPrefix(observation.normalizedPath, prefix));
 
-  return matchesHostname && matchesPrefix;
+  return {
+    inScope: matchesHostname && matchesPrefix,
+    matchesHostname,
+    matchesPrefix,
+  };
+}
+
+function isObservationInScope(observation, specContext) {
+  return classifyObservationScope(observation, specContext).inScope;
 }
 
 function partitionObservationsByScope(observations, specContext) {
@@ -894,11 +948,49 @@ function partitionObservationsByScope(observations, specContext) {
   });
 }
 
-function aggregateCandidates(observations, specContext, includeDocumented) {
+function buildScopeReviewContext(observation, specContext, specContexts) {
+  const scope = classifyObservationScope(observation, specContext);
+  const scopeReason = !scope.matchesHostname && !scope.matchesPrefix
+    ? "host-and-path-out-of-scope"
+    : scope.matchesHostname
+      ? "path-out-of-scope"
+      : "host-out-of-scope";
+  const trustedHostTemplates = specContexts.flatMap((context) => context.hostTemplates);
+  const matchingSpecIds = observation.hostname
+    ? specContexts
+        .filter((context) => isObservationInScope(observation, context))
+        .map((context) => context.specId)
+    : [];
+
+  return {
+    hostFamily: observation.hostname
+      ? sanitizeObservedHostFamily(observation.hostname, trustedHostTemplates)
+      : "[host-not-observed]",
+    matchingSpecIds: uniqueSorted(matchingSpecIds),
+    scopeReason,
+  };
+}
+
+function aggregateCandidates(
+  observations,
+  specContext,
+  includeDocumented,
+  { scopeReview = false, specContexts = [] } = {},
+) {
   const aggregated = new Map();
 
   for (const observation of observations) {
-    const key = `${observation.method ?? "ANY"} ${observation.normalizedPath}`;
+    const scopeReviewContext = scopeReview
+      ? buildScopeReviewContext(observation, specContext, specContexts)
+      : null;
+    const candidatePath = scopeReview
+      ? sanitizeScopeReviewPath(observation.normalizedPath)
+      : observation.normalizedPath;
+    const key = [
+      scopeReviewContext?.hostFamily,
+      observation.method ?? "ANY",
+      candidatePath,
+    ].filter(Boolean).join(" ");
     const matchingTemplateOperations = getMatchingTemplateOperations(
       specContext,
       observation.normalizedPath,
@@ -922,15 +1014,25 @@ function aggregateCandidates(observations, specContext, includeDocumented) {
               ? "path-documented-missing-method"
               : "undocumented",
         evidence: new Set([observation.evidence]),
-        featureFamily: observation.featureFamily,
+        featureFamily: scopeReview
+          ? deriveFeatureFamily(candidatePath)
+          : observation.featureFamily,
         matchedSpecMethods,
         method: observation.method,
-        normalizedPath: observation.normalizedPath,
+        normalizedPath: candidatePath,
         rawPaths: new Set([observation.rawPath]),
         requiredInputs: new Set(extractRequiredInputs(observation)),
         safeMethodToTest: safeMethodToTest(observation.method),
         seenOnPages: new Set(observation.seenOnPages),
         sourceArtifacts: new Set(observation.sourceArtifacts),
+        ...(scopeReviewContext
+          ? {
+              hostFamily: scopeReviewContext.hostFamily,
+              matchingSpecIds: new Set(scopeReviewContext.matchingSpecIds),
+              requiresSpecAssignment: true,
+              scopeReasons: new Set([scopeReviewContext.scopeReason]),
+            }
+          : {}),
       });
     } else {
       const candidate = aggregated.get(key);
@@ -953,6 +1055,12 @@ function aggregateCandidates(observations, specContext, includeDocumented) {
       for (const sourceArtifact of observation.sourceArtifacts) {
         candidate.sourceArtifacts.add(sourceArtifact);
       }
+      if (scopeReviewContext) {
+        for (const matchingSpecId of scopeReviewContext.matchingSpecIds) {
+          candidate.matchingSpecIds.add(matchingSpecId);
+        }
+        candidate.scopeReasons.add(scopeReviewContext.scopeReason);
+      }
     }
   }
 
@@ -964,8 +1072,20 @@ function aggregateCandidates(observations, specContext, includeDocumented) {
       requiredInputs: Array.from(candidate.requiredInputs).sort((left, right) => left.localeCompare(right)),
       seenOnPages: Array.from(candidate.seenOnPages).sort((left, right) => left.localeCompare(right)),
       sourceArtifacts: Array.from(candidate.sourceArtifacts).sort((left, right) => left.localeCompare(right)),
+      ...(scopeReview
+        ? {
+            matchingSpecIds: Array.from(candidate.matchingSpecIds)
+              .sort((left, right) => left.localeCompare(right)),
+            scopeReasons: Array.from(candidate.scopeReasons)
+              .sort((left, right) => left.localeCompare(right)),
+          }
+        : {}),
     }))
-    .filter((candidate) => includeDocumented || candidate.documentationStatus !== "documented")
+    .filter((candidate) => (
+      scopeReview
+      || includeDocumented
+      || candidate.documentationStatus !== "documented"
+    ))
     .sort((left, right) => {
       if (evidencePriority[left.evidence] !== evidencePriority[right.evidence]) {
         return (evidencePriority[right.evidence] ?? 0) - (evidencePriority[left.evidence] ?? 0);
@@ -981,6 +1101,42 @@ function aggregateCandidates(observations, specContext, includeDocumented) {
 
       return left.normalizedPath.localeCompare(right.normalizedPath);
     });
+}
+
+function sanitizeScopeReviewCandidate(candidate) {
+  return {
+    documentationStatus: candidate.documentationStatus,
+    evidence: candidate.evidence,
+    featureFamily: candidate.featureFamily,
+    hostFamily: candidate.hostFamily,
+    matchingSpecIds: candidate.matchingSpecIds,
+    method: candidate.method,
+    normalizedPath: candidate.normalizedPath,
+    requiresSpecAssignment: true,
+    scopeReasons: candidate.scopeReasons,
+  };
+}
+
+function countCandidatesByAction(candidates) {
+  return candidates.reduce((counts, candidate) => {
+    if (candidate.evidence === "confirmed") {
+      if (candidate.method === "GET") {
+        counts.confirmedRead += 1;
+      } else {
+        counts.confirmedSafetyReview += 1;
+      }
+    } else if (candidate.evidence === "probed") {
+      counts.successfullyProbed += 1;
+    } else {
+      counts.bundleOnly += 1;
+    }
+    return counts;
+  }, {
+    bundleOnly: 0,
+    confirmedRead: 0,
+    confirmedSafetyReview: 0,
+    successfullyProbed: 0,
+  });
 }
 
 function matchesSuppression(candidate, suppression) {
@@ -1021,8 +1177,9 @@ function partitionSuppressedCandidates(candidates, suppressions) {
 function buildSummary({
   adjacentObservationCount,
   candidates,
-  includeAdjacent,
+  includeAdjacentRequested,
   observations,
+  scopeReviewCandidates,
   scopedObservationCount,
   specRecord,
   scriptUrls,
@@ -1041,9 +1198,12 @@ function buildSummary({
     countsByEvidence,
     documentedMatches,
     adjacentObservationCount,
-    includeAdjacent,
+    adjacentCandidatesPromoted: false,
+    includeAdjacentRequested,
     inScopeObservationCount: scopedObservationCount,
     observationCount: observations.length,
+    scopeReviewCandidateCount: scopeReviewCandidates.length,
+    scopeReviewCounts: countCandidatesByAction(scopeReviewCandidates),
     scriptUrlCount: scriptUrls.length,
     specId: specRecord.specId,
     specPath: specRecord.specPath,
@@ -1057,11 +1217,10 @@ function printHumanSummary(summary, candidates) {
   console.log(`Observations processed: ${summary.observationCount}`);
   console.log(`In-scope observations: ${summary.inScopeObservationCount}`);
   if (summary.adjacentObservationCount > 0) {
-    console.log(
-      summary.includeAdjacent
-        ? `Adjacent observations included: ${summary.adjacentObservationCount}`
-        : `Adjacent observations ignored: ${summary.adjacentObservationCount} (--include-adjacent to include)`,
-    );
+    console.log(`Adjacent observations retained for scope review: ${summary.adjacentObservationCount}`);
+  }
+  if (summary.includeAdjacentRequested) {
+    console.log("--include-adjacent is compatibility-only; adjacent evidence remains outside active candidates.");
   }
   console.log(`Loaded scripts observed: ${summary.scriptUrlCount}`);
   if (summary.suppressedCandidateCount > 0) {
@@ -1102,6 +1261,7 @@ async function main() {
   const routeInventory = await buildSpecRouteInventory();
   const specRecord = resolveSpec(routeInventory, args.spec);
   const specContext = buildSpecContext(specRecord);
+  const specContexts = routeInventory.map((record) => buildSpecContext(record));
   const artifactPaths = Object.fromEntries(
     Object.entries(artifactFiles).map(([key, filename]) => [
       key,
@@ -1159,20 +1319,26 @@ async function main() {
     }),
   ];
   const { adjacent, inScope } = partitionObservationsByScope(observations, specContext);
-  const scopedObservations = args.includeAdjacent ? observations : inScope;
   const candidateSuppressions = getCandidateSuppressions(specRecord.title);
   const candidatePartitions = partitionSuppressedCandidates(aggregateCandidates(
-    scopedObservations,
+    inScope,
     specContext,
     args.includeDocumented,
   ), candidateSuppressions);
   const candidates = candidatePartitions.active;
+  const scopeReviewCandidates = aggregateCandidates(
+    adjacent,
+    specContext,
+    true,
+    { scopeReview: true, specContexts },
+  ).map((candidate) => sanitizeScopeReviewCandidate(candidate));
   const summary = buildSummary({
     adjacentObservationCount: adjacent.length,
     candidates,
-    includeAdjacent: args.includeAdjacent,
+    includeAdjacentRequested: args.includeAdjacent,
     observations,
-    scopedObservationCount: scopedObservations.length,
+    scopeReviewCandidates,
+    scopedObservationCount: inScope.length,
     specRecord,
     scriptUrls,
     suppressedCandidateCount: candidatePartitions.suppressed.length,
@@ -1181,6 +1347,7 @@ async function main() {
     summary,
     candidates,
     graphqlOperations,
+    scopeReviewCandidates,
     suppressedCandidates: candidatePartitions.suppressed,
   };
   summary.graphqlOperationCount = graphqlOperations.length;
