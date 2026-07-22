@@ -25,12 +25,17 @@ Then create a unique artifact directory outside the repository and run:
 
   npm run discover:portal -- --portal <portal-spec-id> --profile bounded --phase all --artifacts <fresh-artifact-directory>
 
-Read the primary output files named by the runbook. This is an execution-only
-validation: do not edit, commit, or push repository files. Do not submit forms,
-invoke writes, follow redirects, export secrets, or copy cookies, bearer tokens,
-or tenant data into chat.
+Read the primary output files named by the runbook, including
+`candidate-handoff.json`. The `all` phase already performs the normalized
+family diff; do not recommend that diff as a separate post-run command. This is
+an execution-only validation: do not edit, commit, or push repository files.
+Do not submit forms, invoke writes, follow redirects, export secrets, or copy
+cookies, bearer tokens, or tenant data into chat. Landing supported findings is
+a separate human-reviewed specification PR.
 
 Return the exact compact completion structure from the runbook. Distinguish
-confirmed, probed, and bundle-discovered evidence. If the driver emits a
-blocker, report its code and remediation rather than improvising around it.
+confirmed reads, confirmed candidates needing safety classification, successful
+probes, bundle-only candidates, and suppressions. Use the driver's
+evidence-driven recommended next action. If the driver emits a blocker, report
+its code and remediation rather than improvising around it.
 ```

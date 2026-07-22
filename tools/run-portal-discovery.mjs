@@ -2,6 +2,7 @@ import { spawn } from "node:child_process";
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
+import { buildCandidateHandoff } from "./discovery-candidate-handoff.mjs";
 import { classifyGetProbeUrl } from "./discovery-safety.mjs";
 import {
   captureRecipesByTitle,
@@ -230,7 +231,7 @@ function buildBrief(specRecord, recipePath) {
     allowedEvidence: ["confirmed", "probed", "bundle-discovered"],
     authModel: metadata?.authModel ?? null,
     crawlPriority: metadata?.crawlPriority ?? "unknown",
-    nextPass: metadata?.nextPass ?? "unknown",
+    metadataNextPass: metadata?.nextPass ?? "unknown",
     pathPrefixes: specRecord.pathPrefixes,
     portal: specRecord.title,
     portalUrl: metadata?.portalUrl ?? null,
@@ -459,13 +460,15 @@ async function main() {
     }
 
     if (["all", "analyze"].includes(args.phase)) {
+      const candidateQueuePath = path.join(args.artifacts, "candidate-queue.json");
+      const candidateHandoffPath = path.join(args.artifacts, "candidate-handoff.json");
       const candidateArgs = [
         "--spec",
         specRecord.specId,
         "--artifacts",
         args.artifacts,
         "--output",
-        path.join(args.artifacts, "candidate-queue.json"),
+        candidateQueuePath,
       ];
       if (args.includeAdjacent) {
         candidateArgs.push("--include-adjacent");
@@ -474,6 +477,20 @@ async function main() {
         path.join(repoRoot, "tools", "generate-crawl-candidates.mjs"),
         candidateArgs,
       );
+      const candidateQueue = JSON.parse(await readFile(candidateQueuePath, "utf8"));
+      const candidateHandoff = buildCandidateHandoff({
+        candidateQueue,
+        metadataNextPass: brief.metadataNextPass,
+        specId: specRecord.specId,
+        specTitle: specRecord.title,
+      });
+      await writeFile(
+        candidateHandoffPath,
+        `${JSON.stringify(candidateHandoff, null, 2)}\n`,
+        "utf8",
+      );
+      runState.candidateCounts = candidateHandoff.counts;
+      runState.recommendedNextAction = candidateHandoff.recommendedNextAction;
     }
 
     runState.status = "completed";
@@ -481,6 +498,9 @@ async function main() {
     runState.outputs = {
       candidateQueue: ["all", "analyze"].includes(args.phase)
         ? path.join(args.artifacts, "candidate-queue.json")
+        : null,
+      candidateHandoff: ["all", "analyze"].includes(args.phase)
+        ? path.join(args.artifacts, "candidate-handoff.json")
         : null,
       runState: path.join(args.artifacts, "discovery-run.json"),
     };

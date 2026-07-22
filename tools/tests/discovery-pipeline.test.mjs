@@ -9,6 +9,32 @@ import { promisify } from "node:util";
 const execFileAsync = promisify(execFile);
 const repoRoot = path.resolve(import.meta.dirname, "..", "..");
 
+async function writeJson(filePath, value) {
+  await writeFile(filePath, `${JSON.stringify(value, null, 2)}\n`, "utf8");
+}
+
+async function runAnalyze(portal, artifactDir) {
+  await execFileAsync(process.execPath, [
+    path.join(repoRoot, "tools", "run-portal-discovery.mjs"),
+    "--portal",
+    portal,
+    "--phase",
+    "analyze",
+    "--artifacts",
+    artifactDir,
+  ], { cwd: repoRoot });
+
+  const [candidateHandoff, runState] = await Promise.all([
+    readFile(path.join(artifactDir, "candidate-handoff.json"), "utf8"),
+    readFile(path.join(artifactDir, "discovery-run.json"), "utf8"),
+  ]);
+  return {
+    candidateHandoff: JSON.parse(candidateHandoff),
+    candidateHandoffText: candidateHandoff,
+    runState: JSON.parse(runState),
+  };
+}
+
 test("Purview unsafe POST observations are suppressed from generated queues", async () => {
   const artifactDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-purview-suppressions-"));
   const unsafePaths = [
@@ -71,6 +97,173 @@ test("Purview unsafe POST observations are suppressed from generated queues", as
     assert.ok(queue.candidates.every((candidate) => (
       !expectedKeys.includes(candidateKey(candidate))
     )));
+  } finally {
+    await rm(artifactDir, { force: true, recursive: true });
+  }
+});
+
+test("analyze emits a sanitized actionable handoff for Purview-like evidence", async () => {
+  const artifactDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-purview-handoff-"));
+  const tenantId = "2f1c7bb8-2d31-4c2a-9f86-6778c9382bbc";
+  const basePath = `/apiproxy/insiderrisk/insiderrisk/api/v1.0/${tenantId}`;
+
+  try {
+    await Promise.all([
+      writeJson(path.join(artifactDir, "api-records.json"), [
+        {
+          method: "GET",
+          path: `${basePath}/NodocReviewCandidate`,
+          seenOnPages: ["tenant-specific-review-page"],
+        },
+        {
+          method: "POST",
+          path: `${basePath}/NodocSafetyCandidate`,
+          seenOnPages: ["tenant-specific-safety-page"],
+        },
+        {
+          method: "POST",
+          path: `${basePath}/IRMEasyPolicy`,
+          seenOnPages: ["tenant-specific-suppressed-page"],
+        },
+      ]),
+      writeJson(path.join(artifactDir, "probe-results.json"), [
+        {
+          method: "GET",
+          outcome: "confirmed",
+          path: `${basePath}/NodocProbeCandidate`,
+          status: 200,
+        },
+      ]),
+      writeJson(path.join(artifactDir, "bundle-candidates.json"), {
+        candidates: [
+          {
+            candidatePath: `${basePath}/NodocBundleCandidate`,
+            method: "GET",
+            sourceFile: "C:\\tenant-specific\\private-bundle.js",
+          },
+        ],
+      }),
+    ]);
+
+    const { candidateHandoff, candidateHandoffText, runState } = await runAnalyze(
+      "purview",
+      artifactDir,
+    );
+
+    assert.deepEqual(candidateHandoff.counts, {
+      confirmedRead: 1,
+      confirmedSafetyReview: 1,
+      successfullyProbed: 1,
+      bundleOnly: 1,
+      suppressed: 1,
+    });
+    assert.equal(
+      candidateHandoff.confirmedReadCandidates[0].normalizedPath,
+      "/apiproxy/insiderrisk/insiderrisk/api/v1.0/{id}/NodocReviewCandidate",
+    );
+    assert.equal(candidateHandoff.confirmedSafetyReviewCandidates[0].method, "POST");
+    assert.equal(candidateHandoff.successfullyProbedCandidates[0].evidence, "probed");
+    assert.equal(
+      candidateHandoff.bundleOnlyCandidates[0].evidence,
+      "bundle-discovered",
+    );
+    assert.equal(
+      candidateHandoff.suppressedCandidates[0].normalizedPath,
+      "/apiproxy/insiderrisk/insiderrisk/api/v1.0/{id}/IRMEasyPolicy",
+    );
+    assert.equal(
+      candidateHandoff.recommendedNextAction.code,
+      "review-and-promote-confirmed-candidates",
+    );
+    assert.deepEqual(runState.candidateCounts, candidateHandoff.counts);
+    assert.deepEqual(
+      runState.recommendedNextAction,
+      candidateHandoff.recommendedNextAction,
+    );
+    assert.equal(path.basename(runState.outputs.candidateHandoff), "candidate-handoff.json");
+    assert.doesNotMatch(candidateHandoffText, new RegExp(tenantId, "u"));
+    assert.doesNotMatch(candidateHandoffText, /tenant-specific/u);
+    assert.doesNotMatch(candidateHandoffText, /private-bundle/u);
+  } finally {
+    await rm(artifactDir, { force: true, recursive: true });
+  }
+});
+
+test("bundle-only analysis recommends targeted UI validation", async () => {
+  const artifactDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-bundle-handoff-"));
+
+  try {
+    await writeJson(path.join(artifactDir, "bundle-candidates.json"), {
+      candidates: [
+        {
+          candidatePath: "/admin/api/nodocBundleOnlyCandidate",
+          method: "GET",
+          sourceFile: "feature.js",
+        },
+      ],
+    });
+
+    const { candidateHandoff } = await runAnalyze("m365-admin", artifactDir);
+
+    assert.equal(candidateHandoff.counts.bundleOnly, 1);
+    assert.equal(candidateHandoff.counts.confirmedRead, 0);
+    assert.equal(
+      candidateHandoff.recommendedNextAction.code,
+      "validate-bundle-only-candidates",
+    );
+  } finally {
+    await rm(artifactDir, { force: true, recursive: true });
+  }
+});
+
+test("suppressed-only analysis expands coverage instead of repeating the completed diff", async () => {
+  const artifactDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-suppressed-handoff-"));
+
+  try {
+    await writeJson(path.join(artifactDir, "api-records.json"), [
+      {
+        method: "POST",
+        path: "/apiproxy/insiderrisk/insiderrisk/api/v1.0/{placeholder}/IRMEasyPolicy",
+      },
+    ]);
+
+    const { candidateHandoff, candidateHandoffText } = await runAnalyze(
+      "purview",
+      artifactDir,
+    );
+
+    assert.deepEqual(candidateHandoff.counts, {
+      confirmedRead: 0,
+      confirmedSafetyReview: 0,
+      successfullyProbed: 0,
+      bundleOnly: 0,
+      suppressed: 1,
+    });
+    assert.equal(
+      candidateHandoff.recommendedNextAction.code,
+      "expand-recipe-coverage",
+    );
+    assert.doesNotMatch(candidateHandoffText, /normalized-family-diff/u);
+  } finally {
+    await rm(artifactDir, { force: true, recursive: true });
+  }
+});
+
+test("no-candidate analysis uses an appropriate portal metadata fallback", async () => {
+  const artifactDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-metadata-fallback-"));
+
+  try {
+    await writeJson(path.join(artifactDir, "api-records.json"), []);
+
+    const { candidateHandoff } = await runAnalyze("entra-b2c", artifactDir);
+
+    assert.equal(candidateHandoff.counts.confirmedRead, 0);
+    assert.deepEqual(candidateHandoff.recommendedNextAction, {
+      code: "follow-portal-metadata",
+      metadataNextPass: "full-layered-crawl",
+      summary:
+        "No actionable candidates were generated; follow the portal metadata next pass: full-layered-crawl.",
+    });
   } finally {
     await rm(artifactDir, { force: true, recursive: true });
   }
@@ -149,6 +342,7 @@ test("portal driver emits a deterministic M365 Admin brief", async () => {
   assert.equal(result.brief.profile, "bounded");
   assert.equal(result.brief.portal, "M365 Admin");
   assert.equal(result.brief.recipe, "tools/capture-recipes/m365-admin-deep.json");
+  assert.equal(result.brief.metadataNextPass, "normalized-family-diff");
   assert.deepEqual(result.brief.safety.allowedProbeMethods, ["GET"]);
   assert.equal(result.brief.safety.crossOriginProbes, false);
   assert.equal(result.brief.safety.writeActions, false);
