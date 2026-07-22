@@ -832,17 +832,94 @@
       "/spo/",
       "/WdatpPublicApi/"
     ],
-    "operationCount": 124,
-    "lastSuccessfulPassDepth": "diff-first",
+    "operationCount": 135,
+    "lastSuccessfulPassDepth": "bounded-normal-ui-diff",
     "captureRecipes": [
       "tools/capture-recipes/purview-deep.json",
       "tools/capture-recipes/purview-seeded-replay.json"
     ],
-    "promotedDiscoveries": [],
+    "promotedDiscoveries": [
+      {
+        "method": "GET",
+        "note": "Promoted from bounded normal-UI Insider Risk traffic with the tenant identifier parameterized.",
+        "path": "/apiproxy/di/Find/InsiderRiskTag"
+      },
+      {
+        "method": "GET",
+        "note": "Promoted from bounded normal-UI Insider Risk analytics traffic.",
+        "path": "/apiproxy/insiderrisk/insiderrisk/api/v1.0/{tenantId}/InsiderRiskTenantActivityAnalytics('{activityCategory}')"
+      },
+      {
+        "method": "GET",
+        "note": "Promoted from bounded normal-UI Insider Risk analytics traffic for two observed analytics types.",
+        "path": "/apiproxy/insiderrisk/insiderrisk/api/v1.0/{tenantId}/InsiderRiskTenantPolicyAnalytics('{policyAnalyticsType}')"
+      },
+      {
+        "method": "GET",
+        "note": "Promoted from bounded normal-UI Insider Risk indicator traffic.",
+        "path": "/apiproxy/insiderrisk/insiderrisk/api/v1.0/{tenantId}/IptIndicatorProfilesWithCounts"
+      },
+      {
+        "method": "GET",
+        "note": "Promoted only the read operation from bounded normal-UI onboarding traffic.",
+        "path": "/apiproxy/insiderrisk/insiderrisk/api/v1.0/{tenantId}/OnboardingChecklist"
+      },
+      {
+        "method": "GET",
+        "note": "Promoted from bounded normal-UI onboarding traffic.",
+        "path": "/apiproxy/insiderrisk/insiderrisk/api/v1.0/{tenantId}/OnboardingChecklistCheckTaskStatus"
+      },
+      {
+        "method": "GET",
+        "note": "Promoted from bounded normal-UI Insider Risk overview traffic.",
+        "path": "/apiproxy/insiderrisk/insiderrisk/api/v1.0/{tenantId}/overview/activitySensitiveLabeledAggregate"
+      },
+      {
+        "method": "GET",
+        "note": "Promoted from bounded normal-UI Insider Risk overview traffic.",
+        "path": "/apiproxy/insiderrisk/insiderrisk/api/v1.0/{tenantId}/overview/agentRiskLevelAggregate"
+      },
+      {
+        "method": "GET",
+        "note": "Promoted from bounded normal-UI Insider Risk policy-health traffic.",
+        "path": "/apiproxy/insiderrisk/insiderrisk/api/v1.0/{tenantId}/PolicyMetrics"
+      },
+      {
+        "method": "GET",
+        "note": "Promoted from bounded normal-UI Insider Risk report traffic.",
+        "path": "/apiproxy/insiderrisk/insiderrisk/api/v1.0/{tenantId}/UserReports"
+      },
+      {
+        "method": "POST",
+        "note": "Confirmed as a bounded read-only indicator-profile calculation in normal-UI traffic.",
+        "path": "/apiproxy/insiderrisk/insiderrisk/api/v1.0/{tenantId}/IptAllIndicatorsMergedProfile"
+      }
+    ],
+    "knownCandidateExclusions": [
+      {
+        "method": "POST",
+        "note": "Policy POST omitted because the capture does not prove that replay is free of policy state changes.",
+        "path": "/apiproxy/insiderrisk/insiderrisk/api/v1.0/{id}/IRMEasyPolicy"
+      },
+      {
+        "method": "POST",
+        "note": "State-changing onboarding task update observed in normal-UI traffic; intentionally excluded from documentation and probe planning.",
+        "path": "/apiproxy/insiderrisk/insiderrisk/api/v1.0/{id}/OnboardingChecklist"
+      },
+      {
+        "method": "POST",
+        "note": "Generic Graph batch wrapper omitted because it can carry mutations and the captured tenant-specific subrequest is not a stable operation contract.",
+        "path": "/apiproxy/msgraph/v1.0/$batch"
+      }
+    ],
     "knownTelemetryExclusions": [],
-    "openGaps": [],
+    "openGaps": [
+      "The IRMEasyPolicy POST remains unpromoted unless a future intercepted capture proves it is a bounded read-only lookup.",
+      "The generic Microsoft Graph batch wrapper remains unpromoted; document stable inner operations individually when they can be generalized safely."
+    ],
     "notes": [
-      "Keep same-origin Purview Portal /api traffic distinct from the broader Purview proxy surface during follow-up diffing."
+      "Keep same-origin Purview Portal /api traffic distinct from the broader Purview proxy surface during follow-up diffing.",
+      "A bounded normal-UI pass evaluated 15 confirmed candidates, promoted all 11 GET candidates as 10 parameterized paths, promoted one read-only calculation POST, and excluded three unsafe or ambiguous POSTs."
     ]
   },
   {

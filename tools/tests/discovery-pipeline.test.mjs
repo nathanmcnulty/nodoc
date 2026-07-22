@@ -9,6 +9,73 @@ import { promisify } from "node:util";
 const execFileAsync = promisify(execFile);
 const repoRoot = path.resolve(import.meta.dirname, "..", "..");
 
+test("Purview unsafe POST observations are suppressed from generated queues", async () => {
+  const artifactDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-purview-suppressions-"));
+  const unsafePaths = [
+    "/apiproxy/insiderrisk/insiderrisk/api/v1.0/{placeholder}/IRMEasyPolicy",
+    "/apiproxy/insiderrisk/insiderrisk/api/v1.0/{placeholder}/OnboardingChecklist",
+    "/apiproxy/msgraph/v1.0/$batch",
+  ];
+  const normalizedUnsafePaths = unsafePaths.map((candidatePath) => (
+    candidatePath.replace("{placeholder}", "{id}")
+  ));
+
+  try {
+    await Promise.all([
+      writeFile(
+        path.join(artifactDir, "api-records.json"),
+        JSON.stringify(unsafePaths.map((candidatePath) => ({
+          method: "POST",
+          path: candidatePath,
+          seenOnPages: ["tenant-neutral-test"],
+        }))),
+        "utf8",
+      ),
+      writeFile(
+        path.join(artifactDir, "bundle-candidates.json"),
+        JSON.stringify({
+          candidates: unsafePaths.map((candidatePath) => ({
+            candidatePath,
+            method: "POST",
+            sourceFile: "tenant-neutral-fixture.js",
+          })),
+        }),
+        "utf8",
+      ),
+    ]);
+
+    const { stdout } = await execFileAsync(process.execPath, [
+      path.join(repoRoot, "tools", "generate-crawl-candidates.mjs"),
+      "--spec",
+      "purview",
+      "--artifacts",
+      artifactDir,
+      "--json",
+    ], { cwd: repoRoot });
+    const queue = JSON.parse(stdout);
+    const candidateKey = ({ method, normalizedPath }) => `${method} ${normalizedPath}`;
+    const expectedKeys = normalizedUnsafePaths
+      .map((candidatePath) => `POST ${candidatePath}`)
+      .sort();
+
+    assert.deepEqual(
+      queue.suppressedCandidates.map(candidateKey).sort(),
+      expectedKeys,
+    );
+    assert.equal(queue.summary.suppressedCandidateCount, unsafePaths.length);
+    assert.ok(queue.suppressedCandidates.every(({ evidence, sourceArtifacts }) => (
+      evidence === "confirmed"
+      && sourceArtifacts.includes("api-records.json")
+      && sourceArtifacts.includes("bundle-candidates.json")
+    )));
+    assert.ok(queue.candidates.every((candidate) => (
+      !expectedKeys.includes(candidateKey(candidate))
+    )));
+  } finally {
+    await rm(artifactDir, { force: true, recursive: true });
+  }
+});
+
 test("mined methods flow into the crawl candidate queue", async () => {
   const artifactDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-discovery-"));
   try {

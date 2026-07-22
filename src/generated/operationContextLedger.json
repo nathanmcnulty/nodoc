@@ -2639,6 +2639,234 @@
     ]
   },
   {
+    "title": "Purview",
+    "specId": "purview",
+    "specPath": "specifications/nodoc-purview/specification/openapi.yml",
+    "nodocRoute": null,
+    "nodocCategory": "Purview",
+    "headerProfiles": {},
+    "operations": [
+      {
+        "operationId": "getInsiderRiskTags",
+        "summary": "Get insider risk tags",
+        "method": "GET",
+        "path": "/di/Find/InsiderRiskTag",
+        "operationContext": {
+          "surface": "Insider Risk Management overview",
+          "authProfile": "purview-portal-session",
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Observed in successful bounded normal-UI Insider Risk traffic."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "getInsiderRiskTenantActivityAnalytics",
+        "summary": "Get tenant activity analytics",
+        "method": "GET",
+        "path": "/insiderrisk/insiderrisk/api/v1.0/{tenantId}/InsiderRiskTenantActivityAnalytics('{activityCategory}')",
+        "operationContext": {
+          "surface": "Insider Risk Management overview",
+          "authProfile": "purview-portal-session",
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Observed in successful bounded normal-UI Insider Risk traffic."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "getInsiderRiskTenantPolicyAnalytics",
+        "summary": "Get tenant policy analytics",
+        "method": "GET",
+        "path": "/insiderrisk/insiderrisk/api/v1.0/{tenantId}/InsiderRiskTenantPolicyAnalytics('{policyAnalyticsType}')",
+        "operationContext": {
+          "surface": "Insider Risk Management overview",
+          "authProfile": "purview-portal-session",
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Observed for the DataLeaks and DataTheft analytics types in bounded normal-UI traffic."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "listInsiderRiskIndicatorProfilesWithCounts",
+        "summary": "List indicator profiles with counts",
+        "method": "GET",
+        "path": "/insiderrisk/insiderrisk/api/v1.0/{tenantId}/IptIndicatorProfilesWithCounts",
+        "operationContext": {
+          "surface": "Insider Risk Management overview",
+          "authProfile": "purview-portal-session",
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Observed in successful bounded normal-UI Insider Risk traffic."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "getInsiderRiskOnboardingChecklist",
+        "summary": "Get onboarding checklist",
+        "method": "GET",
+        "path": "/insiderrisk/insiderrisk/api/v1.0/{tenantId}/OnboardingChecklist",
+        "operationContext": {
+          "surface": "Insider Risk Management overview",
+          "authProfile": "purview-portal-session",
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "The GET was observed in successful bounded normal-UI traffic.",
+                "The state-changing POST on this path is intentionally not modeled."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "getInsiderRiskOnboardingTaskStatus",
+        "summary": "Get onboarding task status",
+        "method": "GET",
+        "path": "/insiderrisk/insiderrisk/api/v1.0/{tenantId}/OnboardingChecklistCheckTaskStatus",
+        "operationContext": {
+          "surface": "Insider Risk Management overview",
+          "authProfile": "purview-portal-session",
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Observed in successful bounded normal-UI Insider Risk traffic."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "getInsiderRiskSensitiveLabelActivityAggregate",
+        "summary": "Get sensitive label activity aggregate",
+        "method": "GET",
+        "path": "/insiderrisk/insiderrisk/api/v1.0/{tenantId}/overview/activitySensitiveLabeledAggregate",
+        "operationContext": {
+          "surface": "Insider Risk Management overview",
+          "authProfile": "purview-portal-session",
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Observed in successful bounded normal-UI Insider Risk traffic."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "getInsiderRiskAgentRiskLevelAggregate",
+        "summary": "Get agent risk level aggregate",
+        "method": "GET",
+        "path": "/insiderrisk/insiderrisk/api/v1.0/{tenantId}/overview/agentRiskLevelAggregate",
+        "operationContext": {
+          "surface": "Insider Risk Management overview",
+          "authProfile": "purview-portal-session",
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Observed in successful bounded normal-UI Insider Risk traffic."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "listInsiderRiskPolicyMetrics",
+        "summary": "List policy metrics",
+        "method": "GET",
+        "path": "/insiderrisk/insiderrisk/api/v1.0/{tenantId}/PolicyMetrics",
+        "operationContext": {
+          "surface": "Insider Risk Management overview",
+          "authProfile": "purview-portal-session",
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Observed in successful bounded normal-UI Insider Risk traffic."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "listInsiderRiskUserReports",
+        "summary": "List user reports",
+        "method": "GET",
+        "path": "/insiderrisk/insiderrisk/api/v1.0/{tenantId}/UserReports",
+        "operationContext": {
+          "surface": "Insider Risk Management reports",
+          "authProfile": "purview-portal-session",
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Observed in bounded normal-UI traffic; the current session received an authorization denial."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "calculateInsiderRiskMergedIndicatorProfile",
+        "summary": "Calculate merged indicator profile",
+        "method": "POST",
+        "path": "/insiderrisk/insiderrisk/api/v1.0/{tenantId}/IptAllIndicatorsMergedProfile",
+        "operationContext": {
+          "surface": "Insider Risk Management overview",
+          "authProfile": "purview-portal-session",
+          "requestShapes": [
+            {
+              "name": "merged-indicator-profile-calculation",
+              "contentType": "application/json",
+              "bodyKind": "object",
+              "notes": "Read-only aggregate calculation over supplied indicator thresholds."
+            }
+          ],
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Observed as a successful bounded normal-UI calculation."
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
     "title": "Purview Portal",
     "specId": "purview-portal",
     "specPath": "specifications/nodoc-purview-portal/specification/openapi.yml",
