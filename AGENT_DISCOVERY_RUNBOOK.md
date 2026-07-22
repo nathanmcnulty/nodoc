@@ -3,6 +3,17 @@
 Use this runbook for execution. Use `AGENT_DISCOVERY_PLAYBOOK.md` only when a
 blocker requires deeper background.
 
+## Agent handoff
+
+Give the agent this repository-relative instruction:
+
+> Read `PORTAL_DISCOVERY_AGENT_PROMPT.md` and follow it exactly for the named
+> portal. Do not improvise browser automation, edit specifications, or expose
+> captured credentials or tenant data.
+
+The prompt is intentionally separate from this runbook so it can be pasted into
+a new agent session without copying the full playbook.
+
 ## Required input
 
 The task must name one portal by title or spec ID, for example `M365 Admin` or
@@ -14,12 +25,39 @@ The task must name one portal by title or spec ID, for example `M365 Admin` or
 - keep artifacts outside the repository
 - stop after the checked-in recipe and candidate analysis complete
 
+## Browser prerequisite
+
+The deterministic pipeline attaches to an already authenticated browser. The
+agent must not assume that an ordinary Edge process is a CDP endpoint. Before
+starting the capture phase, the operator must launch a dedicated Edge profile
+with remote debugging enabled, sign in to the portal, and verify the endpoint:
+
+```powershell
+$edge = Join-Path ${env:ProgramFiles(x86)} "Microsoft\Edge\Application\msedge.exe"
+$profileDir = Join-Path $env:TEMP "nodoc-edge-cdp-m365-admin"
+Start-Process $edge -ArgumentList @(
+  "--remote-debugging-address=127.0.0.1",
+  "--remote-debugging-port=9222",
+  "--user-data-dir=$profileDir",
+  "--no-first-run",
+  "--no-default-browser-check",
+  "https://admin.cloud.microsoft"
+)
+Invoke-RestMethod http://127.0.0.1:9222/json/version
+```
+
+The response must include `webSocketDebuggerUrl`. If the endpoint is refused,
+the browser was not started with the debugging flag; if it responds but capture
+ends at Microsoft sign-in, authenticate that profile and use a new artifact
+directory for the retry. Do not close or replace the user's normal browser
+profile.
+
 ## Execution
 
 1. Read the machine-generated portal brief:
 
    ```powershell
-   npm run discover:portal -- --portal m365-admin --phase plan --json
+   npm run discover:portal -- --portal m365-admin --profile bounded --phase plan --json
    ```
 
 2. Choose a unique, fresh artifact directory outside the repository for every
@@ -32,7 +70,7 @@ The task must name one portal by title or spec ID, for example `M365 Admin` or
 3. Run the deterministic pipeline:
 
    ```powershell
-   npm run discover:portal -- --portal m365-admin --phase all --artifacts $artifacts
+   npm run discover:portal -- --portal m365-admin --profile bounded --phase all --artifacts $artifacts
    ```
 
 4. Read only these outputs first:
@@ -88,6 +126,7 @@ Return the blocker code and remediation:
 | `recipe-missing` | No checked-in deterministic recipe exists |
 | `feature-gated` | The tenant, role, license, or feature flag blocks the surface |
 | `unsafe-action-required` | Further discovery requires a write or potentially active GET |
+| `recipe-actions-incomplete` | A required navigation or selector in the checked-in recipe failed |
 | `pipeline-failed` | A deterministic command failed |
 
 Escalate to a stronger model only for selector repair, scope classification,

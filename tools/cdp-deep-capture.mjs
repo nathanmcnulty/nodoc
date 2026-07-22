@@ -10,6 +10,12 @@ import {
   classifyGetProbeUrl,
   sanitizeObservedTransportUrl,
 } from "./discovery-safety.mjs";
+import {
+  decodeBoundedCdpBody,
+  responseBodyCaptureLimit,
+  shouldRequestResponseBody,
+  summarizeActionResults,
+} from "./discovery-capture-policy.mjs";
 
 const apiBase = "http://127.0.0.1:9222";
 const defaultNavigationTimeoutMs = 15000;
@@ -19,6 +25,7 @@ const defaultSeedRouteLimit = 8;
 const defaultSettleMs = 8000;
 const defaultPostActionSettleMs = 6000;
 const defaultEvaluateTimeoutMs = 10000;
+const defaultCdpCommandTimeoutMs = 20000;
 let runtimeEvaluateTimeoutMs = defaultEvaluateTimeoutMs;
 
 function stripBom(value) {
@@ -385,7 +392,10 @@ function normalizeRecipeAction(action) {
     action.scope && action.scope !== "any"
       ? `${rawType}-${String(action.scope).trim()}`
       : rawType;
-  return parseActionSpec(`${scopedType}=${action.value ?? ""}`);
+  return {
+    ...parseActionSpec(`${scopedType}=${action.value ?? ""}`),
+    required: Boolean(action.required),
+  };
 }
 
 function resolveRecipePath(value, recipeDir) {
@@ -1187,10 +1197,13 @@ class CdpClient {
     this.listeners = new Map();
     this.socket = new WebSocket(wsUrl);
     this.socketClosed = false;
+    this.closing = false;
+    this.closeDetails = null;
   }
 
   rejectPending(error) {
-    for (const { reject } of this.pending.values()) {
+    for (const { reject, timeout } of this.pending.values()) {
+      clearTimeout(timeout);
       reject(error);
     }
 
@@ -1222,9 +1235,20 @@ class CdpClient {
       this.socket.addEventListener("close", handleClose, { once: true });
     });
 
-    this.socket.addEventListener("close", () => {
+    this.socket.addEventListener("close", (event) => {
       this.socketClosed = true;
-      this.rejectPending(new Error("CDP WebSocket closed."));
+      this.closeDetails = {
+        code: event.code ?? null,
+        reason: event.reason ?? null,
+      };
+      if (!this.closing) {
+        console.error(
+          `CDP WebSocket closed unexpectedly (code ${this.closeDetails.code ?? "unknown"}${this.closeDetails.reason ? `: ${this.closeDetails.reason}` : ""}; pending=${this.pending.size}; nextId=${this.nextId}; pendingMethods=${JSON.stringify(Array.from(this.pending.values()).map(({ method, sessionId }) => ({ method, sessionId }))) }).`,
+        );
+      }
+      this.rejectPending(new Error(
+        `CDP WebSocket closed (code ${this.closeDetails.code ?? "unknown"}${this.closeDetails.reason ? `: ${this.closeDetails.reason}` : ""}).`,
+      ));
     }, { once: true });
 
     this.socket.addEventListener("message", (raw) => {
@@ -1237,6 +1261,7 @@ class CdpClient {
         }
 
         this.pending.delete(key);
+        clearTimeout(entry.timeout);
         if (message.error) {
           entry.reject(new Error(message.error.message));
           return;
@@ -1263,7 +1288,10 @@ class CdpClient {
 
   async send(method, params = {}, sessionId = null) {
     if (this.socketClosed || this.socket.readyState !== WebSocket.OPEN) {
-      throw new Error("CDP WebSocket is not open.");
+      const detail = this.closeDetails
+        ? ` (code ${this.closeDetails.code ?? "unknown"}${this.closeDetails.reason ? `: ${this.closeDetails.reason}` : ""})`
+        : "";
+      throw new Error(`CDP WebSocket is not open${detail}.`);
     }
 
     const id = ++this.nextId;
@@ -1276,7 +1304,16 @@ class CdpClient {
 
     const key = `${sessionId ?? ""}:${id}`;
     const response = new Promise((resolve, reject) => {
-      this.pending.set(key, { resolve, reject });
+      const timeout = setTimeout(() => {
+        if (!this.pending.delete(key)) {
+          return;
+        }
+        reject(new Error(
+          `CDP command ${method} timed out after ${defaultCdpCommandTimeoutMs} ms` +
+          `${sessionId ? ` in session ${sessionId}` : ""}.`,
+        ));
+      }, defaultCdpCommandTimeoutMs);
+      this.pending.set(key, { method, reject, resolve, sessionId, timeout });
     });
 
     this.socket.send(payload);
@@ -1292,6 +1329,7 @@ class CdpClient {
     await new Promise((resolve) => {
       this.socket.addEventListener("close", resolve, { once: true });
       if (this.socket.readyState !== WebSocket.CLOSING) {
+        this.closing = true;
         this.socket.close();
       }
     });
@@ -1822,6 +1860,7 @@ async function main() {
   const scriptBodies = new Map();
   const inFlightRequests = new Set();
   const pendingBodyCaptures = new Set();
+  let responseBodyTail = Promise.resolve();
   const capturedRequests = [];
   const pageStates = [];
   const sessionSnapshots = [];
@@ -1831,6 +1870,7 @@ async function main() {
   const probeOutcomes = new Map();
   const passiveTransports = [];
   const actionResults = [];
+  const boundedNetworkSessions = new Set();
   const configuredSessions = new Set();
   const sessions = new Map([
     [null, { targetTitle: target.title ?? null, targetType: "page", targetUrl: target.url ?? null }],
@@ -1846,9 +1886,19 @@ async function main() {
       return;
     }
 
+    try {
+      await client.send("Network.enable", {
+        maxPostDataSize: 1024 * 128,
+        maxResourceBufferSize: responseBodyCaptureLimit,
+        maxTotalBufferSize: responseBodyCaptureLimit * 32,
+      }, sessionId);
+      boundedNetworkSessions.add(key);
+    } catch {
+      await client.send("Network.enable", { maxPostDataSize: 1024 * 128 }, sessionId);
+    }
+
     for (const [method, params] of [
       ["Runtime.enable", {}],
-      ["Network.enable", { maxPostDataSize: 1024 * 128 }],
       ["Network.setCacheDisabled", { cacheDisabled: true }],
       ["Page.enable", {}],
       ["DOM.enable", {}],
@@ -2012,53 +2062,40 @@ async function main() {
 
   client.on("Network.loadingFinished", (params, metadata) => {
     const key = requestKey(params.requestId, metadata.sessionId);
-    const bodyCapture = (async () => {
-      const scriptRecord = scriptRequestMap.get(key);
-      if (scriptRecord) {
-        try {
-          const scriptBody = await client.send("Network.getResponseBody", {
-            requestId: params.requestId,
-          }, metadata.sessionId);
-          const source = scriptBody?.base64Encoded
-            ? Buffer.from(scriptBody.body, "base64").toString("utf8")
-            : scriptBody?.body ?? "";
-          if (source) {
-            scriptBodies.set(scriptRecord.url, {
-              ...scriptRecord,
-              source,
-            });
-          }
-        } catch {
-          // Some cross-process scripts do not expose their bodies through CDP.
-        }
-        scriptRequestMap.delete(key);
-      }
+    const captureResponseBody = async () => {
+      scriptRequestMap.delete(key);
 
       const record = requestMap.get(key);
       if (record) {
-        try {
-          const body = await client.send("Network.getResponseBody", {
-            requestId: params.requestId,
-          }, metadata.sessionId);
-          const sanitizedResponseBody = sanitizeCapturedBody(
-            body?.base64Encoded
-              ? Buffer.from(body.body, "base64").toString("utf8")
-              : body?.body ?? null,
-          );
-          record.responseBody = truncate(sanitizedResponseBody);
-          record.responseShapeFingerprint = bodyShapeFingerprint(sanitizedResponseBody);
-        } catch {
+        const sessionKey = metadata.sessionId ?? "root";
+        if (
+          boundedNetworkSessions.has(sessionKey)
+          && shouldRequestResponseBody(params.encodedDataLength)
+        ) {
+          try {
+            const body = await client.send("Network.getResponseBody", {
+              requestId: params.requestId,
+            }, metadata.sessionId);
+            const sanitizedResponseBody = sanitizeCapturedBody(decodeBoundedCdpBody(body));
+            record.responseBody = truncate(sanitizedResponseBody);
+            record.responseShapeFingerprint = bodyShapeFingerprint(sanitizedResponseBody);
+          } catch {
+            record.responseBody = null;
+          }
+        } else {
           record.responseBody = null;
         }
 
         capturedRequests.push(record);
         requestMap.delete(key);
       }
-    })().finally(() => {
+    };
+    const bodyCapture = responseBodyTail.then(captureResponseBody).finally(() => {
       inFlightRequests.delete(key);
       lastNetworkActivityAt = Date.now();
       pendingBodyCaptures.delete(bodyCapture);
     });
+    responseBodyTail = bodyCapture.catch(() => {});
     pendingBodyCaptures.add(bodyCapture);
   });
 
@@ -2258,6 +2295,71 @@ async function main() {
     );
   }
 
+  async function capturePageScriptBodies(pageLabel) {
+    for (const [sessionId, targetInfo] of sessions.entries()) {
+      if (!isDomCapableTarget(sessionId, targetInfo)) {
+        continue;
+      }
+
+      let resourceTree;
+      try {
+        resourceTree = await client.send("Page.getResourceTree", {}, sessionId);
+      } catch {
+        continue;
+      }
+
+      const frames = [];
+      const visitFrame = (frameTree) => {
+        if (!frameTree?.frame?.id) {
+          return;
+        }
+        frames.push(frameTree);
+        for (const childFrame of frameTree.childFrames ?? []) {
+          visitFrame(childFrame);
+        }
+      };
+      visitFrame(resourceTree.frameTree);
+
+      for (const frameTree of frames) {
+        for (const resource of frameTree.resources ?? []) {
+          if (
+            resource.type !== "Script"
+            || !resource.url
+            || !shouldRequestResponseBody(resource.contentSize)
+          ) {
+            continue;
+          }
+          const scriptRecord = [...scriptRecords]
+            .reverse()
+            .find((record) =>
+              record.page === pageLabel
+              && record.sessionId === sessionId
+              && record.url === resource.url);
+          if (!scriptRecord || scriptBodies.has(resource.url)) {
+            continue;
+          }
+          try {
+            const content = await client.send("Page.getResourceContent", {
+              frameId: frameTree.frame.id,
+              url: resource.url,
+            }, sessionId);
+            const source = decodeBoundedCdpBody(content);
+            if (source) {
+              scriptBodies.set(resource.url, {
+                ...scriptRecord,
+                mimeType: resource.mimeType ?? scriptRecord.mimeType,
+                source,
+                status: scriptRecord.status ?? 200,
+              });
+            }
+          } catch {
+            // Some cross-origin or browser-managed scripts do not expose resource content.
+          }
+        }
+      }
+    }
+  }
+
   async function captureCheckpoint(pageLabel) {
     await delay(1000);
     const snapshots = await collectSnapshots();
@@ -2316,6 +2418,7 @@ async function main() {
       url: rootSnapshot.url ?? null,
     });
 
+    await capturePageScriptBodies(pageLabel);
     await flushArtifacts();
   }
 
@@ -2683,7 +2786,9 @@ async function main() {
     activePageLabel = args.label ?? "seed-00";
     const initialNavigation = await navigateRoot(args.url);
     actionResults.push({
+      allowCanonicalRedirect: true,
       page: activePageLabel,
+      required: true,
       result: initialNavigation,
       type: "navigate",
       value: args.url,
@@ -2698,6 +2803,7 @@ async function main() {
         await delay(Number(action.value));
         actionResults.push({
           page: pageLabel,
+          required: action.required,
           result: { waitedMs: Number(action.value) },
           scope: action.scope,
           type: action.type,
@@ -2710,6 +2816,7 @@ async function main() {
       if (action.type === "capture") {
         actionResults.push({
           page: pageLabel,
+          required: action.required,
           result: { capturedOnly: true },
           scope: action.scope,
           type: action.type,
@@ -2723,6 +2830,7 @@ async function main() {
         const navigationResult = await navigateRoot(action.value);
         actionResults.push({
           page: pageLabel,
+          required: action.required,
           result: navigationResult,
           scope: action.scope,
           type: action.type,
@@ -2736,6 +2844,7 @@ async function main() {
         const probeResult = await runProbeGetAction(action, pageLabel);
         actionResults.push({
           page: pageLabel,
+          required: action.required,
           result: probeResult,
           scope: action.scope,
           type: action.type,
@@ -2750,6 +2859,7 @@ async function main() {
         const crawlResult = await runCurrentLinkCrawlAction(action, pageLabel);
         actionResults.push({
           page: pageLabel,
+          required: action.required,
           result: crawlResult,
           scope: action.scope,
           type: action.type,
@@ -2763,6 +2873,7 @@ async function main() {
         const replayResult = await runSeededReplayAction(action, pageLabel);
         actionResults.push({
           page: pageLabel,
+          required: action.required,
           result: replayResult,
           scope: action.scope,
           type: action.type,
@@ -2776,6 +2887,7 @@ async function main() {
         const replayResult = await runSeededRouteReplayAction(action, pageLabel);
         actionResults.push({
           page: pageLabel,
+          required: action.required,
           result: replayResult,
           scope: action.scope,
           type: action.type,
@@ -2788,6 +2900,7 @@ async function main() {
       const clickResult = await runClickAction(action);
       actionResults.push({
         page: pageLabel,
+        required: action.required,
         result: clickResult,
         scope: action.scope,
         type: action.type,
@@ -2807,6 +2920,7 @@ async function main() {
       }
     }));
     const summary = {
+      actionValidation: summarizeActionResults(actionResults),
       actions: actionResults.length,
       bundleDiscovery: latestBundleSummary,
       capturedApiRequests: capturedRequests.length,
