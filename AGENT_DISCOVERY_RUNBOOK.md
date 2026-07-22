@@ -23,7 +23,7 @@ The task must name one portal by title or spec ID, for example `M365 Admin` or
 - do not submit forms or invoke writes
 - do not export secrets from the browser
 - keep artifacts outside the repository
-- stop after the checked-in recipe and candidate analysis complete
+- stop after the checked-in recipe, candidate analysis, and handoff generation complete
 
 ## Browser prerequisite
 
@@ -77,6 +77,7 @@ profile.
 
    - `discovery-run.json`
    - `summary.json`
+   - `candidate-handoff.json`
    - `candidate-queue.json`
    - `probe-results.json`
    - `bundle-candidates.json`
@@ -113,6 +114,25 @@ Forbidden:
 Never promote blocked or failed probes to positive evidence. Never model a
 bundle-only request or response schema as confirmed.
 
+## Analysis and promotion handoff
+
+The `all` and `analyze` phases normalize captured route families and diff them
+against the checked-in specification before generating `candidate-queue.json`.
+That is the normalized family diff; do not report
+`normalized-family-diff` as a separate post-run command.
+
+`candidate-handoff.json` is the tenant-safe output for follow-up work. It
+contains normalized paths and evidence labels only, separated into confirmed
+GET candidates ready for human specification review, confirmed non-GET or
+method-ambiguous candidates requiring safety classification, successful
+probes, bundle-only candidates requiring targeted UI validation, and
+intentionally suppressed candidates. It does not contain request bodies,
+headers, tokens, cookies, raw paths, page labels, or tenant-specific values.
+
+Discovery execution ends when these artifacts are generated. Reviewing and
+landing supported findings is a separate specification PR; the discovery agent
+must not edit specifications automatically.
+
 ## Stop and escalation
 
 Do not improvise alternate browser automation after one of these blockers.
@@ -141,15 +161,18 @@ Return this compact structure:
 Portal:
 Status: completed | blocked | failed
 Artifacts:
-Confirmed candidates:
-Successful probes:
-Bundle-only candidates:
+Confirmed reads ready for review:
+Confirmed safety-classification candidates:
+Successful probe candidates:
+Bundle-only validation candidates:
+Suppressed candidates:
 GraphQL/RPC operations:
 Passive streaming endpoints:
 Coverage gaps:
 Blocker code:
-Recommended next pass:
+Recommended next action:
 ```
 
 Do not claim exhaustive coverage. Completion means the bounded recipe finished,
-the candidate queue was generated, and remaining gaps were reported.
+the candidate queue and tenant-safe handoff were generated, and remaining gaps
+were reported. Specification promotion remains a separate review task.

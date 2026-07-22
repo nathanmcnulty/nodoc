@@ -302,6 +302,15 @@ After traffic, DOM extraction, and bundle mining, build a queue of follow-up can
 
 This makes it much easier to prioritize what to crawl next instead of rediscovering the same leads repeatedly.
 
+The deterministic `discover:portal` `all` and `analyze` phases perform this
+normalization and specification diff automatically, then write
+`candidate-handoff.json`. Use that sanitized handoff for promotion triage:
+confirmed GETs can proceed to human specification review, confirmed non-GET or
+ambiguous candidates need safety classification, successful probes retain
+their weaker evidence label, and bundle-only candidates require targeted UI
+validation. Generating the handoff completes discovery execution; landing
+supported findings is a separate review PR.
+
 ### 5b. Safe-probe hidden reads
 
 When bundle mining exposes likely read routes that the UI did not call directly:
@@ -453,6 +462,7 @@ Useful companion artifacts:
 - `bundle-downloads.json`
 - `bundle-candidates.json`
 - `probe-results.json`
+- `candidate-handoff.json`
 - `action-results.json`
 - `session-snapshots.json`
 - per-feature analysis notes
@@ -795,8 +805,10 @@ What helped:
 
 Current takeaway:
 
-- After a broad nav + entity crawl, do a **normalized family diff** before starting another
-  browser run.
+- After a broad nav + entity crawl, run `discover:portal` with `all` or `analyze`
+  before starting another browser run. Candidate generation performs the
+  **normalized family diff** as part of that phase; it is not a separate
+  post-run command.
 - Only launch another crawl when the remaining gaps are still broad or ambiguous; if the
   tail is already concentrated into a few confirmed families, extract exact shapes directly
   from the existing artifacts first.
