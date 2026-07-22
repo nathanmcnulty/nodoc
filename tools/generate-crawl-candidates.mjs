@@ -3,7 +3,7 @@ import path from "node:path";
 
 import fg from "fast-glob";
 
-import { getTelemetrySuppressions } from "./portal-discovery-metadata.mjs";
+import { getCandidateSuppressions } from "./portal-discovery-metadata.mjs";
 import { buildSpecRouteInventory } from "./spec-quality-lib.mjs";
 
 const httpMethods = new Set([
@@ -1160,12 +1160,12 @@ async function main() {
   ];
   const { adjacent, inScope } = partitionObservationsByScope(observations, specContext);
   const scopedObservations = args.includeAdjacent ? observations : inScope;
-  const telemetrySuppressions = getTelemetrySuppressions(specRecord.title);
+  const candidateSuppressions = getCandidateSuppressions(specRecord.title);
   const candidatePartitions = partitionSuppressedCandidates(aggregateCandidates(
     scopedObservations,
     specContext,
     args.includeDocumented,
-  ), telemetrySuppressions);
+  ), candidateSuppressions);
   const candidates = candidatePartitions.active;
   const summary = buildSummary({
     adjacentObservationCount: adjacent.length,

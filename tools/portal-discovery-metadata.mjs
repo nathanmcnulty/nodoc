@@ -390,9 +390,32 @@ export const coverageOverlayByTitle = {
     observedHosts: [
       "purview.microsoft.com",
     ],
-    lastSuccessfulPassDepth: "diff-first",
+    lastSuccessfulPassDepth: "bounded-normal-ui-diff",
+    promotedDiscoveries: [
+      route("GET", "/apiproxy/di/Find/InsiderRiskTag", "Promoted from bounded normal-UI Insider Risk traffic with the tenant identifier parameterized."),
+      route("GET", "/apiproxy/insiderrisk/insiderrisk/api/v1.0/{tenantId}/InsiderRiskTenantActivityAnalytics('{activityCategory}')", "Promoted from bounded normal-UI Insider Risk analytics traffic."),
+      route("GET", "/apiproxy/insiderrisk/insiderrisk/api/v1.0/{tenantId}/InsiderRiskTenantPolicyAnalytics('{policyAnalyticsType}')", "Promoted from bounded normal-UI Insider Risk analytics traffic for two observed analytics types."),
+      route("GET", "/apiproxy/insiderrisk/insiderrisk/api/v1.0/{tenantId}/IptIndicatorProfilesWithCounts", "Promoted from bounded normal-UI Insider Risk indicator traffic."),
+      route("GET", "/apiproxy/insiderrisk/insiderrisk/api/v1.0/{tenantId}/OnboardingChecklist", "Promoted only the read operation from bounded normal-UI onboarding traffic."),
+      route("GET", "/apiproxy/insiderrisk/insiderrisk/api/v1.0/{tenantId}/OnboardingChecklistCheckTaskStatus", "Promoted from bounded normal-UI onboarding traffic."),
+      route("GET", "/apiproxy/insiderrisk/insiderrisk/api/v1.0/{tenantId}/overview/activitySensitiveLabeledAggregate", "Promoted from bounded normal-UI Insider Risk overview traffic."),
+      route("GET", "/apiproxy/insiderrisk/insiderrisk/api/v1.0/{tenantId}/overview/agentRiskLevelAggregate", "Promoted from bounded normal-UI Insider Risk overview traffic."),
+      route("GET", "/apiproxy/insiderrisk/insiderrisk/api/v1.0/{tenantId}/PolicyMetrics", "Promoted from bounded normal-UI Insider Risk policy-health traffic."),
+      route("GET", "/apiproxy/insiderrisk/insiderrisk/api/v1.0/{tenantId}/UserReports", "Promoted from bounded normal-UI Insider Risk report traffic."),
+      route("POST", "/apiproxy/insiderrisk/insiderrisk/api/v1.0/{tenantId}/IptAllIndicatorsMergedProfile", "Confirmed as a bounded read-only indicator-profile calculation in normal-UI traffic."),
+    ],
+    knownCandidateExclusions: [
+      route("POST", "/apiproxy/insiderrisk/insiderrisk/api/v1.0/{id}/IRMEasyPolicy", "Policy POST omitted because the capture does not prove that replay is free of policy state changes."),
+      route("POST", "/apiproxy/insiderrisk/insiderrisk/api/v1.0/{id}/OnboardingChecklist", "State-changing onboarding task update observed in normal-UI traffic; intentionally excluded from documentation and probe planning."),
+      route("POST", "/apiproxy/msgraph/v1.0/$batch", "Generic Graph batch wrapper omitted because it can carry mutations and the captured tenant-specific subrequest is not a stable operation contract."),
+    ],
+    openGaps: [
+      "The IRMEasyPolicy POST remains unpromoted unless a future intercepted capture proves it is a bounded read-only lookup.",
+      "The generic Microsoft Graph batch wrapper remains unpromoted; document stable inner operations individually when they can be generalized safely.",
+    ],
     notes: [
       "Keep same-origin Purview Portal /api traffic distinct from the broader Purview proxy surface during follow-up diffing.",
+      "A bounded normal-UI pass evaluated 15 confirmed candidates, promoted all 11 GET candidates as 10 parameterized paths, promoted one read-only calculation POST, and excluded three unsafe or ambiguous POSTs.",
     ],
   },
   "Purview Portal": {
@@ -627,6 +650,7 @@ export function getCoverageOverlay(title) {
   const overlay = coverageOverlayByTitle[title];
   if (!overlay) {
     return {
+      knownCandidateExclusions: [],
       knownTelemetryExclusions: [],
       notes: [],
       observedHosts: [],
@@ -638,6 +662,7 @@ export function getCoverageOverlay(title) {
 
   return {
     ...overlay,
+    knownCandidateExclusions: (overlay.knownCandidateExclusions ?? []).map(normalizeRouteEntry),
     knownTelemetryExclusions: (overlay.knownTelemetryExclusions ?? []).map(normalizeRouteEntry),
     notes: [...(overlay.notes ?? [])],
     observedHosts: uniqueOrdered(overlay.observedHosts ?? []),
@@ -649,6 +674,14 @@ export function getCoverageOverlay(title) {
 
 export function getTelemetrySuppressions(title) {
   return getCoverageOverlay(title).knownTelemetryExclusions;
+}
+
+export function getCandidateSuppressions(title) {
+  const overlay = getCoverageOverlay(title);
+  return [
+    ...overlay.knownTelemetryExclusions,
+    ...overlay.knownCandidateExclusions,
+  ];
 }
 
 export function getCaptureRecipes(title) {
@@ -684,6 +717,9 @@ export function buildCoverageLedgerEntry(specRecord, recorderPortalIds) {
     lastSuccessfulPassDepth: coverageOverlay.lastSuccessfulPassDepth ?? "untracked",
     captureRecipes: getCaptureRecipes(specRecord.title),
     promotedDiscoveries: [...coverageOverlay.promotedDiscoveries],
+    ...(coverageOverlay.knownCandidateExclusions.length > 0
+      ? { knownCandidateExclusions: [...coverageOverlay.knownCandidateExclusions] }
+      : {}),
     knownTelemetryExclusions: [...coverageOverlay.knownTelemetryExclusions],
     openGaps: [...coverageOverlay.openGaps],
     notes: [...coverageOverlay.notes],

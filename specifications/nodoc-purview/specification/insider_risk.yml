@@ -239,3 +239,465 @@ paths:
 
         '404':
           $ref: common.yml#/components/responses/NotFound
+
+  "/insiderrisk/insiderrisk/api/v1.0/{tenantId}/InsiderRiskTenantActivityAnalytics('{activityCategory}')":
+    get:
+      operationId: getInsiderRiskTenantActivityAnalytics
+      summary: Get tenant activity analytics
+      description: >-
+        Retrieve tenant-level Insider Risk activity analytics for an observed
+        activity category and query date.
+      tags: [InsiderRisk]
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          description: The unique identifier (GUID) of the tenant.
+          schema:
+            type: string
+            format: uuid
+        - name: activityCategory
+          in: path
+          required: true
+          description: Activity analytics category.
+          schema:
+            type: string
+            enum: [Exfiltration]
+        - name: queryDate
+          in: query
+          required: true
+          description: Date used to select the analytics snapshot.
+          schema:
+            type: string
+            format: date
+      x-nodoc-operation-context:
+        surface: Insider Risk Management overview
+        authProfile: purview-portal-session
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Observed in successful bounded normal-UI Insider Risk traffic.
+      responses:
+        '200':
+          description: Tenant activity analytics observed in normal portal traffic.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  "/insiderrisk/insiderrisk/api/v1.0/{tenantId}/InsiderRiskTenantPolicyAnalytics('{policyAnalyticsType}')":
+    get:
+      operationId: getInsiderRiskTenantPolicyAnalytics
+      summary: Get tenant policy analytics
+      description: >-
+        Retrieve tenant-level Insider Risk policy analytics for an observed
+        analytics type and query date.
+      tags: [InsiderRisk]
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          description: The unique identifier (GUID) of the tenant.
+          schema:
+            type: string
+            format: uuid
+        - name: policyAnalyticsType
+          in: path
+          required: true
+          description: Policy analytics type.
+          schema:
+            type: string
+            enum: [DataLeaks, DataTheft]
+        - name: queryDate
+          in: query
+          required: true
+          description: Date used to select the analytics snapshot.
+          schema:
+            type: string
+            format: date
+      x-nodoc-operation-context:
+        surface: Insider Risk Management overview
+        authProfile: purview-portal-session
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Observed for the DataLeaks and DataTheft analytics types in bounded normal-UI traffic.
+      responses:
+        '200':
+          description: Tenant policy analytics observed in normal portal traffic.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /insiderrisk/insiderrisk/api/v1.0/{tenantId}/IptIndicatorProfilesWithCounts:
+    get:
+      operationId: listInsiderRiskIndicatorProfilesWithCounts
+      summary: List indicator profiles with counts
+      description: >-
+        Retrieve Insider Risk indicator profiles and their aggregate counts for
+        the requested facet and policy scope.
+      tags: [InsiderRisk]
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          description: The unique identifier (GUID) of the tenant.
+          schema:
+            type: string
+            format: uuid
+        - name: aggregateFacetType
+          in: query
+          required: true
+          description: Aggregate facet applied to the indicator counts.
+          schema:
+            type: string
+        - name: policyScope
+          in: query
+          required: true
+          description: Policy scope applied to the indicator counts.
+          schema:
+            type: string
+      x-nodoc-operation-context:
+        surface: Insider Risk Management overview
+        authProfile: purview-portal-session
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Observed in successful bounded normal-UI Insider Risk traffic.
+      responses:
+        '200':
+          description: Indicator profile counts observed in normal portal traffic.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /insiderrisk/insiderrisk/api/v1.0/{tenantId}/OnboardingChecklist:
+    get:
+      operationId: getInsiderRiskOnboardingChecklist
+      summary: Get onboarding checklist
+      description: >-
+        Retrieve the current Insider Risk onboarding checklist and task statuses.
+      tags: [InsiderRisk]
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          description: The unique identifier (GUID) of the tenant.
+          schema:
+            type: string
+            format: uuid
+      x-nodoc-operation-context:
+        surface: Insider Risk Management overview
+        authProfile: purview-portal-session
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - The GET was observed in successful bounded normal-UI traffic.
+              - The state-changing POST on this path is intentionally not modeled.
+      responses:
+        '200':
+          description: Onboarding checklist observed in normal portal traffic.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /insiderrisk/insiderrisk/api/v1.0/{tenantId}/OnboardingChecklistCheckTaskStatus:
+    get:
+      operationId: getInsiderRiskOnboardingTaskStatus
+      summary: Get onboarding task status
+      description: >-
+        Retrieve prerequisite status flags used by the Insider Risk onboarding
+        checklist.
+      tags: [InsiderRisk]
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          description: The unique identifier (GUID) of the tenant.
+          schema:
+            type: string
+            format: uuid
+      x-nodoc-operation-context:
+        surface: Insider Risk Management overview
+        authProfile: purview-portal-session
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Observed in successful bounded normal-UI Insider Risk traffic.
+      responses:
+        '200':
+          description: Onboarding prerequisite status observed in normal portal traffic.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /insiderrisk/insiderrisk/api/v1.0/{tenantId}/overview/activitySensitiveLabeledAggregate:
+    get:
+      operationId: getInsiderRiskSensitiveLabelActivityAggregate
+      summary: Get sensitive label activity aggregate
+      description: >-
+        Retrieve the sensitive-label activity aggregate displayed on the Insider
+        Risk overview.
+      tags: [InsiderRisk]
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          description: The unique identifier (GUID) of the tenant.
+          schema:
+            type: string
+            format: uuid
+      x-nodoc-operation-context:
+        surface: Insider Risk Management overview
+        authProfile: purview-portal-session
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Observed in successful bounded normal-UI Insider Risk traffic.
+      responses:
+        '200':
+          description: Sensitive-label activity aggregate observed in normal portal traffic.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /insiderrisk/insiderrisk/api/v1.0/{tenantId}/overview/agentRiskLevelAggregate:
+    get:
+      operationId: getInsiderRiskAgentRiskLevelAggregate
+      summary: Get agent risk level aggregate
+      description: >-
+        Retrieve the agent risk-level aggregate displayed on the Insider Risk
+        overview.
+      tags: [InsiderRisk]
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          description: The unique identifier (GUID) of the tenant.
+          schema:
+            type: string
+            format: uuid
+      x-nodoc-operation-context:
+        surface: Insider Risk Management overview
+        authProfile: purview-portal-session
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Observed in successful bounded normal-UI Insider Risk traffic.
+      responses:
+        '200':
+          description: Agent risk-level aggregate observed in normal portal traffic.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /insiderrisk/insiderrisk/api/v1.0/{tenantId}/PolicyMetrics:
+    get:
+      operationId: listInsiderRiskPolicyMetrics
+      summary: List policy metrics
+      description: >-
+        Retrieve Insider Risk policy metrics used by the overview and policy
+        health experiences.
+      tags: [InsiderRisk]
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          description: The unique identifier (GUID) of the tenant.
+          schema:
+            type: string
+            format: uuid
+        - name: useNewValidations
+          in: query
+          required: false
+          description: Request the newer policy validation result shape.
+          schema:
+            type: boolean
+        - name: useGroupByQuery
+          in: query
+          required: false
+          description: Request grouped policy metric evaluation.
+          schema:
+            type: boolean
+        - name: useNewTPHFlow
+          in: query
+          required: false
+          description: Request the newer policy health flow.
+          schema:
+            type: boolean
+        - name: actorType
+          in: query
+          required: false
+          description: Actor type used to narrow returned policy metrics.
+          schema:
+            type: string
+        - name: $orderby
+          in: query
+          required: false
+          description: OData expression used to order policy metrics.
+          schema:
+            type: string
+        - name: $top
+          in: query
+          required: false
+          description: Maximum number of policy metrics to return.
+          schema:
+            type: integer
+      x-nodoc-operation-context:
+        surface: Insider Risk Management overview
+        authProfile: purview-portal-session
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Observed in successful bounded normal-UI Insider Risk traffic.
+      responses:
+        '200':
+          description: Policy metrics observed in normal portal traffic.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /insiderrisk/insiderrisk/api/v1.0/{tenantId}/UserReports:
+    get:
+      operationId: listInsiderRiskUserReports
+      summary: List user reports
+      description: Retrieve user reports available to Insider Risk Management.
+      tags: [InsiderRisk]
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          description: The unique identifier (GUID) of the tenant.
+          schema:
+            type: string
+            format: uuid
+        - name: $orderby
+          in: query
+          required: false
+          description: OData expression used to order user reports.
+          schema:
+            type: string
+        - name: $top
+          in: query
+          required: false
+          description: Maximum number of user reports to return.
+          schema:
+            type: integer
+      x-nodoc-operation-context:
+        surface: Insider Risk Management reports
+        authProfile: purview-portal-session
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Observed in bounded normal-UI traffic; the current session received an authorization denial.
+      responses:
+        '200':
+          description: Successful user report response.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /insiderrisk/insiderrisk/api/v1.0/{tenantId}/IptAllIndicatorsMergedProfile:
+    post:
+      operationId: calculateInsiderRiskMergedIndicatorProfile
+      summary: Calculate merged indicator profile
+      description: >-
+        Calculate a merged Insider Risk indicator profile for supplied thresholds.
+        The portal carries this bounded read-only calculation as POST.
+      tags: [InsiderRisk]
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          description: The unique identifier (GUID) of the tenant.
+          schema:
+            type: string
+            format: uuid
+        - name: customError
+          in: query
+          required: false
+          description: Request the custom error-handling behavior used by the portal.
+          schema:
+            type: boolean
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - aggregateFacetType
+                - policyScope
+                - indicatorThresholdInput
+              properties:
+                aggregateFacetType:
+                  type: string
+                policyScope:
+                  type: string
+                indicatorThresholdInput:
+                  type: array
+                  items:
+                    type: object
+                    required: [indicator, threshold]
+                    properties:
+                      indicator:
+                        type: string
+                      threshold:
+                        type: integer
+      x-nodoc-operation-context:
+        surface: Insider Risk Management overview
+        authProfile: purview-portal-session
+        requestShapes:
+          - name: merged-indicator-profile-calculation
+            contentType: application/json
+            bodyKind: object
+            notes: Read-only aggregate calculation over supplied indicator thresholds.
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Observed as a successful bounded normal-UI calculation.
+      responses:
+        '200':
+          description: Merged indicator profile calculation observed in normal portal traffic.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound

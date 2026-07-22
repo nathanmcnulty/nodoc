@@ -911,3 +911,43 @@ paths:
 
         '404':
           $ref: common.yml#/components/responses/NotFound
+
+  /di/Find/InsiderRiskTag:
+    get:
+      operationId: getInsiderRiskTags
+      summary: Get insider risk tags
+      description: >-
+        Retrieve insider risk tag definitions used by the Insider Risk
+        Management overview experience.
+      tags: [InsiderRisk]
+      parameters:
+        - name: TenantId
+          in: query
+          required: true
+          description: The unique identifier (GUID) of the tenant.
+          schema:
+            type: string
+            format: uuid
+        - name: filter
+          in: query
+          required: false
+          description: Filter expression used to select insider risk tags.
+          schema:
+            type: string
+      x-nodoc-operation-context:
+        surface: Insider Risk Management overview
+        authProfile: purview-portal-session
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Observed in successful bounded normal-UI Insider Risk traffic.
+      responses:
+        '200':
+          description: Insider risk tag response observed in normal portal traffic.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound

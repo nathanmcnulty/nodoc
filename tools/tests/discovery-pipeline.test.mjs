@@ -6,8 +6,36 @@ import path from "node:path";
 import test from "node:test";
 import { promisify } from "node:util";
 
+import { getCandidateSuppressions } from "../portal-discovery-metadata.mjs";
+
 const execFileAsync = promisify(execFile);
 const repoRoot = path.resolve(import.meta.dirname, "..", "..");
+
+test("Purview unsafe POST candidates are suppressed from future queues", () => {
+  assert.deepEqual(
+    getCandidateSuppressions("Purview")
+      .filter(({ path }) => (
+        path.includes("/IRMEasyPolicy")
+        || path.includes("/OnboardingChecklist")
+        || path.includes("/$batch")
+      ))
+      .map(({ method, path }) => ({ method, path })),
+    [
+      {
+        method: "POST",
+        path: "/apiproxy/insiderrisk/insiderrisk/api/v1.0/{id}/IRMEasyPolicy",
+      },
+      {
+        method: "POST",
+        path: "/apiproxy/insiderrisk/insiderrisk/api/v1.0/{id}/OnboardingChecklist",
+      },
+      {
+        method: "POST",
+        path: "/apiproxy/msgraph/v1.0/$batch",
+      },
+    ],
+  );
+});
 
 test("mined methods flow into the crawl candidate queue", async () => {
   const artifactDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-discovery-"));
