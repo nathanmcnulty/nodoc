@@ -65,3 +65,14 @@ test("confirmed required probes count as successful actions", () => {
     type: "probe-get",
   }), true);
 });
+
+test("initial navigation accepts a same-origin canonical landing route", () => {
+  assert.equal(actionResultSucceeded({
+    allowCanonicalRedirect: true,
+    result: {
+      resolvedUrl: "https://security.microsoft.com",
+      url: "https://security.microsoft.com/homepage",
+    },
+    type: "navigate",
+  }), true);
+});

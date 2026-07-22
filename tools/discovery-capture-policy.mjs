@@ -27,7 +27,8 @@ export function actionResultSucceeded(actionResult) {
     try {
       const actual = new URL(result.url);
       const expected = new URL(result.resolvedUrl ?? actionResult.value);
-      return actual.origin === expected.origin && actual.pathname === expected.pathname;
+      return actual.origin === expected.origin
+        && (actionResult.allowCanonicalRedirect || actual.pathname === expected.pathname);
     } catch {
       return false;
     }

@@ -25,6 +25,7 @@ const defaultSeedRouteLimit = 8;
 const defaultSettleMs = 8000;
 const defaultPostActionSettleMs = 6000;
 const defaultEvaluateTimeoutMs = 10000;
+const defaultCdpCommandTimeoutMs = 20000;
 let runtimeEvaluateTimeoutMs = defaultEvaluateTimeoutMs;
 
 function stripBom(value) {
@@ -1201,7 +1202,8 @@ class CdpClient {
   }
 
   rejectPending(error) {
-    for (const { reject } of this.pending.values()) {
+    for (const { reject, timeout } of this.pending.values()) {
+      clearTimeout(timeout);
       reject(error);
     }
 
@@ -1259,6 +1261,7 @@ class CdpClient {
         }
 
         this.pending.delete(key);
+        clearTimeout(entry.timeout);
         if (message.error) {
           entry.reject(new Error(message.error.message));
           return;
@@ -1301,7 +1304,16 @@ class CdpClient {
 
     const key = `${sessionId ?? ""}:${id}`;
     const response = new Promise((resolve, reject) => {
-      this.pending.set(key, { method, reject, resolve, sessionId });
+      const timeout = setTimeout(() => {
+        if (!this.pending.delete(key)) {
+          return;
+        }
+        reject(new Error(
+          `CDP command ${method} timed out after ${defaultCdpCommandTimeoutMs} ms` +
+          `${sessionId ? ` in session ${sessionId}` : ""}.`,
+        ));
+      }, defaultCdpCommandTimeoutMs);
+      this.pending.set(key, { method, reject, resolve, sessionId, timeout });
     });
 
     this.socket.send(payload);
@@ -2774,6 +2786,7 @@ async function main() {
     activePageLabel = args.label ?? "seed-00";
     const initialNavigation = await navigateRoot(args.url);
     actionResults.push({
+      allowCanonicalRedirect: true,
       page: activePageLabel,
       required: true,
       result: initialNavigation,
