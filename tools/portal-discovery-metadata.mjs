@@ -398,7 +398,7 @@ export const coverageOverlayByTitle = {
     ],
     notes: [
       "A bounded normal-UI pass promoted all four in-scope confirmed GET candidates and did not promote any bundle-only candidate.",
-      "The initial adjacent review contained 68 confirmed items: four telemetry observations are covered by three suppression routes, while 26 static localization or shared shell assets remain scope-review noise rather than target-spec operations.",
+      "The initial adjacent review contained 68 confirmed items: 26 static localization or shared shell assets, four telemetry observations covered by three suppression routes, nine tenant-island reads, two ECS routes matching the Security Copilot server family, and 27 other shared cross-spec candidates.",
     ],
   },
   Purview: {
