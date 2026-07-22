@@ -2418,6 +2418,25 @@
     },
     "operations": [
       {
+        "operationId": "BusinessAppPlatform_get_tenantIsolationPolicy",
+        "summary": "GET /providers/PowerPlatform.Governance/v1/tenants/{tenantId}/tenantIsolationPolicy",
+        "method": "GET",
+        "path": "/providers/PowerPlatform.Governance/v1/tenants/{tenantId}/tenantIsolationPolicy",
+        "operationContext": {
+          "surface": "Security > Overview",
+          "headerProfile": "power-platform-service-bearer",
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Observed as a read-only request while loading the Power Platform security overview."
+              ]
+            }
+          ]
+        }
+      },
+      {
         "operationId": "Licensing_post_v0_1_alpha_tenants_tenantId_BillingPolicies_getEnvironmentMap",
         "summary": "POST /v0.1-alpha/tenants/{tenantId}/BillingPolicies/getEnvironmentMap",
         "method": "POST",
@@ -2445,6 +2464,65 @@
               "confidence": "high",
               "notes": [
                 "Verified from authenticated Power Platform billing license overview and environment-list pages."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "Licensing_get_v0_1_alpha_tenants_tenantId_entitlements_MCSMessages_snapshot_resources",
+        "summary": "GET /v0.1-alpha/tenants/{tenantId}/entitlements/MCSMessages/snapshot/resources",
+        "method": "GET",
+        "path": "/v0.1-alpha/tenants/{tenantId}/entitlements/MCSMessages/snapshot/resources",
+        "operationContext": {
+          "surface": "Billing > Licenses",
+          "headerProfile": "power-platform-service-bearer",
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Observed as a read-only request while loading the licensing overview.",
+                "The captured tenant received a not-found response, so no success payload shape is asserted."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "Licensing_get_v2_0_tenants_tenantId_entitlements_MCSMessages_resources",
+        "summary": "GET /v2.0/tenants/{tenantId}/entitlements/MCSMessages/resources",
+        "method": "GET",
+        "path": "/v2.0/tenants/{tenantId}/entitlements/MCSMessages/resources",
+        "operationContext": {
+          "surface": "Billing > Licenses",
+          "headerProfile": "power-platform-service-bearer",
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Observed as a successful read-only request while loading the licensing overview.",
+                "The portal requested the related users field through includeFields; other legal values were not established."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "Licensing_get_v2_0_tenants_tenantId_entitlements_MCSMessages_users",
+        "summary": "GET /v2.0/tenants/{tenantId}/entitlements/MCSMessages/users",
+        "method": "GET",
+        "path": "/v2.0/tenants/{tenantId}/entitlements/MCSMessages/users",
+        "operationContext": {
+          "surface": "Billing > Licenses",
+          "headerProfile": "power-platform-service-bearer",
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Observed as a successful read-only request while loading the licensing overview."
               ]
             }
           ]

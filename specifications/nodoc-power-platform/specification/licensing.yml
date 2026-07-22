@@ -502,6 +502,52 @@ paths:
       responses:
         '200':
           description: "200 captured response"
+  /v0.1-alpha/tenants/{tenantId}/entitlements/MCSMessages/snapshot/resources:
+    servers:
+      - url: "https://licensing.powerplatform.microsoft.com"
+        description: "Power Platform licensing API"
+    get:
+      operationId: Licensing_get_v0_1_alpha_tenants_tenantId_entitlements_MCSMessages_snapshot_resources
+      summary: "GET /v0.1-alpha/tenants/{tenantId}/entitlements/MCSMessages/snapshot/resources"
+      description: Retrieve the legacy resource-level Copilot Studio message entitlement snapshot for a date range.
+      x-nodoc-live-capture:
+        source: "authenticated Power Platform admin center"
+        browsedPages:
+          - "Power Platform admin center: /billing/licenses/powerApps/overview"
+      tags:
+        - Licensing
+      x-nodoc-operation-context:
+        surface: Billing > Licenses
+        headerProfile: power-platform-service-bearer
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Observed as a read-only request while loading the licensing overview.
+              - The captured tenant received a not-found response, so no success payload shape is asserted.
+      parameters:
+        - name: "tenantId"
+          in: path
+          required: true
+          description: The tenant identifier.
+          schema:
+            type: string
+            format: uuid
+        - name: "fromDate"
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: "toDate"
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+      responses:
+        '404':
+          description: Not-found response observed in normal portal traffic.
   /v0.1-alpha/tenants/{tenantId}/entitlements/MCSMessages/trends:
     servers:
       - url: "https://licensing.powerplatform.microsoft.com"
@@ -1574,6 +1620,109 @@ paths:
       responses:
         '404':
           description: "404 captured response"
+  /v2.0/tenants/{tenantId}/entitlements/MCSMessages/resources:
+    servers:
+      - url: "https://licensing.powerplatform.microsoft.com"
+        description: "Power Platform licensing API"
+    get:
+      operationId: Licensing_get_v2_0_tenants_tenantId_entitlements_MCSMessages_resources
+      summary: "GET /v2.0/tenants/{tenantId}/entitlements/MCSMessages/resources"
+      description: Retrieve resource-level Copilot Studio message entitlement usage for a date range.
+      x-nodoc-live-capture:
+        source: "authenticated Power Platform admin center"
+        browsedPages:
+          - "Power Platform admin center: /billing/licenses/powerApps/overview"
+      tags:
+        - Licensing
+      x-nodoc-operation-context:
+        surface: Billing > Licenses
+        headerProfile: power-platform-service-bearer
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Observed as a successful read-only request while loading the licensing overview.
+              - The portal requested the related users field through includeFields; other legal values were not established.
+      parameters:
+        - name: "tenantId"
+          in: path
+          required: true
+          description: The tenant identifier.
+          schema:
+            type: string
+            format: uuid
+        - name: "fromDate"
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: "toDate"
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: "pageSize"
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+        - name: "includeFields"
+          in: query
+          required: false
+          description: Related fields to include with each resource; `users` was observed in portal traffic.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Resource entitlement usage observed in normal portal traffic; exact response schema pending.
+  /v2.0/tenants/{tenantId}/entitlements/MCSMessages/users:
+    servers:
+      - url: "https://licensing.powerplatform.microsoft.com"
+        description: "Power Platform licensing API"
+    get:
+      operationId: Licensing_get_v2_0_tenants_tenantId_entitlements_MCSMessages_users
+      summary: "GET /v2.0/tenants/{tenantId}/entitlements/MCSMessages/users"
+      description: Retrieve user-level Copilot Studio message entitlement usage for a date range.
+      x-nodoc-live-capture:
+        source: "authenticated Power Platform admin center"
+        browsedPages:
+          - "Power Platform admin center: /billing/licenses/powerApps/overview"
+      tags:
+        - Licensing
+      x-nodoc-operation-context:
+        surface: Billing > Licenses
+        headerProfile: power-platform-service-bearer
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Observed as a successful read-only request while loading the licensing overview.
+      parameters:
+        - name: "tenantId"
+          in: path
+          required: true
+          description: The tenant identifier.
+          schema:
+            type: string
+            format: uuid
+        - name: "fromDate"
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: "toDate"
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: User entitlement usage observed in normal portal traffic; exact response schema pending.
   /v2.0/tenants/{tenantId}/entitlements/MCSSessions:
     servers:
       - url: "https://licensing.powerplatform.microsoft.com"

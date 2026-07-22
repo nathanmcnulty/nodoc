@@ -756,7 +756,9 @@
       "https://admin.powerplatform.microsoft.com"
     ],
     "observedHosts": [
-      "admin.powerplatform.microsoft.com"
+      "admin.powerplatform.microsoft.com",
+      "api.bap.microsoft.com",
+      "licensing.powerplatform.microsoft.com"
     ],
     "pathPrefixes": [
       "/api/",
@@ -769,17 +771,59 @@
       "/v1.0/",
       "/v2.0/"
     ],
-    "operationCount": 244,
-    "lastSuccessfulPassDepth": "diff-first",
+    "operationCount": 248,
+    "lastSuccessfulPassDepth": "bounded-normal-ui-diff",
     "captureRecipes": [
       "tools/capture-recipes/power-platform-deep.json",
       "tools/capture-recipes/power-platform-seeded-replay.json"
     ],
-    "promotedDiscoveries": [],
-    "knownTelemetryExclusions": [],
-    "openGaps": [],
+    "promotedDiscoveries": [
+      {
+        "method": "GET",
+        "note": "Promoted from bounded normal-UI Power Platform security traffic with the tenant identifier parameterized.",
+        "path": "/providers/PowerPlatform.Governance/v1/tenants/{tenantId}/tenantIsolationPolicy"
+      },
+      {
+        "method": "GET",
+        "note": "Promoted as a read-only legacy Copilot Studio licensing lookup; the captured tenant returned not found.",
+        "path": "/v0.1-alpha/tenants/{tenantId}/entitlements/MCSMessages/snapshot/resources"
+      },
+      {
+        "method": "GET",
+        "note": "Promoted from successful bounded normal-UI Copilot Studio licensing traffic.",
+        "path": "/v2.0/tenants/{tenantId}/entitlements/MCSMessages/resources"
+      },
+      {
+        "method": "GET",
+        "note": "Promoted from successful bounded normal-UI Copilot Studio licensing traffic.",
+        "path": "/v2.0/tenants/{tenantId}/entitlements/MCSMessages/users"
+      }
+    ],
+    "knownTelemetryExclusions": [
+      {
+        "method": "POST",
+        "note": "Shared browser telemetry collector observed in portal traffic; intentionally excluded from API documentation and probe planning.",
+        "path": "/Collector/3.0"
+      },
+      {
+        "method": "POST",
+        "note": "Shared browser telemetry collector observed in portal traffic; intentionally excluded from API documentation and probe planning.",
+        "path": "/OneCollector/1.0"
+      },
+      {
+        "method": "POST",
+        "note": "Shared admin-shell client logging endpoint observed on two hosts; intentionally excluded from API documentation and probe planning.",
+        "path": "/api/instrument/logclient"
+      }
+    ],
+    "openGaps": [
+      "Nine confirmed tenant-island API reads remain adjacent scope-review evidence until their effective host templates are assigned explicitly.",
+      "Two ECS routes match the Security Copilot server family and remain for explicit cross-spec assignment.",
+      "Twenty-seven other shared Microsoft 365, Graph, Azure management, authentication, and Defender-family operations remain for a later cross-spec assignment pass."
+    ],
     "notes": [
-      "Recent discovery already covered many Power Platform host families, so future passes should stay gap-driven."
+      "A bounded normal-UI pass promoted all four in-scope confirmed GET candidates and did not promote any bundle-only candidate.",
+      "The initial adjacent review contained 68 confirmed items: 26 static localization or shared shell assets, four telemetry observations covered by three suppression routes, nine tenant-island reads, two ECS routes matching the Security Copilot server family, and 27 other shared cross-spec candidates."
     ]
   },
   {
