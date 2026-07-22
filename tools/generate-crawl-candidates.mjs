@@ -845,23 +845,33 @@ function hostTemplateToRegex(hostTemplate) {
 }
 
 function buildSpecContext(specRecord) {
+  const scopeServerUrls = Array.isArray(specRecord.scopeServerUrls)
+    ? specRecord.scopeServerUrls
+    : specRecord.serverUrls;
   const hostTemplates = uniqueSorted(
-    specRecord.serverUrls
+    scopeServerUrls
       .map((serverUrl) => extractServerHostTemplate(serverUrl))
       .filter(Boolean),
   );
   const serverPathPrefixes = uniqueSorted(
-    specRecord.serverUrls
+    scopeServerUrls
       .map((serverUrl) => extractServerPath(serverUrl))
       .filter(Boolean),
   );
   const templateOperations = [];
 
   for (const operation of specRecord.operations) {
+    const operationServerPathPrefixes = uniqueSorted(
+      (Array.isArray(operation.serverUrls)
+        ? operation.serverUrls
+        : specRecord.serverUrls)
+        .map((serverUrl) => extractServerPath(serverUrl))
+        .filter(Boolean),
+    );
     const expandedPaths = uniqueSorted(
       [
         normalizeRoutePath(operation.path),
-        ...serverPathPrefixes.map((serverPath) => normalizeRoutePath(
+        ...operationServerPathPrefixes.map((serverPath) => normalizeRoutePath(
           joinRoutePath(serverPath, operation.path),
         )),
       ].filter(Boolean),

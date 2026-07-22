@@ -217,11 +217,44 @@ function hasExamples(content) {
   });
 }
 
+function getServerUrls(servers) {
+  return (Array.isArray(servers) ? servers : [])
+    .map((server) => server?.url)
+    .filter((url) => typeof url === "string" && url.trim());
+}
+
+export function getEffectiveServerUrls(specification, pathItem, operation) {
+  if (Array.isArray(operation?.servers)) {
+    return getServerUrls(operation.servers);
+  }
+  if (Array.isArray(pathItem?.servers)) {
+    return getServerUrls(pathItem.servers);
+  }
+  return getServerUrls(specification.servers);
+}
+
+export function getScopeServerUrls(specification) {
+  return uniqueOrdered([
+    ...getServerUrls(specification.servers),
+    ...Object.values(specification.paths ?? {}).flatMap((pathItem) => [
+      ...getServerUrls(pathItem?.servers),
+      ...Object.entries(pathItem ?? {})
+        .filter(([method, operation]) => (
+          httpMethods.has(method)
+          && operation
+          && typeof operation === "object"
+        ))
+        .flatMap(([, operation]) => getServerUrls(operation.servers)),
+    ]),
+  ]);
+}
+
 function getOperationEntries(specification) {
   return Object.entries(specification.paths ?? {}).flatMap(([pathname, pathItem]) => (
     Object.entries(pathItem ?? {})
       .filter(([method, operation]) => httpMethods.has(method) && operation && typeof operation === "object")
       .map(([method, operation]) => ({
+        effectiveServerUrls: getEffectiveServerUrls(specification, pathItem, operation),
         method: method.toUpperCase(),
         operation,
         path: pathname,
@@ -1385,8 +1418,10 @@ export async function buildSpecRouteInventory() {
       serverUrls: (bundledSpecification.servers ?? [])
         .map((server) => server?.url)
         .filter((url) => typeof url === "string"),
+      scopeServerUrls: getScopeServerUrls(bundledSpecification),
       pathPrefixes: getPathPrefixes(bundledSpecification),
       operations: getOperationEntries(bundledSpecification).map((entry) => ({
+        serverUrls: entry.effectiveServerUrls,
         method: entry.method,
         path: entry.path,
         operationId:

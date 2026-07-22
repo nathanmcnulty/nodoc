@@ -6,6 +6,11 @@ import path from "node:path";
 import test from "node:test";
 import { promisify } from "node:util";
 
+import {
+  getEffectiveServerUrls,
+  getScopeServerUrls,
+} from "../spec-quality-lib.mjs";
+
 const execFileAsync = promisify(execFile);
 const repoRoot = path.resolve(import.meta.dirname, "..", "..");
 
@@ -36,6 +41,61 @@ async function runAnalyze(portal, artifactDir) {
     runState: JSON.parse(runState),
   };
 }
+
+test("effective server scope honors operation, path, and root precedence", () => {
+  const rootServers = [{ url: "https://root.example.test" }];
+  const pathServers = [{ url: "https://path.example.test" }];
+  const operationServers = [{
+    url: "https://{organizationHost}.crm.dynamics.com",
+  }];
+  const specification = {
+    servers: rootServers,
+    paths: {
+      "/operation": {
+        get: {
+          servers: operationServers,
+        },
+      },
+      "/path": {
+        servers: pathServers,
+        get: {},
+      },
+      "/root": {
+        get: {},
+      },
+    },
+  };
+
+  assert.deepEqual(
+    getEffectiveServerUrls(
+      specification,
+      specification.paths["/operation"],
+      specification.paths["/operation"].get,
+    ),
+    ["https://{organizationHost}.crm.dynamics.com"],
+  );
+  assert.deepEqual(
+    getEffectiveServerUrls(
+      specification,
+      specification.paths["/path"],
+      specification.paths["/path"].get,
+    ),
+    ["https://path.example.test"],
+  );
+  assert.deepEqual(
+    getEffectiveServerUrls(
+      specification,
+      specification.paths["/root"],
+      specification.paths["/root"].get,
+    ),
+    ["https://root.example.test"],
+  );
+  assert.deepEqual(getScopeServerUrls(specification), [
+    "https://root.example.test",
+    "https://{organizationHost}.crm.dynamics.com",
+    "https://path.example.test",
+  ]);
+});
 
 test("Purview unsafe POST observations are suppressed from generated queues", async () => {
   const artifactDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-purview-suppressions-"));
@@ -199,6 +259,7 @@ test("adjacent Power Platform-like evidence is tenant-safe and never promotion-a
   const artifactDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-power-platform-scope-"));
   const tenantId = "5e2f94d1-730e-46f3-b567-e79c3946ab11";
   const tenantHostLabel = "private-tenant-7f91";
+  const organizationHostLabel = "private-org-8c2f99d4";
   const opaqueTenantId = "NmYi_9r27n27";
   const tenantPage = "private-tenant-scope-page";
   const privateBody = "private-tenant-response-body";
@@ -224,6 +285,26 @@ test("adjacent Power Platform-like evidence is tenant-safe and never promotion-a
           seenOnPages: [tenantPage],
           url:
             `https://${tenantHostLabel}.api.crm.dynamics.com/api/data/v9.2/organizations/${tenantId}/nodocScopeReviewPost`,
+        },
+        {
+          method: "GET",
+          path: "/api/data/v9.0/applicationusers",
+          seenOnPages: [tenantPage],
+          url:
+            `https://${organizationHostLabel}.crm.dynamics.com/api/data/v9.0/applicationusers`,
+        },
+        {
+          method: "GET",
+          path: "/outside/nodocDynamicsScopeReview",
+          seenOnPages: [tenantPage],
+          url:
+            `https://${organizationHostLabel}.crm.dynamics.com/outside/nodocDynamicsScopeReview`,
+        },
+        {
+          method: "GET",
+          path: "/api/v1/oauth2/aad_access_token",
+          seenOnPages: [tenantPage],
+          url: "https://api.engage.cloud.microsoft/api/v1/oauth2/aad_access_token",
         },
       ]),
       writeJson(path.join(artifactDir, "probe-results.json"), [
@@ -261,7 +342,7 @@ test("adjacent Power Platform-like evidence is tenant-safe and never promotion-a
 
     assert.deepEqual(candidateHandoff.counts, {
       adjacentBundleOnly: 1,
-      adjacentConfirmedRead: 1,
+      adjacentConfirmedRead: 3,
       adjacentConfirmedSafetyReview: 1,
       adjacentSuccessfullyProbed: 1,
       confirmedRead: 0,
@@ -272,7 +353,7 @@ test("adjacent Power Platform-like evidence is tenant-safe and never promotion-a
     });
     assert.deepEqual(candidateQueue.summary.scopeReviewCounts, {
       bundleOnly: 1,
-      confirmedRead: 1,
+      confirmedRead: 3,
       confirmedSafetyReview: 1,
       successfullyProbed: 1,
     });
@@ -281,18 +362,31 @@ test("adjacent Power Platform-like evidence is tenant-safe and never promotion-a
       candidateHandoff.recommendedNextAction.code,
       "review-adjacent-candidate-scope",
     );
-    assert.equal(
-      candidateHandoff.adjacentConfirmedReadCandidates[0].hostFamily,
-      "admin.cloud.microsoft",
-    );
-    assert.equal(
-      candidateHandoff.adjacentConfirmedReadCandidates[0].normalizedPath,
-      "/admin/api/nodocScopeReviewRead/{id}",
-    );
+    const adminScopeReview =
+      candidateHandoff.adjacentConfirmedReadCandidates.find(
+        ({ normalizedPath }) => (
+          normalizedPath === "/admin/api/nodocScopeReviewRead/{id}"
+        ),
+      );
+    assert.equal(adminScopeReview?.hostFamily, "admin.cloud.microsoft");
     assert.deepEqual(
-      candidateHandoff.adjacentConfirmedReadCandidates[0].matchingSpecIds,
+      adminScopeReview?.matchingSpecIds,
       ["m365-admin"],
     );
+    const dynamicsScopeReview =
+      candidateHandoff.adjacentConfirmedReadCandidates.find(
+        ({ normalizedPath }) => normalizedPath === "/outside/nodocDynamicsScopeReview",
+      );
+    assert.equal(
+      dynamicsScopeReview?.hostFamily,
+      "{organizationhost}.crm.dynamics.com",
+    );
+    const vivaScopeReview =
+      candidateHandoff.adjacentConfirmedReadCandidates.find(
+        ({ normalizedPath }) => normalizedPath === "/api/v1/oauth2/aad_access_token",
+      );
+    assert.equal(vivaScopeReview?.hostFamily, "api.engage.cloud.microsoft");
+    assert.deepEqual(vivaScopeReview?.matchingSpecIds, ["viva-engage"]);
     assert.equal(
       candidateHandoff.adjacentConfirmedSafetyReviewCandidates[0].hostFamily,
       "{tenant}.api.crm.dynamics.com",
@@ -317,6 +411,7 @@ test("adjacent Power Platform-like evidence is tenant-safe and never promotion-a
     for (const forbidden of [
       tenantId,
       tenantHostLabel,
+      organizationHostLabel,
       opaqueTenantId,
       tenantPage,
       privateBody,
@@ -330,6 +425,30 @@ test("adjacent Power Platform-like evidence is tenant-safe and never promotion-a
       assert.equal(candidateHandoffText.includes(forbidden), false);
       assert.equal(scopeReviewText.includes(forbidden), false);
     }
+
+    const { stdout: documentedStdout } = await execFileAsync(process.execPath, [
+      path.join(repoRoot, "tools", "generate-crawl-candidates.mjs"),
+      "--spec",
+      "power-platform",
+      "--artifacts",
+      artifactDir,
+      "--include-documented",
+      "--json",
+    ], { cwd: repoRoot });
+    const documentedQueue = JSON.parse(documentedStdout);
+    const dynamicsDocumented = documentedQueue.candidates.find(
+      ({ method, normalizedPath }) => (
+        method === "GET"
+        && normalizedPath === "/api/data/v9.0/applicationusers"
+      ),
+    );
+    assert.equal(dynamicsDocumented?.documentationStatus, "documented");
+    assert.equal(
+      documentedQueue.scopeReviewCandidates.some(
+        ({ normalizedPath }) => normalizedPath === "/api/data/v9.0/applicationusers",
+      ),
+      false,
+    );
 
     const { stdout } = await execFileAsync(process.execPath, [
       path.join(repoRoot, "tools", "generate-crawl-candidates.mjs"),
