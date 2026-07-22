@@ -1,4 +1,31 @@
 paths:
+  /admin/api/Users/getunlicenseduserscount:
+    get:
+      summary: Get unlicensed user count
+      description: Retrieve the number of users without assigned licenses.
+      operationId: UsersGroups.GetUnlicensedUsersCount
+      tags: [UsersGroups]
+      x-nodoc-operation-context:
+        surface: Users
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Observed as a successful normal-UI read during bounded portal navigation.
+      responses:
+        '200':
+          description: Unlicensed user count observed in the portal response.
+          content:
+            application/json:
+              schema:
+                type: integer
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
   /admin/api/users/getuserroles:
     post:
       summary: Get user roles
@@ -690,28 +717,54 @@ paths:
         '404':
           $ref: common.yml#/components/responses/NotFound
 
-  /admin/api/users/ListExternalGuestUsers:
+  /admin/api/Users/ListExternalGuestUsers:
     post:
       summary: List external guest users
       description: >-
         Retrieve a list of external guest users in the tenant (Users > Guest).
       operationId: UsersGroups.ListExternalGuestUsers
       tags: [UsersGroups]
+      x-nodoc-operation-context:
+        surface: Users > Guest users
+        requestShapes:
+          - name: guest-user-list
+            contentType: application/json
+            bodyKind: object
+            notes: Read-only list operation carried as POST by the portal.
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Observed as a successful normal-UI list request during bounded portal navigation.
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              description: pending
+              properties:
+                ListAction:
+                  type: integer
+                SortDirection:
+                  type: integer
+                ListContext:
+                  type: object
+                  nullable: true
+                SortPropertyName:
+                  type: string
+                SearchText:
+                  type: string
+                  nullable: true
+                SelectedView:
+                  type: string
+                SelectedViewType:
+                  type: integer
+                ServerContext:
+                  type: object
+                  nullable: true
       responses:
         '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                description: pending
+          description: Successful guest-user list response observed in normal portal traffic.
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 

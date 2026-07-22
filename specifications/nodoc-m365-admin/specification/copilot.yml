@@ -1,4 +1,79 @@
 paths:
+  /admin/api/copilot/getPreferences:
+    get:
+      summary: Get Copilot panel preferences
+      description: >-
+        Retrieve the signed-in administrator's Copilot panel open and close timestamps.
+      operationId: Copilot.GetPreferences
+      tags: [Copilot]
+      x-nodoc-operation-context:
+        surface: Copilot
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Observed as a successful normal-UI read during bounded portal navigation.
+      responses:
+        '200':
+          description: Copilot panel preferences observed in the portal response.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  LastPanelOpenTime:
+                    type: integer
+                    format: int64
+                  LastPanelCloseTime:
+                    type: integer
+                    format: int64
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/settings/company/copilotpolicy/pinApp:
+    get:
+      summary: Get Copilot app pinning eligibility
+      description: >-
+        Retrieve the current Copilot app pinning state and whether the signed-in
+        administrator can change it.
+      operationId: Copilot.GetPinAppPolicy
+      tags: [Copilot]
+      x-nodoc-operation-context:
+        surface: Copilot settings
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Observed as a successful normal-UI read during bounded portal navigation.
+      responses:
+        '200':
+          description: Copilot app pinning state observed in the portal response.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  CopilotPinningPolicyIsPinned:
+                    type: boolean
+                  IsEligibleForChangingPin:
+                    type: boolean
+                  IsGlobalReader:
+                    type: boolean
+                  IsSaveSuccess:
+                    type: boolean
+                  PinnedApps:
+                    type: object
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
   /admin/api/settings/company/copilotpolicy/pin:
     get:
       summary: Get Copilot pin policy

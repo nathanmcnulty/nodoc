@@ -1,4 +1,124 @@
 paths:
+  /fd/msgraph/v1.0/users/$count:
+    get:
+      summary: Get user count
+      description: Retrieve a filtered user count through the M365 Admin Graph proxy.
+      operationId: GraphProxy.GetUsersCount
+      tags: [GraphProxy]
+      parameters:
+        - name: $filter
+          in: query
+          description: Optional Microsoft Graph user filter.
+          schema:
+            type: string
+        - name: ConsistencyLevel
+          in: header
+          description: Consistency level required by advanced Microsoft Graph count queries.
+          schema:
+            type: string
+            default: eventual
+      x-nodoc-operation-context:
+        surface: Users
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Observed as a successful normal-UI read during bounded portal navigation.
+      responses:
+        '200':
+          description: User count observed in the portal response.
+          content:
+            text/plain:
+              schema:
+                type: integer
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /fd/msgraph/beta/deviceManagement/configurationCategories:
+    get:
+      summary: List device configuration categories
+      description: >-
+        Retrieve device-management configuration categories through the M365 Admin Graph proxy.
+      operationId: GraphProxy.ListDeviceConfigurationCategories
+      tags: [GraphProxy]
+      parameters:
+        - name: $filter
+          in: query
+          description: Microsoft Graph category filter sent by the portal.
+          schema:
+            type: string
+      x-nodoc-operation-context:
+        surface: Edge management
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Observed as successful normal-UI traffic while the Edge experience loaded.
+      responses:
+        '200':
+          description: Device configuration category collection observed in the portal response.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  '@odata.context':
+                    type: string
+                  value:
+                    type: array
+                    items:
+                      type: object
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /fd/msgraph/beta/deviceManagement/configurationSettings:
+    get:
+      summary: List device configuration settings
+      description: >-
+        Retrieve device-management configuration settings through the M365 Admin Graph proxy.
+      operationId: GraphProxy.ListDeviceConfigurationSettings
+      tags: [GraphProxy]
+      parameters:
+        - name: $count
+          in: query
+          description: Whether to include the total result count.
+          schema:
+            type: boolean
+        - name: $filter
+          in: query
+          description: Microsoft Graph settings filter sent by the portal.
+          schema:
+            type: string
+        - name: $orderby
+          in: query
+          description: Microsoft Graph ordering expression sent by the portal.
+          schema:
+            type: string
+      x-nodoc-operation-context:
+        surface: Edge management
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Observed as successful normal-UI traffic while the Edge experience loaded.
+      responses:
+        '200':
+          description: Successful device configuration settings responses observed in normal portal traffic.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
   /fd/msgraph/v1.0/subscribedSkus:
     get:
       summary: Get subscribed SKUs

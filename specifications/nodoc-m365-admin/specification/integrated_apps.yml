@@ -1,4 +1,47 @@
 paths:
+  /fd/addins/api/apps/insight:
+    get:
+      summary: Get integrated app insights
+      description: Retrieve workload-scoped insight cards for the integrated apps experience.
+      operationId: IntegratedApps.GetAppInsights
+      tags: [IntegratedApps]
+      parameters:
+        - name: workload
+          in: query
+          description: Workload selected by the integrated apps experience.
+          schema:
+            type: string
+      x-nodoc-operation-context:
+        surface: Integrated apps
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Observed as a successful normal-UI read during bounded portal navigation.
+      responses:
+        '200':
+          description: Integrated app insight wrapper observed in the portal response.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                  errorMessage:
+                    type: string
+                    nullable: true
+                  statusCode:
+                    type: string
+                  statusCodeCategory:
+                    type: string
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
   /fd/addins/api/apps:
     get:
       summary: Get integrated apps

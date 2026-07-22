@@ -1,4 +1,40 @@
 paths:
+  /admin/api/Domains/Summary:
+    get:
+      summary: Get domain summary
+      description: >-
+        Retrieve aggregate domain counts and health-state totals for the Domains experience.
+      operationId: Domains.GetSummary
+      tags: [Domains]
+      x-nodoc-operation-context:
+        surface: Domains
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Observed as a successful normal-UI read during bounded portal navigation.
+      responses:
+        '200':
+          description: Domain summary wrapper observed in the portal response.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Succeeded:
+                    type: boolean
+                  Message:
+                    type: string
+                    nullable: true
+                  Data:
+                    type: object
+                    description: Aggregate domain counts returned by the captured response.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /admin/api/DomainList/Customization:
     get:

@@ -164,6 +164,110 @@ paths:
         '404':
           $ref: common.yml#/components/responses/NotFound
 
+  /medeina/settings/datashare:
+    get:
+      summary: Get Security Copilot data-sharing settings
+      description: >-
+        Retrieve tenant-level Security Copilot data-sharing, improvement, audit,
+        upload, feedback, and migration settings.
+      operationId: PortalServices.GetMedeinaDataShareSettings
+      tags: [Portal Services]
+      x-nodoc-operation-context:
+        surface: Security Copilot settings
+        authProfile: defender-copilot-entitlement
+        availability:
+          level: tenant-conditional
+          notes:
+            - Returned settings depend on Security Copilot enablement for the current tenant.
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Observed as a successful normal-UI read during bounded Defender navigation.
+      responses:
+        '200':
+          description: Security Copilot data-sharing settings observed in the portal response.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  enabled:
+                    type: boolean
+                  featureFlags:
+                    type: array
+                    items:
+                      type: string
+                  mandatoryFeatureFlags:
+                    type: array
+                    items:
+                      type: string
+                  allowedRestrictedFeatureFlags:
+                    type: array
+                    items:
+                      type: string
+                  freRequirements:
+                    type: object
+                  complianceRequirements:
+                    type: object
+                  allowTenantPluginUpload:
+                    type: boolean
+                  allowAuditLogging:
+                    type: boolean
+                  allowUserPluginUpload:
+                    type: boolean
+                  allowUserPluginManagement:
+                    type: boolean
+                  allowUserFileUpload:
+                    type: boolean
+                  allowSubmitFeedback:
+                    type: boolean
+                  trials:
+                    type: array
+                    items: {}
+                  partnerWorkspaces:
+                    type: object
+                  migrationInfo:
+                    type: object
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /medeina/usage/capacities:
+    get:
+      summary: Get Security Copilot capacities
+      description: >-
+        Retrieve Security Copilot capacity state for the current tenant. The captured
+        successful response was null, so no capacity object schema is asserted.
+      operationId: PortalServices.GetMedeinaCapacities
+      tags: [Portal Services]
+      x-nodoc-operation-context:
+        surface: Security Copilot settings
+        authProfile: defender-copilot-entitlement
+        availability:
+          level: tenant-conditional
+          notes:
+            - Capacity state can be absent when no Security Copilot capacity is available.
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Observed as a successful normal-UI read during bounded Defender navigation.
+      responses:
+        '200':
+          description: Successful capacity-state response observed in normal portal traffic.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
   /cdssecuritycopilot/trial:
     get:
       summary: Get Security Copilot trial status

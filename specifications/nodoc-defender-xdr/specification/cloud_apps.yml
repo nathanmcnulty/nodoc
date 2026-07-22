@@ -625,6 +625,47 @@ paths:
         '404':
           $ref: common.yml#/components/responses/NotFound
 
+  /mcas/cas/api/v1/app_connectors/dashboard/get_app_connectors_count_by_status:
+    get:
+      summary: Get app connector counts by status
+      description: >-
+        Retrieve connected-app instance counts grouped by connector health state for
+        the Defender for Cloud Apps dashboard.
+      operationId: CloudApps.GetAppConnectorsCountByStatus
+      tags: [CloudApps]
+      x-nodoc-operation-context:
+        surface: Defender for Cloud Apps connectors
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Observed as a successful normal-UI read during bounded Defender navigation.
+      responses:
+        '200':
+          description: App connector status counts observed in the portal response.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      disabled:
+                        type: integer
+                      hasErrors:
+                        type: integer
+                      hasWarnings:
+                        type: integer
+                      ok:
+                        type: integer
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
   /mcas/cas/api/v1/app_connectors/dashboard/get_instance_count_by_app:
     get:
       summary: Get app connector instance count by app

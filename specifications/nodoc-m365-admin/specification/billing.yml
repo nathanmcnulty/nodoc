@@ -1,4 +1,385 @@
 paths:
+  /admin/api/licenses/requests/summary:
+    get:
+      summary: Get license request summary
+      description: Retrieve aggregate license-request activity for the admin portal.
+      operationId: Billing.GetLicenseRequestSummary
+      tags: [Billing]
+      x-nodoc-operation-context:
+        surface: Billing and licenses
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Observed as a successful normal-UI read during bounded portal navigation.
+      responses:
+        '200':
+          description: License-request summary observed in the portal response.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  RequestCount:
+                    type: integer
+                  LastCreatedTime:
+                    type: string
+                    format: date-time
+                  Items:
+                    type: array
+                    items: {}
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/neptunelicensing/configurationplans:
+    get:
+      summary: List Neptune licensing configuration plans
+      description: Retrieve configuration plans surfaced by the Neptune licensing experience.
+      operationId: Billing.ListNeptuneConfigurationPlans
+      tags: [Billing]
+      x-nodoc-operation-context:
+        surface: Billing and licenses
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Observed as a successful normal-UI read during bounded portal navigation.
+      responses:
+        '200':
+          description: Configuration-plan collection observed in the portal response.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  value:
+                    type: array
+                    items: {}
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/neptunelicensing/creditrequests:
+    get:
+      summary: List Neptune licensing credit requests
+      description: Retrieve filtered credit requests surfaced by the Neptune licensing experience.
+      operationId: Billing.ListNeptuneCreditRequests
+      tags: [Billing]
+      parameters:
+        - name: includeCount
+          in: query
+          description: Whether to include the aggregate result count.
+          schema:
+            type: boolean
+        - name: service
+          in: query
+          description: Service filter sent by the portal.
+          schema:
+            type: string
+        - name: states
+          in: query
+          description: State filter sent by the portal.
+          schema:
+            type: string
+        - name: top
+          in: query
+          description: Maximum number of records requested by the portal.
+          schema:
+            type: integer
+      x-nodoc-operation-context:
+        surface: Billing and licenses
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Observed as a successful normal-UI read during bounded portal navigation.
+      responses:
+        '200':
+          description: Credit-request collection observed in the portal response.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  value:
+                    type: array
+                    items: {}
+                  count:
+                    type: integer
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /fd/arm/providers/Microsoft.Billing/billingAccounts/{billingAccountId}/billingProfiles/{billingProfileId}/providers/Microsoft.Marketplace/products:
+    get:
+      summary: List marketplace products
+      description: >-
+        Retrieve read-only marketplace product results for a billing profile.
+        Observed while the marketplace catalog loaded; this is not a purchase operation.
+      operationId: Billing.ListMarketplaceProducts
+      tags: [Billing]
+      parameters:
+        - name: billingAccountId
+          in: path
+          required: true
+          description: ARM billing account identifier.
+          schema:
+            type: string
+        - name: billingProfileId
+          in: path
+          required: true
+          description: ARM billing profile identifier.
+          schema:
+            type: string
+        - name: $expand
+          in: query
+          description: Optional ARM expansion expression.
+          schema:
+            type: string
+        - name: $filter
+          in: query
+          description: Optional marketplace product filter.
+          schema:
+            type: string
+        - name: $top
+          in: query
+          description: Maximum number of products requested.
+          schema:
+            type: integer
+        - name: api-version
+          in: query
+          description: ARM Marketplace API version.
+          schema:
+            type: string
+        - name: language
+          in: query
+          description: Optional response language.
+          schema:
+            type: string
+        - name: market
+          in: query
+          description: Marketplace region code.
+          schema:
+            type: string
+      x-nodoc-operation-context:
+        surface: Marketplace catalog
+        authProfile: m365-admin-brokered-arm-token
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Observed as successful normal-UI catalog traffic during bounded portal navigation.
+      responses:
+        '200':
+          description: Successful marketplace product responses observed in normal portal traffic.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /fd/arm/providers/Microsoft.Billing/billingAccounts/{billingAccountId}/billingProfiles/{billingProfileId}/providers/Microsoft.Marketplace/skus:
+    get:
+      summary: List marketplace SKUs
+      description: >-
+        Retrieve read-only marketplace SKU results for a billing profile.
+        Observed while the marketplace catalog loaded; this is not a purchase operation.
+      operationId: Billing.ListMarketplaceSkus
+      tags: [Billing]
+      parameters:
+        - name: billingAccountId
+          in: path
+          required: true
+          description: ARM billing account identifier.
+          schema:
+            type: string
+        - name: billingProfileId
+          in: path
+          required: true
+          description: ARM billing profile identifier.
+          schema:
+            type: string
+        - name: $filter
+          in: query
+          description: Optional marketplace SKU filter.
+          schema:
+            type: string
+        - name: $skiptoken
+          in: query
+          description: Optional continuation token.
+          schema:
+            type: string
+        - name: api-version
+          in: query
+          description: ARM Marketplace API version.
+          schema:
+            type: string
+        - name: language
+          in: query
+          description: Response language requested by the portal.
+          schema:
+            type: string
+        - name: market
+          in: query
+          description: Marketplace region code.
+          schema:
+            type: string
+        - name: productFamily
+          in: query
+          description: Product-family filter sent by the portal.
+          schema:
+            type: string
+      x-nodoc-operation-context:
+        surface: Marketplace catalog
+        authProfile: m365-admin-brokered-arm-token
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Observed as successful normal-UI catalog traffic during bounded portal navigation.
+      responses:
+        '200':
+          description: Successful marketplace SKU response observed in normal portal traffic.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /fd/arm/providers/Microsoft.Billing/billingAccounts/{billingAccountId}/billingSubscriptions/{billingSubscriptionId}/fetchProductDetails:
+    post:
+      summary: Fetch billing subscription product details
+      description: >-
+        Retrieve product details for a billing subscription. The portal carries this
+        read-only lookup as POST with an empty JSON object.
+      operationId: Billing.FetchSubscriptionProductDetails
+      tags: [Billing]
+      parameters:
+        - name: billingAccountId
+          in: path
+          required: true
+          description: ARM billing account identifier.
+          schema:
+            type: string
+        - name: billingSubscriptionId
+          in: path
+          required: true
+          description: Billing subscription identifier.
+          schema:
+            type: string
+        - name: api-version
+          in: query
+          description: ARM billing API version.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              maxProperties: 0
+      x-nodoc-operation-context:
+        surface: Billing subscriptions
+        authProfile: m365-admin-brokered-arm-token
+        requestShapes:
+          - name: product-details-read
+            contentType: application/json
+            bodyKind: object
+            notes: Read-only lookup observed with an empty JSON object.
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Observed as a successful normal-UI lookup during bounded portal navigation.
+      responses:
+        '200':
+          description: Successful product-details response observed in normal portal traffic.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /fd/arm/providers/Microsoft.Billing/billingAccounts/{billingAccountId}/checkAccess:
+    post:
+      summary: Check billing account access
+      description: >-
+        Evaluate whether the current administrator can perform requested billing actions.
+        This operation returns access decisions and does not perform the submitted actions.
+      operationId: Billing.CheckBillingAccountAccess
+      tags: [Billing]
+      parameters:
+        - name: billingAccountId
+          in: path
+          required: true
+          description: ARM billing account identifier.
+          schema:
+            type: string
+        - name: api-version
+          in: query
+          description: ARM billing API version.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [actions]
+              properties:
+                actions:
+                  type: array
+                  items:
+                    type: string
+      x-nodoc-operation-context:
+        surface: Marketplace and billing subscriptions
+        authProfile: m365-admin-brokered-arm-token
+        requestShapes:
+          - name: billing-access-check
+            contentType: application/json
+            bodyKind: object
+            notes: Read-only authorization check for the requested action names.
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Observed as a successful normal-UI access check during bounded portal navigation.
+      responses:
+        '200':
+          description: Billing access decisions observed in the portal response.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    accessDecision:
+                      type: string
+                    action:
+                      type: string
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
   /admin/api/billing/BillingModel:
     get:
       summary: Get billing model
@@ -644,6 +1025,59 @@ paths:
         '403':
           $ref: common.yml#/components/responses/Forbidden
 
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /fd/m365licensing/v3/licensedProducts/{productId}/allotments:
+    get:
+      summary: List licensed product allotments
+      description: Retrieve allotments for a licensed product shown by the subscriptions experience.
+      operationId: Billing.ListLicensedProductAllotments
+      tags: [Billing]
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          description: Licensed product identifier.
+          schema:
+            type: string
+        - name: allotmentSourceOwnerType
+          in: query
+          description: Owner-type filter sent by the portal.
+          schema:
+            type: string
+        - name: allotmentSourceState
+          in: query
+          description: Allotment-state filter sent by the portal.
+          schema:
+            type: string
+        - name: allotmentSourceType
+          in: query
+          description: Allotment-source filter sent by the portal.
+          schema:
+            type: string
+      x-nodoc-operation-context:
+        surface: Billing subscriptions
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Observed as a successful normal-UI read during bounded portal navigation.
+      responses:
+        '200':
+          description: Licensed product allotments observed in the portal response.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  value:
+                    type: array
+                    items: {}
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
         '404':
           $ref: common.yml#/components/responses/NotFound
 

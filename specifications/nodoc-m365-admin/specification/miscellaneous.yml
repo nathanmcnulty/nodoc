@@ -1,4 +1,35 @@
 paths:
+  /fd/dms/odata/C2RReleaseInfo:
+    get:
+      summary: List Click-to-Run release information
+      description: >-
+        Retrieve Click-to-Run release information loaded by the admin portal.
+        The captured payload was not generalized beyond the successful response.
+      operationId: Misc.ListC2RReleaseInfo
+      tags: [Miscellaneous]
+      parameters:
+        - name: $orderby
+          in: query
+          description: OData ordering expression sent by the portal.
+          schema:
+            type: string
+      x-nodoc-operation-context:
+        surface: Admin portal bootstrap
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Observed as a successful normal-UI read during bounded portal navigation.
+      responses:
+        '200':
+          description: Successful Click-to-Run release response observed in normal portal traffic.
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
   /admin/api/coordinatedbootstrap/shellinfo:
     get:
       summary: Get shell info

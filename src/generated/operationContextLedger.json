@@ -118,6 +118,42 @@
     },
     "operations": [
       {
+        "operationId": "CloudApps.GetAppConnectorsCountByStatus",
+        "summary": "Get app connector counts by status",
+        "method": "GET",
+        "path": "/mcas/cas/api/v1/app_connectors/dashboard/get_app_connectors_count_by_status",
+        "operationContext": {
+          "surface": "Defender for Cloud Apps connectors",
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Observed as a successful normal-UI read during bounded Defender navigation."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "SentinelPrecision.GetOperationsManagementSolution",
+        "summary": "Get Sentinel Operations Management solution",
+        "method": "GET",
+        "path": "/arm/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationsManagement/solutions/SecurityInsights({solutionName})",
+        "operationContext": {
+          "surface": "Microsoft Sentinel",
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Observed as a successful normal-UI read during bounded Defender navigation."
+              ]
+            }
+          ]
+        }
+      },
+      {
         "operationId": "MultiTenant.ListTenants",
         "summary": "Get MTO tenant picker",
         "method": "GET",
@@ -273,6 +309,56 @@
               "Returned auth and readiness state depends on tenant enablement and the signed-in operator."
             ]
           }
+        }
+      },
+      {
+        "operationId": "PortalServices.GetMedeinaDataShareSettings",
+        "summary": "Get Security Copilot data-sharing settings",
+        "method": "GET",
+        "path": "/medeina/settings/datashare",
+        "operationContext": {
+          "surface": "Security Copilot settings",
+          "authProfile": "defender-copilot-entitlement",
+          "availability": {
+            "level": "tenant-conditional",
+            "notes": [
+              "Returned settings depend on Security Copilot enablement for the current tenant."
+            ]
+          },
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Observed as a successful normal-UI read during bounded Defender navigation."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "PortalServices.GetMedeinaCapacities",
+        "summary": "Get Security Copilot capacities",
+        "method": "GET",
+        "path": "/medeina/usage/capacities",
+        "operationContext": {
+          "surface": "Security Copilot settings",
+          "authProfile": "defender-copilot-entitlement",
+          "availability": {
+            "level": "tenant-conditional",
+            "notes": [
+              "Capacity state can be absent when no Security Copilot capacity is available."
+            ]
+          },
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Observed as a successful normal-UI read during bounded Defender navigation."
+              ]
+            }
+          ]
         }
       },
       {
@@ -728,6 +814,42 @@
     },
     "operations": [
       {
+        "operationId": "Copilot.GetPreferences",
+        "summary": "Get Copilot panel preferences",
+        "method": "GET",
+        "path": "/admin/api/copilot/getPreferences",
+        "operationContext": {
+          "surface": "Copilot",
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Observed as a successful normal-UI read during bounded portal navigation."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "Copilot.GetPinAppPolicy",
+        "summary": "Get Copilot app pinning eligibility",
+        "method": "GET",
+        "path": "/admin/api/settings/company/copilotpolicy/pinApp",
+        "operationContext": {
+          "surface": "Copilot settings",
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Observed as a successful normal-UI read during bounded portal navigation."
+              ]
+            }
+          ]
+        }
+      },
+      {
         "operationId": "Agents.GetFrontierAccess",
         "summary": "Get Frontier access policy",
         "method": "GET",
@@ -914,6 +1036,42 @@
               "confidence": "high",
               "notes": [
                 "Verified against the signed-in `#/brandcenter` route with query values `alias='BrandGuide'` and `managedPath='sites'`."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "Reports.GetOverviewMetrics",
+        "summary": "Get overview metrics",
+        "method": "GET",
+        "path": "/admin/api/metrics/GetOverviewMetrics",
+        "operationContext": {
+          "surface": "Admin overview",
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Observed as a successful normal-UI read during bounded portal navigation."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "Reports.GetMWSUsers",
+        "summary": "Get MWS report users",
+        "method": "GET",
+        "path": "/admin/api/reports/GetMWSUsers",
+        "operationContext": {
+          "surface": "Reports",
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Observed as a successful normal-UI read during bounded portal navigation."
               ]
             }
           ]
@@ -1294,6 +1452,24 @@
         }
       },
       {
+        "operationId": "UsersGroups.GetUnlicensedUsersCount",
+        "summary": "Get unlicensed user count",
+        "method": "GET",
+        "path": "/admin/api/Users/getunlicenseduserscount",
+        "operationContext": {
+          "surface": "Users",
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Observed as a successful normal-UI read during bounded portal navigation."
+              ]
+            }
+          ]
+        }
+      },
+      {
         "operationId": "UsersGroups.ListUsers",
         "summary": "List users",
         "method": "POST",
@@ -1419,6 +1595,24 @@
         }
       },
       {
+        "operationId": "GraphProxy.GetUsersCount",
+        "summary": "Get user count",
+        "method": "GET",
+        "path": "/fd/msgraph/v1.0/users/$count",
+        "operationContext": {
+          "surface": "Users",
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Observed as a successful normal-UI read during bounded portal navigation."
+              ]
+            }
+          ]
+        }
+      },
+      {
         "operationId": "GraphProxy.BatchV1",
         "summary": "Graph v1.0 batch request",
         "method": "POST",
@@ -1449,6 +1643,42 @@
               "confidence": "high",
               "notes": [
                 "Verified on the signed-in `#/Settings/enhancedRestore` route."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "GraphProxy.ListDeviceConfigurationCategories",
+        "summary": "List device configuration categories",
+        "method": "GET",
+        "path": "/fd/msgraph/beta/deviceManagement/configurationCategories",
+        "operationContext": {
+          "surface": "Edge management",
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Observed as successful normal-UI traffic while the Edge experience loaded."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "GraphProxy.ListDeviceConfigurationSettings",
+        "summary": "List device configuration settings",
+        "method": "GET",
+        "path": "/fd/msgraph/beta/deviceManagement/configurationSettings",
+        "operationContext": {
+          "surface": "Edge management",
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Observed as successful normal-UI traffic while the Edge experience loaded."
               ]
             }
           ]
@@ -1541,6 +1771,24 @@
         }
       },
       {
+        "operationId": "IntegratedApps.GetAppInsights",
+        "summary": "Get integrated app insights",
+        "method": "GET",
+        "path": "/fd/addins/api/apps/insight",
+        "operationContext": {
+          "surface": "Integrated apps",
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Observed as a successful normal-UI read during bounded portal navigation."
+              ]
+            }
+          ]
+        }
+      },
+      {
         "operationId": "ContentUnderstanding.GetAutoFill",
         "summary": "Get autofill settings",
         "method": "GET",
@@ -1601,6 +1849,24 @@
               "confidence": "high",
               "notes": [
                 "Validated against the checked-in M365Internals Content Understanding cmdlet."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "Misc.ListC2RReleaseInfo",
+        "summary": "List Click-to-Run release information",
+        "method": "GET",
+        "path": "/fd/dms/odata/C2RReleaseInfo",
+        "operationContext": {
+          "surface": "Admin portal bootstrap",
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Observed as a successful normal-UI read during bounded portal navigation."
               ]
             }
           ]
@@ -1716,6 +1982,170 @@
         }
       },
       {
+        "operationId": "Billing.GetLicenseRequestSummary",
+        "summary": "Get license request summary",
+        "method": "GET",
+        "path": "/admin/api/licenses/requests/summary",
+        "operationContext": {
+          "surface": "Billing and licenses",
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Observed as a successful normal-UI read during bounded portal navigation."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "Billing.ListNeptuneConfigurationPlans",
+        "summary": "List Neptune licensing configuration plans",
+        "method": "GET",
+        "path": "/admin/api/neptunelicensing/configurationplans",
+        "operationContext": {
+          "surface": "Billing and licenses",
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Observed as a successful normal-UI read during bounded portal navigation."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "Billing.ListNeptuneCreditRequests",
+        "summary": "List Neptune licensing credit requests",
+        "method": "GET",
+        "path": "/admin/api/neptunelicensing/creditrequests",
+        "operationContext": {
+          "surface": "Billing and licenses",
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Observed as a successful normal-UI read during bounded portal navigation."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "Billing.ListMarketplaceProducts",
+        "summary": "List marketplace products",
+        "method": "GET",
+        "path": "/fd/arm/providers/Microsoft.Billing/billingAccounts/{billingAccountId}/billingProfiles/{billingProfileId}/providers/Microsoft.Marketplace/products",
+        "operationContext": {
+          "surface": "Marketplace catalog",
+          "authProfile": "m365-admin-brokered-arm-token",
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Observed as successful normal-UI catalog traffic during bounded portal navigation."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "Billing.ListMarketplaceSkus",
+        "summary": "List marketplace SKUs",
+        "method": "GET",
+        "path": "/fd/arm/providers/Microsoft.Billing/billingAccounts/{billingAccountId}/billingProfiles/{billingProfileId}/providers/Microsoft.Marketplace/skus",
+        "operationContext": {
+          "surface": "Marketplace catalog",
+          "authProfile": "m365-admin-brokered-arm-token",
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Observed as successful normal-UI catalog traffic during bounded portal navigation."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "Billing.FetchSubscriptionProductDetails",
+        "summary": "Fetch billing subscription product details",
+        "method": "POST",
+        "path": "/fd/arm/providers/Microsoft.Billing/billingAccounts/{billingAccountId}/billingSubscriptions/{billingSubscriptionId}/fetchProductDetails",
+        "operationContext": {
+          "surface": "Billing subscriptions",
+          "authProfile": "m365-admin-brokered-arm-token",
+          "requestShapes": [
+            {
+              "name": "product-details-read",
+              "contentType": "application/json",
+              "bodyKind": "object",
+              "notes": "Read-only lookup observed with an empty JSON object."
+            }
+          ],
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Observed as a successful normal-UI lookup during bounded portal navigation."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "Billing.CheckBillingAccountAccess",
+        "summary": "Check billing account access",
+        "method": "POST",
+        "path": "/fd/arm/providers/Microsoft.Billing/billingAccounts/{billingAccountId}/checkAccess",
+        "operationContext": {
+          "surface": "Marketplace and billing subscriptions",
+          "authProfile": "m365-admin-brokered-arm-token",
+          "requestShapes": [
+            {
+              "name": "billing-access-check",
+              "contentType": "application/json",
+              "bodyKind": "object",
+              "notes": "Read-only authorization check for the requested action names."
+            }
+          ],
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Observed as a successful normal-UI access check during bounded portal navigation."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "Billing.ListLicensedProductAllotments",
+        "summary": "List licensed product allotments",
+        "method": "GET",
+        "path": "/fd/m365licensing/v3/licensedProducts/{productId}/allotments",
+        "operationContext": {
+          "surface": "Billing subscriptions",
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Observed as a successful normal-UI read during bounded portal navigation."
+              ]
+            }
+          ]
+        }
+      },
+      {
         "operationId": "Billing.GetMicrosoft365BackupFeature",
         "summary": "Get Microsoft 365 Backup billing feature",
         "method": "GET",
@@ -1745,6 +2175,50 @@
               "confidence": "high",
               "notes": [
                 "Verified against the signed-in `#/Settings/enhancedRestore` route together with the companion enhanced restore and Graph backup reads."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "UsersGroups.ListExternalGuestUsers",
+        "summary": "List external guest users",
+        "method": "POST",
+        "path": "/admin/api/Users/ListExternalGuestUsers",
+        "operationContext": {
+          "surface": "Users > Guest users",
+          "requestShapes": [
+            {
+              "name": "guest-user-list",
+              "contentType": "application/json",
+              "bodyKind": "object",
+              "notes": "Read-only list operation carried as POST by the portal."
+            }
+          ],
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Observed as a successful normal-UI list request during bounded portal navigation."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "Domains.GetSummary",
+        "summary": "Get domain summary",
+        "method": "GET",
+        "path": "/admin/api/Domains/Summary",
+        "operationContext": {
+          "surface": "Domains",
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Observed as a successful normal-UI read during bounded portal navigation."
               ]
             }
           ]
