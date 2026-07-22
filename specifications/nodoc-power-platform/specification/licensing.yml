@@ -1642,6 +1642,7 @@ paths:
             confidence: high
             notes:
               - Observed as a successful read-only request while loading the licensing overview.
+              - The portal requested the related users field through includeFields; other legal values were not established.
       parameters:
         - name: "tenantId"
           in: path
@@ -1671,29 +1672,12 @@ paths:
         - name: "includeFields"
           in: query
           required: false
-          description: Related fields to include with each resource.
+          description: Related fields to include with each resource; `users` was observed in portal traffic.
           schema:
             type: string
-            enum:
-              - users
       responses:
         '200':
-          description: Resource entitlement usage observed in normal portal traffic.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  value:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        resources:
-                          type: array
-                          items:
-                            type: object
-                            additionalProperties: true
+          description: Resource entitlement usage observed in normal portal traffic; exact response schema pending.
   /v2.0/tenants/{tenantId}/entitlements/MCSMessages/users:
     servers:
       - url: "https://licensing.powerplatform.microsoft.com"
@@ -1738,22 +1722,7 @@ paths:
             format: date
       responses:
         '200':
-          description: User entitlement usage observed in normal portal traffic.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  value:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        users:
-                          type: array
-                          items:
-                            type: object
-                            additionalProperties: true
+          description: User entitlement usage observed in normal portal traffic; exact response schema pending.
   /v2.0/tenants/{tenantId}/entitlements/MCSSessions:
     servers:
       - url: "https://licensing.powerplatform.microsoft.com"
