@@ -6,35 +6,69 @@ import path from "node:path";
 import test from "node:test";
 import { promisify } from "node:util";
 
-import { getCandidateSuppressions } from "../portal-discovery-metadata.mjs";
-
 const execFileAsync = promisify(execFile);
 const repoRoot = path.resolve(import.meta.dirname, "..", "..");
 
-test("Purview unsafe POST candidates are suppressed from future queues", () => {
-  assert.deepEqual(
-    getCandidateSuppressions("Purview")
-      .filter(({ path }) => (
-        path.includes("/IRMEasyPolicy")
-        || path.includes("/OnboardingChecklist")
-        || path.includes("/$batch")
-      ))
-      .map(({ method, path }) => ({ method, path })),
-    [
-      {
-        method: "POST",
-        path: "/apiproxy/insiderrisk/insiderrisk/api/v1.0/{id}/IRMEasyPolicy",
-      },
-      {
-        method: "POST",
-        path: "/apiproxy/insiderrisk/insiderrisk/api/v1.0/{id}/OnboardingChecklist",
-      },
-      {
-        method: "POST",
-        path: "/apiproxy/msgraph/v1.0/$batch",
-      },
-    ],
-  );
+test("Purview unsafe POST observations are suppressed from generated queues", async () => {
+  const artifactDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-purview-suppressions-"));
+  const unsafePaths = [
+    "/apiproxy/insiderrisk/insiderrisk/api/v1.0/{id}/IRMEasyPolicy",
+    "/apiproxy/insiderrisk/insiderrisk/api/v1.0/{id}/OnboardingChecklist",
+    "/apiproxy/msgraph/v1.0/$batch",
+  ];
+
+  try {
+    await Promise.all([
+      writeFile(
+        path.join(artifactDir, "api-records.json"),
+        JSON.stringify(unsafePaths.map((candidatePath) => ({
+          method: "POST",
+          path: candidatePath,
+          seenOnPages: ["tenant-neutral-test"],
+        }))),
+        "utf8",
+      ),
+      writeFile(
+        path.join(artifactDir, "bundle-candidates.json"),
+        JSON.stringify({
+          candidates: unsafePaths.map((candidatePath) => ({
+            candidatePath,
+            method: "POST",
+            sourceFile: "tenant-neutral-fixture.js",
+          })),
+        }),
+        "utf8",
+      ),
+    ]);
+
+    const { stdout } = await execFileAsync(process.execPath, [
+      path.join(repoRoot, "tools", "generate-crawl-candidates.mjs"),
+      "--spec",
+      "purview",
+      "--artifacts",
+      artifactDir,
+      "--json",
+    ], { cwd: repoRoot });
+    const queue = JSON.parse(stdout);
+    const candidateKey = ({ method, normalizedPath }) => `${method} ${normalizedPath}`;
+    const expectedKeys = unsafePaths.map((candidatePath) => `POST ${candidatePath}`).sort();
+
+    assert.deepEqual(
+      queue.suppressedCandidates.map(candidateKey).sort(),
+      expectedKeys,
+    );
+    assert.equal(queue.summary.suppressedCandidateCount, unsafePaths.length);
+    assert.ok(queue.suppressedCandidates.every(({ evidence, sourceArtifacts }) => (
+      evidence === "confirmed"
+      && sourceArtifacts.includes("api-records.json")
+      && sourceArtifacts.includes("bundle-candidates.json")
+    )));
+    assert.ok(queue.candidates.every((candidate) => (
+      !expectedKeys.includes(candidateKey(candidate))
+    )));
+  } finally {
+    await rm(artifactDir, { force: true, recursive: true });
+  }
 });
 
 test("mined methods flow into the crawl candidate queue", async () => {
