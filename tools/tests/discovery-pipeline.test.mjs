@@ -12,10 +12,13 @@ const repoRoot = path.resolve(import.meta.dirname, "..", "..");
 test("Purview unsafe POST observations are suppressed from generated queues", async () => {
   const artifactDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-purview-suppressions-"));
   const unsafePaths = [
-    "/apiproxy/insiderrisk/insiderrisk/api/v1.0/{id}/IRMEasyPolicy",
-    "/apiproxy/insiderrisk/insiderrisk/api/v1.0/{id}/OnboardingChecklist",
+    "/apiproxy/insiderrisk/insiderrisk/api/v1.0/{placeholder}/IRMEasyPolicy",
+    "/apiproxy/insiderrisk/insiderrisk/api/v1.0/{placeholder}/OnboardingChecklist",
     "/apiproxy/msgraph/v1.0/$batch",
   ];
+  const normalizedUnsafePaths = unsafePaths.map((candidatePath) => (
+    candidatePath.replace("{placeholder}", "{id}")
+  ));
 
   try {
     await Promise.all([
@@ -51,7 +54,9 @@ test("Purview unsafe POST observations are suppressed from generated queues", as
     ], { cwd: repoRoot });
     const queue = JSON.parse(stdout);
     const candidateKey = ({ method, normalizedPath }) => `${method} ${normalizedPath}`;
-    const expectedKeys = unsafePaths.map((candidatePath) => `POST ${candidatePath}`).sort();
+    const expectedKeys = normalizedUnsafePaths
+      .map((candidatePath) => `POST ${candidatePath}`)
+      .sort();
 
     assert.deepEqual(
       queue.suppressedCandidates.map(candidateKey).sort(),
