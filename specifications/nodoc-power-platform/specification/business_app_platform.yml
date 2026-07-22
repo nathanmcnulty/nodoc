@@ -612,3 +612,36 @@ paths:
       responses:
         '200':
           description: "200 captured response"
+  /providers/PowerPlatform.Governance/v1/tenants/{tenantId}/tenantIsolationPolicy:
+    servers:
+      - url: "https://api.bap.microsoft.com"
+        description: "Business App Platform resource provider"
+    get:
+      operationId: BusinessAppPlatform_get_tenantIsolationPolicy
+      summary: "GET /providers/PowerPlatform.Governance/v1/tenants/{tenantId}/tenantIsolationPolicy"
+      description: Retrieve the tenant isolation policy used by the Power Platform security overview.
+      x-nodoc-live-capture:
+        source: "authenticated Power Platform admin center"
+        browsedPages:
+          - "Power Platform admin center: /security/overview"
+      tags:
+        - BusinessAppPlatform
+      x-nodoc-operation-context:
+        surface: Security > Overview
+        headerProfile: power-platform-service-bearer
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Observed as a read-only request while loading the Power Platform security overview.
+      parameters:
+        - name: "tenantId"
+          in: path
+          required: true
+          description: The tenant identifier.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Tenant isolation policy response observed in normal portal traffic.

@@ -377,10 +377,28 @@ export const coverageOverlayByTitle = {
     ],
     observedHosts: [
       "admin.powerplatform.microsoft.com",
+      "api.bap.microsoft.com",
+      "licensing.powerplatform.microsoft.com",
     ],
-    lastSuccessfulPassDepth: "diff-first",
+    lastSuccessfulPassDepth: "bounded-normal-ui-diff",
+    promotedDiscoveries: [
+      route("GET", "/providers/PowerPlatform.Governance/v1/tenants/{tenantId}/tenantIsolationPolicy", "Promoted from bounded normal-UI Power Platform security traffic with the tenant identifier parameterized."),
+      route("GET", "/v0.1-alpha/tenants/{tenantId}/entitlements/MCSMessages/snapshot/resources", "Promoted as a read-only legacy Copilot Studio licensing lookup; the captured tenant returned not found."),
+      route("GET", "/v2.0/tenants/{tenantId}/entitlements/MCSMessages/resources", "Promoted from successful bounded normal-UI Copilot Studio licensing traffic."),
+      route("GET", "/v2.0/tenants/{tenantId}/entitlements/MCSMessages/users", "Promoted from successful bounded normal-UI Copilot Studio licensing traffic."),
+    ],
+    knownTelemetryExclusions: [
+      route("POST", "/Collector/3.0", "Shared browser telemetry collector observed in portal traffic; intentionally excluded from API documentation and probe planning."),
+      route("POST", "/OneCollector/1.0", "Shared browser telemetry collector observed in portal traffic; intentionally excluded from API documentation and probe planning."),
+      route("POST", "/api/instrument/logclient", "Shared admin-shell client logging endpoint observed on two hosts; intentionally excluded from API documentation and probe planning."),
+    ],
+    openGaps: [
+      "Nine confirmed tenant-island API reads remain adjacent scope-review evidence until their effective host templates are assigned explicitly.",
+      "Twenty-nine shared Microsoft 365, Graph, Azure management, authentication, and Defender-family operations remain for a later cross-spec assignment pass.",
+    ],
     notes: [
-      "Recent discovery already covered many Power Platform host families, so future passes should stay gap-driven.",
+      "A bounded normal-UI pass promoted all four in-scope confirmed GET candidates and did not promote any bundle-only candidate.",
+      "The initial adjacent review contained 68 confirmed items: four telemetry observations are covered by three suppression routes, while 26 static localization or shared shell assets remain scope-review noise rather than target-spec operations.",
     ],
   },
   Purview: {
