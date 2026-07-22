@@ -8,10 +8,15 @@ const supportedDocumentationStatuses = new Set([
   "path-documented-missing-method",
   "undocumented",
 ]);
+const supportedScopeReasons = new Set([
+  "host-and-path-out-of-scope",
+  "host-out-of-scope",
+  "path-out-of-scope",
+]);
 
 function compareCandidates(left, right) {
-  return `${left.method ?? ""} ${left.normalizedPath}`.localeCompare(
-    `${right.method ?? ""} ${right.normalizedPath}`,
+  return `${left.hostFamily ?? ""} ${left.method ?? ""} ${left.normalizedPath}`.localeCompare(
+    `${right.hostFamily ?? ""} ${right.method ?? ""} ${right.normalizedPath}`,
   );
 }
 
@@ -43,6 +48,43 @@ function sanitizeCandidate(candidate, { suppressed = false } = {}) {
   };
 }
 
+function sanitizeScopeReviewCandidate(candidate) {
+  const sanitized = sanitizeCandidate(candidate);
+  const hostFamily = String(candidate?.hostFamily || "").trim().toLowerCase();
+  const matchingSpecIds = Array.isArray(candidate?.matchingSpecIds)
+    ? candidate.matchingSpecIds
+        .map((specId) => String(specId || "").trim())
+        .filter(Boolean)
+        .sort((left, right) => left.localeCompare(right))
+    : [];
+  const scopeReasons = Array.isArray(candidate?.scopeReasons)
+    ? candidate.scopeReasons
+        .map((reason) => String(reason || "").trim())
+        .filter(Boolean)
+        .sort((left, right) => left.localeCompare(right))
+    : [];
+  if (!hostFamily) {
+    throw new Error("Scope-review candidates require a sanitized host family.");
+  }
+  if (
+    scopeReasons.length === 0
+    || scopeReasons.some((reason) => !supportedScopeReasons.has(reason))
+  ) {
+    throw new Error("Scope-review candidates require supported scope reasons.");
+  }
+  if (candidate?.requiresSpecAssignment !== true) {
+    throw new Error("Scope-review candidates must require explicit spec assignment.");
+  }
+
+  return {
+    ...sanitized,
+    hostFamily,
+    matchingSpecIds: Array.from(new Set(matchingSpecIds)),
+    requiresSpecAssignment: true,
+    scopeReasons: Array.from(new Set(scopeReasons)),
+  };
+}
+
 function deriveRecommendedNextAction(counts, metadataNextPass) {
   if (counts.confirmedRead > 0) {
     return {
@@ -68,11 +110,31 @@ function deriveRecommendedNextAction(counts, metadataNextPass) {
     };
   }
 
+  if (
+    counts.adjacentConfirmedRead > 0
+    || counts.adjacentConfirmedSafetyReview > 0
+    || counts.adjacentSuccessfullyProbed > 0
+  ) {
+    return {
+      code: "review-adjacent-candidate-scope",
+      summary:
+        "Assign the adjacent confirmed or probed candidates to the correct specification and host family before any promotion review.",
+    };
+  }
+
   if (counts.bundleOnly > 0) {
     return {
       code: "validate-bundle-only-candidates",
       summary:
         "Run targeted UI validation for the bundle-only candidates before considering promotion.",
+    };
+  }
+
+  if (counts.adjacentBundleOnly > 0) {
+    return {
+      code: "review-adjacent-bundle-scope",
+      summary:
+        "Assign the adjacent bundle-only candidates to the correct specification and host family before targeted validation.",
     };
   }
 
@@ -111,11 +173,18 @@ export function buildCandidateHandoff({
   if (!Array.isArray(candidateQueue?.suppressedCandidates)) {
     throw new Error("Candidate handoff generation requires candidateQueue.suppressedCandidates.");
   }
+  if (!Array.isArray(candidateQueue?.scopeReviewCandidates)) {
+    throw new Error("Candidate handoff generation requires candidateQueue.scopeReviewCandidates.");
+  }
 
   const confirmedReadCandidates = [];
   const confirmedSafetyReviewCandidates = [];
   const successfullyProbedCandidates = [];
   const bundleOnlyCandidates = [];
+  const adjacentConfirmedReadCandidates = [];
+  const adjacentConfirmedSafetyReviewCandidates = [];
+  const adjacentSuccessfullyProbedCandidates = [];
+  const adjacentBundleOnlyCandidates = [];
 
   for (const candidate of candidateQueue.candidates) {
     const sanitized = sanitizeCandidate(candidate);
@@ -132,6 +201,21 @@ export function buildCandidateHandoff({
     }
   }
 
+  for (const candidate of candidateQueue.scopeReviewCandidates) {
+    const sanitized = sanitizeScopeReviewCandidate(candidate);
+    if (sanitized.evidence === "confirmed") {
+      if (sanitized.method === "GET") {
+        adjacentConfirmedReadCandidates.push(sanitized);
+      } else {
+        adjacentConfirmedSafetyReviewCandidates.push(sanitized);
+      }
+    } else if (sanitized.evidence === "probed") {
+      adjacentSuccessfullyProbedCandidates.push(sanitized);
+    } else {
+      adjacentBundleOnlyCandidates.push(sanitized);
+    }
+  }
+
   const suppressedCandidates = candidateQueue.suppressedCandidates
     .map((candidate) => sanitizeCandidate(candidate, { suppressed: true }))
     .sort(compareCandidates);
@@ -139,8 +223,16 @@ export function buildCandidateHandoff({
   confirmedSafetyReviewCandidates.sort(compareCandidates);
   successfullyProbedCandidates.sort(compareCandidates);
   bundleOnlyCandidates.sort(compareCandidates);
+  adjacentConfirmedReadCandidates.sort(compareCandidates);
+  adjacentConfirmedSafetyReviewCandidates.sort(compareCandidates);
+  adjacentSuccessfullyProbedCandidates.sort(compareCandidates);
+  adjacentBundleOnlyCandidates.sort(compareCandidates);
 
   const counts = {
+    adjacentBundleOnly: adjacentBundleOnlyCandidates.length,
+    adjacentConfirmedRead: adjacentConfirmedReadCandidates.length,
+    adjacentConfirmedSafetyReview: adjacentConfirmedSafetyReviewCandidates.length,
+    adjacentSuccessfullyProbed: adjacentSuccessfullyProbedCandidates.length,
     confirmedRead: confirmedReadCandidates.length,
     confirmedSafetyReview: confirmedSafetyReviewCandidates.length,
     successfullyProbed: successfullyProbedCandidates.length,
@@ -149,12 +241,16 @@ export function buildCandidateHandoff({
   };
 
   return {
-    schemaVersion: 1,
+    schemaVersion: 2,
     spec: {
       id: specId,
       title: specTitle,
     },
     counts,
+    adjacentConfirmedReadCandidates,
+    adjacentConfirmedSafetyReviewCandidates,
+    adjacentSuccessfullyProbedCandidates,
+    adjacentBundleOnlyCandidates,
     confirmedReadCandidates,
     confirmedSafetyReviewCandidates,
     successfullyProbedCandidates,

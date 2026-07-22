@@ -3,6 +3,7 @@ import test from "node:test";
 
 import {
   classifyGetProbeUrl,
+  sanitizeObservedHostFamily,
   sanitizeObservedTransportUrl,
 } from "../discovery-safety.mjs";
 
@@ -84,4 +85,36 @@ test("redacts passive transport URL values and credentials", () => {
     "wss://example.com/socket?access_token=%5Bredacted%5D&tenant=%5Bredacted%5D",
   );
   assert.equal(sanitizeObservedTransportUrl("not a url"), null);
+});
+
+test("normalizes observed hosts to trusted templates or tenant-safe families", () => {
+  const trustedTemplates = [
+    "admin.cloud.microsoft",
+    "{tenant}-admin.sharepoint.com",
+  ];
+
+  assert.equal(
+    sanitizeObservedHostFamily("admin.cloud.microsoft", trustedTemplates),
+    "admin.cloud.microsoft",
+  );
+  assert.equal(
+    sanitizeObservedHostFamily("contoso-private-admin.sharepoint.com", trustedTemplates),
+    "{tenant}-admin.sharepoint.com",
+  );
+  assert.equal(
+    sanitizeObservedHostFamily("contoso-private.api.crm.dynamics.com", trustedTemplates),
+    "{tenant}.api.crm.dynamics.com",
+  );
+  assert.equal(
+    sanitizeObservedHostFamily("content.powerapps.com", trustedTemplates),
+    "content.powerapps.com",
+  );
+  assert.equal(
+    sanitizeObservedHostFamily("tenant-only-host", trustedTemplates),
+    "[redacted-host]",
+  );
+  assert.equal(
+    sanitizeObservedHostFamily("private-tenant.internal.example", trustedTemplates),
+    "[redacted-host]",
+  );
 });

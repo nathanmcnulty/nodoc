@@ -308,8 +308,12 @@ normalization and specification diff automatically, then write
 confirmed GETs can proceed to human specification review, confirmed non-GET or
 ambiguous candidates need safety classification, successful probes retain
 their weaker evidence label, and bundle-only candidates require targeted UI
-validation. Generating the handoff completes discovery execution; landing
-supported findings is a separate review PR.
+validation. Adjacent confirmed, probed, and bundle-only evidence is retained in
+separate scope-review categories with sanitized host-family context. Assign
+those entries to the correct specification explicitly before any promotion
+review; they never enter the target spec's active candidate queue. Generating
+the handoff completes discovery execution; landing supported findings is a
+separate review PR.
 
 ### 5b. Safe-probe hidden reads
 

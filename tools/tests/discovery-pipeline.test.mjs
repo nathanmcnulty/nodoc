@@ -24,13 +24,15 @@ async function runAnalyze(portal, artifactDir) {
     artifactDir,
   ], { cwd: repoRoot });
 
-  const [candidateHandoff, runState] = await Promise.all([
+  const [candidateHandoff, candidateQueue, runState] = await Promise.all([
     readFile(path.join(artifactDir, "candidate-handoff.json"), "utf8"),
+    readFile(path.join(artifactDir, "candidate-queue.json"), "utf8"),
     readFile(path.join(artifactDir, "discovery-run.json"), "utf8"),
   ]);
   return {
     candidateHandoff: JSON.parse(candidateHandoff),
     candidateHandoffText: candidateHandoff,
+    candidateQueue: JSON.parse(candidateQueue),
     runState: JSON.parse(runState),
   };
 }
@@ -151,6 +153,10 @@ test("analyze emits a sanitized actionable handoff for Purview-like evidence", a
     );
 
     assert.deepEqual(candidateHandoff.counts, {
+      adjacentBundleOnly: 0,
+      adjacentConfirmedRead: 0,
+      adjacentConfirmedSafetyReview: 0,
+      adjacentSuccessfullyProbed: 0,
       confirmedRead: 1,
       confirmedSafetyReview: 1,
       successfullyProbed: 1,
@@ -184,6 +190,164 @@ test("analyze emits a sanitized actionable handoff for Purview-like evidence", a
     assert.doesNotMatch(candidateHandoffText, new RegExp(tenantId, "u"));
     assert.doesNotMatch(candidateHandoffText, /tenant-specific/u);
     assert.doesNotMatch(candidateHandoffText, /private-bundle/u);
+  } finally {
+    await rm(artifactDir, { force: true, recursive: true });
+  }
+});
+
+test("adjacent Power Platform-like evidence is tenant-safe and never promotion-active", async () => {
+  const artifactDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-power-platform-scope-"));
+  const tenantId = "5e2f94d1-730e-46f3-b567-e79c3946ab11";
+  const tenantHostLabel = "private-tenant-7f91";
+  const opaqueTenantId = "NmYi_9r27n27";
+  const tenantPage = "private-tenant-scope-page";
+  const privateBody = "private-tenant-response-body";
+
+  try {
+    await Promise.all([
+      writeJson(path.join(artifactDir, "api-records.json"), [
+        {
+          method: "GET",
+          path: `/admin/api/nodocScopeReviewRead/${opaqueTenantId}`,
+          seenOnPages: [tenantPage],
+          url:
+            `https://admin.cloud.microsoft/admin/api/nodocScopeReviewRead/${opaqueTenantId}`,
+        },
+        {
+          headers: {
+            authorization: "Bearer private-tenant-token",
+            cookie: "private-tenant-cookie=value",
+          },
+          method: "POST",
+          path: `/api/data/v9.2/organizations/${tenantId}/nodocScopeReviewPost`,
+          responseBodySample: privateBody,
+          seenOnPages: [tenantPage],
+          url:
+            `https://${tenantHostLabel}.api.crm.dynamics.com/api/data/v9.2/organizations/${tenantId}/nodocScopeReviewPost`,
+        },
+      ]),
+      writeJson(path.join(artifactDir, "probe-results.json"), [
+        {
+          method: "GET",
+          outcome: "confirmed",
+          path: "/_api/web/lists",
+          status: 200,
+          url: `https://${tenantHostLabel}-admin.sharepoint.com/_api/web/lists`,
+        },
+      ]),
+      writeJson(path.join(artifactDir, "bundle-candidates.json"), {
+        candidates: [
+          {
+            candidatePath: "/api/nodocTargetBundleCandidate",
+            method: "GET",
+            sourceFile: "tenant-neutral-target.js",
+          },
+          {
+            candidatePath:
+              "https://admin.cloud.microsoft/api/nodocAdjacentBundleCandidate",
+            method: "GET",
+            sourceFile: "tenant-neutral-adjacent.js",
+          },
+        ],
+      }),
+    ]);
+
+    const {
+      candidateHandoff,
+      candidateHandoffText,
+      candidateQueue,
+      runState,
+    } = await runAnalyze("power-platform", artifactDir);
+
+    assert.deepEqual(candidateHandoff.counts, {
+      adjacentBundleOnly: 1,
+      adjacentConfirmedRead: 1,
+      adjacentConfirmedSafetyReview: 1,
+      adjacentSuccessfullyProbed: 1,
+      confirmedRead: 0,
+      confirmedSafetyReview: 0,
+      successfullyProbed: 0,
+      bundleOnly: 1,
+      suppressed: 0,
+    });
+    assert.deepEqual(candidateQueue.summary.scopeReviewCounts, {
+      bundleOnly: 1,
+      confirmedRead: 1,
+      confirmedSafetyReview: 1,
+      successfullyProbed: 1,
+    });
+    assert.equal(candidateQueue.summary.adjacentCandidatesPromoted, false);
+    assert.equal(
+      candidateHandoff.recommendedNextAction.code,
+      "review-adjacent-candidate-scope",
+    );
+    assert.equal(
+      candidateHandoff.adjacentConfirmedReadCandidates[0].hostFamily,
+      "admin.cloud.microsoft",
+    );
+    assert.equal(
+      candidateHandoff.adjacentConfirmedReadCandidates[0].normalizedPath,
+      "/admin/api/nodocScopeReviewRead/{id}",
+    );
+    assert.deepEqual(
+      candidateHandoff.adjacentConfirmedReadCandidates[0].matchingSpecIds,
+      ["m365-admin"],
+    );
+    assert.equal(
+      candidateHandoff.adjacentConfirmedSafetyReviewCandidates[0].hostFamily,
+      "{tenant}.api.crm.dynamics.com",
+    );
+    assert.equal(
+      candidateHandoff.adjacentSuccessfullyProbedCandidates[0].hostFamily,
+      "{tenant}-admin.sharepoint.com",
+    );
+    assert.ok([
+      ...candidateHandoff.adjacentConfirmedReadCandidates,
+      ...candidateHandoff.adjacentConfirmedSafetyReviewCandidates,
+      ...candidateHandoff.adjacentSuccessfullyProbedCandidates,
+      ...candidateHandoff.adjacentBundleOnlyCandidates,
+    ].every(({ requiresSpecAssignment }) => requiresSpecAssignment));
+    assert.deepEqual(
+      candidateQueue.candidates.map(({ normalizedPath }) => normalizedPath),
+      ["/api/nodocTargetBundleCandidate"],
+    );
+    assert.deepEqual(runState.candidateCounts, candidateHandoff.counts);
+    const scopeReviewText = JSON.stringify(candidateQueue.scopeReviewCandidates);
+
+    for (const forbidden of [
+      tenantId,
+      tenantHostLabel,
+      opaqueTenantId,
+      tenantPage,
+      privateBody,
+      "private-tenant-token",
+      "private-tenant-cookie",
+      artifactDir,
+      "https://",
+      "seenOnPages",
+      "responseBodySample",
+    ]) {
+      assert.equal(candidateHandoffText.includes(forbidden), false);
+      assert.equal(scopeReviewText.includes(forbidden), false);
+    }
+
+    const { stdout } = await execFileAsync(process.execPath, [
+      path.join(repoRoot, "tools", "generate-crawl-candidates.mjs"),
+      "--spec",
+      "power-platform",
+      "--artifacts",
+      artifactDir,
+      "--include-adjacent",
+      "--json",
+    ], { cwd: repoRoot });
+    const compatibilityQueue = JSON.parse(stdout);
+    assert.equal(compatibilityQueue.summary.includeAdjacentRequested, true);
+    assert.equal(compatibilityQueue.summary.adjacentCandidatesPromoted, false);
+    assert.deepEqual(compatibilityQueue.candidates, candidateQueue.candidates);
+    assert.deepEqual(
+      compatibilityQueue.scopeReviewCandidates,
+      candidateQueue.scopeReviewCandidates,
+    );
   } finally {
     await rm(artifactDir, { force: true, recursive: true });
   }
@@ -233,6 +397,10 @@ test("suppressed-only analysis expands coverage instead of repeating the complet
     );
 
     assert.deepEqual(candidateHandoff.counts, {
+      adjacentBundleOnly: 0,
+      adjacentConfirmedRead: 0,
+      adjacentConfirmedSafetyReview: 0,
+      adjacentSuccessfullyProbed: 0,
       confirmedRead: 0,
       confirmedSafetyReview: 0,
       successfullyProbed: 0,
