@@ -393,6 +393,10 @@ x-nodoc-authProfiles:
 
 paths:
   # Copilot
+  /admin/api/copilot/getPreferences:
+    $ref: copilot.yml#/paths/~1admin~1api~1copilot~1getPreferences
+  /admin/api/settings/company/copilotpolicy/pinApp:
+    $ref: copilot.yml#/paths/~1admin~1api~1settings~1company~1copilotpolicy~1pinApp
   /admin/api/settings/company/copilotpolicy/pin:
     $ref: copilot.yml#/paths/~1admin~1api~1settings~1company~1copilotpolicy~1pin
   /admin/api/copilotsettings/settings:
@@ -487,6 +491,10 @@ paths:
     $ref: security_settings.yml#/paths/~1admin~1api~1Settings~1security~1guestUserPolicy
 
   # Reports
+  /admin/api/metrics/GetOverviewMetrics:
+    $ref: reports.yml#/paths/~1admin~1api~1metrics~1GetOverviewMetrics
+  /admin/api/reports/GetMWSUsers:
+    $ref: reports.yml#/paths/~1admin~1api~1reports~1GetMWSUsers
   /admin/api/reports/GetReportData:
     $ref: reports.yml#/paths/~1admin~1api~1reports~1GetReportData
   /admin/api/reports/GetSummaryDataV3:
@@ -527,6 +535,8 @@ paths:
     $ref: search.yml#/paths/~1fd~1substrateAcronyms~1api~1v1.0~1GetTenantAdminAcronymsFromSds
 
   # Users & Groups
+  /admin/api/Users/getunlicenseduserscount:
+    $ref: users_groups.yml#/paths/~1admin~1api~1Users~1getunlicenseduserscount
   /admin/api/users/getuserroles:
     $ref: users_groups.yml#/paths/~1admin~1api~1users~1getuserroles
   /admin/api/Users/ListUsers:
@@ -583,6 +593,8 @@ paths:
     $ref: tenant.yml#/paths/~1_api~1v2.1~1unifiedStorageQuotaEligible
 
   # Graph Proxy
+  /fd/msgraph/v1.0/users/$count:
+    $ref: graph_proxy.yml#/paths/~1fd~1msgraph~1v1.0~1users~1$count
   /fd/msgraph/v1.0/subscribedSkus:
     $ref: graph_proxy.yml#/paths/~1fd~1msgraph~1v1.0~1subscribedSkus
   /fd/msgraph/v1.0/devices:
@@ -595,8 +607,12 @@ paths:
     $ref: graph_proxy.yml#/paths/~1fd~1msgraph~1v1.0~1$batch
   /fd/msgraph/beta/deviceManagement:
     $ref: graph_proxy.yml#/paths/~1fd~1msgraph~1beta~1deviceManagement
+  /fd/msgraph/beta/deviceManagement/configurationCategories:
+    $ref: graph_proxy.yml#/paths/~1fd~1msgraph~1beta~1deviceManagement~1configurationCategories
   /fd/msgraph/beta/deviceManagement/configurationPolicies:
     $ref: graph_proxy.yml#/paths/~1fd~1msgraph~1beta~1deviceManagement~1configurationPolicies
+  /fd/msgraph/beta/deviceManagement/configurationSettings:
+    $ref: graph_proxy.yml#/paths/~1fd~1msgraph~1beta~1deviceManagement~1configurationSettings
   /fd/msgraph/beta/solutions/backupRestore:
     $ref: graph_proxy.yml#/paths/~1fd~1msgraph~1beta~1solutions~1backupRestore
   /fd/msgraph/beta/solutions/backupRestore/protectionPolicies:
@@ -651,6 +667,8 @@ paths:
     $ref: edge.yml#/paths/~1fd~1OfficePolicyAdmin~1v1.0~1edge~1policies~1{id}~1policywithpayload
 
   # Integrated Apps
+  /fd/addins/api/apps/insight:
+    $ref: integrated_apps.yml#/paths/~1fd~1addins~1api~1apps~1insight
   /fd/addins/api/apps:
     $ref: integrated_apps.yml#/paths/~1fd~1addins~1api~1apps
   /fd/addins/api/agents:
@@ -703,6 +721,8 @@ paths:
     $ref: viva.yml#/paths/~1admin~1api~1viva~1glint~1lookupClient
 
   # Miscellaneous
+  /fd/dms/odata/C2RReleaseInfo:
+    $ref: miscellaneous.yml#/paths/~1fd~1dms~1odata~1C2RReleaseInfo
   /admin/api/coordinatedbootstrap/shellinfo:
     $ref: miscellaneous.yml#/paths/~1admin~1api~1coordinatedbootstrap~1shellinfo
   /adminportal/home/ClassicModernAdminDataStream:
@@ -757,6 +777,20 @@ paths:
     $ref: features.yml#/paths/~1admin~1api~1features~1all
 
   # Billing
+  /admin/api/licenses/requests/summary:
+    $ref: billing.yml#/paths/~1admin~1api~1licenses~1requests~1summary
+  /admin/api/neptunelicensing/configurationplans:
+    $ref: billing.yml#/paths/~1admin~1api~1neptunelicensing~1configurationplans
+  /admin/api/neptunelicensing/creditrequests:
+    $ref: billing.yml#/paths/~1admin~1api~1neptunelicensing~1creditrequests
+  /fd/arm/providers/Microsoft.Billing/billingAccounts/{billingAccountId}/billingProfiles/{billingProfileId}/providers/Microsoft.Marketplace/products:
+    $ref: billing.yml#/paths/~1fd~1arm~1providers~1Microsoft.Billing~1billingAccounts~1{billingAccountId}~1billingProfiles~1{billingProfileId}~1providers~1Microsoft.Marketplace~1products
+  /fd/arm/providers/Microsoft.Billing/billingAccounts/{billingAccountId}/billingProfiles/{billingProfileId}/providers/Microsoft.Marketplace/skus:
+    $ref: billing.yml#/paths/~1fd~1arm~1providers~1Microsoft.Billing~1billingAccounts~1{billingAccountId}~1billingProfiles~1{billingProfileId}~1providers~1Microsoft.Marketplace~1skus
+  /fd/arm/providers/Microsoft.Billing/billingAccounts/{billingAccountId}/billingSubscriptions/{billingSubscriptionId}/fetchProductDetails:
+    $ref: billing.yml#/paths/~1fd~1arm~1providers~1Microsoft.Billing~1billingAccounts~1{billingAccountId}~1billingSubscriptions~1{billingSubscriptionId}~1fetchProductDetails
+  /fd/arm/providers/Microsoft.Billing/billingAccounts/{billingAccountId}/checkAccess:
+    $ref: billing.yml#/paths/~1fd~1arm~1providers~1Microsoft.Billing~1billingAccounts~1{billingAccountId}~1checkAccess
   /admin/api/billing/BillingModel:
     $ref: billing.yml#/paths/~1admin~1api~1billing~1BillingModel
   /fd/commerceMgmt/moderncommerce/footprint:
@@ -765,6 +799,8 @@ paths:
     $ref: billing.yml#/paths/~1fd~1KeyFulfillment~1v3.0~1softwareKeys
   /fd/m365licensing/v3/licensedProducts:
     $ref: billing.yml#/paths/~1fd~1m365licensing~1v3~1licensedProducts
+  /fd/m365licensing/v3/licensedProducts/{productId}/allotments:
+    $ref: billing.yml#/paths/~1fd~1m365licensing~1v3~1licensedProducts~1{productId}~1allotments
   /fd/storeForBusinessMgmt/bd-prod/agreements/vlpermissions:
     $ref: billing.yml#/paths/~1fd~1storeForBusinessMgmt~1bd-prod~1agreements~1vlpermissions
   /_api/v2.1/billingFeatures('M365Backup'):
@@ -793,8 +829,8 @@ paths:
     $ref: users_groups.yml#/paths/~1admin~1api~1contact~1GetContacts
   /admin/api/guestuserlist/Customization:
     $ref: users_groups.yml#/paths/~1admin~1api~1guestuserlist~1Customization
-  /admin/api/users/ListExternalGuestUsers:
-    $ref: users_groups.yml#/paths/~1admin~1api~1users~1ListExternalGuestUsers
+  /admin/api/Users/ListExternalGuestUsers:
+    $ref: users_groups.yml#/paths/~1admin~1api~1Users~1ListExternalGuestUsers
   /admin/api/UserList/Customization:
     $ref: users_groups.yml#/paths/~1admin~1api~1UserList~1Customization
   /admin/api/users/administrativeunits:
@@ -833,6 +869,8 @@ paths:
     $ref: tenant.yml#/paths/~1admin~1api~1tenant~1seatSize
 
   # Domains (new)
+  /admin/api/Domains/Summary:
+    $ref: domains.yml#/paths/~1admin~1api~1Domains~1Summary
   /admin/api/DomainList/Customization:
     $ref: domains.yml#/paths/~1admin~1api~1DomainList~1Customization
   /admin/api/Domains/GetDomainBuyModel:

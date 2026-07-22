@@ -1038,6 +1038,8 @@ paths:
     $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1app_connectors~1count
   /mcas/cas/api/v1/app_connectors/dashboard/get_apps_count_by_status:
     $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1app_connectors~1dashboard~1get_apps_count_by_status
+  /mcas/cas/api/v1/app_connectors/dashboard/get_app_connectors_count_by_status:
+    $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1app_connectors~1dashboard~1get_app_connectors_count_by_status
   /mcas/cas/api/v1/app_connectors/dashboard/get_instance_count_by_app:
     $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1app_connectors~1dashboard~1get_instance_count_by_app
   /mcas/cas/api/v1/app_connectors/dashboard/get_supported_apps_metadata:
@@ -1287,6 +1289,8 @@ paths:
   # Sentinel Precision
   /apiproxy/arm/subscriptions:
     $ref: sentinel_precision.yml#/paths/~1apiproxy~1arm~1subscriptions
+  /arm/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationsManagement/solutions/SecurityInsights({solutionName}):
+    $ref: sentinel_precision.yml#/paths/~1arm~1subscriptions~1{subscriptionId}~1resourceGroups~1{resourceGroupName}~1providers~1Microsoft.OperationsManagement~1solutions~1SecurityInsights({solutionName})
   /apiproxy/arm/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/overview:
     $ref: sentinel_precision.yml#/paths/~1apiproxy~1arm~1subscriptions~1{subscriptionId}~1resourceGroups~1{resourceGroupName}~1providers~1Microsoft.OperationalInsights~1workspaces~1{workspaceName}~1providers~1Microsoft.SecurityInsights~1overview
   /apiproxy/arm/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/recommendations:
@@ -1455,6 +1459,10 @@ paths:
     $ref: portal_services.yml#/paths/~1shell~1api~1shell~1shellinfo
   /medeina/auth:
     $ref: portal_services.yml#/paths/~1medeina~1auth
+  /medeina/settings/datashare:
+    $ref: portal_services.yml#/paths/~1medeina~1settings~1datashare
+  /medeina/usage/capacities:
+    $ref: portal_services.yml#/paths/~1medeina~1usage~1capacities
   /cdssecuritycopilot/trial:
     $ref: portal_services.yml#/paths/~1cdssecuritycopilot~1trial
   /msgraph/v1.0/users:

@@ -39,6 +39,64 @@ paths:
         '404':
           $ref: common.yml#/components/responses/NotFound
 
+  /arm/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationsManagement/solutions/SecurityInsights({solutionName}):
+    get:
+      summary: Get Sentinel Operations Management solution
+      description: >-
+        Retrieve the Operations Management solution record that links a resource group
+        to its Microsoft Sentinel workspace.
+      operationId: SentinelPrecision.GetOperationsManagementSolution
+      tags: [Sentinel]
+      parameters:
+        - $ref: '#/components/parameters/SubscriptionId'
+        - $ref: '#/components/parameters/ResourceGroupName'
+        - name: solutionName
+          in: path
+          required: true
+          description: Operations Management solution name selected by the portal.
+          schema:
+            type: string
+        - name: api-version
+          in: query
+          description: ARM API version used for the solution lookup.
+          schema:
+            type: string
+      x-nodoc-operation-context:
+        surface: Microsoft Sentinel
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Observed as a successful normal-UI read during bounded Defender navigation.
+      responses:
+        '200':
+          description: Operations Management solution record observed in the portal response.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  plan:
+                    type: object
+                  properties:
+                    type: object
+                  location:
+                    type: string
+                  tags:
+                    type: object
+                  id:
+                    type: string
+                  name:
+                    type: string
+                  type:
+                    type: string
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
   /apiproxy/arm/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/{workspaceName}/providers/Microsoft.SecurityInsights/overview:
     post:
       summary: Get Sentinel overview sections

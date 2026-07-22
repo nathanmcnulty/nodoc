@@ -1,4 +1,80 @@
 paths:
+  /admin/api/metrics/GetOverviewMetrics:
+    get:
+      summary: Get overview metrics
+      description: Retrieve the bounded set of metrics rendered by the admin overview experience.
+      operationId: Reports.GetOverviewMetrics
+      tags: [Reports]
+      parameters:
+        - name: limit
+          in: query
+          description: Maximum number of metric records requested by the portal.
+          schema:
+            type: integer
+      x-nodoc-operation-context:
+        surface: Admin overview
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Observed as a successful normal-UI read during bounded portal navigation.
+      responses:
+        '200':
+          description: Overview metrics wrapper observed in the portal response.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Output:
+                    type: array
+                    items:
+                      type: object
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/reports/GetMWSUsers:
+    get:
+      summary: Get MWS report users
+      description: Retrieve the user records for the selected MWS report entity.
+      operationId: Reports.GetMWSUsers
+      tags: [Reports]
+      parameters:
+        - name: entityname
+          in: query
+          description: Report entity selector sent by the portal.
+          schema:
+            type: string
+      x-nodoc-operation-context:
+        surface: Reports
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Observed as a successful normal-UI read during bounded portal navigation.
+      responses:
+        '200':
+          description: MWS users report wrapper observed in the portal response.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Output:
+                    type: array
+                    items:
+                      type: object
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
   /admin/api/reports/GetReportData:
     get:
       summary: Get report data
