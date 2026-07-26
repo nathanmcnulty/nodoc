@@ -221,9 +221,9 @@ x-nodoc-headerProfiles:
         description: URL-decoded value of the XSRF-TOKEN cookie from the authenticated Defender session.
       - name: x-tid
         description: Active tenant identifier used by the Defender proxy.
-      - name: tenant-id
-        description: Active tenant identifier forwarded to the Defender for Cloud Apps backend.
     observedHeaders:
+      - name: tenant-id
+        description: Active tenant identifier observed on Defender for Cloud Apps requests, but not consistently emitted by other Defender endpoint families.
       - name: Accept
         value: application/json, text/plain, */*
         description: JSON response preference emitted by the live Cloud Apps portal.
