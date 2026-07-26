@@ -227,12 +227,6 @@ paths:
         masking, integration, and session-control options.
       operationId: CloudApps.GetSettings
       tags: [CloudApps]
-      x-nodoc-operation-context:
-        surface: Settings > Cloud Apps
-        workflows:
-          - Open Defender for Cloud Apps settings and load the tenant-wide configuration.
-        authProfile: defender-session-baseline
-        headerProfile: defender-cloud-apps-tenant-context
       responses:
         '200':
           description: OK
@@ -307,6 +301,15 @@ paths:
         required: true
         content:
           application/json:
+            example:
+              skip: 0
+              limit: 20
+              filters:
+                builtIn:
+                  eq: [false]
+              performAsyncTotal: false
+              sortDirection: asc
+              sortField: name
             schema:
               type: object
               required: [skip, limit, filters, performAsyncTotal, sortDirection, sortField]
