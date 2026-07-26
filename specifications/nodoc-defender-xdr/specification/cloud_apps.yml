@@ -227,6 +227,12 @@ paths:
         masking, integration, and session-control options.
       operationId: CloudApps.GetSettings
       tags: [CloudApps]
+      x-nodoc-operation-context:
+        surface: Settings > Cloud Apps
+        workflows:
+          - Open Defender for Cloud Apps settings and load the tenant-wide configuration.
+        authProfile: defender-session-baseline
+        headerProfile: defender-cloud-apps-tenant-context
       responses:
         '200':
           description: OK
@@ -287,6 +293,58 @@ paths:
         '403':
           $ref: common.yml#/components/responses/Forbidden
 
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/subnet:
+    post:
+      summary: List Cloud Apps IP address ranges
+      description: >-
+        Retrieve the paged IP address range inventory used by the Defender for Cloud Apps settings grid.
+      operationId: CloudApps.ListSubnets
+      tags: [CloudApps]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [skip, limit, filters, performAsyncTotal, sortDirection, sortField]
+              properties:
+                skip:
+                  type: integer
+                  minimum: 0
+                limit:
+                  type: integer
+                  minimum: 1
+                filters:
+                  type: object
+                  additionalProperties: true
+                performAsyncTotal:
+                  type: boolean
+                sortDirection:
+                  type: string
+                  enum: [asc, desc]
+                sortField:
+                  type: string
+      x-nodoc-operation-context:
+        surface: Settings > Cloud Apps > IP address ranges
+        workflows:
+          - Open the IP address ranges grid and retrieve its first page.
+        authProfile: defender-session-baseline
+        headerProfile: defender-cloud-apps-tenant-context
+      responses:
+        '200':
+          description: Paged Cloud Apps IP address range inventory.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
         '404':
           $ref: common.yml#/components/responses/NotFound
 
@@ -2141,6 +2199,62 @@ paths:
         '403':
           $ref: common.yml#/components/responses/Forbidden
 
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/discovery/get_encryption_settings:
+    get:
+      summary: Get Cloud Discovery anonymization settings
+      description: >-
+        Retrieve the user and machine anonymization settings used by Cloud Discovery.
+      operationId: CloudApps.GetDiscoveryEncryptionSettings
+      tags: [CloudApps]
+      x-nodoc-operation-context:
+        surface: Settings > Cloud Apps > Cloud Discovery
+        workflows:
+          - Open Cloud Discovery anonymization settings.
+        authProfile: defender-session-baseline
+        headerProfile: defender-cloud-apps-tenant-context
+      responses:
+        '200':
+          description: Cloud Discovery anonymization settings.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /mcas/cas/api/v1/tenant_config/resolveDiscoveryUserWithAAD:
+    get:
+      summary: Get Cloud Discovery user enrichment state
+      description: >-
+        Retrieve whether Cloud Discovery resolves observed users through Microsoft Entra ID.
+      operationId: CloudApps.GetDiscoveryUserEnrichment
+      tags: [CloudApps]
+      x-nodoc-operation-context:
+        surface: Settings > Cloud Apps > Cloud Discovery
+        workflows:
+          - Open Cloud Discovery user enrichment settings.
+        authProfile: defender-session-baseline
+        headerProfile: defender-cloud-apps-tenant-context
+      responses:
+        '200':
+          description: Cloud Discovery user enrichment state.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
         '404':
           $ref: common.yml#/components/responses/NotFound
 
