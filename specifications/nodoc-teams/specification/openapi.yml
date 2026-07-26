@@ -1655,6 +1655,11 @@ paths:
         `TeamsUpgradePolicy`, `TenantNetworkRegion`, and `TenantTrustedIPAddress`.
       parameters:
         - $ref: '#/components/parameters/PolicyType'
+      x-nodoc-operation-context:
+        surface: Teams admin center policy configuration
+        workflows:
+          - Load a tenant policy or configuration inventory from the Teams admin center.
+        headerProfile: teams-service-bearer
       responses:
         '200':
           description: Policy or configuration inventory payload.
@@ -1681,6 +1686,11 @@ paths:
       parameters:
         - $ref: '#/components/parameters/PolicyType'
         - $ref: '#/components/parameters/PolicyName'
+      x-nodoc-operation-context:
+        surface: Teams admin center policy configuration
+        workflows:
+          - Load a named tenant policy configuration, including the Global instance.
+        headerProfile: teams-service-bearer
       responses:
         '200':
           description: Named policy configuration payload.
