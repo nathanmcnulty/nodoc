@@ -5,7 +5,44 @@
     "specPath": "specifications/nodoc-defender-xdr/specification/openapi.yml",
     "nodocRoute": null,
     "nodocCategory": null,
-    "headerProfiles": {},
+    "headerProfiles": {
+      "defender-cloud-apps-tenant-context": {
+        "description": "Tenant-bound Defender for Cloud Apps request profile observed on the security.microsoft.com proxy.",
+        "notes": [
+          "The authenticated WebRequestSession must retain its browser-compatible User-Agent when request context is copied to another worker."
+        ],
+        "requiredHeaders": [
+          {
+            "name": "X-XSRF-TOKEN",
+            "description": "URL-decoded value of the XSRF-TOKEN cookie from the authenticated Defender session."
+          },
+          {
+            "name": "x-tid",
+            "description": "Active tenant identifier used by the Defender proxy."
+          }
+        ],
+        "observedHeaders": [
+          {
+            "name": "tenant-id",
+            "description": "Active tenant identifier observed on Defender for Cloud Apps requests, but not consistently emitted by other Defender endpoint families."
+          },
+          {
+            "name": "Accept",
+            "description": "JSON response preference emitted by the live Cloud Apps portal.",
+            "value": "application/json, text/plain, */*"
+          },
+          {
+            "name": "Accept-Language",
+            "description": "Locale emitted by the retained live portal capture.",
+            "value": "en-us"
+          },
+          {
+            "name": "Referer",
+            "description": "Active security.microsoft.com Cloud Apps settings page."
+          }
+        ]
+      }
+    },
     "authProfiles": {
       "defender-session-baseline": {
         "description": "Authenticated Defender XDR session baseline used across apiproxy calls, shell bootstrap, and same-origin portal helpers.",
@@ -118,6 +155,34 @@
     },
     "operations": [
       {
+        "operationId": "Configuration.GetCloudAppsSettings",
+        "summary": "Get Cloud Apps general settings",
+        "method": "GET",
+        "path": "/mcas/cas/api/v1/settings",
+        "operationContext": {
+          "surface": "Settings > Cloud Apps",
+          "workflows": [
+            "Open Defender for Cloud Apps settings and load the tenant-wide configuration."
+          ],
+          "headerProfile": "defender-cloud-apps-tenant-context",
+          "authProfile": "defender-session-baseline"
+        }
+      },
+      {
+        "operationId": "CloudApps.ListSubnets",
+        "summary": "List Cloud Apps IP address ranges",
+        "method": "POST",
+        "path": "/mcas/cas/api/v1/subnet",
+        "operationContext": {
+          "surface": "Settings > Cloud Apps > IP address ranges",
+          "workflows": [
+            "Open the IP address ranges grid and retrieve its first page."
+          ],
+          "headerProfile": "defender-cloud-apps-tenant-context",
+          "authProfile": "defender-session-baseline"
+        }
+      },
+      {
         "operationId": "CloudApps.GetAppConnectorsCountByStatus",
         "summary": "Get app connector counts by status",
         "method": "GET",
@@ -133,6 +198,34 @@
               ]
             }
           ]
+        }
+      },
+      {
+        "operationId": "CloudApps.GetDiscoveryEncryptionSettings",
+        "summary": "Get Cloud Discovery anonymization settings",
+        "method": "GET",
+        "path": "/mcas/cas/api/v1/discovery/get_encryption_settings",
+        "operationContext": {
+          "surface": "Settings > Cloud Apps > Cloud Discovery",
+          "workflows": [
+            "Open Cloud Discovery anonymization settings."
+          ],
+          "headerProfile": "defender-cloud-apps-tenant-context",
+          "authProfile": "defender-session-baseline"
+        }
+      },
+      {
+        "operationId": "CloudApps.GetDiscoveryUserEnrichment",
+        "summary": "Get Cloud Discovery user enrichment state",
+        "method": "GET",
+        "path": "/mcas/cas/api/v1/tenant_config/resolveDiscoveryUserWithAAD",
+        "operationContext": {
+          "surface": "Settings > Cloud Apps > Cloud Discovery",
+          "workflows": [
+            "Open Cloud Discovery user enrichment settings."
+          ],
+          "headerProfile": "defender-cloud-apps-tenant-context",
+          "authProfile": "defender-session-baseline"
         }
       },
       {
@@ -1251,6 +1344,19 @@
               "notes": "The search admin surface uses a JSON body for list filters rather than query parameters."
             }
           ]
+        }
+      },
+      {
+        "operationId": "Search.GetBingNewsOptions",
+        "summary": "Get Bing news options",
+        "method": "GET",
+        "path": "/admin/api/searchadminapi/news/options/Bing",
+        "operationContext": {
+          "surface": "Settings > Search & intelligence",
+          "workflows": [
+            "Open Microsoft Search news settings and retrieve Bing news targeting and newsletter options."
+          ],
+          "headerProfile": "m365-admin-microsoft-search"
         }
       },
       {
@@ -3580,6 +3686,32 @@
               ]
             }
           ]
+        }
+      },
+      {
+        "operationId": null,
+        "summary": "Get Teams policy or configuration inventory",
+        "method": "GET",
+        "path": "/Skype.Policy/configurations/{policyType}",
+        "operationContext": {
+          "surface": "Teams admin center policy configuration",
+          "workflows": [
+            "Load a tenant policy or configuration inventory from the Teams admin center."
+          ],
+          "headerProfile": "teams-service-bearer"
+        }
+      },
+      {
+        "operationId": null,
+        "summary": "Get a named Teams policy configuration instance",
+        "method": "GET",
+        "path": "/Skype.Policy/configurations/{policyType}/configuration/{policyName}",
+        "operationContext": {
+          "surface": "Teams admin center policy configuration",
+          "workflows": [
+            "Load a named tenant policy configuration, including the Global instance."
+          ],
+          "headerProfile": "teams-service-bearer"
         }
       },
       {
