@@ -213,6 +213,28 @@ externalDocs:
   description: Checked-in source specification and supporting modules.
   url: https://github.com/nathanmcnulty/nodoc/tree/main/specifications/nodoc-defender-xdr/specification
 
+x-nodoc-headerProfiles:
+  defender-cloud-apps-tenant-context:
+    description: Tenant-bound Defender for Cloud Apps request profile observed on the security.microsoft.com proxy.
+    requiredHeaders:
+      - name: X-XSRF-TOKEN
+        description: URL-decoded value of the XSRF-TOKEN cookie from the authenticated Defender session.
+      - name: x-tid
+        description: Active tenant identifier used by the Defender proxy.
+    observedHeaders:
+      - name: tenant-id
+        description: Active tenant identifier observed on Defender for Cloud Apps requests, but not consistently emitted by other Defender endpoint families.
+      - name: Accept
+        value: application/json, text/plain, */*
+        description: JSON response preference emitted by the live Cloud Apps portal.
+      - name: Accept-Language
+        value: en-us
+        description: Locale emitted by the retained live portal capture.
+      - name: Referer
+        description: Active security.microsoft.com Cloud Apps settings page.
+    notes:
+      - The authenticated WebRequestSession must retain its browser-compatible User-Agent when request context is copied to another worker.
+
 x-nodoc-authProfiles:
   defender-session-baseline:
     description: Authenticated Defender XDR session baseline used across apiproxy calls, shell bootstrap, and same-origin portal helpers.
@@ -1018,6 +1040,8 @@ paths:
     $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1mail_settings~1get
   /mcas/cas/api/v1/subnet/metadata:
     $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1subnet~1metadata
+  /mcas/cas/api/v1/subnet:
+    $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1subnet
   /mcas/cas/api/v1/user_tags/metadata:
     $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1user_tags~1metadata
   /mcas/cas/api/v1/tokens/metadata:
@@ -1150,6 +1174,10 @@ paths:
     $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1manage_admins~1is_external_user
   /mcas/cas/api/v1/data_encryption_settings/get:
     $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1data_encryption_settings~1get
+  /mcas/cas/api/v1/discovery/get_encryption_settings:
+    $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1discovery~1get_encryption_settings
+  /mcas/cas/api/v1/tenant_config/resolveDiscoveryUserWithAAD:
+    $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1tenant_config~1resolveDiscoveryUserWithAAD
   /mcas/cas/api/v1/user_config/get_should_display_sync_bar:
     $ref: cloud_apps.yml#/paths/~1mcas~1cas~1api~1v1~1user_config~1get_should_display_sync_bar
   /mcas/cas/api/v1/invited_group_admins:

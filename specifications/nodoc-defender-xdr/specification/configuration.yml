@@ -502,6 +502,12 @@ paths:
         including organization details and feature configuration.
       operationId: Configuration.GetCloudAppsSettings
       tags: [Configuration]
+      x-nodoc-operation-context:
+        surface: Settings > Cloud Apps
+        workflows:
+          - Open Defender for Cloud Apps settings and load the tenant-wide configuration.
+        authProfile: defender-session-baseline
+        headerProfile: defender-cloud-apps-tenant-context
       responses:
         '200':
           description: OK
