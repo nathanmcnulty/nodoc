@@ -4,7 +4,7 @@ Agents should execute the bounded workflow in
 [AGENT_DISCOVERY_RUNBOOK.md](./AGENT_DISCOVERY_RUNBOOK.md) first. This playbook
 is the deeper reference for blockers, design decisions, and research.
 
-This is a living guide for researching undocumented portal APIs in a way that is repeatable, safe, and useful to future agents.
+This is a living guide for researching undocumented portal APIs in a way that is repeatable, safe, and useful to future agents. Prefer checked-in recipes, structured artifacts, and machine-generated decisions so lower-capability workers can execute bounded runs with little interactive reasoning.
 
 The goal is to turn real portal behavior into high-quality specs and generated artifacts while preserving tenant safety and recording what did and did not work.
 
@@ -30,11 +30,12 @@ When promoting discoveries into the repository, aim for more than just path cove
 ## Core principles
 
 1. **Traffic first.** Start with real browser traffic before relying on bundle mining.
-2. **Use the signed-in browser session.** Reuse the real Edge profile whenever possible so portal-only auth and context are preserved.
+2. **Use a dedicated signed-in browser session.** Reuse a persistent Edge or Chrome debug profile so portal-only auth and context survive retries without exposing the user's normal profile.
 3. **Prefer safe reads.** GETs first, then safe POST-backed reads, then intercepted write-shape capture, then reversible writes only if necessary.
 4. **Keep evidence.** Record whether an endpoint is confirmed by live traffic, safe probe, or bundle discovery.
 5. **Separate confidence levels.** Do not present bundle-only discoveries as if they were fully confirmed.
 6. **Scratch stays out of repo.** Scripts, network logs, bundle downloads, screenshots, and raw notes belong in workspace artifacts, not in the repository.
+7. **Keep reasoning out of the hot path.** Encode navigation, safety, normalization, and handoff logic in checked-in tooling; agents should execute and report rather than reconstruct the workflow from raw evidence.
 
 ## Coverage expansion model
 
@@ -97,6 +98,31 @@ Before scheduling another browser run, put the target surface into one of these 
 
 The goal is to avoid treating every portal as if it needs the same kind of crawl.
 
+## Deterministic swarm model
+
+Use four bounded roles instead of asking every worker to understand the entire
+research process:
+
+1. **Coordinator**
+   - Runs `--phase plan --json`, assigns one portal and checked-in recipe, and
+     records a unique artifact directory.
+2. **Capture worker**
+   - Follows `AGENT_DISCOVERY_RUNBOOK.md` exactly and owns one CDP endpoint,
+     page target, and artifact directory for the duration of the run.
+3. **Analysis worker**
+   - Runs the checked-in `analyze` phase over completed immutable capture
+     artifacts and reports the generated handoff; it does not reinterpret raw
+     requests when structured outputs are sufficient.
+4. **Promotion reviewer**
+   - Reviews scope, safety, and evidence before changing a specification. This
+     is the only role that turns candidates into repository changes.
+
+On one machine, serialize capture workers because the deterministic driver uses
+one CDP endpoint on port `9222`. Parallelize across isolated machines or over
+completed artifacts, never by sharing a live page target or output directory.
+This reduces browser races, duplicate traffic, context consumption, and
+different agents reaching different conclusions from the same evidence.
+
 ## Recommended workflow
 
 ### 1. Review the current repo baseline
@@ -114,22 +140,43 @@ The goal is to avoid treating every portal as if it needs the same kind of crawl
 
 Preferred flow:
 
-1. Use the real signed-in Edge profile.
+1. Have the operator start the persistent dedicated Edge or Chrome profile from
+   the runbook and authenticate it.
 2. Attach automation over CDP, usually on `http://127.0.0.1:9222`.
-3. If multiple profiles exist, verify the active one is the current signed-in work profile before doing anything else.
+3. Verify `/json/version` exposes a browser websocket and `/json/list` contains
+   the intended authenticated portal target before capture.
 
 Practical notes:
 
-- Prefer `playwright-core` plus `chromium.connectOverCDP(...)`.
-- Best-known flow: start or reuse the signed-in Edge Work profile with `--remote-debugging-port=9222`, then attach over CDP instead of launching an automation-owned browser.
-- Avoid cloning the user profile unless CDP attach is impossible; copied profiles can lose auth or drift from the live browser state.
-- If you must fall back to a copied profile, make a **fresh copy for each run**. Reusing an older copied profile later in the session redirected back to Microsoft login even though a fresh copy still worked.
-- If browser-level `connectOverCDP(...)` starts timing out after the websocket connects, keep the live browser open and fall back to a fresh same-origin tab opened through the CDP HTTP `/json/new?...` endpoint, then drive that page target directly over its `webSocketDebuggerUrl` with raw CDP.
-- Prefer the checked-in page-target fallback runner (`npm run capture:deep-crawl -- --portal <name> --url <seed-url> --out <artifact-dir> ...`) before inventing another scratch harness; it already handles child-target attach, SPA/hash fallback, checkpointed artifact writes, scoped request filtering, checked-in recipe loading (`--recipe`), and recipe variables (`--var name=value`).
-- Prefer one fresh investigation tab per portal family when using the raw page-target fallback. Stale same-origin tabs can poison browser-level attach or leave you attached to the wrong target.
-- Once the page is live, capture at least one real backend request from the target feature family and preserve its auth + portal headers. That header set is often enough to power later safe probes without reopening the UI for every candidate.
-- Do **not** close the user’s browser when the script ends; open a fresh page or tab for the investigation, close only that page, and disconnect by exiting the script.
+- Use the checked-in `discover:portal` driver. It owns target creation, child-target
+  attach, SPA fallback, checkpoints, scoped capture, bundle mining, and candidate
+  generation; do not reproduce those steps interactively.
+- Do not clone a normal browser profile, call CDP `/json/new` manually, or switch
+  to a second browser automation mode after attach trouble.
+- If the websocket or target attach fails, stop the worker. The operator checks
+  the dedicated session, closes only that dedicated debug browser if needed,
+  relaunches the same persistent profile, verifies both CDP endpoints, and gives
+  the worker a new empty artifact directory.
+- Let the checked-in runner use auth and portal headers in memory for same-session
+  safe probes. Persisted bodies are token-redacted and persisted headers contain
+  metadata rather than raw authorization or cookie values. Other tenant content
+  can remain in capture artifacts, so keep them local and share only the
+  sanitized `candidate-handoff.json`.
+- Do **not** close the user's normal browser. The runner may create and close its
+  own investigation target; browser-session recovery remains operator-owned.
 - If you still need a scratch `.mjs` experiment, keep it in the artifacts directory and promote only the pieces that generalize back into the checked-in runner.
+
+Deterministic recovery depends on where execution stopped:
+
+- Completed capture, interrupted analysis: run `--phase analyze` against the
+  same artifact directory. No browser is required.
+- Interrupted capture with checkpoint files: preserve that directory unchanged,
+  create a new empty directory, and run `all` with `--seed-artifacts` pointing
+  to the prior directory.
+- Authentication or CDP recovery: verify the dedicated profile, then use a new
+  empty directory. Never append capture traffic to an earlier run.
+- Failed required selector or action: emit the structured blocker and escalate
+  recipe repair. Do not improvise clicks in the live worker.
 
 ### 3. Inventory the navigation surface
 
@@ -315,6 +362,14 @@ review; they never enter the target spec's active candidate queue. Generating
 the handoff completes discovery execution; landing supported findings is a
 separate review PR.
 
+Treat `candidate-handoff.json` as the canonical candidate-to-spec control
+artifact. Do not create a second hand-maintained mapping table from raw bundle
+strings. An adjacent candidate is evidence observed during the run that belongs
+to another trusted host or specification family; preserve it for explicit scope
+assignment, but never promote it into the target spec by proximity alone. If a
+candidate lacks a generated evidence category or next action, report a pipeline
+gap instead of guessing a confidence or destination.
+
 ### 5b. Safe-probe hidden reads
 
 When bundle mining exposes likely read routes that the UI did not call directly:
@@ -492,9 +547,14 @@ subset of those requests or omitted the body shape.
 
 ### Less effective
 
-- Hard-coding runtime navigation container IDs
-- Asking an agent to coordinate page crawl, response harvesting, bundle downloading, and parsing as separate interactive steps
-- Treating bundle-only routes as ready for full spec modeling without either traffic or safe probe evidence
+- Hard-coding runtime navigation container IDs, because UI refreshes invalidate
+  them and force agents to rediscover selectors.
+- Asking an agent to coordinate page crawl, response harvesting, bundle
+  downloading, and parsing as separate interactive steps, because it discards
+  checkpoints and spends context restating machine-readable evidence.
+- Treating bundle-only routes as ready for full spec modeling without either
+  traffic or safe probe evidence, because downstream consumers cannot
+  distinguish a live route from a stale string.
 
 ## Experiment log
 
@@ -861,6 +921,14 @@ Add new ideas here before trying them, then move the result into the experiment 
 - Add a denylist or lower priority for shared settings routes that are reachable from many entities but rarely add new API families.
 - Add reusable interaction-matrix templates for report blades, list/detail portals, and settings-heavy portals so shallow recipes can be expanded consistently.
 - Add a route-family diversity report that highlights when one entity type or path family is dominating the crawl and suppressing breadth.
+- Add a machine-generated shard manifest that assigns non-overlapping recipe or
+  route families, seed artifacts, budgets, and output directories to workers.
+- Extend CDP preflight output with sanitized page-target health so operators can
+  distinguish an unavailable listener, wrong profile, sign-in target, and stale
+  dedicated session without inspecting raw browser state.
+- Record requested recipe, selected recipe, recipe source, and required-action
+  failures in the run manifest so swarm coordinators can reject recipe drift
+  mechanically.
 
 ## PR-ready checklist
 

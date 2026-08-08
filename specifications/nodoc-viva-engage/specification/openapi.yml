@@ -637,12 +637,12 @@ paths:
       operationId: RealtimeRelay_PostHandshake
       security: []
       servers:
-        - url: https://{relayHost}.rt.yammer.com
+        - url: https://{relayHost}
           description: Tenant- and user-scoped realtime relay host returned by the authenticated Viva Engage shell.
           variables:
             relayHost:
-              default: relay-instance
-              description: Placeholder for the transient relay host subdomain returned by `RealtimeConnectionSettingsClients`.
+              default: relay-instance.rt.yammer.com
+              description: Placeholder for the transient `*.rt.yammer.com` relay host returned by `RealtimeConnectionSettingsClients`.
       requestBody:
         required: true
         content:
@@ -720,12 +720,12 @@ paths:
       operationId: RealtimeRelay_PostSubscribe
       security: []
       servers:
-        - url: https://{relayHost}.rt.yammer.com
+        - url: https://{relayHost}
           description: Tenant- and user-scoped realtime relay host returned by the authenticated Viva Engage shell.
           variables:
             relayHost:
-              default: relay-instance
-              description: Placeholder for the transient relay host subdomain returned by `RealtimeConnectionSettingsClients`.
+              default: relay-instance.rt.yammer.com
+              description: Placeholder for the transient `*.rt.yammer.com` relay host returned by `RealtimeConnectionSettingsClients`.
       requestBody:
         required: true
         content:
@@ -793,12 +793,12 @@ paths:
       operationId: RealtimeRelay_PostConnect
       security: []
       servers:
-        - url: https://{relayHost}.rt.yammer.com
+        - url: https://{relayHost}
           description: Tenant- and user-scoped realtime relay host returned by the authenticated Viva Engage shell.
           variables:
             relayHost:
-              default: relay-instance
-              description: Placeholder for the transient relay host subdomain returned by `RealtimeConnectionSettingsClients`.
+              default: relay-instance.rt.yammer.com
+              description: Placeholder for the transient `*.rt.yammer.com` relay host returned by `RealtimeConnectionSettingsClients`.
       requestBody:
         required: true
         content:

@@ -28,29 +28,71 @@ The task must name one portal by title or spec ID, for example `M365 Admin` or
 ## Browser prerequisite
 
 The deterministic pipeline attaches to an already authenticated browser. The
-agent must not assume that an ordinary Edge process is a CDP endpoint. Before
-starting the capture phase, the operator must launch a dedicated Edge profile
-with remote debugging enabled, sign in to the portal, and verify the endpoint:
+agent must not launch, close, or repair that browser. Before assigning a capture
+worker, the operator must launch a dedicated Edge or Chrome profile with remote
+debugging enabled, sign in to the portal, and verify both the browser endpoint
+and page targets.
+
+Use one persistent dedicated profile per browser and portal so authentication
+survives retries without copying or modifying the user's normal browser profile:
 
 ```powershell
-$edge = Join-Path ${env:ProgramFiles(x86)} "Microsoft\Edge\Application\msedge.exe"
-$profileDir = Join-Path $env:TEMP "nodoc-edge-cdp-m365-admin"
-Start-Process $edge -ArgumentList @(
+$portal = "m365-admin"
+$portalUrl = "https://admin.cloud.microsoft"
+$browserName = "edge" # edge or chrome
+$browserCandidates = if ($browserName -eq "edge") {
+   @(
+      (Join-Path ${env:ProgramFiles(x86)} "Microsoft\Edge\Application\msedge.exe"),
+      (Join-Path ${env:ProgramFiles} "Microsoft\Edge\Application\msedge.exe")
+   )
+} else {
+   @(
+      (Join-Path ${env:ProgramFiles} "Google\Chrome\Application\chrome.exe"),
+      (Join-Path ${env:ProgramFiles(x86)} "Google\Chrome\Application\chrome.exe")
+   )
+}
+$browser = $browserCandidates | Where-Object { Test-Path $_ } | Select-Object -First 1
+if (-not $browser) { throw "Could not find $browserName in a standard install path." }
+
+$profileDir = Join-Path $env:LOCALAPPDATA "nodoc-cdp\$browserName-$portal"
+$existingCdp = try {
+   Invoke-RestMethod http://127.0.0.1:9222/json/version -TimeoutSec 2
+} catch {
+   $null
+}
+
+if (-not $existingCdp) {
+   $listener = Get-NetTCPConnection -LocalPort 9222 -State Listen -ErrorAction SilentlyContinue
+   if ($listener) {
+      throw "Port 9222 is occupied but is not a healthy CDP endpoint. Resolve it manually; do not kill the owning process from an agent run."
+   }
+   Start-Process $browser -ArgumentList @(
   "--remote-debugging-address=127.0.0.1",
   "--remote-debugging-port=9222",
   "--user-data-dir=$profileDir",
   "--no-first-run",
   "--no-default-browser-check",
-  "https://admin.cloud.microsoft"
-)
-Invoke-RestMethod http://127.0.0.1:9222/json/version
+      $portalUrl
+   ) | Out-Null
+}
+
+$version = Invoke-RestMethod http://127.0.0.1:9222/json/version -TimeoutSec 3
+$targets = Invoke-RestMethod http://127.0.0.1:9222/json/list -TimeoutSec 3 |
+   Where-Object { $_.type -eq "page" }
+if (-not $version.webSocketDebuggerUrl) { throw "CDP endpoint has no browser WebSocket URL." }
+$version | Select-Object Browser, webSocketDebuggerUrl
+$targets | Select-Object id, title, url
 ```
 
-The response must include `webSocketDebuggerUrl`. If the endpoint is refused,
-the browser was not started with the debugging flag; if it responds but capture
-ends at Microsoft sign-in, authenticate that profile and use a new artifact
-directory for the retry. Do not close or replace the user's normal browser
-profile.
+Before handing off to an agent, the operator must confirm that the listed page
+target is the intended portal and is past sign-in. If an existing endpoint is
+the wrong dedicated session, has stale targets, or times out during attach, the
+operator may close that dedicated debug browser and relaunch the same dedicated
+profile. Never kill a listener by PID, close the user's normal browser, copy a
+normal browser profile, or run two automation modes against the same session.
+
+Every retry after browser recovery uses a new empty artifact directory. A
+healthy completed capture may be analyzed again without reopening the browser.
 
 ## Execution
 
@@ -73,18 +115,64 @@ profile.
    npm run discover:portal -- --portal m365-admin --profile bounded --phase all --artifacts $artifacts
    ```
 
-4. Read only these outputs first:
+4. If execution is interrupted, choose exactly one recovery path:
+
+    - If capture completed and primary capture artifacts exist, rerun analysis
+       against the same directory without touching the browser:
+
+       ```powershell
+       npm run discover:portal -- --portal m365-admin --profile bounded --phase analyze --artifacts $artifacts
+       ```
+
+    - If capture did not complete, preserve the partial directory as immutable
+       evidence and start a new run seeded from its checkpointed page states:
+
+       ```powershell
+       $retryArtifacts = Join-Path $env:TEMP ("nodoc-m365-admin-retry-" + [guid]::NewGuid())
+       npm run discover:portal -- --portal m365-admin --profile bounded --phase all --artifacts $retryArtifacts --seed-artifacts $artifacts
+       ```
+
+    Never resume `capture` or `all` into a non-empty directory, merge artifact
+    directories, or use `analyze` as a substitute for an incomplete capture.
+
+5. Read only these outputs first, in order:
 
    - `discovery-run.json`
    - `summary.json`
    - `candidate-handoff.json`
+
+   Stop there when those files explain the status, counts, blocker, and
+   recommended next action.
+
+6. Read the following structured evidence only when the handoff requires a
+   specific candidate, probe, bundle, or streaming detail:
+
    - `candidate-queue.json`
    - `probe-results.json`
    - `bundle-candidates.json`
    - `stream-records.json`
 
-5. Consult `page-states.json`, `action-results.json`, or raw request artifacts
-   only when the primary outputs do not explain a candidate or blocker.
+7. Consult `page-states.json`, `action-results.json`, or raw request artifacts
+   only when the structured outputs do not explain a candidate or blocker, and
+   escalate that inspection to a trusted review worker.
+
+## Swarm execution contract
+
+- One coordinator runs `plan`, assigns one portal and checked-in recipe per
+   capture worker, and records the artifact directory for each assignment.
+- One capture worker owns port `9222`, its page target, and its artifact
+   directory at a time. Never let workers share or append to those resources.
+- Parallel capture requires separate machines or isolated browser/CDP
+   endpoints. On one machine, serialize capture workers; parallelize only
+   offline review of completed immutable artifacts.
+- Lower-capability workers execute the runbook and return the completion
+   structure. They do not invent selectors, change recipes, classify unsafe
+   actions, inspect raw secrets, or edit specifications.
+- Escalate only failed required recipe actions, ambiguous safety or scope, and
+   recipe changes. After review, rerun the complete checked-in recipe in a new
+   artifact directory rather than patching a live run interactively.
+- Treat `candidate-handoff.json` and the driver's `recommendedNextAction` as the
+   work queue. Do not create a second speculative mapping from raw bundle output.
 
 ## Safety boundary
 
@@ -104,6 +192,14 @@ Forbidden:
 - sign-out, export, execute, start-job, trigger, or similar action routes
 - editing specifications during discovery
 - copying bearer tokens, cookies, or tenant data into chat or committed files
+
+The runner may use raw browser headers in memory during capture, but it does not
+persist raw authorization or cookie values. Persisted request and response
+bodies redact token-bearing keys and token-like strings; persisted headers are
+reduced to names, auth-presence signals, and selected non-secret metadata.
+Capture artifacts can still contain tenant identifiers and content, so keep
+them local. Only `candidate-handoff.json` is designed as the tenant-safe sharing
+surface.
 
 ## Evidence labels
 
