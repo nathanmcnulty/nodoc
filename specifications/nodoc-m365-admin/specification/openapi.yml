@@ -619,6 +619,20 @@ paths:
     $ref: graph_proxy.yml#/paths/~1fd~1msgraph~1beta~1solutions~1backupRestore~1protectionPolicies
   /fd/msgraph/beta/solutions/backupRestore/emailNotificationsSetting:
     $ref: graph_proxy.yml#/paths/~1fd~1msgraph~1beta~1solutions~1backupRestore~1emailNotificationsSetting
+  /fd/msgraph/beta/reports/getOneDriveActivityFileCounts(period='D30'):
+    $ref: "graph_proxy.yml#/paths/~1fd~1msgraph~1beta~1reports~1getOneDriveActivityFileCounts(period='D30')"
+  /fd/msgraph/beta/reports/getOneDriveUsageAccountCounts(period='D30'):
+    $ref: "graph_proxy.yml#/paths/~1fd~1msgraph~1beta~1reports~1getOneDriveUsageAccountCounts(period='D30')"
+  /fd/msgraph/beta/reports/getOneDriveUsageFileCounts(period='D180'):
+    $ref: "graph_proxy.yml#/paths/~1fd~1msgraph~1beta~1reports~1getOneDriveUsageFileCounts(period='D180')"
+  /fd/msgraph/beta/reports/getSharePointActivityFileCounts(period='D30'):
+    $ref: "graph_proxy.yml#/paths/~1fd~1msgraph~1beta~1reports~1getSharePointActivityFileCounts(period='D30')"
+  /fd/msgraph/beta/reports/getSharePointSiteUsageFileCounts(period='D180'):
+    $ref: "graph_proxy.yml#/paths/~1fd~1msgraph~1beta~1reports~1getSharePointSiteUsageFileCounts(period='D180')"
+  /fd/msgraph/beta/reports/getSharePointSiteUsageSiteCounts(period='D30'):
+    $ref: "graph_proxy.yml#/paths/~1fd~1msgraph~1beta~1reports~1getSharePointSiteUsageSiteCounts(period='D30')"
+  /fd/msgraph/beta/reports/getSharePointSiteUsageStorage(period='D180'):
+    $ref: "graph_proxy.yml#/paths/~1fd~1msgraph~1beta~1reports~1getSharePointSiteUsageStorage(period='D180')"
   /fd/MsGraph/beta/security/dataDiscovery/cloudAppDiscovery/uploadedStreams:
     $ref: graph_proxy.yml#/paths/~1fd~1MsGraph~1beta~1security~1dataDiscovery~1cloudAppDiscovery~1uploadedStreams
   /fd/MsGraph/beta/security/dataDiscovery/cloudAppDiscovery/uploadedStreams/{streamId}/microsoft.graph.security.aggregatedAppsDetails(period=duration'P90D'):
@@ -947,6 +961,12 @@ paths:
     $ref: health.yml#/paths/~1admin~1api~1servicehealth~1status~1activeCM
 
   # Reports (new)
+  /admin/api/products/inactiveUsers/OneDriveUsage:
+    $ref: reports.yml#/paths/~1admin~1api~1products~1inactiveUsers~1OneDriveUsage
+  /admin/api/products/inactiveUsers/OneDriveUsageVSB:
+    $ref: reports.yml#/paths/~1admin~1api~1products~1inactiveUsers~1OneDriveUsageVSB
+  /admin/api/products/inactiveUsers/TeamsUsage:
+    $ref: reports.yml#/paths/~1admin~1api~1products~1inactiveUsers~1TeamsUsage
   /admin/api/reports/GetReportCategoryDetails:
     $ref: reports.yml#/paths/~1admin~1api~1reports~1GetReportCategoryDetails
   /admin/api/reports/GetReportTileData:
@@ -1003,3 +1023,4 @@ paths:
   # Integrated Apps (new)
   /admin/api/privatecatalog/GetAddInDetails:
     $ref: integrated_apps.yml#/paths/~1admin~1api~1privatecatalog~1GetAddInDetails
+
