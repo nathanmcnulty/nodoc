@@ -1162,6 +1162,61 @@ paths:
         '403':
           $ref: '#/components/responses/Forbidden'
 
+  /_api/SPO.Tenant/GetAdminReportMetadata:
+    post:
+      tags: [Settings]
+      summary: Get admin report metadata
+      description: |
+        Returns report metadata for selected admin datasets in the SharePoint
+        admin center. The call is observed as a JSON POST and includes a
+        `dataset` array in the request body.
+      operationId: SharePointAdmin.GetAdminReportMetadata
+      parameters:
+        - $ref: '#/components/parameters/XRequestDigest'
+        - $ref: '#/components/parameters/SdkVersion'
+        - $ref: '#/components/parameters/ODataVersion'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - dataset
+              properties:
+                dataset:
+                  type: array
+                  items:
+                    type: string
+      x-nodoc-operation-context:
+        surface: Reports
+        workflows:
+          - Open the SharePoint admin center and request admin report metadata for a selected report dataset.
+        headerProfile: sharepoint-admin-write
+        requestShapes:
+          - name: admin-report-metadata
+            contentType: application/json
+            bodyKind: dataset-request
+            notes: Request body includes `dataset` array values such as `SitePermissions`.
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Confirmed call to `/_api/SPO.Tenant/GetAdminReportMetadata` from the SharePoint admin page.
+      responses:
+        '200':
+          description: Admin report metadata returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
   "/_api/SPO.Tenant/sites('{siteId}')":
     get:
       tags: [Sites]
