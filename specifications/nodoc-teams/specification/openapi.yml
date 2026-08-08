@@ -2740,6 +2740,24 @@ paths:
                 $ref: '#/components/schemas/TeamsAppCatalogEntries'
         '401':
           $ref: '#/components/responses/Unauthorized'
+  /AdminAppCatalog/v2/admin/unifiedApps:
+    servers:
+      - url: https://substrate.office.com
+        description: Teams app catalog backend
+    get:
+      tags: [AppCatalog]
+      summary: Get unified Teams app catalog entries
+      description: |
+        Confirmed read observed from the Teams admin portal app catalog surface.
+      responses:
+        '200':
+          description: Unified Teams app catalog payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
   /AdminAppCatalog/teamsApps/acmStatus:
     servers:
       - url: https://substrate.office.com

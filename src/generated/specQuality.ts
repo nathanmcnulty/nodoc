@@ -601,7 +601,7 @@ export const generatedSpecDataByTitle = {
     "specPath": "specifications/nodoc-teams/specification/openapi.yml",
     "specSourceUrl": "https://github.com/nathanmcnulty/nodoc/tree/main/specifications/nodoc-teams/specification",
     "specDownloadUrl": "https://raw.githubusercontent.com/nathanmcnulty/nodoc/main/specifications/nodoc-teams/specification/openapi.yml",
-    "operationCount": 99,
+    "operationCount": 100,
     "tagCount": 32,
     "tagGroupCount": 7,
     "ungroupedTagCount": 0,
