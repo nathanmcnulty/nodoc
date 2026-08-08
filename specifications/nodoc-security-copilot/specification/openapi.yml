@@ -605,6 +605,29 @@ paths:
               schema:
                 $ref: '#/components/schemas/GraphDetailsResponse'
 
+  /pods/{podId}/workspaces/{workspaceName}/securitycopilot/graphData/details:
+    post:
+      tags: [Workspace]
+      summary: Resolve Security Copilot workspace graph data details
+      description: Resolves user, role, group, and service-principal identifiers for a selected workspace context.
+      operationId: SecurityCopilotPortal.GraphData.GetWorkspaceDetails
+      parameters:
+        - $ref: '#/components/parameters/PodId'
+        - $ref: '#/components/parameters/WorkspaceName'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GraphDetailsRequest'
+      responses:
+        '200':
+          description: Workspace graph data details returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GraphDetailsResponse'
+
   /provisioning/create:
     post:
       tags: [Provisioning]
