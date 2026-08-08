@@ -791,6 +791,23 @@ paths:
               schema:
                 $ref: '#/components/schemas/SessionsResponse'
 
+  /pods/{podId}/workspaces/{workspaceName}/securitycopilot/sessions/prompts:
+    get:
+      tags: [Sessions]
+      summary: List session prompts
+      description: Retrieves persisted session prompt definitions for a workspace.
+      operationId: SecurityCopilotPortal.Sessions.ListPrompts
+      parameters:
+        - $ref: '#/components/parameters/PodId'
+        - $ref: '#/components/parameters/WorkspaceName'
+      responses:
+        '200':
+          description: Session prompts returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+
   /pods/{podId}/workspaces/{workspaceName}/securitycopilot/promptbooks:
     get:
       tags: [Promptbooks]
@@ -883,6 +900,59 @@ paths:
               schema:
                 $ref: '#/components/schemas/GenericListEnvelope'
 
+  /pods/{podId}/workspaces/{workspaceName}/securitycopilot/skillsets/authSettings:
+    get:
+      tags: [Builder]
+      summary: Get skillset authentication settings
+      description: Retrieves authentication metadata required to wire Skillset sign-in and trust settings.
+      operationId: SecurityCopilotPortal.Skillsets.GetAuthSettings
+      parameters:
+        - $ref: '#/components/parameters/PodId'
+        - $ref: '#/components/parameters/WorkspaceName'
+      responses:
+        '200':
+          description: Skillset auth settings returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+
+  /pods/{podId}/workspaces/{workspaceName}/securitycopilot/skillsets/Fusion/icon:
+    get:
+      tags: [Builder]
+      summary: Get Fusion skillset icon
+      description: Retrieves the icon asset for the Fusion skillset.
+      operationId: SecurityCopilotPortal.Skillsets.GetFusionIcon
+      parameters:
+        - $ref: '#/components/parameters/PodId'
+        - $ref: '#/components/parameters/WorkspaceName'
+      responses:
+        '200':
+          description: Fusion icon returned successfully.
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+
+  /pods/{podId}/workspaces/{workspaceName}/securitycopilot/skillsets/KnowledgeBase/icon:
+    get:
+      tags: [Builder]
+      summary: Get KnowledgeBase skillset icon
+      description: Retrieves the icon asset for the KnowledgeBase skillset.
+      operationId: SecurityCopilotPortal.Skillsets.GetKnowledgeBaseIcon
+      parameters:
+        - $ref: '#/components/parameters/PodId'
+        - $ref: '#/components/parameters/WorkspaceName'
+      responses:
+        '200':
+          description: KnowledgeBase icon returned successfully.
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+
   /pods/{podId}/workspaces/{workspaceName}/securitycopilot/skillsets/configurations:
     get:
       tags: [Builder]
@@ -918,6 +988,23 @@ paths:
               schema:
                 $ref: '#/components/schemas/GenericListEnvelope'
 
+  /pods/{podId}/workspaces/{workspaceName}/securitycopilot/WorkspaceSettings:
+    get:
+      tags: [Workspace]
+      summary: Get workspace settings
+      description: Retrieves workspace-level settings for the selected workspace.
+      operationId: SecurityCopilotPortal.Workspace.GetSettings
+      parameters:
+        - $ref: '#/components/parameters/PodId'
+        - $ref: '#/components/parameters/WorkspaceName'
+      responses:
+        '200':
+          description: Workspace settings returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+
   /pods/{podId}/workspaces/{workspaceName}/securitycopilot/skillsets/{skillsetName}/skills:
     get:
       tags: [Builder]
@@ -952,6 +1039,23 @@ paths:
       responses:
         '200':
           description: Store client configuration returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MarketplaceClientConfigResponse'
+
+  /config/v1/SecurityCopilotClient/1.0.0:
+    get:
+      tags: [Store]
+      summary: Get Security Copilot client configuration
+      description: Retrieves Copilot client configuration used by bootstrap and runtime surfaces.
+      operationId: SecurityCopilotPortal.Store.GetCopilotClientConfiguration
+      parameters:
+        - $ref: '#/components/parameters/SecurityService'
+        - $ref: '#/components/parameters/Environment'
+      responses:
+        '200':
+          description: Copilot client configuration returned successfully.
           content:
             application/json:
               schema:
