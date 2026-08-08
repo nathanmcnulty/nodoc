@@ -28,7 +28,7 @@ info:
 
     Documentation and specifications have been provided on a best-efforts basis and may not be
     100% accurate.
-  version: 0.1.0
+  version: 0.1.1
   contact:
     name: nodoc
     url: https://github.com/nathanmcnulty/nodoc
@@ -251,6 +251,46 @@ components:
       schema:
         type: string
         example: Prod
+    YammerClientEnvironment:
+      name: Environment
+      in: query
+      required: true
+      description: Viva Engage environment identifier for the Yammer client configuration endpoint.
+      schema:
+        type: string
+        example: Production
+    YammerClientApplication:
+      name: Application
+      in: query
+      required: true
+      description: Client application family requesting Yammer configuration.
+      schema:
+        type: string
+        example: YammerWeb
+    YammerClientCloud:
+      name: Cloud
+      in: query
+      required: true
+      description: Tenant cloud identifier used by the Yammer clients configuration endpoint.
+      schema:
+        type: string
+        example: Public
+    YammerClientTenantId:
+      name: TenantId
+      in: query
+      required: true
+      description: Tenant identifier in GUID format for the current Viva Engage tenant.
+      schema:
+        type: string
+        format: uuid
+    YammerClientUserId:
+      name: UserId
+      in: query
+      required: true
+      description: Current principal identifier in GUID format.
+      schema:
+        type: string
+        format: uuid
   responses:
     Unauthorized:
       description: Authentication is required or the current browser token is no longer valid.
@@ -1056,6 +1096,26 @@ paths:
       responses:
         '200':
           description: Copilot client configuration returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MarketplaceClientConfigResponse'
+
+  /config/v1/YammerClients/0.0.1:
+    get:
+      tags: [Store]
+      summary: Get Yammer client configuration
+      description: Loads Viva Engage/Yammer feature-flight style configuration for the authenticated user context.
+      operationId: SecurityCopilotPortal.Store.GetYammerClientConfiguration
+      parameters:
+        - $ref: '#/components/parameters/YammerClientApplication'
+        - $ref: '#/components/parameters/YammerClientCloud'
+        - $ref: '#/components/parameters/YammerClientEnvironment'
+        - $ref: '#/components/parameters/YammerClientTenantId'
+        - $ref: '#/components/parameters/YammerClientUserId'
+      responses:
+        '200':
+          description: Yammer client configuration returned successfully.
           content:
             application/json:
               schema:

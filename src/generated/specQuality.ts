@@ -535,7 +535,7 @@ export const generatedSpecDataByTitle = {
     "specPath": "specifications/nodoc-security-copilot/specification/openapi.yml",
     "specSourceUrl": "https://github.com/nathanmcnulty/nodoc/tree/main/specifications/nodoc-security-copilot/specification",
     "specDownloadUrl": "https://raw.githubusercontent.com/nathanmcnulty/nodoc/main/specifications/nodoc-security-copilot/specification/openapi.yml",
-    "operationCount": 38,
+    "operationCount": 39,
     "tagCount": 8,
     "tagGroupCount": 4,
     "ungroupedTagCount": 0,
