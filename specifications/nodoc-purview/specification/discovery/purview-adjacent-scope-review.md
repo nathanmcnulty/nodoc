@@ -52,7 +52,9 @@ Artifacts directory: C:\Users\NATHAN~1\AppData\Local\Temp\nodoc-purview-discover
 - suppressedCandidates: 0
 
 ## Suggested owner actions
-- Assign routes with explicit `matchingSpecIds` to the same owning spec.
+- Assign routes with explicit `matchingSpecIds` to the same owning spec (high-confidence assignments):
+  - `purview-portal`: `GET /api/Auth/getSpaAuthCode`, `GET /api/v2/auth/GetCachedRoles`, `POST /api/auth/IsInRoles`, `POST /api/log/Put`
+  - `security-copilot`: `GET /config/v1/LokiService/1.0.0.0`, `GET /provisioning/checkTenant`, `POST /api/gateway/actions/collections/me`
 - Resolve remaining `unspecified` routes by host-family ownership and target spec.
 - Keep 59 bundle-only candidates in a separate follow-up validation PR.
 - Do not promote adjacent entries without explicit host/spec assignment.
