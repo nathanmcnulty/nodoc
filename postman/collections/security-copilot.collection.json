@@ -2412,6 +2412,137 @@
                                                             "protocolProfileBehavior": {
                                                                 "disableBodyPruning": true
                                                             }
+                                                        },
+                                                        {
+                                                            "name": "prompts",
+                                                            "description": "",
+                                                            "item": [
+                                                                {
+                                                                    "id": "3b2cec37-6580-48a3-8375-a9380af37b14",
+                                                                    "name": "List session prompts",
+                                                                    "request": {
+                                                                        "name": "List session prompts",
+                                                                        "description": {
+                                                                            "content": "Retrieves persisted session prompt definitions for a workspace.",
+                                                                            "type": "text/plain"
+                                                                        },
+                                                                        "url": {
+                                                                            "path": [
+                                                                                "pods",
+                                                                                ":podId",
+                                                                                "workspaces",
+                                                                                ":workspaceName",
+                                                                                "securitycopilot",
+                                                                                "sessions",
+                                                                                "prompts"
+                                                                            ],
+                                                                            "host": [
+                                                                                "{{baseUrl}}"
+                                                                            ],
+                                                                            "query": [],
+                                                                            "variable": [
+                                                                                {
+                                                                                    "type": "any",
+                                                                                    "value": "11111111-2222-3333-4444-555555555555",
+                                                                                    "key": "podId",
+                                                                                    "disabled": false,
+                                                                                    "description": {
+                                                                                        "content": "(Required) Regional Security Platform pod identifier for the active account.",
+                                                                                        "type": "text/plain"
+                                                                                    }
+                                                                                },
+                                                                                {
+                                                                                    "type": "any",
+                                                                                    "value": "security-copilot",
+                                                                                    "key": "workspaceName",
+                                                                                    "disabled": false,
+                                                                                    "description": {
+                                                                                        "content": "(Required) Security Copilot workspace name.",
+                                                                                        "type": "text/plain"
+                                                                                    }
+                                                                                }
+                                                                            ]
+                                                                        },
+                                                                        "header": [
+                                                                            {
+                                                                                "key": "Accept",
+                                                                                "value": "application/json"
+                                                                            }
+                                                                        ],
+                                                                        "method": "GET",
+                                                                        "body": {},
+                                                                        "auth": null
+                                                                    },
+                                                                    "response": [
+                                                                        {
+                                                                            "id": "a4fd96c9-18da-4d11-ad48-70bba8e92d8d",
+                                                                            "name": "Session prompts returned successfully.",
+                                                                            "originalRequest": {
+                                                                                "url": {
+                                                                                    "path": [
+                                                                                        "pods",
+                                                                                        ":podId",
+                                                                                        "workspaces",
+                                                                                        ":workspaceName",
+                                                                                        "securitycopilot",
+                                                                                        "sessions",
+                                                                                        "prompts"
+                                                                                    ],
+                                                                                    "host": [
+                                                                                        "{{baseUrl}}"
+                                                                                    ],
+                                                                                    "query": [],
+                                                                                    "variable": [
+                                                                                        {
+                                                                                            "disabled": false,
+                                                                                            "description": {
+                                                                                                "content": "(Required) Regional Security Platform pod identifier for the active account.",
+                                                                                                "type": "text/plain"
+                                                                                            },
+                                                                                            "type": "any",
+                                                                                            "value": "11111111-2222-3333-4444-555555555555",
+                                                                                            "key": "podId"
+                                                                                        },
+                                                                                        {
+                                                                                            "disabled": false,
+                                                                                            "description": {
+                                                                                                "content": "(Required) Security Copilot workspace name.",
+                                                                                                "type": "text/plain"
+                                                                                            },
+                                                                                            "type": "any",
+                                                                                            "value": "security-copilot",
+                                                                                            "key": "workspaceName"
+                                                                                        }
+                                                                                    ]
+                                                                                },
+                                                                                "header": [
+                                                                                    {
+                                                                                        "key": "Accept",
+                                                                                        "value": "application/json"
+                                                                                    }
+                                                                                ],
+                                                                                "method": "GET",
+                                                                                "body": {}
+                                                                            },
+                                                                            "status": "OK",
+                                                                            "code": 200,
+                                                                            "header": [
+                                                                                {
+                                                                                    "key": "Content-Type",
+                                                                                    "value": "application/json"
+                                                                                }
+                                                                            ],
+                                                                            "body": "{\n  \"key_0\": 5366\n}",
+                                                                            "cookie": [],
+                                                                            "_postman_previewlanguage": "json"
+                                                                        }
+                                                                    ],
+                                                                    "event": [],
+                                                                    "protocolProfileBehavior": {
+                                                                        "disableBodyPruning": true
+                                                                    }
+                                                                }
+                                                            ]
                                                         }
                                                     ]
                                                 },
@@ -3163,6 +3294,415 @@
                                                             }
                                                         },
                                                         {
+                                                            "name": "authSettings",
+                                                            "description": "",
+                                                            "item": [
+                                                                {
+                                                                    "id": "bc160791-8ecf-47f8-886e-00fa00bc35f7",
+                                                                    "name": "Get skillset authentication settings",
+                                                                    "request": {
+                                                                        "name": "Get skillset authentication settings",
+                                                                        "description": {
+                                                                            "content": "Retrieves authentication metadata required to wire Skillset sign-in and trust settings.",
+                                                                            "type": "text/plain"
+                                                                        },
+                                                                        "url": {
+                                                                            "path": [
+                                                                                "pods",
+                                                                                ":podId",
+                                                                                "workspaces",
+                                                                                ":workspaceName",
+                                                                                "securitycopilot",
+                                                                                "skillsets",
+                                                                                "authSettings"
+                                                                            ],
+                                                                            "host": [
+                                                                                "{{baseUrl}}"
+                                                                            ],
+                                                                            "query": [],
+                                                                            "variable": [
+                                                                                {
+                                                                                    "type": "any",
+                                                                                    "value": "11111111-2222-3333-4444-555555555555",
+                                                                                    "key": "podId",
+                                                                                    "disabled": false,
+                                                                                    "description": {
+                                                                                        "content": "(Required) Regional Security Platform pod identifier for the active account.",
+                                                                                        "type": "text/plain"
+                                                                                    }
+                                                                                },
+                                                                                {
+                                                                                    "type": "any",
+                                                                                    "value": "security-copilot",
+                                                                                    "key": "workspaceName",
+                                                                                    "disabled": false,
+                                                                                    "description": {
+                                                                                        "content": "(Required) Security Copilot workspace name.",
+                                                                                        "type": "text/plain"
+                                                                                    }
+                                                                                }
+                                                                            ]
+                                                                        },
+                                                                        "header": [
+                                                                            {
+                                                                                "key": "Accept",
+                                                                                "value": "application/json"
+                                                                            }
+                                                                        ],
+                                                                        "method": "GET",
+                                                                        "body": {},
+                                                                        "auth": null
+                                                                    },
+                                                                    "response": [
+                                                                        {
+                                                                            "id": "7c7a0c9c-fae2-4491-9e31-33ff64924f9a",
+                                                                            "name": "Skillset auth settings returned successfully.",
+                                                                            "originalRequest": {
+                                                                                "url": {
+                                                                                    "path": [
+                                                                                        "pods",
+                                                                                        ":podId",
+                                                                                        "workspaces",
+                                                                                        ":workspaceName",
+                                                                                        "securitycopilot",
+                                                                                        "skillsets",
+                                                                                        "authSettings"
+                                                                                    ],
+                                                                                    "host": [
+                                                                                        "{{baseUrl}}"
+                                                                                    ],
+                                                                                    "query": [],
+                                                                                    "variable": [
+                                                                                        {
+                                                                                            "disabled": false,
+                                                                                            "description": {
+                                                                                                "content": "(Required) Regional Security Platform pod identifier for the active account.",
+                                                                                                "type": "text/plain"
+                                                                                            },
+                                                                                            "type": "any",
+                                                                                            "value": "11111111-2222-3333-4444-555555555555",
+                                                                                            "key": "podId"
+                                                                                        },
+                                                                                        {
+                                                                                            "disabled": false,
+                                                                                            "description": {
+                                                                                                "content": "(Required) Security Copilot workspace name.",
+                                                                                                "type": "text/plain"
+                                                                                            },
+                                                                                            "type": "any",
+                                                                                            "value": "security-copilot",
+                                                                                            "key": "workspaceName"
+                                                                                        }
+                                                                                    ]
+                                                                                },
+                                                                                "header": [
+                                                                                    {
+                                                                                        "key": "Accept",
+                                                                                        "value": "application/json"
+                                                                                    }
+                                                                                ],
+                                                                                "method": "GET",
+                                                                                "body": {}
+                                                                            },
+                                                                            "status": "OK",
+                                                                            "code": 200,
+                                                                            "header": [
+                                                                                {
+                                                                                    "key": "Content-Type",
+                                                                                    "value": "application/json"
+                                                                                }
+                                                                            ],
+                                                                            "body": "{\n  \"key_0\": 5366\n}",
+                                                                            "cookie": [],
+                                                                            "_postman_previewlanguage": "json"
+                                                                        }
+                                                                    ],
+                                                                    "event": [],
+                                                                    "protocolProfileBehavior": {
+                                                                        "disableBodyPruning": true
+                                                                    }
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "name": "Fusion",
+                                                            "description": "",
+                                                            "item": [
+                                                                {
+                                                                    "name": "icon",
+                                                                    "description": "",
+                                                                    "item": [
+                                                                        {
+                                                                            "id": "deb9a07b-b668-4c10-a2fc-db751f82f8ed",
+                                                                            "name": "Get Fusion skillset icon",
+                                                                            "request": {
+                                                                                "name": "Get Fusion skillset icon",
+                                                                                "description": {
+                                                                                    "content": "Retrieves the icon asset for the Fusion skillset.",
+                                                                                    "type": "text/plain"
+                                                                                },
+                                                                                "url": {
+                                                                                    "path": [
+                                                                                        "pods",
+                                                                                        ":podId",
+                                                                                        "workspaces",
+                                                                                        ":workspaceName",
+                                                                                        "securitycopilot",
+                                                                                        "skillsets",
+                                                                                        "Fusion",
+                                                                                        "icon"
+                                                                                    ],
+                                                                                    "host": [
+                                                                                        "{{baseUrl}}"
+                                                                                    ],
+                                                                                    "query": [],
+                                                                                    "variable": [
+                                                                                        {
+                                                                                            "type": "any",
+                                                                                            "value": "11111111-2222-3333-4444-555555555555",
+                                                                                            "key": "podId",
+                                                                                            "disabled": false,
+                                                                                            "description": {
+                                                                                                "content": "(Required) Regional Security Platform pod identifier for the active account.",
+                                                                                                "type": "text/plain"
+                                                                                            }
+                                                                                        },
+                                                                                        {
+                                                                                            "type": "any",
+                                                                                            "value": "security-copilot",
+                                                                                            "key": "workspaceName",
+                                                                                            "disabled": false,
+                                                                                            "description": {
+                                                                                                "content": "(Required) Security Copilot workspace name.",
+                                                                                                "type": "text/plain"
+                                                                                            }
+                                                                                        }
+                                                                                    ]
+                                                                                },
+                                                                                "header": [
+                                                                                    {
+                                                                                        "key": "Accept",
+                                                                                        "value": "application/octet-stream"
+                                                                                    }
+                                                                                ],
+                                                                                "method": "GET",
+                                                                                "body": {},
+                                                                                "auth": null
+                                                                            },
+                                                                            "response": [
+                                                                                {
+                                                                                    "id": "b86b7bce-ef07-456f-a042-689c1b593286",
+                                                                                    "name": "Fusion icon returned successfully.",
+                                                                                    "originalRequest": {
+                                                                                        "url": {
+                                                                                            "path": [
+                                                                                                "pods",
+                                                                                                ":podId",
+                                                                                                "workspaces",
+                                                                                                ":workspaceName",
+                                                                                                "securitycopilot",
+                                                                                                "skillsets",
+                                                                                                "Fusion",
+                                                                                                "icon"
+                                                                                            ],
+                                                                                            "host": [
+                                                                                                "{{baseUrl}}"
+                                                                                            ],
+                                                                                            "query": [],
+                                                                                            "variable": [
+                                                                                                {
+                                                                                                    "disabled": false,
+                                                                                                    "description": {
+                                                                                                        "content": "(Required) Regional Security Platform pod identifier for the active account.",
+                                                                                                        "type": "text/plain"
+                                                                                                    },
+                                                                                                    "type": "any",
+                                                                                                    "value": "11111111-2222-3333-4444-555555555555",
+                                                                                                    "key": "podId"
+                                                                                                },
+                                                                                                {
+                                                                                                    "disabled": false,
+                                                                                                    "description": {
+                                                                                                        "content": "(Required) Security Copilot workspace name.",
+                                                                                                        "type": "text/plain"
+                                                                                                    },
+                                                                                                    "type": "any",
+                                                                                                    "value": "security-copilot",
+                                                                                                    "key": "workspaceName"
+                                                                                                }
+                                                                                            ]
+                                                                                        },
+                                                                                        "header": [
+                                                                                            {
+                                                                                                "key": "Accept",
+                                                                                                "value": "application/octet-stream"
+                                                                                            }
+                                                                                        ],
+                                                                                        "method": "GET",
+                                                                                        "body": {}
+                                                                                    },
+                                                                                    "status": "OK",
+                                                                                    "code": 200,
+                                                                                    "header": [
+                                                                                        {
+                                                                                            "key": "Content-Type",
+                                                                                            "value": "application/octet-stream"
+                                                                                        }
+                                                                                    ],
+                                                                                    "body": "string",
+                                                                                    "cookie": [],
+                                                                                    "_postman_previewlanguage": "text"
+                                                                                }
+                                                                            ],
+                                                                            "event": [],
+                                                                            "protocolProfileBehavior": {
+                                                                                "disableBodyPruning": true
+                                                                            }
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "name": "KnowledgeBase",
+                                                            "description": "",
+                                                            "item": [
+                                                                {
+                                                                    "name": "icon",
+                                                                    "description": "",
+                                                                    "item": [
+                                                                        {
+                                                                            "id": "26da6feb-4504-46aa-8fe7-a529e4c0798b",
+                                                                            "name": "Get KnowledgeBase skillset icon",
+                                                                            "request": {
+                                                                                "name": "Get KnowledgeBase skillset icon",
+                                                                                "description": {
+                                                                                    "content": "Retrieves the icon asset for the KnowledgeBase skillset.",
+                                                                                    "type": "text/plain"
+                                                                                },
+                                                                                "url": {
+                                                                                    "path": [
+                                                                                        "pods",
+                                                                                        ":podId",
+                                                                                        "workspaces",
+                                                                                        ":workspaceName",
+                                                                                        "securitycopilot",
+                                                                                        "skillsets",
+                                                                                        "KnowledgeBase",
+                                                                                        "icon"
+                                                                                    ],
+                                                                                    "host": [
+                                                                                        "{{baseUrl}}"
+                                                                                    ],
+                                                                                    "query": [],
+                                                                                    "variable": [
+                                                                                        {
+                                                                                            "type": "any",
+                                                                                            "value": "11111111-2222-3333-4444-555555555555",
+                                                                                            "key": "podId",
+                                                                                            "disabled": false,
+                                                                                            "description": {
+                                                                                                "content": "(Required) Regional Security Platform pod identifier for the active account.",
+                                                                                                "type": "text/plain"
+                                                                                            }
+                                                                                        },
+                                                                                        {
+                                                                                            "type": "any",
+                                                                                            "value": "security-copilot",
+                                                                                            "key": "workspaceName",
+                                                                                            "disabled": false,
+                                                                                            "description": {
+                                                                                                "content": "(Required) Security Copilot workspace name.",
+                                                                                                "type": "text/plain"
+                                                                                            }
+                                                                                        }
+                                                                                    ]
+                                                                                },
+                                                                                "header": [
+                                                                                    {
+                                                                                        "key": "Accept",
+                                                                                        "value": "application/octet-stream"
+                                                                                    }
+                                                                                ],
+                                                                                "method": "GET",
+                                                                                "body": {},
+                                                                                "auth": null
+                                                                            },
+                                                                            "response": [
+                                                                                {
+                                                                                    "id": "bfd1d8a1-6ec1-4a82-91c8-fb7d1a2987df",
+                                                                                    "name": "KnowledgeBase icon returned successfully.",
+                                                                                    "originalRequest": {
+                                                                                        "url": {
+                                                                                            "path": [
+                                                                                                "pods",
+                                                                                                ":podId",
+                                                                                                "workspaces",
+                                                                                                ":workspaceName",
+                                                                                                "securitycopilot",
+                                                                                                "skillsets",
+                                                                                                "KnowledgeBase",
+                                                                                                "icon"
+                                                                                            ],
+                                                                                            "host": [
+                                                                                                "{{baseUrl}}"
+                                                                                            ],
+                                                                                            "query": [],
+                                                                                            "variable": [
+                                                                                                {
+                                                                                                    "disabled": false,
+                                                                                                    "description": {
+                                                                                                        "content": "(Required) Regional Security Platform pod identifier for the active account.",
+                                                                                                        "type": "text/plain"
+                                                                                                    },
+                                                                                                    "type": "any",
+                                                                                                    "value": "11111111-2222-3333-4444-555555555555",
+                                                                                                    "key": "podId"
+                                                                                                },
+                                                                                                {
+                                                                                                    "disabled": false,
+                                                                                                    "description": {
+                                                                                                        "content": "(Required) Security Copilot workspace name.",
+                                                                                                        "type": "text/plain"
+                                                                                                    },
+                                                                                                    "type": "any",
+                                                                                                    "value": "security-copilot",
+                                                                                                    "key": "workspaceName"
+                                                                                                }
+                                                                                            ]
+                                                                                        },
+                                                                                        "header": [
+                                                                                            {
+                                                                                                "key": "Accept",
+                                                                                                "value": "application/octet-stream"
+                                                                                            }
+                                                                                        ],
+                                                                                        "method": "GET",
+                                                                                        "body": {}
+                                                                                    },
+                                                                                    "status": "OK",
+                                                                                    "code": 200,
+                                                                                    "header": [
+                                                                                        {
+                                                                                            "key": "Content-Type",
+                                                                                            "value": "application/octet-stream"
+                                                                                        }
+                                                                                    ],
+                                                                                    "body": "string",
+                                                                                    "cookie": [],
+                                                                                    "_postman_previewlanguage": "text"
+                                                                                }
+                                                                            ],
+                                                                            "event": [],
+                                                                            "protocolProfileBehavior": {
+                                                                                "disableBodyPruning": true
+                                                                            }
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
                                                             "name": "configurations",
                                                             "description": "",
                                                             "item": [
@@ -3624,6 +4164,135 @@
                                                             ]
                                                         }
                                                     ]
+                                                },
+                                                {
+                                                    "name": "WorkspaceSettings",
+                                                    "description": "",
+                                                    "item": [
+                                                        {
+                                                            "id": "bc9c3d9e-ff71-44a2-b331-75e84a6e0601",
+                                                            "name": "Get workspace settings",
+                                                            "request": {
+                                                                "name": "Get workspace settings",
+                                                                "description": {
+                                                                    "content": "Retrieves workspace-level settings for the selected workspace.",
+                                                                    "type": "text/plain"
+                                                                },
+                                                                "url": {
+                                                                    "path": [
+                                                                        "pods",
+                                                                        ":podId",
+                                                                        "workspaces",
+                                                                        ":workspaceName",
+                                                                        "securitycopilot",
+                                                                        "WorkspaceSettings"
+                                                                    ],
+                                                                    "host": [
+                                                                        "{{baseUrl}}"
+                                                                    ],
+                                                                    "query": [],
+                                                                    "variable": [
+                                                                        {
+                                                                            "type": "any",
+                                                                            "value": "11111111-2222-3333-4444-555555555555",
+                                                                            "key": "podId",
+                                                                            "disabled": false,
+                                                                            "description": {
+                                                                                "content": "(Required) Regional Security Platform pod identifier for the active account.",
+                                                                                "type": "text/plain"
+                                                                            }
+                                                                        },
+                                                                        {
+                                                                            "type": "any",
+                                                                            "value": "security-copilot",
+                                                                            "key": "workspaceName",
+                                                                            "disabled": false,
+                                                                            "description": {
+                                                                                "content": "(Required) Security Copilot workspace name.",
+                                                                                "type": "text/plain"
+                                                                            }
+                                                                        }
+                                                                    ]
+                                                                },
+                                                                "header": [
+                                                                    {
+                                                                        "key": "Accept",
+                                                                        "value": "application/json"
+                                                                    }
+                                                                ],
+                                                                "method": "GET",
+                                                                "body": {},
+                                                                "auth": null
+                                                            },
+                                                            "response": [
+                                                                {
+                                                                    "id": "4dc474d6-0f7d-4347-9734-c73aebb0f915",
+                                                                    "name": "Workspace settings returned successfully.",
+                                                                    "originalRequest": {
+                                                                        "url": {
+                                                                            "path": [
+                                                                                "pods",
+                                                                                ":podId",
+                                                                                "workspaces",
+                                                                                ":workspaceName",
+                                                                                "securitycopilot",
+                                                                                "WorkspaceSettings"
+                                                                            ],
+                                                                            "host": [
+                                                                                "{{baseUrl}}"
+                                                                            ],
+                                                                            "query": [],
+                                                                            "variable": [
+                                                                                {
+                                                                                    "disabled": false,
+                                                                                    "description": {
+                                                                                        "content": "(Required) Regional Security Platform pod identifier for the active account.",
+                                                                                        "type": "text/plain"
+                                                                                    },
+                                                                                    "type": "any",
+                                                                                    "value": "11111111-2222-3333-4444-555555555555",
+                                                                                    "key": "podId"
+                                                                                },
+                                                                                {
+                                                                                    "disabled": false,
+                                                                                    "description": {
+                                                                                        "content": "(Required) Security Copilot workspace name.",
+                                                                                        "type": "text/plain"
+                                                                                    },
+                                                                                    "type": "any",
+                                                                                    "value": "security-copilot",
+                                                                                    "key": "workspaceName"
+                                                                                }
+                                                                            ]
+                                                                        },
+                                                                        "header": [
+                                                                            {
+                                                                                "key": "Accept",
+                                                                                "value": "application/json"
+                                                                            }
+                                                                        ],
+                                                                        "method": "GET",
+                                                                        "body": {}
+                                                                    },
+                                                                    "status": "OK",
+                                                                    "code": 200,
+                                                                    "header": [
+                                                                        {
+                                                                            "key": "Content-Type",
+                                                                            "value": "application/json"
+                                                                        }
+                                                                    ],
+                                                                    "body": "{\n  \"key_0\": 5366\n}",
+                                                                    "cookie": [],
+                                                                    "_postman_previewlanguage": "json"
+                                                                }
+                                                            ],
+                                                            "event": [],
+                                                            "protocolProfileBehavior": {
+                                                                "disableBodyPruning": true
+                                                            }
+                                                        }
+                                                    ]
                                                 }
                                             ]
                                         }
@@ -3924,6 +4593,133 @@
                                                         }
                                                     ],
                                                     "body": "{\n  \"key_0\": 7714\n}",
+                                                    "cookie": [],
+                                                    "_postman_previewlanguage": "json"
+                                                }
+                                            ],
+                                            "event": [],
+                                            "protocolProfileBehavior": {
+                                                "disableBodyPruning": true
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "name": "SecurityCopilotClient",
+                            "description": "",
+                            "item": [
+                                {
+                                    "name": "1.0.0",
+                                    "description": "",
+                                    "item": [
+                                        {
+                                            "id": "e54c8e7b-84cc-4510-9219-a178bd07ed37",
+                                            "name": "Get Security Copilot client configuration",
+                                            "request": {
+                                                "name": "Get Security Copilot client configuration",
+                                                "description": {
+                                                    "content": "Retrieves Copilot client configuration used by bootstrap and runtime surfaces.",
+                                                    "type": "text/plain"
+                                                },
+                                                "url": {
+                                                    "path": [
+                                                        "config",
+                                                        "v1",
+                                                        "SecurityCopilotClient",
+                                                        "1.0.0"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [
+                                                        {
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "(Required) Security service family whose Security Store client settings should be loaded.",
+                                                                "type": "text/plain"
+                                                            },
+                                                            "key": "SecurityService",
+                                                            "value": "default"
+                                                        },
+                                                        {
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "(Required) Deployment environment whose Security Store client settings should be loaded.",
+                                                                "type": "text/plain"
+                                                            },
+                                                            "key": "Environment",
+                                                            "value": "Prod"
+                                                        }
+                                                    ],
+                                                    "variable": []
+                                                },
+                                                "header": [
+                                                    {
+                                                        "key": "Accept",
+                                                        "value": "application/json"
+                                                    }
+                                                ],
+                                                "method": "GET",
+                                                "body": {},
+                                                "auth": null
+                                            },
+                                            "response": [
+                                                {
+                                                    "id": "c40fd274-71d1-4dc0-8246-159cf1a6fe55",
+                                                    "name": "Copilot client configuration returned successfully.",
+                                                    "originalRequest": {
+                                                        "url": {
+                                                            "path": [
+                                                                "config",
+                                                                "v1",
+                                                                "SecurityCopilotClient",
+                                                                "1.0.0"
+                                                            ],
+                                                            "host": [
+                                                                "{{baseUrl}}"
+                                                            ],
+                                                            "query": [
+                                                                {
+                                                                    "disabled": false,
+                                                                    "description": {
+                                                                        "content": "(Required) Security service family whose Security Store client settings should be loaded.",
+                                                                        "type": "text/plain"
+                                                                    },
+                                                                    "key": "SecurityService",
+                                                                    "value": "default"
+                                                                },
+                                                                {
+                                                                    "disabled": false,
+                                                                    "description": {
+                                                                        "content": "(Required) Deployment environment whose Security Store client settings should be loaded.",
+                                                                        "type": "text/plain"
+                                                                    },
+                                                                    "key": "Environment",
+                                                                    "value": "Prod"
+                                                                }
+                                                            ],
+                                                            "variable": []
+                                                        },
+                                                        "header": [
+                                                            {
+                                                                "key": "Accept",
+                                                                "value": "application/json"
+                                                            }
+                                                        ],
+                                                        "method": "GET",
+                                                        "body": {}
+                                                    },
+                                                    "status": "OK",
+                                                    "code": 200,
+                                                    "header": [
+                                                        {
+                                                            "key": "Content-Type",
+                                                            "value": "application/json"
+                                                        }
+                                                    ],
+                                                    "body": "{\n  \"key_0\": true,\n  \"key_1\": \"string\"\n}",
                                                     "cookie": [],
                                                     "_postman_previewlanguage": "json"
                                                 }
