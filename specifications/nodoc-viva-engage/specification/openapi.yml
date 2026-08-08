@@ -17,6 +17,7 @@ info:
       - direct-route captures on `/main/admin/segmentation`, `/main/admin/external-networks-settings`, and `/main/admin/setup-external-network`
       - route-specific persisted GraphQL operations such as `NetworkSegmentationQueryClients` and `ExternalNetworksAdminSettingsClients`
       - repeated admin captures also observed `UniversalCreateButtonQueryClients`, which returned create-capability flags and dismissable prompt state for the shell `Create new` affordance
+      - later authenticated captures also observed persisted request shapes for `NetworkTopicSettingsClients`, `UpdateAppActivityStateClients`, `InformationBarrierSettingsClients`, `FeatureAccessInsightsClients`, and `DismissablePromptsClients`
       - a cross-host bearer-backed token helper on `https://api.engage.cloud.microsoft/api/v1/oauth2/aad_access_token`
       - a same-origin `RealtimeConnectionSettingsClients` persisted query that returned transient `*.rt.yammer.com/cometd/` relay hosts
       - relay POSTs on `/cometd/handshake`, `/cometd/`, and `/cometd/connect` that carried redacted `token` and `hub_tenant_token` values in the Bayeux payload instead of `Authorization` or cookie headers
@@ -34,7 +35,7 @@ info:
 
     Documentation and specifications have been provided on a best-efforts basis and may not be
     100% accurate.
-  version: 0.4.1
+  version: 0.4.2
   contact:
     name: nodoc
     url: https://github.com/nathanmcnulty/nodoc
@@ -408,6 +409,108 @@ paths:
                         - project: ClientForward
                           key: GuidedAdminNotificationsLandingPage
                           value: "true"
+              updateAppActivityStateClients:
+                summary: App activity state write-pattern request
+                value:
+                  operationName: UpdateAppActivityStateClients
+                  variables:
+                    input:
+                      appActivityState: ACTIVE_WEB
+                  extensions:
+                    persistedQuery:
+                      version: 1
+                      sha256Hash: 3f6b829be98a15f58df4c56e7fcfa5cad8200a8b806acb606c7221aa19b2a9bd
+                    yammerTreatments:
+                      version: "1"
+                      treatments:
+                        - project: ClientForward
+                          key: GuidedAdminNotificationsLandingPage
+                          value: "true"
+                        - project: ClientForward
+                          key: InformationBarriersPhase0
+                          value: "true"
+                        - project: ClientForward
+                          key: LoadThreadDataWhileRouting
+                          value: enabled
+              informationBarrierSettingsClients:
+                summary: Information-barrier settings query
+                value:
+                  operationName: InformationBarrierSettingsClients
+                  variables:
+                    userId: "[redacted-user-id]"
+                  extensions:
+                    persistedQuery:
+                      version: 1
+                      sha256Hash: 598b1b8a5989efdebe0026ba63b00fb6f3b077ba5343288dc396d5c7743ccb13
+                    yammerTreatments:
+                      version: "1"
+                      treatments:
+                        - project: ClientForward
+                          key: GuidedAdminNotificationsLandingPage
+                          value: "true"
+                        - project: ClientForward
+                          key: InformationBarriersPhase0
+                          value: "true"
+                        - project: ClientForward
+                          key: EventCoorganizerEdits
+                          value: "true"
+              dismissablePromptsClients:
+                summary: Dismissable prompts read pattern with prompt key input
+                value:
+                  operationName: DismissablePromptsClients
+                  variables:
+                    promptKeys:
+                      - PWAInstallRenew
+                    promptTypes: []
+                  extensions:
+                    persistedQuery:
+                      version: 1
+                      sha256Hash: 958e489298f973f8874009b67eea7ab389e497993dc7dab77215aef241005cef
+                    yammerTreatments:
+                      version: "1"
+                      treatments:
+                        - project: ClientForward
+                          key: GuidedAdminNotificationsLandingPage
+                          value: "true"
+                        - project: ClientForward
+                          key: InformationBarriersPhase0
+                          value: "true"
+              networkTopicSettingsClients:
+                summary: Network topic settings query
+                value:
+                  operationName: NetworkTopicSettingsClients
+                  extensions:
+                    persistedQuery:
+                      version: 1
+                      sha256Hash: 14543bcd3f500d7c6f65d9727c4c5910108c6f2e9093cda1523c49277ac1966d
+                    yammerTreatments:
+                      version: "1"
+                      treatments:
+                        - project: ClientForward
+                          key: GuidedAdminNotificationsLandingPage
+                          value: "true"
+                        - project: ClientForward
+                          key: InformationBarriersPhase0
+                          value: "true"
+              featureAccessInsightsClients:
+                summary: Feature access insights query
+                value:
+                  operationName: FeatureAccessInsightsClients
+                  variables:
+                    includeDigitalSafety: false
+                  extensions:
+                    persistedQuery:
+                      version: 1
+                      sha256Hash: 5b59208f0fa30d1f518b04a8f2054b7186fcf28176012fc846b3c75fdea68bfc
+                    yammerTreatments:
+                      version: "1"
+                      treatments:
+                        - project: ClientForward
+                          key: GuidedAdminNotificationsLandingPage
+                          value: "true"
+                        - project: ClientForward
+                          key: InformationBarriersPhase0
+                          value: "true"
       x-nodoc-operation-context:
         surface: Admin shell
         workflows:
@@ -426,6 +529,9 @@ paths:
             - Repeated admin captures also observed `UniversalCreateButtonQueryClients`, which returned create-capability flags and dismissable prompt state for the shell `Create new` affordance.
             - The segmentation direct-route capture confirmed `NetworkSegmentationQueryClients` together with the dedicated `4-page-admin-segmentation-settings.js` route chunk.
             - The external-networks settings and setup direct-route captures confirmed `ExternalNetworksAdminSettingsClients` together with the dedicated `4-page-admin-external-networks-settings.js` route chunk.
+            - Later authenticated captures also observed `NetworkTopicSettingsClients`,
+              `InformationBarrierSettingsClients`, `UpdateAppActivityStateClients`,
+              `FeatureAccessInsightsClients`, and `DismissablePromptsClients` request shapes.
             - A no-submit probe of a visible access-code control such as `Generate code` or `Redeem code` stayed on `/main/admin/setup-external-network` and did not emit a distinct write or redemption request before the next user-input step.
             - The `RealtimeConnectionSettingsClients` operation returned transient `cometdBaseUrl` values that bootstrapped `*.rt.yammer.com/cometd/handshake`, `/cometd/`, and `/cometd/connect` relay calls without `Authorization` or cookie headers.
             - Navigating to `/main/admin/external-networks` updated the URL but rendered the generic admin landing state during this pass, so `external-networks-settings` should be treated as the canonical external-networks route.

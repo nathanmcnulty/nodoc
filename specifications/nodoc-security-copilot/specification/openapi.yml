@@ -647,6 +647,28 @@ paths:
               schema:
                 $ref: '#/components/schemas/ContainerPermissionCheckResponse'
 
+  /api/gateway/actions/collections/me:
+    post:
+      tags: [Provisioning]
+      summary: Evaluate collection permissions
+      description: Evaluates collection-level permissions for the current user during startup and collection selection flows.
+      operationId: SecurityCopilotPortal.ActionGateway.EvaluateCollectionPermissions
+      parameters:
+        - $ref: '#/components/parameters/ApiVersion20240301Preview'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContainerPermissionCheckRequest'
+      responses:
+        '200':
+          description: Collection permission evaluation returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContainerPermissionCheckResponse'
+
   /provisioning/checkTenant:
     get:
       tags: [Provisioning]
@@ -952,6 +974,23 @@ paths:
       responses:
         '200':
           description: Store client configuration returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MarketplaceClientConfigResponse'
+
+  /config/v1/LokiService/1.0.0.0:
+    get:
+      tags: [Store]
+      summary: Get Loki Service client configuration
+      description: Retrieves ECS Loki service configuration used by Security Copilot telemetry and diagnostics surfaces.
+      operationId: SecurityCopilotPortal.Store.GetLokiServiceClientConfiguration
+      parameters:
+        - $ref: '#/components/parameters/SecurityService'
+        - $ref: '#/components/parameters/Environment'
+      responses:
+        '200':
+          description: Loki service configuration returned successfully.
           content:
             application/json:
               schema:
