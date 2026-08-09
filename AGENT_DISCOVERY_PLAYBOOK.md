@@ -198,11 +198,12 @@ new artifact directory; it does not overwrite history.
   health availability fields and recommend completing or retrying capture before
   any promotion review.
 - Capture finalization is deadline-bounded. Body draining, script/bundle mining,
-  artifact flushing, and parent supervision use conservative defaults and can be
-  lowered with `--supervision-timeout-ms` for deterministic tests. A timeout keeps
-  already-written artifacts immutable, records the phase/detail in
-  `capture-failure.json`, and remains an interrupted capture; it must not produce
-  canonical interaction health or be retried in place.
+  and artifact flushing use `--supervision-timeout-ms`; the complete productive
+  child process has a separate `--capture-supervision-timeout-ms` failsafe (15
+  minutes by default). A timeout keeps already-written artifacts immutable and
+  records the phase/detail in `capture-failure.json`; parent termination records
+  `parent-supervision` itself. Either case remains an interrupted capture, must
+  not produce canonical interaction health, and must not be retried in place.
 - Pass promotion workers only assigned handoff entries and the relevant spec
   family, not the full capture corpus.
 - Review diffs and machine-generated counts before reading raw evidence.
