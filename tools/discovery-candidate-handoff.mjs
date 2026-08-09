@@ -1,3 +1,5 @@
+import { sanitizeInteractionHealth } from "./discovery-capture-policy.mjs";
+
 const supportedEvidence = new Set([
   "bundle-discovered",
   "confirmed",
@@ -160,6 +162,7 @@ function deriveRecommendedNextAction(counts, metadataNextPass) {
 
 export function buildCandidateHandoff({
   candidateQueue,
+  interactionHealth = null,
   metadataNextPass,
   specId,
   specTitle,
@@ -247,6 +250,7 @@ export function buildCandidateHandoff({
       title: specTitle,
     },
     counts,
+    interactionHealth: sanitizeInteractionHealth(interactionHealth),
     adjacentConfirmedReadCandidates,
     adjacentConfirmedSafetyReviewCandidates,
     adjacentSuccessfullyProbedCandidates,
