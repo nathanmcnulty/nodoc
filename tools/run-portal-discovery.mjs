@@ -2,7 +2,10 @@ import { createHash } from "node:crypto";
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
-import { buildCandidateHandoff } from "./discovery-candidate-handoff.mjs";
+import {
+  buildCandidateHandoff,
+  writePartitionedCandidateHandoff,
+} from "./discovery-candidate-handoff.mjs";
 import { aggregateInteractionHealth, sanitizeInteractionHealth } from "./discovery-capture-policy.mjs";
 import { evaluateDiscoverySaturation } from "./discovery-saturation.mjs";
 import { classifyGetProbeUrl } from "./discovery-safety.mjs";
@@ -34,6 +37,7 @@ const validPhases = new Set(["all", "analyze", "capture", "plan"]);
 function parseArgs(argv) {
   const args = {
     artifacts: null,
+    groupedHandoffDir: null,
     includeAdjacent: false,
     saturation: false,
     applySaturationStop: false,
@@ -95,6 +99,9 @@ function parseArgs(argv) {
       index += 1;
     } else if (argument === "--artifacts" && next) {
       args.artifacts = path.resolve(next);
+      index += 1;
+    } else if ((argument === "--grouped-handoff" || argument === "--grouped-handoff-dir") && next) {
+      args.groupedHandoffDir = path.resolve(next);
       index += 1;
     } else if (argument === "--recipe" && next) {
       args.recipe = path.resolve(next);
@@ -1114,6 +1121,9 @@ async function main() {
         `${JSON.stringify(candidateHandoff, null, 2)}\n`,
         "utf8",
       );
+      if (args.groupedHandoffDir) {
+        await writePartitionedCandidateHandoff(candidateHandoff, args.groupedHandoffDir);
+      }
       runState.candidateCounts = candidateHandoff.counts;
       runState.recommendedNextAction = candidateHandoff.recommendedNextAction;
       runState.saturation = saturation;
@@ -1145,6 +1155,9 @@ async function main() {
         : null,
       candidateHandoff: ["all", "analyze"].includes(args.phase)
         ? path.join(args.artifacts, "candidate-handoff.json")
+        : null,
+      groupedCandidateHandoff: args.groupedHandoffDir
+        ? path.join(args.groupedHandoffDir, "manifest.json")
         : null,
       runState: path.join(args.artifacts, "discovery-run.json"),
     };

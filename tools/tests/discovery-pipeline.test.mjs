@@ -11,9 +11,42 @@ import {
   getScopeServerUrls,
 } from "../spec-quality-lib.mjs";
 import { enqueueAssignment } from "../portal-discovery-ledger.mjs";
+import {
+  buildPartitionedCandidateHandoff,
+  validatePartitionedCandidateHandoff,
+} from "../discovery-candidate-handoff.mjs";
 
 const execFileAsync = promisify(execFile);
 const repoRoot = path.resolve(import.meta.dirname, "..", "..");
+
+test("partitioned handoff preserves identities, isolates adjacent evidence, and is deterministic", () => {
+  const handoff = {
+    schemaVersion: 2,
+    spec: { id: "alpha", title: "Alpha" },
+    interactionHealth: null,
+    interactionHealthStatus: { available: false, reason: "canonical-health-unavailable" },
+    saturation: null,
+    recovery: { captureStatus: "interrupted" },
+    recommendedNextAction: { code: "complete-or-retry-capture" },
+    confirmedReadCandidates: [{ method: "GET", normalizedPath: "/v1/items", evidence: "confirmed", documentationStatus: "undocumented", baseUrls: ["https://alpha.example"], provenance: ["network"], reasons: ["confirmed"] }],
+    confirmedSafetyReviewCandidates: [{ method: "POST", normalizedPath: "/v1/items", evidence: "confirmed", documentationStatus: "undocumented", baseUrls: ["https://alpha.example"], provenance: ["network"], reasons: ["write"] }],
+    successfullyProbedCandidates: [],
+    bundleOnlyCandidates: [{ method: "GET", normalizedPath: "/graphql", evidence: "bundle-discovered", documentationStatus: "undocumented", baseUrls: ["https://alpha.example"], provenance: ["bundle"], reasons: ["operation"], operation: { name: "Items", operationType: "query" } }],
+    suppressedCandidates: [],
+    adjacentConfirmedReadCandidates: [{ method: "GET", normalizedPath: "/v1/other", evidence: "confirmed", documentationStatus: "undocumented", hostFamily: "other.example", matchingSpecIds: ["beta"], requiresSpecAssignment: true, scopeReasons: ["host-out-of-scope"], baseUrls: ["https://other.example"], provenance: ["network"], reasons: ["adjacent"] }],
+    adjacentConfirmedSafetyReviewCandidates: [],
+    adjacentSuccessfullyProbedCandidates: [],
+    adjacentBundleOnlyCandidates: [],
+  };
+  const first = buildPartitionedCandidateHandoff(handoff);
+  const second = buildPartitionedCandidateHandoff(handoff);
+  assert.deepEqual(first, second);
+  assert.equal(first.manifest.totals.candidateCount, 4);
+  assert.equal(first.manifest.totals.evidenceFamilyCount, 4);
+  assert.ok(first.partitions.some(({ reviewClass, destination }) => reviewClass === "adjacent-confirmed-read" && destination.specId === "unassigned"));
+  assert.throws(() => validatePartitionedCandidateHandoff(handoff, { partitions: first.partitions.slice(1) }), /duplicated or dropped/);
+  assert.match(JSON.stringify(first), /Items/);
+});
 
 async function writeJson(filePath, value) {
   await writeFile(filePath, `${JSON.stringify(value, null, 2)}\n`, "utf8");
