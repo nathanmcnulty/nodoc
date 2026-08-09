@@ -642,6 +642,50 @@ test("analyze carries canonical interaction health into handoff and run state", 
   }
 });
 
+test("analyze blocks escalated interaction health instead of reporting success", async () => {
+  const artifactDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-interaction-health-escalation-"));
+
+  try {
+    await Promise.all([
+      writeJson(path.join(artifactDir, "api-records.json"), []),
+      writeJson(path.join(artifactDir, "summary.json"), {
+        interactionHealth: {
+          accounting: {
+            consistent: true,
+            inconsistency: null,
+          },
+          counts: {},
+          recommendation: {
+            recommended: true,
+            code: "escalate-interaction-health",
+          },
+          schemaVersion: 1,
+        },
+      }),
+    ]);
+
+    await assert.rejects(
+      execFileAsync(process.execPath, [
+        path.join(repoRoot, "tools", "run-portal-discovery.mjs"),
+        "--portal",
+        "entra-b2c",
+        "--phase",
+        "analyze",
+        "--artifacts",
+        artifactDir,
+      ], { cwd: repoRoot }),
+      /interaction-health-escalation/u,
+    );
+    const runState = JSON.parse(
+      await readFile(path.join(artifactDir, "discovery-run.json"), "utf8"),
+    );
+    assert.equal(runState.status, "blocked");
+    assert.equal(runState.blocker.code, "interaction-health-escalation");
+  } finally {
+    await rm(artifactDir, { force: true, recursive: true });
+  }
+});
+
 test("mined methods flow into the crawl candidate queue", async () => {
   const artifactDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-discovery-"));
   try {
