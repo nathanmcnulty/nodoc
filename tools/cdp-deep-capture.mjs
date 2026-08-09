@@ -34,7 +34,47 @@ const defaultSettleMs = 8000;
 const defaultPostActionSettleMs = 6000;
 const defaultEvaluateTimeoutMs = 10000;
 const defaultCdpCommandTimeoutMs = 20000;
+const defaultFinalizationTimeoutMs = 30000;
+const defaultBodyCaptureTimeoutMs = 10000;
+const defaultScriptCaptureTimeoutMs = 15000;
 let runtimeEvaluateTimeoutMs = defaultEvaluateTimeoutMs;
+
+class CapturePhaseTimeoutError extends Error {
+  constructor(phase, timeoutMs, detail = null) {
+    super(`Capture phase "${phase}" timed out after ${timeoutMs} ms.`);
+    this.name = "CapturePhaseTimeoutError";
+    this.phase = phase;
+    this.timeoutMs = timeoutMs;
+    this.detail = detail;
+  }
+}
+
+async function withPhaseTimeout(operation, timeoutMs, phase) {
+  let timer;
+  try {
+    return await Promise.race([
+      Promise.resolve().then(operation),
+      new Promise((_, reject) => {
+        timer = setTimeout(() => reject(new CapturePhaseTimeoutError(phase, timeoutMs)), timeoutMs);
+      }),
+    ]);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function writeCaptureFailure(args, error) {
+  await writeFile(
+    path.join(args.outDir, "capture-failure.json"),
+    `${JSON.stringify({
+      detail: error instanceof Error ? error.message : String(error),
+      phase: error?.phase ?? "capture",
+      schemaVersion: captureArtifactSchemaVersion,
+      timeoutMs: error?.timeoutMs ?? null,
+    }, null, 2)}\n`,
+    "utf8",
+  );
+}
 
 function stripBom(value) {
   return typeof value === "string" ? value.replace(/^\uFEFF/u, "") : value;
@@ -514,6 +554,12 @@ function applyRecipeConfig(args, recipeConfig, recipePath) {
     args.evaluateTimeoutMs = Number(recipeConfig.evaluateTimeoutMs);
   }
 
+  for (const key of ["finalizationTimeoutMs", "bodyCaptureTimeoutMs", "scriptCaptureTimeoutMs"]) {
+    if (Number.isFinite(Number(recipeConfig[key]))) {
+      args[key] = Number(recipeConfig[key]);
+    }
+  }
+
   if (recipeConfig.actions) {
     args.actions = ensureArray(recipeConfig.actions).map(normalizeRecipeAction);
   }
@@ -531,6 +577,9 @@ async function parseArgs(argv) {
     captureScripts: true,
     bundleCacheDir: null,
     evaluateTimeoutMs: defaultEvaluateTimeoutMs,
+    finalizationTimeoutMs: defaultFinalizationTimeoutMs,
+    bodyCaptureTimeoutMs: defaultBodyCaptureTimeoutMs,
+    scriptCaptureTimeoutMs: defaultScriptCaptureTimeoutMs,
     label: null,
     matchHosts: [],
     matchPathPrefixes: [],
@@ -801,6 +850,19 @@ async function parseArgs(argv) {
       continue;
     }
 
+    for (const key of ["finalizationTimeoutMs", "bodyCaptureTimeoutMs", "scriptCaptureTimeoutMs"]) {
+      const option = `--${key.replace(/[A-Z]/gu, (letter) => `-${letter.toLowerCase()}`)}`;
+      if (arg === option && next) {
+        args[key] = Number(next);
+        index += 1;
+        break;
+      }
+      if (arg.startsWith(`${option}=`)) {
+        args[key] = Number(arg.slice(option.length + 1));
+        break;
+      }
+    }
+
     if (arg === "--action" && next) {
       args.actions.push(parseActionSpec(next));
       index += 1;
@@ -826,6 +888,12 @@ async function parseArgs(argv) {
   }
 
   for (const key of ["evaluateTimeoutMs", "navigationTimeoutMs", "networkIdleMs", "postActionSettleMs", "settleMs"]) {
+    if (!Number.isFinite(args[key]) || args[key] <= 0) {
+      throw new Error(`Invalid value for ${key}: "${args[key]}".`);
+    }
+  }
+
+  for (const key of ["finalizationTimeoutMs", "bodyCaptureTimeoutMs", "scriptCaptureTimeoutMs"]) {
     if (!Number.isFinite(args[key]) || args[key] <= 0) {
       throw new Error(`Invalid value for ${key}: "${args[key]}".`);
     }
@@ -2405,78 +2473,88 @@ async function main() {
     };
   }
 
-  async function flushArtifacts() {
-    await Promise.allSettled(Array.from(pendingBodyCaptures));
-    const filteredRequests = capturedRequests
-      .filter((request) => request.url && request.method)
-      .map((request) => ({
-        ...request,
-        matchesCurrentSpec: shouldMatchRequest(request.url, args),
+  async function flushArtifacts({ timeoutMs = args.finalizationTimeoutMs, phase = "artifact-flush" } = {}) {
+    return withPhaseTimeout(async () => {
+      await withPhaseTimeout(
+        () => Promise.allSettled(Array.from(pendingBodyCaptures)),
+        Math.min(timeoutMs, args.bodyCaptureTimeoutMs),
+        "body-capture",
+      );
+      const filteredRequests = capturedRequests
+        .filter((request) => request.url && request.method)
+        .map((request) => ({
+          ...request,
+          matchesCurrentSpec: shouldMatchRequest(request.url, args),
+        }));
+      const apiRecords = filteredRequests
+        .filter((request) => !request.probeId)
+        .map((request) => toApiRecord(request, args.portal));
+      const rawRequests = filteredRequests.map((request) => ({
+        schemaVersion: captureArtifactSchemaVersion,
+        attribution: request.attribution,
+        evidenceId: request.evidenceId,
+        ...requestEvidence(request),
+        ...summarizeHeaderMetadata(request.headers ?? {}),
+        ...summarizeResponseHeaderMetadata(request.responseHeaders ?? {}),
+        failureText: request.failureText ?? null,
+        matchesCurrentSpec: request.matchesCurrentSpec,
+        method: request.method,
+        mimeType: request.mimeType ?? null,
+        pageLabel: request.pageLabel,
+        probeId: request.probeId ?? null,
+        probeOutcome: request.probeId ? probeOutcomes.get(request.probeId) ?? null : null,
+        requestBody: request.requestBody ?? null,
+        responseBody: request.responseBody ?? null,
+        status: request.status ?? null,
+        url: request.url,
       }));
-    const apiRecords = filteredRequests
-      .filter((request) => !request.probeId)
-      .map((request) => toApiRecord(request, args.portal));
-    const rawRequests = filteredRequests.map((request) => ({
-      schemaVersion: captureArtifactSchemaVersion,
-      attribution: request.attribution,
-      evidenceId: request.evidenceId,
-      ...requestEvidence(request),
-      ...summarizeHeaderMetadata(request.headers ?? {}),
-      ...summarizeResponseHeaderMetadata(request.responseHeaders ?? {}),
-      failureText: request.failureText ?? null,
-      matchesCurrentSpec: request.matchesCurrentSpec,
-      method: request.method,
-      mimeType: request.mimeType ?? null,
-      pageLabel: request.pageLabel,
-      probeId: request.probeId ?? null,
-      probeOutcome: request.probeId ? probeOutcomes.get(request.probeId) ?? null : null,
-      requestBody: request.requestBody ?? null,
-      responseBody: request.responseBody ?? null,
-      status: request.status ?? null,
-      url: request.url,
-    }));
 
-    await writeBundleArtifacts();
-    await writeMergedArray(
-      path.join(args.outDir, "api-records.json"),
-      apiRecords,
-      (item) => `${item.method} ${item.path} ${item.requestFingerprint}`,
-    );
-    await writeMergedArray(
-      path.join(args.outDir, "page-states.json"),
-      pageStates,
-      (item) => item.page,
-    );
-    await writeMergedArray(
-      path.join(args.outDir, "session-snapshots.json"),
-      sessionSnapshots,
-      (item) => item.page,
-    );
-    await writeMergedArray(
-      path.join(args.outDir, "script-urls.json"),
-      scriptPages,
-      (item) => item.page,
-    );
-    await writeMergedArray(
-      path.join(args.outDir, "action-results.json"),
-      actionResults,
-      (item) => item.page,
-    );
-    await writeMergedArray(
-      path.join(args.outDir, "raw-requests.json"),
-      rawRequests,
-      (item) => item.evidenceId ?? `${item.requestFingerprint} ${item.pageLabel}`,
-    );
-    await writeMergedArray(
-      path.join(args.outDir, "probe-results.json"),
-      probeResults,
-      (item) => item.probeId ?? `${item.method} ${item.url} ${item.page}`,
-    );
-    await writeMergedArray(
-      path.join(args.outDir, "stream-records.json"),
-      passiveTransports,
-      (item) => `${item.transport} ${item.url} ${item.page} ${item.attribution?.sessionId ?? "root"}`,
-    );
+      await withPhaseTimeout(
+        writeBundleArtifacts,
+        Math.min(timeoutMs, args.scriptCaptureTimeoutMs),
+        "script-capture",
+      );
+      await writeMergedArray(
+        path.join(args.outDir, "api-records.json"),
+        apiRecords,
+        (item) => `${item.method} ${item.path} ${item.requestFingerprint}`,
+      );
+      await writeMergedArray(
+        path.join(args.outDir, "page-states.json"),
+        pageStates,
+        (item) => item.page,
+      );
+      await writeMergedArray(
+        path.join(args.outDir, "session-snapshots.json"),
+        sessionSnapshots,
+        (item) => item.page,
+      );
+      await writeMergedArray(
+        path.join(args.outDir, "script-urls.json"),
+        scriptPages,
+        (item) => item.page,
+      );
+      await writeMergedArray(
+        path.join(args.outDir, "action-results.json"),
+        actionResults,
+        (item) => item.page,
+      );
+      await writeMergedArray(
+        path.join(args.outDir, "raw-requests.json"),
+        rawRequests,
+        (item) => item.evidenceId ?? `${item.requestFingerprint} ${item.pageLabel}`,
+      );
+      await writeMergedArray(
+        path.join(args.outDir, "probe-results.json"),
+        probeResults,
+        (item) => item.probeId ?? `${item.method} ${item.url} ${item.page}`,
+      );
+      await writeMergedArray(
+        path.join(args.outDir, "stream-records.json"),
+        passiveTransports,
+        (item) => `${item.transport} ${item.url} ${item.page} ${item.attribution?.sessionId ?? "root"}`,
+      );
+    }, timeoutMs, phase);
   }
 
   async function capturePageScriptBodies(pageLabel) {
@@ -3206,7 +3284,18 @@ async function main() {
   }
 }
 
-main().catch((error) => {
+main().catch(async (error) => {
+  try {
+    const argv = process.argv.slice(2);
+    const outIndex = argv.findIndex((arg) => arg === "--out");
+    const outputPath = argv.find((arg) => arg.startsWith("--out="))?.slice("--out=".length)
+      ?? (outIndex >= 0 ? argv[outIndex + 1] : null);
+    if (outputPath) {
+      await writeCaptureFailure({ outDir: path.resolve(outputPath) }, error);
+    }
+  } catch (metadataError) {
+    console.error("Failed to write capture failure metadata:", metadataError);
+  }
   console.error(error);
   process.exitCode = 1;
 });
