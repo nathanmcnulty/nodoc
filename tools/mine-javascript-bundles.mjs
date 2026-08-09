@@ -1,4 +1,5 @@
-import { access, readFile, realpath, writeFile } from "node:fs/promises";
+import { access, mkdir, readFile, realpath, rename, rm, writeFile } from "node:fs/promises";
+import { createHash } from "node:crypto";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -28,9 +29,98 @@ const confidence = {
 };
 const maxExpressionDepth = 6;
 const maxGraphqlOperations = 100;
+const cacheSchemaVersion = 1;
 
 function uniqueSorted(values) {
   return Array.from(new Set(values)).sort((left, right) => left.localeCompare(right));
+}
+
+function stableCacheOptions(prefixes) {
+  return { prefixes: uniqueSorted(prefixes) };
+}
+
+function contentHash(source) {
+  return createHash("sha256").update(source, "utf8").digest("hex");
+}
+
+function cacheKey(source, prefixes) {
+  return createHash("sha256")
+    .update(JSON.stringify({
+      analyzerVersion,
+      cacheSchemaVersion,
+      contentHash: contentHash(source),
+      options: stableCacheOptions(prefixes),
+      schemaVersion,
+    }), "utf8")
+    .digest("hex");
+}
+
+function cachePath(cacheDir, key) {
+  return path.join(cacheDir, key.slice(0, 2), `${key}.json`);
+}
+
+function remapSourceFile(value, sourceFile) {
+  if (Array.isArray(value)) return value.map((item) => remapSourceFile(item, sourceFile));
+  if (!value || typeof value !== "object") return value;
+  return Object.fromEntries(Object.entries(value).map(([key, item]) => [
+    key,
+    key === "sourceFile" ? sourceFile : remapSourceFile(item, sourceFile),
+  ]));
+}
+
+function validCacheResult(result, key, sourceHash) {
+  return result
+    && result.cacheSchemaVersion === cacheSchemaVersion
+    && result.analyzerVersion === analyzerVersion
+    && result.schemaVersion === schemaVersion
+    && result.key === key
+    && result.contentHash === sourceHash
+    && result.result
+    && Array.isArray(result.result.candidates)
+    && Array.isArray(result.result.graphqlOperations)
+    && Array.isArray(result.result.parseFailures ?? [])
+    && Array.isArray(result.result.sourceMaps ?? []);
+}
+
+async function readCacheEntry(cacheDir, key, sourceHash) {
+  try {
+    const entry = JSON.parse(await readFile(cachePath(cacheDir, key), "utf8"));
+    return validCacheResult(entry, key, sourceHash) ? entry.result : { invalid: true };
+  } catch (error) {
+    if (error?.code === "ENOENT") return null;
+    return { invalid: true };
+  }
+}
+
+async function writeCacheEntry(cacheDir, key, sourceHash, result) {
+  const target = cachePath(cacheDir, key);
+  const directory = path.dirname(target);
+  await mkdir(directory, { recursive: true });
+  const temporary = `${target}.${process.pid}.${Date.now()}.${Math.random().toString(16).slice(2)}.tmp`;
+  const entry = {
+    analyzerVersion,
+    cacheSchemaVersion,
+    contentHash: sourceHash,
+    key,
+    result,
+    schemaVersion,
+  };
+  try {
+    await writeFile(temporary, `${JSON.stringify(entry)}\n`, { encoding: "utf8", flag: "wx" });
+    try {
+      await rename(temporary, target);
+    } catch (error) {
+      if (!(["EEXIST", "EPERM", "ENOTEMPTY"].includes(error?.code))) throw error;
+      try {
+        await rm(target, { force: true });
+        await rename(temporary, target);
+      } catch (replacementError) {
+        if (!(["EEXIST", "EPERM", "ENOTEMPTY"].includes(replacementError?.code))) throw replacementError;
+      }
+    }
+  } finally {
+    await rm(temporary, { force: true });
+  }
 }
 
 function normalizePrefix(value) {
@@ -866,15 +956,52 @@ export function mineBundleSource(source, options = {}) {
 }
 
 export async function mineJavascriptBundles(options) {
-  const prefixes = options.prefixes ?? [];
+  const prefixes = uniqueSorted((options.prefixes ?? []).map(normalizePrefix).filter(Boolean));
+  const cacheDir = options.cacheDir ? path.resolve(options.cacheDir) : null;
+  const cacheEnabled = options.cacheMode !== "disabled" && Boolean(cacheDir);
+  const memory = new Map();
+  const metrics = {
+    analyzerExecutions: 0,
+    bytesAvoided: 0,
+    cacheHits: { memory: 0, persistent: 0 },
+    cacheInvalidEntries: 0,
+    cacheMisses: 0,
+    requestedBundles: (options.bundleFiles ?? []).length,
+    uniqueContentHashes: 0,
+  };
   const results = [];
   for (const bundleFile of options.bundleFiles ?? []) {
     const source = await readFile(bundleFile, "utf8");
-    results.push(mineBundleSource(source, {
-      prefixes,
-      sourceFile: path.basename(bundleFile),
-    }));
+    const sourceHash = contentHash(source);
+    const key = cacheKey(source, prefixes);
+    let result = cacheEnabled ? memory.get(key) : null;
+    if (result) {
+      metrics.cacheHits.memory += 1;
+    } else if (cacheEnabled) {
+      result = await readCacheEntry(cacheDir, key, sourceHash);
+      if (result?.invalid) {
+        metrics.cacheInvalidEntries += 1;
+        result = null;
+      } else if (result) {
+        metrics.cacheHits.persistent += 1;
+      }
+    }
+    if (!result) {
+      metrics.cacheMisses += 1;
+      metrics.analyzerExecutions += 1;
+      result = mineBundleSource(source, { prefixes, sourceFile: path.basename(bundleFile) });
+      if (cacheEnabled) await writeCacheEntry(cacheDir, key, sourceHash, result);
+    } else {
+      metrics.bytesAvoided += Buffer.byteLength(source, "utf8");
+      result = remapSourceFile(result, path.basename(bundleFile));
+    }
+    if (result.sourceFile !== path.basename(bundleFile)) {
+      result = remapSourceFile(result, path.basename(bundleFile));
+    }
+    if (cacheEnabled) memory.set(key, result);
+    results.push(result);
   }
+  metrics.uniqueContentHashes = memory.size;
 
   const candidateMap = new Map();
   const graphqlMap = new Map();
@@ -914,6 +1041,7 @@ export async function mineJavascriptBundles(options) {
         url,
       }))),
     schemaVersion,
+    cache: { ...metrics, enabled: cacheEnabled, mode: cacheEnabled ? "enabled" : "disabled" },
   };
 }
 
@@ -953,6 +1081,8 @@ function parseArgs(argv) {
     bundleDir: null,
     output: null,
     prefixes: [],
+    cacheDir: null,
+    cacheMode: "disabled",
   };
 
   for (let index = 0; index < argv.length; index += 1) {
@@ -970,6 +1100,13 @@ function parseArgs(argv) {
     } else if (argument === "--prefix" && next) {
       args.prefixes.push(next);
       index += 1;
+    } else if (argument === "--cache-dir" && next) {
+      args.cacheDir = path.resolve(next);
+      args.cacheMode = "persistent";
+      index += 1;
+    } else if (argument === "--no-cache") {
+      args.cacheDir = null;
+      args.cacheMode = "disabled";
     }
   }
 
@@ -1020,6 +1157,8 @@ async function main() {
   const payload = await mineJavascriptBundles({
     bundleFiles,
     prefixes: args.prefixes,
+    cacheDir: args.cacheDir,
+    cacheMode: args.cacheMode,
   });
   await writeFile(args.output, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
   console.log(JSON.stringify({

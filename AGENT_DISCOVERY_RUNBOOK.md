@@ -221,6 +221,36 @@ GraphQL entries include operation type/name and a persisted-query hash only when
 the hash is statically present. Parse failures are counted and preserved as
 diagnostics rather than treated as successful extraction.
 
+### Bundle analysis cache
+
+Bundle analysis caching is disabled by default, preserving legacy execution. To
+opt in for repeated runs, pass `--bundle-cache-dir <directory>` to
+`run-portal-discovery.mjs`; the directory is a local derivative cache and must
+not be used as evidence storage. Entries are keyed by SHA-256 bundle content,
+analyzer version, cache schema version, result schema version, and normalized
+path-prefix options. URL, local path, and modification time are never keys.
+
+Within a run, duplicate bytes share one analyzer execution. Persistent entries
+are reused only when all key metadata matches. Missing, malformed, partial,
+corrupt, or version/options-mismatched entries are explicit misses and are
+atomically replaced with a Windows-safe temporary-file rename. Cache metadata
+contains no absolute paths or raw bundle bodies; cached results use the same
+sanitized analyzer schema as `bundle-candidates.json`. Immutable bundle files
+and run artifacts remain the source evidence and are never replaced by cache
+reads. `bundle-candidates.json` and `summary.json` expose deterministic cache
+metrics: requested bundles, unique content hashes, memory/persistent hits,
+misses, invalid entries, bytes avoided, and analyzer executions.
+
+Remove the cache directory, or change analyzer/schema/options versions, to force
+invalidation. Do not share a cache across incompatible analyzer implementations.
+
+The synthetic benchmark fixture in
+`tools/tests/mine-javascript-bundles.test.mjs` uses three files with identical
+bytes: legacy mode performs three analyzer executions, while the cache-enabled
+run performs one and preserves candidate cardinality. Run it with
+`node --test tools/tests/mine-javascript-bundles.test.mjs`; this measures analyzer
+CPU reduction only and does not claim downstream token savings.
+
 ## Swarm execution contract
 
 - One coordinator runs `plan`, assigns one portal and checked-in recipe per
