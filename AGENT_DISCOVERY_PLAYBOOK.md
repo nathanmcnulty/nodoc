@@ -422,7 +422,7 @@ What to extract:
 - route candidates for a later safe-probe queue
 - If you have sibling pages in the same feature family, diff their `script-urls.json` sets early so page-specific bundles stand out before you mine generic shell chunks.
 - Prioritize unique or near-unique bundles first; these are often where request factories, enum values, hidden sibling routes, and request-body defaults live.
-- The static miner uses an AST when possible and falls back to bounded string extraction for malformed or non-standard bundles. It preserves inferred HTTP methods, dynamic `{param}` route templates, GraphQL operation names, source locations, source-map references, and parse failures.
+- The static miner uses an AST when possible and falls back to bounded string extraction for malformed or non-standard bundles. It preserves inferred HTTP methods, dynamic `{param}` route templates, absolute host provenance, confidence/provenance metadata, GraphQL operation type/name plus statically present persisted-query hashes, source locations, source-map references, and parse failures. It never executes bundle code.
 
 ### 5a. Build a candidate queue
 
