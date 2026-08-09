@@ -5,6 +5,17 @@ blocker requires deeper background.
 
 ## Agent handoff
 
+Validated grouped handoffs may be converted offline with
+`tools/discovery-review-assignments.mjs`. The schema-versioned plan creates one
+deterministic assignment per partition and contains only digests, counts,
+destination metadata, blockers, capabilities, and routing. `cheap` is reserved
+for unblocked read-only partitions; safety, adjacent ownership, scope/host
+ambiguity, incomplete capture/health, and unknown eligibility route to Luna or
+manual review, while suppressed work is blocked. Only cheap and Luna entries
+may be imported into the ledger; manual and blocked entries remain visible but
+non-reviewable. Import is idempotent and uses the existing ledger lock without
+changing capture endpoint/profile leases.
+
 Give the agent this repository-relative instruction:
 
 > Read `PORTAL_DISCOVERY_AGENT_PROMPT.md` and follow it exactly for the named
