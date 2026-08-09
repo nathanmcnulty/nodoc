@@ -1484,6 +1484,143 @@
                                             ]
                                         }
                                     ]
+                                },
+                                {
+                                    "name": "collections",
+                                    "description": "",
+                                    "item": [
+                                        {
+                                            "name": "me",
+                                            "description": "",
+                                            "item": [
+                                                {
+                                                    "id": "0a15c369-c13e-43da-bbee-e3590ef9aad4",
+                                                    "name": "Evaluate collection permissions",
+                                                    "request": {
+                                                        "name": "Evaluate collection permissions",
+                                                        "description": {
+                                                            "content": "Evaluates collection-level permissions for the current user during startup and collection selection flows.",
+                                                            "type": "text/plain"
+                                                        },
+                                                        "url": {
+                                                            "path": [
+                                                                "api",
+                                                                "gateway",
+                                                                "actions",
+                                                                "collections",
+                                                                "me"
+                                                            ],
+                                                            "host": [
+                                                                "{{baseUrl}}"
+                                                            ],
+                                                            "query": [
+                                                                {
+                                                                    "disabled": false,
+                                                                    "description": {
+                                                                        "content": "(Required) Preview API version observed on Security Platform provisioning helpers.",
+                                                                        "type": "text/plain"
+                                                                    },
+                                                                    "key": "api-version",
+                                                                    "value": "2024-03-01-preview"
+                                                                }
+                                                            ],
+                                                            "variable": []
+                                                        },
+                                                        "header": [
+                                                            {
+                                                                "key": "Content-Type",
+                                                                "value": "application/json"
+                                                            },
+                                                            {
+                                                                "key": "Accept",
+                                                                "value": "application/json"
+                                                            }
+                                                        ],
+                                                        "method": "POST",
+                                                        "body": {
+                                                            "mode": "raw",
+                                                            "raw": "[\n  \"string\",\n  \"string\"\n]",
+                                                            "options": {
+                                                                "raw": {
+                                                                    "headerFamily": "json",
+                                                                    "language": "json"
+                                                                }
+                                                            }
+                                                        },
+                                                        "auth": null
+                                                    },
+                                                    "response": [
+                                                        {
+                                                            "id": "1e0a80a4-93b9-4137-8d1e-050c1e354f10",
+                                                            "name": "Collection permission evaluation returned successfully.",
+                                                            "originalRequest": {
+                                                                "url": {
+                                                                    "path": [
+                                                                        "api",
+                                                                        "gateway",
+                                                                        "actions",
+                                                                        "collections",
+                                                                        "me"
+                                                                    ],
+                                                                    "host": [
+                                                                        "{{baseUrl}}"
+                                                                    ],
+                                                                    "query": [
+                                                                        {
+                                                                            "disabled": false,
+                                                                            "description": {
+                                                                                "content": "(Required) Preview API version observed on Security Platform provisioning helpers.",
+                                                                                "type": "text/plain"
+                                                                            },
+                                                                            "key": "api-version",
+                                                                            "value": "2024-03-01-preview"
+                                                                        }
+                                                                    ],
+                                                                    "variable": []
+                                                                },
+                                                                "header": [
+                                                                    {
+                                                                        "key": "Content-Type",
+                                                                        "value": "application/json"
+                                                                    },
+                                                                    {
+                                                                        "key": "Accept",
+                                                                        "value": "application/json"
+                                                                    }
+                                                                ],
+                                                                "method": "POST",
+                                                                "body": {
+                                                                    "mode": "raw",
+                                                                    "raw": "[\n  \"string\",\n  \"string\"\n]",
+                                                                    "options": {
+                                                                        "raw": {
+                                                                            "headerFamily": "json",
+                                                                            "language": "json"
+                                                                        }
+                                                                    }
+                                                                }
+                                                            },
+                                                            "status": "OK",
+                                                            "code": 200,
+                                                            "header": [
+                                                                {
+                                                                    "key": "Content-Type",
+                                                                    "value": "application/json"
+                                                                }
+                                                            ],
+                                                            "body": "{\n  \"key_0\": 6182\n}",
+                                                            "cookie": [],
+                                                            "_postman_previewlanguage": "json"
+                                                        }
+                                                    ],
+                                                    "event": [],
+                                                    "protocolProfileBehavior": {
+                                                        "disableBodyPruning": true
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    ]
                                 }
                             ]
                         }
@@ -4720,6 +4857,314 @@
                                                         }
                                                     ],
                                                     "body": "{\n  \"key_0\": true,\n  \"key_1\": \"string\"\n}",
+                                                    "cookie": [],
+                                                    "_postman_previewlanguage": "json"
+                                                }
+                                            ],
+                                            "event": [],
+                                            "protocolProfileBehavior": {
+                                                "disableBodyPruning": true
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "name": "LokiService",
+                            "description": "",
+                            "item": [
+                                {
+                                    "name": "1.0.0.0",
+                                    "description": "",
+                                    "item": [
+                                        {
+                                            "id": "543b6265-25ed-4bfd-8e48-42f5b509ba36",
+                                            "name": "Get Loki Service client configuration",
+                                            "request": {
+                                                "name": "Get Loki Service client configuration",
+                                                "description": {
+                                                    "content": "Retrieves ECS Loki service configuration used by Security Copilot telemetry and diagnostics surfaces.",
+                                                    "type": "text/plain"
+                                                },
+                                                "url": {
+                                                    "path": [
+                                                        "config",
+                                                        "v1",
+                                                        "LokiService",
+                                                        "1.0.0.0"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [
+                                                        {
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "(Required) Security service family whose Security Store client settings should be loaded.",
+                                                                "type": "text/plain"
+                                                            },
+                                                            "key": "SecurityService",
+                                                            "value": "default"
+                                                        },
+                                                        {
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "(Required) Deployment environment whose Security Store client settings should be loaded.",
+                                                                "type": "text/plain"
+                                                            },
+                                                            "key": "Environment",
+                                                            "value": "Prod"
+                                                        }
+                                                    ],
+                                                    "variable": []
+                                                },
+                                                "header": [
+                                                    {
+                                                        "key": "Accept",
+                                                        "value": "application/json"
+                                                    }
+                                                ],
+                                                "method": "GET",
+                                                "body": {},
+                                                "auth": null
+                                            },
+                                            "response": [
+                                                {
+                                                    "id": "2082f04c-13e4-4e18-83dc-87c7bdf97f48",
+                                                    "name": "Loki service configuration returned successfully.",
+                                                    "originalRequest": {
+                                                        "url": {
+                                                            "path": [
+                                                                "config",
+                                                                "v1",
+                                                                "LokiService",
+                                                                "1.0.0.0"
+                                                            ],
+                                                            "host": [
+                                                                "{{baseUrl}}"
+                                                            ],
+                                                            "query": [
+                                                                {
+                                                                    "disabled": false,
+                                                                    "description": {
+                                                                        "content": "(Required) Security service family whose Security Store client settings should be loaded.",
+                                                                        "type": "text/plain"
+                                                                    },
+                                                                    "key": "SecurityService",
+                                                                    "value": "default"
+                                                                },
+                                                                {
+                                                                    "disabled": false,
+                                                                    "description": {
+                                                                        "content": "(Required) Deployment environment whose Security Store client settings should be loaded.",
+                                                                        "type": "text/plain"
+                                                                    },
+                                                                    "key": "Environment",
+                                                                    "value": "Prod"
+                                                                }
+                                                            ],
+                                                            "variable": []
+                                                        },
+                                                        "header": [
+                                                            {
+                                                                "key": "Accept",
+                                                                "value": "application/json"
+                                                            }
+                                                        ],
+                                                        "method": "GET",
+                                                        "body": {}
+                                                    },
+                                                    "status": "OK",
+                                                    "code": 200,
+                                                    "header": [
+                                                        {
+                                                            "key": "Content-Type",
+                                                            "value": "application/json"
+                                                        }
+                                                    ],
+                                                    "body": "{\n  \"key_0\": false,\n  \"key_1\": false\n}",
+                                                    "cookie": [],
+                                                    "_postman_previewlanguage": "json"
+                                                }
+                                            ],
+                                            "event": [],
+                                            "protocolProfileBehavior": {
+                                                "disableBodyPruning": true
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "name": "YammerClients",
+                            "description": "",
+                            "item": [
+                                {
+                                    "name": "0.0.1",
+                                    "description": "",
+                                    "item": [
+                                        {
+                                            "id": "a0cf4821-9bdd-4657-81a9-e71ec82bec71",
+                                            "name": "Get Yammer client configuration",
+                                            "request": {
+                                                "name": "Get Yammer client configuration",
+                                                "description": {
+                                                    "content": "Loads Viva Engage/Yammer feature-flight style configuration for the authenticated user context.",
+                                                    "type": "text/plain"
+                                                },
+                                                "url": {
+                                                    "path": [
+                                                        "config",
+                                                        "v1",
+                                                        "YammerClients",
+                                                        "0.0.1"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [
+                                                        {
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "(Required) Client application family requesting Yammer configuration.",
+                                                                "type": "text/plain"
+                                                            },
+                                                            "key": "Application",
+                                                            "value": "YammerWeb"
+                                                        },
+                                                        {
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "(Required) Tenant cloud identifier used by the Yammer clients configuration endpoint.",
+                                                                "type": "text/plain"
+                                                            },
+                                                            "key": "Cloud",
+                                                            "value": "Public"
+                                                        },
+                                                        {
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "(Required) Viva Engage environment identifier for the Yammer client configuration endpoint.",
+                                                                "type": "text/plain"
+                                                            },
+                                                            "key": "Environment",
+                                                            "value": "Production"
+                                                        },
+                                                        {
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "(Required) Tenant identifier in GUID format for the current Viva Engage tenant.",
+                                                                "type": "text/plain"
+                                                            },
+                                                            "key": "TenantId",
+                                                            "value": "844c2762-8400-6b97-18cb-c2c2f2dab0e7"
+                                                        },
+                                                        {
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "(Required) Current principal identifier in GUID format.",
+                                                                "type": "text/plain"
+                                                            },
+                                                            "key": "UserId",
+                                                            "value": "844c2762-8400-6b97-18cb-c2c2f2dab0e7"
+                                                        }
+                                                    ],
+                                                    "variable": []
+                                                },
+                                                "header": [
+                                                    {
+                                                        "key": "Accept",
+                                                        "value": "application/json"
+                                                    }
+                                                ],
+                                                "method": "GET",
+                                                "body": {},
+                                                "auth": null
+                                            },
+                                            "response": [
+                                                {
+                                                    "id": "fd09a4b7-21da-4b36-a141-74af32d26754",
+                                                    "name": "Yammer client configuration returned successfully.",
+                                                    "originalRequest": {
+                                                        "url": {
+                                                            "path": [
+                                                                "config",
+                                                                "v1",
+                                                                "YammerClients",
+                                                                "0.0.1"
+                                                            ],
+                                                            "host": [
+                                                                "{{baseUrl}}"
+                                                            ],
+                                                            "query": [
+                                                                {
+                                                                    "disabled": false,
+                                                                    "description": {
+                                                                        "content": "(Required) Client application family requesting Yammer configuration.",
+                                                                        "type": "text/plain"
+                                                                    },
+                                                                    "key": "Application",
+                                                                    "value": "YammerWeb"
+                                                                },
+                                                                {
+                                                                    "disabled": false,
+                                                                    "description": {
+                                                                        "content": "(Required) Tenant cloud identifier used by the Yammer clients configuration endpoint.",
+                                                                        "type": "text/plain"
+                                                                    },
+                                                                    "key": "Cloud",
+                                                                    "value": "Public"
+                                                                },
+                                                                {
+                                                                    "disabled": false,
+                                                                    "description": {
+                                                                        "content": "(Required) Viva Engage environment identifier for the Yammer client configuration endpoint.",
+                                                                        "type": "text/plain"
+                                                                    },
+                                                                    "key": "Environment",
+                                                                    "value": "Production"
+                                                                },
+                                                                {
+                                                                    "disabled": false,
+                                                                    "description": {
+                                                                        "content": "(Required) Tenant identifier in GUID format for the current Viva Engage tenant.",
+                                                                        "type": "text/plain"
+                                                                    },
+                                                                    "key": "TenantId",
+                                                                    "value": "844c2762-8400-6b97-18cb-c2c2f2dab0e7"
+                                                                },
+                                                                {
+                                                                    "disabled": false,
+                                                                    "description": {
+                                                                        "content": "(Required) Current principal identifier in GUID format.",
+                                                                        "type": "text/plain"
+                                                                    },
+                                                                    "key": "UserId",
+                                                                    "value": "844c2762-8400-6b97-18cb-c2c2f2dab0e7"
+                                                                }
+                                                            ],
+                                                            "variable": []
+                                                        },
+                                                        "header": [
+                                                            {
+                                                                "key": "Accept",
+                                                                "value": "application/json"
+                                                            }
+                                                        ],
+                                                        "method": "GET",
+                                                        "body": {}
+                                                    },
+                                                    "status": "OK",
+                                                    "code": 200,
+                                                    "header": [
+                                                        {
+                                                            "key": "Content-Type",
+                                                            "value": "application/json"
+                                                        }
+                                                    ],
+                                                    "body": "{\n  \"key_0\": false,\n  \"key_1\": false\n}",
                                                     "cookie": [],
                                                     "_postman_previewlanguage": "json"
                                                 }
