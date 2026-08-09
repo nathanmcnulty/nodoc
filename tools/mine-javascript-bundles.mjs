@@ -8,13 +8,25 @@ import fg from "fast-glob";
 
 const httpMethods = new Set(["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]);
 const endpointPropertyNames = new Set([
+  "apipath",
   "endpoint",
   "endpointurl",
   "path",
   "route",
+  "routepath",
   "uri",
   "url",
 ]);
+const analyzerVersion = "2";
+const schemaVersion = 2;
+const wrapperNames = new Set(["axios", "client", "fetch", "http", "request"]);
+const confidence = {
+  exact: 1,
+  inferred: 0.8,
+  fallback: 0.6,
+  parseFallback: 0.4,
+};
+const maxExpressionDepth = 6;
 
 function uniqueSorted(values) {
   return Array.from(new Set(values)).sort((left, right) => left.localeCompare(right));
@@ -34,10 +46,14 @@ function cleanCandidatePath(value) {
     .replaceAll("\\u002F", "/")
     .replaceAll("\\u002f", "/")
     .trim();
+  let baseUrl = null;
+  let hostname = null;
 
   try {
     if (/^https?:\/\//iu.test(candidate)) {
       const parsed = new URL(candidate);
+      baseUrl = parsed.origin;
+      hostname = parsed.hostname.toLowerCase();
       candidate = `${parsed.pathname}${parsed.search}`;
     }
   } catch {
@@ -53,42 +69,7 @@ function cleanCandidatePath(value) {
     return null;
   }
 
-  return candidate;
-}
-
-function expressionValue(node) {
-  if (!node) {
-    return null;
-  }
-
-  if (node.type === "Literal" && typeof node.value === "string") {
-    return node.value;
-  }
-
-  if (node.type === "TemplateLiteral") {
-    return node.quasis
-      .map((quasi, index) => {
-        const suffix = index < node.expressions.length ? "{param}" : "";
-        return `${quasi.value.cooked ?? quasi.value.raw}${suffix}`;
-      })
-      .join("");
-  }
-
-  if (node.type === "BinaryExpression" && node.operator === "+") {
-    const left = expressionValue(node.left);
-    const right = expressionValue(node.right);
-    if (left !== null && right !== null) {
-      return `${left}${right}`;
-    }
-    if (left !== null) {
-      return `${left}{param}`;
-    }
-    if (right !== null) {
-      return `{param}${right}`;
-    }
-  }
-
-  return null;
+  return { baseUrl, candidatePath: candidate, hostname };
 }
 
 function propertyName(node) {
@@ -111,7 +92,7 @@ function memberName(node) {
   if (node.type === "Identifier") {
     return node.name;
   }
-  if (node.type !== "MemberExpression") {
+  if (node.type !== "MemberExpression" || (node.computed && node.property.type !== "Literal")) {
     return null;
   }
   const objectName = memberName(node.object);
@@ -119,7 +100,270 @@ function memberName(node) {
   return [objectName, property].filter(Boolean).join(".");
 }
 
-function methodDescriptorFromOptions(node) {
+function evaluated(text, candidateConfidence, provenance, extras = {}) {
+  return {
+    baseUrl: extras.baseUrl ?? null,
+    confidence: candidateConfidence,
+    hostname: extras.hostname ?? null,
+    provenance,
+    staticValue: extras.staticValue,
+    text,
+  };
+}
+
+function expressionValue(node, context, depth = 0) {
+  if (!node || depth > maxExpressionDepth) {
+    return null;
+  }
+
+  if (node.type === "Literal" && ["boolean", "number", "string"].includes(typeof node.value)) {
+    return evaluated(String(node.value), confidence.exact, "literal", {
+      staticValue: node.value,
+    });
+  }
+
+  if (node.type === "Identifier") {
+    const value = context.constants.get(node.name);
+    return value
+      ? {
+          ...value,
+          confidence: Math.min(value.confidence, confidence.inferred),
+          provenance: `const:${node.name}->${value.provenance}`,
+        }
+      : null;
+  }
+
+  if (node.type === "MemberExpression") {
+    const object = expressionValue(node.object, context, depth + 1);
+    const property = propertyName(node.property);
+    const value = object?.properties?.get(property);
+    return value
+      ? {
+          ...value,
+          confidence: Math.min(value.confidence, confidence.inferred),
+          provenance: `property:${memberName(node)}->${value.provenance}`,
+        }
+      : null;
+  }
+
+  if (node.type === "ObjectExpression") {
+    const properties = new Map();
+    for (const property of node.properties) {
+      if (
+        property.type !== "Property"
+        || (property.computed && property.key.type !== "Literal")
+      ) {
+        continue;
+      }
+      const key = propertyName(property.key);
+      const value = expressionValue(property.value, context, depth + 1);
+      if (key && value) {
+        properties.set(key, value);
+      }
+    }
+    return properties.size > 0
+      ? {
+          confidence: confidence.inferred,
+          properties,
+          provenance: "object-literal",
+          text: "",
+        }
+      : null;
+  }
+
+  if (node.type === "TemplateLiteral") {
+    let text = "";
+    let candidateConfidence = confidence.exact;
+    const provenance = [];
+    for (let index = 0; index < node.quasis.length; index += 1) {
+      text += node.quasis[index].value.cooked ?? node.quasis[index].value.raw;
+      if (index >= node.expressions.length) {
+        continue;
+      }
+      const value = expressionValue(node.expressions[index], context, depth + 1);
+      if (value?.staticValue !== undefined || value?.text) {
+        text += value.text;
+        candidateConfidence = Math.min(candidateConfidence, value.confidence);
+        provenance.push(value.provenance);
+      } else {
+        text += "{param}";
+        candidateConfidence = Math.min(candidateConfidence, confidence.inferred);
+        provenance.push("dynamic-placeholder");
+      }
+    }
+    return evaluated(
+      text,
+      candidateConfidence,
+      `template:${provenance.join("+") || "static"}`,
+    );
+  }
+
+  if (node.type === "BinaryExpression" && node.operator === "+") {
+    const left = expressionValue(node.left, context, depth + 1);
+    const right = expressionValue(node.right, context, depth + 1);
+    if (!left && !right) {
+      return null;
+    }
+    return evaluated(
+      `${left?.text ?? "{param}"}${right?.text ?? "{param}"}`,
+      Math.min(left?.confidence ?? confidence.fallback, right?.confidence ?? confidence.fallback),
+      `binary:${left?.provenance ?? "dynamic"}+${right?.provenance ?? "dynamic"}`,
+      {
+        baseUrl: left?.baseUrl ?? right?.baseUrl,
+        hostname: left?.hostname ?? right?.hostname,
+      },
+    );
+  }
+
+  if (node.type === "UnaryExpression" && node.operator === "!") {
+    const argument = expressionValue(node.argument, context, depth + 1);
+    if (argument?.staticValue === undefined) {
+      return null;
+    }
+    const value = !argument.staticValue;
+    return evaluated(String(value), confidence.inferred, `unary:${argument.provenance}`, {
+      staticValue: value,
+    });
+  }
+
+  if (node.type === "ConditionalExpression") {
+    const test = expressionValue(node.test, context, depth + 1);
+    if (test?.staticValue === undefined) {
+      return null;
+    }
+    const branch = test.staticValue ? node.consequent : node.alternate;
+    const value = expressionValue(branch, context, depth + 1);
+    return value
+      ? {
+          ...value,
+          confidence: Math.min(value.confidence, confidence.inferred),
+          provenance: `conditional:${test.staticValue ? "consequent" : "alternate"}->${value.provenance}`,
+        }
+      : null;
+  }
+
+  if (node.type === "LogicalExpression") {
+    const left = expressionValue(node.left, context, depth + 1);
+    if (left?.staticValue === undefined) {
+      return null;
+    }
+    const selectRight = node.operator === "&&" ? Boolean(left.staticValue) : !left.staticValue;
+    const value = selectRight
+      ? expressionValue(node.right, context, depth + 1)
+      : left;
+    return value
+      ? {
+          ...value,
+          confidence: Math.min(value.confidence, confidence.inferred),
+          provenance: `logical:${node.operator}->${value.provenance}`,
+        }
+      : null;
+  }
+
+  const isUrlConstructor = (
+    node.type === "NewExpression"
+    || node.type === "CallExpression"
+  ) && memberName(node.callee) === "URL";
+  if (isUrlConstructor) {
+    const route = expressionValue(node.arguments[0], context, depth + 1);
+    const base = expressionValue(node.arguments[1], context, depth + 1);
+    if (!route?.text) {
+      return null;
+    }
+    try {
+      const url = base?.text ? new URL(route.text, base.text) : new URL(route.text);
+      return evaluated(
+        `${url.pathname}${url.search}`,
+        Math.min(route.confidence, base?.confidence ?? confidence.exact),
+        `url-constructor:${route.provenance}${base ? `+${base.provenance}` : ""}`,
+        { baseUrl: url.origin, hostname: url.hostname.toLowerCase() },
+      );
+    } catch {
+      return route.text.startsWith("/")
+        ? {
+            ...route,
+            provenance: `url-constructor:${route.provenance}`,
+          }
+        : null;
+    }
+  }
+
+  return null;
+}
+
+function collectStaticContext(ast) {
+  const context = {
+    aliases: new Map(),
+    clientBases: new Map(),
+    constants: new Map(),
+    xhrInstances: new Set(),
+  };
+  const declarations = [];
+
+  ancestor(ast, {
+    VariableDeclarator(node, ancestors) {
+      const declaration = ancestors.at(-2);
+      if (declaration?.type === "VariableDeclaration" && declaration.kind === "const") {
+        declarations.push(node);
+      }
+    },
+  });
+
+  for (let pass = 0; pass < maxExpressionDepth; pass += 1) {
+    let changed = false;
+    for (const declaration of declarations) {
+      if (declaration.id.type !== "Identifier" || !declaration.init) {
+        continue;
+      }
+      const name = declaration.id.name;
+      const value = expressionValue(declaration.init, context);
+      if (value && !context.constants.has(name)) {
+        context.constants.set(name, value);
+        changed = true;
+      }
+
+      const directAlias = memberName(declaration.init);
+      if (directAlias) {
+        const root = directAlias.split(".")[0];
+        const resolved = context.aliases.get(root) ?? directAlias;
+        if (wrapperNames.has(resolved.split(".")[0].toLowerCase())) {
+          context.aliases.set(name, resolved);
+        }
+      }
+
+      if (
+        declaration.init.type === "CallExpression"
+        && memberName(declaration.init.callee)?.toLowerCase().endsWith(".create")
+      ) {
+        const owner = memberName(declaration.init.callee).split(".")[0];
+        const resolvedOwner = context.aliases.get(owner) ?? owner;
+        if (wrapperNames.has(resolvedOwner.toLowerCase())) {
+          context.aliases.set(name, resolvedOwner);
+          const options = expressionValue(declaration.init.arguments[0], context);
+          const base = options?.properties?.get("baseURL")
+            ?? options?.properties?.get("baseUrl");
+          if (base?.text) {
+            context.clientBases.set(name, base);
+          }
+        }
+      }
+
+      if (
+        declaration.init.type === "NewExpression"
+        && memberName(declaration.init.callee) === "XMLHttpRequest"
+      ) {
+        context.xhrInstances.add(name);
+      }
+    }
+    if (!changed) {
+      break;
+    }
+  }
+
+  return context;
+}
+
+function methodDescriptorFromOptions(node, context) {
   if (!node) {
     return { found: false, method: null };
   }
@@ -146,7 +390,7 @@ function methodDescriptorFromOptions(node) {
     if (key !== "method") {
       continue;
     }
-    const method = expressionValue(property.value)?.toUpperCase();
+    const method = expressionValue(property.value, context)?.text.toUpperCase();
     descriptor = {
       found: true,
       method: httpMethods.has(method) ? method : null,
@@ -155,8 +399,8 @@ function methodDescriptorFromOptions(node) {
   return descriptor;
 }
 
-function methodFromOptions(node) {
-  return methodDescriptorFromOptions(node).method;
+function methodFromOptions(node, context) {
+  return methodDescriptorFromOptions(node, context).method;
 }
 
 function lineForNode(node) {
@@ -164,22 +408,26 @@ function lineForNode(node) {
 }
 
 function extractCandidatePaths(value, prefixes) {
-  const source = String(value || "");
+  const source = String(value?.text ?? value ?? "");
   const paths = new Set();
 
   for (const prefix of prefixes) {
     let index = source.indexOf(prefix);
     while (index >= 0) {
       const fragment = source.slice(index).split(/[\s<>"'`\\|]/u, 1)[0];
-      const candidate = cleanCandidatePath(fragment);
-      if (candidate) {
-        paths.add(candidate);
+      const cleaned = cleanCandidatePath(fragment);
+      if (cleaned) {
+        paths.add(JSON.stringify({
+          ...cleaned,
+          baseUrl: cleaned.baseUrl ?? value?.baseUrl ?? null,
+          hostname: cleaned.hostname ?? value?.hostname ?? null,
+        }));
       }
       index = source.indexOf(prefix, index + prefix.length);
     }
   }
 
-  return Array.from(paths);
+  return Array.from(paths, (candidate) => JSON.parse(candidate));
 }
 
 function normalizeMethod(value) {
@@ -187,14 +435,36 @@ function normalizeMethod(value) {
   return httpMethods.has(method) ? method : null;
 }
 
-function parseGraphqlOperations(source) {
+function parseGraphqlOperations(source, ast, context) {
   const operations = new Map();
   const matcher = /\b(query|mutation|subscription)\s+([A-Za-z_][A-Za-z0-9_]*)\b/gu;
   for (const match of source.matchAll(matcher)) {
     const key = `${match[1]} ${match[2]}`;
     operations.set(key, {
+      confidence: confidence.exact,
       name: match[2],
       operationType: match[1],
+      provenance: "graphql-document",
+    });
+  }
+  if (ast) {
+    ancestor(ast, {
+      ObjectExpression(node) {
+        const object = expressionValue(node, context);
+        const operationName = object?.properties?.get("operationName")?.text
+          ?? object?.properties?.get("name")?.text;
+        const persistedQueryHash = object?.properties?.get("sha256Hash")?.text
+          ?? object?.properties?.get("persistedQueryHash")?.text;
+        if (!operationName || !/^[a-f0-9]{32,128}$/iu.test(persistedQueryHash ?? "")) {
+          return;
+        }
+        for (const operation of operations.values()) {
+          if (operation.name === operationName) {
+            operation.persistedQueryHash = persistedQueryHash.toLowerCase();
+            operation.provenance = `${operation.provenance}+persisted-query-object`;
+          }
+        }
+      },
     });
   }
   return Array.from(operations.values()).sort((left, right) =>
@@ -221,17 +491,21 @@ export function mineBundleSource(source, options = {}) {
   let parseError = null;
 
   function addCandidate(value, details = {}) {
-    for (const candidatePath of extractCandidatePaths(value, prefixes)) {
+    for (const extracted of extractCandidatePaths(value, prefixes)) {
       const method = normalizeMethod(details.method);
       const occurrenceId = details.occurrenceId ?? `line:${details.line ?? "unknown"}`;
-      const key = `${method ?? "ANY"} ${candidatePath} ${occurrenceId}`;
+      const key = `${method ?? "ANY"} ${extracted.hostname ?? "NO_HOST"} ${extracted.candidatePath} ${occurrenceId}`;
       const existing = candidates.get(key);
       const candidate = {
-        candidatePath,
+        baseUrl: extracted.baseUrl,
+        candidatePath: extracted.candidatePath,
+        confidence: details.confidence ?? value?.confidence ?? confidence.fallback,
         discoveryKind: details.discoveryKind ?? "string-literal",
+        hostname: extracted.hostname,
         line: details.line ?? null,
         method,
         occurrenceId,
+        provenance: details.provenance ?? value?.provenance ?? "literal-scan",
         sourceFile,
       };
       if (!existing || (candidate.line ?? Number.MAX_SAFE_INTEGER) < (existing.line ?? Number.MAX_SAFE_INTEGER)) {
@@ -240,6 +514,12 @@ export function mineBundleSource(source, options = {}) {
     }
   }
 
+  let context = {
+    aliases: new Map(),
+    clientBases: new Map(),
+    constants: new Map(),
+    xhrInstances: new Set(),
+  };
   let ast = null;
   try {
     ast = parse(source, {
@@ -265,40 +545,87 @@ export function mineBundleSource(source, options = {}) {
   }
 
   if (ast) {
+    context = collectStaticContext(ast);
     ancestor(ast, {
       CallExpression(node) {
         const callee = memberName(node.callee);
         const lowerCallee = callee?.toLowerCase() ?? "";
+        const rootName = lowerCallee.split(".")[0];
+        const resolvedRoot = context.aliases.get(rootName)?.toLowerCase() ?? rootName;
         const directMethod = normalizeMethod(lowerCallee.split(".").at(-1));
         const isFetch = lowerCallee === "fetch" || lowerCallee.endsWith(".fetch");
         const isHttpClientCall = directMethod && (
-          lowerCallee.includes("axios")
-          || lowerCallee.includes("http")
-          || lowerCallee.includes("client")
-          || lowerCallee.includes("request")
+          wrapperNames.has(resolvedRoot)
+          || wrapperNames.has(rootName)
         );
-        const target = expressionValue(node.arguments[0]);
+        const isRequestWrapper = (
+          lowerCallee.split(".").length === 1
+          && ["axios", "http", "request"].includes(resolvedRoot)
+        );
+        const isXhrOpen = lowerCallee.endsWith(".open")
+          && context.xhrInstances.has(rootName);
+        const targetNode = node.arguments[isXhrOpen ? 1 : 0];
+        let target = expressionValue(targetNode, context);
+        let methodDescriptor = methodDescriptorFromOptions(node.arguments[1], context);
+        let method = directMethod;
 
-        if (target && (isFetch || isHttpClientCall)) {
-          const methodDescriptor = methodDescriptorFromOptions(node.arguments[1]);
+        if (isXhrOpen) {
+          method = normalizeMethod(expressionValue(node.arguments[0], context)?.text);
+        } else if (isFetch || isRequestWrapper) {
+          method = methodDescriptor.found
+            ? methodDescriptor.method
+            : isFetch
+              ? "GET"
+              : null;
+        }
+
+        if (isRequestWrapper && node.arguments[0]?.type === "ObjectExpression") {
+          const requestOptions = expressionValue(node.arguments[0], context);
+          target = requestOptions?.properties?.get("url")
+            ?? requestOptions?.properties?.get("uri")
+            ?? null;
+          method = normalizeMethod(
+            requestOptions?.properties?.get("method")?.text
+            ?? requestOptions?.properties?.get("httpMethod")?.text,
+          );
+        }
+
+        const clientBase = context.clientBases.get(rootName);
+        if (target?.text && clientBase?.text && !/^https?:\/\//iu.test(target.text)) {
+          try {
+            const url = new URL(target.text, clientBase.text);
+            target = {
+              ...target,
+              baseUrl: url.origin,
+              hostname: url.hostname.toLowerCase(),
+              provenance: `client-base:${clientBase.provenance}->${target.provenance}`,
+            };
+          } catch {
+            // Invalid static base URLs are ignored rather than guessed.
+          }
+        }
+
+        if (target && (isFetch || isHttpClientCall || isRequestWrapper || isXhrOpen)) {
           addCandidate(target, {
-            discoveryKind: isFetch ? "fetch-call" : "http-client-call",
+            discoveryKind: isXhrOpen
+              ? "xmlhttprequest-open"
+              : isFetch
+                ? "fetch-call"
+                : "http-client-call",
             line: lineForNode(node),
-            method: isFetch
-              ? methodDescriptor.found
-                ? methodDescriptor.method
-                : "GET"
-              : directMethod,
-            occurrenceId: `${node.arguments[0]?.start ?? node.start}:${node.arguments[0]?.end ?? node.end}`,
+            method,
+            occurrenceId: `${targetNode?.start ?? node.start}:${targetNode?.end ?? node.end}`,
           });
         }
       },
       Literal(node) {
         if (typeof node.value === "string") {
           addCandidate(node.value, {
+            confidence: confidence.exact,
             discoveryKind: "string-literal",
             line: lineForNode(node),
             occurrenceId: `${node.start}:${node.end}`,
+            provenance: "literal",
           });
         }
       },
@@ -307,13 +634,13 @@ export function mineBundleSource(source, options = {}) {
         if (!endpointPropertyNames.has(key)) {
           return;
         }
-        const value = expressionValue(node.value);
+        const value = expressionValue(node.value, context);
         if (!value) {
           return;
         }
         const parent = ancestors.at(-2);
         const parentMethod = parent?.type === "ObjectExpression"
-          ? methodFromOptions(parent)
+          ? methodFromOptions(parent, context)
           : null;
         addCandidate(value, {
           discoveryKind: "endpoint-property",
@@ -323,7 +650,7 @@ export function mineBundleSource(source, options = {}) {
         });
       },
       TemplateLiteral(node) {
-        const value = expressionValue(node);
+        const value = expressionValue(node, context);
         if (value) {
           addCandidate(value, {
             discoveryKind: "template-literal",
@@ -342,7 +669,11 @@ export function mineBundleSource(source, options = {}) {
         "gu",
       );
       for (const match of source.matchAll(matcher)) {
-        addCandidate(match[0], { discoveryKind: "parse-fallback" });
+        addCandidate(match[0], {
+          confidence: confidence.parseFallback,
+          discoveryKind: "parse-fallback",
+          provenance: "parse-fallback",
+        });
       }
     }
   }
@@ -360,7 +691,7 @@ export function mineBundleSource(source, options = {}) {
       ));
   const deduplicatedCandidates = new Map();
   for (const candidate of filteredCandidates) {
-    const key = `${candidate.method ?? "ANY"} ${candidate.candidatePath}`;
+    const key = `${candidate.method ?? "ANY"} ${candidate.hostname ?? "NO_HOST"} ${candidate.candidatePath}`;
     const existing = deduplicatedCandidates.get(key);
     if (!existing || (candidate.line ?? Number.MAX_SAFE_INTEGER) < (existing.line ?? Number.MAX_SAFE_INTEGER)) {
       deduplicatedCandidates.set(key, candidate);
@@ -368,17 +699,19 @@ export function mineBundleSource(source, options = {}) {
   }
 
   return {
+    analyzerVersion,
     candidates: Array.from(deduplicatedCandidates.values())
       .map(({ occurrenceId: _occurrenceId, ...candidate }) => candidate)
       .sort((left, right) =>
       `${left.candidatePath} ${left.method ?? ""}`.localeCompare(
         `${right.candidatePath} ${right.method ?? ""}`,
       )),
-    graphqlOperations: parseGraphqlOperations(source).map((operation) => ({
+    graphqlOperations: parseGraphqlOperations(source, ast, context).map((operation) => ({
       ...operation,
       sourceFile,
     })),
     parseError,
+    schemaVersion,
     sourceFile,
     sourceMapUrls: parseSourceMapUrls(source),
   };
@@ -413,6 +746,7 @@ export async function mineJavascriptBundles(options) {
   }
 
   return {
+    analyzerVersion,
     bundleCount: results.length,
     candidates: Array.from(candidateMap.values()),
     graphqlOperations: Array.from(graphqlMap.values()),
@@ -427,6 +761,7 @@ export async function mineJavascriptBundles(options) {
         sourceFile: result.sourceFile,
         url,
       }))),
+    schemaVersion,
   };
 }
 
