@@ -56,6 +56,9 @@ const safeObjectKeys = new Set([
   "reason",
   "category",
   "counts",
+  "captureComplete",
+  "captureStatus",
+  "captureReason",
   "accounting",
   "recommendation",
 ]);
@@ -155,6 +158,9 @@ function attemptShell(assignmentId, input = {}) {
     completedAt: input.completedAt ?? null,
     updatedAt: input.updatedAt ?? nowIso(),
     counts: input.counts ?? null,
+    captureComplete: input.captureComplete ?? null,
+    captureStatus: sanitizeText(input.captureStatus, 100),
+    captureReason: sanitizeText(input.captureReason, 200),
     interactionHealth: sanitizeStructured(input.interactionHealth),
     nextAction: sanitizeStructured(input.nextAction),
     blocker: sanitizeStructured(input.blocker),
@@ -595,6 +601,7 @@ export async function claimAssignment(input) {
     );
     const chosen = [...state.assignments.values()]
       .filter((assignment) => assignment.state === "queued")
+      .filter((assignment) => !input.assignmentId || assignment.assignmentId === input.assignmentId)
       .filter((assignment) => !endpoint || assignment.endpoint === endpoint)
       .filter((assignment) => !input.phase || input.phase === "all" || assignment.phase === input.phase)
       .filter((assignment) => (
@@ -696,6 +703,9 @@ export async function updateAttempt(input) {
         "status",
         "checkpointCursor",
         "counts",
+        "captureComplete",
+        "captureStatus",
+        "captureReason",
         "interactionHealth",
         "nextAction",
         "blocker",
@@ -760,6 +770,9 @@ export async function updateAttemptFromDiscoveryRun(input) {
     ...input,
     status: run.status || "completed",
     counts: buildAttemptCountsFromRunState(run),
+    captureComplete: run.capture?.captureComplete ?? null,
+    captureStatus: run.capture?.captureStatus ?? null,
+    captureReason: run.capture?.reason ?? null,
     interactionHealth: run.interactionHealth ?? null,
     nextAction: run.recommendedNextAction ?? null,
     blocker: run.blocker ?? null,

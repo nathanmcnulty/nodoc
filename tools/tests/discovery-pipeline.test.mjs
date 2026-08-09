@@ -18,11 +18,21 @@ async function writeJson(filePath, value) {
   await writeFile(filePath, `${JSON.stringify(value, null, 2)}\n`, "utf8");
 }
 
-async function runAnalyze(portal, artifactDir, { summary = true } = {}) {
+async function runAnalyze(portal, artifactDir, {
+  summary = true,
+  ledgerPath,
+  assignmentId,
+  endpoint,
+  noLedger = false,
+  seedPageStates = false,
+} = {}) {
   if (summary) {
     await writeJson(path.join(artifactDir, "summary.json"), { portal });
   }
-  await execFileAsync(process.execPath, [
+  if (seedPageStates) {
+    await writeJson(path.join(artifactDir, "page-states.json"), []);
+  }
+  const argumentsList = [
     path.join(repoRoot, "tools", "run-portal-discovery.mjs"),
     "--portal",
     portal,
@@ -30,7 +40,12 @@ async function runAnalyze(portal, artifactDir, { summary = true } = {}) {
     "analyze",
     "--artifacts",
     artifactDir,
-  ], { cwd: repoRoot });
+  ];
+  if (ledgerPath) argumentsList.push("--ledger-path", ledgerPath);
+  if (assignmentId) argumentsList.push("--assignment-id", assignmentId);
+  if (endpoint) argumentsList.push("--endpoint", endpoint);
+  if (noLedger) argumentsList.push("--no-ledger");
+  await execFileAsync(process.execPath, argumentsList, { cwd: repoRoot });
 
   const [candidateHandoff, candidateQueue, runState] = await Promise.all([
     readFile(path.join(artifactDir, "candidate-handoff.json"), "utf8"),
@@ -44,6 +59,40 @@ async function runAnalyze(portal, artifactDir, { summary = true } = {}) {
     runState: JSON.parse(runState),
   };
 }
+
+test("capture pipeline auto-enqueues and claims a deterministic ledger attempt", async (t) => {
+  const artifactDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-ledger-auto-"));
+  const ledgerPath = path.join(artifactDir, "ledger.jsonl");
+  const analysisDir = path.join(artifactDir, "analysis");
+  await mkdir(analysisDir);
+  try {
+    const { runState } = await runAnalyze("m365-admin", analysisDir, {
+      ledgerPath,
+      endpoint: "https://admin.cloud.microsoft",
+      seedPageStates: true,
+    });
+    const ledger = JSON.parse((await readFile(ledgerPath, "utf8")).trim().split("\n").at(-1));
+    assert.equal(runState.ledger.attemptNumber, 1);
+    assert.equal(ledger.eventType, "attempt-updated");
+    assert.equal(ledger.payload.status, "completed");
+    assert.equal(ledger.payload.lease, null);
+  } finally {
+    await rm(artifactDir, { force: true, recursive: true });
+  }
+});
+
+test("legacy analysis remains explicitly opt-out from ledger dispatch", async (t) => {
+  const artifactDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-ledger-legacy-"));
+  try {
+    const { runState } = await runAnalyze("m365-admin", artifactDir, {
+      noLedger: true,
+      seedPageStates: true,
+    });
+    assert.deepEqual(runState.ledger, { mode: "legacy-no-ledger" });
+  } finally {
+    await rm(artifactDir, { force: true, recursive: true });
+  }
+});
 
 test("effective server scope honors operation, path, and root precedence", () => {
   const rootServers = [{ url: "https://root.example.test" }];
