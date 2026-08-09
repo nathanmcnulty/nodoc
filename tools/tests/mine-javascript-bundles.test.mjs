@@ -1,7 +1,14 @@
 import assert from "node:assert/strict";
+import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
 import test from "node:test";
 
-import { mineBundleSource } from "../mine-javascript-bundles.mjs";
+import { mineBundleSource, mineJavascriptBundles } from "../mine-javascript-bundles.mjs";
+
+async function fixtureDirectory() {
+  return mkdtemp(path.join(os.tmpdir(), "nodoc-bundle-cache-"));
+}
 
 test("extracts endpoint methods and dynamic route templates", () => {
   const source = [
@@ -179,4 +186,92 @@ test("does not promote dynamic cycles or unrelated strings", () => {
       console.log("/not-an-endpoint");
     `, { prefixes: ["/api/"] });
     assert.deepEqual(result.candidates.map(({ candidatePath }) => candidatePath), []);
+});
+
+test("deduplicates duplicate bytes in memory and reports deterministic metrics", async () => {
+  const directory = await fixtureDirectory();
+  try {
+    const first = path.join(directory, "first.js");
+    const second = path.join(directory, "second.js");
+    const source = 'fetch("/api/shared");';
+    await Promise.all([writeFile(first, source), writeFile(second, source)]);
+    const result = await mineJavascriptBundles({
+      bundleFiles: [first, second],
+      prefixes: ["/api/"],
+      cacheDir: path.join(directory, "cache"),
+    });
+    assert.deepEqual(result.cache, {
+      analyzerExecutions: 1,
+      bytesAvoided: source.length,
+      cacheHits: { memory: 1, persistent: 0 },
+      cacheInvalidEntries: 0,
+      cacheMisses: 1,
+      enabled: true,
+      mode: "enabled",
+      requestedBundles: 2,
+      uniqueContentHashes: 1,
+    });
+    assert.deepEqual(result.candidates.map(({ sourceFile }) => sourceFile), ["first.js", "second.js"]);
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+test("benchmark fixture reports analyzer execution reduction without changing candidates", async () => {
+  const directory = await fixtureDirectory();
+  try {
+    const bundleFiles = await Promise.all(["a.js", "b.js", "c.js"].map(async (name) => {
+      const file = path.join(directory, name);
+      await writeFile(file, 'fetch("/api/shared");');
+      return file;
+    }));
+    const legacy = await mineJavascriptBundles({ bundleFiles, prefixes: ["/api/"] });
+    const cached = await mineJavascriptBundles({
+      bundleFiles,
+      prefixes: ["/api/"],
+      cacheDir: path.join(directory, "cache"),
+    });
+    assert.equal(legacy.cache.analyzerExecutions, bundleFiles.length);
+    assert.equal(cached.cache.analyzerExecutions, 1);
+    assert.equal(legacy.candidates.length, cached.candidates.length);
+    assert.equal(legacy.cache.analyzerExecutions - cached.cache.analyzerExecutions, 2);
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+test("reuses persistent cache, invalidates options, and replaces corrupt entries", async () => {
+  const directory = await fixtureDirectory();
+  const cacheDir = path.join(directory, "cache");
+  try {
+    const bundle = path.join(directory, "bundle.js");
+    await writeFile(bundle, 'fetch("/api/shared");');
+    const first = await mineJavascriptBundles({ bundleFiles: [bundle], prefixes: ["/api/"], cacheDir });
+    const second = await mineJavascriptBundles({ bundleFiles: [bundle], prefixes: ["/api/"], cacheDir });
+    assert.equal(first.cache.analyzerExecutions, 1);
+    assert.equal(second.cache.cacheHits.persistent, 1);
+    const entry = (await import("node:fs/promises")).readdir(cacheDir, { recursive: true });
+    const files = (await entry).filter((file) => String(file).endsWith(".json"));
+    assert.equal(files.length, 1);
+    await writeFile(path.join(cacheDir, files[0]), "partial");
+    const repaired = await mineJavascriptBundles({ bundleFiles: [bundle], prefixes: ["/api/"], cacheDir });
+    assert.equal(repaired.cache.cacheInvalidEntries, 1);
+    assert.equal(repaired.cache.analyzerExecutions, 1);
+    const changed = await mineJavascriptBundles({ bundleFiles: [bundle], prefixes: ["/admin/"], cacheDir });
+    assert.equal(changed.cache.cacheHits.persistent, 0);
+    assert.equal(changed.cache.analyzerExecutions, 1);
+    assert.deepEqual(changed.candidates, []);
+
+    const concurrent = await Promise.all([
+      mineJavascriptBundles({ bundleFiles: [bundle], prefixes: ["/api/"], cacheDir }),
+      mineJavascriptBundles({ bundleFiles: [bundle], prefixes: ["/api/"], cacheDir }),
+    ]);
+    for (const result of concurrent) {
+      assert.ok(result.cache.cacheHits.persistent + result.cache.analyzerExecutions >= 1);
+    }
+    const cacheJson = await Promise.all(files.map((file) => readFile(path.join(cacheDir, file), "utf8")));
+    assert.ok(cacheJson.every((value) => JSON.parse(value).result));
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
 });
