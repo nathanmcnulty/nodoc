@@ -623,6 +623,16 @@ subset of those requests or omitted the body shape.
 
 ## Process patterns that worked well
 
+### Adjacent candidate triage
+
+Group adjacent candidates by target host family and specification family.
+Known static portal content under `/entracopilot/Content/`,
+`/Content/Dynamic/`, `/AzureHubs/Content/`, `/iam/Content/`, and `/erm/Content/`
+is analyzer noise: it remains in aggregate and suppressed evidence but is
+excluded from actionable scope-review queues. This is not a blanket
+`/entracopilot` suppression; nearby meaningful routes remain actionable. Split
+follow-up PRs by target specification and host family.
+
 ### Effective
 
 - Attaching a deterministic runner to the already-authenticated Edge session over CDP

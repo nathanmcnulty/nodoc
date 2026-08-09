@@ -223,6 +223,7 @@ test("analyze emits a sanitized actionable handoff for Purview-like evidence", a
       bundleOnly: 1,
       suppressed: 1,
     });
+
     assert.equal(
       candidateHandoff.confirmedReadCandidates[0].normalizedPath,
       "/apiproxy/insiderrisk/insiderrisk/api/v1.0/{id}/NodocReviewCandidate",
@@ -250,6 +251,28 @@ test("analyze emits a sanitized actionable handoff for Purview-like evidence", a
     assert.doesNotMatch(candidateHandoffText, new RegExp(tenantId, "u"));
     assert.doesNotMatch(candidateHandoffText, /tenant-specific/u);
     assert.doesNotMatch(candidateHandoffText, /private-bundle/u);
+  } finally {
+    await rm(artifactDir, { force: true, recursive: true });
+  }
+});
+
+test("adjacent known static assets are suppressed without hiding nearby Entra routes", async () => {
+  const artifactDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-static-asset-noise-"));
+
+  try {
+    await writeJson(path.join(artifactDir, "api-records.json"), [
+      { method: "GET", path: "/entracopilot/Content/app.js", seenOnPages: ["home"] },
+      { method: "GET", path: "/entracopilot/api/meaningful", seenOnPages: ["home"] },
+    ]);
+    const result = await runAnalyze("entra-idgov", artifactDir);
+    assert.ok(result.candidateQueue.suppressedCandidates.some((candidate) => (
+      candidate.normalizedPath === "/entracopilot/Content/app.js"
+      && candidate.suppressionNote.includes("Known static portal asset")
+    )));
+    assert.ok(result.candidateQueue.scopeReviewCandidates.some((candidate) => (
+      candidate.normalizedPath === "/entracopilot/api/meaningful"
+    )));
+    assert.equal(result.candidateQueue.summary.adjacentStaticAssetObservationCount, 1);
   } finally {
     await rm(artifactDir, { force: true, recursive: true });
   }
