@@ -79,6 +79,43 @@ test("initial navigation accepts a same-origin canonical landing route", () => {
   }), true);
 });
 
+test("required clicks need a URL, target, or state transition", () => {
+  assert.equal(actionResultSucceeded({
+    result: {
+      afterUrl: "https://entra.microsoft.com/#same",
+      beforeUrl: "https://entra.microsoft.com/#same",
+      clicked: true,
+    },
+    type: "click-href",
+  }), false);
+  assert.equal(actionResultSucceeded({
+    result: {
+      afterUrl: "https://entra.microsoft.com/#next",
+      beforeUrl: "https://entra.microsoft.com/#same",
+      clicked: true,
+    },
+    type: "click-href",
+  }), true);
+  assert.equal(actionResultSucceeded({
+    result: {
+      afterUrl: "https://entra.microsoft.com/#same",
+      beforeUrl: "https://entra.microsoft.com/#same",
+      clicked: true,
+      stateTransition: true,
+    },
+    type: "click-href",
+  }), true);
+  assert.equal(actionResultSucceeded({
+    result: {
+      afterUrl: "https://entra.microsoft.com/#same",
+      beforeUrl: "https://entra.microsoft.com/#same",
+      clicked: true,
+      targetTransition: true,
+    },
+    type: "click-href",
+  }), true);
+});
+
 function clickResult({
   clicked = false,
   eligibility = "eligible",
@@ -207,7 +244,7 @@ test("two high-value eligible misses escalate only with corroborated saturation"
 
 test("mismatched reported counters produce a machine-readable accounting failure", () => {
   const health = aggregateInteractionHealth(
-    [clickResult({ clicked: true })],
+    [clickResult({ clicked: true, transitionEvidence: { urlChanged: true } })],
     { reported: { attempted: 1, succeeded: 0, missed: 1 } },
   );
   assert.equal(health.accounting.consistent, false);

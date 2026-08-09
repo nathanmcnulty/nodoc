@@ -579,6 +579,39 @@ test("no-candidate analysis uses an appropriate portal metadata fallback", async
   }
 });
 
+test("Entra PIM UI and telemetry bundle false positives are suppressed", async () => {
+  const artifactDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-entra-pim-suppressions-"));
+  const falsePositivePaths = [
+    "/api/SearchData/LogSearchTerm",
+    "/api/make-reset-styles",
+    "/api/shorthands",
+  ];
+
+  try {
+    await writeJson(path.join(artifactDir, "bundle-candidates.json"), {
+      candidates: falsePositivePaths.map((candidatePath) => ({
+        candidatePath,
+        method: null,
+        sourceFile: "tenant-neutral-ui-bundle.js",
+      })),
+    });
+
+    const { candidateHandoff, candidateQueue } = await runAnalyze("entra-pim", artifactDir);
+    assert.equal(candidateHandoff.counts.bundleOnly, 0);
+    assert.equal(candidateHandoff.counts.suppressed, falsePositivePaths.length);
+    assert.deepEqual(
+      candidateHandoff.suppressedCandidates
+        .map(({ normalizedPath }) => normalizedPath)
+        .sort(),
+      [...falsePositivePaths].sort(),
+    );
+    assert.deepEqual(candidateQueue.candidates, []);
+    assert.equal(candidateQueue.suppressedCandidates.length, falsePositivePaths.length);
+  } finally {
+    await rm(artifactDir, { force: true, recursive: true });
+  }
+});
+
 test("analyze carries canonical interaction health into handoff and run state", async () => {
   const artifactDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-interaction-health-handoff-"));
 
@@ -602,8 +635,52 @@ test("analyze carries canonical interaction health into handoff and run state", 
     const { candidateHandoff, runState } = await runAnalyze("entra-b2c", artifactDir);
     assert.equal(candidateHandoff.interactionHealth.counts.attempted, 1);
     assert.equal(candidateHandoff.interactionHealth.counts.absentNotApplicable, 1);
-    assert.equal(candidateHandoff.interactionHealth.recommendation.recommended, false);
-    assert.deepEqual(runState.interactionHealth, candidateHandoff.interactionHealth);
+   assert.equal(candidateHandoff.interactionHealth.recommendation.recommended, false);
+   assert.deepEqual(runState.interactionHealth, candidateHandoff.interactionHealth);
+ } finally {
+    await rm(artifactDir, { force: true, recursive: true });
+  }
+});
+
+test("analyze blocks escalated interaction health instead of reporting success", async () => {
+  const artifactDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-interaction-health-escalation-"));
+
+  try {
+    await Promise.all([
+      writeJson(path.join(artifactDir, "api-records.json"), []),
+      writeJson(path.join(artifactDir, "summary.json"), {
+        interactionHealth: {
+          accounting: {
+            consistent: true,
+            inconsistency: null,
+          },
+          counts: {},
+          recommendation: {
+            recommended: true,
+            code: "escalate-interaction-health",
+          },
+          schemaVersion: 1,
+        },
+      }),
+    ]);
+
+    await assert.rejects(
+      execFileAsync(process.execPath, [
+        path.join(repoRoot, "tools", "run-portal-discovery.mjs"),
+        "--portal",
+        "entra-b2c",
+        "--phase",
+        "analyze",
+        "--artifacts",
+        artifactDir,
+      ], { cwd: repoRoot }),
+      /interaction-health-escalation/u,
+    );
+    const runState = JSON.parse(
+      await readFile(path.join(artifactDir, "discovery-run.json"), "utf8"),
+    );
+    assert.equal(runState.status, "blocked");
+    assert.equal(runState.blocker.code, "interaction-health-escalation");
   } finally {
     await rm(artifactDir, { force: true, recursive: true });
   }

@@ -518,12 +518,17 @@ function applyRecipeConfig(args, recipeConfig, recipePath) {
     args.actions = ensureArray(recipeConfig.actions).map(normalizeRecipeAction);
   }
 
+  if (recipeConfig.captureScripts !== undefined) {
+    args.captureScripts = Boolean(recipeConfig.captureScripts);
+  }
+
   args.seedRouteGroups = normalizeSeedRouteGroups(recipeConfig.seedRouteGroups);
 }
 
 async function parseArgs(argv) {
   const args = {
     actions: [],
+    captureScripts: true,
     evaluateTimeoutMs: defaultEvaluateTimeoutMs,
     label: null,
     matchHosts: [],
@@ -1694,6 +1699,20 @@ function buildActionLabel(action, index) {
     .replace(/\s+/gu, "-");
 }
 
+function stateFingerprintFromSnapshot(snapshot) {
+  if (!snapshot || typeof snapshot !== "object") {
+    return null;
+  }
+
+  return sha256(JSON.stringify({
+    controls: snapshot.controls ?? [],
+    links: snapshot.sameOriginLinks ?? [],
+    tabs: snapshot.visibleTabs ?? [],
+    title: snapshot.title ?? null,
+    url: snapshot.url ?? null,
+  }));
+}
+
 function resolveMaybeRelativeUrl(value, baseUrl) {
   try {
     return new URL(value, baseUrl).toString();
@@ -2236,6 +2255,16 @@ async function main() {
     return evaluateJson(client, "location.href");
   }
 
+  async function getRootStateFingerprint() {
+    try {
+      return stateFingerprintFromSnapshot(
+        await evaluateJson(client, buildDomSnapshotExpression()),
+      );
+    } catch {
+      return null;
+    }
+  }
+
   async function collectSnapshots() {
     const snapshots = [];
     for (const [sessionId, targetInfo] of sessions.entries()) {
@@ -2286,6 +2315,31 @@ async function main() {
   };
 
   async function writeBundleArtifacts() {
+    if (!args.captureScripts) {
+      await writeFile(
+        path.join(args.outDir, "bundle-downloads.json"),
+        `${JSON.stringify([], null, 2)}\n`,
+        "utf8",
+      );
+      await writeFile(
+        path.join(args.outDir, "bundle-candidates.json"),
+        `${JSON.stringify({
+          bundleCount: 0,
+          candidates: [],
+          graphqlOperations: [],
+          parseFailures: [],
+        }, null, 2)}\n`,
+        "utf8",
+      );
+      latestBundleSummary = {
+        bundleCount: 0,
+        candidateCount: 0,
+        graphqlOperationCount: 0,
+        parseFailureCount: 0,
+      };
+      return;
+    }
+
     const bundleDir = path.join(args.outDir, "bundles");
     await mkdir(bundleDir, { recursive: true });
     const downloads = [];
@@ -2513,13 +2567,13 @@ async function main() {
         .filter((record) => record.page === pageLabel)
         .map((record) => record.url),
     );
-    const stateFingerprint = sha256(JSON.stringify({
+    const stateFingerprint = stateFingerprintFromSnapshot({
       controls: combinedControls,
-      links: combinedLinks,
-      tabs: combinedTabs,
+      sameOriginLinks: combinedLinks,
       title: rootSnapshot.title ?? null,
       url: rootSnapshot.url ?? null,
-    }));
+      visibleTabs: combinedTabs,
+    });
 
     pageStates.push({
       schemaVersion: captureArtifactSchemaVersion,
@@ -2549,7 +2603,9 @@ async function main() {
       url: rootSnapshot.url ?? null,
     });
 
-    await capturePageScriptBodies(pageLabel);
+    if (args.captureScripts) {
+      await capturePageScriptBodies(pageLabel);
+    }
     await flushArtifacts();
     return {
       pageState: pageStates.at(-1),
@@ -2634,6 +2690,8 @@ async function main() {
 
   async function runClickAction(action, preActionSnapshots = null) {
     const beforeUrl = await getRootUrl();
+    const beforeStateFingerprint = await getRootStateFingerprint();
+    const beforeTargetIds = new Set(sessions.keys());
     const beforeSnapshots = preActionSnapshots ?? await collectSnapshots();
     const eligibility = deriveActionEligibility(action, beforeSnapshots);
     for (const [sessionId, targetInfo] of getOrderedSessions(action.scope)) {
@@ -2645,13 +2703,25 @@ async function main() {
         }
 
         const settleResult = await waitForNetworkIdle(args.postActionSettleMs);
+        const afterUrl = await getRootUrl();
+        const afterStateFingerprint = await getRootStateFingerprint();
         return {
           ...result,
-          afterUrl: await getRootUrl(),
+          afterStateFingerprint,
+          afterUrl,
           beforeUrl,
+          beforeStateFingerprint,
           eligibility,
           sessionId: sessionId ?? "root",
           settleResult,
+          stateTransition: Boolean(
+            beforeStateFingerprint
+            && afterStateFingerprint
+            && beforeStateFingerprint !== afterStateFingerprint,
+          ),
+          targetTransition: Array.from(sessions.keys()).some(
+            (targetId) => !beforeTargetIds.has(targetId),
+          ),
           targetTitle: targetInfo?.targetTitle ?? null,
           targetType: targetInfo?.targetType ?? "page",
           targetUrl: targetInfo?.targetUrl ?? null,

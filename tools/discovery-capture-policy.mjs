@@ -35,7 +35,15 @@ export function actionResultSucceeded(actionResult) {
     }
   }
   if (type.startsWith("click")) {
-    return result.clicked === true;
+    const transitionEvidence = result.transitionEvidence ?? {};
+    return result.clicked === true && (
+      result.beforeUrl !== result.afterUrl
+      || result.stateTransition === true
+      || result.targetTransition === true
+      || transitionEvidence.urlChanged === true
+      || transitionEvidence.stateChanged === true
+      || transitionEvidence.targetChanged === true
+    );
   }
   if (type === "probe-get") {
     return result.outcome === "confirmed";

@@ -506,6 +506,20 @@ async function main() {
         console.error(JSON.stringify(runState, null, 2));
         return;
       }
+      if (interactionHealth?.recommendation?.recommended === true) {
+        runState.status = "blocked";
+        runState.interactionHealth = interactionHealth;
+        runState.blocker = {
+          code: "interaction-health-escalation",
+          detail: "The canonical interaction-health signal escalated unhealthy navigation; capture cannot be treated as success.",
+          remediation:
+            "Repair the navigation recipe or confirm the portal route is available, then rerun with a new empty artifact directory.",
+        };
+        await writeRunState(args.artifacts, runState);
+        process.exitCode = 2;
+        console.error(JSON.stringify(runState, null, 2));
+        return;
+      }
     }
 
     if (args.phase === "analyze" && !interactionHealth) {
@@ -520,6 +534,19 @@ async function main() {
         inconsistency: interactionHealth.accounting.inconsistency,
         remediation:
           "Regenerate the summary from the immutable action-results artifact and resolve the accounting mismatch before continuing.",
+      };
+      await writeRunState(args.artifacts, runState);
+      process.exitCode = 2;
+      console.error(JSON.stringify(runState, null, 2));
+      return;
+    }
+    if (args.phase === "analyze" && interactionHealth?.recommendation?.recommended === true) {
+      runState.status = "blocked";
+      runState.blocker = {
+        code: "interaction-health-escalation",
+        detail: "The canonical interaction-health signal escalated unhealthy navigation; analysis cannot be treated as success.",
+        remediation:
+          "Repair the navigation recipe or confirm the portal route is available, then rerun with a new empty artifact directory.",
       };
       await writeRunState(args.artifacts, runState);
       process.exitCode = 2;
