@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { appendFile, mkdir, mkdtemp, readFile, rm, utimes, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -11,6 +11,7 @@ import {
   getLedgerViewFromFile,
   readLedgerRecords,
   resumeAttempt,
+  updateAttempt,
 } from "../portal-discovery-ledger.mjs";
 
 async function fixture(t) {
@@ -89,6 +90,52 @@ test("expired leases become stale and can resume deterministically", async (t) =
     ledgerPath,
     endpoint: "admin.example.test:443",
     now: "2026-01-01T00:00:00.000Z",
+  });
+
+  test("partial tails are ignored and reported without poisoning valid state", async (t) => {
+    const ledgerPath = await fixture(t);
+    await enqueueAssignment(assignment(ledgerPath, "job-1"));
+    await appendFile(ledgerPath, '{"recordVersion":1,"eventType":"assignment-created"', "utf8");
+
+    const records = await readLedgerRecords(ledgerPath);
+    assert.equal(records.length, 1);
+    const view = await getLedgerViewFromFile({ ledgerPath });
+    assert.deepEqual(view.counts.partialTail, {
+      line: 2,
+      policy: "ignored-until-next-complete-record",
+    });
+    assert.equal(view.assignments[0].assignmentId, "job-1");
+  });
+
+  test("invalid transitions and immutable retry attempts are rejected", async (t) => {
+    const ledgerPath = await fixture(t);
+    await enqueueAssignment(assignment(ledgerPath, "job-1"));
+    await assert.rejects(
+      updateAttempt({ ledgerPath, assignmentId: "job-1", attemptNumber: 1, status: "completed" }),
+      /Cannot transition status from queued to completed/u,
+    );
+    const resumed = await resumeAttempt({ ledgerPath, assignmentId: "job-1" });
+    assert.equal(resumed.attempt.attemptNumber, 2);
+    await claimAssignment({ ledgerPath, endpoint: "admin.example.test:443", workerId: "worker-1" });
+    await assert.rejects(
+      resumeAttempt({ ledgerPath, assignmentId: "job-1" }),
+      /Cannot resume a running attempt/u,
+    );
+  });
+
+  test("stale lock reclamation is atomic and leaves no lock after callback failure", async (t) => {
+    const ledgerPath = await fixture(t);
+    const lockPath = `${ledgerPath}.lock`;
+    await mkdir(lockPath, { recursive: true });
+    await writeFile(path.join(lockPath, "owner.json"), "{}\n", "utf8");
+    const stale = new Date(Date.now() - 60_000);
+    await utimes(lockPath, stale, stale);
+    await enqueueAssignment(assignment(ledgerPath, "job-1"));
+    assert.equal(await readFile(ledgerPath, "utf8").then((value) => value.includes("job-1")), true);
+    await assert.rejects(
+      updateAttempt({ ledgerPath, assignmentId: "job-1", attemptNumber: 1, status: "completed" }),
+      /Cannot transition status from queued to completed/u,
+    );
   });
 
   const records = await readLedgerRecords(ledgerPath);

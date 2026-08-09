@@ -3,6 +3,7 @@ import {
   appendFile,
   mkdir,
   readFile,
+  rename,
   rm,
   stat,
   writeFile,
@@ -244,7 +245,12 @@ export async function readLedgerRecords(ledgerPath = defaultLedgerPath) {
     }
     throw error;
   }
-  return content.split(/\r?\n/u).flatMap((line, index) => {
+  const lines = content.split(/\r?\n/u);
+  const hasPartialTail = lines.at(-1) !== "";
+  const records = lines.flatMap((line, index) => {
+    if (hasPartialTail && index === lines.length - 1) {
+      return [];
+    }
     if (!line.trim()) {
       return [];
     }
@@ -257,6 +263,10 @@ export async function readLedgerRecords(ledgerPath = defaultLedgerPath) {
       }];
     }
   });
+  if (hasPartialTail) {
+    records.partialTail = { line: lines.length, policy: "ignored-until-next-complete-record" };
+  }
+  return records;
 }
 
 async function appendRecord(ledgerPath, record, recordedAt = nowIso()) {
@@ -299,7 +309,16 @@ async function withLedgerLock(ledgerPath, callback) {
       try {
         const lockStat = await stat(lockPath);
         if (Date.now() - lockStat.mtimeMs > lockStaleMs) {
-          await rm(lockPath, { recursive: true, force: true });
+          const reclaimPath = `${lockPath}.reclaim-${randomUUID()}`;
+          try {
+            await rename(lockPath, reclaimPath);
+          } catch (reclaimError) {
+            if (reclaimError?.code === "ENOENT") {
+              continue;
+            }
+            throw reclaimError;
+          }
+          await rm(reclaimPath, { recursive: true, force: true });
           continue;
         }
       } catch (statError) {
@@ -338,6 +357,7 @@ export function buildLedgerState(records, now = Date.now()) {
     schemaVersion: ledgerSchemaVersion,
     assignments: new Map(),
     corruptLines: [],
+    partialTail: records.partialTail ?? null,
   };
 
   for (const raw of records) {
@@ -779,6 +799,7 @@ export async function getLedgerViewFromFile(input = {}) {
       ...(view === "all" ? {
         total: assignments.length,
         corruptLines: state.corruptLines.length,
+        partialTail: state.partialTail,
       } : {}),
     },
   };

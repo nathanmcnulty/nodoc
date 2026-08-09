@@ -391,6 +391,28 @@ async function writeRunState(artifactDir, payload) {
   );
 }
 
+async function persistTerminalRun(args, runState) {
+  await persistTerminalRun(args, runState);
+  if (!args.assignmentId) {
+    return;
+  }
+  const attemptNumber = args.attemptNumber
+    ?? await latestAttemptNumber(args.ledgerPath, args.assignmentId);
+  if (!attemptNumber) {
+    throw new Error(`Unable to locate an attempt for ${args.assignmentId}.`);
+  }
+  await updateAttemptFromDiscoveryRun({
+    ledgerPath: args.ledgerPath,
+    assignmentId: args.assignmentId,
+    attemptNumber,
+    artifactDir: args.artifacts,
+    model: args.model,
+    reasoning: args.reasoning,
+    workerId: args.workerId,
+    discoveryRun: runState,
+  });
+}
+
 async function readInteractionHealth(artifactDir) {
   let summary;
   try {
@@ -631,14 +653,14 @@ async function main() {
         existingArtifacts: existingArtifacts.slice(0, 20),
         remediation: "Choose a new empty artifact directory and rerun the command.",
       };
-      await writeRunState(args.artifacts, runState);
+      await persistTerminalRun(args, runState);
       process.exitCode = 2;
       console.error(JSON.stringify(runState, null, 2));
       return;
     }
   }
 
-  await writeRunState(args.artifacts, runState);
+  await persistTerminalRun(args, runState);
 
   try {
     if (["all", "capture"].includes(args.phase)) {
@@ -648,7 +670,7 @@ async function main() {
           code: "recipe-missing",
           detail: `No checked-in capture recipe exists for ${specRecord.title}.`,
         };
-        await writeRunState(args.artifacts, runState);
+        await persistTerminalRun(args, runState);
         process.exitCode = 2;
         console.error(JSON.stringify(runState, null, 2));
         return;
@@ -662,7 +684,7 @@ async function main() {
           detail: "The selected recipe contains active-looking actions.",
           unsafeActions: recipeSafety.unsafeActions,
         };
-        await writeRunState(args.artifacts, runState);
+        await persistTerminalRun(args, runState);
         process.exitCode = 2;
         console.error(JSON.stringify(runState, null, 2));
         return;
@@ -677,7 +699,7 @@ async function main() {
           remediation:
             "Open an authenticated Edge/Chrome session with remote debugging on 127.0.0.1:9222, then rerun the same command.",
         };
-        await writeRunState(args.artifacts, runState);
+        await persistTerminalRun(args, runState);
         process.exitCode = 2;
         console.error(JSON.stringify(runState, null, 2));
         return;
@@ -717,7 +739,7 @@ async function main() {
           remediation:
             "Authenticate in the existing remote-debugging browser profile, choose a new empty artifact directory, and rerun the command.",
         };
-        await writeRunState(args.artifacts, runState);
+        await persistTerminalRun(args, runState);
         process.exitCode = 2;
         console.error(JSON.stringify(runState, null, 2));
         return;
@@ -731,7 +753,7 @@ async function main() {
           remediation:
             "Repair the checked-in recipe or confirm the portal route is available, then rerun with a new empty artifact directory.",
         };
-        await writeRunState(args.artifacts, runState);
+        await persistTerminalRun(args, runState);
         process.exitCode = 2;
         console.error(JSON.stringify(runState, null, 2));
         return;
@@ -746,7 +768,7 @@ async function main() {
           remediation:
             "Regenerate the summary from the immutable action-results artifact and resolve the accounting mismatch before continuing.",
         };
-        await writeRunState(args.artifacts, runState);
+        await persistTerminalRun(args, runState);
         process.exitCode = 2;
         console.error(JSON.stringify(runState, null, 2));
         return;
@@ -760,7 +782,7 @@ async function main() {
           remediation:
             "Repair the navigation recipe or confirm the portal route is available, then rerun with a new empty artifact directory.",
         };
-        await writeRunState(args.artifacts, runState);
+        await persistTerminalRun(args, runState);
         process.exitCode = 2;
         console.error(JSON.stringify(runState, null, 2));
         return;
@@ -780,7 +802,7 @@ async function main() {
         remediation:
           "Regenerate the summary from the immutable action-results artifact and resolve the accounting mismatch before continuing.",
       };
-      await writeRunState(args.artifacts, runState);
+      await persistTerminalRun(args, runState);
       process.exitCode = 2;
       console.error(JSON.stringify(runState, null, 2));
       return;
@@ -793,7 +815,7 @@ async function main() {
         remediation:
           "Repair the navigation recipe or confirm the portal route is available, then rerun with a new empty artifact directory.",
       };
-      await writeRunState(args.artifacts, runState);
+      await persistTerminalRun(args, runState);
       process.exitCode = 2;
       console.error(JSON.stringify(runState, null, 2));
       return;
@@ -846,13 +868,13 @@ async function main() {
         : null,
       runState: path.join(args.artifacts, "discovery-run.json"),
     };
-    await writeRunState(args.artifacts, runState);
+    await persistTerminalRun(args, runState);
     console.log(JSON.stringify(runState, null, 2));
   } catch (error) {
     runState.status = "failed";
     runState.completedAt = new Date().toISOString();
     runState.blocker = {
-      code: "pipeline-failed",
+      code: error?.message?.includes("after signal") ? "pipeline-interrupted" : "pipeline-failed",
       detail: error instanceof Error ? error.message : String(error),
     };
     await writeRunState(args.artifacts, runState);
