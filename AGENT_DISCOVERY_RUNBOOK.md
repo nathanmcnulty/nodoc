@@ -292,6 +292,14 @@ target spec automatically. The handoff does not contain raw hostnames, URLs,
 IDs, request bodies, headers, tokens, cookies, raw paths, page labels, artifact
 paths, timestamps, or tenant-specific values.
 
+Group adjacent candidates by target host family and specification family. Known
+static portal assets under `/entracopilot/Content/`, `/Content/Dynamic/`,
+`/AzureHubs/Content/`, `/iam/Content/`, and `/erm/Content/` are analyzer noise:
+they remain in suppressed evidence and aggregate counts but are excluded from
+actionable scope-review queues. Do not suppress the entire `/entracopilot`
+prefix; nearby meaningful routes remain actionable. Split follow-up PRs by
+target specification and host family.
+
 Discovery execution ends when these artifacts are generated. Reviewing and
 landing supported findings is a separate specification PR; the discovery agent
 must not edit specifications automatically.
