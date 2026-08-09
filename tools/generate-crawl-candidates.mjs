@@ -574,9 +574,18 @@ function collectBundleCandidateRecords(data, allowedPrefixes) {
     const method = normalizeMethod(record.method);
     const hostname = extractHostname(record.url) ?? extractHostname(value);
     candidates.set(`${hostname ?? "NO_HOST"} ${method ?? "ANY"} ${normalizedPath}`, {
+      confidence: typeof record.confidence === "number" ? record.confidence : null,
+      discoveryKind:
+        typeof record.discoveryKind === "string" && record.discoveryKind.trim()
+          ? record.discoveryKind.trim()
+          : null,
       hostname,
       method,
       normalizedPath,
+      provenance:
+        typeof record.provenance === "string" && record.provenance.trim()
+          ? record.provenance.trim()
+          : null,
       sourceFile:
         typeof record.sourceFile === "string" && record.sourceFile.trim()
           ? record.sourceFile.trim()
