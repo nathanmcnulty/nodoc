@@ -54,6 +54,7 @@ function parseArgs(argv) {
     recipe: null,
     seedArtifacts: null,
     targetId: null,
+    bundleCacheDir: null,
     variables: [],
   };
 
@@ -140,6 +141,9 @@ function parseArgs(argv) {
       index += 1;
     } else if (argument === "--target-id" && next) {
       args.targetId = next;
+      index += 1;
+    } else if (argument === "--bundle-cache-dir" && next) {
+      args.bundleCacheDir = path.resolve(next);
       index += 1;
     } else if (argument === "--var" && next) {
       args.variables.push(next);
@@ -771,6 +775,9 @@ async function main() {
       }
       if (args.seedArtifacts) {
         captureArgs.push("--seed-artifacts", args.seedArtifacts);
+      }
+      if (args.bundleCacheDir) {
+        captureArgs.push("--bundle-cache-dir", args.bundleCacheDir);
       }
       for (const variable of args.variables) {
         captureArgs.push("--var", variable);

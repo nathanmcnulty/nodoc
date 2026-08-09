@@ -529,6 +529,7 @@ async function parseArgs(argv) {
   const args = {
     actions: [],
     captureScripts: true,
+    bundleCacheDir: null,
     evaluateTimeoutMs: defaultEvaluateTimeoutMs,
     label: null,
     matchHosts: [],
@@ -660,6 +661,12 @@ async function parseArgs(argv) {
 
     if (arg === "--out" && next) {
       args.outDir = path.resolve(next);
+      index += 1;
+      continue;
+    }
+
+    if (arg === "--bundle-cache-dir" && next) {
+      args.bundleCacheDir = path.resolve(next);
       index += 1;
       continue;
     }
@@ -2374,6 +2381,7 @@ async function main() {
 
     const bundleCandidates = await mineJavascriptBundles({
       bundleFiles,
+      cacheDir: args.bundleCacheDir,
       prefixes: uniqueSorted([
         ...args.matchPathPrefixes,
         "/_api/",
@@ -2393,6 +2401,7 @@ async function main() {
       candidateCount: bundleCandidates.candidates.length,
       graphqlOperationCount: bundleCandidates.graphqlOperations.length,
       parseFailureCount: bundleCandidates.parseFailures.length,
+      cache: bundleCandidates.cache,
     };
   }
 
