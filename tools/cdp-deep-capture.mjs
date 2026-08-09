@@ -11,7 +11,9 @@ import {
   sanitizeObservedTransportUrl,
 } from "./discovery-safety.mjs";
 import {
+  buildTransitionEvidence,
   decodeBoundedCdpBody,
+  deriveActionEligibility,
   responseBodyCaptureLimit,
   shouldRequestResponseBody,
   summarizeActionResults,
@@ -394,6 +396,8 @@ function normalizeRecipeAction(action) {
       : rawType;
   return {
     ...parseActionSpec(`${scopedType}=${action.value ?? ""}`),
+    highValue: action.highValue === true,
+    optional: action.optional === true,
     required: Boolean(action.required),
   };
 }
@@ -1340,6 +1344,15 @@ class CdpClient {
 
 function requestKey(requestId, sessionId = null) {
   return `${sessionId ?? ""}:${requestId}`;
+}
+
+function requestFamily(request) {
+  try {
+    const parsed = new URL(request.url);
+    return `${String(request.method || "GET").toUpperCase()} ${parsed.pathname}`;
+  } catch {
+    return `${String(request.method || "GET").toUpperCase()} ${String(request.url || "")}`;
+  }
 }
 
 function isDomCapableTarget(sessionId, targetInfo) {
@@ -2420,6 +2433,10 @@ async function main() {
 
     await capturePageScriptBodies(pageLabel);
     await flushArtifacts();
+    return {
+      pageState: pageStates.at(-1),
+      snapshots,
+    };
   }
 
   async function navigateRoot(targetUrl) {
@@ -2497,8 +2514,10 @@ async function main() {
       });
   }
 
-  async function runClickAction(action) {
+  async function runClickAction(action, preActionSnapshots = null) {
     const beforeUrl = await getRootUrl();
+    const beforeSnapshots = preActionSnapshots ?? await collectSnapshots();
+    const eligibility = deriveActionEligibility(action, beforeSnapshots);
     for (const [sessionId, targetInfo] of getOrderedSessions(action.scope)) {
       try {
         const result = await evaluateJson(client, buildClickExpression(action), sessionId);
@@ -2511,6 +2530,7 @@ async function main() {
           ...result,
           afterUrl: await getRootUrl(),
           beforeUrl,
+          eligibility,
           sessionId: sessionId ?? "root",
           settleResult,
           targetTitle: targetInfo?.targetTitle ?? null,
@@ -2526,6 +2546,7 @@ async function main() {
       afterUrl: beforeUrl,
       beforeUrl,
       clicked: false,
+      eligibility,
     };
   }
 
@@ -2897,16 +2918,34 @@ async function main() {
         continue;
       }
 
-      const clickResult = await runClickAction(action);
-      actionResults.push({
+      const beforeSnapshots = await collectSnapshots();
+      const beforePageState = pageStates.at(-1);
+      const beforeUrl = await getRootUrl();
+      const beforeRequestFamilies = new Set(capturedRequests.map(requestFamily));
+      const clickResult = await runClickAction(action, beforeSnapshots);
+      const actionResult = {
+        highValue: action.highValue === true,
         page: pageLabel,
         required: action.required,
         result: clickResult,
         scope: action.scope,
         type: action.type,
         value: action.value,
+      };
+      actionResults.push(actionResult);
+      const checkpoint = await captureCheckpoint(pageLabel);
+      const afterRequestFamilies = new Set(capturedRequests.map(requestFamily));
+      actionResult.result.transitionEvidence = buildTransitionEvidence({
+        afterPageState: checkpoint?.pageState,
+        afterSnapshots: checkpoint?.snapshots,
+        afterUrl: clickResult.afterUrl ?? await getRootUrl(),
+        beforePageState,
+        beforeSnapshots,
+        beforeUrl,
+        newRequestFamilies: Array.from(afterRequestFamilies)
+          .filter((family) => !beforeRequestFamilies.has(family))
+          .sort(),
       });
-      await captureCheckpoint(pageLabel);
     }
 
     await waitForNetworkIdle(args.postActionSettleMs);
@@ -2919,12 +2958,16 @@ async function main() {
         return null;
       }
     }));
+    const actionValidation = summarizeActionResults(actionResults, {
+      includeInteractionHealth: true,
+    });
     const summary = {
-      actionValidation: summarizeActionResults(actionResults),
+      actionValidation,
       actions: actionResults.length,
       bundleDiscovery: latestBundleSummary,
       capturedApiRequests: capturedRequests.length,
       finalUrl: await getRootUrl(),
+      interactionHealth: actionValidation.interactionHealth,
       outDir: args.outDir,
       pageCount: pageStates.length,
       passiveTransportCount: passiveTransports.length,

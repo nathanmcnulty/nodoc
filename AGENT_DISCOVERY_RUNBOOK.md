@@ -163,6 +163,16 @@ healthy completed capture may be analyzed again without reopening the browser.
    - `summary.json`
    - `candidate-handoff.json`
 
+   For captures, `summary.json`, `discovery-run.json`, and
+   `candidate-handoff.json` carry the same sanitized `interactionHealth` signal.
+   Its `counts` are derived once from `action-results.json`: controls found in
+   the pre-action target/frame inventory are eligible attempts, while absent or
+   feature-gated controls are `absentNotApplicable` rather than selector
+   misses. Treat `accounting.consistent: false` as a deterministic blocker.
+   Escalation is recommended only when repeated eligible misses also show
+   unchanged state, no transition, and no new request family; a single absent
+   control is not an escalation.
+
    `summary.json` is expected from a completed `capture` or `all` phase. If it is
    absent but checkpointed capture artifacts exist, treat the original command
    as interrupted rather than completed. A trusted orchestrator may run the
@@ -318,6 +328,7 @@ Return the blocker code and remediation:
 | `feature-gated` | The tenant, role, license, or feature flag blocks the surface |
 | `unsafe-action-required` | Further discovery requires a write or potentially active GET |
 | `recipe-actions-incomplete` | A required navigation or selector in the checked-in recipe failed |
+| `interaction-health-accounting-inconsistent` | Immutable action results disagree with the reported interaction-health counters |
 | `pipeline-failed` | A deterministic command failed |
 
 Escalate to a stronger model only for selector repair, scope classification,
