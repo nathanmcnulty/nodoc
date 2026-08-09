@@ -4,11 +4,12 @@ import test from "node:test";
 import { mineBundleSource } from "../mine-javascript-bundles.mjs";
 
 test("extracts endpoint methods and dynamic route templates", () => {
-  const result = mineBundleSource(`
-    fetch("/api/users", { method: "POST" });
-    client.get(\`/admin/items/\${itemId}\`);
-    const config = { endpoint: "/apiproxy/incidents", method: "PATCH" };
-  `, {
+  const source = [
+    'fetch("/api/users", { method: "POST" });',
+    'client.get(`/admin/items/${itemId}`);',
+    'const config = { endpoint: "/apiproxy/incidents", method: "PATCH" };',
+  ].join("\n");
+  const result = mineBundleSource(source, {
     prefixes: ["/api/", "/admin/", "/apiproxy/"],
     sourceFile: "sample.js",
   });
