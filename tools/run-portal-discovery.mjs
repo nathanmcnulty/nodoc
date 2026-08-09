@@ -392,7 +392,7 @@ async function writeRunState(artifactDir, payload) {
 }
 
 async function persistTerminalRun(args, runState) {
-  await persistTerminalRun(args, runState);
+  await writeRunState(args.artifacts, runState);
   if (!args.assignmentId) {
     return;
   }
@@ -418,7 +418,7 @@ async function readInteractionHealth(artifactDir) {
   try {
     summary = JSON.parse(await readFile(path.join(artifactDir, "summary.json"), "utf8"));
   } catch (error) {
-    if (error?.code === "ENOENT") {
+    if (error?.code === "ENOENT" || error instanceof SyntaxError) {
       return null;
     }
     throw error;
@@ -441,6 +441,55 @@ async function readInteractionHealth(artifactDir) {
   return sanitizeInteractionHealth(aggregateInteractionHealth(actionResults, {
     reported: reportedInteractionHealth?.counts,
   }));
+}
+
+async function inspectCaptureCompleteness(artifactDir) {
+  const summaryPath = path.join(artifactDir, "summary.json");
+  try {
+    const summary = JSON.parse(await readFile(summaryPath, "utf8"));
+    if (!summary || typeof summary !== "object" || !summary.portal) {
+      return {
+        captureStatus: "corrupted-minimum-artifacts",
+        captureComplete: false,
+        reason: "summary-invalid",
+        source: "summary.json",
+      };
+    }
+    const authenticationBarrier = await detectAuthenticationBarrier(artifactDir, summary);
+    if (authenticationBarrier) {
+      return {
+        captureStatus: "authentication-blocked",
+        captureComplete: false,
+        reason: "authentication-required",
+        source: authenticationBarrier.source,
+      };
+    }
+    return {
+      captureStatus: "complete",
+      captureComplete: true,
+      reason: "summary-present",
+      source: "summary.json",
+    };
+  } catch (error) {
+    if (error?.code === "ENOENT") {
+      const artifacts = await findExistingCaptureArtifacts(artifactDir);
+      return {
+        captureStatus: artifacts.length > 0 ? "interrupted" : "missing-minimum-artifacts",
+        captureComplete: false,
+        reason: artifacts.length > 0 ? "summary-missing" : "summary-missing-and-no-capture-artifacts",
+        source: "artifact-directory",
+      };
+    }
+    if (error instanceof SyntaxError) {
+      return {
+        captureStatus: "corrupted-minimum-artifacts",
+        captureComplete: false,
+        reason: "summary-invalid-json",
+        source: "summary.json",
+      };
+    }
+    throw error;
+  }
 }
 
 async function findExistingCaptureArtifacts(artifactDir) {
@@ -641,7 +690,13 @@ async function main() {
     startedAt: new Date().toISOString(),
     status: "running",
   };
+  const captureCompleteness = await inspectCaptureCompleteness(args.artifacts);
+  runState.capture = captureCompleteness;
+  runState.recovery = args.phase === "analyze"
+    ? { status: "recovered-analysis", source: "immutable-artifacts" }
+    : null;
   let interactionHealth = null;
+  let interactionHealthStatus = null;
 
   if (["all", "capture"].includes(args.phase)) {
     const existingArtifacts = await findExistingCaptureArtifacts(args.artifacts);
@@ -793,6 +848,20 @@ async function main() {
       interactionHealth = await readInteractionHealth(args.artifacts);
       runState.interactionHealth = interactionHealth;
     }
+    if (args.phase === "analyze") {
+      interactionHealthStatus = interactionHealth
+        ? { available: true, reason: null, source: "summary-and-action-results" }
+        : {
+            available: false,
+            reason: captureCompleteness.reason === "summary-missing"
+              ? "summary-missing"
+              : captureCompleteness.reason === "summary-invalid-json" || captureCompleteness.reason === "summary-invalid"
+                ? "summary-corrupt"
+                : "canonical-health-unavailable",
+            source: captureCompleteness.source,
+          };
+      runState.interactionHealthStatus = interactionHealthStatus;
+    }
     if (args.phase === "analyze" && interactionHealth?.accounting?.consistent === false) {
       runState.status = "blocked";
       runState.blocker = {
@@ -835,15 +904,32 @@ async function main() {
       if (args.includeAdjacent) {
         candidateArgs.push("--include-adjacent");
       }
-      await runNode(
-        path.join(repoRoot, "tools", "generate-crawl-candidates.mjs"),
-        candidateArgs,
-      );
+      try {
+        await runNode(
+          path.join(repoRoot, "tools", "generate-crawl-candidates.mjs"),
+          candidateArgs,
+        );
+      } catch (error) {
+        if (captureCompleteness.captureComplete === false && captureCompleteness.captureStatus === "missing-minimum-artifacts") {
+          const emptyQueue = {
+            schemaVersion: 1,
+            candidates: [],
+            suppressedCandidates: [],
+            scopeReviewCandidates: [],
+            summary: { missingMinimumArtifacts: true },
+          };
+          await writeFile(candidateQueuePath, `${JSON.stringify(emptyQueue, null, 2)}\n`, "utf8");
+        } else {
+          throw error;
+        }
+      }
       const candidateQueue = JSON.parse(await readFile(candidateQueuePath, "utf8"));
       const candidateHandoff = buildCandidateHandoff({
         candidateQueue,
         interactionHealth,
+        interactionHealthStatus,
         metadataNextPass: brief.metadataNextPass,
+        recovery: captureCompleteness,
         specId: specRecord.specId,
         specTitle: specRecord.title,
       });
@@ -858,6 +944,11 @@ async function main() {
 
     runState.status = "completed";
     runState.interactionHealth = interactionHealth;
+    runState.interactionHealthStatus = interactionHealthStatus ?? (
+      interactionHealth
+        ? { available: true, reason: null, source: "summary-and-action-results" }
+        : { available: false, reason: "canonical-health-unavailable", source: "capture-artifacts" }
+    );
     runState.completedAt = new Date().toISOString();
     runState.outputs = {
       candidateQueue: ["all", "analyze"].includes(args.phase)
