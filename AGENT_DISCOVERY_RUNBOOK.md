@@ -173,13 +173,20 @@ healthy completed capture may be analyzed again without reopening the browser.
    unchanged state, no transition, and no new request family; a single absent
    control is not an escalation.
 
-   `summary.json` is expected from a completed `capture` or `all` phase. If it is
-   absent but checkpointed capture artifacts exist, treat the original command
-   as interrupted rather than completed. A trusted orchestrator may run the
-   documented `analyze` recovery against that immutable directory when the
-   primary capture artifacts are complete; otherwise use a seeded retry in a new
-   directory. Stop when the primary files explain the status, counts, blocker,
-   and recommended next action.
+   `summary.json` is the minimum proof of a complete capture. If it is absent but
+   checkpointed capture artifacts exist, analysis may still finish and emit
+   candidate outputs, but `discovery-run.json` and `candidate-handoff.json` must
+   report `capture.captureStatus: interrupted`, `capture.captureComplete: false`,
+   and `interactionHealthStatus.reason: summary-missing`. Treat the capture as
+   incomplete and follow the recovery recommendation; never infer canonical
+   health or recipe completion from partial action results. Invalid JSON or an
+   invalid minimum summary is `corrupted-minimum-artifacts`; an authentication
+   barrier is `authentication-blocked`. A trusted orchestrator may run the
+   documented `analyze` recovery against immutable artifacts, including an
+   interrupted directory, but promotion-shaped guidance is withheld until a
+   complete capture is available. Complete captures analyzed offline are marked
+   as `recovery.status: recovered-analysis` while preserving top-level
+   `status: completed` for compatibility.
 
 6. Read the following structured evidence only when the handoff requires a
    specific candidate, probe, bundle, or streaming detail:
@@ -205,6 +212,14 @@ opaque `evidenceId` and `probeId` values are stable hashes of the action,
 checkpoint, normalized URL, target/session/frame, and attempt context, so late
 event delivery does not change deduplication keys. Existing array artifact files
 remain readable by older consumers because the schema field is additive.
+
+The JavaScript analyzer adds bounded v2 metadata to `bundle-candidates.json`:
+`confidence`, `provenance`, `discoveryKind`, and (when applicable) `hostname`.
+`candidatePath` remains a normalized path for compatibility. Absolute URL hosts
+are retained separately for scope classification; no bundle code is executed.
+GraphQL entries include operation type/name and a persisted-query hash only when
+the hash is statically present. Parse failures are counted and preserved as
+diagnostics rather than treated as successful extraction.
 
 ## Swarm execution contract
 

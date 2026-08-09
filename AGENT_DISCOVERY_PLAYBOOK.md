@@ -193,12 +193,33 @@ new artifact directory; it does not overwrite history.
   prompt.
 - Have workers read `discovery-run.json` and `candidate-handoff.json` first.
   A missing expected `summary.json` means the capture command was interrupted;
-  raw artifacts remain escalation-only.
+  raw artifacts remain escalation-only. Offline analysis can preserve candidate
+  accounting in that directory, but must report explicit capture completeness and
+  health availability fields and recommend completing or retrying capture before
+  any promotion review.
 - Pass promotion workers only assigned handoff entries and the relevant spec
   family, not the full capture corpus.
 - Review diffs and machine-generated counts before reading raw evidence.
 - If a worker returns no response, recover from its immutable outputs before
   spending tokens on a second capture.
+
+### Recovery-status semantics
+
+`discovery-run.json` keeps the backward-compatible top-level `status` field as
+the status of the current phase. Additive `capture.captureStatus` and
+`capture.captureComplete` distinguish phase completion from capture completeness:
+`complete`, `interrupted`, `authentication-blocked`,
+`corrupted-minimum-artifacts`, and `missing-minimum-artifacts` are deterministic
+capture states. `recovery.status: recovered-analysis` means analysis completed
+from immutable artifacts; it does not make an interrupted capture complete.
+
+When `interactionHealth` is `null`, `interactionHealthStatus` must state an
+explicit `reason` and `source`. Missing or corrupt `summary.json` never permits
+reconstructing canonical health from partial action results. Candidate queues and
+sanitized handoffs remain available for triage, but their recommended next action
+prioritizes capture completion/retry and never claims recipe completion or emits
+promotion-shaped guidance solely from partial artifacts. A complete capture may
+be analyzed offline and retain the normal evidence-based recommendation.
 
 ### PR lifecycle ownership
 
@@ -422,7 +443,7 @@ What to extract:
 - route candidates for a later safe-probe queue
 - If you have sibling pages in the same feature family, diff their `script-urls.json` sets early so page-specific bundles stand out before you mine generic shell chunks.
 - Prioritize unique or near-unique bundles first; these are often where request factories, enum values, hidden sibling routes, and request-body defaults live.
-- The static miner uses an AST when possible and falls back to bounded string extraction for malformed or non-standard bundles. It preserves inferred HTTP methods, dynamic `{param}` route templates, GraphQL operation names, source locations, source-map references, and parse failures.
+- The static miner uses an AST when possible and falls back to bounded string extraction for malformed or non-standard bundles. It preserves inferred HTTP methods, dynamic `{param}` route templates, absolute host provenance, confidence/provenance metadata, GraphQL operation type/name plus statically present persisted-query hashes, source locations, source-map references, and parse failures. It never executes bundle code.
 
 ### 5a. Build a candidate queue
 
