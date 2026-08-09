@@ -2,9 +2,51 @@ name: Validate site
 
 on:
   pull_request:
+    paths:
+      - .github/workflows/ci.yml
+      - .node-version
+      - babel.config.js
+      - docusaurus.config.ts
+      - package.json
+      - package-lock.json
+      - plugins/**
+      - specifications/**
+      - src/**
+      - static/**
+      - tsconfig.json
+      - tools/capture-recipes/**
+      - tools/generate-operation-context-ledger.mjs
+      - tools/generate-operation-live-capture-ledger.mjs
+      - tools/generate-portal-coverage-ledger.mjs
+      - tools/generate-spec-quality.mjs
+      - tools/portal-discovery-metadata.mjs
+      - tools/spec-quality-lib.mjs
+      - tools/validate-portal-discovery-metadata.mjs
+      - tools/validate-spec-quality.mjs
   push:
     branches:
       - main
+    paths:
+      - .github/workflows/ci.yml
+      - .node-version
+      - babel.config.js
+      - docusaurus.config.ts
+      - package.json
+      - package-lock.json
+      - plugins/**
+      - specifications/**
+      - src/**
+      - static/**
+      - tsconfig.json
+      - tools/capture-recipes/**
+      - tools/generate-operation-context-ledger.mjs
+      - tools/generate-operation-live-capture-ledger.mjs
+      - tools/generate-portal-coverage-ledger.mjs
+      - tools/generate-spec-quality.mjs
+      - tools/portal-discovery-metadata.mjs
+      - tools/spec-quality-lib.mjs
+      - tools/validate-portal-discovery-metadata.mjs
+      - tools/validate-spec-quality.mjs
   workflow_dispatch:
 
 permissions:
