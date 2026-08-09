@@ -77,13 +77,24 @@ test("preserves ambiguous methods and respects object spread order", () => {
     sourceFile: "methods.js",
   });
 
-  test("propagates bounded constants, URL hosts, aliases, XHR, route metadata, and hashes", () => {
+  assert.deepEqual(
+    result.candidates.map(({ candidatePath, method }) => ({ candidatePath, method })),
+    [
+      { candidatePath: "/api/final", method: "PATCH" },
+      { candidatePath: "/api/overridden", method: null },
+      { candidatePath: "/api/shared", method: null },
+      { candidatePath: "/api/shared", method: "POST" },
+    ],
+  );
+});
+
+test("propagates bounded constants, URL hosts, aliases, XHR, route metadata, and hashes", () => {
     const result = mineBundleSource(`
       const base = "https://api.example.test";
       const suffix = "/v1";
       const routes = { users: suffix + "/users" };
       const doFetch = fetch;
-      doFetch(new URL(routes.users, base), { method: "GET" });
+      doFetch(new URL("/v1/users", base), { method: "GET" });
       const xhr = new XMLHttpRequest();
       xhr.open("POST", base + "/v1/users");
       const documentText = "query Users { users { id } }";
@@ -104,9 +115,9 @@ test("preserves ambiguous methods and respects object spread order", () => {
       result.graphqlOperations[0].persistedQueryHash,
       "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
     );
-  });
+});
 
-  test("keeps malformed bundles in parse-failure accounting with bounded fallback", () => {
+test("keeps malformed bundles in parse-failure accounting with bounded fallback", () => {
     const result = mineBundleSource("fetch('/api/fallback'); }", {
       prefixes: ["/api/"],
       sourceFile: "broken.js",
@@ -114,15 +125,58 @@ test("preserves ambiguous methods and respects object spread order", () => {
 
     assert.ok(result.parseError);
     assert.deepEqual(result.candidates.map(({ candidatePath }) => candidatePath), ["/api/fallback"]);
-  });
+});
 
-  assert.deepEqual(
-    result.candidates.map(({ candidatePath, method }) => ({ candidatePath, method })),
-    [
-      { candidatePath: "/api/final", method: "PATCH" },
-      { candidatePath: "/api/overridden", method: null },
-      { candidatePath: "/api/shared", method: null },
-      { candidatePath: "/api/shared", method: "POST" },
-    ],
-  );
+test("bounds const propagation, resolves aliases, URLs, XHR, routes, SDK metadata, and hosts", () => {
+    const result = mineBundleSource(`
+      const base = "https://API.Example.test/root";
+      const path = "/api/items";
+      const url = new URL(path, base);
+      const request = fetch;
+      const send = request;
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", url);
+      const sdk = { routes: { list: "/api/sdk-list" }, endpoint: "/api/sdk" };
+      send("https://other.example.test/api/alias");
+      client.get(sdk.routes.list);
+    `, { prefixes: ["/api/"], sourceFile: "bounded.js" });
+
+    assert.deepEqual(result.candidates.map(({ candidatePath, hostname, method }) => ({
+      candidatePath, hostname, method,
+    })), [
+      { candidatePath: "/api/alias", hostname: "other.example.test", method: "GET" },
+      { candidatePath: "/api/items", hostname: "api.example.test", method: "POST" },
+      { candidatePath: "/api/sdk", hostname: null, method: null },
+      { candidatePath: "/api/sdk-list", hostname: null, method: "GET" },
+    ]);
+});
+
+test("extracts GraphQL names, types, persisted hashes, and parse fallback metadata", () => {
+    const result = mineBundleSource(`
+      const operationName = "TenantSettings";
+      const metadata = { operationName, sha256Hash: "ABCDEF0123456789ABCDEF0123456789" };
+      const query = "query TenantSettings { tenant { id } }";
+    `, { prefixes: ["/api/"] });
+    assert.deepEqual(result.graphqlOperations, [{
+      confidence: 0.8,
+      name: "TenantSettings",
+      operationType: "query",
+      persistedQueryHash: "abcdef0123456789abcdef0123456789",
+      provenance: "graphql-document+persisted-query-object",
+      sourceFile: "bundle.js",
+    }]);
+
+    const fallback = mineBundleSource("fetch('/api/fallback'); {{{", { prefixes: ["/api/"] });
+    assert.equal(fallback.candidates[0].discoveryKind, "parse-fallback");
+    assert.equal(fallback.candidates[0].confidence, 0.4);
+    assert.match(fallback.candidates[0].reason, /regex-only bounded fallback/u);
+});
+
+test("does not promote dynamic cycles or unrelated strings", () => {
+    const result = mineBundleSource(`
+      const a = b; const b = a;
+      let reassigned = "/api/first"; reassigned = "/api/second";
+      console.log("/not-an-endpoint");
+    `, { prefixes: ["/api/"] });
+    assert.deepEqual(result.candidates.map(({ candidatePath }) => candidatePath), []);
 });
