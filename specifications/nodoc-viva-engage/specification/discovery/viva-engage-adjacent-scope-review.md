@@ -2,13 +2,13 @@
 
 Portal: Viva Engage  
 Spec: viva-engage  
-Artifacts directory: `C:\Users\NathanMcNulty\AppData\Local\Temp\nodoc-viva-engage-discovery-1c319b10-f452-4be9-964a-99d91c40bc6d`
+Artifacts directory: `C:\Users\NATHAN~1\AppData\Local\Temp\nodoc-viva-engage-bundle-retry-a288c459-0894-487d-97b3-b228229483b8`
 
 ## Run completion
 
 - Status: completed
 - Recommended next action: `review-adjacent-candidate-scope`
-- Candidate counts: confirmed-read=0, confirmed-safety=0, successfully-probed=0, bundle-only=42, suppressed=0, adjacent-confirmed-read=35, adjacent-safety=9, adjacent-probed=0, adjacent-bundle-only=0
+- Candidate counts: confirmed-read=0, confirmed-safety=0, successfully-probed=0, bundle-only=42, suppressed=0, adjacent-confirmed-read=30, adjacent-safety=9, adjacent-probed=0, adjacent-bundle-only=0
 - Evidence channels: GraphQL=0, RPC=0, streaming=0, successful probe results=0
 
 This is an ownership handoff only. No adjacent route is promotion-ready for the Viva Engage
@@ -25,10 +25,9 @@ scope and safety decision.
 | GET | `/shellux/...` (two shell localization/theme assets) | `{tenant}.{tenant}.office.net` | Microsoft 365 shell / Teams-family spec | Shared shell resources |
 | GET | `/teams-js/validDomains/json/validDomains.json` | `{tenant}.{tenant}.office.net` | Teams platform spec | Teams SDK configuration asset |
 | GET | `/yammer/.../yammer-locale/en-us/*.json` (20 locale assets) | `{tenant}.{tenant}.office.net` | Yammer/Viva shared static-assets owner | Localization bundles, not callable API routes |
-| GET | `/config/v1/YammerClients/0.0.1` | `ecs.office.com` | `security-copilot` or shared ECS owner | Existing matching spec metadata points outside Viva Engage |
 | GET | `/v1.0/users/{id}/photo/$value` | `graph.microsoft.com` | Microsoft Graph spec | Microsoft Graph profile-photo read |
 
-The grouped rows above account for all 35 adjacent confirmed reads from the handoff artifact.
+The grouped rows above account for all 30 adjacent confirmed reads from the handoff artifact.
 Individual URL evidence remains in `candidate-handoff.json`; the grouped presentation avoids
 turning static asset paths into proposed API operations.
 
@@ -66,7 +65,7 @@ operations and must not be replayed, submitted, or converted into OpenAPI paths 
 
 ## Adjacent scope-review evidence
 
-- Adjacent confirmed reads: 35; assign by host family before any promotion review.
+- Adjacent confirmed reads: 30; assign by host family before any promotion review.
 - Adjacent confirmed non-GETs: 9; classify as telemetry, authentication, startup, settings, or
   persona behavior before considering ownership.
 - Adjacent successful probes: 0.
