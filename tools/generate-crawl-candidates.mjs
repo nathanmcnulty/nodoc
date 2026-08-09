@@ -1172,7 +1172,15 @@ function matchesSuppression(candidate, suppression) {
   }
 
   return candidate.normalizedPath === suppression.path
-    && (!suppression.method || suppression.method === candidate.method);
+    && (
+      !suppression.method
+      || suppression.method === candidate.method
+      || (
+        candidate.evidence === "bundle-discovered"
+        && !candidate.method
+        && suppression.method === "GET"
+      )
+    );
 }
 
 function partitionSuppressedCandidates(candidates, suppressions) {

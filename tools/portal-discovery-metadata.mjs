@@ -255,9 +255,19 @@ export const coverageOverlayByTitle = {
     observedHosts: [
       "api.azrbac.mspim.azure.com",
     ],
-    lastSuccessfulPassDepth: "deep-clickflow",
+    lastSuccessfulPassDepth: "shell-only",
+    knownTelemetryExclusions: [
+      route("GET", "/api/SearchData/LogSearchTerm", "Bundle-only search telemetry; no matching PIM API traffic was observed."),
+      route("GET", "/api/make-reset-styles", "Bundle-only UI stylesheet helper; no matching PIM API traffic was observed."),
+      route("GET", "/api/shorthands", "Bundle-only UI shorthand helper; no matching PIM API traffic was observed."),
+    ],
+    openGaps: [
+      "The sanitized baseline reached only the Entra shell and recorded zero api.azrbac.mspim.azure.com traffic.",
+      "A fresh bounded href-based capture must prove navigation beyond the shell before any PIM route promotion.",
+    ],
     notes: [
-      "The deep clickflow pass woke the PIM backend, but the resulting routes were already covered by the checked-in spec.",
+      "The prior label-based flow clicked Microsoft Entra roles once, then repeated the same state because RoleSettings was exposed by href rather than the attempted Role settings label.",
+      "The three bundle-only UI and telemetry observations are explicitly excluded from candidate planning until confirmed by read-only PIM traffic.",
     ],
   },
   Exchange: {

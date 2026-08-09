@@ -579,6 +579,39 @@ test("no-candidate analysis uses an appropriate portal metadata fallback", async
   }
 });
 
+test("Entra PIM UI and telemetry bundle false positives are suppressed", async () => {
+  const artifactDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-entra-pim-suppressions-"));
+  const falsePositivePaths = [
+    "/api/SearchData/LogSearchTerm",
+    "/api/make-reset-styles",
+    "/api/shorthands",
+  ];
+
+  try {
+    await writeJson(path.join(artifactDir, "bundle-candidates.json"), {
+      candidates: falsePositivePaths.map((candidatePath) => ({
+        candidatePath,
+        method: null,
+        sourceFile: "tenant-neutral-ui-bundle.js",
+      })),
+    });
+
+    const { candidateHandoff, candidateQueue } = await runAnalyze("entra-pim", artifactDir);
+    assert.equal(candidateHandoff.counts.bundleOnly, 0);
+    assert.equal(candidateHandoff.counts.suppressed, falsePositivePaths.length);
+    assert.deepEqual(
+      candidateHandoff.suppressedCandidates
+        .map(({ normalizedPath }) => normalizedPath)
+        .sort(),
+      [...falsePositivePaths].sort(),
+    );
+    assert.deepEqual(candidateQueue.candidates, []);
+    assert.equal(candidateQueue.suppressedCandidates.length, falsePositivePaths.length);
+  } finally {
+    await rm(artifactDir, { force: true, recursive: true });
+  }
+});
+
 test("mined methods flow into the crawl candidate queue", async () => {
   const artifactDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-discovery-"));
   try {

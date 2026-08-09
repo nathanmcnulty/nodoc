@@ -8,35 +8,489 @@
   "matchPathPrefixes": [
     "/api"
   ],
-  "postActionSettleMs": 10000,
-  "settleMs": 12000,
+  "postActionSettleMs": 5000,
+  "settleMs": 6000,
   "actions": [
-    "click-label-root=Microsoft Entra roles",
-    "wait-ms=6000",
-    "capture=entra-roles",
-    "click-contains-root=Role settings",
-    "wait-ms=6000",
-    "capture=role-settings",
-    "click-label-root=Groups",
-    "wait-ms=6000",
-    "capture=groups",
-    "click-label-root=Azure resources",
-    "wait-ms=6000",
-    "capture=azure-resources",
-    "click-contains-root=Approvals",
-    "wait-ms=6000",
-    "capture=approvals",
-    "click-label-root=My requests",
-    "wait-ms=6000",
-    "capture=my-requests",
-    "click-label-root=My audit history"
-    ,"wait-ms=6000"
-    ,"capture=my-audit-history"
-    ,"click-label-iframe=Microsoft Entra roles"
-    ,"wait-ms=6000"
-    ,"capture=entra-roles-iframe"
-    ,"click-label-iframe=Groups"
-    ,"wait-ms=6000"
-    ,"capture=groups-iframe"
+    {
+      "type": "navigate",
+      "value": "https://entra.microsoft.com/#blade/Microsoft_Azure_PIMCommon/CommonMenuBlade",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "2000",
+      "required": true
+    },
+    {
+      "type": "click-href",
+      "scope": "root",
+      "value": "#view/Microsoft_Azure_PIMCommon/CommonMenuBlade/~/aadmigratedroles",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "2000",
+      "required": true
+    },
+    {
+      "type": "click-href",
+      "scope": "root",
+      "value": "#view/Microsoft_Azure_PIMCommon/ResourceMenuBlade/~/aadoverview/resourceId//resourceType/tenant/provider/aadroles",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "2000",
+      "required": true
+    },
+    {
+      "type": "capture",
+      "value": "overview",
+      "required": true
+    },
+    {
+      "type": "navigate",
+      "value": "https://entra.microsoft.com/#blade/Microsoft_Azure_PIMCommon/CommonMenuBlade",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "2000",
+      "required": true
+    },
+    {
+      "type": "click-href",
+      "scope": "root",
+      "value": "#view/Microsoft_Azure_PIMCommon/CommonMenuBlade/~/aadmigratedroles",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "2000",
+      "required": true
+    },
+    {
+      "type": "click-href",
+      "scope": "root",
+      "value": "#view/Microsoft_Azure_PIMCommon/ResourceMenuBlade/~/MyActions/resourceId//resourceType/tenant/provider/aadroles",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "2000",
+      "required": true
+    },
+    {
+      "type": "capture",
+      "value": "my-roles",
+      "required": true
+    },
+    {
+      "type": "navigate",
+      "value": "https://entra.microsoft.com/#blade/Microsoft_Azure_PIMCommon/CommonMenuBlade",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "2000",
+      "required": true
+    },
+    {
+      "type": "click-href",
+      "scope": "root",
+      "value": "#view/Microsoft_Azure_PIMCommon/CommonMenuBlade/~/aadmigratedroles",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "2000",
+      "required": true
+    },
+    {
+      "type": "click-href",
+      "scope": "root",
+      "value": "#view/Microsoft_Azure_PIMCommon/ResourceMenuBlade/~/PendingRequest/resourceId//resourceType/tenant/provider/aadroles",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "2000",
+      "required": true
+    },
+    {
+      "type": "capture",
+      "value": "pending-requests",
+      "required": true
+    },
+    {
+      "type": "navigate",
+      "value": "https://entra.microsoft.com/#blade/Microsoft_Azure_PIMCommon/CommonMenuBlade",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "2000",
+      "required": true
+    },
+    {
+      "type": "click-href",
+      "scope": "root",
+      "value": "#view/Microsoft_Azure_PIMCommon/CommonMenuBlade/~/aadmigratedroles",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "2000",
+      "required": true
+    },
+    {
+      "type": "click-href",
+      "scope": "root",
+      "value": "#view/Microsoft_Azure_PIMCommon/ResourceMenuBlade/~/ApproveRequests/resourceId//resourceType/tenant/provider/aadroles",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "2000",
+      "required": true
+    },
+    {
+      "type": "capture",
+      "value": "approve-requests",
+      "required": true
+    },
+    {
+      "type": "navigate",
+      "value": "https://entra.microsoft.com/#blade/Microsoft_Azure_PIMCommon/CommonMenuBlade",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "2000",
+      "required": true
+    },
+    {
+      "type": "click-href",
+      "scope": "root",
+      "value": "#view/Microsoft_Azure_PIMCommon/CommonMenuBlade/~/aadmigratedroles",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "2000",
+      "required": true
+    },
+    {
+      "type": "click-href",
+      "scope": "root",
+      "value": "#view/Microsoft_Azure_PIMCommon/ResourceMenuBlade/~/Reviews/resourceId//resourceType/tenant/provider/aadroles",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "2000",
+      "required": true
+    },
+    {
+      "type": "capture",
+      "value": "review-access",
+      "required": true
+    },
+    {
+      "type": "navigate",
+      "value": "https://entra.microsoft.com/#blade/Microsoft_Azure_PIMCommon/CommonMenuBlade",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "2000",
+      "required": true
+    },
+    {
+      "type": "click-href",
+      "scope": "root",
+      "value": "#view/Microsoft_Azure_PIMCommon/CommonMenuBlade/~/aadmigratedroles",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "2000",
+      "required": true
+    },
+    {
+      "type": "click-href",
+      "scope": "root",
+      "value": "#view/Microsoft_Azure_PIMCommon/ResourceMenuBlade/~/roles/resourceId//resourceType/tenant/provider/aadroles",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "2000",
+      "required": true
+    },
+    {
+      "type": "capture",
+      "value": "roles",
+      "required": true
+    },
+    {
+      "type": "navigate",
+      "value": "https://entra.microsoft.com/#blade/Microsoft_Azure_PIMCommon/CommonMenuBlade",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "2000",
+      "required": true
+    },
+    {
+      "type": "click-href",
+      "scope": "root",
+      "value": "#view/Microsoft_Azure_PIMCommon/CommonMenuBlade/~/aadmigratedroles",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "2000",
+      "required": true
+    },
+    {
+      "type": "click-href",
+      "scope": "root",
+      "value": "#view/Microsoft_Azure_PIMCommon/ResourceMenuBlade/~/members/resourceId//resourceType/tenant/provider/aadroles",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "2000",
+      "required": true
+    },
+    {
+      "type": "capture",
+      "value": "assignments",
+      "required": true
+    },
+    {
+      "type": "navigate",
+      "value": "https://entra.microsoft.com/#blade/Microsoft_Azure_PIMCommon/CommonMenuBlade",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "2000",
+      "required": true
+    },
+    {
+      "type": "click-href",
+      "scope": "root",
+      "value": "#view/Microsoft_Azure_PIMCommon/CommonMenuBlade/~/aadmigratedroles",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "2000",
+      "required": true
+    },
+    {
+      "type": "click-href",
+      "scope": "root",
+      "value": "#view/Microsoft_Azure_PIMCommon/ResourceMenuBlade/~/Alerts/resourceId//resourceType/tenant/provider/aadroles",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "2000",
+      "required": true
+    },
+    {
+      "type": "capture",
+      "value": "alerts",
+      "required": true
+    },
+    {
+      "type": "navigate",
+      "value": "https://entra.microsoft.com/#blade/Microsoft_Azure_PIMCommon/CommonMenuBlade",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "2000",
+      "required": true
+    },
+    {
+      "type": "click-href",
+      "scope": "root",
+      "value": "#view/Microsoft_Azure_PIMCommon/CommonMenuBlade/~/aadmigratedroles",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "2000",
+      "required": true
+    },
+    {
+      "type": "click-href",
+      "scope": "root",
+      "value": "#view/Microsoft_Azure_PIMCommon/ResourceMenuBlade/~/AccessReviews/resourceId//resourceType/tenant/provider/aadroles",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "2000",
+      "required": true
+    },
+    {
+      "type": "capture",
+      "value": "access-reviews",
+      "required": true
+    },
+    {
+      "type": "navigate",
+      "value": "https://entra.microsoft.com/#blade/Microsoft_Azure_PIMCommon/CommonMenuBlade",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "2000",
+      "required": true
+    },
+    {
+      "type": "click-href",
+      "scope": "root",
+      "value": "#view/Microsoft_Azure_PIMCommon/CommonMenuBlade/~/aadmigratedroles",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "2000",
+      "required": true
+    },
+    {
+      "type": "click-href",
+      "scope": "root",
+      "value": "#view/Microsoft_Azure_PIMCommon/ResourceMenuBlade/~/aaddiscovery/resourceId//resourceType/tenant/provider/aadroles",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "2000",
+      "required": true
+    },
+    {
+      "type": "capture",
+      "value": "discovery-insights",
+      "required": true
+    },
+    {
+      "type": "navigate",
+      "value": "https://entra.microsoft.com/#blade/Microsoft_Azure_PIMCommon/CommonMenuBlade",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "2000",
+      "required": true
+    },
+    {
+      "type": "click-href",
+      "scope": "root",
+      "value": "#view/Microsoft_Azure_PIMCommon/CommonMenuBlade/~/aadmigratedroles",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "2000",
+      "required": true
+    },
+    {
+      "type": "click-href",
+      "scope": "root",
+      "value": "#view/Microsoft_Azure_PIMCommon/ResourceMenuBlade/~/RoleSettings/resourceId//resourceType/tenant/provider/aadroles",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "2000",
+      "required": true
+    },
+    {
+      "type": "capture",
+      "value": "role-settings",
+      "required": true
+    },
+    {
+      "type": "navigate",
+      "value": "https://entra.microsoft.com/#blade/Microsoft_Azure_PIMCommon/CommonMenuBlade",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "2000",
+      "required": true
+    },
+    {
+      "type": "click-href",
+      "scope": "root",
+      "value": "#view/Microsoft_Azure_PIMCommon/CommonMenuBlade/~/aadmigratedroles",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "2000",
+      "required": true
+    },
+    {
+      "type": "click-href",
+      "scope": "root",
+      "value": "#view/Microsoft_Azure_PIMCommon/ResourceMenuBlade/~/Audit/resourceId//resourceType/tenant/provider/aadroles",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "2000",
+      "required": true
+    },
+    {
+      "type": "capture",
+      "value": "resource-audit",
+      "required": true
+    },
+    {
+      "type": "navigate",
+      "value": "https://entra.microsoft.com/#blade/Microsoft_Azure_PIMCommon/CommonMenuBlade",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "2000",
+      "required": true
+    },
+    {
+      "type": "click-href",
+      "scope": "root",
+      "value": "#view/Microsoft_Azure_PIMCommon/CommonMenuBlade/~/aadmigratedroles",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "2000",
+      "required": true
+    },
+    {
+      "type": "click-href",
+      "scope": "root",
+      "value": "#view/Microsoft_Azure_PIMCommon/ResourceMenuBlade/~/MyAudit/resourceId//resourceType/tenant/provider/aadroles",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "2000",
+      "required": true
+    },
+    {
+      "type": "capture",
+      "value": "my-audit",
+      "required": true
+    }
   ]
 }

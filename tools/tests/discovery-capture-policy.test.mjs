@@ -76,3 +76,40 @@ test("initial navigation accepts a same-origin canonical landing route", () => {
     type: "navigate",
   }), true);
 });
+
+test("required clicks need a URL, target, or state transition", () => {
+  assert.equal(actionResultSucceeded({
+    result: {
+      afterUrl: "https://entra.microsoft.com/#same",
+      beforeUrl: "https://entra.microsoft.com/#same",
+      clicked: true,
+    },
+    type: "click-href",
+  }), false);
+  assert.equal(actionResultSucceeded({
+    result: {
+      afterUrl: "https://entra.microsoft.com/#next",
+      beforeUrl: "https://entra.microsoft.com/#same",
+      clicked: true,
+    },
+    type: "click-href",
+  }), true);
+  assert.equal(actionResultSucceeded({
+    result: {
+      afterUrl: "https://entra.microsoft.com/#same",
+      beforeUrl: "https://entra.microsoft.com/#same",
+      clicked: true,
+      stateTransition: true,
+    },
+    type: "click-href",
+  }), true);
+  assert.equal(actionResultSucceeded({
+    result: {
+      afterUrl: "https://entra.microsoft.com/#same",
+      beforeUrl: "https://entra.microsoft.com/#same",
+      clicked: true,
+      targetTransition: true,
+    },
+    type: "click-href",
+  }), true);
+});

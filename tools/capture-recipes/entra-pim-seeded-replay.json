@@ -8,16 +8,17 @@
   "matchPathPrefixes": [
     "/api"
   ],
-  "seedLinkLimit": 2,
+  "seedLinkContains": [
+    "Microsoft_Azure_PIMCommon/ResourceMenuBlade/~"
+  ],
+  "seedLinkLimit": 14,
+  "postActionSettleMs": 5000,
+  "settleMs": 6000,
   "actions": [
-    "replay-seeded-links=entra-roles",
-    "replay-seeded-links=role-settings",
-    "replay-seeded-links=groups",
-    "replay-seeded-links=azure-resources",
-    "replay-seeded-links=approvals",
-    "replay-seeded-links=my-requests",
-    "replay-seeded-links=my-audit-history",
-    "replay-seeded-links=entra-roles-iframe",
-    "replay-seeded-links=groups-iframe"
+    {
+      "type": "replay-seeded-links",
+      "value": "all",
+      "required": true
+    }
   ]
 }
