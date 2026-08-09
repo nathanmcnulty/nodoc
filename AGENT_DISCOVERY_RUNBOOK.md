@@ -134,8 +134,13 @@ healthy completed capture may be analyzed again without reopening the browser.
 3. Run the deterministic pipeline:
 
    ```powershell
-   npm run discover:portal -- --portal m365-admin --profile bounded --phase all --artifacts $artifacts
+   npm run discover:portal -- --portal m365-admin --profile bounded --phase all --endpoint https://admin.cloud.microsoft --artifacts $artifacts --ledger-path $ledgerPath
    ```
+
+   Capture and analysis automatically enqueue and claim a deterministic ledger
+   assignment when `--endpoint` is supplied. Use `--assignment-id` to target a
+   precreated assignment. For explicitly legacy, non-ledger analysis, pass
+   `--no-ledger`; do not use that mode for production capture.
 
 4. If execution is interrupted, choose exactly one recovery path:
 
@@ -156,6 +161,11 @@ healthy completed capture may be analyzed again without reopening the browser.
 
     Never resume `capture` or `all` into a non-empty directory, merge artifact
     directories, or use `analyze` as a substitute for an incomplete capture.
+    Finalization is bounded by the capture and parent supervision deadlines. A
+    timeout preserves already-written artifacts and records the blocking phase
+    in `capture-failure.json`; it remains interrupted and must use a new seeded
+    retry directory. Override the conservative parent deadline only for tests
+    with `--supervision-timeout-ms <milliseconds>`.
 
 5. Read only these outputs first, in order:
 
