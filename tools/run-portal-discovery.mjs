@@ -392,7 +392,7 @@ async function writeRunState(artifactDir, payload) {
 }
 
 async function persistTerminalRun(args, runState) {
-  await persistTerminalRun(args, runState);
+  await writeRunState(args.artifacts, runState);
   if (!args.assignmentId) {
     return;
   }

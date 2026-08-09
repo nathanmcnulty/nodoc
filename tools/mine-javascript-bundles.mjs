@@ -15,6 +15,17 @@ const endpointPropertyNames = new Set([
   "uri",
   "url",
 ]);
+const wrapperFunctionNames = new Set(["fetch", "request", "http", "client", "axios"]);
+const httpMethodNames = new Set(["delete", "get", "post", "put", "patch", "head", "options"]);
+const conditionalTypes = new Set(["ConditionalExpression", "LogicalExpression"]);
+
+const candidateConfidence = {
+  exact: 1.0,
+  inferred: 0.8,
+  fallback: 0.6,
+};
+
+const maxExpressionDepth = 6;
 
 function uniqueSorted(values) {
   return Array.from(new Set(values)).sort((left, right) => left.localeCompare(right));
@@ -34,10 +45,12 @@ function cleanCandidatePath(value) {
     .replaceAll("\\u002F", "/")
     .replaceAll("\\u002f", "/")
     .trim();
+  let hostname = null;
 
   try {
     if (/^https?:\/\//iu.test(candidate)) {
       const parsed = new URL(candidate);
+      hostname = parsed.hostname.toLowerCase();
       candidate = `${parsed.pathname}${parsed.search}`;
     }
   } catch {
@@ -53,39 +66,259 @@ function cleanCandidatePath(value) {
     return null;
   }
 
-  return candidate;
+  return { candidate, hostname };
 }
 
-function expressionValue(node) {
-  if (!node) {
+function isObjectExpression(node) {
+  return node && node.type === "ObjectExpression";
+}
+
+function objectLiteralMap(node, evaluator) {
+  if (!isObjectExpression(node)) {
+    return null;
+  }
+
+  const values = new Map();
+  for (const property of node.properties) {
+    if (property.type !== "Property" || property.computed) {
+      continue;
+    }
+    const key = propertyName(property.key);
+    if (!key) {
+      continue;
+    }
+    const value = evaluator(property.value);
+    if (value) {
+      values.set(key, value);
+    }
+  }
+  return values.size > 0 ? values : null;
+}
+
+function combineHost(baseHost, nextHost) {
+  return nextHost || baseHost || null;
+}
+
+function evaluateTruthiness(node, evaluator, context, depth = 0) {
+  if (!node || depth > maxExpressionDepth) {
+    return null;
+  }
+
+  if (node.type === "Literal") {
+    return Boolean(node.value);
+  }
+
+  if (node.type === "Identifier") {
+    const constant = context.constants.get(node.name);
+    return typeof constant === "boolean" ? constant : null;
+  }
+
+  if (node.type === "UnaryExpression" && node.operator === "!") {
+    const value = evaluateTruthiness(node.argument, evaluator, context, depth + 1);
+    return value === null ? null : !value;
+  }
+
+  if (node.type === "UnaryExpression" && node.operator === "typeof") {
+    return null;
+  }
+
+  if (node.type === "BinaryExpression" && ["===", "==", "!==", "!="].includes(node.operator)) {
+    const left = expressionValue(node.left, context, depth + 1)?.candidate;
+    const right = expressionValue(node.right, context, depth + 1)?.candidate;
+    if (left === undefined || right === undefined) {
+      return null;
+    }
+    return node.operator === "!==" || node.operator === "!=" ? left !== right : left === right;
+  }
+
+  return null;
+}
+
+function expressionValue(node, context = { constants: new Map() }, depth = 0) {
+  if (!node || depth > maxExpressionDepth) {
     return null;
   }
 
   if (node.type === "Literal" && typeof node.value === "string") {
-    return node.value;
+    return {
+      candidate: node.value,
+      confidence: candidateConfidence.exact,
+      provenance: "literal",
+      hostname: null,
+    };
+  }
+
+  if (node.type === "Literal" && (typeof node.value === "number" || typeof node.value === "boolean")) {
+    return {
+      candidate: String(node.value),
+      confidence: candidateConfidence.exact,
+      provenance: "literal",
+      hostname: null,
+    };
   }
 
   if (node.type === "TemplateLiteral") {
-    return node.quasis
+    return {
+      candidate: node.quasis
       .map((quasi, index) => {
-        const suffix = index < node.expressions.length ? "{param}" : "";
+        const expression = node.expressions[index];
+        const resolved = expressionValue(expression, context, depth + 1);
+        const suffix = index < node.expressions.length
+          ? (resolved?.candidate ?? "{param}")
+          : "";
         return `${quasi.value.cooked ?? quasi.value.raw}${suffix}`;
       })
-      .join("");
+      .join(""),
+      confidence: node.expressions.every((expression) => expressionValue(expression, context, depth + 1))
+        ? candidateConfidence.inferred
+        : candidateConfidence.fallback,
+      provenance: "template",
+      hostname: null,
+    };
   }
 
   if (node.type === "BinaryExpression" && node.operator === "+") {
-    const left = expressionValue(node.left);
-    const right = expressionValue(node.right);
-    if (left !== null && right !== null) {
-      return `${left}${right}`;
+    const left = expressionValue(node.left, context, depth + 1);
+    const right = expressionValue(node.right, context, depth + 1);
+    if (left && right) {
+      const merged = cleanCandidatePath(`${left.candidate}${right.candidate}`);
+      if (merged) {
+        return {
+          candidate: merged.candidate,
+          confidence: Math.min(left.confidence, right.confidence),
+          provenance: "binary",
+          hostname: merged.hostname ?? combineHost(left.hostname, right.hostname),
+        };
+      }
+      return {
+        candidate: `${left.candidate}${right.candidate}`,
+        confidence: Math.min(left.confidence, right.confidence),
+        provenance: "binary",
+        hostname: combineHost(left.hostname, right.hostname),
+      };
     }
     if (left !== null) {
-      return `${left}{param}`;
+      return {
+        candidate: `${left.candidate}{param}`,
+        confidence: Math.min(left.confidence, candidateConfidence.fallback),
+        provenance: "binary",
+        hostname: left.hostname,
+      };
     }
     if (right !== null) {
-      return `{param}${right}`;
+      return {
+        candidate: `{param}${right.candidate}`,
+        confidence: Math.min(right.confidence, candidateConfidence.fallback),
+        provenance: "binary",
+        hostname: right.hostname,
+      };
     }
+  }
+
+  if (node.type === "Identifier") {
+    const directValue = context.constants.get(node.name);
+    if (!directValue) return null;
+    return directValue.candidate
+      ? {
+          ...directValue,
+          confidence: Math.min(directValue.confidence, candidateConfidence.inferred),
+          provenance: `identifier:${node.name}:${directValue.provenance}`,
+        }
+      : null;
+  }
+
+  if (node.type === "MemberExpression") {
+    const objectName = memberName(node.object);
+    if (!objectName) {
+      return null;
+    }
+    const objectValue = context.constants.get(objectName);
+    if (objectValue && typeof objectValue === "object" && !Array.isArray(objectValue)) {
+      const property = propertyName(node.property);
+      if (property && Object.hasOwn(objectValue, property)) {
+        const resolved = objectValue[property];
+        return resolved?.candidate
+          ? {
+              ...resolved,
+              confidence: Math.min(resolved.confidence, candidateConfidence.inferred),
+              provenance: `object-property:${objectName}.${property}:${resolved.provenance}`,
+            }
+          : null;
+      }
+    }
+  }
+
+  if (node.type === "ConditionalExpression") {
+    const result = evaluateTruthiness(node.test, expressionValue, context, depth + 1);
+    if (result === null) {
+      return null;
+    }
+    const next = result ? node.consequent : node.alternate;
+    const resolved = expressionValue(next, context, depth + 1);
+    return resolved ? {
+      candidate: resolved.candidate,
+      confidence: Math.min(resolved.confidence, candidateConfidence.fallback),
+      provenance: `conditional:${resolved.provenance}`,
+      hostname: resolved.hostname,
+    } : null;
+  }
+
+  if (node.type === "LogicalExpression") {
+    const truth = evaluateTruthiness(node.left, expressionValue, context, depth + 1);
+    if (node.operator === "&&") {
+      if (truth === false) return null;
+      return expressionValue(node.right, context, depth + 1);
+    }
+    if (node.operator === "||") {
+      if (truth === true) return expressionValue(node.left, context, depth + 1);
+      return expressionValue(node.right, context, depth + 1);
+    }
+    if (node.operator === "??") {
+      return expressionValue(node.left, context, depth + 1)
+        ?? expressionValue(node.right, context, depth + 1);
+    }
+  }
+
+  if (node.type === "NewExpression" && memberName(node.callee) === "URL") {
+    const pathValue = expressionValue(node.arguments?.[0], context, depth + 1);
+    const baseValue = expressionValue(node.arguments?.[1], context, depth + 1);
+    if (!pathValue?.candidate) {
+      return null;
+    }
+    if (!baseValue?.candidate && node.arguments?.length === 1) {
+      if (/^\//.test(pathValue.candidate)) {
+        return {
+          candidate: pathValue.candidate,
+          confidence: pathValue.confidence,
+          provenance: `new-url:${pathValue.provenance}`,
+          hostname: null,
+        };
+      }
+      return null;
+    }
+
+    if (!baseValue?.candidate || !/^https?:/iu.test(baseValue.candidate)) {
+      return null;
+    }
+    try {
+      const merged = new URL(pathValue.candidate, baseValue.candidate);
+      return {
+        candidate: `${merged.pathname}${merged.search}`,
+        confidence: Math.min(pathValue.confidence, baseValue.confidence),
+        provenance: `new-url:${pathValue.provenance}+${baseValue.provenance}`,
+        hostname: merged.hostname.toLowerCase(),
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  if (node.type === "CallExpression" && memberName(node.callee)?.toLowerCase() === "url") {
+    const value = expressionValue(node.callee.object, context, depth + 1);
+    if (!value) {
+      return null;
+    }
+    return value;
   }
 
   return null;
@@ -119,7 +352,7 @@ function memberName(node) {
   return [objectName, property].filter(Boolean).join(".");
 }
 
-function methodDescriptorFromOptions(node) {
+function methodDescriptorFromOptions(node, context = { constants: new Map() }) {
   if (!node) {
     return { found: false, method: null };
   }
@@ -146,7 +379,8 @@ function methodDescriptorFromOptions(node) {
     if (key !== "method") {
       continue;
     }
-    const method = expressionValue(property.value)?.toUpperCase();
+    const value = expressionValue(property.value, context);
+    const method = typeof value?.candidate === "string" ? value.candidate.toUpperCase() : null;
     descriptor = {
       found: true,
       method: httpMethods.has(method) ? method : null,
@@ -155,8 +389,8 @@ function methodDescriptorFromOptions(node) {
   return descriptor;
 }
 
-function methodFromOptions(node) {
-  return methodDescriptorFromOptions(node).method;
+function methodFromOptions(node, context) {
+  return methodDescriptorFromOptions(node, context).method;
 }
 
 function lineForNode(node) {
@@ -165,7 +399,7 @@ function lineForNode(node) {
 
 function extractCandidatePaths(value, prefixes) {
   const source = String(value || "");
-  const paths = new Set();
+  const paths = new Map();
 
   for (const prefix of prefixes) {
     let index = source.indexOf(prefix);
@@ -173,13 +407,13 @@ function extractCandidatePaths(value, prefixes) {
       const fragment = source.slice(index).split(/[\s<>"'`\\|]/u, 1)[0];
       const candidate = cleanCandidatePath(fragment);
       if (candidate) {
-        paths.add(candidate);
+        paths.set(`${candidate.hostname ?? ""} ${candidate.candidate}`, candidate);
       }
       index = source.indexOf(prefix, index + prefix.length);
     }
   }
 
-  return Array.from(paths);
+  return Array.from(paths.values());
 }
 
 function normalizeMethod(value) {
@@ -189,12 +423,17 @@ function normalizeMethod(value) {
 
 function parseGraphqlOperations(source) {
   const operations = new Map();
+  const hashes = Array.from(source.matchAll(/(?:sha256Hash|persistedQuery|queryHash|hash)\s*["']?\s*[:=]\s*["']([a-f0-9]{32,128})["']/giu), (match) => match[1]);
   const matcher = /\b(query|mutation|subscription)\s+([A-Za-z_][A-Za-z0-9_]*)\b/gu;
   for (const match of source.matchAll(matcher)) {
     const key = `${match[1]} ${match[2]}`;
+    const hash = source.match(new RegExp(`(?:sha256|hash|persistedQuery)[^\\n]{0,160}?${match[2]}[^\\n]{0,160}?([a-f0-9]{32,128})`, "iu"))?.[1]
+      ?? source.match(new RegExp(`([a-f0-9]{32,128})[^\\n]{0,160}?(?:sha256|hash|persistedQuery)[^\\n]{0,160}?${match[2]}`, "iu"))?.[1]
+      ?? (hashes.length === 1 ? hashes[0] : null);
     operations.set(key, {
       name: match[2],
       operationType: match[1],
+      persistedQueryHash: hash,
     });
   }
   return Array.from(operations.values()).sort((left, right) =>
@@ -218,20 +457,35 @@ export function mineBundleSource(source, options = {}) {
       .filter(Boolean),
   );
   const candidates = new Map();
+  const constants = new Map();
+  const aliases = new Set();
+  const xhrAliases = new Set(["xmlhttprequest"]);
   let parseError = null;
 
   function addCandidate(value, details = {}) {
-    for (const candidatePath of extractCandidatePaths(value, prefixes)) {
+    const values = typeof value === "object" && value?.candidate
+      ? (() => {
+          const cleaned = cleanCandidatePath(value.candidate);
+          return cleaned
+            ? [{ ...value, candidate: cleaned.candidate, hostname: value.hostname ?? cleaned.hostname }]
+            : [];
+        })()
+      : extractCandidatePaths(value, prefixes);
+    for (const candidateValue of values) {
+      const candidatePath = candidateValue.candidate;
       const method = normalizeMethod(details.method);
       const occurrenceId = details.occurrenceId ?? `line:${details.line ?? "unknown"}`;
-      const key = `${method ?? "ANY"} ${candidatePath} ${occurrenceId}`;
+      const key = `${method ?? "ANY"} ${candidatePath} ${candidateValue.hostname ?? ""} ${occurrenceId}`;
       const existing = candidates.get(key);
       const candidate = {
         candidatePath,
         discoveryKind: details.discoveryKind ?? "string-literal",
+        confidence: details.confidence ?? candidateValue.confidence ?? candidateConfidence.fallback,
+        hostname: details.hostname ?? candidateValue.hostname ?? null,
         line: details.line ?? null,
         method,
         occurrenceId,
+        provenance: details.provenance ?? candidateValue.provenance ?? null,
         sourceFile,
       };
       if (!existing || (candidate.line ?? Number.MAX_SAFE_INTEGER) < (existing.line ?? Number.MAX_SAFE_INTEGER)) {
@@ -266,25 +520,59 @@ export function mineBundleSource(source, options = {}) {
 
   if (ast) {
     ancestor(ast, {
+      VariableDeclaration(node) {
+        if (node.kind !== "const") {
+          return;
+        }
+        for (const declarator of node.declarations) {
+          if (declarator.id?.type !== "Identifier" || !declarator.init) continue;
+          const value = expressionValue(declarator.init, { constants });
+          if (value) constants.set(declarator.id.name, value);
+          if (declarator.init.type === "ObjectExpression") {
+            const mapped = objectLiteralMap(
+              declarator.init,
+              (child) => expressionValue(child, { constants }),
+            );
+            if (mapped) constants.set(declarator.id.name, Object.fromEntries(mapped));
+          }
+          if (declarator.init.type === "Identifier" && wrapperFunctionNames.has(declarator.init.name.toLowerCase())) {
+            aliases.add(declarator.id.name.toLowerCase());
+          }
+          if (declarator.init.type === "NewExpression" && memberName(declarator.init.callee)?.toLowerCase() === "xmlhttprequest") {
+            xhrAliases.add(declarator.id.name.toLowerCase());
+          }
+        }
+      },
+    });
+    ancestor(ast, {
       CallExpression(node) {
         const callee = memberName(node.callee);
         const lowerCallee = callee?.toLowerCase() ?? "";
         const directMethod = normalizeMethod(lowerCallee.split(".").at(-1));
         const isFetch = lowerCallee === "fetch" || lowerCallee.endsWith(".fetch");
+        const isXhrOpen = lowerCallee.endsWith(".open")
+          && xhrAliases.has(lowerCallee.split(".")[0]);
+        const isAliasCall = aliases.has(lowerCallee);
         const isHttpClientCall = directMethod && (
           lowerCallee.includes("axios")
           || lowerCallee.includes("http")
           || lowerCallee.includes("client")
           || lowerCallee.includes("request")
+          || aliases.has(lowerCallee.split(".")[0])
         );
-        const target = expressionValue(node.arguments[0]);
+        const targetArgument = isXhrOpen ? node.arguments[1] : node.arguments[0];
+        const target = expressionValue(targetArgument, { constants });
 
-        if (target && (isFetch || isHttpClientCall)) {
-          const methodDescriptor = methodDescriptorFromOptions(node.arguments[1]);
+        if (target && (isFetch || isAliasCall || isHttpClientCall || isXhrOpen)) {
+          const methodDescriptor = isXhrOpen
+            ? { found: true, method: normalizeMethod(expressionValue(node.arguments[0], { constants })?.candidate) }
+            : methodDescriptorFromOptions(node.arguments[1], { constants });
           addCandidate(target, {
-            discoveryKind: isFetch ? "fetch-call" : "http-client-call",
+            discoveryKind: isXhrOpen ? "xhr-open" : isFetch || isAliasCall ? "fetch-call" : "http-client-call",
             line: lineForNode(node),
-            method: isFetch
+            method: isXhrOpen
+              ? methodDescriptor.method
+              : isFetch || isAliasCall
               ? methodDescriptor.found
                 ? methodDescriptor.method
                 : "GET"
@@ -293,8 +581,12 @@ export function mineBundleSource(source, options = {}) {
           });
         }
       },
-      Literal(node) {
+      Literal(node, ancestors) {
         if (typeof node.value === "string") {
+          const parent = ancestors.at(-2);
+          if (parent?.type === "CallExpression" || parent?.type === "BinaryExpression") {
+            return;
+          }
           addCandidate(node.value, {
             discoveryKind: "string-literal",
             line: lineForNode(node),
@@ -307,13 +599,13 @@ export function mineBundleSource(source, options = {}) {
         if (!endpointPropertyNames.has(key)) {
           return;
         }
-        const value = expressionValue(node.value);
+        const value = expressionValue(node.value, { constants });
         if (!value) {
           return;
         }
         const parent = ancestors.at(-2);
         const parentMethod = parent?.type === "ObjectExpression"
-          ? methodFromOptions(parent)
+          ? methodFromOptions(parent, { constants })
           : null;
         addCandidate(value, {
           discoveryKind: "endpoint-property",
@@ -323,7 +615,7 @@ export function mineBundleSource(source, options = {}) {
         });
       },
       TemplateLiteral(node) {
-        const value = expressionValue(node);
+        const value = expressionValue(node, { constants });
         if (value) {
           addCandidate(value, {
             discoveryKind: "template-literal",

@@ -206,6 +206,14 @@ checkpoint, normalized URL, target/session/frame, and attempt context, so late
 event delivery does not change deduplication keys. Existing array artifact files
 remain readable by older consumers because the schema field is additive.
 
+The JavaScript analyzer adds bounded v2 metadata to `bundle-candidates.json`:
+`confidence`, `provenance`, `discoveryKind`, and (when applicable) `hostname`.
+`candidatePath` remains a normalized path for compatibility. Absolute URL hosts
+are retained separately for scope classification; no bundle code is executed.
+GraphQL entries include operation type/name and a persisted-query hash only when
+the hash is statically present. Parse failures are counted and preserved as
+diagnostics rather than treated as successful extraction.
+
 ## Swarm execution contract
 
 - One coordinator runs `plan`, assigns one portal and checked-in recipe per
