@@ -37,6 +37,10 @@ function sanitizeCandidate(candidate, { suppressed = false } = {}) {
   }
 
   return {
+    baseUrls: Array.isArray(candidate.baseUrls)
+      ? candidate.baseUrls.map((value) => String(value || "").trim()).filter(Boolean).sort()
+      : [],
+    confidenceScore: Number.isFinite(candidate.confidenceScore) ? candidate.confidenceScore : null,
     method: candidate.method ? String(candidate.method).toUpperCase() : null,
     normalizedPath,
     documentationStatus,
@@ -44,6 +48,12 @@ function sanitizeCandidate(candidate, { suppressed = false } = {}) {
     featureFamily: candidate.featureFamily
       ? String(candidate.featureFamily)
       : null,
+    provenance: Array.isArray(candidate.provenances)
+      ? candidate.provenances.map((value) => String(value || "").trim()).filter(Boolean).sort()
+      : [],
+    reasons: Array.isArray(candidate.reasons)
+      ? candidate.reasons.map((value) => String(value || "").trim()).filter(Boolean).sort()
+      : [],
     ...(suppressed
       ? { suppressionNote: candidate.suppressionNote ? String(candidate.suppressionNote) : null }
       : {}),

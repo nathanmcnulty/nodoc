@@ -538,8 +538,13 @@ function collectGraphqlOperations(data) {
       return;
     }
     const operation = {
+      confidence: Number.isFinite(value.confidence) ? value.confidence : null,
       name: value.name,
       operationType: value.operationType,
+      persistedQueryHash: typeof value.persistedQueryHash === "string"
+        ? value.persistedQueryHash.toLowerCase()
+        : null,
+      provenance: typeof value.provenance === "string" ? value.provenance : null,
       sourceFile:
         typeof value.sourceFile === "string" ? value.sourceFile : null,
     };
@@ -574,9 +579,15 @@ function collectBundleCandidateRecords(data, allowedPrefixes) {
     const method = normalizeMethod(record.method);
     const hostname = extractHostname(record.url) ?? extractHostname(value);
     candidates.set(`${hostname ?? "NO_HOST"} ${method ?? "ANY"} ${normalizedPath}`, {
+      baseUrl: typeof record.baseUrl === "string" ? record.baseUrl : null,
+      confidenceScore: Number.isFinite(record.confidence)
+        ? record.confidence
+        : Number.isFinite(record.confidenceScore) ? record.confidenceScore : null,
       hostname,
       method,
       normalizedPath,
+      provenance: typeof record.provenance === "string" ? record.provenance : null,
+      reason: typeof record.reason === "string" ? record.reason : null,
       sourceFile:
         typeof record.sourceFile === "string" && record.sourceFile.trim()
           ? record.sourceFile.trim()
@@ -774,7 +785,10 @@ async function collectBundleObservations(options) {
       ].filter(Boolean),
       featureFamily: deriveFeatureFamily(record.normalizedPath),
       hostname: record.hostname,
-      confidenceScore: confidenceForObservation("bundle-discovered", 0, 0),
+      confidenceScore: record.confidenceScore ?? confidenceForObservation("bundle-discovered", 0, 0),
+      baseUrl: record.baseUrl ?? null,
+      provenance: record.provenance ?? null,
+      reason: record.reason ?? null,
     });
   }
 
@@ -1052,6 +1066,9 @@ function aggregateCandidates(
         safeMethodToTest: safeMethodToTest(observation.method),
         seenOnPages: new Set(observation.seenOnPages),
         sourceArtifacts: new Set(observation.sourceArtifacts),
+        ...(observation.baseUrl ? { baseUrls: new Set([observation.baseUrl]) } : {}),
+        ...(observation.provenance ? { provenances: new Set([observation.provenance]) } : {}),
+        ...(observation.reason ? { reasons: new Set([observation.reason]) } : {}),
         ...(scopeReviewContext
           ? {
               hostFamily: scopeReviewContext.hostFamily,
@@ -1082,6 +1099,18 @@ function aggregateCandidates(
       for (const sourceArtifact of observation.sourceArtifacts) {
         candidate.sourceArtifacts.add(sourceArtifact);
       }
+      if (observation.baseUrl) {
+        candidate.baseUrls ??= new Set();
+        candidate.baseUrls.add(observation.baseUrl);
+      }
+      if (observation.provenance) {
+        candidate.provenances ??= new Set();
+        candidate.provenances.add(observation.provenance);
+      }
+      if (observation.reason) {
+        candidate.reasons ??= new Set();
+        candidate.reasons.add(observation.reason);
+      }
       if (scopeReviewContext) {
         for (const matchingSpecId of scopeReviewContext.matchingSpecIds) {
           candidate.matchingSpecIds.add(matchingSpecId);
@@ -1099,6 +1128,9 @@ function aggregateCandidates(
       requiredInputs: Array.from(candidate.requiredInputs).sort((left, right) => left.localeCompare(right)),
       seenOnPages: Array.from(candidate.seenOnPages).sort((left, right) => left.localeCompare(right)),
       sourceArtifacts: Array.from(candidate.sourceArtifacts).sort((left, right) => left.localeCompare(right)),
+      baseUrls: Array.from(candidate.baseUrls ?? []).sort((left, right) => left.localeCompare(right)),
+      provenances: Array.from(candidate.provenances ?? []).sort((left, right) => left.localeCompare(right)),
+      reasons: Array.from(candidate.reasons ?? []).sort((left, right) => left.localeCompare(right)),
       ...(scopeReview
         ? {
             matchingSpecIds: Array.from(candidate.matchingSpecIds)

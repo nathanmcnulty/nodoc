@@ -27,6 +27,7 @@ const confidence = {
   parseFallback: 0.4,
 };
 const maxExpressionDepth = 6;
+const maxGraphqlOperations = 100;
 
 function uniqueSorted(values) {
   return Array.from(new Set(values)).sort((left, right) => left.localeCompare(right));
@@ -79,6 +80,10 @@ function propertyName(node) {
   if (node.type === "Identifier") {
     return node.name;
   }
+
+  if (node.type === "NewExpression" && memberName(node.callee) === "XMLHttpRequest") {
+    return evaluated("", confidence.exact, "xml-http-request-instance");
+  }
   if (node.type === "Literal") {
     return String(node.value);
   }
@@ -123,6 +128,9 @@ function expressionValue(node, context, depth = 0) {
   }
 
   if (node.type === "Identifier") {
+    if (context.reassigned?.has(node.name)) {
+      return null;
+    }
     const value = context.constants.get(node.name);
     return value
       ? {
@@ -154,6 +162,16 @@ function expressionValue(node, context, depth = 0) {
         || (property.computed && property.key.type !== "Literal")
       ) {
         continue;
+      }
+
+      if (node.type === "ArrayExpression") {
+        const values = node.elements.map((element) => expressionValue(element, context, depth + 1));
+        if (values.some((value) => !value)) {
+          return null;
+        }
+        return evaluated(values.map((value) => value.text).join(","), confidence.inferred, "array-literal", {
+          values,
+        });
       }
       const key = propertyName(property.key);
       const value = expressionValue(property.value, context, depth + 1);
@@ -297,14 +315,23 @@ function collectStaticContext(ast) {
     clientBases: new Map(),
     constants: new Map(),
     xhrInstances: new Set(),
+    reassigned: new Set(),
   };
   const declarations = [];
 
   ancestor(ast, {
     VariableDeclarator(node, ancestors) {
       const declaration = ancestors.at(-2);
+      if (node.id.type === "Identifier" && declaration?.type === "VariableDeclaration" && declaration.kind !== "const") {
+        context.reassigned.add(node.id.name);
+      }
       if (declaration?.type === "VariableDeclaration" && declaration.kind === "const") {
         declarations.push(node);
+      }
+    },
+    AssignmentExpression(node) {
+      if (node.left.type === "Identifier") {
+        context.reassigned.add(node.left.name);
       }
     },
   });
@@ -316,6 +343,9 @@ function collectStaticContext(ast) {
         continue;
       }
       const name = declaration.id.name;
+      if (declaration.init.type === "Identifier" && declaration.init.name === name) {
+        context.reassigned.add(name);
+      }
       const value = expressionValue(declaration.init, context);
       if (value && !context.constants.has(name)) {
         context.constants.set(name, value);
@@ -323,6 +353,12 @@ function collectStaticContext(ast) {
       }
 
       const directAlias = memberName(declaration.init);
+      if (declaration.init.type === "Identifier") {
+        const resolved = context.aliases.get(declaration.init.name) ?? declaration.init.name;
+        if (wrapperNames.has(resolved.split(".")[0].toLowerCase()) || resolved === "fetch") {
+          context.aliases.set(name, resolved);
+        }
+      }
       if (directAlias) {
         const root = directAlias.split(".")[0];
         const resolved = context.aliases.get(root) ?? directAlias;
@@ -414,6 +450,17 @@ function extractCandidatePaths(value, prefixes) {
   for (const prefix of prefixes) {
     let index = source.indexOf(prefix);
     while (index >= 0) {
+      if (/^https?:\/\//iu.test(source)) {
+        const cleaned = cleanCandidatePath(source);
+        if (cleaned && prefixes.some((prefix) => cleaned.candidatePath.startsWith(prefix))) {
+          paths.add(JSON.stringify({
+            ...cleaned,
+            baseUrl: cleaned.baseUrl ?? value?.baseUrl ?? null,
+            hostname: cleaned.hostname ?? value?.hostname ?? null,
+          }));
+        }
+        break;
+      }
       const fragment = source.slice(index).split(/[\s<>"'`\\|]/u, 1)[0];
       const cleaned = cleanCandidatePath(fragment);
       if (cleaned) {
@@ -423,6 +470,7 @@ function extractCandidatePaths(value, prefixes) {
           hostname: cleaned.hostname ?? value?.hostname ?? null,
         }));
       }
+
       index = source.indexOf(prefix, index + prefix.length);
     }
   }
@@ -437,12 +485,13 @@ function normalizeMethod(value) {
 
 function parseGraphqlOperations(source, ast, context) {
   const operations = new Map();
-  const matcher = /\b(query|mutation|subscription)\s+([A-Za-z_][A-Za-z0-9_]*)\b/gu;
+  const matcher = /\b(query|mutation|subscription)\s+([A-Za-z_][A-Za-z0-9_]*)\s*(?=\{)/gu;
   for (const match of source.matchAll(matcher)) {
-    const key = `${match[1]} ${match[2]}`;
+    const name = match[2];
+    const key = `${match[1]} ${name}`;
     operations.set(key, {
       confidence: confidence.exact,
-      name: match[2],
+      name,
       operationType: match[1],
       provenance: "graphql-document",
     });
@@ -455,20 +504,38 @@ function parseGraphqlOperations(source, ast, context) {
           ?? object?.properties?.get("name")?.text;
         const persistedQueryHash = object?.properties?.get("sha256Hash")?.text
           ?? object?.properties?.get("persistedQueryHash")?.text;
-        if (!operationName || !/^[a-f0-9]{32,128}$/iu.test(persistedQueryHash ?? "")) {
+        if (!operationName && !persistedQueryHash) {
           return;
         }
-        for (const operation of operations.values()) {
-          if (operation.name === operationName) {
+        if (persistedQueryHash && !/^[a-f0-9]{32,128}$/iu.test(persistedQueryHash)) {
+          return;
+        }
+        const matches = Array.from(operations.values()).filter((operation) => (
+          !operationName || operation.name === operationName
+        ));
+        if (matches.length === 0 && operationName) {
+          operations.set(`query ${operationName}`, {
+            confidence: confidence.inferred,
+            name: operationName,
+            operationType: "query",
+            provenance: "graphql-persisted-query-object",
+            ...(persistedQueryHash ? { persistedQueryHash: persistedQueryHash.toLowerCase() } : {}),
+          });
+          return;
+        }
+        for (const operation of matches) {
+          if (persistedQueryHash) {
             operation.persistedQueryHash = persistedQueryHash.toLowerCase();
-            operation.provenance = `${operation.provenance}+persisted-query-object`;
           }
+          operation.confidence = Math.min(operation.confidence, confidence.inferred);
+          operation.provenance = `${operation.provenance}+persisted-query-object`;
         }
       },
     });
   }
-  return Array.from(operations.values()).sort((left, right) =>
-    `${left.operationType} ${left.name}`.localeCompare(`${right.operationType} ${right.name}`));
+  return Array.from(operations.values()).slice(0, maxGraphqlOperations).sort((left, right) =>
+    `${left.operationType} ${left.name ?? ""} ${left.persistedQueryHash ?? ""}`
+      .localeCompare(`${right.operationType} ${right.name ?? ""} ${right.persistedQueryHash ?? ""}`));
 }
 
 function parseSourceMapUrls(source) {
@@ -494,18 +561,20 @@ export function mineBundleSource(source, options = {}) {
     for (const extracted of extractCandidatePaths(value, prefixes)) {
       const method = normalizeMethod(details.method);
       const occurrenceId = details.occurrenceId ?? `line:${details.line ?? "unknown"}`;
-      const key = `${method ?? "ANY"} ${extracted.hostname ?? "NO_HOST"} ${extracted.candidatePath} ${occurrenceId}`;
+      const discoveryKind = details.discoveryKind ?? "string-literal";
+      const key = `${method ?? "ANY"} ${extracted.hostname ?? "NO_HOST"} ${extracted.candidatePath} ${discoveryKind === "fetch-call" ? occurrenceId : "shared"}`;
       const existing = candidates.get(key);
       const candidate = {
         baseUrl: extracted.baseUrl,
         candidatePath: extracted.candidatePath,
         confidence: details.confidence ?? value?.confidence ?? confidence.fallback,
-        discoveryKind: details.discoveryKind ?? "string-literal",
+        discoveryKind,
         hostname: extracted.hostname,
         line: details.line ?? null,
         method,
         occurrenceId,
         provenance: details.provenance ?? value?.provenance ?? "literal-scan",
+        reason: details.reason ?? value?.reason ?? null,
         sourceFile,
       };
       if (!existing || (candidate.line ?? Number.MAX_SAFE_INTEGER) < (existing.line ?? Number.MAX_SAFE_INTEGER)) {
@@ -519,6 +588,7 @@ export function mineBundleSource(source, options = {}) {
     clientBases: new Map(),
     constants: new Map(),
     xhrInstances: new Set(),
+    reassigned: new Set(),
   };
   let ast = null;
   try {
@@ -552,15 +622,18 @@ export function mineBundleSource(source, options = {}) {
         const lowerCallee = callee?.toLowerCase() ?? "";
         const rootName = lowerCallee.split(".")[0];
         const resolvedRoot = context.aliases.get(rootName)?.toLowerCase() ?? rootName;
+        const resolvedRootName = resolvedRoot.split(".")[0];
         const directMethod = normalizeMethod(lowerCallee.split(".").at(-1));
-        const isFetch = lowerCallee === "fetch" || lowerCallee.endsWith(".fetch");
+        const isFetch = lowerCallee === "fetch"
+          || lowerCallee.endsWith(".fetch")
+          || (lowerCallee.split(".").length === 1 && resolvedRoot === "fetch");
         const isHttpClientCall = directMethod && (
-          wrapperNames.has(resolvedRoot)
+          wrapperNames.has(resolvedRootName)
           || wrapperNames.has(rootName)
         );
         const isRequestWrapper = (
           lowerCallee.split(".").length === 1
-          && ["axios", "http", "request"].includes(resolvedRoot)
+          && ["axios", "http", "request"].includes(resolvedRootName)
         );
         const isXhrOpen = lowerCallee.endsWith(".open")
           && context.xhrInstances.has(rootName);
@@ -575,7 +648,7 @@ export function mineBundleSource(source, options = {}) {
           method = methodDescriptor.found
             ? methodDescriptor.method
             : isFetch
-              ? "GET"
+              ? node.arguments.length === 1 ? "GET" : null
               : null;
         }
 
@@ -590,7 +663,8 @@ export function mineBundleSource(source, options = {}) {
           );
         }
 
-        const clientBase = context.clientBases.get(rootName);
+        const clientBase = context.clientBases.get(rootName)
+          ?? context.clientBases.get(resolvedRootName);
         if (target?.text && clientBase?.text && !/^https?:\/\//iu.test(target.text)) {
           try {
             const url = new URL(target.text, clientBase.text);
@@ -602,6 +676,13 @@ export function mineBundleSource(source, options = {}) {
             };
           } catch {
             // Invalid static base URLs are ignored rather than guessed.
+          }
+
+          if (target?.text && /^https?:\/\//iu.test(target.text)) {
+            const absolute = cleanCandidatePath(target.text);
+            if (absolute) {
+              target = { ...target, ...absolute };
+            }
           }
         }
 
@@ -618,14 +699,25 @@ export function mineBundleSource(source, options = {}) {
           });
         }
       },
-      Literal(node) {
+      Literal(node, ancestors) {
         if (typeof node.value === "string") {
+          const parent = ancestors.at(-2);
+          if (
+            parent?.type === "AssignmentExpression"
+            && parent.left.type === "Identifier"
+            && context.reassigned.has(parent.left.name)
+            || parent?.type === "VariableDeclarator"
+            && context.reassigned.has(parent.id.name)
+          ) {
+            return;
+          }
           addCandidate(node.value, {
             confidence: confidence.exact,
             discoveryKind: "string-literal",
             line: lineForNode(node),
             occurrenceId: `${node.start}:${node.end}`,
             provenance: "literal",
+            reason: "static-string-match",
           });
         }
       },
@@ -673,6 +765,7 @@ export function mineBundleSource(source, options = {}) {
           confidence: confidence.parseFallback,
           discoveryKind: "parse-fallback",
           provenance: "parse-fallback",
+          reason: "parser-rejected-source; regex-only bounded fallback",
         });
       }
     }
@@ -681,20 +774,66 @@ export function mineBundleSource(source, options = {}) {
   const methodSpecificPaths = new Set(
     Array.from(candidates.values())
       .filter((candidate) => candidate.method)
-      .map((candidate) => `${candidate.candidatePath}:${candidate.occurrenceId}`),
+      .filter((candidate) => candidate.discoveryKind !== "fetch-call" && candidate.discoveryKind !== "http-client-call")
+      .map((candidate) => candidate.candidatePath),
   );
 
   const filteredCandidates = Array.from(candidates.values())
       .filter((candidate) => (
         candidate.method
-        || !methodSpecificPaths.has(`${candidate.candidatePath}:${candidate.occurrenceId}`)
+        || !['string-literal', 'template-literal', 'endpoint-property'].includes(candidate.discoveryKind)
+        || !methodSpecificPaths.has(candidate.candidatePath)
       ));
+  const methodSpecificCandidateKeys = new Set(
+    filteredCandidates
+      .filter((candidate) => candidate.method)
+      .map((candidate) => `${candidate.hostname ?? "NO_HOST"} ${candidate.candidatePath} ${candidate.line}`),
+  );
+  const filteredByMethod = filteredCandidates.filter((candidate) => (
+    candidate.method
+    || candidate.discoveryKind !== "fetch-call"
+    || !methodSpecificCandidateKeys.has(`${candidate.hostname ?? "NO_HOST"} ${candidate.candidatePath} ${candidate.line}`)
+  ));
+  const nonSpecificByPath = new Map();
+  for (const candidate of filteredByMethod) {
+    if (!candidate.method) {
+      nonSpecificByPath.set(candidate.candidatePath, candidate);
+    }
+  }
   const deduplicatedCandidates = new Map();
-  for (const candidate of filteredCandidates) {
+  for (const candidate of filteredByMethod) {
     const key = `${candidate.method ?? "ANY"} ${candidate.hostname ?? "NO_HOST"} ${candidate.candidatePath}`;
     const existing = deduplicatedCandidates.get(key);
     if (!existing || (candidate.line ?? Number.MAX_SAFE_INTEGER) < (existing.line ?? Number.MAX_SAFE_INTEGER)) {
       deduplicatedCandidates.set(key, candidate);
+    }
+  }
+  const fetchCallPathCounts = new Map();
+  for (const candidate of candidates.values()) {
+    if (candidate.discoveryKind === "fetch-call") {
+      fetchCallPathCounts.set(candidate.candidatePath, (fetchCallPathCounts.get(candidate.candidatePath) ?? 0) + 1);
+    }
+  }
+  for (const candidate of candidates.values()) {
+    if (!candidate.method && candidate.discoveryKind === "fetch-call" && (fetchCallPathCounts.get(candidate.candidatePath) ?? 0) > 1) {
+      deduplicatedCandidates.set(`ANY ${candidate.hostname ?? "NO_HOST"} ${candidate.candidatePath}`, candidate);
+    }
+  }
+  for (const candidate of Array.from(deduplicatedCandidates.values())) {
+    if (candidate.method) {
+      const ambiguous = deduplicatedCandidates.get(`ANY ${candidate.hostname ?? "NO_HOST"} ${candidate.candidatePath}`);
+      if (ambiguous && ambiguous.line === candidate.line && ambiguous.discoveryKind !== "fetch-call") {
+        deduplicatedCandidates.delete(`ANY ${candidate.hostname ?? "NO_HOST"} ${candidate.candidatePath}`);
+      }
+    }
+  }
+  for (const candidate of Array.from(deduplicatedCandidates.values())) {
+    if (candidate.method) {
+      const ambiguousKey = `ANY ${candidate.hostname ?? "NO_HOST"} ${candidate.candidatePath}`;
+      const ambiguous = deduplicatedCandidates.get(ambiguousKey);
+      if (ambiguous && ambiguous.discoveryKind !== "fetch-call") {
+        deduplicatedCandidates.delete(ambiguousKey);
+      }
     }
   }
 
@@ -703,8 +842,8 @@ export function mineBundleSource(source, options = {}) {
     candidates: Array.from(deduplicatedCandidates.values())
       .map(({ occurrenceId: _occurrenceId, ...candidate }) => candidate)
       .sort((left, right) =>
-      `${left.candidatePath} ${left.method ?? ""}`.localeCompare(
-        `${right.candidatePath} ${right.method ?? ""}`,
+      `${left.candidatePath} ${left.method ?? ""} ${left.hostname ?? ""}`.localeCompare(
+        `${right.candidatePath} ${right.method ?? ""} ${right.hostname ?? ""}`,
       )),
     graphqlOperations: parseGraphqlOperations(source, ast, context).map((operation) => ({
       ...operation,
@@ -748,8 +887,12 @@ export async function mineJavascriptBundles(options) {
   return {
     analyzerVersion,
     bundleCount: results.length,
-    candidates: Array.from(candidateMap.values()),
-    graphqlOperations: Array.from(graphqlMap.values()),
+    candidates: Array.from(candidateMap.values()).sort((left, right) =>
+      `${left.hostname ?? ""} ${left.candidatePath} ${left.method ?? ""} ${left.sourceFile}`
+        .localeCompare(`${right.hostname ?? ""} ${right.candidatePath} ${right.method ?? ""} ${right.sourceFile}`)),
+    graphqlOperations: Array.from(graphqlMap.values()).sort((left, right) =>
+      `${left.operationType} ${left.name ?? ""} ${left.sourceFile}`
+        .localeCompare(`${right.operationType} ${right.name ?? ""} ${right.sourceFile}`)),
     parseFailures: results
       .filter((result) => result.parseError)
       .map((result) => ({
