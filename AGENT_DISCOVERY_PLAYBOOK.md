@@ -235,6 +235,15 @@ turn the discovery run into a secondary pipeline-failed transition error.
   not produce canonical interaction health, and must not be retried in place.
 - Pass promotion workers only assigned handoff entries and the relevant spec
   family, not the full capture corpus.
+- For offline scheduling, pass `--grouped-handoff <directory>` to preserve the
+  monolithic handoff while emitting a schema-versioned `manifest.json`, shared
+  metadata, and deterministic partitions keyed by destination spec, host
+  family, and review class. Assign one worker per manifest partition. Adjacent
+  partitions are explicitly blocked for spec/host assignment and are never
+  promotion groups. Reassemble candidate IDs exactly once and verify each
+  partition digest and byte count before accepting worker output. Model and
+  reasoning values are scheduling recommendations, not live ledger mutations;
+  byte counts are a deterministic payload proxy, not tokenizer measurements.
 - Review diffs and machine-generated counts before reading raw evidence.
 - If a worker returns no response, recover from its immutable outputs before
   spending tokens on a second capture.

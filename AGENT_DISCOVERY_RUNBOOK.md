@@ -232,6 +232,19 @@ healthy completed capture may be analyzed again without reopening the browser.
    - `bundle-candidates.json`
    - `stream-records.json`
 
+### Optional grouped worker handoff
+
+The compatibility monolithic `candidate-handoff.json` is emitted by default.
+For offline scheduling, pass `--grouped-handoff <fresh-directory>` to `all` or
+`analyze`. The directory contains `manifest.json`, `shared-metadata.json`, and
+one deterministic partition file per destination spec/host family/review class.
+Adjacent partitions are never promotion-active: they carry an explicit
+assignment blocker. Workers must use the manifest's model/reasoning policy and
+blockers, then reassemble candidate IDs exactly once before review. Partition
+digests and byte counts are manifest metadata; mutation invalidates the stated
+digest. The grouped output contains only normalized, tenant-safe fields and is
+an additive derivative of the monolithic handoff.
+
 7. Consult `page-states.json`, `action-results.json`, or raw request artifacts
    only when the structured outputs do not explain a candidate or blocker, and
    escalate that inspection to a trusted review worker.
