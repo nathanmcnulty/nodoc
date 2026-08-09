@@ -425,27 +425,29 @@ async function prepareLedgerAttempt(args, specRecord, recipePath) {
     return null;
   }
   const digest = await recipeDigest(recipePath);
-  const assignmentId = args.assignmentId
-    || `${specRecord.specId}-${createHash("sha256")
+  const assignmentId = args.assignmentId || `${specRecord.specId}-${createHash("sha256")
       .update(`${specRecord.specId}|${args.endpoint}|${digest}|${args.phase}|${args.priority}`)
       .digest("hex")
       .slice(0, 16)}`;
-  await enqueueAssignment({
-    ledgerPath: args.ledgerPath,
-    assignmentId,
-    specId: specRecord.specId,
-    portal: specRecord.title,
-    recipePath,
-    recipeDigest: digest,
-    endpoint: args.endpoint,
-    profile: args.profile,
-    phase: args.phase,
-    priority: args.priority,
-    artifactDir: args.artifacts,
-    model: args.model,
-    reasoning: args.reasoning,
-    workerId: args.workerId,
-  });
+  if (!args.assignmentId) {
+    await enqueueAssignment({
+      ledgerPath: args.ledgerPath,
+      assignmentId,
+      specId: specRecord.specId,
+      portal: specRecord.title,
+      recipePath,
+      recipeDigest: digest,
+      endpoint: args.endpoint,
+      profile: args.profile,
+      phase: args.phase,
+      priority: args.priority,
+      artifactDir: args.artifacts,
+      model: args.model,
+      reasoning: args.reasoning,
+      workerId: args.workerId,
+    });
+  }
+  args.assignmentId = assignmentId;
   const claimed = await claimAssignment({
     ledgerPath: args.ledgerPath,
     assignmentId,
@@ -460,7 +462,6 @@ async function prepareLedgerAttempt(args, specRecord, recipePath) {
       `Ledger assignment ${assignmentId} is unavailable because its endpoint/profile lease is held or its state conflicts.`,
     );
   }
-  args.assignmentId = assignmentId;
   args.attemptNumber = claimed.assignment.latestAttempt.attemptNumber;
   return claimed.assignment;
 }

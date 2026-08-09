@@ -10,6 +10,7 @@ import {
   getEffectiveServerUrls,
   getScopeServerUrls,
 } from "../spec-quality-lib.mjs";
+import { enqueueAssignment } from "../portal-discovery-ledger.mjs";
 
 const execFileAsync = promisify(execFile);
 const repoRoot = path.resolve(import.meta.dirname, "..", "..");
@@ -87,6 +88,40 @@ test("legacy analysis remains explicitly opt-out from ledger dispatch", async (t
     const { runState } = await runAnalyze("m365-admin", artifactDir, {
       noLedger: true,
       seedPageStates: true,
+    });
+
+    test("precreated assignment is claimed without duplicate enqueue", async () => {
+      const artifactDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-ledger-precreated-"));
+      const ledgerPath = path.join(artifactDir, "ledger.jsonl");
+      const analysisDir = path.join(artifactDir, "analysis");
+      await mkdir(analysisDir);
+      const assignmentId = "precreated-m365-admin";
+      try {
+        await enqueueAssignment({
+          ledgerPath,
+          assignmentId,
+          specId: "m365-admin",
+          portal: "M365 Admin",
+          recipePath: path.join(repoRoot, "tools", "capture-recipes", "m365-admin-deep.json"),
+          recipeDigest: "a".repeat(64),
+          endpoint: "https://admin.cloud.microsoft",
+          profile: "bounded",
+          phase: "analyze",
+          artifactDir: analysisDir,
+        });
+        const { runState } = await runAnalyze("m365-admin", analysisDir, {
+          ledgerPath,
+          assignmentId,
+          endpoint: "https://admin.cloud.microsoft",
+          seedPageStates: true,
+        });
+        const records = (await readFile(ledgerPath, "utf8")).trim().split("\n");
+        assert.equal(records.filter((line) => line.includes('"eventType":"assignment-created"')).length, 1);
+        assert.equal(runState.ledger.assignmentId, assignmentId);
+        assert.equal(runState.ledger.attemptNumber, 1);
+      } finally {
+        await rm(artifactDir, { force: true, recursive: true });
+      }
     });
     assert.deepEqual(runState.ledger, { mode: "legacy-no-ledger" });
   } finally {
