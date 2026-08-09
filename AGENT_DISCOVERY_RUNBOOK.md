@@ -256,6 +256,28 @@ digests and byte counts are manifest metadata; mutation invalidates the stated
 digest. The grouped output contains only normalized, tenant-safe fields and is
 an additive derivative of the monolithic handoff.
 
+### Optional derivative-family deduplication
+
+Offline schedulers may opt in to `tools/discovery-derivative-families.mjs` after
+grouped handoff validation. It emits a schema-versioned, SHA-256 content-addressed
+family index from normalized method, host family, route/query shape, response-shape
+fingerprint, GraphQL metadata, review class, and safety/scope flags. Tenant IDs,
+raw URLs/values, auth, paths, timestamps, and run-local IDs are excluded from keys.
+The index preserves every candidate and evidence reference and is therefore a
+review-input compaction derivative, never an evidence replacement. Stable ordering,
+digests, and Windows-safe temporary-file rename persistence make updates atomic and
+idempotent. Missing indexes are misses; corrupt or incompatible indexes are misses
+unless the safety context requires a blocker.
+
+Reuse is only a recommendation: prior approved families must match destination,
+host ownership, safety class, capture/health fingerprint, analyzer/schema versions,
+and required provenance. Changed shape, adjacent or ambiguous scope, incomplete
+health/capture, blocked work, and version/provenance mismatches remain review work
+with explicit reason codes; no assignment is silently skipped. The deterministic
+measurement reports baseline and compacted serialized bytes, unique/repeated family
+counts, eligible reuse recommendations, maximum worker payload, and preserved
+candidate/evidence cardinality. It makes no token, CPU, latency, or quality claim.
+
 7. Consult `page-states.json`, `action-results.json`, or raw request artifacts
    only when the structured outputs do not explain a candidate or blocker, and
    escalate that inspection to a trusted review worker.
