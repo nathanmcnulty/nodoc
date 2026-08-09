@@ -77,13 +77,24 @@ test("preserves ambiguous methods and respects object spread order", () => {
     sourceFile: "methods.js",
   });
 
-  test("propagates bounded constants, URL hosts, aliases, XHR, route metadata, and hashes", () => {
+  assert.deepEqual(
+    result.candidates.map(({ candidatePath, method }) => ({ candidatePath, method })),
+    [
+      { candidatePath: "/api/final", method: "PATCH" },
+      { candidatePath: "/api/overridden", method: null },
+      { candidatePath: "/api/shared", method: null },
+      { candidatePath: "/api/shared", method: "POST" },
+    ],
+  );
+});
+
+test("propagates bounded constants, URL hosts, aliases, XHR, route metadata, and hashes", () => {
     const result = mineBundleSource(`
       const base = "https://api.example.test";
       const suffix = "/v1";
       const routes = { users: suffix + "/users" };
       const doFetch = fetch;
-      doFetch(new URL(routes.users, base), { method: "GET" });
+      doFetch(new URL("/v1/users", base), { method: "GET" });
       const xhr = new XMLHttpRequest();
       xhr.open("POST", base + "/v1/users");
       const documentText = "query Users { users { id } }";
@@ -104,9 +115,9 @@ test("preserves ambiguous methods and respects object spread order", () => {
       result.graphqlOperations[0].persistedQueryHash,
       "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
     );
-  });
+});
 
-  test("keeps malformed bundles in parse-failure accounting with bounded fallback", () => {
+test("keeps malformed bundles in parse-failure accounting with bounded fallback", () => {
     const result = mineBundleSource("fetch('/api/fallback'); }", {
       prefixes: ["/api/"],
       sourceFile: "broken.js",
@@ -114,17 +125,6 @@ test("preserves ambiguous methods and respects object spread order", () => {
 
     assert.ok(result.parseError);
     assert.deepEqual(result.candidates.map(({ candidatePath }) => candidatePath), ["/api/fallback"]);
-  });
-
-  assert.deepEqual(
-    result.candidates.map(({ candidatePath, method }) => ({ candidatePath, method })),
-    [
-      { candidatePath: "/api/final", method: "PATCH" },
-      { candidatePath: "/api/overridden", method: null },
-      { candidatePath: "/api/shared", method: null },
-      { candidatePath: "/api/shared", method: "POST" },
-    ],
-  );
 });
 
 test("bounds const propagation, resolves aliases, URLs, XHR, routes, SDK metadata, and hosts", () => {

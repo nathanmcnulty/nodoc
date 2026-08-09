@@ -621,7 +621,9 @@ export function mineBundleSource(source, options = {}) {
         const callee = memberName(node.callee);
         const lowerCallee = callee?.toLowerCase() ?? "";
         const rootName = lowerCallee.split(".")[0];
-        const resolvedRoot = context.aliases.get(rootName)?.toLowerCase() ?? rootName;
+        const resolvedRoot = context.aliases.get(rootName)
+          ?? context.aliases.get(callee?.split(".")[0])
+          ?? rootName;
         const resolvedRootName = resolvedRoot.split(".")[0];
         const directMethod = normalizeMethod(lowerCallee.split(".").at(-1));
         const isFetch = lowerCallee === "fetch"
@@ -774,7 +776,7 @@ export function mineBundleSource(source, options = {}) {
   const methodSpecificPaths = new Set(
     Array.from(candidates.values())
       .filter((candidate) => candidate.method)
-      .filter((candidate) => candidate.discoveryKind !== "fetch-call" && candidate.discoveryKind !== "http-client-call")
+      .filter((candidate) => !["fetch-call", "http-client-call"].includes(candidate.discoveryKind))
       .map((candidate) => candidate.candidatePath),
   );
 
@@ -812,6 +814,13 @@ export function mineBundleSource(source, options = {}) {
   for (const candidate of candidates.values()) {
     if (candidate.discoveryKind === "fetch-call") {
       fetchCallPathCounts.set(candidate.candidatePath, (fetchCallPathCounts.get(candidate.candidatePath) ?? 0) + 1);
+    }
+    const ambiguousCandidates = Array.from(deduplicatedCandidates.values())
+      .filter((candidate) => !candidate.method && candidate.discoveryKind === "fetch-call");
+    for (const candidate of ambiguousCandidates) {
+      if ((fetchCallPathCounts.get(candidate.candidatePath) ?? 0) > 1) {
+        deduplicatedCandidates.set(`ANY ${candidate.hostname ?? "NO_HOST"} ${candidate.candidatePath}`, candidate);
+      }
     }
   }
   for (const candidate of candidates.values()) {
