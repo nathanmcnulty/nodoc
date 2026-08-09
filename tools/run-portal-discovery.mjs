@@ -268,6 +268,36 @@ async function writeRunState(artifactDir, payload) {
   );
 }
 
+async function readInteractionHealth(artifactDir) {
+  let summary;
+  try {
+    summary = JSON.parse(await readFile(path.join(artifactDir, "summary.json"), "utf8"));
+  } catch (error) {
+    if (error?.code === "ENOENT") {
+      return null;
+    }
+    throw error;
+  }
+
+  let actionResults;
+  try {
+    actionResults = JSON.parse(await readFile(path.join(artifactDir, "action-results.json"), "utf8"));
+  } catch (error) {
+    if (error?.code === "ENOENT") {
+      return sanitizeInteractionHealth(
+        summary.interactionHealth ?? summary.actionValidation?.interactionHealth,
+      );
+    }
+    throw error;
+  }
+
+  const reportedInteractionHealth =
+    summary.interactionHealth ?? summary.actionValidation?.interactionHealth;
+  return sanitizeInteractionHealth(aggregateInteractionHealth(actionResults, {
+    reported: reportedInteractionHealth?.counts,
+  }));
+}
+
 async function findExistingCaptureArtifacts(artifactDir) {
   try {
     return (await readdir(artifactDir))
@@ -428,15 +458,7 @@ async function main() {
       const captureSummary = JSON.parse(
         await readFile(path.join(args.artifacts, "summary.json"), "utf8"),
       );
-      const actionResults = JSON.parse(
-        await readFile(path.join(args.artifacts, "action-results.json"), "utf8"),
-      );
-      const reportedInteractionHealth =
-        captureSummary.interactionHealth ?? captureSummary.actionValidation?.interactionHealth;
-      const recomputedInteractionHealth = aggregateInteractionHealth(actionResults, {
-        reported: reportedInteractionHealth?.counts,
-      });
-      interactionHealth = sanitizeInteractionHealth(recomputedInteractionHealth);
+      interactionHealth = await readInteractionHealth(args.artifacts);
       runState.interactionHealth = interactionHealth;
       const authenticationBarrier = await detectAuthenticationBarrier(
         args.artifacts,
@@ -484,6 +506,25 @@ async function main() {
         console.error(JSON.stringify(runState, null, 2));
         return;
       }
+    }
+
+    if (args.phase === "analyze" && !interactionHealth) {
+      interactionHealth = await readInteractionHealth(args.artifacts);
+      runState.interactionHealth = interactionHealth;
+    }
+    if (args.phase === "analyze" && interactionHealth?.accounting?.consistent === false) {
+      runState.status = "blocked";
+      runState.blocker = {
+        code: "interaction-health-accounting-inconsistent",
+        detail: "The canonical interaction-health accounting contains an inconsistency.",
+        inconsistency: interactionHealth.accounting.inconsistency,
+        remediation:
+          "Regenerate the summary from the immutable action-results artifact and resolve the accounting mismatch before continuing.",
+      };
+      await writeRunState(args.artifacts, runState);
+      process.exitCode = 2;
+      console.error(JSON.stringify(runState, null, 2));
+      return;
     }
 
     if (["all", "analyze"].includes(args.phase)) {

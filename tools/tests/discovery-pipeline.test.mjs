@@ -579,6 +579,36 @@ test("no-candidate analysis uses an appropriate portal metadata fallback", async
   }
 });
 
+test("analyze carries canonical interaction health into handoff and run state", async () => {
+  const artifactDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-interaction-health-handoff-"));
+
+  try {
+    await Promise.all([
+      writeJson(path.join(artifactDir, "api-records.json"), []),
+      writeJson(path.join(artifactDir, "summary.json"), {}),
+      writeJson(path.join(artifactDir, "action-results.json"), [{
+        result: {
+          clicked: false,
+          eligibility: {
+            candidateCount: 0,
+            status: "absent-not-applicable",
+          },
+        },
+        type: "click-label",
+        value: "Feature gated",
+      }]),
+    ]);
+
+    const { candidateHandoff, runState } = await runAnalyze("entra-b2c", artifactDir);
+    assert.equal(candidateHandoff.interactionHealth.counts.attempted, 1);
+    assert.equal(candidateHandoff.interactionHealth.counts.absentNotApplicable, 1);
+    assert.equal(candidateHandoff.interactionHealth.recommendation.recommended, false);
+    assert.deepEqual(runState.interactionHealth, candidateHandoff.interactionHealth);
+  } finally {
+    await rm(artifactDir, { force: true, recursive: true });
+  }
+});
+
 test("mined methods flow into the crawl candidate queue", async () => {
   const artifactDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-discovery-"));
   try {
