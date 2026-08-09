@@ -1,5 +1,13 @@
 # Portal discovery agent prompt
 
+Workers receive one schema-versioned assignment from the offline controller. The
+worker must return the assignment ID and digest, assignment type, terminal status,
+decision, reason codes, blockers, metrics, exact candidate/evidence accounting,
+and one recommended next action. The controller is authoritative: unknown IDs,
+digest mismatches, incomplete accounting, illegal transitions, or capability
+violations fail closed. Human prose is diagnostic only and must not be used to
+change the ledger or specifications.
+
 Copy this prompt into a new agent session after the operator has started and
 authenticated the dedicated CDP browser described in
 `AGENT_DISCOVERY_RUNBOOK.md`.

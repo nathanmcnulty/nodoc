@@ -5,6 +5,26 @@ blocker requires deeper background.
 
 ## Agent handoff
 
+### Layer 1 controller commands
+
+The checked-in portfolio is validated and materialized from existing spec,
+recipe, crawl, and coverage metadata. These commands are offline and report-only
+unless `--apply` is explicitly supplied:
+
+```powershell
+npm run control:portal-discovery -- validate-portfolio --json
+npm run control:portal-discovery -- compile-plan --json
+npm run control:portal-discovery -- status --json
+```
+
+The plan has stable IDs and SHA-256 digests. Capture assignments serialize by
+endpoint/profile lease family; only immutable, non-conflicting review work is
+parallelizable. A fresh artifact directory is a runtime precondition and is never
+created in committed data. `--apply` is required before enqueueing and enqueue is
+idempotent through the existing ledger lock. Corrupt or incompatible manifests,
+plans, ledgers, and worker results fail closed; retry only after repairing the
+input or returning the assignment to its legal queued state.
+
 Validated grouped handoffs may be converted offline with
 `tools/discovery-review-assignments.mjs`. The schema-versioned plan creates one
 deterministic assignment per partition and contains only digests, counts,

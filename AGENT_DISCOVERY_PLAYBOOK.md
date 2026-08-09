@@ -136,6 +136,19 @@ The goal is to avoid treating every portal as if it needs the same kind of crawl
 
 ## Deterministic swarm model
 
+### Layer 1 control plane
+
+The portfolio manifest is schema-versioned but derives portal identity, recipe
+paths, endpoint host families, operation counts, and coverage metadata from the
+checked-in inventory. Its compiler emits a stable plan digest, capture lease
+serialization, offline review parallelism, dependency-safe preconditions, route
+budgets, and explicit terminal/next-action semantics. Routing is deterministic:
+routine unblocked reads use the cheap route, safety/scope/state-changing or
+incomplete work uses Luna/manual, and disabled or missing-precondition work is
+blocked by the orchestrator. Worker results are imported only after exact scope,
+candidate/evidence cardinality, capability ceilings, digest, and legal-state
+validation. Application remains opt-in and report-only is the default.
+
 Use four bounded roles instead of asking every worker to understand the entire
 research process:
 
