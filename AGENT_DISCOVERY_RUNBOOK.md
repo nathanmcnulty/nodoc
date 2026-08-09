@@ -183,6 +183,19 @@ healthy completed capture may be analyzed again without reopening the browser.
    only when the structured outputs do not explain a candidate or blocker, and
    escalate that inspection to a trusted review worker.
 
+### Attribution and artifact compatibility
+
+Capture artifacts written by `cdp-deep-capture.mjs` use schema version `2` on
+records that carry capture evidence. Network, script, stream, and probe records
+are attributed from the CDP session, target, and frame that emitted the event;
+they do not use the current action label as a global fallback. `raw-requests.json`
+and `session-snapshots.json` include the page/checkpoint label plus target and
+frame relationship metadata, including worker and service-worker targets. The
+opaque `evidenceId` and `probeId` values are stable hashes of the action,
+checkpoint, normalized URL, target/session/frame, and attempt context, so late
+event delivery does not change deduplication keys. Existing array artifact files
+remain readable by older consumers because the schema field is additive.
+
 ## Swarm execution contract
 
 - One coordinator runs `plan`, assigns one portal and checked-in recipe per
