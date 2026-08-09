@@ -76,6 +76,45 @@ test("preserves ambiguous methods and respects object spread order", () => {
     sourceFile: "methods.js",
   });
 
+  test("propagates bounded constants, URL hosts, aliases, XHR, route metadata, and hashes", () => {
+    const result = mineBundleSource(`
+      const base = "https://api.example.test";
+      const suffix = "/v1";
+      const routes = { users: suffix + "/users" };
+      const doFetch = fetch;
+      doFetch(new URL(routes.users, base), { method: "GET" });
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", base + "/v1/users");
+      const documentText = "query Users { users { id } }";
+      const persistedQuery = { sha256Hash: "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef" };
+    `, {
+      prefixes: ["/v1/"],
+      sourceFile: "v2.js",
+    });
+
+    assert.deepEqual(
+      result.candidates.map(({ candidatePath, hostname, method }) => ({ candidatePath, hostname, method })),
+      [
+        { candidatePath: "/v1/users", hostname: "api.example.test", method: "GET" },
+        { candidatePath: "/v1/users", hostname: "api.example.test", method: "POST" },
+      ],
+    );
+    assert.equal(
+      result.graphqlOperations[0].persistedQueryHash,
+      "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+    );
+  });
+
+  test("keeps malformed bundles in parse-failure accounting with bounded fallback", () => {
+    const result = mineBundleSource("fetch('/api/fallback'); }", {
+      prefixes: ["/api/"],
+      sourceFile: "broken.js",
+    });
+
+    assert.ok(result.parseError);
+    assert.deepEqual(result.candidates.map(({ candidatePath }) => candidatePath), ["/api/fallback"]);
+  });
+
   assert.deepEqual(
     result.candidates.map(({ candidatePath, method }) => ({ candidatePath, method })),
     [
