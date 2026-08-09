@@ -161,6 +161,19 @@ different agents reaching different conclusions from the same evidence.
 
 ### Cost-aware orchestration policy
 
+### Offline review scheduling
+
+After grouped-handoff validation, build the deterministic review assignment
+plan before allocating workers. Validate partition digests, byte counts,
+reassembly totals, capture completeness, canonical health, and eligibility.
+The plan reports serialized plan bytes, largest worker partition, assignment,
+candidate, and evidence-family totals plus route counts. These are deterministic
+size/cardinality proxies, not token or quality measurements. Cheap workers
+receive only unblocked routine read-only partitions at low reasoning. Any
+safety, scope/host/spec, adjacent ownership, state-changing, unknown,
+incomplete, or digest/reassembly blocker escalates to Luna/manual or blocks.
+Suppressed candidates never become promotion assignments.
+
 Use capability tiers rather than sending every stage to the strongest model:
 
 1. **Preflight and queue management: orchestrator**
