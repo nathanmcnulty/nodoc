@@ -4,6 +4,7 @@ import path from "node:path";
 
 import { buildCandidateHandoff } from "./discovery-candidate-handoff.mjs";
 import { aggregateInteractionHealth, sanitizeInteractionHealth } from "./discovery-capture-policy.mjs";
+import { evaluateDiscoverySaturation } from "./discovery-saturation.mjs";
 import { classifyGetProbeUrl } from "./discovery-safety.mjs";
 import {
   captureRecipesByTitle,
@@ -34,6 +35,8 @@ function parseArgs(argv) {
   const args = {
     artifacts: null,
     includeAdjacent: false,
+    saturation: false,
+    applySaturationStop: false,
     noLedger: false,
     json: false,
     phase: "all",
@@ -72,6 +75,11 @@ function parseArgs(argv) {
     const next = argv[index + 1];
     if (argument === "--include-adjacent") {
       args.includeAdjacent = true;
+    } else if (argument === "--saturation") {
+      args.saturation = true;
+    } else if (argument === "--apply-saturation-stop") {
+      args.saturation = true;
+      args.applySaturationStop = true;
     } else if (argument === "--no-ledger") {
       args.noLedger = true;
     } else if (argument === "--json") {
@@ -786,6 +794,19 @@ async function main() {
     : null;
   let interactionHealth = null;
   let interactionHealthStatus = null;
+  let captureSummary = null;
+  let actionResults = [];
+  let recipe = null;
+  try {
+    actionResults = JSON.parse(await readFile(path.join(args.artifacts, "action-results.json"), "utf8"));
+  } catch (error) {
+    if (error?.code !== "ENOENT" && !(error instanceof SyntaxError)) throw error;
+  }
+  try {
+    recipe = JSON.parse(await readFile(recipePath, "utf8"));
+  } catch (error) {
+    if (error?.code !== "ENOENT" && !(error instanceof SyntaxError)) throw error;
+  }
 
   if (["all", "capture"].includes(args.phase)) {
     const existingArtifacts = await findExistingCaptureArtifacts(args.artifacts);
@@ -905,7 +926,7 @@ async function main() {
         return;
       }
 
-      const captureSummary = JSON.parse(
+      captureSummary = JSON.parse(
         await readFile(path.join(args.artifacts, "summary.json"), "utf8"),
       );
       interactionHealth = await readInteractionHealth(args.artifacts);
@@ -1019,6 +1040,20 @@ async function main() {
     }
 
     if (["all", "analyze"].includes(args.phase)) {
+      if (actionResults.length === 0) {
+        try {
+          actionResults = JSON.parse(await readFile(path.join(args.artifacts, "action-results.json"), "utf8"));
+        } catch (error) {
+          if (error?.code !== "ENOENT" && !(error instanceof SyntaxError)) throw error;
+        }
+      }
+      if (!captureSummary) {
+        try {
+          captureSummary = JSON.parse(await readFile(path.join(args.artifacts, "summary.json"), "utf8"));
+        } catch (error) {
+          if (error?.code !== "ENOENT" && !(error instanceof SyntaxError)) throw error;
+        }
+      }
       const candidateQueuePath = path.join(args.artifacts, "candidate-queue.json");
       const candidateHandoffPath = path.join(args.artifacts, "candidate-handoff.json");
       const candidateArgs = [
@@ -1053,6 +1088,17 @@ async function main() {
         }
       }
       const candidateQueue = JSON.parse(await readFile(candidateQueuePath, "utf8"));
+      const saturation = evaluateDiscoverySaturation({
+        actionResults,
+        candidateQueue,
+        capture: captureCompleteness,
+        interactionHealth,
+        interactionHealthStatus,
+        recipe,
+        requiredActionFailures: captureSummary?.actionValidation?.requiredActionFailures ?? [],
+        enabled: args.saturation,
+        applyStop: args.applySaturationStop,
+      });
       const candidateHandoff = buildCandidateHandoff({
         candidateQueue,
         interactionHealth,
@@ -1061,6 +1107,7 @@ async function main() {
         recovery: captureCompleteness,
         specId: specRecord.specId,
         specTitle: specRecord.title,
+        saturation,
       });
       await writeFile(
         candidateHandoffPath,
@@ -1069,6 +1116,7 @@ async function main() {
       );
       runState.candidateCounts = candidateHandoff.counts;
       runState.recommendedNextAction = candidateHandoff.recommendedNextAction;
+      runState.saturation = saturation;
     }
 
     runState.status = "completed";
@@ -1078,6 +1126,18 @@ async function main() {
         ? { available: true, reason: null, source: "summary-and-action-results" }
         : { available: false, reason: "canonical-health-unavailable", source: "capture-artifacts" }
     );
+    if (args.saturation && !runState.saturation) {
+      runState.saturation = evaluateDiscoverySaturation({
+        actionResults,
+        capture: captureCompleteness,
+        interactionHealth,
+        interactionHealthStatus: runState.interactionHealthStatus,
+        recipe,
+        requiredActionFailures: captureSummary?.actionValidation?.requiredActionFailures ?? [],
+        enabled: args.saturation,
+        applyStop: args.applySaturationStop,
+      });
+    }
     runState.completedAt = new Date().toISOString();
     runState.outputs = {
       candidateQueue: ["all", "analyze"].includes(args.phase)

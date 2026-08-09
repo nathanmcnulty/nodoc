@@ -9,6 +9,140 @@ import {
   shouldRequestResponseBody,
   summarizeActionResults,
 } from "../discovery-capture-policy.mjs";
+import { evaluateDiscoverySaturation } from "../discovery-saturation.mjs";
+
+function click(index, gain = {}) {
+  return {
+    type: "click-label",
+    eligibility: { status: "eligible" },
+    result: {
+      clicked: true,
+      beforeUrl: `/before-${index}`,
+      afterUrl: `/after-${index}`,
+      ...gain,
+    },
+  };
+}
+
+function unchangedClick() {
+  return {
+    type: "click-label",
+    eligibility: { status: "eligible" },
+    result: { clicked: false },
+  };
+}
+
+test("productive novelty prevents saturation", () => {
+  const signal = evaluateDiscoverySaturation({
+    actionResults: [click(1), click(2, { newRequestFamilies: ["family-b"] }), click(3), click(4)],
+    capture: { captureComplete: true },
+    interactionHealth: { accounting: { consistent: true } },
+    interactionHealthStatus: { available: true },
+    enabled: true,
+    thresholds: { windowSize: 2, minimumEvidenceWindows: 2, consecutiveWindows: 2 },
+  });
+  assert.equal(signal.reason, "insufficient-evidence-window");
+  assert.equal(signal.applied, false);
+});
+
+test("healthy repeated zero-gain windows are stoppable only when enabled", () => {
+  const signal = evaluateDiscoverySaturation({
+    actionResults: [unchangedClick(), unchangedClick(), unchangedClick(), unchangedClick()],
+    capture: { captureComplete: true },
+    interactionHealth: { accounting: { consistent: true } },
+    interactionHealthStatus: { available: true },
+    enabled: true,
+    applyStop: true,
+    thresholds: { windowSize: 2, minimumEvidenceWindows: 2, consecutiveWindows: 2 },
+  });
+  assert.equal(signal.reason, "healthy-saturation");
+  assert.equal(signal.applied, true);
+});
+
+test("missing summary makes saturation unavailable", () => {
+  const signal = evaluateDiscoverySaturation({
+    actionResults: [click(1), click(2)],
+    capture: { captureComplete: true },
+    interactionHealthStatus: { available: false },
+    enabled: true,
+  });
+  assert.equal(signal.available, false);
+  assert.equal(signal.reason, "summary-missing");
+});
+
+test("high-value pending work blocks a healthy stop", () => {
+  const signal = evaluateDiscoverySaturation({
+    actionResults: [
+      { ...unchangedClick(), highValue: true },
+      unchangedClick(),
+      unchangedClick(),
+      unchangedClick(),
+    ],
+    capture: { captureComplete: true },
+    interactionHealth: { accounting: { consistent: true } },
+    interactionHealthStatus: { available: true },
+    enabled: true,
+    applyStop: true,
+    thresholds: { windowSize: 2, minimumEvidenceWindows: 2, consecutiveWindows: 2 },
+  });
+  assert.equal(signal.reason, "low-yield-incomplete");
+  assert.equal(signal.applied, false);
+  assert.deepEqual(signal.blockers, ["high-value-pending-action"]);
+});
+
+test("unknown eligibility and interaction escalation block stopping", () => {
+  const unknown = evaluateDiscoverySaturation({
+    actionResults: [
+      { ...unchangedClick(), eligibility: { status: "unknown" } },
+      unchangedClick(),
+      unchangedClick(),
+      unchangedClick(),
+    ],
+    capture: { captureComplete: true },
+    interactionHealth: { accounting: { consistent: true } },
+    interactionHealthStatus: { available: true },
+    enabled: true,
+    thresholds: { windowSize: 2, minimumEvidenceWindows: 2, consecutiveWindows: 2 },
+  });
+  assert.equal(unknown.available, true);
+  assert.equal(unknown.applied, false);
+  assert.deepEqual(unknown.blockers, ["unknown-eligibility"]);
+
+  const failed = evaluateDiscoverySaturation({
+    actionResults: [unchangedClick(), unchangedClick(), unchangedClick(), unchangedClick()],
+    capture: { captureComplete: true },
+    interactionHealth: {
+      accounting: { consistent: true },
+      recommendation: { recommended: true },
+    },
+    interactionHealthStatus: { available: true },
+    enabled: true,
+    thresholds: { windowSize: 2, minimumEvidenceWindows: 2, consecutiveWindows: 2 },
+  });
+  assert.equal(failed.reason, "interaction-failure");
+  assert.deepEqual(failed.blockers, ["interaction-failure"]);
+});
+
+test("saturation output is deterministically ordered and integer-valued", () => {
+  const signal = evaluateDiscoverySaturation({
+    actionResults: [
+      click(1, { newRequestFamilies: ["z-family", "a-family"] }),
+      click(2, { newCandidateFamilies: ["z-candidate", "a-candidate"] }),
+    ],
+    candidateQueue: {
+      candidates: [{ featureFamily: "z" }, { featureFamily: "a" }],
+      scopeReviewCandidates: [],
+    },
+    capture: { captureComplete: true },
+    interactionHealth: { accounting: { consistent: true } },
+    interactionHealthStatus: { available: true },
+    enabled: true,
+    thresholds: { windowSize: 2, minimumEvidenceWindows: 1, consecutiveWindows: 1 },
+  });
+  assert.deepEqual(signal.windows[0].gain.newRequestFamilies, ["a-family", "z-family"]);
+  assert.deepEqual(signal.windows[0].gain.newCandidateFamilies, ["a-candidate", "z-candidate"]);
+  assert.equal(Number.isInteger(signal.windows[0].gain.total), true);
+});
 
 test("response bodies require a known bounded transfer size", () => {
   assert.equal(shouldRequestResponseBody(undefined), false);
