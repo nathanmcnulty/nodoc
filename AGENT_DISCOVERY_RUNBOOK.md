@@ -25,6 +25,28 @@ The task must name one portal by title or spec ID, for example `M365 Admin` or
 - keep artifacts outside the repository
 - stop after the checked-in recipe, candidate analysis, and handoff generation complete
 
+The worker assignment must also include one explicit artifact directory or
+instruct the worker to create one fresh directory. A worker owns exactly one
+portal, one recipe, one CDP endpoint, and one artifact directory.
+
+## Orchestrator preflight
+
+Run these checks before allocating a capture worker. They are coordinator work,
+not discovery work:
+
+1. Confirm the repository remote is the intended fork and never the upstream
+   project.
+2. Restore the repository's locked dependencies when `node_modules` is absent;
+   workers must not install or update packages.
+3. Run the portal plan command and require `status: planned`.
+4. Verify CDP `/json/version` and `/json/list`, including an authenticated target
+   for the intended portal.
+5. Confirm the selected recipe exists and choose a fresh artifact directory.
+
+Do not spend a worker allocation on a missing dependency, invalid portal ID,
+missing recipe, unavailable CDP listener, or unauthenticated target. Report and
+repair those prerequisites at the orchestrator layer first.
+
 ## Browser prerequisite
 
 The deterministic pipeline attaches to an already authenticated browser. The
@@ -141,8 +163,13 @@ healthy completed capture may be analyzed again without reopening the browser.
    - `summary.json`
    - `candidate-handoff.json`
 
-   Stop there when those files explain the status, counts, blocker, and
-   recommended next action.
+   `summary.json` is expected from a completed `capture` or `all` phase. If it is
+   absent but checkpointed capture artifacts exist, treat the original command
+   as interrupted rather than completed. A trusted orchestrator may run the
+   documented `analyze` recovery against that immutable directory when the
+   primary capture artifacts are complete; otherwise use a seeded retry in a new
+   directory. Stop when the primary files explain the status, counts, blocker,
+   and recommended next action.
 
 6. Read the following structured evidence only when the handoff requires a
    specific candidate, probe, bundle, or streaming detail:
@@ -173,6 +200,40 @@ healthy completed capture may be analyzed again without reopening the browser.
    artifact directory rather than patching a live run interactively.
 - Treat `candidate-handoff.json` and the driver's `recommendedNextAction` as the
    work queue. Do not create a second speculative mapping from raw bundle output.
+- Prefer the cheapest supported worker model that can execute tools reliably,
+  currently `gpt-5.3-codex-spark` at low reasoning. Use `gpt-5.6-luna` only when
+  Spark is unavailable or repeatedly fails to execute the deterministic
+  contract. Model fallback does not relax safety or evidence rules.
+- On a single CDP endpoint, the maximum live capture concurrency is one. The
+  orchestrator may queue additional portals, but must not start their capture
+  workers until the current owner has released the endpoint. Offline analysis
+  and promotion review may run concurrently over different immutable artifact
+  directories.
+- Treat a worker that returns no message separately from a failed pipeline.
+  Inspect the assigned directory for `discovery-run.json`. If capture artifacts
+  are complete, run `analyze` once against that directory and reconstruct the
+  completion response from the primary outputs. If capture is incomplete,
+  preserve it and use the documented seeded retry in a new directory.
+
+## Review and landing gates
+
+Discovery, promotion, and merge are separate stages:
+
+1. **Discovery worker:** executes this runbook and produces immutable local
+   artifacts plus the tenant-safe handoff. It never edits the repository.
+2. **Promotion worker:** receives only the target spec, relevant sanitized
+   handoff entries, and explicit scope assignments. It creates one focused
+   branch/PR, regenerates derived artifacts, and validates the changed surface.
+3. **Review worker or orchestrator:** verifies evidence labels, host/spec scope,
+   tenant-data sanitization, generated-file consistency, and validation results.
+4. **Merge:** occurs only after required checks and review pass. Follow-up gaps
+   become new assignments or PRs; they are not silently folded into an unrelated
+   promotion PR.
+
+The orchestrator records for each assignment: portal/spec ID, worker model,
+recipe, artifact directory, status or blocker code, handoff counts,
+recommended next action, promotion PR, review result, and merge result. This is
+the durable queue; chat history is not the system of record.
 
 ## Safety boundary
 

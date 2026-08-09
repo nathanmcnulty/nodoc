@@ -11,6 +11,11 @@ First read `AGENT_DISCOVERY_RUNBOOK.md` in this repository and follow it
 exactly. It is the execution contract. Do not use the deeper
 `AGENT_DISCOVERY_PLAYBOOK.md` unless the runbook says a blocker needs it.
 
+This assignment is one execution shard. Do not coordinate other agents, install
+dependencies, repair the environment, review unrelated portals, promote
+findings, create a branch or pull request, or merge changes. The orchestrator
+owns those stages.
+
 Before capture, verify that the operator-provided authenticated browser is
 reachable at http://127.0.0.1:9222/json/version and that the response contains
 webSocketDebuggerUrl. If it is unavailable, stop and report
@@ -41,4 +46,9 @@ probes, and bundle-only leads separately; they require explicit specification
 and host-family assignment and are not promotion-ready for the target spec.
 Use the driver's evidence-driven recommended next action. If the driver emits a
 blocker, report its code and remediation rather than improvising around it.
+
+If command execution finishes but you cannot return a normal response, leave
+the artifact directory unchanged. The orchestrator may inspect
+`discovery-run.json` and run only the documented `analyze` recovery against a
+completed capture. Never rerun capture into the same directory.
 ```
