@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import { enqueueAssignment } from "./portal-discovery-ledger.mjs";
+import { recommendDerivativeReuse } from "./discovery-derivative-families.mjs";
 
 export const reviewAssignmentSchemaVersion = 1;
 
@@ -52,7 +53,7 @@ function validatePartitionShape(entry, partition) {
   }
 }
 
-export function buildReviewAssignmentPlan(grouped) {
+export function buildReviewAssignmentPlan(grouped, { derivativeFamilyIndex = null, previousDerivativeFamilyIndex = null, derivativeReviewMetadata = {} } = {}) {
   if (!grouped?.manifest || !Array.isArray(grouped.partitions)) throw new Error("A grouped handoff is required.");
   const { manifest } = grouped;
   if (manifest.schemaVersion !== 1) throw new Error("Unsupported grouped handoff schema version.");
@@ -91,11 +92,20 @@ export function buildReviewAssignmentPlan(grouped) {
       route: routing.route,
       reasonCodes: [...new Set(routing.reasonCodes)].sort(),
     };
-    return {
+    const assignment = {
       ...metadata,
       assignmentId: `review-${digest(metadata).slice(0, 24)}`,
       assignmentDigest: digest(metadata),
     };
+    if (derivativeFamilyIndex) {
+      assignment.derivativeReuseRecommendations = recommendDerivativeReuse(
+        derivativeFamilyIndex,
+        previousDerivativeFamilyIndex,
+        derivativeReviewMetadata,
+      ).filter((recommendation) => partition.candidates.some((candidate) =>
+        derivativeFamilyIndex.candidateFamilyRefs.some((ref) => ref.candidateId === candidate.candidateId && ref.familyId === recommendation.familyId)));
+    }
+    return assignment;
   }).sort((a, b) => a.assignmentId.localeCompare(b.assignmentId));
   const totals = {
     assignmentCount: entries.length,

@@ -174,6 +174,20 @@ safety, scope/host/spec, adjacent ownership, state-changing, unknown,
 incomplete, or digest/reassembly blocker escalates to Luna/manual or blocks.
 Suppressed candidates never become promotion assignments.
 
+An explicit offline opt-in may build a derivative family index from those grouped
+handoffs. Family IDs are stable across sanitized runs only when all output-affecting
+normalized route/request/response, GraphQL, review, safety, and scope characteristics
+match; run-local candidate/evidence IDs remain mapped one-for-one. Compare only
+schema-compatible indexes. Reuse is gated by the prior approved outcome, destination
+ownership, safety class, complete capture/health, analyzer and schema versions, and
+required provenance. Adjacent, ambiguous, changed-shape, incomplete, blocked, corrupt,
+or incompatible entries receive deterministic reason codes and a review recommendation.
+Persist reusable indexes with an atomic Windows-safe rename and treat malformed entries
+as misses or safety blockers. Record deterministic byte and cardinality proxies before
+and after compaction, including maximum worker payload and exact preserved references.
+Roll out in report-only mode first, then allow a reviewer to act on reusable
+recommendations; invalidation is automatic on any family-key or compatibility change.
+
 Use capability tiers rather than sending every stage to the strongest model:
 
 1. **Preflight and queue management: orchestrator**
