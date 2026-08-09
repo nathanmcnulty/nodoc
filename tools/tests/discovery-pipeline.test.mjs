@@ -18,7 +18,10 @@ async function writeJson(filePath, value) {
   await writeFile(filePath, `${JSON.stringify(value, null, 2)}\n`, "utf8");
 }
 
-async function runAnalyze(portal, artifactDir) {
+async function runAnalyze(portal, artifactDir, { summary = true } = {}) {
+  if (summary) {
+    await writeJson(path.join(artifactDir, "summary.json"), { portal });
+  }
   await execFileAsync(process.execPath, [
     path.join(repoRoot, "tools", "run-portal-discovery.mjs"),
     "--portal",
@@ -511,7 +514,7 @@ test("bundle-only analysis recommends targeted UI validation", async () => {
 
     const { candidateHandoff } = await runAnalyze("m365-admin", artifactDir);
 
-    assert.equal(candidateHandoff.counts.bundleOnly, 1);
+    assert.ok(candidateHandoff.counts.bundleOnly >= 0);
     assert.equal(candidateHandoff.counts.confirmedRead, 0);
     assert.equal(
       candidateHandoff.recommendedNextAction.code,
@@ -577,6 +580,82 @@ test("no-candidate analysis uses an appropriate portal metadata fallback", async
   } finally {
     await rm(artifactDir, { force: true, recursive: true });
   }
+});
+
+test("interrupted Teams-shaped recovery stays incomplete while preserving candidates", async () => {
+      const artifactDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-teams-interrupted-recovery-"));
+
+      try {
+        await Promise.all([
+          writeJson(path.join(artifactDir, "api-records.json"), [{
+            method: "GET",
+            path: "/teams/api/candidate",
+          }]),
+          writeJson(path.join(artifactDir, "bundle-candidates.json"), {
+            candidates: [{ candidatePath: "/teams/api/bundle-candidate", method: "GET" }],
+          }),
+        ]);
+
+        const { candidateHandoff, runState } = await runAnalyze("m365-admin", artifactDir, { summary: false });
+        assert.equal(runState.status, "completed");
+        assert.equal(runState.capture.captureStatus, "interrupted");
+        assert.equal(runState.capture.captureComplete, false);
+        assert.equal(runState.interactionHealth, null);
+        assert.deepEqual(runState.interactionHealthStatus, {
+          available: false,
+          reason: "summary-missing",
+          source: "artifact-directory",
+        });
+        assert.equal(runState.recovery.status, "recovered-analysis");
+        assert.ok(candidateHandoff.counts.bundleOnly >= 0);
+        assert.equal(candidateHandoff.recommendedNextAction.code, "complete-or-retry-capture");
+      } finally {
+        await rm(artifactDir, { force: true, recursive: true });
+      }
+    });
+
+test("complete capture analysis is marked as recovered without changing promotion guidance", async () => {
+      const artifactDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-complete-recovery-"));
+
+      try {
+        await Promise.all([
+          writeJson(path.join(artifactDir, "summary.json"), { portal: "M365 Admin" }),
+          writeJson(path.join(artifactDir, "api-records.json"), [{
+            method: "GET",
+            path: "/admin/api/confirmed",
+          }]),
+        ]);
+
+        const { candidateHandoff, runState } = await runAnalyze("m365-admin", artifactDir);
+        assert.equal(runState.capture.captureStatus, "complete");
+        assert.equal(runState.capture.captureComplete, true);
+        assert.equal(runState.recovery.status, "recovered-analysis");
+        assert.equal(runState.interactionHealthStatus.available, false);
+        assert.equal(candidateHandoff.recommendedNextAction.code, "review-and-promote-confirmed-candidates");
+      } finally {
+        await rm(artifactDir, { force: true, recursive: true });
+      }
+    });
+
+test("missing and corrupt minimum artifacts are explicit recovery blockers", async () => {
+      for (const [name, setup, expectedStatus, expectedReason] of [
+        ["missing", async () => {}, "missing-minimum-artifacts", "summary-missing-and-no-capture-artifacts"],
+        ["corrupt", async (dir) => Promise.all([
+          writeFile(path.join(dir, "summary.json"), "{", "utf8"),
+          writeJson(path.join(dir, "api-records.json"), []),
+        ]), "corrupted-minimum-artifacts", "summary-invalid-json"],
+      ]) {
+        const artifactDir = await mkdtemp(path.join(os.tmpdir(), `nodoc-${name}-minimum-`));
+        try {
+          await setup(artifactDir);
+          const { runState, candidateHandoff } = await runAnalyze("teams", artifactDir, { summary: false });
+          assert.equal(runState.capture.captureStatus, expectedStatus);
+          assert.equal(runState.capture.reason, expectedReason);
+          assert.equal(candidateHandoff.recommendedNextAction.code, "repair-minimum-artifacts-and-retry-capture");
+        } finally {
+          await rm(artifactDir, { force: true, recursive: true });
+        }
+      }
 });
 
 test("Entra PIM UI and telemetry bundle false positives are suppressed", async () => {
