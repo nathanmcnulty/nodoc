@@ -5,6 +5,17 @@ blocker requires deeper background.
 
 ## Agent handoff
 
+Validated grouped handoffs may be converted offline with
+`tools/discovery-review-assignments.mjs`. The schema-versioned plan creates one
+deterministic assignment per partition and contains only digests, counts,
+destination metadata, blockers, capabilities, and routing. `cheap` is reserved
+for unblocked read-only partitions; safety, adjacent ownership, scope/host
+ambiguity, incomplete capture/health, and unknown eligibility route to Luna or
+manual review, while suppressed work is blocked. Only cheap and Luna entries
+may be imported into the ledger; manual and blocked entries remain visible but
+non-reviewable. Import is idempotent and uses the existing ledger lock without
+changing capture endpoint/profile leases.
+
 Give the agent this repository-relative instruction:
 
 > Read `PORTAL_DISCOVERY_AGENT_PROMPT.md` and follow it exactly for the named
@@ -46,6 +57,25 @@ not discovery work:
 Do not spend a worker allocation on a missing dependency, invalid portal ID,
 missing recipe, unavailable CDP listener, or unauthenticated target. Report and
 repair those prerequisites at the orchestrator layer first.
+
+## Optional deterministic saturation analysis
+
+Legacy discovery remains full-traversal by default. An orchestrator may opt in
+to offline saturation reporting with `--saturation`; add
+`--apply-saturation-stop` only when the caller wants a healthy decision marked
+as applied. The flag does not alter the checked-in capture recipe or live
+action execution. The evaluator uses immutable action results, canonical
+summary health, capture completeness, and candidate/request-family novelty.
+
+A healthy stop requires a complete capture, available and consistent canonical
+health, known eligibility, no required failures, no high-value eligible work,
+no scope-review ambiguity, a minimum evidence window, and the configured
+consecutive zero/low-gain windows. The result records the schema version,
+thresholds, exact reason, evaluated windows, category gains, remaining work,
+blockers, and whether the result was merely recommended or applied. Missing
+summaries, interrupted captures, health mismatches, interaction failures, and
+unknown eligibility are unavailable/blocking states; they must never be
+interpreted as healthy saturation.
 
 ## Browser prerequisite
 
@@ -161,11 +191,18 @@ healthy completed capture may be analyzed again without reopening the browser.
 
     Never resume `capture` or `all` into a non-empty directory, merge artifact
     directories, or use `analyze` as a substitute for an incomplete capture.
-    Finalization is bounded by the capture and parent supervision deadlines. A
-    timeout preserves already-written artifacts and records the blocking phase
-    in `capture-failure.json`; it remains interrupted and must use a new seeded
-    retry directory. Override the conservative parent deadline only for tests
-    with `--supervision-timeout-ms <milliseconds>`.
+    Body draining, script/bundle processing, and artifact finalization are bounded
+    by `--supervision-timeout-ms`. Productive capture has a separate total
+    `--capture-supervision-timeout-ms` failsafe. The production ledger lease is
+    derived from that failsafe plus finalization margin, and long-running workers
+    may renew it only with an atomic assignment, attempt, and owner match. An
+    expired running lease is reclaimed as `stale`; a renewal from any other owner
+    is rejected and cannot extend the lease.
+    `--capture-supervision-timeout-ms` (15 minutes by default), so a legitimate
+    recipe is not killed by the finalization budget. If the parent
+    failsafe expires, the parent writes `capture-failure.json` with phase
+    `parent-supervision`, preserves already-written artifacts, and leaves the run
+    interrupted; retry in a new seeded directory.
 
 5. Read only these outputs first, in order:
 
@@ -205,6 +242,19 @@ healthy completed capture may be analyzed again without reopening the browser.
    - `probe-results.json`
    - `bundle-candidates.json`
    - `stream-records.json`
+
+### Optional grouped worker handoff
+
+The compatibility monolithic `candidate-handoff.json` is emitted by default.
+For offline scheduling, pass `--grouped-handoff <fresh-directory>` to `all` or
+`analyze`. The directory contains `manifest.json`, `shared-metadata.json`, and
+one deterministic partition file per destination spec/host family/review class.
+Adjacent partitions are never promotion-active: they carry an explicit
+assignment blocker. Workers must use the manifest's model/reasoning policy and
+blockers, then reassemble candidate IDs exactly once before review. Partition
+digests and byte counts are manifest metadata; mutation invalidates the stated
+digest. The grouped output contains only normalized, tenant-safe fields and is
+an additive derivative of the monolithic handoff.
 
 7. Consult `page-states.json`, `action-results.json`, or raw request artifacts
    only when the structured outputs do not explain a candidate or blocker, and

@@ -1,10 +1,13 @@
-import { spawn } from "node:child_process";
 import { createHash } from "node:crypto";
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
-import { buildCandidateHandoff } from "./discovery-candidate-handoff.mjs";
+import {
+  buildCandidateHandoff,
+  writePartitionedCandidateHandoff,
+} from "./discovery-candidate-handoff.mjs";
 import { aggregateInteractionHealth, sanitizeInteractionHealth } from "./discovery-capture-policy.mjs";
+import { evaluateDiscoverySaturation } from "./discovery-saturation.mjs";
 import { classifyGetProbeUrl } from "./discovery-safety.mjs";
 import {
   captureRecipesByTitle,
@@ -17,17 +20,27 @@ import {
   enqueueAssignment,
   ensureLedgerFileReady,
   getLedgerViewFromFile,
+  ledgerLeaseRenewalIntervalMs,
+  ledgerStaleLeaseMs,
   resumeAttempt,
   updateAttempt,
   updateAttemptFromDiscoveryRun,
 } from "./portal-discovery-ledger.mjs";
+import {
+  ProcessSupervisionTimeoutError,
+  runNode,
+  writeParentSupervisionFailure,
+} from "./portal-discovery-process.mjs";
 
 const validPhases = new Set(["all", "analyze", "capture", "plan"]);
 
 function parseArgs(argv) {
   const args = {
     artifacts: null,
+    groupedHandoffDir: null,
     includeAdjacent: false,
+    saturation: false,
+    applySaturationStop: false,
     noLedger: false,
     json: false,
     phase: "all",
@@ -57,6 +70,7 @@ function parseArgs(argv) {
     targetId: null,
     bundleCacheDir: null,
     supervisionTimeoutMs: 120000,
+    captureSupervisionTimeoutMs: 900000,
     variables: [],
   };
 
@@ -65,6 +79,11 @@ function parseArgs(argv) {
     const next = argv[index + 1];
     if (argument === "--include-adjacent") {
       args.includeAdjacent = true;
+    } else if (argument === "--saturation") {
+      args.saturation = true;
+    } else if (argument === "--apply-saturation-stop") {
+      args.saturation = true;
+      args.applySaturationStop = true;
     } else if (argument === "--no-ledger") {
       args.noLedger = true;
     } else if (argument === "--json") {
@@ -80,6 +99,9 @@ function parseArgs(argv) {
       index += 1;
     } else if (argument === "--artifacts" && next) {
       args.artifacts = path.resolve(next);
+      index += 1;
+    } else if ((argument === "--grouped-handoff" || argument === "--grouped-handoff-dir") && next) {
+      args.groupedHandoffDir = path.resolve(next);
       index += 1;
     } else if (argument === "--recipe" && next) {
       args.recipe = path.resolve(next);
@@ -154,6 +176,11 @@ function parseArgs(argv) {
       index += 1;
     } else if (argument.startsWith("--supervision-timeout-ms=")) {
       args.supervisionTimeoutMs = Number(argument.slice("--supervision-timeout-ms=".length));
+    } else if (argument === "--capture-supervision-timeout-ms" && next) {
+      args.captureSupervisionTimeoutMs = Number(next);
+      index += 1;
+    } else if (argument.startsWith("--capture-supervision-timeout-ms=")) {
+      args.captureSupervisionTimeoutMs = Number(argument.slice("--capture-supervision-timeout-ms=".length));
     } else if (argument === "--var" && next) {
       args.variables.push(next);
       index += 1;
@@ -165,6 +192,9 @@ function parseArgs(argv) {
   }
   if (!Number.isFinite(args.supervisionTimeoutMs) || args.supervisionTimeoutMs <= 0) {
     throw new Error(`Invalid --supervision-timeout-ms "${args.supervisionTimeoutMs}".`);
+  }
+  if (!Number.isFinite(args.captureSupervisionTimeoutMs) || args.captureSupervisionTimeoutMs <= 0) {
+    throw new Error(`Invalid --capture-supervision-timeout-ms "${args.captureSupervisionTimeoutMs}".`);
   }
   if (!args.ledgerMode) {
     if (!args.portal) {
@@ -465,6 +495,10 @@ async function prepareLedgerAttempt(args, specRecord, recipePath) {
     workerId: args.workerId,
     model: args.model,
     reasoning: args.reasoning,
+    leaseMs: Math.max(
+      ledgerStaleLeaseMs,
+      args.captureSupervisionTimeoutMs + args.supervisionTimeoutMs + ledgerLeaseRenewalIntervalMs,
+    ),
   });
   if (!claimed) {
     throw new Error(
@@ -588,44 +622,6 @@ async function preflightCdp() {
       detail: error instanceof Error ? error.message : String(error),
     };
   }
-}
-
-async function runNode(scriptPath, argumentsList, timeoutMs) {
-  await new Promise((resolve, reject) => {
-    const child = spawn(process.execPath, [scriptPath, ...argumentsList], {
-      cwd: repoRoot,
-      stdio: "inherit",
-    });
-    let settled = false;
-    const timeout = setTimeout(() => {
-      if (settled) {
-        return;
-      }
-      settled = true;
-      child.kill();
-      reject(new Error(`${path.basename(scriptPath)} exceeded the ${timeoutMs} ms supervision deadline.`));
-    }, timeoutMs);
-    const finish = (callback) => (value) => {
-      if (settled) {
-        return;
-      }
-      settled = true;
-      clearTimeout(timeout);
-      callback(value);
-    };
-    child.on("error", finish(reject));
-    child.on("exit", finish((code, signal) => {
-      if (code === 0) {
-        resolve();
-        return;
-      }
-      reject(new Error(
-        signal
-          ? `${path.basename(scriptPath)} exited after signal ${signal}.`
-          : `${path.basename(scriptPath)} exited with code ${code}.`,
-      ));
-    }));
-  });
 }
 
 async function latestAttemptNumber(ledgerPath, assignmentId) {
@@ -805,6 +801,19 @@ async function main() {
     : null;
   let interactionHealth = null;
   let interactionHealthStatus = null;
+  let captureSummary = null;
+  let actionResults = [];
+  let recipe = null;
+  try {
+    actionResults = JSON.parse(await readFile(path.join(args.artifacts, "action-results.json"), "utf8"));
+  } catch (error) {
+    if (error?.code !== "ENOENT" && !(error instanceof SyntaxError)) throw error;
+  }
+  try {
+    recipe = JSON.parse(await readFile(recipePath, "utf8"));
+  } catch (error) {
+    if (error?.code !== "ENOENT" && !(error instanceof SyntaxError)) throw error;
+  }
 
   if (["all", "capture"].includes(args.phase)) {
     const existingArtifacts = await findExistingCaptureArtifacts(args.artifacts);
@@ -891,7 +900,8 @@ async function main() {
         await runNode(
           path.join(repoRoot, "tools", "cdp-deep-capture.mjs"),
           captureArgs,
-          args.supervisionTimeoutMs,
+          args.captureSupervisionTimeoutMs,
+          { cwd: repoRoot },
         );
       } catch (error) {
         const failurePath = path.join(args.artifacts, "capture-failure.json");
@@ -903,12 +913,18 @@ async function main() {
             throw readError;
           }
         }
+        const parentSupervision = error instanceof ProcessSupervisionTimeoutError;
+        if (!failure && parentSupervision) {
+          failure = await writeParentSupervisionFailure(failurePath, error.timeoutMs, error.message);
+        }
         runState.status = "blocked";
         runState.blocker = {
-          code: failure?.phase ? "capture-phase-timeout" : "capture-process-failed",
+          code: parentSupervision
+            ? "capture-process-timeout"
+            : failure?.phase ? "capture-phase-timeout" : "capture-process-failed",
           detail: failure?.detail ?? error.message,
           phase: failure?.phase ?? "parent-supervision",
-          timeoutMs: failure?.timeoutMs ?? args.supervisionTimeoutMs,
+          timeoutMs: failure?.timeoutMs ?? args.captureSupervisionTimeoutMs,
           remediation: "Preserve the immutable artifacts and retry into a new empty directory, optionally seeded from this capture.",
         };
         await persistTerminalRun(args, runState);
@@ -917,7 +933,7 @@ async function main() {
         return;
       }
 
-      const captureSummary = JSON.parse(
+      captureSummary = JSON.parse(
         await readFile(path.join(args.artifacts, "summary.json"), "utf8"),
       );
       interactionHealth = await readInteractionHealth(args.artifacts);
@@ -1031,6 +1047,20 @@ async function main() {
     }
 
     if (["all", "analyze"].includes(args.phase)) {
+      if (actionResults.length === 0) {
+        try {
+          actionResults = JSON.parse(await readFile(path.join(args.artifacts, "action-results.json"), "utf8"));
+        } catch (error) {
+          if (error?.code !== "ENOENT" && !(error instanceof SyntaxError)) throw error;
+        }
+      }
+      if (!captureSummary) {
+        try {
+          captureSummary = JSON.parse(await readFile(path.join(args.artifacts, "summary.json"), "utf8"));
+        } catch (error) {
+          if (error?.code !== "ENOENT" && !(error instanceof SyntaxError)) throw error;
+        }
+      }
       const candidateQueuePath = path.join(args.artifacts, "candidate-queue.json");
       const candidateHandoffPath = path.join(args.artifacts, "candidate-handoff.json");
       const candidateArgs = [
@@ -1065,6 +1095,17 @@ async function main() {
         }
       }
       const candidateQueue = JSON.parse(await readFile(candidateQueuePath, "utf8"));
+      const saturation = evaluateDiscoverySaturation({
+        actionResults,
+        candidateQueue,
+        capture: captureCompleteness,
+        interactionHealth,
+        interactionHealthStatus,
+        recipe,
+        requiredActionFailures: captureSummary?.actionValidation?.requiredActionFailures ?? [],
+        enabled: args.saturation,
+        applyStop: args.applySaturationStop,
+      });
       const candidateHandoff = buildCandidateHandoff({
         candidateQueue,
         interactionHealth,
@@ -1073,14 +1114,19 @@ async function main() {
         recovery: captureCompleteness,
         specId: specRecord.specId,
         specTitle: specRecord.title,
+        saturation,
       });
       await writeFile(
         candidateHandoffPath,
         `${JSON.stringify(candidateHandoff, null, 2)}\n`,
         "utf8",
       );
+      if (args.groupedHandoffDir) {
+        await writePartitionedCandidateHandoff(candidateHandoff, args.groupedHandoffDir);
+      }
       runState.candidateCounts = candidateHandoff.counts;
       runState.recommendedNextAction = candidateHandoff.recommendedNextAction;
+      runState.saturation = saturation;
     }
 
     runState.status = "completed";
@@ -1090,6 +1136,18 @@ async function main() {
         ? { available: true, reason: null, source: "summary-and-action-results" }
         : { available: false, reason: "canonical-health-unavailable", source: "capture-artifacts" }
     );
+    if (args.saturation && !runState.saturation) {
+      runState.saturation = evaluateDiscoverySaturation({
+        actionResults,
+        capture: captureCompleteness,
+        interactionHealth,
+        interactionHealthStatus: runState.interactionHealthStatus,
+        recipe,
+        requiredActionFailures: captureSummary?.actionValidation?.requiredActionFailures ?? [],
+        enabled: args.saturation,
+        applyStop: args.applySaturationStop,
+      });
+    }
     runState.completedAt = new Date().toISOString();
     runState.outputs = {
       candidateQueue: ["all", "analyze"].includes(args.phase)
@@ -1097,6 +1155,9 @@ async function main() {
         : null,
       candidateHandoff: ["all", "analyze"].includes(args.phase)
         ? path.join(args.artifacts, "candidate-handoff.json")
+        : null,
+      groupedCandidateHandoff: args.groupedHandoffDir
+        ? path.join(args.groupedHandoffDir, "manifest.json")
         : null,
       runState: path.join(args.artifacts, "discovery-run.json"),
     };

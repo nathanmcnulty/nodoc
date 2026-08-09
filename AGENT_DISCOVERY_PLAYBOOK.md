@@ -84,6 +84,26 @@ Blind spidering is useful for **candidate discovery**, but it is not enough on i
 
 Treat spidering as a **candidate generator plus prioritization aid**, not as the only validation step.
 
+### Information-gain and saturation contract
+
+The discovery runner exposes an optional deterministic saturation signal on the
+run and tenant-safe candidate handoff surfaces. It is disabled unless the
+orchestrator passes `--saturation`, preserving existing recipe traversal. A
+window is productive when it records a successful transition or new request or
+candidate family. A stop recommendation requires at least the configured
+minimum number of windows followed by the configured consecutive zero/low-gain
+windows, while all safety and completeness gates remain satisfied.
+
+The signal distinguishes `recipe-exhausted`, `healthy-saturation`,
+`low-yield-incomplete`, `interaction-failure`, `unknown-health`,
+`summary-missing`, `health-mismatch`, `interrupted-capture`, and insufficient
+evidence. High-value pending actions, unresolved required failures, unknown
+eligibility, scope ambiguity, and inconsistent canonical accounting block a
+healthy stop. Partial offline analysis reports unavailable rather than
+reconstructing live completeness. Use the recorded window gains and remaining
+eligible work for scheduling and reviewer triage; do not infer token or CPU
+savings from candidate cardinality alone.
+
 ### Recommended spidering rules
 
 - same-origin first
@@ -141,6 +161,19 @@ different agents reaching different conclusions from the same evidence.
 
 ### Cost-aware orchestration policy
 
+### Offline review scheduling
+
+After grouped-handoff validation, build the deterministic review assignment
+plan before allocating workers. Validate partition digests, byte counts,
+reassembly totals, capture completeness, canonical health, and eligibility.
+The plan reports serialized plan bytes, largest worker partition, assignment,
+candidate, and evidence-family totals plus route counts. These are deterministic
+size/cardinality proxies, not token or quality measurements. Cheap workers
+receive only unblocked routine read-only partitions at low reasoning. Any
+safety, scope/host/spec, adjacent ownership, state-changing, unknown,
+incomplete, or digest/reassembly blocker escalates to Luna/manual or blocks.
+Suppressed candidates never become promotion assignments.
+
 Use capability tiers rather than sending every stage to the strongest model:
 
 1. **Preflight and queue management: orchestrator**
@@ -186,6 +219,15 @@ model, artifact directory, timestamps, handoff counts, recommended next action,
 PR URL, review result, and merge result. A retry creates a new attempt record and
 new artifact directory; it does not overwrite history.
 
+Capture leases are owned by one worker and are sized from the configured capture
+failsafe plus bounded finalization margin. A worker may renew only while the
+attempt is still running and the persisted lease owner matches; stale recovery
+therefore reclaims genuinely abandoned owners without allowing another worker to
+extend them. Terminal updates release the lease exactly once. If stale recovery
+or another worker has already persisted a terminal state, later finalization is
+idempotent, preserves the authoritative blocker and provenance, and must not
+turn the discovery run into a secondary pipeline-failed transition error.
+
 ### Token-minimizing handoffs
 
 - Give capture workers only `PORTAL_DISCOVERY_AGENT_PROMPT.md`, the portal ID,
@@ -198,13 +240,23 @@ new artifact directory; it does not overwrite history.
   health availability fields and recommend completing or retrying capture before
   any promotion review.
 - Capture finalization is deadline-bounded. Body draining, script/bundle mining,
-  artifact flushing, and parent supervision use conservative defaults and can be
-  lowered with `--supervision-timeout-ms` for deterministic tests. A timeout keeps
-  already-written artifacts immutable, records the phase/detail in
-  `capture-failure.json`, and remains an interrupted capture; it must not produce
-  canonical interaction health or be retried in place.
+  and artifact flushing use `--supervision-timeout-ms`; the complete productive
+  child process has a separate `--capture-supervision-timeout-ms` failsafe (15
+  minutes by default). A timeout keeps already-written artifacts immutable and
+  records the phase/detail in `capture-failure.json`; parent termination records
+  `parent-supervision` itself. Either case remains an interrupted capture, must
+  not produce canonical interaction health, and must not be retried in place.
 - Pass promotion workers only assigned handoff entries and the relevant spec
   family, not the full capture corpus.
+- For offline scheduling, pass `--grouped-handoff <directory>` to preserve the
+  monolithic handoff while emitting a schema-versioned `manifest.json`, shared
+  metadata, and deterministic partitions keyed by destination spec, host
+  family, and review class. Assign one worker per manifest partition. Adjacent
+  partitions are explicitly blocked for spec/host assignment and are never
+  promotion groups. Reassemble candidate IDs exactly once and verify each
+  partition digest and byte count before accepting worker output. Model and
+  reasoning values are scheduling recommendations, not live ledger mutations;
+  byte counts are a deterministic payload proxy, not tokenizer measurements.
 - Review diffs and machine-generated counts before reading raw evidence.
 - If a worker returns no response, recover from its immutable outputs before
   spending tokens on a second capture.
