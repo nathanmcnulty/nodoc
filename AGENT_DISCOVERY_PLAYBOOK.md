@@ -123,6 +123,79 @@ completed artifacts, never by sharing a live page target or output directory.
 This reduces browser races, duplicate traffic, context consumption, and
 different agents reaching different conclusions from the same evidence.
 
+### Cost-aware orchestration policy
+
+Use capability tiers rather than sending every stage to the strongest model:
+
+1. **Preflight and queue management: orchestrator**
+   - Restores locked dependencies, validates plans and recipes, checks the fork
+     remote, verifies authenticated CDP targets, and assigns immutable artifact
+     directories before workers start.
+2. **Deterministic capture and artifact summary: inexpensive worker**
+   - Prefer `gpt-5.3-codex-spark` with low reasoning. Give it only one portal,
+     the execution prompt, and its artifact assignment.
+3. **Fallback execution: inexpensive general worker**
+   - Use `gpt-5.6-luna` when Spark is unavailable or repeatedly fails to execute
+     tools. Do not escalate merely because the portal produced few candidates.
+4. **Scope, safety, selector repair, and promotion review: stronger reviewer**
+   - Escalate only decisions that require judgment, as listed in the runbook.
+
+Keep live capture concurrency at one worker per CDP endpoint. Determine total
+supportable concurrency from independently owned resources, not from the number
+of available model slots:
+
+```text
+live capture workers = min(authenticated CDP endpoints, isolated machines,
+                           unique artifact assignments)
+offline workers = bounded by immutable artifact sets and review capacity
+```
+
+On the common single-machine setup with port `9222`, queue many portal
+assignments but serialize their capture workers. Parallelize plan generation,
+completed-artifact analysis, scope review, and independent promotion PRs only
+when they cannot write the same files.
+
+### Durable orchestration ledger
+
+Track each portal through explicit states instead of relying on chat context:
+
+```text
+queued -> preflight-ready -> capturing -> captured -> analyzed
+       -> scope-review -> promotion-pr -> reviewed -> merged
+```
+
+Terminal side states are `blocked` and `failed`, each with a documented blocker
+code or failure reason and a next action. Store at least the spec ID, recipe,
+model, artifact directory, timestamps, handoff counts, recommended next action,
+PR URL, review result, and merge result. A retry creates a new attempt record and
+new artifact directory; it does not overwrite history.
+
+### Token-minimizing handoffs
+
+- Give capture workers only `PORTAL_DISCOVERY_AGENT_PROMPT.md`, the portal ID,
+  and assignment-specific constraints; do not paste the playbook into their
+  prompt.
+- Have workers read `discovery-run.json` and `candidate-handoff.json` first.
+  A missing expected `summary.json` means the capture command was interrupted;
+  raw artifacts remain escalation-only.
+- Pass promotion workers only assigned handoff entries and the relevant spec
+  family, not the full capture corpus.
+- Review diffs and machine-generated counts before reading raw evidence.
+- If a worker returns no response, recover from its immutable outputs before
+  spending tokens on a second capture.
+
+### PR lifecycle ownership
+
+- One promotion assignment should produce one focused PR.
+- The orchestrator verifies the PR targets `nathanmcnulty/nodoc` before push or
+  merge. Do not push to or open PRs against the official upstream repository or
+  another fork.
+- Never merge directly from a discovery worker.
+- After CI and review, merge only the reviewed commit set. Create a new follow-up
+  assignment for recipe repair, adjacent host/spec work, or deferred candidates.
+- Rebase or resolve conflicts in the promotion branch, rerun the relevant
+  validation, and require another review when the effective diff changes.
+
 ## Recommended workflow
 
 ### 1. Review the current repo baseline
