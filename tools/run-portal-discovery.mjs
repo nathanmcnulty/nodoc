@@ -305,18 +305,6 @@ async function inspectRecipeSafety(recipePath) {
     }
   }
 
-  if (summary.finalizedComplete === false) {
-    return {
-      captureStatus: "interrupted",
-      captureComplete: false,
-      reason: summary.timeoutPhase ? "finalization-timeout" : "finalization-incomplete",
-      blocker: {
-        phase: summary.timeoutPhase ?? "finalization",
-        detail: summary.timeoutDetail ?? "Capture finalization did not complete.",
-      },
-      source: "summary.json",
-    };
-  }
   return {
     safe: unsafeActions.length === 0,
     unsafeActions,
