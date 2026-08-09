@@ -948,6 +948,33 @@ function partitionObservationsByScope(observations, specContext) {
   });
 }
 
+const knownStaticAssetPrefixes = [
+  "/entracopilot/Content/",
+  "/Content/Dynamic/",
+  "/Content/ExtensionManifest/",
+  "/Scripts/",
+  "/AzureHubs/Content/",
+  "/iam/Content/",
+  "/erm/Content/",
+];
+
+function isKnownStaticAssetPath(normalizedPath) {
+  const lowerPath = normalizedPath.toLowerCase();
+  return knownStaticAssetPrefixes.some((prefix) => lowerPath.startsWith(prefix.toLowerCase()))
+    || /(?:^|\/)[^/]*(?:[.-])[a-f0-9]{8,}(?:\.[^/]+)?$/iu.test(normalizedPath);
+}
+
+function partitionAdjacentStaticAssets(observations) {
+  return observations.reduce((result, observation) => {
+    result[isKnownStaticAssetPath(observation.normalizedPath) ? "staticAssets" : "actionable"]
+      .push(observation);
+    return result;
+  }, {
+    actionable: [],
+    staticAssets: [],
+  });
+}
+
 function buildScopeReviewContext(observation, specContext, specContexts) {
   const scope = classifyObservationScope(observation, specContext);
   const scopeReason = !scope.matchesHostname && !scope.matchesPrefix
@@ -1176,6 +1203,7 @@ function partitionSuppressedCandidates(candidates, suppressions) {
 
 function buildSummary({
   adjacentObservationCount,
+  adjacentStaticAssetObservationCount,
   candidates,
   includeAdjacentRequested,
   observations,
@@ -1198,6 +1226,7 @@ function buildSummary({
     countsByEvidence,
     documentedMatches,
     adjacentObservationCount,
+    adjacentStaticAssetObservationCount,
     adjacentCandidatesPromoted: false,
     includeAdjacentRequested,
     inScopeObservationCount: scopedObservationCount,
@@ -1319,6 +1348,7 @@ async function main() {
     }),
   ];
   const { adjacent, inScope } = partitionObservationsByScope(observations, specContext);
+  const adjacentPartitions = partitionAdjacentStaticAssets(adjacent);
   const candidateSuppressions = getCandidateSuppressions(specRecord.title);
   const candidatePartitions = partitionSuppressedCandidates(aggregateCandidates(
     inScope,
@@ -1327,13 +1357,26 @@ async function main() {
   ), candidateSuppressions);
   const candidates = candidatePartitions.active;
   const scopeReviewCandidates = aggregateCandidates(
-    adjacent,
+    adjacentPartitions.actionable,
     specContext,
     true,
     { scopeReview: true, specContexts },
   ).map((candidate) => sanitizeScopeReviewCandidate(candidate));
+  const staticAssetCandidates = aggregateCandidates(
+    adjacentPartitions.staticAssets,
+    specContext,
+    true,
+  ).map((candidate) => ({
+    ...candidate,
+    suppressionNote: "Known static portal asset; retained as analyzer evidence but excluded from adjacent scope review.",
+  }));
+  const suppressedCandidates = [
+    ...candidatePartitions.suppressed,
+    ...staticAssetCandidates,
+  ];
   const summary = buildSummary({
     adjacentObservationCount: adjacent.length,
+    adjacentStaticAssetObservationCount: adjacentPartitions.staticAssets.length,
     candidates,
     includeAdjacentRequested: args.includeAdjacent,
     observations,
@@ -1341,14 +1384,14 @@ async function main() {
     scopedObservationCount: inScope.length,
     specRecord,
     scriptUrls,
-    suppressedCandidateCount: candidatePartitions.suppressed.length,
+    suppressedCandidateCount: suppressedCandidates.length,
   });
   const payload = {
     summary,
     candidates,
     graphqlOperations,
     scopeReviewCandidates,
-    suppressedCandidates: candidatePartitions.suppressed,
+    suppressedCandidates,
   };
   summary.graphqlOperationCount = graphqlOperations.length;
 
