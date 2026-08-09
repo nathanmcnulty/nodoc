@@ -1,4 +1,5 @@
 import { spawn } from "node:child_process";
+import { createHash } from "node:crypto";
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
@@ -10,6 +11,16 @@ import {
   crawlMetadataByTitle,
 } from "./portal-discovery-metadata.mjs";
 import { buildSpecInventory, repoRoot } from "./spec-quality-lib.mjs";
+import {
+  claimAssignment,
+  defaultLedgerPath,
+  enqueueAssignment,
+  ensureLedgerFileReady,
+  getLedgerViewFromFile,
+  resumeAttempt,
+  updateAttempt,
+  updateAttemptFromDiscoveryRun,
+} from "./portal-discovery-ledger.mjs";
 
 const validPhases = new Set(["all", "analyze", "capture", "plan"]);
 
@@ -19,6 +30,25 @@ function parseArgs(argv) {
     includeAdjacent: false,
     json: false,
     phase: "all",
+    ledgerMode: null,
+    ledgerPath: defaultLedgerPath,
+    assignmentId: null,
+    attemptNumber: null,
+    endpoint: null,
+    priority: "normal",
+    model: null,
+    reasoning: null,
+    workerId: null,
+    view: "all",
+    status: null,
+    promotionRef: null,
+    reviewRef: null,
+    mergeRef: null,
+    nextAction: null,
+    blocker: null,
+    specId: null,
+    includeAttempts: false,
+    discoveryRun: null,
     portal: null,
     profile: "bounded",
     recipe: null,
@@ -49,6 +79,62 @@ function parseArgs(argv) {
     } else if (argument === "--recipe" && next) {
       args.recipe = path.resolve(next);
       index += 1;
+    } else if (argument === "--ledger" && next) {
+      args.ledgerMode = next;
+      index += 1;
+    } else if (argument === "--ledger-path" && next) {
+      args.ledgerPath = path.resolve(next);
+      index += 1;
+    } else if (argument === "--assignment-id" && next) {
+      args.assignmentId = next;
+      index += 1;
+    } else if ((argument === "--attempt" || argument === "--attempt-number") && next) {
+      args.attemptNumber = Number(next);
+      index += 1;
+    } else if (argument === "--endpoint" && next) {
+      args.endpoint = next;
+      index += 1;
+    } else if (argument === "--priority" && next) {
+      args.priority = next;
+      index += 1;
+    } else if (argument === "--model" && next) {
+      args.model = next;
+      index += 1;
+    } else if (argument === "--reasoning" && next) {
+      args.reasoning = next;
+      index += 1;
+    } else if (argument === "--worker-id" && next) {
+      args.workerId = next;
+      index += 1;
+    } else if (argument === "--view" && next) {
+      args.view = next;
+      index += 1;
+    } else if (argument === "--status" && next) {
+      args.status = next;
+      index += 1;
+    } else if (argument === "--promotion-ref" && next) {
+      args.promotionRef = next;
+      index += 1;
+    } else if (argument === "--review-ref" && next) {
+      args.reviewRef = next;
+      index += 1;
+    } else if (argument === "--merge-ref" && next) {
+      args.mergeRef = next;
+      index += 1;
+    } else if (argument === "--blocker" && next) {
+      args.blocker = parseJsonArgument(next);
+      index += 1;
+    } else if (argument === "--spec-id" && next) {
+      args.specId = next;
+      index += 1;
+    } else if (argument === "--discovery-run" && next) {
+      args.discoveryRun = path.resolve(next);
+      index += 1;
+    } else if (argument === "--next-action" && next) {
+      args.nextAction = parseJsonArgument(next);
+      index += 1;
+    } else if (argument === "--include-attempts") {
+      args.includeAttempts = true;
     } else if (argument === "--seed-artifacts" && next) {
       args.seedArtifacts = path.resolve(next);
       index += 1;
@@ -61,19 +147,56 @@ function parseArgs(argv) {
     }
   }
 
-  if (!args.portal) {
-    throw new Error("Missing required --portal <title-or-spec-id>.");
-  }
-  if (!validPhases.has(args.phase)) {
-    throw new Error(`Invalid --phase "${args.phase}". Use plan, capture, analyze, or all.`);
-  }
   if (args.profile !== "bounded") {
     throw new Error(`Invalid --profile "${args.profile}". Only the bounded profile is currently supported.`);
   }
-  if (args.phase !== "plan" && !args.artifacts) {
-    throw new Error(`--artifacts <directory> is required for phase "${args.phase}".`);
+  if (!args.ledgerMode) {
+    if (!args.portal) {
+      throw new Error("Missing required --portal <title-or-spec-id>.");
+    }
+    if (!validPhases.has(args.phase)) {
+      throw new Error(`Invalid --phase "${args.phase}". Use plan, capture, analyze, or all.`);
+    }
+    if (args.phase !== "plan" && !args.artifacts) {
+      throw new Error(`--artifacts <directory> is required for phase "${args.phase}".`);
+    }
+    return args;
+  }
+
+  if (!new Set(["enqueue", "status", "claim", "update", "resume"]).has(args.ledgerMode)) {
+    throw new Error("Invalid --ledger value. Use enqueue, status, claim, update, or resume.");
+  }
+  if (args.ledgerMode === "enqueue" && (!args.endpoint || (!args.portal && !args.specId))) {
+    throw new Error("Ledger enqueue requires --endpoint and either --portal or --spec-id.");
+  }
+  if (["update", "resume"].includes(args.ledgerMode) && !args.assignmentId) {
+    throw new Error(`Ledger ${args.ledgerMode} requires --assignment-id.`);
+  }
+  if (args.attemptNumber !== null && !Number.isInteger(args.attemptNumber)) {
+    throw new Error("--attempt-number must be an integer.");
   }
   return args;
+}
+
+function parseJsonArgument(raw) {
+  try {
+    return JSON.parse(raw);
+  } catch {
+    const [code, ...detail] = raw.split(":");
+    return { code: code.trim(), detail: detail.join(":").trim() || null };
+  }
+}
+
+async function recipeDigest(recipePath) {
+  return createHash("sha256").update(await readFile(recipePath, "utf8")).digest("hex");
+}
+
+function resolveLedgerSpec(specInventory, args) {
+  if (args.specId) {
+    const normalized = args.specId.trim().toLowerCase();
+    return specInventory.find((record) => record.specId.toLowerCase() === normalized) ?? null;
+  }
+  return args.portal ? resolvePortal(specInventory, args.portal) : null;
 }
 
 function resolvePortal(specInventory, portalInput) {
@@ -268,6 +391,28 @@ async function writeRunState(artifactDir, payload) {
   );
 }
 
+async function persistTerminalRun(args, runState) {
+  await persistTerminalRun(args, runState);
+  if (!args.assignmentId) {
+    return;
+  }
+  const attemptNumber = args.attemptNumber
+    ?? await latestAttemptNumber(args.ledgerPath, args.assignmentId);
+  if (!attemptNumber) {
+    throw new Error(`Unable to locate an attempt for ${args.assignmentId}.`);
+  }
+  await updateAttemptFromDiscoveryRun({
+    ledgerPath: args.ledgerPath,
+    assignmentId: args.assignmentId,
+    attemptNumber,
+    artifactDir: args.artifacts,
+    model: args.model,
+    reasoning: args.reasoning,
+    workerId: args.workerId,
+    discoveryRun: runState,
+  });
+}
+
 async function readInteractionHealth(artifactDir) {
   let summary;
   try {
@@ -355,8 +500,130 @@ async function runNode(scriptPath, argumentsList) {
   });
 }
 
+async function latestAttemptNumber(ledgerPath, assignmentId) {
+  const view = await getLedgerViewFromFile({
+    ledgerPath,
+    filters: { assignmentId },
+    includeAttempts: true,
+  });
+  return view.assignments[0]?.latestAttempt?.attemptNumber ?? null;
+}
+
+async function runLedgerMode(args) {
+  await ensureLedgerFileReady(args.ledgerPath);
+
+  if (args.ledgerMode === "status") {
+    console.log(JSON.stringify(await getLedgerViewFromFile({
+      ledgerPath: args.ledgerPath,
+      view: args.view,
+      filters: {
+        assignmentId: args.assignmentId,
+        specId: args.specId,
+        portal: args.portal,
+        state: args.status,
+      },
+      includeAttempts: args.includeAttempts,
+    }), null, 2));
+    return;
+  }
+
+  if (args.ledgerMode === "claim") {
+    console.log(JSON.stringify(await claimAssignment({
+      ledgerPath: args.ledgerPath,
+      endpoint: args.endpoint,
+      phase: args.phase,
+      workerId: args.workerId,
+      model: args.model,
+      reasoning: args.reasoning,
+    }), null, 2));
+    return;
+  }
+
+  if (args.ledgerMode === "resume") {
+    console.log(JSON.stringify(await resumeAttempt({
+      ledgerPath: args.ledgerPath,
+      assignmentId: args.assignmentId,
+      artifactDir: args.artifacts,
+      phase: args.phase,
+      workerId: args.workerId,
+      model: args.model,
+      reasoning: args.reasoning,
+    }), null, 2));
+    return;
+  }
+
+  if (args.ledgerMode === "update") {
+    const attemptNumber = args.attemptNumber
+      ?? await latestAttemptNumber(args.ledgerPath, args.assignmentId);
+    if (!attemptNumber) {
+      throw new Error(`Unable to locate an attempt for ${args.assignmentId}.`);
+    }
+    const common = {
+      ledgerPath: args.ledgerPath,
+      assignmentId: args.assignmentId,
+      attemptNumber,
+      artifactDir: args.artifacts || undefined,
+      model: args.model,
+      reasoning: args.reasoning,
+    };
+    const result = args.discoveryRun
+      ? await updateAttemptFromDiscoveryRun({
+        ...common,
+        discoveryRun: JSON.parse(await readFile(args.discoveryRun, "utf8")),
+      })
+      : await updateAttempt({
+        ...common,
+        status: args.status || undefined,
+        nextAction: args.nextAction,
+        blocker: args.blocker,
+        promotionRef: args.promotionRef,
+        reviewRef: args.reviewRef,
+        mergeRef: args.mergeRef,
+        actor: args.workerId,
+      });
+    console.log(JSON.stringify(result.assignment, null, 2));
+    return;
+  }
+
+  const spec = resolveLedgerSpec(await buildSpecInventory(), args);
+  if (!spec) {
+    throw new Error("Could not resolve ledger assignment from --portal or --spec-id.");
+  }
+  const selectedRecipe = args.recipe || await selectRecipe(spec, null);
+  if (!selectedRecipe) {
+    throw new Error(`No checked-in recipe exists for ${spec.title}.`);
+  }
+  const digest = await recipeDigest(selectedRecipe);
+  const assignmentId = args.assignmentId
+    || `${spec.specId}-${createHash("sha256")
+      .update(`${spec.specId}|${args.endpoint}|${digest}|${args.phase}|${args.priority}`)
+      .digest("hex")
+      .slice(0, 16)}`;
+  const result = await enqueueAssignment({
+    ledgerPath: args.ledgerPath,
+    assignmentId,
+    specId: spec.specId,
+    portal: spec.title,
+    recipePath: selectedRecipe,
+    recipeDigest: digest,
+    endpoint: args.endpoint,
+    profile: args.profile,
+    phase: args.phase,
+    priority: args.priority,
+    artifactDir: args.artifacts,
+    model: args.model,
+    reasoning: args.reasoning,
+    workerId: args.workerId,
+  });
+  console.log(JSON.stringify(result.assignment, null, 2));
+}
+
 async function main() {
   const args = parseArgs(process.argv.slice(2));
+  if (args.ledgerMode) {
+    await runLedgerMode(args);
+    return;
+  }
   const specInventory = await buildSpecInventory();
   const specRecord = resolvePortal(specInventory, args.portal);
   const recipePath = await selectRecipe(specRecord, args.recipe);
@@ -386,14 +653,14 @@ async function main() {
         existingArtifacts: existingArtifacts.slice(0, 20),
         remediation: "Choose a new empty artifact directory and rerun the command.",
       };
-      await writeRunState(args.artifacts, runState);
+      await persistTerminalRun(args, runState);
       process.exitCode = 2;
       console.error(JSON.stringify(runState, null, 2));
       return;
     }
   }
 
-  await writeRunState(args.artifacts, runState);
+  await persistTerminalRun(args, runState);
 
   try {
     if (["all", "capture"].includes(args.phase)) {
@@ -403,7 +670,7 @@ async function main() {
           code: "recipe-missing",
           detail: `No checked-in capture recipe exists for ${specRecord.title}.`,
         };
-        await writeRunState(args.artifacts, runState);
+        await persistTerminalRun(args, runState);
         process.exitCode = 2;
         console.error(JSON.stringify(runState, null, 2));
         return;
@@ -417,7 +684,7 @@ async function main() {
           detail: "The selected recipe contains active-looking actions.",
           unsafeActions: recipeSafety.unsafeActions,
         };
-        await writeRunState(args.artifacts, runState);
+        await persistTerminalRun(args, runState);
         process.exitCode = 2;
         console.error(JSON.stringify(runState, null, 2));
         return;
@@ -432,7 +699,7 @@ async function main() {
           remediation:
             "Open an authenticated Edge/Chrome session with remote debugging on 127.0.0.1:9222, then rerun the same command.",
         };
-        await writeRunState(args.artifacts, runState);
+        await persistTerminalRun(args, runState);
         process.exitCode = 2;
         console.error(JSON.stringify(runState, null, 2));
         return;
@@ -472,7 +739,7 @@ async function main() {
           remediation:
             "Authenticate in the existing remote-debugging browser profile, choose a new empty artifact directory, and rerun the command.",
         };
-        await writeRunState(args.artifacts, runState);
+        await persistTerminalRun(args, runState);
         process.exitCode = 2;
         console.error(JSON.stringify(runState, null, 2));
         return;
@@ -486,7 +753,7 @@ async function main() {
           remediation:
             "Repair the checked-in recipe or confirm the portal route is available, then rerun with a new empty artifact directory.",
         };
-        await writeRunState(args.artifacts, runState);
+        await persistTerminalRun(args, runState);
         process.exitCode = 2;
         console.error(JSON.stringify(runState, null, 2));
         return;
@@ -501,7 +768,7 @@ async function main() {
           remediation:
             "Regenerate the summary from the immutable action-results artifact and resolve the accounting mismatch before continuing.",
         };
-        await writeRunState(args.artifacts, runState);
+        await persistTerminalRun(args, runState);
         process.exitCode = 2;
         console.error(JSON.stringify(runState, null, 2));
         return;
@@ -515,7 +782,7 @@ async function main() {
           remediation:
             "Repair the navigation recipe or confirm the portal route is available, then rerun with a new empty artifact directory.",
         };
-        await writeRunState(args.artifacts, runState);
+        await persistTerminalRun(args, runState);
         process.exitCode = 2;
         console.error(JSON.stringify(runState, null, 2));
         return;
@@ -535,7 +802,7 @@ async function main() {
         remediation:
           "Regenerate the summary from the immutable action-results artifact and resolve the accounting mismatch before continuing.",
       };
-      await writeRunState(args.artifacts, runState);
+      await persistTerminalRun(args, runState);
       process.exitCode = 2;
       console.error(JSON.stringify(runState, null, 2));
       return;
@@ -548,7 +815,7 @@ async function main() {
         remediation:
           "Repair the navigation recipe or confirm the portal route is available, then rerun with a new empty artifact directory.",
       };
-      await writeRunState(args.artifacts, runState);
+      await persistTerminalRun(args, runState);
       process.exitCode = 2;
       console.error(JSON.stringify(runState, null, 2));
       return;
@@ -601,13 +868,13 @@ async function main() {
         : null,
       runState: path.join(args.artifacts, "discovery-run.json"),
     };
-    await writeRunState(args.artifacts, runState);
+    await persistTerminalRun(args, runState);
     console.log(JSON.stringify(runState, null, 2));
   } catch (error) {
     runState.status = "failed";
     runState.completedAt = new Date().toISOString();
     runState.blocker = {
-      code: "pipeline-failed",
+      code: error?.message?.includes("after signal") ? "pipeline-interrupted" : "pipeline-failed",
       detail: error instanceof Error ? error.message : String(error),
     };
     await writeRunState(args.artifacts, runState);
