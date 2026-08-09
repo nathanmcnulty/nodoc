@@ -87,7 +87,22 @@ function sanitizeScopeReviewCandidate(candidate) {
   };
 }
 
-function deriveRecommendedNextAction(counts, metadataNextPass) {
+function deriveRecommendedNextAction(counts, metadataNextPass, recovery) {
+  if (recovery?.captureStatus !== "complete") {
+    return {
+      code: recovery?.captureStatus === "authentication-blocked"
+        ? "authenticate-and-retry-capture"
+        : ["corrupted-minimum-artifacts", "missing-minimum-artifacts"].includes(recovery?.captureStatus)
+          ? "repair-minimum-artifacts-and-retry-capture"
+          : "complete-or-retry-capture",
+      summary: recovery?.captureStatus === "authentication-blocked"
+        ? "Authenticate the dedicated browser session and retry capture before treating any candidates as promotion-ready."
+        : ["corrupted-minimum-artifacts", "missing-minimum-artifacts"].includes(recovery?.captureStatus)
+          ? "Repair or regenerate the corrupted minimum capture artifacts and retry capture before promotion review."
+          : "Complete or retry the interrupted capture before treating any candidates as promotion-ready.",
+    };
+  }
+
   if (counts.confirmedRead > 0) {
     return {
       code: "review-and-promote-confirmed-candidates",
@@ -163,7 +178,9 @@ function deriveRecommendedNextAction(counts, metadataNextPass) {
 export function buildCandidateHandoff({
   candidateQueue,
   interactionHealth = null,
+  interactionHealthStatus = null,
   metadataNextPass,
+  recovery = null,
   specId,
   specTitle,
 }) {
@@ -251,6 +268,12 @@ export function buildCandidateHandoff({
     },
     counts,
     interactionHealth: sanitizeInteractionHealth(interactionHealth),
+    interactionHealthStatus: interactionHealthStatus ?? {
+      available: Boolean(interactionHealth),
+      reason: interactionHealth ? null : "canonical-health-unavailable",
+      source: interactionHealth ? "summary-and-action-results" : "analysis-artifacts",
+    },
+    recovery,
     adjacentConfirmedReadCandidates,
     adjacentConfirmedSafetyReviewCandidates,
     adjacentSuccessfullyProbedCandidates,
@@ -260,6 +283,6 @@ export function buildCandidateHandoff({
     successfullyProbedCandidates,
     bundleOnlyCandidates,
     suppressedCandidates,
-    recommendedNextAction: deriveRecommendedNextAction(counts, metadataNextPass),
+    recommendedNextAction: deriveRecommendedNextAction(counts, metadataNextPass, recovery),
   };
 }
