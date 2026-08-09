@@ -518,12 +518,17 @@ function applyRecipeConfig(args, recipeConfig, recipePath) {
     args.actions = ensureArray(recipeConfig.actions).map(normalizeRecipeAction);
   }
 
+  if (recipeConfig.captureScripts !== undefined) {
+    args.captureScripts = Boolean(recipeConfig.captureScripts);
+  }
+
   args.seedRouteGroups = normalizeSeedRouteGroups(recipeConfig.seedRouteGroups);
 }
 
 async function parseArgs(argv) {
   const args = {
     actions: [],
+    captureScripts: true,
     evaluateTimeoutMs: defaultEvaluateTimeoutMs,
     label: null,
     matchHosts: [],
@@ -2310,6 +2315,31 @@ async function main() {
   };
 
   async function writeBundleArtifacts() {
+    if (!args.captureScripts) {
+      await writeFile(
+        path.join(args.outDir, "bundle-downloads.json"),
+        `${JSON.stringify([], null, 2)}\n`,
+        "utf8",
+      );
+      await writeFile(
+        path.join(args.outDir, "bundle-candidates.json"),
+        `${JSON.stringify({
+          bundleCount: 0,
+          candidates: [],
+          graphqlOperations: [],
+          parseFailures: [],
+        }, null, 2)}\n`,
+        "utf8",
+      );
+      latestBundleSummary = {
+        bundleCount: 0,
+        candidateCount: 0,
+        graphqlOperationCount: 0,
+        parseFailureCount: 0,
+      };
+      return;
+    }
+
     const bundleDir = path.join(args.outDir, "bundles");
     await mkdir(bundleDir, { recursive: true });
     const downloads = [];
@@ -2573,7 +2603,9 @@ async function main() {
       url: rootSnapshot.url ?? null,
     });
 
-    await capturePageScriptBodies(pageLabel);
+    if (args.captureScripts) {
+      await capturePageScriptBodies(pageLabel);
+    }
     await flushArtifacts();
     return {
       pageState: pageStates.at(-1),

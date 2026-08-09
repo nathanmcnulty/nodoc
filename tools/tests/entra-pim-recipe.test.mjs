@@ -36,6 +36,7 @@ test("Entra PIM deep recipe uses observed href branches only", async () => {
   const featureClickActions = clickActions.filter((action) => action.value !== rootHref);
 
   assert.equal(recipe.url, commonMenuUrl);
+  assert.equal(recipe.captureScripts, false);
   assert.equal(clickActions.length, featureHrefs.length * 2);
   assert.deepEqual(
     [...new Set(featureClickActions.map((action) => action.value))].sort(),
