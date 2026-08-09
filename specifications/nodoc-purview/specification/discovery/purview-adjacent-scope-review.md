@@ -21,7 +21,7 @@ Artifacts directory: C:\Users\NATHAN~1\AppData\Local\Temp\nodoc-purview-discover
 | GET | /manifest.json | {tenant}.prod.ext.{tenant}.{tenant}.azure.com | unspecified | host-and-path-out-of-scope |
 | GET | /releasenotes/releasenotes.json | {tenant}.prod.ext.{tenant}.{tenant}.azure.com | unspecified | host-and-path-out-of-scope |
 | GET | /account | api.{tenant}.microsoft.com | unspecified | host-and-path-out-of-scope |
-| GET | /provisioning/checkTenant | api.{tenant}.microsoft.com | unspecified | host-and-path-out-of-scope |
+| GET | /provisioning/checkTenant | api.{tenant}.microsoft.com | security-copilot | host-and-path-out-of-scope |
 | GET | /config/v1/LokiService/1.0.0.0 | ecs.office.com | security-copilot | host-and-path-out-of-scope |
 | GET | /tenants | management.azure.com | unspecified | host-and-path-out-of-scope |
 | GET | /api/Auth/getSpaAuthCode | purview.microsoft.com | purview-portal | path-out-of-scope |
@@ -34,7 +34,7 @@ Artifacts directory: C:\Users\NATHAN~1\AppData\Local\Temp\nodoc-purview-discover
 | POST | /Collector/3.0 | {tenant}.{tenant}.{tenant}.microsoft.com | unspecified | host-and-path-out-of-scope |
 | POST | /OneCollector/1.0 | {tenant}.{tenant}.{tenant}.microsoft.com | unspecified | host-and-path-out-of-scope |
 | POST | /account/features | api.{tenant}.microsoft.com | unspecified | host-and-path-out-of-scope |
-| POST | /api/gateway/actions/collections/me | api.{tenant}.microsoft.com | unspecified | host-and-path-out-of-scope |
+| POST | /api/gateway/actions/collections/me | api.{tenant}.microsoft.com | security-copilot | host-and-path-out-of-scope |
 | POST | /api/auth/IsInRoles | purview.microsoft.com | purview-portal | path-out-of-scope |
 | POST | /api/log/Put | purview.microsoft.com | purview-portal | path-out-of-scope |
 
