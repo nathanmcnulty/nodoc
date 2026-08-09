@@ -186,6 +186,15 @@ model, artifact directory, timestamps, handoff counts, recommended next action,
 PR URL, review result, and merge result. A retry creates a new attempt record and
 new artifact directory; it does not overwrite history.
 
+Capture leases are owned by one worker and are sized from the configured capture
+failsafe plus bounded finalization margin. A worker may renew only while the
+attempt is still running and the persisted lease owner matches; stale recovery
+therefore reclaims genuinely abandoned owners without allowing another worker to
+extend them. Terminal updates release the lease exactly once. If stale recovery
+or another worker has already persisted a terminal state, later finalization is
+idempotent, preserves the authoritative blocker and provenance, and must not
+turn the discovery run into a secondary pipeline-failed transition error.
+
 ### Token-minimizing handoffs
 
 - Give capture workers only `PORTAL_DISCOVERY_AGENT_PROMPT.md`, the portal ID,

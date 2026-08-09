@@ -16,6 +16,8 @@ import {
   enqueueAssignment,
   ensureLedgerFileReady,
   getLedgerViewFromFile,
+  ledgerLeaseRenewalIntervalMs,
+  ledgerStaleLeaseMs,
   resumeAttempt,
   updateAttempt,
   updateAttemptFromDiscoveryRun,
@@ -478,6 +480,10 @@ async function prepareLedgerAttempt(args, specRecord, recipePath) {
     workerId: args.workerId,
     model: args.model,
     reasoning: args.reasoning,
+    leaseMs: Math.max(
+      ledgerStaleLeaseMs,
+      args.captureSupervisionTimeoutMs + args.supervisionTimeoutMs + ledgerLeaseRenewalIntervalMs,
+    ),
   });
   if (!claimed) {
     throw new Error(
