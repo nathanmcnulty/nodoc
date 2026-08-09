@@ -393,6 +393,93 @@ paths:
         '404':
           $ref: common.yml#/components/responses/NotFound
 
+  /admin/api/products/inactiveUsers/OneDriveUsage:
+    get:
+      summary: Get inactive OneDrive users
+      description: >-
+        Retrieve inactive OneDrive user summary data from the products reporting surface.
+      operationId: Reports.GetInactiveUsersOneDriveUsage
+      tags: [Reports]
+      x-nodoc-operation-context:
+        surface: Reports
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Observed as a confirmed same-origin GET in bounded SharePoint admin capture.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/products/inactiveUsers/OneDriveUsageVSB:
+    get:
+      summary: Get inactive OneDrive usage baseline data
+      description: >-
+        Retrieve inactive OneDrive user data used by the legacy VSB (View/Scope blade).
+      operationId: Reports.GetInactiveUsersOneDriveUsageVSB
+      tags: [Reports]
+      x-nodoc-operation-context:
+        surface: Reports
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Observed as a confirmed same-origin GET in bounded SharePoint admin capture.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /admin/api/products/inactiveUsers/TeamsUsage:
+    get:
+      summary: Get inactive Teams users
+      description: >-
+        Retrieve inactive Teams user summary data from the products reporting surface.
+      operationId: Reports.GetInactiveUsersTeamsUsage
+      tags: [Reports]
+      x-nodoc-operation-context:
+        surface: Reports
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Observed as a confirmed same-origin GET in bounded SharePoint admin capture.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: pending
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
   /admin/api/reports/config/GetTenantConfiguration:
     get:
       summary: Get reports tenant configuration
@@ -416,3 +503,4 @@ paths:
 
         '404':
           $ref: common.yml#/components/responses/NotFound
+

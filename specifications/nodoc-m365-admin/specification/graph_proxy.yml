@@ -530,6 +530,209 @@ paths:
         '404':
           $ref: common.yml#/components/responses/NotFound
 
+  /fd/msgraph/beta/reports/getOneDriveActivityFileCounts(period='D30'):
+    get:
+      summary: Get OneDrive activity file counts
+      description: >-
+        Retrieve OneDrive activity file count report data through the admin Graph proxy.
+      operationId: GraphProxy.GetOneDriveActivityFileCounts
+      tags: [GraphProxy]
+      x-nodoc-operation-context:
+        surface: Reports
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Confirmed in bounded SharePoint admin capture.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /fd/msgraph/beta/reports/getOneDriveUsageAccountCounts(period='D30'):
+    get:
+      summary: Get OneDrive usage account counts
+      description: >-
+        Retrieve OneDrive usage account count report data through the admin Graph proxy.
+      operationId: GraphProxy.GetOneDriveUsageAccountCounts
+      tags: [GraphProxy]
+      x-nodoc-operation-context:
+        surface: Reports
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Confirmed in bounded SharePoint admin capture.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /fd/msgraph/beta/reports/getOneDriveUsageFileCounts(period='D180'):
+    get:
+      summary: Get OneDrive usage file counts
+      description: >-
+        Retrieve OneDrive usage file count report data through the admin Graph proxy.
+      operationId: GraphProxy.GetOneDriveUsageFileCounts
+      tags: [GraphProxy]
+      x-nodoc-operation-context:
+        surface: Reports
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Confirmed in bounded SharePoint admin capture.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /fd/msgraph/beta/reports/getSharePointActivityFileCounts(period='D30'):
+    get:
+      summary: Get SharePoint activity file counts
+      description: >-
+        Retrieve SharePoint activity file count report data through the admin Graph proxy.
+      operationId: GraphProxy.GetSharePointActivityFileCounts
+      tags: [GraphProxy]
+      x-nodoc-operation-context:
+        surface: Reports
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Confirmed in bounded SharePoint admin capture.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /fd/msgraph/beta/reports/getSharePointSiteUsageFileCounts(period='D180'):
+    get:
+      summary: Get SharePoint site usage file counts
+      description: >-
+        Retrieve SharePoint site usage file count report data through the admin Graph proxy.
+      operationId: GraphProxy.GetSharePointSiteUsageFileCounts
+      tags: [GraphProxy]
+      x-nodoc-operation-context:
+        surface: Reports
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Confirmed in bounded SharePoint admin capture.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /fd/msgraph/beta/reports/getSharePointSiteUsageSiteCounts(period='D30'):
+    get:
+      summary: Get SharePoint site usage site counts
+      description: >-
+        Retrieve SharePoint site usage site count report data through the admin Graph proxy.
+      operationId: GraphProxy.GetSharePointSiteUsageSiteCounts
+      tags: [GraphProxy]
+      x-nodoc-operation-context:
+        surface: Reports
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Confirmed in bounded SharePoint admin capture.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
+  /fd/msgraph/beta/reports/getSharePointSiteUsageStorage(period='D180'):
+    get:
+      summary: Get SharePoint site usage storage
+      description: >-
+        Retrieve SharePoint site usage storage report data through the admin Graph proxy.
+      operationId: GraphProxy.GetSharePointSiteUsageStorage
+      tags: [GraphProxy]
+      x-nodoc-operation-context:
+        surface: Reports
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Confirmed in bounded SharePoint admin capture.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+        '404':
+          $ref: common.yml#/components/responses/NotFound
+
   /fd/MsGraph/beta/security/dataDiscovery/cloudAppDiscovery/uploadedStreams:
     get:
       summary: List cloud app discovery uploaded streams
@@ -759,3 +962,4 @@ components:
                 type: string
               appliesTo:
                 type: string
+
