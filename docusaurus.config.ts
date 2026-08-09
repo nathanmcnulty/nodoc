@@ -186,11 +186,6 @@ const config: Config = {
       title: "nodoc",
       items: [
         {
-          to: "/getting-started",
-          label: "Getting Started",
-          position: "left",
-        },
-        {
           href: "https://github.com/nathanmcnulty/nodoc",
           className: "icon--github navbar--icon-link",
           "aria-label": "GitHub repository",

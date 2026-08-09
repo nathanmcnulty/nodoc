@@ -11,11 +11,19 @@ import {
   sanitizeObservedTransportUrl,
 } from "./discovery-safety.mjs";
 import {
+  buildTransitionEvidence,
   decodeBoundedCdpBody,
+  deriveActionEligibility,
   responseBodyCaptureLimit,
   shouldRequestResponseBody,
   summarizeActionResults,
 } from "./discovery-capture-policy.mjs";
+import {
+  buildStableEvidenceId,
+  captureArtifactSchemaVersion,
+  CdpAttributionRegistry,
+  normalizeAttributionUrl,
+} from "./cdp-attribution.mjs";
 
 const apiBase = "http://127.0.0.1:9222";
 const defaultNavigationTimeoutMs = 15000;
@@ -394,6 +402,8 @@ function normalizeRecipeAction(action) {
       : rawType;
   return {
     ...parseActionSpec(`${scopedType}=${action.value ?? ""}`),
+    highValue: action.highValue === true,
+    optional: action.optional === true,
     required: Boolean(action.required),
   };
 }
@@ -508,12 +518,17 @@ function applyRecipeConfig(args, recipeConfig, recipePath) {
     args.actions = ensureArray(recipeConfig.actions).map(normalizeRecipeAction);
   }
 
+  if (recipeConfig.captureScripts !== undefined) {
+    args.captureScripts = Boolean(recipeConfig.captureScripts);
+  }
+
   args.seedRouteGroups = normalizeSeedRouteGroups(recipeConfig.seedRouteGroups);
 }
 
 async function parseArgs(argv) {
   const args = {
     actions: [],
+    captureScripts: true,
     evaluateTimeoutMs: defaultEvaluateTimeoutMs,
     label: null,
     matchHosts: [],
@@ -1132,7 +1147,10 @@ async function writeMergedArray(filePath, items, keyBuilder) {
     }
   }
 
-  await writeFile(filePath, `${JSON.stringify(Array.from(merged.values()), null, 2)}\n`, "utf8");
+  const ordered = Array.from(merged.entries())
+    .sort(([left], [right]) => left.localeCompare(right))
+    .map(([, value]) => value);
+  await writeFile(filePath, `${JSON.stringify(ordered, null, 2)}\n`, "utf8");
 }
 
 async function createTarget() {
@@ -1340,6 +1358,15 @@ class CdpClient {
 
 function requestKey(requestId, sessionId = null) {
   return `${sessionId ?? ""}:${requestId}`;
+}
+
+function requestFamily(request) {
+  try {
+    const parsed = new URL(request.url);
+    return `${String(request.method || "GET").toUpperCase()} ${parsed.pathname}`;
+  } catch {
+    return `${String(request.method || "GET").toUpperCase()} ${String(request.url || "")}`;
+  }
 }
 
 function isDomCapableTarget(sessionId, targetInfo) {
@@ -1633,7 +1660,9 @@ function toApiRecord(request, portalName) {
     const parsed = new URL(request.url);
     const querySample = parsed.search ? parsed.search : null;
     return {
+      schemaVersion: captureArtifactSchemaVersion,
       ...requestEvidence(request),
+      attribution: request.attribution,
       confidence: "confirmed-traffic",
       method: request.method,
       path: parsed.pathname,
@@ -1646,7 +1675,9 @@ function toApiRecord(request, portalName) {
     };
   } catch {
     return {
+      schemaVersion: captureArtifactSchemaVersion,
       ...requestEvidence(request),
+      attribution: request.attribution,
       confidence: "confirmed-traffic",
       method: request.method,
       path: request.url,
@@ -1666,6 +1697,20 @@ function buildActionLabel(action, index) {
   return `${String(index + 1).padStart(2, "0")}-${action.type}-${compactValue || "step"}`
     .replace(/[<>:"/\\|?*]+/gu, "-")
     .replace(/\s+/gu, "-");
+}
+
+function stateFingerprintFromSnapshot(snapshot) {
+  if (!snapshot || typeof snapshot !== "object") {
+    return null;
+  }
+
+  return sha256(JSON.stringify({
+    controls: snapshot.controls ?? [],
+    links: snapshot.sameOriginLinks ?? [],
+    tabs: snapshot.visibleTabs ?? [],
+    title: snapshot.title ?? null,
+    url: snapshot.url ?? null,
+  }));
 }
 
 function resolveMaybeRelativeUrl(value, baseUrl) {
@@ -1868,17 +1913,44 @@ async function main() {
   const scriptRecords = [];
   const probeResults = [];
   const probeOutcomes = new Map();
+  const probeAssociations = new Map();
   const passiveTransports = [];
   const actionResults = [];
   const boundedNetworkSessions = new Set();
   const configuredSessions = new Set();
-  const sessions = new Map([
-    [null, { targetTitle: target.title ?? null, targetType: "page", targetUrl: target.url ?? null }],
-  ]);
-  let activePageLabel = args.label ?? "seed-00";
-  let activeProbe = null;
+  let currentActionIndex = -1;
+  let currentContext = {
+    actionIndex: currentActionIndex,
+    attempt: 0,
+    checkpoint: args.label ?? "seed-00",
+    pageLabel: args.label ?? "seed-00",
+    pageUrl: args.url,
+  };
+  const attributionRegistry = new CdpAttributionRegistry(target, currentContext);
+  const sessions = attributionRegistry.sessions;
   let currentLoadResolver = null;
   let lastNetworkActivityAt = Date.now();
+
+  function setCaptureContext(pageLabel, actionIndex = currentActionIndex, pageUrl = null, attempt = 0) {
+    currentContext = {
+      actionIndex,
+      attempt,
+      checkpoint: pageLabel,
+      pageLabel,
+      pageUrl: pageUrl ?? currentContext.pageUrl ?? null,
+    };
+    attributionRegistry.setRootContext(currentContext);
+  }
+
+  function resolveEventAttribution(sessionId, params = {}) {
+    return attributionRegistry.resolve({
+      documentURL: params.documentURL,
+      frameId: params.frameId,
+      loaderId: params.loaderId,
+      sessionId,
+      targetUrl: sessions.get(sessionId)?.targetUrl ?? null,
+    });
+  }
 
   async function configureSession(sessionId = null) {
     const key = sessionId ?? "root";
@@ -1922,20 +1994,16 @@ async function main() {
   });
 
   client.on("Target.attachedToTarget", async (params, metadata) => {
-    if (metadata.sessionId) {
-      return;
-    }
-
     const childSessionId = params.sessionId ?? null;
-    if (!childSessionId) {
+    if (!childSessionId || childSessionId === metadata.sessionId) {
       return;
     }
 
-    sessions.set(childSessionId, {
-      targetTitle: params.targetInfo?.title ?? null,
-      targetType: params.targetInfo?.type ?? null,
-      targetUrl: params.targetInfo?.url ?? null,
-    });
+    attributionRegistry.registerSession(
+      childSessionId,
+      params.targetInfo ?? {},
+      metadata.sessionId ?? null,
+    );
 
     try {
       await configureSession(childSessionId);
@@ -1945,11 +2013,47 @@ async function main() {
     }
   });
 
+  client.on("Target.detachedFromTarget", (params, metadata) => {
+    const detachedSessionId = params.sessionId ?? null;
+    if (detachedSessionId) {
+      attributionRegistry.markDetached(detachedSessionId);
+    }
+  });
+
+  client.on("Target.targetInfoChanged", (params, metadata) => {
+    attributionRegistry.updateTarget(metadata.sessionId ?? null, params.targetInfo ?? {});
+  });
+
+  client.on("Page.frameAttached", (params, metadata) => {
+    attributionRegistry.recordFrameAttached(
+      metadata.sessionId ?? null,
+      params.frameId,
+      params.parentFrameId,
+    );
+  });
+
+  client.on("Page.frameNavigated", (params, metadata) => {
+    attributionRegistry.recordFrameNavigated(metadata.sessionId ?? null, params.frame);
+  });
+
+  client.on("Page.frameDetached", (params, metadata) => {
+    const sessionId = metadata.sessionId ?? null;
+    const entry = sessions.get(sessionId);
+    if (entry?.frameId === params.frameId) {
+      entry.frameId = null;
+      entry.frameUrl = null;
+    }
+  });
+
   client.on("Network.requestWillBeSent", (params, metadata) => {
     const resourceType = params.type ?? params.initiator?.type ?? "";
     const requestUrl = params.request?.url;
     const sessionId = metadata.sessionId ?? null;
     const key = requestKey(params.requestId, sessionId);
+    const attribution = resolveEventAttribution(sessionId, params);
+    const probeId = requestUrl
+      ? probeAssociations.get(`${sessionId ?? "root"}:${normalizeAttributionUrl(requestUrl)}`) ?? null
+      : null;
 
     if (requestUrl && !["EventSource", "WebSocket"].includes(resourceType)) {
       inFlightRequests.add(key);
@@ -1958,13 +2062,15 @@ async function main() {
 
     if (resourceType === "Script" && requestUrl) {
       scriptRecords.push({
-        page: activePageLabel,
+        attribution,
+        page: attribution.pageLabel,
         sessionId,
         url: requestUrl,
       });
       scriptRequestMap.set(key, {
+        attribution,
         mimeType: null,
-        page: activePageLabel,
+        page: attribution.pageLabel,
         sessionId,
         status: null,
         url: requestUrl,
@@ -1977,8 +2083,10 @@ async function main() {
         return;
       }
       passiveTransports.push({
+        attribution,
         method: params.request?.method ?? "GET",
-        page: activePageLabel,
+        page: attribution.pageLabel,
+        schemaVersion: captureArtifactSchemaVersion,
         transport: resourceType === "Ping" ? "beacon" : "event-source",
         url: sanitizedUrl,
       });
@@ -1990,10 +2098,22 @@ async function main() {
 
     const sanitizedRequestBody = sanitizeCapturedBody(params.request.postData ?? null);
     requestMap.set(key, {
+      attribution,
+      evidenceId: buildStableEvidenceId("request", {
+        actionIndex: attribution.actionIndex,
+        attempt: attribution.attempt,
+        frameId: attribution.frameId,
+        loaderId: attribution.loaderId,
+        method: params.request.method,
+        normalizedUrl: normalizeAttributionUrl(requestUrl),
+        pageLabel: attribution.pageLabel,
+        sessionId: attribution.sessionId,
+        targetId: attribution.targetId,
+      }),
       headers: params.request.headers ?? {},
       method: params.request.method,
-      pageLabel: activePageLabel,
-      probeId: activeProbe?.url === requestUrl ? activeProbe.id : null,
+      pageLabel: attribution.pageLabel,
+      probeId,
       requestBody: truncate(sanitizedRequestBody),
       requestShapeFingerprint: bodyShapeFingerprint(sanitizedRequestBody),
       resourceType,
@@ -2019,27 +2139,33 @@ async function main() {
     }
   });
 
-  client.on("Network.webSocketCreated", (params) => {
+  client.on("Network.webSocketCreated", (params, metadata) => {
+    const attribution = resolveEventAttribution(metadata.sessionId ?? null, params);
     const sanitizedUrl = sanitizeObservedTransportUrl(params.url);
     if (!sanitizedUrl) {
       return;
     }
     passiveTransports.push({
+      attribution,
       method: "GET",
-      page: activePageLabel,
+      page: attribution.pageLabel,
+      schemaVersion: captureArtifactSchemaVersion,
       transport: "websocket",
       url: sanitizedUrl,
     });
   });
 
-  client.on("Network.webTransportCreated", (params) => {
+  client.on("Network.webTransportCreated", (params, metadata) => {
+    const attribution = resolveEventAttribution(metadata.sessionId ?? null, params);
     const sanitizedUrl = sanitizeObservedTransportUrl(params.url);
     if (!sanitizedUrl) {
       return;
     }
     passiveTransports.push({
+      attribution,
       method: "CONNECT",
-      page: activePageLabel,
+      page: attribution.pageLabel,
+      schemaVersion: captureArtifactSchemaVersion,
       transport: "webtransport",
       url: sanitizedUrl,
     });
@@ -2129,6 +2255,16 @@ async function main() {
     return evaluateJson(client, "location.href");
   }
 
+  async function getRootStateFingerprint() {
+    try {
+      return stateFingerprintFromSnapshot(
+        await evaluateJson(client, buildDomSnapshotExpression()),
+      );
+    } catch {
+      return null;
+    }
+  }
+
   async function collectSnapshots() {
     const snapshots = [];
     for (const [sessionId, targetInfo] of sessions.entries()) {
@@ -2143,6 +2279,10 @@ async function main() {
         }
 
         snapshots.push({
+          schemaVersion: captureArtifactSchemaVersion,
+          targetId: targetInfo?.targetId ?? null,
+          parentFrameId: targetInfo?.parentFrameId ?? null,
+          parentSessionId: targetInfo?.parentSessionId ?? null,
           sessionId: sessionId ?? "root",
           targetTitle: targetInfo?.targetTitle ?? null,
           targetType: targetInfo?.targetType ?? "page",
@@ -2151,6 +2291,10 @@ async function main() {
         });
       } catch (error) {
         snapshots.push({
+          schemaVersion: captureArtifactSchemaVersion,
+          targetId: targetInfo?.targetId ?? null,
+          parentFrameId: targetInfo?.parentFrameId ?? null,
+          parentSessionId: targetInfo?.parentSessionId ?? null,
           error: error instanceof Error ? error.message : String(error),
           sessionId: sessionId ?? "root",
           targetTitle: targetInfo?.targetTitle ?? null,
@@ -2171,6 +2315,31 @@ async function main() {
   };
 
   async function writeBundleArtifacts() {
+    if (!args.captureScripts) {
+      await writeFile(
+        path.join(args.outDir, "bundle-downloads.json"),
+        `${JSON.stringify([], null, 2)}\n`,
+        "utf8",
+      );
+      await writeFile(
+        path.join(args.outDir, "bundle-candidates.json"),
+        `${JSON.stringify({
+          bundleCount: 0,
+          candidates: [],
+          graphqlOperations: [],
+          parseFailures: [],
+        }, null, 2)}\n`,
+        "utf8",
+      );
+      latestBundleSummary = {
+        bundleCount: 0,
+        candidateCount: 0,
+        graphqlOperationCount: 0,
+        parseFailureCount: 0,
+      };
+      return;
+    }
+
     const bundleDir = path.join(args.outDir, "bundles");
     await mkdir(bundleDir, { recursive: true });
     const downloads = [];
@@ -2188,6 +2357,9 @@ async function main() {
         localPath: path.relative(args.outDir, absolutePath).replaceAll("\\", "/"),
         mimeType: script.mimeType,
         page: script.page,
+        schemaVersion: captureArtifactSchemaVersion,
+        targetId: script.attribution?.targetId ?? null,
+        sessionId: script.sessionId ?? null,
         sourceMapUrl: sourceMapUrlForScript(script.source, script.url),
         status: script.status,
         url: script.url,
@@ -2236,6 +2408,9 @@ async function main() {
       .filter((request) => !request.probeId)
       .map((request) => toApiRecord(request, args.portal));
     const rawRequests = filteredRequests.map((request) => ({
+      schemaVersion: captureArtifactSchemaVersion,
+      attribution: request.attribution,
+      evidenceId: request.evidenceId,
       ...requestEvidence(request),
       ...summarizeHeaderMetadata(request.headers ?? {}),
       ...summarizeResponseHeaderMetadata(request.responseHeaders ?? {}),
@@ -2281,17 +2456,17 @@ async function main() {
     await writeMergedArray(
       path.join(args.outDir, "raw-requests.json"),
       rawRequests,
-      (item) => `${item.requestFingerprint} ${item.pageLabel}`,
+      (item) => item.evidenceId ?? `${item.requestFingerprint} ${item.pageLabel}`,
     );
     await writeMergedArray(
       path.join(args.outDir, "probe-results.json"),
       probeResults,
-      (item) => `${item.method} ${item.url} ${item.page}`,
+      (item) => item.probeId ?? `${item.method} ${item.url} ${item.page}`,
     );
     await writeMergedArray(
       path.join(args.outDir, "stream-records.json"),
       passiveTransports,
-      (item) => `${item.transport} ${item.url} ${item.page}`,
+      (item) => `${item.transport} ${item.url} ${item.page} ${item.attribution?.sessionId ?? "root"}`,
     );
   }
 
@@ -2364,13 +2539,18 @@ async function main() {
     await delay(1000);
     const snapshots = await collectSnapshots();
     const rootSnapshot = snapshots.find((snapshot) => snapshot.sessionId === "root" && !snapshot.error) ?? snapshots[0] ?? {};
+    setCaptureContext(pageLabel, currentActionIndex, rootSnapshot.url ?? null);
     const requestInventory = capturedRequests
       .filter((request) => request.pageLabel === pageLabel && !request.probeId)
       .map((request) => ({
         matchesCurrentSpec: shouldMatchRequest(request.url, args),
+        attribution: request.attribution,
         method: request.method,
         path: new URL(request.url).pathname,
+        sessionId: request.sessionId ?? null,
         status: request.status,
+        targetId: request.attribution?.targetId ?? null,
+        targetType: request.attribution?.targetType ?? null,
         url: request.url,
       }));
     const combinedLinks = uniqueSorted(
@@ -2387,15 +2567,16 @@ async function main() {
         .filter((record) => record.page === pageLabel)
         .map((record) => record.url),
     );
-    const stateFingerprint = sha256(JSON.stringify({
+    const stateFingerprint = stateFingerprintFromSnapshot({
       controls: combinedControls,
-      links: combinedLinks,
-      tabs: combinedTabs,
+      sameOriginLinks: combinedLinks,
       title: rootSnapshot.title ?? null,
       url: rootSnapshot.url ?? null,
-    }));
+      visibleTabs: combinedTabs,
+    });
 
     pageStates.push({
+      schemaVersion: captureArtifactSchemaVersion,
       page: pageLabel,
       readyState: rootSnapshot.readyState ?? null,
       requestInventory,
@@ -2408,18 +2589,28 @@ async function main() {
       visibleTabs: combinedTabs,
     });
     sessionSnapshots.push({
+      schemaVersion: captureArtifactSchemaVersion,
+      checkpoint: currentContext,
       page: pageLabel,
+      targets: attributionRegistry.snapshot(),
       sessionSnapshots: snapshots,
       url: rootSnapshot.url ?? null,
     });
     scriptPages.push({
+      schemaVersion: captureArtifactSchemaVersion,
       page: pageLabel,
       scriptUrls: combinedScriptUrls,
       url: rootSnapshot.url ?? null,
     });
 
-    await capturePageScriptBodies(pageLabel);
+    if (args.captureScripts) {
+      await capturePageScriptBodies(pageLabel);
+    }
     await flushArtifacts();
+    return {
+      pageState: pageStates.at(-1),
+      snapshots,
+    };
   }
 
   async function navigateRoot(targetUrl) {
@@ -2497,22 +2688,40 @@ async function main() {
       });
   }
 
-  async function runClickAction(action) {
+  async function runClickAction(action, preActionSnapshots = null) {
     const beforeUrl = await getRootUrl();
+    const beforeStateFingerprint = await getRootStateFingerprint();
+    const beforeTargetIds = new Set(sessions.keys());
+    const beforeSnapshots = preActionSnapshots ?? await collectSnapshots();
+    const eligibility = deriveActionEligibility(action, beforeSnapshots);
     for (const [sessionId, targetInfo] of getOrderedSessions(action.scope)) {
       try {
+        attributionRegistry.setSessionContext(sessionId, currentContext);
         const result = await evaluateJson(client, buildClickExpression(action), sessionId);
         if (!result?.clicked) {
           continue;
         }
 
         const settleResult = await waitForNetworkIdle(args.postActionSettleMs);
+        const afterUrl = await getRootUrl();
+        const afterStateFingerprint = await getRootStateFingerprint();
         return {
           ...result,
-          afterUrl: await getRootUrl(),
+          afterStateFingerprint,
+          afterUrl,
           beforeUrl,
+          beforeStateFingerprint,
+          eligibility,
           sessionId: sessionId ?? "root",
           settleResult,
+          stateTransition: Boolean(
+            beforeStateFingerprint
+            && afterStateFingerprint
+            && beforeStateFingerprint !== afterStateFingerprint,
+          ),
+          targetTransition: Array.from(sessions.keys()).some(
+            (targetId) => !beforeTargetIds.has(targetId),
+          ),
           targetTitle: targetInfo?.targetTitle ?? null,
           targetType: targetInfo?.targetType ?? "page",
           targetUrl: targetInfo?.targetUrl ?? null,
@@ -2526,6 +2735,7 @@ async function main() {
       afterUrl: beforeUrl,
       beforeUrl,
       clicked: false,
+      eligibility,
     };
   }
 
@@ -2544,7 +2754,7 @@ async function main() {
 
     for (const [linkIndex, seededLink] of seededLinks.entries()) {
       const linkPageLabel = `${basePageLabel}-${String(linkIndex + 1).padStart(2, "0")}-${slugify(seededLink.url)}`;
-      activePageLabel = linkPageLabel;
+      setCaptureContext(linkPageLabel);
       const navigationResult = await navigateRoot(seededLink.url);
       actionResults.push({
         page: linkPageLabel,
@@ -2565,7 +2775,7 @@ async function main() {
       await captureCheckpoint(linkPageLabel);
     }
 
-    activePageLabel = basePageLabel;
+    setCaptureContext(basePageLabel);
 
     return {
       replayedCount: replayed.length,
@@ -2582,7 +2792,7 @@ async function main() {
 
     for (const [routeIndex, seededRoute] of seededRoutes.entries()) {
       const routePageLabel = `${basePageLabel}-${String(routeIndex + 1).padStart(2, "0")}-${slugify(seededRoute.url)}`;
-      activePageLabel = routePageLabel;
+      setCaptureContext(routePageLabel);
       const navigationResult = await navigateRoot(seededRoute.url);
       actionResults.push({
         page: routePageLabel,
@@ -2600,7 +2810,7 @@ async function main() {
       await captureCheckpoint(routePageLabel);
     }
 
-    activePageLabel = basePageLabel;
+    setCaptureContext(basePageLabel);
 
     return {
       replayedCount: replayed.length,
@@ -2659,7 +2869,7 @@ async function main() {
       queuedUrls.delete(candidate.url);
       visitedUrls.add(candidate.url);
       const pageLabel = `${basePageLabel}-${String(replayed.length + 1).padStart(2, "0")}-${slugify(candidate.url)}`;
-      activePageLabel = pageLabel;
+      setCaptureContext(pageLabel);
       const navigationResult = await navigateRoot(candidate.url);
       await captureCheckpoint(pageLabel);
       const currentState = pageStates.at(-1);
@@ -2692,7 +2902,7 @@ async function main() {
       }
     }
 
-    activePageLabel = basePageLabel;
+    setCaptureContext(basePageLabel);
     return {
       replayedCount: replayed.length,
       repeatedStateCount: replayed.filter((item) => item.repeatedState).length,
@@ -2700,27 +2910,38 @@ async function main() {
     };
   }
 
-  async function runProbeGetAction(action, pageLabel) {
-    for (const [sessionId, targetInfo] of getOrderedSessions(action.scope)) {
-      const probeId = `${pageLabel}:${sessionId ?? "root"}:${Date.now()}`;
+  async function runProbeGetAction(action, pageLabel, actionIndex) {
+    for (const [attempt, [sessionId, targetInfo]] of getOrderedSessions(action.scope).entries()) {
       try {
+        attributionRegistry.setSessionContext(sessionId, currentContext);
         const probeUrl = await evaluateJson(
           client,
           `new URL(${JSON.stringify(String(action.value || ""))}, location.href).toString()`,
           sessionId,
         );
-        activeProbe = { id: probeId, url: probeUrl };
-        let result;
-        try {
-          result = await evaluateJson(
-            client,
-            buildProbeExpression(action.value),
-            sessionId,
-            Math.max(runtimeEvaluateTimeoutMs, args.navigationTimeoutMs),
-          );
-        } finally {
-          activeProbe = null;
-        }
+        const attribution = attributionRegistry.resolve({
+          sessionId,
+          targetUrl: targetInfo?.targetUrl ?? null,
+        });
+        const probeId = buildStableEvidenceId("probe", {
+          actionIndex,
+          attempt,
+          frameId: attribution.frameId,
+          normalizedUrl: normalizeAttributionUrl(probeUrl),
+          pageLabel,
+          sessionId: attribution.sessionId,
+          targetId: attribution.targetId,
+        });
+        probeAssociations.set(
+          `${sessionId ?? "root"}:${normalizeAttributionUrl(probeUrl)}`,
+          probeId,
+        );
+        const result = await evaluateJson(
+          client,
+          buildProbeExpression(action.value),
+          sessionId,
+          Math.max(runtimeEvaluateTimeoutMs, args.navigationTimeoutMs),
+        );
         if (!result?.url) {
           probeOutcomes.set(probeId, "probe-failed");
           continue;
@@ -2745,11 +2966,13 @@ async function main() {
         probeOutcomes.set(probeId, outcome);
         const parsed = new URL(result.url);
         probeResults.push({
+          attribution,
+          probeId,
+          schemaVersion: captureArtifactSchemaVersion,
           method: "GET",
           outcome,
           page: pageLabel,
           path: parsed.pathname,
-          probeId,
           querySamples: parsed.search ? [parsed.search] : [],
           responseBodySample: sanitizedResult.body,
           status: result.status,
@@ -2763,8 +2986,6 @@ async function main() {
           targetType: targetInfo?.targetType ?? "page",
         };
       } catch {
-        activeProbe = null;
-        probeOutcomes.set(probeId, "probe-failed");
         // Try another DOM-capable target.
       }
     }
@@ -2783,21 +3004,22 @@ async function main() {
   });
 
   try {
-    activePageLabel = args.label ?? "seed-00";
+    setCaptureContext(args.label ?? "seed-00", -1, args.url);
     const initialNavigation = await navigateRoot(args.url);
     actionResults.push({
       allowCanonicalRedirect: true,
-      page: activePageLabel,
+      page: currentContext.pageLabel,
       required: true,
       result: initialNavigation,
       type: "navigate",
       value: args.url,
     });
-    await captureCheckpoint(activePageLabel);
+    await captureCheckpoint(currentContext.pageLabel);
 
     for (const [index, action] of args.actions.entries()) {
       const pageLabel = buildActionLabel(action, index);
-      activePageLabel = pageLabel;
+      currentActionIndex = index;
+      setCaptureContext(pageLabel);
 
       if (action.type === "wait-ms") {
         await delay(Number(action.value));
@@ -2841,7 +3063,7 @@ async function main() {
       }
 
       if (action.type === "probe-get") {
-        const probeResult = await runProbeGetAction(action, pageLabel);
+        const probeResult = await runProbeGetAction(action, pageLabel, index);
         actionResults.push({
           page: pageLabel,
           required: action.required,
@@ -2897,16 +3119,34 @@ async function main() {
         continue;
       }
 
-      const clickResult = await runClickAction(action);
-      actionResults.push({
+      const beforeSnapshots = await collectSnapshots();
+      const beforePageState = pageStates.at(-1);
+      const beforeUrl = await getRootUrl();
+      const beforeRequestFamilies = new Set(capturedRequests.map(requestFamily));
+      const clickResult = await runClickAction(action, beforeSnapshots);
+      const actionResult = {
+        highValue: action.highValue === true,
         page: pageLabel,
         required: action.required,
         result: clickResult,
         scope: action.scope,
         type: action.type,
         value: action.value,
+      };
+      actionResults.push(actionResult);
+      const checkpoint = await captureCheckpoint(pageLabel);
+      const afterRequestFamilies = new Set(capturedRequests.map(requestFamily));
+      actionResult.result.transitionEvidence = buildTransitionEvidence({
+        afterPageState: checkpoint?.pageState,
+        afterSnapshots: checkpoint?.snapshots,
+        afterUrl: clickResult.afterUrl ?? await getRootUrl(),
+        beforePageState,
+        beforeSnapshots,
+        beforeUrl,
+        newRequestFamilies: Array.from(afterRequestFamilies)
+          .filter((family) => !beforeRequestFamilies.has(family))
+          .sort(),
       });
-      await captureCheckpoint(pageLabel);
     }
 
     await waitForNetworkIdle(args.postActionSettleMs);
@@ -2919,12 +3159,17 @@ async function main() {
         return null;
       }
     }));
+    const actionValidation = summarizeActionResults(actionResults, {
+      includeInteractionHealth: true,
+    });
     const summary = {
-      actionValidation: summarizeActionResults(actionResults),
+      schemaVersion: captureArtifactSchemaVersion,
+      actionValidation,
       actions: actionResults.length,
       bundleDiscovery: latestBundleSummary,
       capturedApiRequests: capturedRequests.length,
       finalUrl: await getRootUrl(),
+      interactionHealth: actionValidation.interactionHealth,
       outDir: args.outDir,
       pageCount: pageStates.length,
       passiveTransportCount: passiveTransports.length,

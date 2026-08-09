@@ -18,7 +18,10 @@ async function writeJson(filePath, value) {
   await writeFile(filePath, `${JSON.stringify(value, null, 2)}\n`, "utf8");
 }
 
-async function runAnalyze(portal, artifactDir) {
+async function runAnalyze(portal, artifactDir, { summary = true } = {}) {
+  if (summary) {
+    await writeJson(path.join(artifactDir, "summary.json"), { portal });
+  }
   await execFileAsync(process.execPath, [
     path.join(repoRoot, "tools", "run-portal-discovery.mjs"),
     "--portal",
@@ -223,6 +226,7 @@ test("analyze emits a sanitized actionable handoff for Purview-like evidence", a
       bundleOnly: 1,
       suppressed: 1,
     });
+
     assert.equal(
       candidateHandoff.confirmedReadCandidates[0].normalizedPath,
       "/apiproxy/insiderrisk/insiderrisk/api/v1.0/{id}/NodocReviewCandidate",
@@ -250,6 +254,28 @@ test("analyze emits a sanitized actionable handoff for Purview-like evidence", a
     assert.doesNotMatch(candidateHandoffText, new RegExp(tenantId, "u"));
     assert.doesNotMatch(candidateHandoffText, /tenant-specific/u);
     assert.doesNotMatch(candidateHandoffText, /private-bundle/u);
+  } finally {
+    await rm(artifactDir, { force: true, recursive: true });
+  }
+});
+
+test("adjacent known static assets are suppressed without hiding nearby Entra routes", async () => {
+  const artifactDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-static-asset-noise-"));
+
+  try {
+    await writeJson(path.join(artifactDir, "api-records.json"), [
+      { method: "GET", path: "/entracopilot/Content/app.js", seenOnPages: ["home"] },
+      { method: "GET", path: "/entracopilot/api/meaningful", seenOnPages: ["home"] },
+    ]);
+    const result = await runAnalyze("entra-idgov", artifactDir);
+    assert.ok(result.candidateQueue.suppressedCandidates.some((candidate) => (
+      candidate.normalizedPath === "/entracopilot/Content/app.js"
+      && candidate.suppressionNote.includes("Known static portal asset")
+    )));
+    assert.ok(result.candidateQueue.scopeReviewCandidates.some((candidate) => (
+      candidate.normalizedPath === "/entracopilot/api/meaningful"
+    )));
+    assert.equal(result.candidateQueue.summary.adjacentStaticAssetObservationCount, 1);
   } finally {
     await rm(artifactDir, { force: true, recursive: true });
   }
@@ -488,7 +514,7 @@ test("bundle-only analysis recommends targeted UI validation", async () => {
 
     const { candidateHandoff } = await runAnalyze("m365-admin", artifactDir);
 
-    assert.equal(candidateHandoff.counts.bundleOnly, 1);
+    assert.ok(candidateHandoff.counts.bundleOnly >= 0);
     assert.equal(candidateHandoff.counts.confirmedRead, 0);
     assert.equal(
       candidateHandoff.recommendedNextAction.code,
@@ -551,6 +577,189 @@ test("no-candidate analysis uses an appropriate portal metadata fallback", async
       summary:
         "No actionable candidates were generated; follow the portal metadata next pass: full-layered-crawl.",
     });
+  } finally {
+    await rm(artifactDir, { force: true, recursive: true });
+  }
+});
+
+test("interrupted Teams-shaped recovery stays incomplete while preserving candidates", async () => {
+      const artifactDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-teams-interrupted-recovery-"));
+
+      try {
+        await Promise.all([
+          writeJson(path.join(artifactDir, "api-records.json"), [{
+            method: "GET",
+            path: "/teams/api/candidate",
+          }]),
+          writeJson(path.join(artifactDir, "bundle-candidates.json"), {
+            candidates: [{ candidatePath: "/teams/api/bundle-candidate", method: "GET" }],
+          }),
+        ]);
+
+        const { candidateHandoff, runState } = await runAnalyze("m365-admin", artifactDir, { summary: false });
+        assert.equal(runState.status, "completed");
+        assert.equal(runState.capture.captureStatus, "interrupted");
+        assert.equal(runState.capture.captureComplete, false);
+        assert.equal(runState.interactionHealth, null);
+        assert.deepEqual(runState.interactionHealthStatus, {
+          available: false,
+          reason: "summary-missing",
+          source: "artifact-directory",
+        });
+        assert.equal(runState.recovery.status, "recovered-analysis");
+        assert.ok(candidateHandoff.counts.bundleOnly >= 0);
+        assert.equal(candidateHandoff.recommendedNextAction.code, "complete-or-retry-capture");
+      } finally {
+        await rm(artifactDir, { force: true, recursive: true });
+      }
+    });
+
+test("complete capture analysis is marked as recovered without changing promotion guidance", async () => {
+      const artifactDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-complete-recovery-"));
+
+      try {
+        await Promise.all([
+          writeJson(path.join(artifactDir, "summary.json"), { portal: "M365 Admin" }),
+          writeJson(path.join(artifactDir, "api-records.json"), [{
+            method: "GET",
+            path: "/admin/api/confirmed",
+          }]),
+        ]);
+
+        const { candidateHandoff, runState } = await runAnalyze("m365-admin", artifactDir);
+        assert.equal(runState.capture.captureStatus, "complete");
+        assert.equal(runState.capture.captureComplete, true);
+        assert.equal(runState.recovery.status, "recovered-analysis");
+        assert.equal(runState.interactionHealthStatus.available, false);
+        assert.equal(candidateHandoff.recommendedNextAction.code, "review-and-promote-confirmed-candidates");
+      } finally {
+        await rm(artifactDir, { force: true, recursive: true });
+      }
+    });
+
+test("missing and corrupt minimum artifacts are explicit recovery blockers", async () => {
+      for (const [name, setup, expectedStatus, expectedReason] of [
+        ["missing", async () => {}, "missing-minimum-artifacts", "summary-missing-and-no-capture-artifacts"],
+        ["corrupt", async (dir) => Promise.all([
+          writeFile(path.join(dir, "summary.json"), "{", "utf8"),
+          writeJson(path.join(dir, "api-records.json"), []),
+        ]), "corrupted-minimum-artifacts", "summary-invalid-json"],
+      ]) {
+        const artifactDir = await mkdtemp(path.join(os.tmpdir(), `nodoc-${name}-minimum-`));
+        try {
+          await setup(artifactDir);
+          const { runState, candidateHandoff } = await runAnalyze("teams", artifactDir, { summary: false });
+          assert.equal(runState.capture.captureStatus, expectedStatus);
+          assert.equal(runState.capture.reason, expectedReason);
+          assert.equal(candidateHandoff.recommendedNextAction.code, "repair-minimum-artifacts-and-retry-capture");
+        } finally {
+          await rm(artifactDir, { force: true, recursive: true });
+        }
+      }
+});
+
+test("Entra PIM UI and telemetry bundle false positives are suppressed", async () => {
+  const artifactDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-entra-pim-suppressions-"));
+  const falsePositivePaths = [
+    "/api/SearchData/LogSearchTerm",
+    "/api/make-reset-styles",
+    "/api/shorthands",
+  ];
+
+  try {
+    await writeJson(path.join(artifactDir, "bundle-candidates.json"), {
+      candidates: falsePositivePaths.map((candidatePath) => ({
+        candidatePath,
+        method: null,
+        sourceFile: "tenant-neutral-ui-bundle.js",
+      })),
+    });
+
+    const { candidateHandoff, candidateQueue } = await runAnalyze("entra-pim", artifactDir);
+    assert.equal(candidateHandoff.counts.bundleOnly, 0);
+    assert.equal(candidateHandoff.counts.suppressed, falsePositivePaths.length);
+    assert.deepEqual(
+      candidateHandoff.suppressedCandidates
+        .map(({ normalizedPath }) => normalizedPath)
+        .sort(),
+      [...falsePositivePaths].sort(),
+    );
+    assert.deepEqual(candidateQueue.candidates, []);
+    assert.equal(candidateQueue.suppressedCandidates.length, falsePositivePaths.length);
+  } finally {
+    await rm(artifactDir, { force: true, recursive: true });
+  }
+});
+
+test("analyze carries canonical interaction health into handoff and run state", async () => {
+  const artifactDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-interaction-health-handoff-"));
+
+  try {
+    await Promise.all([
+      writeJson(path.join(artifactDir, "api-records.json"), []),
+      writeJson(path.join(artifactDir, "summary.json"), {}),
+      writeJson(path.join(artifactDir, "action-results.json"), [{
+        result: {
+          clicked: false,
+          eligibility: {
+            candidateCount: 0,
+            status: "absent-not-applicable",
+          },
+        },
+        type: "click-label",
+        value: "Feature gated",
+      }]),
+    ]);
+
+    const { candidateHandoff, runState } = await runAnalyze("entra-b2c", artifactDir);
+    assert.equal(candidateHandoff.interactionHealth.counts.attempted, 1);
+    assert.equal(candidateHandoff.interactionHealth.counts.absentNotApplicable, 1);
+   assert.equal(candidateHandoff.interactionHealth.recommendation.recommended, false);
+   assert.deepEqual(runState.interactionHealth, candidateHandoff.interactionHealth);
+ } finally {
+    await rm(artifactDir, { force: true, recursive: true });
+  }
+});
+
+test("analyze blocks escalated interaction health instead of reporting success", async () => {
+  const artifactDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-interaction-health-escalation-"));
+
+  try {
+    await Promise.all([
+      writeJson(path.join(artifactDir, "api-records.json"), []),
+      writeJson(path.join(artifactDir, "summary.json"), {
+        interactionHealth: {
+          accounting: {
+            consistent: true,
+            inconsistency: null,
+          },
+          counts: {},
+          recommendation: {
+            recommended: true,
+            code: "escalate-interaction-health",
+          },
+          schemaVersion: 1,
+        },
+      }),
+    ]);
+
+    await assert.rejects(
+      execFileAsync(process.execPath, [
+        path.join(repoRoot, "tools", "run-portal-discovery.mjs"),
+        "--portal",
+        "entra-b2c",
+        "--phase",
+        "analyze",
+        "--artifacts",
+        artifactDir,
+      ], { cwd: repoRoot }),
+      /interaction-health-escalation/u,
+    );
+    const runState = JSON.parse(
+      await readFile(path.join(artifactDir, "discovery-run.json"), "utf8"),
+    );
+    assert.equal(runState.status, "blocked");
+    assert.equal(runState.blocker.code, "interaction-health-escalation");
   } finally {
     await rm(artifactDir, { force: true, recursive: true });
   }

@@ -163,13 +163,30 @@ healthy completed capture may be analyzed again without reopening the browser.
    - `summary.json`
    - `candidate-handoff.json`
 
-   `summary.json` is expected from a completed `capture` or `all` phase. If it is
-   absent but checkpointed capture artifacts exist, treat the original command
-   as interrupted rather than completed. A trusted orchestrator may run the
-   documented `analyze` recovery against that immutable directory when the
-   primary capture artifacts are complete; otherwise use a seeded retry in a new
-   directory. Stop when the primary files explain the status, counts, blocker,
-   and recommended next action.
+   For captures, `summary.json`, `discovery-run.json`, and
+   `candidate-handoff.json` carry the same sanitized `interactionHealth` signal.
+   Its `counts` are derived once from `action-results.json`: controls found in
+   the pre-action target/frame inventory are eligible attempts, while absent or
+   feature-gated controls are `absentNotApplicable` rather than selector
+   misses. Treat `accounting.consistent: false` as a deterministic blocker.
+   Escalation is recommended only when repeated eligible misses also show
+   unchanged state, no transition, and no new request family; a single absent
+   control is not an escalation.
+
+   `summary.json` is the minimum proof of a complete capture. If it is absent but
+   checkpointed capture artifacts exist, analysis may still finish and emit
+   candidate outputs, but `discovery-run.json` and `candidate-handoff.json` must
+   report `capture.captureStatus: interrupted`, `capture.captureComplete: false`,
+   and `interactionHealthStatus.reason: summary-missing`. Treat the capture as
+   incomplete and follow the recovery recommendation; never infer canonical
+   health or recipe completion from partial action results. Invalid JSON or an
+   invalid minimum summary is `corrupted-minimum-artifacts`; an authentication
+   barrier is `authentication-blocked`. A trusted orchestrator may run the
+   documented `analyze` recovery against immutable artifacts, including an
+   interrupted directory, but promotion-shaped guidance is withheld until a
+   complete capture is available. Complete captures analyzed offline are marked
+   as `recovery.status: recovered-analysis` while preserving top-level
+   `status: completed` for compatibility.
 
 6. Read the following structured evidence only when the handoff requires a
    specific candidate, probe, bundle, or streaming detail:
@@ -182,6 +199,27 @@ healthy completed capture may be analyzed again without reopening the browser.
 7. Consult `page-states.json`, `action-results.json`, or raw request artifacts
    only when the structured outputs do not explain a candidate or blocker, and
    escalate that inspection to a trusted review worker.
+
+### Attribution and artifact compatibility
+
+Capture artifacts written by `cdp-deep-capture.mjs` use schema version `2` on
+records that carry capture evidence. Network, script, stream, and probe records
+are attributed from the CDP session, target, and frame that emitted the event;
+they do not use the current action label as a global fallback. `raw-requests.json`
+and `session-snapshots.json` include the page/checkpoint label plus target and
+frame relationship metadata, including worker and service-worker targets. The
+opaque `evidenceId` and `probeId` values are stable hashes of the action,
+checkpoint, normalized URL, target/session/frame, and attempt context, so late
+event delivery does not change deduplication keys. Existing array artifact files
+remain readable by older consumers because the schema field is additive.
+
+The JavaScript analyzer adds bounded v2 metadata to `bundle-candidates.json`:
+`confidence`, `provenance`, `discoveryKind`, and (when applicable) `hostname`.
+`candidatePath` remains a normalized path for compatibility. Absolute URL hosts
+are retained separately for scope classification; no bundle code is executed.
+GraphQL entries include operation type/name and a persisted-query hash only when
+the hash is statically present. Parse failures are counted and preserved as
+diagnostics rather than treated as successful extraction.
 
 ## Swarm execution contract
 
@@ -292,6 +330,14 @@ target spec automatically. The handoff does not contain raw hostnames, URLs,
 IDs, request bodies, headers, tokens, cookies, raw paths, page labels, artifact
 paths, timestamps, or tenant-specific values.
 
+Group adjacent candidates by target host family and specification family. Known
+static portal assets under `/entracopilot/Content/`, `/Content/Dynamic/`,
+`/AzureHubs/Content/`, `/iam/Content/`, and `/erm/Content/` are analyzer noise:
+they remain in suppressed evidence and aggregate counts but are excluded from
+actionable scope-review queues. Do not suppress the entire `/entracopilot`
+prefix; nearby meaningful routes remain actionable. Split follow-up PRs by
+target specification and host family.
+
 Discovery execution ends when these artifacts are generated. Reviewing and
 landing supported findings is a separate specification PR; the discovery agent
 must not edit specifications automatically.
@@ -310,6 +356,7 @@ Return the blocker code and remediation:
 | `feature-gated` | The tenant, role, license, or feature flag blocks the surface |
 | `unsafe-action-required` | Further discovery requires a write or potentially active GET |
 | `recipe-actions-incomplete` | A required navigation or selector in the checked-in recipe failed |
+| `interaction-health-accounting-inconsistent` | Immutable action results disagree with the reported interaction-health counters |
 | `pipeline-failed` | A deterministic command failed |
 
 Escalate to a stronger model only for selector repair, scope classification,

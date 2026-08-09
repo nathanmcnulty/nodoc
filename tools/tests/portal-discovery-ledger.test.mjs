@@ -1,0 +1,153 @@
+import assert from "node:assert/strict";
+import { appendFile, mkdir, mkdtemp, readFile, rm, utimes, writeFile } from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
+import test from "node:test";
+
+import {
+  buildLedgerState,
+  claimAssignment,
+  enqueueAssignment,
+  getLedgerViewFromFile,
+  readLedgerRecords,
+  resumeAttempt,
+  updateAttempt,
+} from "../portal-discovery-ledger.mjs";
+
+async function fixture(t) {
+  const directory = await mkdtemp(path.join(os.tmpdir(), "portal-ledger-"));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  return path.join(directory, "ledger.jsonl");
+}
+
+function assignment(ledgerPath, assignmentId, overrides = {}) {
+  return {
+    ledgerPath,
+    assignmentId,
+    specId: "admin",
+    portal: "Admin portal",
+    recipePath: path.join(process.cwd(), "tools", "recipes", "admin.json"),
+    recipeDigest: "a".repeat(64),
+    endpoint: "https://admin.example.test",
+    profile: "bounded",
+    phase: "capture",
+    priority: "normal",
+    artifactDir: path.join(os.tmpdir(), "private-user", assignmentId),
+    ...overrides,
+  };
+}
+
+test("enqueue is idempotent and stores portable sanitized paths", async (t) => {
+  const ledgerPath = await fixture(t);
+  const input = assignment(ledgerPath, "job-1");
+
+  const [first, second] = await Promise.all([
+    enqueueAssignment(input),
+    enqueueAssignment(input),
+  ]);
+
+  assert.equal([first.noop, second.noop].filter(Boolean).length, 1);
+  const records = await readLedgerRecords(ledgerPath);
+  assert.equal(records.length, 1);
+  assert.equal(records[0].value.payload.recipePath, "tools/recipes/admin.json");
+  assert.equal(records[0].value.payload.artifactDir, "[external]/job-1");
+  assert.doesNotMatch(await readFile(ledgerPath, "utf8"), /private-user/u);
+});
+
+test("concurrent claims serialize and preserve one endpoint lease", async (t) => {
+  const ledgerPath = await fixture(t);
+  await enqueueAssignment(assignment(ledgerPath, "job-1"));
+  await enqueueAssignment(assignment(ledgerPath, "job-2"));
+
+  const claims = await Promise.all([
+    claimAssignment({
+      ledgerPath,
+      endpoint: "admin.example.test:443",
+      workerId: "worker-1",
+      now: "2026-01-01T00:00:00.000Z",
+    }),
+    claimAssignment({
+      ledgerPath,
+      endpoint: "admin.example.test:443",
+      workerId: "worker-2",
+      now: "2026-01-01T00:00:00.000Z",
+    }),
+  ]);
+
+  assert.equal(claims.filter(Boolean).length, 1);
+  const view = await getLedgerViewFromFile({
+    ledgerPath,
+    now: Date.parse("2026-01-01T00:00:01.000Z"),
+  });
+  assert.equal(view.assignments.filter((entry) => entry.state === "capturing").length, 1);
+  assert.equal(view.assignments.filter((entry) => entry.state === "queued").length, 1);
+});
+
+test("expired leases become stale and can resume deterministically", async (t) => {
+  const ledgerPath = await fixture(t);
+  await enqueueAssignment(assignment(ledgerPath, "job-1"));
+  await claimAssignment({
+    ledgerPath,
+    endpoint: "admin.example.test:443",
+    now: "2026-01-01T00:00:00.000Z",
+  });
+
+  test("partial tails are ignored and reported without poisoning valid state", async (t) => {
+    const ledgerPath = await fixture(t);
+    await enqueueAssignment(assignment(ledgerPath, "job-1"));
+    await appendFile(ledgerPath, '{"recordVersion":1,"eventType":"assignment-created"', "utf8");
+
+    const records = await readLedgerRecords(ledgerPath);
+    assert.equal(records.length, 1);
+    const view = await getLedgerViewFromFile({ ledgerPath });
+    assert.deepEqual(view.counts.partialTail, {
+      line: 2,
+      policy: "ignored-until-next-complete-record",
+    });
+    assert.equal(view.assignments[0].assignmentId, "job-1");
+  });
+
+  test("invalid transitions and immutable retry attempts are rejected", async (t) => {
+    const ledgerPath = await fixture(t);
+    await enqueueAssignment(assignment(ledgerPath, "job-1"));
+    await assert.rejects(
+      updateAttempt({ ledgerPath, assignmentId: "job-1", attemptNumber: 1, status: "completed" }),
+      /Cannot transition status from queued to completed/u,
+    );
+    const resumed = await resumeAttempt({ ledgerPath, assignmentId: "job-1" });
+    assert.equal(resumed.attempt.attemptNumber, 2);
+    await claimAssignment({ ledgerPath, endpoint: "admin.example.test:443", workerId: "worker-1" });
+    await assert.rejects(
+      resumeAttempt({ ledgerPath, assignmentId: "job-1" }),
+      /Cannot resume a running attempt/u,
+    );
+  });
+
+  test("stale lock reclamation is atomic and leaves no lock after callback failure", async (t) => {
+    const ledgerPath = await fixture(t);
+    const lockPath = `${ledgerPath}.lock`;
+    await mkdir(lockPath, { recursive: true });
+    await writeFile(path.join(lockPath, "owner.json"), "{}\n", "utf8");
+    const stale = new Date(Date.now() - 60_000);
+    await utimes(lockPath, stale, stale);
+    await enqueueAssignment(assignment(ledgerPath, "job-1"));
+    assert.equal(await readFile(ledgerPath, "utf8").then((value) => value.includes("job-1")), true);
+    await assert.rejects(
+      updateAttempt({ ledgerPath, assignmentId: "job-1", attemptNumber: 1, status: "completed" }),
+      /Cannot transition status from queued to completed/u,
+    );
+  });
+
+  const records = await readLedgerRecords(ledgerPath);
+  const state = buildLedgerState(records, Date.parse("2026-01-01T00:06:00.000Z"));
+  assert.equal(state.assignments.get("job-1").state, "stale");
+
+  const resumed = await resumeAttempt({
+    ledgerPath,
+    assignmentId: "job-1",
+    artifactDir: path.join(os.tmpdir(), "retry-artifacts"),
+  });
+  assert.equal(resumed.attempt.attemptNumber, 2);
+  assert.equal(resumed.attempt.status, "queued");
+  assert.equal(resumed.attempt.artifactDir, "[external]/retry-artifacts");
+});
