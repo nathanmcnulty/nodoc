@@ -8,6 +8,22 @@ This is a living guide for researching undocumented portal APIs in a way that is
 
 The goal is to turn real portal behavior into high-quality specs and generated artifacts while preserving tenant safety and recording what did and did not work.
 
+## Capture provenance
+
+The deep CDP capture records use additive schema version `2` metadata. Each
+network, script, stream, and probe observation retains the deterministic
+session/target/frame attribution that produced it, including parent session or
+frame relationships for attached iframe, worker, and service-worker targets.
+Checkpoint labels are resolved from target and frame context rather than one
+mutable global page label, so responses delivered after an action transition
+remain associated with their source page. Stable `evidenceId` and `probeId`
+hashes use action index, checkpoint, normalized URL, target/session/frame, and
+attempt inputs; repeated runs with the same inputs produce the same IDs. These
+fields are intended for local artifact review and deduplication, not for the
+tenant-safe handoff, which continues to omit raw provenance and tenant values.
+Consumers that only understand the prior array artifacts can ignore the new
+fields.
+
 ## Outcomes to aim for
 
 - Confirmed API paths from live portal traffic
