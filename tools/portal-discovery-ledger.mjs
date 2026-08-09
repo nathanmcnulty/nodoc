@@ -15,6 +15,7 @@ const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), ".."
 export const defaultLedgerPath = path.join(repoRoot, ".portal-discovery-ledger.jsonl");
 export const ledgerSchemaVersion = 1;
 export const ledgerStaleLeaseMs = 5 * 60 * 1000;
+export const ledgerLeaseRenewalIntervalMs = 60 * 1000;
 
 const lockStaleMs = 30_000;
 const lockWaitMs = 10_000;
@@ -547,7 +548,9 @@ export async function enqueueAssignment(input) {
       throw new Error("Assignment creation requires specId, portal, recipePath, recipeDigest, and endpoint.");
     }
     const records = await readLedgerRecords(ledgerPath);
-    const state = buildLedgerState(records);
+    const nowMs = input.now ? Date.parse(input.now) : Date.now();
+    if (!Number.isFinite(nowMs)) throw new Error("Invalid now timestamp.");
+    const state = buildLedgerState(records, nowMs);
     const existing = state.assignments.get(assignmentId);
     if (existing) {
       if (!sameAssignment(existing, input)) {
@@ -578,7 +581,10 @@ export async function enqueueAssignment(input) {
       },
     };
     const record = await appendRecord(ledgerPath, event, createdAt);
-    const updated = buildLedgerState([...records, { line: records.length + 1, value: record }]);
+    const updated = buildLedgerState(
+      [...records, { line: records.length + 1, value: record }],
+      nowMs,
+    );
     return { assignment: assignmentView(updated.assignments.get(assignmentId)), event, noop: false };
   });
 }
@@ -622,7 +628,7 @@ export async function claimAssignment(input) {
         endpoint: chosen.endpoint,
         profile: chosen.profile,
         startedAt: now,
-        expiresAt: nowIso(nowMs + ledgerStaleLeaseMs),
+        expiresAt: nowIso(nowMs + (input.leaseMs || ledgerStaleLeaseMs)),
       },
     }, nowMs);
     const event = {
@@ -641,12 +647,46 @@ export async function claimAssignment(input) {
   });
 }
 
+export async function renewAttemptLease(input) {
+  const ledgerPath = input.ledgerPath || defaultLedgerPath;
+  return withLedgerLock(ledgerPath, async () => {
+    const now = input.now || nowIso();
+    const nowMs = Date.parse(now);
+    if (!Number.isFinite(nowMs)) throw new Error("Invalid now timestamp.");
+    const records = await readLedgerRecords(ledgerPath);
+    const state = buildLedgerState(records, nowMs);
+    const assignment = state.assignments.get(assertValidAssignmentId(input.assignmentId));
+    const attempt = assignment?.attempts.find((entry) => entry.attemptNumber === Number(input.attemptNumber));
+    if (!attempt) throw new Error("Unknown attempt for lease renewal.");
+    if (attempt.status !== "running" || attempt.lease?.owner !== sanitizeText(input.workerId || "worker", 200)) {
+      throw new Error("Cannot renew a lease not owned by this worker.");
+    }
+    const leaseMs = Number(input.leaseMs || ledgerStaleLeaseMs);
+    if (!Number.isFinite(leaseMs) || leaseMs <= 0) throw new Error("leaseMs must be positive.");
+    const next = applyPatch(attempt, {
+      lease: { ...attempt.lease, expiresAt: nowIso(nowMs + leaseMs) },
+    }, nowMs);
+    const event = {
+      eventType: "attempt-updated",
+      assignmentId: assignment.assignmentId,
+      attemptNumber: attempt.attemptNumber,
+      actor: sanitizeText(input.workerId || "worker", 200),
+      payload: next,
+    };
+    const record = await appendRecord(ledgerPath, event, now);
+    const updated = buildLedgerState([...records, { line: records.length + 1, value: record }], nowMs);
+    return { assignment: assignmentView(updated.assignments.get(assignment.assignmentId)), event };
+  });
+}
+
 export async function resumeAttempt(input) {
   const ledgerPath = input.ledgerPath || defaultLedgerPath;
   return withLedgerLock(ledgerPath, async () => {
     const assignmentId = assertValidAssignmentId(input.assignmentId);
     const records = await readLedgerRecords(ledgerPath);
-    const state = buildLedgerState(records);
+    const nowMs = input.now ? Date.parse(input.now) : Date.now();
+    if (!Number.isFinite(nowMs)) throw new Error("Invalid now timestamp.");
+    const state = buildLedgerState(records, nowMs);
     const assignment = state.assignments.get(assignmentId);
     if (!assignment) {
       throw new Error(`Unknown assignment ${assignmentId}.`);
@@ -692,11 +732,36 @@ export async function updateAttempt(input) {
       throw new Error("attemptNumber must be a positive integer.");
     }
     const records = await readLedgerRecords(ledgerPath);
-    const state = buildLedgerState(records);
+    const nowMs = input.now ? Date.parse(input.now) : Date.now();
+    if (!Number.isFinite(nowMs)) throw new Error("Invalid now timestamp.");
+    const state = buildLedgerState(records, nowMs);
     const assignment = state.assignments.get(assignmentId);
     const attempt = assignment?.attempts.find((entry) => entry.attemptNumber === attemptNumber);
     if (!attempt) {
       throw new Error(`Unknown attempt ${attemptNumber} for assignment ${assignmentId}.`);
+    }
+    if (attempt.status === "stale" && terminalStatuses.has(input.status)) {
+      return { assignment: assignmentView(assignment), event: null, noop: true };
+    }
+    if (terminalStatuses.has(attempt.status) && terminalStatuses.has(input.status)) {
+      const persisted = [...records]
+        .filter(({ value }) => value?.eventType === "attempt-updated"
+          && value.assignmentId === assignmentId
+          && Number(value.attemptNumber) === attemptNumber)
+        .at(-1)?.value?.payload;
+      if (persisted?.status === attempt.status) {
+        return { assignment: assignmentView(assignment), event: null, noop: true };
+      }
+      const event = {
+        eventType: "attempt-updated",
+        assignmentId,
+        attemptNumber,
+        actor: sanitizeText(input.actor || "orchestrator", 200),
+        payload: attempt,
+      };
+      const record = await appendRecord(ledgerPath, event, nowIso(nowMs));
+      const updated = buildLedgerState([...records, { line: records.length + 1, value: record }], nowMs);
+      return { assignment: assignmentView(updated.assignments.get(assignmentId)), event, noop: false };
     }
     const patch = Object.fromEntries(
       [
@@ -718,7 +783,7 @@ export async function updateAttempt(input) {
         "reasoning",
       ].filter((key) => input[key] !== undefined).map((key) => [key, input[key]]),
     );
-    const next = applyPatch(attempt, patch);
+    const next = applyPatch(attempt, patch, nowMs);
     if (equivalent(attempt, next)) {
       return { assignment: assignmentView(assignment), event: null, noop: true };
     }
@@ -729,7 +794,7 @@ export async function updateAttempt(input) {
       actor: sanitizeText(input.actor || "orchestrator", 200),
       payload: next,
     };
-    const record = await appendRecord(ledgerPath, event);
+    const record = await appendRecord(ledgerPath, event, nowIso(nowMs));
     const updated = buildLedgerState([...records, { line: records.length + 1, value: record }]);
     return { assignment: assignmentView(updated.assignments.get(assignmentId)), event, noop: false };
   });

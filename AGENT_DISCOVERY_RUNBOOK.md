@@ -163,8 +163,13 @@ healthy completed capture may be analyzed again without reopening the browser.
     directories, or use `analyze` as a substitute for an incomplete capture.
     Body draining, script/bundle processing, and artifact finalization are bounded
     by `--supervision-timeout-ms`. Productive capture has a separate total
-    failsafe, `--capture-supervision-timeout-ms` (15 minutes by default), so a
-    legitimate recipe is not killed by the finalization budget. If the parent
+    `--capture-supervision-timeout-ms` failsafe. The production ledger lease is
+    derived from that failsafe plus finalization margin, and long-running workers
+    may renew it only with an atomic assignment, attempt, and owner match. An
+    expired running lease is reclaimed as `stale`; a renewal from any other owner
+    is rejected and cannot extend the lease.
+    `--capture-supervision-timeout-ms` (15 minutes by default), so a legitimate
+    recipe is not killed by the finalization budget. If the parent
     failsafe expires, the parent writes `capture-failure.json` with phase
     `parent-supervision`, preserves already-written artifacts, and leaves the run
     interrupted; retry in a new seeded directory.
