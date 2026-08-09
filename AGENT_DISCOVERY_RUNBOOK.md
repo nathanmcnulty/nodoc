@@ -161,6 +161,11 @@ healthy completed capture may be analyzed again without reopening the browser.
 
     Never resume `capture` or `all` into a non-empty directory, merge artifact
     directories, or use `analyze` as a substitute for an incomplete capture.
+    Finalization is bounded by the capture and parent supervision deadlines. A
+    timeout preserves already-written artifacts and records the blocking phase
+    in `capture-failure.json`; it remains interrupted and must use a new seeded
+    retry directory. Override the conservative parent deadline only for tests
+    with `--supervision-timeout-ms <milliseconds>`.
 
 5. Read only these outputs first, in order:
 
