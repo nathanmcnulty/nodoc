@@ -1,4 +1,3 @@
-import { spawn } from "node:child_process";
 import { createHash } from "node:crypto";
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
@@ -21,6 +20,11 @@ import {
   updateAttempt,
   updateAttemptFromDiscoveryRun,
 } from "./portal-discovery-ledger.mjs";
+import {
+  ProcessSupervisionTimeoutError,
+  runNode,
+  writeParentSupervisionFailure,
+} from "./portal-discovery-process.mjs";
 
 const validPhases = new Set(["all", "analyze", "capture", "plan"]);
 
@@ -57,6 +61,7 @@ function parseArgs(argv) {
     targetId: null,
     bundleCacheDir: null,
     supervisionTimeoutMs: 120000,
+    captureSupervisionTimeoutMs: 900000,
     variables: [],
   };
 
@@ -154,6 +159,11 @@ function parseArgs(argv) {
       index += 1;
     } else if (argument.startsWith("--supervision-timeout-ms=")) {
       args.supervisionTimeoutMs = Number(argument.slice("--supervision-timeout-ms=".length));
+    } else if (argument === "--capture-supervision-timeout-ms" && next) {
+      args.captureSupervisionTimeoutMs = Number(next);
+      index += 1;
+    } else if (argument.startsWith("--capture-supervision-timeout-ms=")) {
+      args.captureSupervisionTimeoutMs = Number(argument.slice("--capture-supervision-timeout-ms=".length));
     } else if (argument === "--var" && next) {
       args.variables.push(next);
       index += 1;
@@ -165,6 +175,9 @@ function parseArgs(argv) {
   }
   if (!Number.isFinite(args.supervisionTimeoutMs) || args.supervisionTimeoutMs <= 0) {
     throw new Error(`Invalid --supervision-timeout-ms "${args.supervisionTimeoutMs}".`);
+  }
+  if (!Number.isFinite(args.captureSupervisionTimeoutMs) || args.captureSupervisionTimeoutMs <= 0) {
+    throw new Error(`Invalid --capture-supervision-timeout-ms "${args.captureSupervisionTimeoutMs}".`);
   }
   if (!args.ledgerMode) {
     if (!args.portal) {
@@ -590,44 +603,6 @@ async function preflightCdp() {
   }
 }
 
-async function runNode(scriptPath, argumentsList, timeoutMs) {
-  await new Promise((resolve, reject) => {
-    const child = spawn(process.execPath, [scriptPath, ...argumentsList], {
-      cwd: repoRoot,
-      stdio: "inherit",
-    });
-    let settled = false;
-    const timeout = setTimeout(() => {
-      if (settled) {
-        return;
-      }
-      settled = true;
-      child.kill();
-      reject(new Error(`${path.basename(scriptPath)} exceeded the ${timeoutMs} ms supervision deadline.`));
-    }, timeoutMs);
-    const finish = (callback) => (value) => {
-      if (settled) {
-        return;
-      }
-      settled = true;
-      clearTimeout(timeout);
-      callback(value);
-    };
-    child.on("error", finish(reject));
-    child.on("exit", finish((code, signal) => {
-      if (code === 0) {
-        resolve();
-        return;
-      }
-      reject(new Error(
-        signal
-          ? `${path.basename(scriptPath)} exited after signal ${signal}.`
-          : `${path.basename(scriptPath)} exited with code ${code}.`,
-      ));
-    }));
-  });
-}
-
 async function latestAttemptNumber(ledgerPath, assignmentId) {
   const view = await getLedgerViewFromFile({
     ledgerPath,
@@ -891,7 +866,8 @@ async function main() {
         await runNode(
           path.join(repoRoot, "tools", "cdp-deep-capture.mjs"),
           captureArgs,
-          args.supervisionTimeoutMs,
+          args.captureSupervisionTimeoutMs,
+          { cwd: repoRoot },
         );
       } catch (error) {
         const failurePath = path.join(args.artifacts, "capture-failure.json");
@@ -903,12 +879,18 @@ async function main() {
             throw readError;
           }
         }
+        const parentSupervision = error instanceof ProcessSupervisionTimeoutError;
+        if (!failure && parentSupervision) {
+          failure = await writeParentSupervisionFailure(failurePath, error.timeoutMs, error.message);
+        }
         runState.status = "blocked";
         runState.blocker = {
-          code: failure?.phase ? "capture-phase-timeout" : "capture-process-failed",
+          code: parentSupervision
+            ? "capture-process-timeout"
+            : failure?.phase ? "capture-phase-timeout" : "capture-process-failed",
           detail: failure?.detail ?? error.message,
           phase: failure?.phase ?? "parent-supervision",
-          timeoutMs: failure?.timeoutMs ?? args.supervisionTimeoutMs,
+          timeoutMs: failure?.timeoutMs ?? args.captureSupervisionTimeoutMs,
           remediation: "Preserve the immutable artifacts and retry into a new empty directory, optionally seeded from this capture.",
         };
         await persistTerminalRun(args, runState);

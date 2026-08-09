@@ -161,11 +161,13 @@ healthy completed capture may be analyzed again without reopening the browser.
 
     Never resume `capture` or `all` into a non-empty directory, merge artifact
     directories, or use `analyze` as a substitute for an incomplete capture.
-    Finalization is bounded by the capture and parent supervision deadlines. A
-    timeout preserves already-written artifacts and records the blocking phase
-    in `capture-failure.json`; it remains interrupted and must use a new seeded
-    retry directory. Override the conservative parent deadline only for tests
-    with `--supervision-timeout-ms <milliseconds>`.
+    Body draining, script/bundle processing, and artifact finalization are bounded
+    by `--supervision-timeout-ms`. Productive capture has a separate total
+    failsafe, `--capture-supervision-timeout-ms` (15 minutes by default), so a
+    legitimate recipe is not killed by the finalization budget. If the parent
+    failsafe expires, the parent writes `capture-failure.json` with phase
+    `parent-supervision`, preserves already-written artifacts, and leaves the run
+    interrupted; retry in a new seeded directory.
 
 5. Read only these outputs first, in order:
 
