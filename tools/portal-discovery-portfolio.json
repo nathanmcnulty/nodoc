@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "manifestId": "checked-in-portal-portfolio",
+  "defaults": {
+    "enabled": true,
+    "auth": { "requiresProfile": true, "profile": "bounded" },
+    "riskTier": "medium",
+    "captureBudget": { "timeoutMs": 900000, "retryCount": 1, "actionCount": 80 },
+    "reviewBudget": { "timeoutMs": 120000, "retryCount": 1, "maxPayloadBytes": 262144 },
+    "priority": 20
+  },
+  "portals": [
+    { "specId": "defender-xdr", "priority": 30, "riskTier": "high", "outstandingGapClasses": ["fresh-capture", "scope-review"] },
+    { "specId": "entra-b2c", "outstandingGapClasses": ["fresh-capture"] },
+    { "specId": "ibiza-iam", "priority": 30, "outstandingGapClasses": ["fresh-capture", "scope-review"] },
+    { "specId": "entra-idgov", "outstandingGapClasses": ["fresh-capture"] },
+    { "specId": "entra-iga", "outstandingGapClasses": ["auth/profile", "fresh-capture"] },
+    { "specId": "entra-pim", "riskTier": "high", "outstandingGapClasses": ["fresh-capture", "safety-review"] },
+    { "specId": "exchange-beta", "priority": 30, "outstandingGapClasses": ["fresh-capture", "scope-review"] },
+    { "specId": "intune-autopatch", "priority": 30, "outstandingGapClasses": ["fresh-capture"] },
+    { "specId": "intune-portal", "priority": 30, "outstandingGapClasses": ["fresh-capture"] },
+    { "specId": "m365-admin", "priority": 30, "outstandingGapClasses": ["fresh-capture", "scope-review"] },
+    { "specId": "m365-apps-config", "priority": 30, "outstandingGapClasses": ["fresh-capture"] },
+    { "specId": "m365-apps-inventory", "priority": 30, "outstandingGapClasses": ["fresh-capture"] },
+    { "specId": "m365-apps-services", "priority": 30, "outstandingGapClasses": ["fresh-capture"] },
+    { "specId": "power-platform", "priority": 30, "outstandingGapClasses": ["fresh-capture", "scope-review"] },
+    { "specId": "purview", "priority": 30, "riskTier": "high", "outstandingGapClasses": ["fresh-capture", "scope-review"] },
+    { "specId": "purview-portal", "outstandingGapClasses": ["fresh-capture"] },
+    { "specId": "security-copilot", "riskTier": "high", "outstandingGapClasses": ["fresh-capture", "safety-review"] },
+    { "specId": "sharepoint-admin", "riskTier": "high", "outstandingGapClasses": ["auth/profile", "fresh-capture"] },
+    { "specId": "teams", "priority": 30, "outstandingGapClasses": ["fresh-capture", "scope-review"] },
+    { "specId": "viva-engage", "riskTier": "high", "outstandingGapClasses": ["fresh-capture", "scope-review", "state-changing"] }
+  ]
+}
