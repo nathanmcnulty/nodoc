@@ -3,6 +3,7 @@ import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 import { buildCandidateHandoff } from "./discovery-candidate-handoff.mjs";
+import { aggregateInteractionHealth, sanitizeInteractionHealth } from "./discovery-capture-policy.mjs";
 import { classifyGetProbeUrl } from "./discovery-safety.mjs";
 import {
   captureRecipesByTitle,
@@ -267,6 +268,36 @@ async function writeRunState(artifactDir, payload) {
   );
 }
 
+async function readInteractionHealth(artifactDir) {
+  let summary;
+  try {
+    summary = JSON.parse(await readFile(path.join(artifactDir, "summary.json"), "utf8"));
+  } catch (error) {
+    if (error?.code === "ENOENT") {
+      return null;
+    }
+    throw error;
+  }
+
+  let actionResults;
+  try {
+    actionResults = JSON.parse(await readFile(path.join(artifactDir, "action-results.json"), "utf8"));
+  } catch (error) {
+    if (error?.code === "ENOENT") {
+      return sanitizeInteractionHealth(
+        summary.interactionHealth ?? summary.actionValidation?.interactionHealth,
+      );
+    }
+    throw error;
+  }
+
+  const reportedInteractionHealth =
+    summary.interactionHealth ?? summary.actionValidation?.interactionHealth;
+  return sanitizeInteractionHealth(aggregateInteractionHealth(actionResults, {
+    reported: reportedInteractionHealth?.counts,
+  }));
+}
+
 async function findExistingCaptureArtifacts(artifactDir) {
   try {
     return (await readdir(artifactDir))
@@ -343,6 +374,7 @@ async function main() {
     startedAt: new Date().toISOString(),
     status: "running",
   };
+  let interactionHealth = null;
 
   if (["all", "capture"].includes(args.phase)) {
     const existingArtifacts = await findExistingCaptureArtifacts(args.artifacts);
@@ -426,6 +458,8 @@ async function main() {
       const captureSummary = JSON.parse(
         await readFile(path.join(args.artifacts, "summary.json"), "utf8"),
       );
+      interactionHealth = await readInteractionHealth(args.artifacts);
+      runState.interactionHealth = interactionHealth;
       const authenticationBarrier = await detectAuthenticationBarrier(
         args.artifacts,
         captureSummary,
@@ -457,6 +491,67 @@ async function main() {
         console.error(JSON.stringify(runState, null, 2));
         return;
       }
+      if (interactionHealth?.accounting?.consistent === false) {
+        runState.status = "blocked";
+        runState.interactionHealth = interactionHealth;
+        runState.blocker = {
+          code: "interaction-health-accounting-inconsistent",
+          detail: "The canonical interaction-health accounting contains an inconsistency.",
+          inconsistency: interactionHealth?.accounting?.inconsistency ?? null,
+          remediation:
+            "Regenerate the summary from the immutable action-results artifact and resolve the accounting mismatch before continuing.",
+        };
+        await writeRunState(args.artifacts, runState);
+        process.exitCode = 2;
+        console.error(JSON.stringify(runState, null, 2));
+        return;
+      }
+      if (interactionHealth?.recommendation?.recommended === true) {
+        runState.status = "blocked";
+        runState.interactionHealth = interactionHealth;
+        runState.blocker = {
+          code: "interaction-health-escalation",
+          detail: "The canonical interaction-health signal escalated unhealthy navigation; capture cannot be treated as success.",
+          remediation:
+            "Repair the navigation recipe or confirm the portal route is available, then rerun with a new empty artifact directory.",
+        };
+        await writeRunState(args.artifacts, runState);
+        process.exitCode = 2;
+        console.error(JSON.stringify(runState, null, 2));
+        return;
+      }
+    }
+
+    if (args.phase === "analyze" && !interactionHealth) {
+      interactionHealth = await readInteractionHealth(args.artifacts);
+      runState.interactionHealth = interactionHealth;
+    }
+    if (args.phase === "analyze" && interactionHealth?.accounting?.consistent === false) {
+      runState.status = "blocked";
+      runState.blocker = {
+        code: "interaction-health-accounting-inconsistent",
+        detail: "The canonical interaction-health accounting contains an inconsistency.",
+        inconsistency: interactionHealth.accounting.inconsistency,
+        remediation:
+          "Regenerate the summary from the immutable action-results artifact and resolve the accounting mismatch before continuing.",
+      };
+      await writeRunState(args.artifacts, runState);
+      process.exitCode = 2;
+      console.error(JSON.stringify(runState, null, 2));
+      return;
+    }
+    if (args.phase === "analyze" && interactionHealth?.recommendation?.recommended === true) {
+      runState.status = "blocked";
+      runState.blocker = {
+        code: "interaction-health-escalation",
+        detail: "The canonical interaction-health signal escalated unhealthy navigation; analysis cannot be treated as success.",
+        remediation:
+          "Repair the navigation recipe or confirm the portal route is available, then rerun with a new empty artifact directory.",
+      };
+      await writeRunState(args.artifacts, runState);
+      process.exitCode = 2;
+      console.error(JSON.stringify(runState, null, 2));
+      return;
     }
 
     if (["all", "analyze"].includes(args.phase)) {
@@ -480,6 +575,7 @@ async function main() {
       const candidateQueue = JSON.parse(await readFile(candidateQueuePath, "utf8"));
       const candidateHandoff = buildCandidateHandoff({
         candidateQueue,
+        interactionHealth,
         metadataNextPass: brief.metadataNextPass,
         specId: specRecord.specId,
         specTitle: specRecord.title,
@@ -494,6 +590,7 @@ async function main() {
     }
 
     runState.status = "completed";
+    runState.interactionHealth = interactionHealth;
     runState.completedAt = new Date().toISOString();
     runState.outputs = {
       candidateQueue: ["all", "analyze"].includes(args.phase)
