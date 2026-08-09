@@ -47,6 +47,25 @@ Do not spend a worker allocation on a missing dependency, invalid portal ID,
 missing recipe, unavailable CDP listener, or unauthenticated target. Report and
 repair those prerequisites at the orchestrator layer first.
 
+## Optional deterministic saturation analysis
+
+Legacy discovery remains full-traversal by default. An orchestrator may opt in
+to offline saturation reporting with `--saturation`; add
+`--apply-saturation-stop` only when the caller wants a healthy decision marked
+as applied. The flag does not alter the checked-in capture recipe or live
+action execution. The evaluator uses immutable action results, canonical
+summary health, capture completeness, and candidate/request-family novelty.
+
+A healthy stop requires a complete capture, available and consistent canonical
+health, known eligibility, no required failures, no high-value eligible work,
+no scope-review ambiguity, a minimum evidence window, and the configured
+consecutive zero/low-gain windows. The result records the schema version,
+thresholds, exact reason, evaluated windows, category gains, remaining work,
+blockers, and whether the result was merely recommended or applied. Missing
+summaries, interrupted captures, health mismatches, interaction failures, and
+unknown eligibility are unavailable/blocking states; they must never be
+interpreted as healthy saturation.
+
 ## Browser prerequisite
 
 The deterministic pipeline attaches to an already authenticated browser. The

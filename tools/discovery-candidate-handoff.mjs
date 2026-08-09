@@ -1,4 +1,5 @@
 import { sanitizeInteractionHealth } from "./discovery-capture-policy.mjs";
+import { sanitizeDiscoverySaturation } from "./discovery-saturation.mjs";
 
 const supportedEvidence = new Set([
   "bundle-discovered",
@@ -193,6 +194,7 @@ export function buildCandidateHandoff({
   recovery = null,
   specId,
   specTitle,
+  saturation = null,
 }) {
   if (!String(specId || "").trim() || !String(specTitle || "").trim()) {
     throw new Error("Candidate handoff generation requires spec identity.");
@@ -283,6 +285,7 @@ export function buildCandidateHandoff({
       reason: interactionHealth ? null : "canonical-health-unavailable",
       source: interactionHealth ? "summary-and-action-results" : "analysis-artifacts",
     },
+    saturation: sanitizeDiscoverySaturation(saturation),
     recovery,
     adjacentConfirmedReadCandidates,
     adjacentConfirmedSafetyReviewCandidates,

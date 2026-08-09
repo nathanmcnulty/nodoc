@@ -62,6 +62,31 @@ const safeObjectKeys = new Set([
   "captureReason",
   "accounting",
   "recommendation",
+  "schemaVersion",
+  "enabled",
+  "applied",
+  "thresholds",
+  "recipeComplete",
+  "windowsEvaluated",
+  "consecutiveLowGainWindows",
+  "lowGainWindowCount",
+  "gains",
+  "remainingEligibleWork",
+  "blockers",
+  "windows",
+  "actionCount",
+  "eligibleActionCount",
+  "gain",
+  "candidateFamilies",
+  "requestFamilies",
+  "successfulTransitions",
+  "total",
+  "newCandidateFamilies",
+  "newRequestFamilies",
+  "eligibleActions",
+  "highValuePending",
+  "scopeAmbiguity",
+  "unknownEligibility",
 ]);
 
 function nowIso(now = Date.now()) {
@@ -163,6 +188,7 @@ function attemptShell(assignmentId, input = {}) {
     captureStatus: sanitizeText(input.captureStatus, 100),
     captureReason: sanitizeText(input.captureReason, 200),
     interactionHealth: sanitizeStructured(input.interactionHealth),
+    saturation: sanitizeStructured(input.saturation),
     nextAction: sanitizeStructured(input.nextAction),
     blocker: sanitizeStructured(input.blocker),
     artifactHashes: input.artifactHashes ?? artifactHash(input.artifactDir),
@@ -199,6 +225,9 @@ function applyPatch(attempt, patch, now = Date.now()) {
     interactionHealth: patch.interactionHealth === undefined
       ? attempt.interactionHealth
       : sanitizeStructured(patch.interactionHealth),
+    saturation: patch.saturation === undefined
+      ? attempt.saturation
+      : sanitizeStructured(patch.saturation),
     nextAction: patch.nextAction === undefined
       ? attempt.nextAction
       : sanitizeStructured(patch.nextAction),
@@ -772,6 +801,7 @@ export async function updateAttempt(input) {
         "captureStatus",
         "captureReason",
         "interactionHealth",
+        "saturation",
         "nextAction",
         "blocker",
         "artifactDir",
@@ -839,6 +869,7 @@ export async function updateAttemptFromDiscoveryRun(input) {
     captureStatus: run.capture?.captureStatus ?? null,
     captureReason: run.capture?.reason ?? null,
     interactionHealth: run.interactionHealth ?? null,
+    saturation: run.saturation ?? null,
     nextAction: run.recommendedNextAction ?? null,
     blocker: run.blocker ?? null,
     artifactDir: input.artifactDir || run.artifacts || run.artifactDir || undefined,

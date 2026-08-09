@@ -84,6 +84,26 @@ Blind spidering is useful for **candidate discovery**, but it is not enough on i
 
 Treat spidering as a **candidate generator plus prioritization aid**, not as the only validation step.
 
+### Information-gain and saturation contract
+
+The discovery runner exposes an optional deterministic saturation signal on the
+run and tenant-safe candidate handoff surfaces. It is disabled unless the
+orchestrator passes `--saturation`, preserving existing recipe traversal. A
+window is productive when it records a successful transition or new request or
+candidate family. A stop recommendation requires at least the configured
+minimum number of windows followed by the configured consecutive zero/low-gain
+windows, while all safety and completeness gates remain satisfied.
+
+The signal distinguishes `recipe-exhausted`, `healthy-saturation`,
+`low-yield-incomplete`, `interaction-failure`, `unknown-health`,
+`summary-missing`, `health-mismatch`, `interrupted-capture`, and insufficient
+evidence. High-value pending actions, unresolved required failures, unknown
+eligibility, scope ambiguity, and inconsistent canonical accounting block a
+healthy stop. Partial offline analysis reports unavailable rather than
+reconstructing live completeness. Use the recorded window gains and remaining
+eligible work for scheduling and reviewer triage; do not infer token or CPU
+savings from candidate cardinality alone.
+
 ### Recommended spidering rules
 
 - same-origin first
