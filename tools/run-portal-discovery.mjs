@@ -28,6 +28,7 @@ function parseArgs(argv) {
   const args = {
     artifacts: null,
     includeAdjacent: false,
+    noLedger: false,
     json: false,
     phase: "all",
     ledgerMode: null,
@@ -64,6 +65,8 @@ function parseArgs(argv) {
     const next = argv[index + 1];
     if (argument === "--include-adjacent") {
       args.includeAdjacent = true;
+    } else if (argument === "--no-ledger") {
+      args.noLedger = true;
     } else if (argument === "--json") {
       args.json = true;
     } else if (argument === "--portal" && next) {
@@ -418,7 +421,7 @@ async function writeRunState(artifactDir, payload) {
 
 async function persistTerminalRun(args, runState) {
   await writeRunState(args.artifacts, runState);
-  if (!args.assignmentId) {
+  if (!args.assignmentId || args.noLedger) {
     return;
   }
   const attemptNumber = args.attemptNumber
@@ -436,6 +439,52 @@ async function persistTerminalRun(args, runState) {
     workerId: args.workerId,
     discoveryRun: runState,
   });
+}
+
+async function prepareLedgerAttempt(args, specRecord, recipePath) {
+  if (args.noLedger || args.phase === "plan" || !args.endpoint) {
+    return null;
+  }
+  const digest = await recipeDigest(recipePath);
+  const assignmentId = args.assignmentId || `${specRecord.specId}-${createHash("sha256")
+      .update(`${specRecord.specId}|${args.endpoint}|${digest}|${args.phase}|${args.priority}`)
+      .digest("hex")
+      .slice(0, 16)}`;
+  if (!args.assignmentId) {
+    await enqueueAssignment({
+      ledgerPath: args.ledgerPath,
+      assignmentId,
+      specId: specRecord.specId,
+      portal: specRecord.title,
+      recipePath,
+      recipeDigest: digest,
+      endpoint: args.endpoint,
+      profile: args.profile,
+      phase: args.phase,
+      priority: args.priority,
+      artifactDir: args.artifacts,
+      model: args.model,
+      reasoning: args.reasoning,
+      workerId: args.workerId,
+    });
+  }
+  args.assignmentId = assignmentId;
+  const claimed = await claimAssignment({
+    ledgerPath: args.ledgerPath,
+    assignmentId,
+    endpoint: args.endpoint,
+    phase: args.phase,
+    workerId: args.workerId,
+    model: args.model,
+    reasoning: args.reasoning,
+  });
+  if (!claimed) {
+    throw new Error(
+      `Ledger assignment ${assignmentId} is unavailable because its endpoint/profile lease is held or its state conflicts.`,
+    );
+  }
+  args.attemptNumber = claimed.assignment.latestAttempt.attemptNumber;
+  return claimed.assignment;
 }
 
 async function readInteractionHealth(artifactDir) {
@@ -621,6 +670,7 @@ async function runLedgerMode(args) {
   if (args.ledgerMode === "claim") {
     console.log(JSON.stringify(await claimAssignment({
       ledgerPath: args.ledgerPath,
+      assignmentId: args.assignmentId,
       endpoint: args.endpoint,
       phase: args.phase,
       workerId: args.workerId,
@@ -725,12 +775,40 @@ async function main() {
     return;
   }
 
+  let ledgerAssignment = null;
+  try {
+    ledgerAssignment = await prepareLedgerAttempt(args, specRecord, recipePath);
+  } catch (error) {
+    const runState = {
+      artifacts: args.artifacts,
+      brief,
+      phase: args.phase,
+      startedAt: new Date().toISOString(),
+      status: "blocked",
+      blocker: {
+        code: "ledger-dispatch-conflict",
+        detail: error instanceof Error ? error.message : String(error),
+      },
+    };
+    await writeRunState(args.artifacts, runState);
+    process.exitCode = 2;
+    console.error(JSON.stringify(runState, null, 2));
+    return;
+  }
+
   const runState = {
     artifacts: args.artifacts,
     brief,
     phase: args.phase,
     startedAt: new Date().toISOString(),
     status: "running",
+    ledger: ledgerAssignment
+      ? {
+          assignmentId: args.assignmentId,
+          attemptNumber: args.attemptNumber,
+          ledgerPath: args.ledgerPath,
+        }
+      : { mode: "legacy-no-ledger" },
   };
   const captureCompleteness = await inspectCaptureCompleteness(args.artifacts);
   runState.capture = captureCompleteness;
@@ -1043,7 +1121,7 @@ async function main() {
       code: error?.message?.includes("after signal") ? "pipeline-interrupted" : "pipeline-failed",
       detail: error instanceof Error ? error.message : String(error),
     };
-    await writeRunState(args.artifacts, runState);
+    await persistTerminalRun(args, runState);
     throw error;
   }
 }

@@ -134,8 +134,13 @@ healthy completed capture may be analyzed again without reopening the browser.
 3. Run the deterministic pipeline:
 
    ```powershell
-   npm run discover:portal -- --portal m365-admin --profile bounded --phase all --artifacts $artifacts
+   npm run discover:portal -- --portal m365-admin --profile bounded --phase all --endpoint https://admin.cloud.microsoft --artifacts $artifacts --ledger-path $ledgerPath
    ```
+
+   Capture and analysis automatically enqueue and claim a deterministic ledger
+   assignment when `--endpoint` is supplied. Use `--assignment-id` to target a
+   precreated assignment. For explicitly legacy, non-ledger analysis, pass
+   `--no-ledger`; do not use that mode for production capture.
 
 4. If execution is interrupted, choose exactly one recovery path:
 
