@@ -55,6 +55,7 @@ function parseArgs(argv) {
     seedArtifacts: null,
     targetId: null,
     bundleCacheDir: null,
+    supervisionTimeoutMs: 120000,
     variables: [],
   };
 
@@ -145,6 +146,11 @@ function parseArgs(argv) {
     } else if (argument === "--bundle-cache-dir" && next) {
       args.bundleCacheDir = path.resolve(next);
       index += 1;
+    } else if (argument === "--supervision-timeout-ms" && next) {
+      args.supervisionTimeoutMs = Number(next);
+      index += 1;
+    } else if (argument.startsWith("--supervision-timeout-ms=")) {
+      args.supervisionTimeoutMs = Number(argument.slice("--supervision-timeout-ms=".length));
     } else if (argument === "--var" && next) {
       args.variables.push(next);
       index += 1;
@@ -153,6 +159,9 @@ function parseArgs(argv) {
 
   if (args.profile !== "bounded") {
     throw new Error(`Invalid --profile "${args.profile}". Only the bounded profile is currently supported.`);
+  }
+  if (!Number.isFinite(args.supervisionTimeoutMs) || args.supervisionTimeoutMs <= 0) {
+    throw new Error(`Invalid --supervision-timeout-ms "${args.supervisionTimeoutMs}".`);
   }
   if (!args.ledgerMode) {
     if (!args.portal) {
@@ -293,6 +302,18 @@ async function inspectRecipeSafety(recipePath) {
     }
   }
 
+  if (summary.finalizedComplete === false) {
+    return {
+      captureStatus: "interrupted",
+      captureComplete: false,
+      reason: summary.timeoutPhase ? "finalization-timeout" : "finalization-incomplete",
+      blocker: {
+        phase: summary.timeoutPhase ?? "finalization",
+        detail: summary.timeoutDetail ?? "Capture finalization did not complete.",
+      },
+      source: "summary.json",
+    };
+  }
   return {
     safe: unsafeActions.length === 0,
     unsafeActions,
@@ -532,14 +553,31 @@ async function preflightCdp() {
   }
 }
 
-async function runNode(scriptPath, argumentsList) {
+async function runNode(scriptPath, argumentsList, timeoutMs) {
   await new Promise((resolve, reject) => {
     const child = spawn(process.execPath, [scriptPath, ...argumentsList], {
       cwd: repoRoot,
       stdio: "inherit",
     });
-    child.on("error", reject);
-    child.on("exit", (code, signal) => {
+    let settled = false;
+    const timeout = setTimeout(() => {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      child.kill();
+      reject(new Error(`${path.basename(scriptPath)} exceeded the ${timeoutMs} ms supervision deadline.`));
+    }, timeoutMs);
+    const finish = (callback) => (value) => {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      clearTimeout(timeout);
+      callback(value);
+    };
+    child.on("error", finish(reject));
+    child.on("exit", finish((code, signal) => {
       if (code === 0) {
         resolve();
         return;
@@ -549,7 +587,7 @@ async function runNode(scriptPath, argumentsList) {
           ? `${path.basename(scriptPath)} exited after signal ${signal}.`
           : `${path.basename(scriptPath)} exited with code ${code}.`,
       ));
-    });
+    }));
   });
 }
 
@@ -782,7 +820,36 @@ async function main() {
       for (const variable of args.variables) {
         captureArgs.push("--var", variable);
       }
-      await runNode(path.join(repoRoot, "tools", "cdp-deep-capture.mjs"), captureArgs);
+      captureArgs.push("--finalization-timeout-ms", String(args.supervisionTimeoutMs));
+      try {
+        await runNode(
+          path.join(repoRoot, "tools", "cdp-deep-capture.mjs"),
+          captureArgs,
+          args.supervisionTimeoutMs,
+        );
+      } catch (error) {
+        const failurePath = path.join(args.artifacts, "capture-failure.json");
+        let failure = null;
+        try {
+          failure = JSON.parse(await readFile(failurePath, "utf8"));
+        } catch (readError) {
+          if (readError?.code !== "ENOENT" && !(readError instanceof SyntaxError)) {
+            throw readError;
+          }
+        }
+        runState.status = "blocked";
+        runState.blocker = {
+          code: failure?.phase ? "capture-phase-timeout" : "capture-process-failed",
+          detail: failure?.detail ?? error.message,
+          phase: failure?.phase ?? "parent-supervision",
+          timeoutMs: failure?.timeoutMs ?? args.supervisionTimeoutMs,
+          remediation: "Preserve the immutable artifacts and retry into a new empty directory, optionally seeded from this capture.",
+        };
+        await persistTerminalRun(args, runState);
+        process.exitCode = 2;
+        console.error(JSON.stringify(runState, null, 2));
+        return;
+      }
 
       const captureSummary = JSON.parse(
         await readFile(path.join(args.artifacts, "summary.json"), "utf8"),
@@ -915,6 +982,7 @@ async function main() {
         await runNode(
           path.join(repoRoot, "tools", "generate-crawl-candidates.mjs"),
           candidateArgs,
+          args.supervisionTimeoutMs,
         );
       } catch (error) {
         if (captureCompleteness.captureComplete === false && captureCompleteness.captureStatus === "missing-minimum-artifacts") {
