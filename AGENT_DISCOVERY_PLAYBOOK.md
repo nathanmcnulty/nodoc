@@ -149,6 +149,22 @@ blocked by the orchestrator. Worker results are imported only after exact scope,
 candidate/evidence cardinality, capability ceilings, digest, and legal-state
 validation. Application remains opt-in and report-only is the default.
 
+### Layer 2 promotion architecture
+
+`tools/portal-discovery-promotion-planner.mjs` compiles validated grouped handoffs
+into a schema-versioned promotion plan. Candidates are mapped to the checked-in
+route inventory as exact matches, compatible extensions, conflicts, or novel
+surfaces. Only promotion-active, exact-accounted, health-complete candidates with
+an explicit capability-authorized approval can become proposals. Adjacent,
+suppressed, bundle-only, unsafe, ambiguous, incomplete, changed-shape, and schema
+conflict cases are rejected, blocked, or routed to Luna/manual.
+
+Traceability is preserved from change group to candidate IDs and evidence IDs.
+Groups are split by destination spec and compatible validation surface, with stable
+digests, expected files, deterministic validation commands, budgets, and byte or
+cardinality measurements. The compiler does not edit specs, create branches, or
+open/merge PRs; those actions require an explicit operator boundary.
+
 Use four bounded roles instead of asking every worker to understand the entire
 research process:
 
