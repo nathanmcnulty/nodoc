@@ -16,6 +16,8 @@ export const defaultLedgerPath = path.join(repoRoot, ".portal-discovery-ledger.j
 export const ledgerSchemaVersion = 1;
 export const ledgerStaleLeaseMs = 5 * 60 * 1000;
 export const ledgerLeaseRenewalIntervalMs = 60 * 1000;
+export const globalLiveLifecycleKey = "global-browser-cdp";
+const liveLifecyclePhases = new Set(["all", "capture", "preflight", "alignment", "finalization", "shutdown"]);
 
 const lockStaleMs = 30_000;
 const lockWaitMs = 10_000;
@@ -646,6 +648,8 @@ export async function claimAssignment(input) {
         .filter((assignment) => assignment.latestAttempt?.status === "running")
         .map((assignment) => `${assignment.endpoint}|${assignment.profile}`),
     );
+    const activeLiveLifecycle = [...state.assignments.values()]
+      .some((assignment) => assignment.latestAttempt?.status === "running" && liveLifecyclePhases.has(assignment.phase));
     const chosen = [...state.assignments.values()]
       .filter((assignment) => assignment.state === "queued")
       .filter((assignment) => !input.assignmentId || assignment.assignmentId === input.assignmentId)
@@ -653,7 +657,11 @@ export async function claimAssignment(input) {
       .filter((assignment) => !profile || assignment.profile === profile)
       .filter((assignment) => !input.phase || input.phase === "all" || assignment.phase === input.phase)
       .filter((assignment) => (
-        assignment.phase === "analyze"
+        !liveLifecyclePhases.has(assignment.phase)
+        || !activeLiveLifecycle
+      ))
+      .filter((assignment) => (
+        !liveLifecyclePhases.has(assignment.phase)
         || !activeKeys.has(`${assignment.endpoint}|${assignment.profile}`)
       ))
       .sort(compareAssignments)[0];
