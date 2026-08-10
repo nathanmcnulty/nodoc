@@ -26,9 +26,11 @@ info:
     request bodies used by Setup (`POST /inventory/api/Settings`) and Security
     Update Status (`POST /inventory/api/SecurityCurrencyGoal`).
 
-    Export paths and the configured but still-unlit host
-    `health.insights.office.net` remain bundle discoveries that were not
-    exercised in the current tenant.
+    An export route was observed during read-only list/detail replay, but
+    `Device` and `OfficeAddin` requests returned `Object Not Found`. It remains
+    intentionally undocumented because export/job routes require separate safety
+    review. The configured but still-unlit host `health.insights.office.net`
+    remains a bundle discovery that was not exercised in the current tenant.
 
     Documentation and specifications have been provided on a best-efforts basis and
     may not be 100% accurate.
@@ -464,6 +466,8 @@ paths:
       parameters:
         - $ref: '#/components/parameters/apiVersion'
         - $ref: '#/components/parameters/filter'
+        - $ref: '#/components/parameters/select'
+        - $ref: '#/components/parameters/skip'
         - $ref: '#/components/parameters/top'
         - $ref: '#/components/parameters/count'
         - $ref: '#/components/parameters/enableChannelManagement'
