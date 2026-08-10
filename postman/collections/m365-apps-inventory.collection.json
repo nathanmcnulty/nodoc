@@ -473,6 +473,24 @@
                                                 {
                                                     "disabled": false,
                                                     "description": {
+                                                        "content": "OData projection expression.",
+                                                        "type": "text/plain"
+                                                    },
+                                                    "key": "$select",
+                                                    "value": "string"
+                                                },
+                                                {
+                                                    "disabled": false,
+                                                    "description": {
+                                                        "content": "Number of results to skip.",
+                                                        "type": "text/plain"
+                                                    },
+                                                    "key": "$skip",
+                                                    "value": "8166"
+                                                },
+                                                {
+                                                    "disabled": false,
+                                                    "description": {
                                                         "content": "Maximum number of results to return.",
                                                         "type": "text/plain"
                                                     },
@@ -542,6 +560,24 @@
                                                             },
                                                             "key": "$filter",
                                                             "value": "string"
+                                                        },
+                                                        {
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "OData projection expression.",
+                                                                "type": "text/plain"
+                                                            },
+                                                            "key": "$select",
+                                                            "value": "string"
+                                                        },
+                                                        {
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "Number of results to skip.",
+                                                                "type": "text/plain"
+                                                            },
+                                                            "key": "$skip",
+                                                            "value": "8166"
                                                         },
                                                         {
                                                             "disabled": false,
@@ -4939,7 +4975,7 @@
         "name": "M365 Apps Inventory",
         "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
         "description": {
-            "content": "The M365 Apps Inventory API is used by the Microsoft 365 Apps admin center\nto query device inventory, build summaries, add-ins, setup state, and\nsecurity update currency from `query.inventory.insights.office.net`.\n\nThis surface was observed while browsing:\n\n  - Home and Cloud Update\n  - Inventory\n  - Security Update Status\n  - Setup\n\nRequests use portal-issued bearer tokens together with diagnostic headers such\nas `x-api-name`, `x-correlationid`, `x-manageoffice-client-sid`, and\n`x-requested-with`. Most observed requests specify `api-version=1.1` and\naccept OData-style query options.\n\nA second pass with token-backed probes confirmed additional inventory\nfamilies including Languages, OfficeApplications, OfficeAddinVersions,\nOnboarding, `GetLatestSecurityReleasesPerServicingChannel`, and the\n`SecurityVulnerabilities` endpoints. Intercepted save flows also exposed the\nrequest bodies used by Setup (`POST /inventory/api/Settings`) and Security\nUpdate Status (`POST /inventory/api/SecurityCurrencyGoal`).\n\nExport paths and the configured but still-unlit host\n`health.insights.office.net` remain bundle discoveries that were not\nexercised in the current tenant.\n\nDocumentation and specifications have been provided on a best-efforts basis and\nmay not be 100% accurate.\n\n\nContact Support:\n Name: nodoc",
+            "content": "The M365 Apps Inventory API is used by the Microsoft 365 Apps admin center\nto query device inventory, build summaries, add-ins, setup state, and\nsecurity update currency from `query.inventory.insights.office.net`.\n\nThis surface was observed while browsing:\n\n  - Home and Cloud Update\n  - Inventory\n  - Security Update Status\n  - Setup\n\nRequests use portal-issued bearer tokens together with diagnostic headers such\nas `x-api-name`, `x-correlationid`, `x-manageoffice-client-sid`, and\n`x-requested-with`. Most observed requests specify `api-version=1.1` and\naccept OData-style query options.\n\nA second pass with token-backed probes confirmed additional inventory\nfamilies including Languages, OfficeApplications, OfficeAddinVersions,\nOnboarding, `GetLatestSecurityReleasesPerServicingChannel`, and the\n`SecurityVulnerabilities` endpoints. Intercepted save flows also exposed the\nrequest bodies used by Setup (`POST /inventory/api/Settings`) and Security\nUpdate Status (`POST /inventory/api/SecurityCurrencyGoal`).\n\nAn export route was observed during read-only list/detail replay, but\n`Device` and `OfficeAddin` requests returned `Object Not Found`. It remains\nintentionally undocumented because export/job routes require separate safety\nreview. The configured but still-unlit host `health.insights.office.net`\nremains a bundle discovery that was not exercised in the current tenant.\n\nDocumentation and specifications have been provided on a best-efforts basis and\nmay not be 100% accurate.\n\n\nContact Support:\n Name: nodoc",
             "type": "text/plain"
         }
     }
