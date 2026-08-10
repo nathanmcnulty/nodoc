@@ -31,6 +31,7 @@ import {
   runNode,
   writeParentSupervisionFailure,
 } from "./portal-discovery-process.mjs";
+import { runBrowserCdpPreflight } from "./browser-cdp-preflight.mjs";
 
 const validPhases = new Set(["all", "analyze", "capture", "plan"]);
 
@@ -49,6 +50,8 @@ function parseArgs(argv) {
     assignmentId: null,
     attemptNumber: null,
     endpoint: null,
+    cdpEndpoint: "http://127.0.0.1:9222",
+    expectedProduct: null,
     priority: "normal",
     model: null,
     reasoning: null,
@@ -120,6 +123,12 @@ function parseArgs(argv) {
       index += 1;
     } else if (argument === "--endpoint" && next) {
       args.endpoint = next;
+      index += 1;
+    } else if (argument === "--cdp-endpoint" && next) {
+      args.cdpEndpoint = next;
+      index += 1;
+    } else if (argument === "--expected-product" && next) {
+      args.expectedProduct = next;
       index += 1;
     } else if (argument === "--priority" && next) {
       args.priority = next;
@@ -713,6 +722,42 @@ async function main() {
 
   let ledgerAssignment = null;
   try {
+    if (["all", "capture"].includes(args.phase)) {
+      const existingArtifacts = await findExistingCaptureArtifacts(args.artifacts);
+      if (existingArtifacts.length > 0) {
+        const runState = {
+          artifacts: args.artifacts,
+          brief,
+          phase: args.phase,
+          startedAt: new Date().toISOString(),
+          status: "blocked",
+          blocker: {
+            code: "artifacts-not-empty",
+            detail: "Capture requires a fresh artifact directory to prevent stale traffic and authentication state from contaminating the run.",
+            existingArtifacts: existingArtifacts.slice(0, 20),
+            remediation: "Choose a new empty artifact directory and rerun the command.",
+          },
+        };
+        await persistTerminalRun(args, runState);
+        process.exitCode = 2;
+        console.error(JSON.stringify(runState, null, 2));
+        return;
+      }
+    }
+    if (["all", "capture"].includes(args.phase)) {
+      const recipe = JSON.parse(await readFile(recipePath, "utf8"));
+      const cdp = await runBrowserCdpPreflight({
+        endpoint: args.cdpEndpoint,
+        expectedProduct: args.expectedProduct,
+        matchHosts: recipe.matchHosts,
+        matchPathPrefixes: recipe.matchPathPrefixes,
+        urlPattern: recipe.matchUrlPattern,
+        titlePattern: recipe.matchTitlePattern,
+        expectedTitlePattern: recipe.expectedTitlePattern,
+        rejectBodyPattern: recipe.rejectBodyPattern,
+      });
+      args.targetId = cdp.target.id;
+    }
     ledgerAssignment = await prepareLedgerAttempt(args, specRecord, recipePath);
   } catch (error) {
     const runState = {
@@ -722,7 +767,7 @@ async function main() {
       startedAt: new Date().toISOString(),
       status: "blocked",
       blocker: {
-        code: "ledger-dispatch-conflict",
+        code: error?.message?.startsWith("browser-cdp-preflight:") ? "browser-cdp-preflight-failed" : "ledger-dispatch-conflict",
         detail: error instanceof Error ? error.message : String(error),
       },
     };
@@ -767,23 +812,6 @@ async function main() {
     if (error?.code !== "ENOENT" && !(error instanceof SyntaxError)) throw error;
   }
 
-  if (["all", "capture"].includes(args.phase)) {
-    const existingArtifacts = await findExistingCaptureArtifacts(args.artifacts);
-    if (existingArtifacts.length > 0) {
-      runState.status = "blocked";
-      runState.blocker = {
-        code: "artifacts-not-empty",
-        detail: "Capture requires a fresh artifact directory to prevent stale traffic and authentication state from contaminating the run.",
-        existingArtifacts: existingArtifacts.slice(0, 20),
-        remediation: "Choose a new empty artifact directory and rerun the command.",
-      };
-      await persistTerminalRun(args, runState);
-      process.exitCode = 2;
-      console.error(JSON.stringify(runState, null, 2));
-      return;
-    }
-  }
-
   await persistTerminalRun(args, runState);
 
   try {
@@ -814,21 +842,6 @@ async function main() {
         return;
       }
 
-      const cdp = await preflightCdp();
-      if (!cdp.available) {
-        runState.status = "blocked";
-        runState.blocker = {
-          code: "browser-cdp-unavailable",
-          detail: cdp.detail,
-          remediation:
-            "Open an authenticated Edge/Chrome session with remote debugging on 127.0.0.1:9222, then rerun the same command.",
-        };
-        await persistTerminalRun(args, runState);
-        process.exitCode = 2;
-        console.error(JSON.stringify(runState, null, 2));
-        return;
-      }
-
       const captureArgs = [
         "--recipe",
         recipePath,
@@ -838,6 +851,7 @@ async function main() {
       if (args.targetId) {
         captureArgs.push("--target-id", args.targetId);
       }
+      captureArgs.push("--cdp-endpoint", args.cdpEndpoint);
       if (args.seedArtifacts) {
         captureArgs.push("--seed-artifacts", args.seedArtifacts);
       }

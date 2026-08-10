@@ -133,13 +133,29 @@ not discovery work:
 2. Restore the repository's locked dependencies when `node_modules` is absent;
    workers must not install or update packages.
 3. Run the portal plan command and require `status: planned`.
-4. Verify CDP `/json/version` and `/json/list`, including an authenticated target
-   for the intended portal.
+4. Run `tools/browser-cdp-preflight.mjs` against the operator-selected loopback
+   endpoint. It verifies browser metadata, expected product, exactly one matching
+   page, harmless Runtime.evaluate, authentication, and stable identity.
 5. Confirm the selected recipe exists and choose a fresh artifact directory.
 
 Do not spend a worker allocation on a missing dependency, invalid portal ID,
 missing recipe, unavailable CDP listener, or unauthenticated target. Report and
 repair those prerequisites at the orchestrator layer first.
+
+### Protected PR transport troubleshooting
+
+The app-injected default Git transport may use a different credential than the
+`gh` keyring token. If `gh auth status` reports the `workflow` scope but a push
+that includes a workflow file is rejected, first use a process-scoped push
+override without changing user or global configuration:
+
+```powershell
+git -c credential.helper= -c 'credential.https://github.com.helper=!gh auth git-credential' push
+```
+
+Verify only the reported `gh auth status` scopes and helper origins; never print
+credential values. `gh auth setup-git` is the persistent opt-in alternative.
+Broad helper resets are last-resort diagnosis only, not the default fix.
 
 ## Optional deterministic saturation analysis
 
@@ -163,10 +179,13 @@ interpreted as healthy saturation.
 ## Browser prerequisite
 
 The deterministic pipeline attaches to an already authenticated browser. The
-agent must not launch, close, or repair that browser. Before assigning a capture
-worker, the operator must launch a dedicated Edge or Chrome profile with remote
-debugging enabled, sign in to the portal, and verify both the browser endpoint
-and page targets.
+agent must not launch, close, navigate, or repair that browser. The operator
+owns exactly one long-lived portal target and starts one dedicated Edge root with
+loopback TCP CDP on an explicit fixed port (normally `9222`) and an operator-
+selected persisted signed-in profile. Chrome is fallback only. No Playwright,
+browser canvas, or other controller may own that browser, profile, or port
+concurrently. Never use `--remote-allow-origins=*`, kill by process name, or
+transition an existing normal Edge session automatically.
 
 Use one persistent dedicated profile per browser and portal so authentication
 survives retries without copying or modifying the user's normal browser profile:
@@ -174,7 +193,7 @@ survives retries without copying or modifying the user's normal browser profile:
 ```powershell
 $portal = "m365-admin"
 $portalUrl = "https://admin.cloud.microsoft"
-$browserName = "edge" # edge or chrome
+$browserName = "edge" # Chrome is fallback only
 $browserCandidates = if ($browserName -eq "edge") {
    @(
       (Join-Path ${env:ProgramFiles(x86)} "Microsoft\Edge\Application\msedge.exe"),
@@ -211,20 +230,18 @@ if (-not $existingCdp) {
    ) | Out-Null
 }
 
-$version = Invoke-RestMethod http://127.0.0.1:9222/json/version -TimeoutSec 3
-$targets = Invoke-RestMethod http://127.0.0.1:9222/json/list -TimeoutSec 3 |
-   Where-Object { $_.type -eq "page" }
-if (-not $version.webSocketDebuggerUrl) { throw "CDP endpoint has no browser WebSocket URL." }
-$version | Select-Object Browser, webSocketDebuggerUrl
-$targets | Select-Object id, title, url
+node tools/browser-cdp-preflight.mjs --endpoint http://127.0.0.1:9222 `
+  --expected-product Edge --match-host config.office.com `
+  --match-path-prefix /officeSettings/inventory
 ```
 
-Before handing off to an agent, the operator must confirm that the listed page
-target is the intended portal and is past sign-in. If an existing endpoint is
+Before handing off to an agent, the operator must confirm that the preflight
+passed for the intended portal and is past sign-in. If an existing endpoint is
 the wrong dedicated session, has stale targets, or times out during attach, the
 operator may close that dedicated debug browser and relaunch the same dedicated
-profile. Never kill a listener by PID, close the user's normal browser, copy a
-normal browser profile, or run two automation modes against the same session.
+profile. Never close the user's normal browser, copy a normal browser profile, or
+run two automation modes against the same session. A failed preflight does not
+prepare or mutate the discovery ledger.
 
 Every retry after browser recovery uses a new empty artifact directory. A
 healthy completed capture may be analyzed again without reopening the browser.

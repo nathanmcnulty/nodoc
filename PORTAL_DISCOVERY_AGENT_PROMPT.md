@@ -28,11 +28,12 @@ dependencies, repair the environment, review unrelated portals, promote
 findings, create a branch or pull request, or merge changes. The orchestrator
 owns those stages.
 
-Before capture, verify that the operator-provided authenticated browser is
-reachable at http://127.0.0.1:9222/json/version and that the response contains
-webSocketDebuggerUrl. If it is unavailable, stop and report
-`browser-cdp-unavailable`; do not launch, close, or replace a browser and do not
-invent alternate Playwright/CDP automation.
+Before capture, run the required read-only gate:
+
+  node tools/browser-cdp-preflight.mjs --endpoint http://127.0.0.1:9222 --expected-product Edge --match-host <portal-host> --match-path-prefix <portal-path>
+
+If it fails, stop and report `browser-cdp-preflight-failed`; do not launch,
+close, navigate, or replace a browser and do not invent alternate automation.
 
 Run the deterministic interface:
 
