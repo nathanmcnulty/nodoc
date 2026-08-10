@@ -142,6 +142,21 @@ Do not spend a worker allocation on a missing dependency, invalid portal ID,
 missing recipe, unavailable CDP listener, or unauthenticated target. Report and
 repair those prerequisites at the orchestrator layer first.
 
+### Protected PR transport troubleshooting
+
+The app-injected default Git transport may use a different credential than the
+`gh` keyring token. If `gh auth status` reports the `workflow` scope but a push
+that includes a workflow file is rejected, first use a process-scoped push
+override without changing user or global configuration:
+
+```powershell
+git -c credential.helper= -c 'credential.https://github.com.helper=!gh auth git-credential' push
+```
+
+Verify only the reported `gh auth status` scopes and helper origins; never print
+credential values. `gh auth setup-git` is the persistent opt-in alternative.
+Broad helper resets are last-resort diagnosis only, not the default fix.
+
 ## Optional deterministic saturation analysis
 
 Legacy discovery remains full-traversal by default. An orchestrator may opt in
