@@ -785,26 +785,6 @@ export async function updateAttempt(input) {
     if (attempt.status === "stale" && terminalStatuses.has(input.status)) {
       return { assignment: assignmentView(assignment), event: null, noop: true };
     }
-    if (terminalStatuses.has(attempt.status) && terminalStatuses.has(input.status)) {
-      const persisted = [...records]
-        .filter(({ value }) => value?.eventType === "attempt-updated"
-          && value.assignmentId === assignmentId
-          && Number(value.attemptNumber) === attemptNumber)
-        .at(-1)?.value?.payload;
-      if (persisted?.status === attempt.status) {
-        return { assignment: assignmentView(assignment), event: null, noop: true };
-      }
-      const event = {
-        eventType: "attempt-updated",
-        assignmentId,
-        attemptNumber,
-        actor: sanitizeText(input.actor || "orchestrator", 200),
-        payload: attempt,
-      };
-      const record = await appendRecord(ledgerPath, event, nowIso(nowMs));
-      const updated = buildLedgerState([...records, { line: records.length + 1, value: record }], nowMs);
-      return { assignment: assignmentView(updated.assignments.get(assignmentId)), event, noop: false };
-    }
     const patch = Object.fromEntries(
       [
         "status",
