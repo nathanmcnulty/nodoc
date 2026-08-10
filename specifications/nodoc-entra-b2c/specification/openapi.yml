@@ -47,8 +47,10 @@ components:
       schema:
         type: string
       description: |
-        The tenant identifier. Accepts either the tenant object ID (GUID)
-        or the tenant domain name (e.g., `contoso.onmicrosoft.com`).
+        The tenant identifier sent on the wire as `tenantId`. For tenant
+        information and user-flow routes, use the tenant object ID (GUID) or
+        tenant domain name. Policy and Azure resource routes use the tenant
+        domain value in this same query parameter.
       example: 847b5907-ca15-40f4-b171-eb18619dbfab
     tenantDomain:
       name: tenantId
@@ -56,7 +58,8 @@ components:
       required: true
       schema:
         type: string
-      description: The tenant domain name.
+      description: The tenant domain value sent on the wire as `tenantId`; this
+        semantic role is used by policy and Azure resource routes.
       example: contoso.com
   schemas:
     AdminFlow:
@@ -392,12 +395,14 @@ paths:
       description: |
         Retrieves and optionally initializes the B2C tenant policy configuration.
         The `skipInitialization` parameter controls whether to trigger first-time
-        setup of B2C policies.
+        setup of B2C policies. The service default is `false`, which is unsafe
+        for read-only use because it may initialize tenant policy state.
 
         **Note:** Returns 400 if self-service sign-up is not enabled.
 
-        **Warning:** Setting `skipInitialization=false` may perform write operations
-        to initialize tenant policies.
+        **Safety:** Read-only callers must explicitly send
+        `skipInitialization=true`. This specification provides no safe reason to
+        execute the initializing form during offline reconciliation.
       operationId: Tenants.GetAndInitializeTenantPolicy
       parameters:
         - $ref: '#/components/parameters/tenantDomain'
@@ -406,9 +411,11 @@ paths:
           schema:
             type: boolean
             default: false
+            example: true
           description: |
-            If `true`, skips initialization and only reads existing policy.
-            If `false`, may create default policies if none exist.
+            Required for read-only use: `true` skips initialization and only reads
+            existing policy. The service default `false` may create default
+            policies if none exist and is unsafe for read-only callers.
       responses:
         '200':
           description: Tenant policy configuration
