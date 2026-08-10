@@ -28,12 +28,15 @@ dependencies, repair the environment, review unrelated portals, promote
 findings, create a branch or pull request, or merge changes. The orchestrator
 owns those stages.
 
-Before capture, run the required read-only gate:
+Before capture, run the required read-only gate. Owner startup only reports
+`lifecycleStatus: owner-ready` and `authenticationStatus: unverified`; only
+this preflight determines whether authentication is confirmed or blocked:
 
   node tools/browser-cdp-preflight.mjs --endpoint http://127.0.0.1:9222 --expected-product Edge --match-host <portal-host> --match-path-prefix <portal-path>
 
-If it fails, stop and report `browser-cdp-preflight-failed`; do not launch,
-close, navigate, or replace a browser and do not invent alternate automation.
+If it fails, stop and report `browser-cdp-preflight-failed`; keep the owner alive
+when manual sign-in or page repair could fix the target, and do not launch,
+close, navigate, or replace a browser or invent alternate automation.
 
 Run the deterministic interface:
 

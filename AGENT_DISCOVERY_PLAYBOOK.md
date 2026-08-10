@@ -427,14 +427,15 @@ Preferred flow:
    --portal-url <url> --browser edge --port 9222`. The owner resolves Edge
    deterministically, launches an independent root, and keeps its dedicated
    profile beneath `%LOCALAPPDATA%\nodoc-cdp`.
-2. Complete sign-in in that persistent profile; launch intentionally returns an
-   `authentication-required` next step rather than treating a CDP listener as
-   proof of authentication.
-3. Require owner `status` to be healthy, then run
-   `npm run preflight:browser-cdp -- ...` against
-   `http://127.0.0.1:9222`. The bounded `/json/version` check must identify the
-   expected product, and `/json/list` must contain exactly one intended
-   authenticated portal target.
+2. The owner returns `code: preflight-required`, `lifecycleStatus: owner-ready`,
+   and `authenticationStatus: unverified`; it does not inspect or report target
+   authentication. Leave exactly one intended portal page open, complete sign-in
+   only if the browser UI requires it, then run authenticated preflight.
+3. Require owner `status` to be healthy, then **always** run
+   `npm run preflight:browser-cdp -- ...` against `http://127.0.0.1:9222`.
+   Only that read-only preflight determines whether authentication is confirmed
+   or blocked: `/json/version` must identify the expected product, and
+   `/json/list` must contain exactly one intended authenticated portal target.
 
 Chrome 136+ ignores remote-debugging switches against its default data
 directory unless a nonstandard `--user-data-dir` is supplied, as documented in

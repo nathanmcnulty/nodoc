@@ -11,6 +11,7 @@ import { matchesExpectedProduct } from "./browser-cdp-preflight.mjs";
 
 export const DEFAULT_CDP_HOST = "127.0.0.1";
 export const DEFAULT_CDP_PORT = 9222;
+export const OWNER_PREFLIGHT_REQUIRED_CODE = "preflight-required";
 const manifestSchemaVersion = 1;
 const manifestOwner = "nodoc-browser-cdp";
 const maxVersionBytes = 64 * 1024;
@@ -426,11 +427,13 @@ export async function getBrowserOwnerStatus(options = {}, dependencies = {}) {
   };
 }
 
-function authenticationNextStep({ endpoint, product, portalUrl }) {
+function ownerReadyNextStep({ endpoint, product, portalUrl }) {
   const host = new URL(portalUrl).hostname;
   return {
-    code: "authentication-required",
-    message: "Complete sign-in in the dedicated browser, leave exactly one intended portal page open, then run the authenticated preflight.",
+    code: OWNER_PREFLIGHT_REQUIRED_CODE,
+    lifecycleStatus: "owner-ready",
+    authenticationStatus: "unverified",
+    message: "Authentication is UNVERIFIED until authenticated preflight succeeds. Leave exactly one intended portal page open, complete sign-in only if the browser UI requires it, then run authenticated preflight.",
     command: `npm run preflight:browser-cdp -- --endpoint ${endpoint} --expected-product ${product} --match-host ${host}`,
   };
 }
@@ -452,7 +455,7 @@ export async function startBrowserOwner(options = {}, dependencies = {}) {
       profileKey: config.profileKey,
       product: status.manifest.product,
       pid: status.pid,
-      nextStep: authenticationNextStep({ endpoint: config.endpoint, product: status.manifest.product, portalUrl }),
+      nextStep: ownerReadyNextStep({ endpoint: config.endpoint, product: status.manifest.product, portalUrl }),
     };
   }
   if (status.state !== "stopped") {
@@ -509,7 +512,7 @@ export async function startBrowserOwner(options = {}, dependencies = {}) {
         product: binary.product,
         browser: version.browser,
         pid: child.pid,
-        nextStep: authenticationNextStep({ endpoint: config.endpoint, product: binary.product, portalUrl }),
+        nextStep: ownerReadyNextStep({ endpoint: config.endpoint, product: binary.product, portalUrl }),
       };
     } catch (error) {
       lastError = error;
