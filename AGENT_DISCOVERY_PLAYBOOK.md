@@ -150,7 +150,7 @@ The goal is to avoid treating every portal as if it needs the same kind of crawl
 
 The portfolio manifest is schema-versioned but derives portal identity, recipe
 paths, endpoint host families, operation counts, and coverage metadata from the
-checked-in inventory. Its compiler emits a stable plan digest, capture lease
+checked-in inventory. Its compiler emits a stable plan digest, global live-lifecycle
 serialization, offline review parallelism, dependency-safe preconditions, route
 budgets, and explicit terminal/next-action semantics. Routing is deterministic:
 routine unblocked reads use the cheap route, safety/scope/state-changing or
@@ -235,9 +235,13 @@ unassigned scope, specification evidence gaps, safety/ownership/schema
 conflicts, incomplete health, and benchmark regressions. Frontier scheduling is
 bounded by action, time, payload, token-estimate, retry, portal, and spec
 budgets. Priority is deterministic across evidence gap, information gain,
-safety, cost proxy, freshness, dependencies, and saturation. Endpoint/profile
-capture work remains serialized by existing lease semantics; only immutable
-offline review work may be parallelized. Saturated completion is allowed only
+safety, cost proxy, freshness, dependencies, and saturation. Endpoint/profile capture work remains globally serialized by the live lifecycle
+gate across every spec and host; only immutable, non-conflicting offline
+reconciliation/review work may be parallelized. Exactly one owner, preflight,
+alignment, ledger attempt, capture, finalization, and shutdown lifecycle may be
+active. The next live lifecycle waits for terminal owner shutdown, artifact/ledger
+accounting, evidence review, qualified spec/Postman PR disposition, and
+process-improvement disposition. Saturated completion is allowed only
 when canonical health and saturation gates pass with no unresolved critical
 frontier item.
 
@@ -294,6 +298,9 @@ and after compaction, including maximum worker payload and exact preserved refer
 Roll out in report-only mode first, then allow a reviewer to act on reusable
 recommendations; invalidation is automatic on any family-key or compatibility change.
 
+Use capability tiers for execution, but enforce exact model identity for review and
+controller results: only `gpt-5.6-luna` is accepted; wrong-model output fails closed.
+
 Use capability tiers rather than sending every stage to the strongest model:
 
 1. **Preflight and queue management: orchestrator**
@@ -326,17 +333,19 @@ when they cannot write the same files.
 
 ### Durable orchestration ledger
 
-Track each portal through explicit states instead of relying on chat context:
+Track every directory under `specifications` through explicit durable states instead
+of relying on chat context. No directory may silently disappear from the queue:
 
 ```text
-queued -> preflight-ready -> capturing -> captured -> analyzed
+queued -> attempted -> reviewed -> dispositioned
+       -> preflight-ready -> capturing -> captured -> analyzed
        -> scope-review -> promotion-pr -> reviewed -> merged
 ```
 
 Terminal side states are `blocked` and `failed`, each with a documented blocker
-code or failure reason and a next action. Store at least the spec ID, recipe,
-model, artifact directory, timestamps, handoff counts, recommended next action,
-PR URL, review result, and merge result. A retry creates a new attempt record and
+code or failure reason and a next action. Store at least the spec ID, recipe, model, artifact directory, timestamps, handoff
+counts, reusable lessons, lifecycle accounting, process-improvement disposition,
+recommended next action, PR URL, review result, and merge result. A retry creates a new attempt record and
 new artifact directory; it does not overwrite history.
 
 Capture leases are owned by one worker and are sized from the configured capture
