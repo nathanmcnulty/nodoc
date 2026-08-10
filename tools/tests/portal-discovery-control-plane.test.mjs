@@ -79,8 +79,9 @@ test("worker result preserves exact accounting and rejects cheap capability viol
   const manifest = await buildPortfolioManifest();
   const plan = compileOrchestrationPlan({ ...manifest, portals: [{ ...manifest.portals[0], riskTier: "low", outstandingGapClasses: [] }] });
   const assignment = plan.assignments.find((entry) => entry.type === "review" && entry.route === "cheap");
-  const result = { schemaVersion: 1, assignmentId: assignment.assignmentId, assignmentDigest: assignment.assignmentDigest, assignmentType: "review", status: "completed", decision: "no-action", reasonCodes: ["routine-read-only"], blockers: [], metrics: { complete: true }, recommendedNextAction: "none", candidateAccounting: { accepted: [], rejected: [], escalated: [], blocked: [] }, evidenceAccounting: { accepted: [], rejected: [], escalated: [], blocked: [] } };
+  const result = { schemaVersion: 1, assignmentId: assignment.assignmentId, assignmentDigest: assignment.assignmentDigest, assignmentType: "review", status: "completed", model: "gpt-5.6-luna", decision: "no-action", reasonCodes: ["routine-read-only"], blockers: [], metrics: { complete: true }, recommendedNextAction: "none", lessons: ["reviewed immutable evidence"], lifecycleAccounting: { terminalOwnerShutdown: true, artifactLedgerAccounting: true }, processImprovementDisposition: "none", candidateAccounting: { accepted: [], rejected: [], escalated: [], blocked: [] }, evidenceAccounting: { accepted: [], rejected: [], escalated: [], blocked: [] } };
   assert.equal(validateWorkerResult(result, plan).sanitized, true);
+  assert.throws(() => validateWorkerResult({ ...result, model: "gpt-5.3-codex-spark" }, plan), /exact runtime model/);
   assert.throws(() => validateWorkerResult({ ...result, reasonCodes: ["state-changing"] }, plan), /capability violation/);
   assert.deepEqual(projectPortfolioStatus(manifest).portals.length, manifest.portals.length);
 });
