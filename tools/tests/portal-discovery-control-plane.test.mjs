@@ -19,6 +19,18 @@ test("materialized portfolio and plan are stable and serialize shared capture le
   validateOrchestrationPlan(plan);
 });
 
+test("filtered Intune Autopatch controller plans select the exact deep recipe", async () => {
+  const manifest = await buildPortfolioManifest();
+  const intune = manifest.portals.find((portal) => portal.specId === "intune-autopatch");
+  assert.equal(intune?.recipe, "tools/capture-recipes/intune-autopatch-deep.json");
+
+  const plan = compileOrchestrationPlan({ ...manifest, portals: [intune] }, { budgets: { maxCaptures: 1 } });
+  assert.equal(
+    plan.assignments.find((entry) => entry.type === "capture")?.recipe,
+    "tools/capture-recipes/intune-autopatch-deep.json",
+  );
+});
+
 test("disabled and missing recipe portals are blocked without live allocation", async () => {
   const manifest = await buildPortfolioManifest();
   const changed = { ...manifest, portals: [{ ...manifest.portals[0], enabled: false, recipe: null }] };
