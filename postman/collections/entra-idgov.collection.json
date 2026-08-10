@@ -306,6 +306,169 @@
                                             ]
                                         },
                                         {
+                                            "name": "businessFlows",
+                                            "description": "",
+                                            "item": [
+                                                {
+                                                    "id": "94e720de-9195-4c24-a219-4461ac4279da",
+                                                    "name": "List business flows for a provider",
+                                                    "request": {
+                                                        "name": "List business flows for a provider",
+                                                        "description": {
+                                                            "content": "Retrieves access review business flows surfaced by the Access reviews > Programs\nexperience. Confirmed live from the Identity Governance Programs blade.\n",
+                                                            "type": "text/plain"
+                                                        },
+                                                        "url": {
+                                                            "path": [
+                                                                "accessReviews",
+                                                                "v2.0",
+                                                                "approvalWorkflowProviders",
+                                                                ":providerId",
+                                                                "businessFlows"
+                                                            ],
+                                                            "host": [
+                                                                "{{baseUrl}}"
+                                                            ],
+                                                            "query": [
+                                                                {
+                                                                    "disabled": false,
+                                                                    "description": {
+                                                                        "content": "Include the total count of matching business flows.",
+                                                                        "type": "text/plain"
+                                                                    },
+                                                                    "key": "$count",
+                                                                    "value": "false"
+                                                                },
+                                                                {
+                                                                    "disabled": false,
+                                                                    "description": {
+                                                                        "content": "Maximum number of results to return",
+                                                                        "type": "text/plain"
+                                                                    },
+                                                                    "key": "$top",
+                                                                    "value": "2747"
+                                                                },
+                                                                {
+                                                                    "disabled": false,
+                                                                    "description": {
+                                                                        "content": "Number of results to skip",
+                                                                        "type": "text/plain"
+                                                                    },
+                                                                    "key": "$skip",
+                                                                    "value": "2747"
+                                                                }
+                                                            ],
+                                                            "variable": [
+                                                                {
+                                                                    "type": "any",
+                                                                    "value": "7e316f8e-f222-2ece-c62e-1b6c700a6f4f",
+                                                                    "key": "providerId",
+                                                                    "disabled": false,
+                                                                    "description": {
+                                                                        "content": "(Required) The approval workflow provider ID. Known providers:\n- `F40AE6A6-7BFC-4ABF-9E2A-63120C21A538` — Feature flags / configuration\n- `D5EC9F3B-324E-4F8A-AF55-B69EDD48ECBE` — Access review requests\n",
+                                                                        "type": "text/plain"
+                                                                    }
+                                                                }
+                                                            ]
+                                                        },
+                                                        "header": [
+                                                            {
+                                                                "key": "Accept",
+                                                                "value": "application/json"
+                                                            }
+                                                        ],
+                                                        "method": "GET",
+                                                        "body": {},
+                                                        "auth": null
+                                                    },
+                                                    "response": [
+                                                        {
+                                                            "id": "e2be8881-da15-477b-988a-6eff9e0f7935",
+                                                            "name": "Business flows returned successfully.",
+                                                            "originalRequest": {
+                                                                "url": {
+                                                                    "path": [
+                                                                        "accessReviews",
+                                                                        "v2.0",
+                                                                        "approvalWorkflowProviders",
+                                                                        ":providerId",
+                                                                        "businessFlows"
+                                                                    ],
+                                                                    "host": [
+                                                                        "{{baseUrl}}"
+                                                                    ],
+                                                                    "query": [
+                                                                        {
+                                                                            "disabled": false,
+                                                                            "description": {
+                                                                                "content": "Include the total count of matching business flows.",
+                                                                                "type": "text/plain"
+                                                                            },
+                                                                            "key": "$count",
+                                                                            "value": "false"
+                                                                        },
+                                                                        {
+                                                                            "disabled": false,
+                                                                            "description": {
+                                                                                "content": "Maximum number of results to return",
+                                                                                "type": "text/plain"
+                                                                            },
+                                                                            "key": "$top",
+                                                                            "value": "2747"
+                                                                        },
+                                                                        {
+                                                                            "disabled": false,
+                                                                            "description": {
+                                                                                "content": "Number of results to skip",
+                                                                                "type": "text/plain"
+                                                                            },
+                                                                            "key": "$skip",
+                                                                            "value": "2747"
+                                                                        }
+                                                                    ],
+                                                                    "variable": [
+                                                                        {
+                                                                            "disabled": false,
+                                                                            "description": {
+                                                                                "content": "(Required) The approval workflow provider ID. Known providers:\n- `F40AE6A6-7BFC-4ABF-9E2A-63120C21A538` — Feature flags / configuration\n- `D5EC9F3B-324E-4F8A-AF55-B69EDD48ECBE` — Access review requests\n",
+                                                                                "type": "text/plain"
+                                                                            },
+                                                                            "type": "any",
+                                                                            "value": "7e316f8e-f222-2ece-c62e-1b6c700a6f4f",
+                                                                            "key": "providerId"
+                                                                        }
+                                                                    ]
+                                                                },
+                                                                "header": [
+                                                                    {
+                                                                        "key": "Accept",
+                                                                        "value": "application/json"
+                                                                    }
+                                                                ],
+                                                                "method": "GET",
+                                                                "body": {}
+                                                            },
+                                                            "status": "OK",
+                                                            "code": 200,
+                                                            "header": [
+                                                                {
+                                                                    "key": "Content-Type",
+                                                                    "value": "application/json"
+                                                                }
+                                                            ],
+                                                            "body": "{\n  \"@odata.context\": \"https://api.accessreviews.identitygovernance.azure.com/accessReviews/v2.0/$metadata#approvalWorkflowProviders('F40AE6A6-7BFC-4ABF-9E2A-63120C21A538')/businessFlows\",\n  \"@odata.count\": 1,\n  \"value\": [\n    {\n      \"id\": \"52a2c256-9a91-4f56-9edc-06969fdcc298\",\n      \"partnerId\": \"d5ec9f3b-324e-4f8a-af55-b69edd48ecbe\",\n      \"displayName\": \"Quarterly guest access review\",\n      \"description\": \"Reviews guest access to the CRM application.\",\n      \"createdDateTime\": \"2026-01-27T18:09:30.2847107Z\",\n      \"lastUpdatedDateTime\": \"2026-02-01T14:15:00Z\",\n      \"deDuplicationId\": null,\n      \"recordVersion\": \"1\",\n      \"customData\": null,\n      \"policyTemplateId\": null,\n      \"isDefault\": false,\n      \"schemaId\": null,\n      \"settings\": null,\n      \"policy\": null,\n      \"summary\": null\n    }\n  ]\n}",
+                                                            "cookie": [],
+                                                            "_postman_previewlanguage": "json"
+                                                        }
+                                                    ],
+                                                    "event": [],
+                                                    "protocolProfileBehavior": {
+                                                        "disableBodyPruning": true
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        {
                                             "name": "requests",
                                             "description": "",
                                             "item": [
@@ -2067,6 +2230,125 @@
                                             ]
                                         }
                                     ]
+                                }
+                            ]
+                        },
+                        {
+                            "name": "reports",
+                            "description": "",
+                            "item": [
+                                {
+                                    "id": "39a8652d-8efc-456d-8cd1-77999e79d168",
+                                    "name": "List access review reports",
+                                    "request": {
+                                        "name": "List access review reports",
+                                        "description": {
+                                            "content": "Retrieves report rows shown by the Access reviews > Review History experience.\nConfirmed live from the Identity Governance Review History blade.\n",
+                                            "type": "text/plain"
+                                        },
+                                        "url": {
+                                            "path": [
+                                                "accessReviews",
+                                                "v2.0",
+                                                "reports"
+                                            ],
+                                            "host": [
+                                                "{{baseUrl}}"
+                                            ],
+                                            "query": [
+                                                {
+                                                    "disabled": false,
+                                                    "description": {
+                                                        "content": "OData filter expression",
+                                                        "type": "text/plain"
+                                                    },
+                                                    "key": "$filter",
+                                                    "value": "string"
+                                                },
+                                                {
+                                                    "disabled": false,
+                                                    "description": {
+                                                        "content": "Maximum number of results to return",
+                                                        "type": "text/plain"
+                                                    },
+                                                    "key": "$top",
+                                                    "value": "2747"
+                                                }
+                                            ],
+                                            "variable": []
+                                        },
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            }
+                                        ],
+                                        "method": "GET",
+                                        "body": {},
+                                        "auth": null
+                                    },
+                                    "response": [
+                                        {
+                                            "id": "776f3949-54d4-4c41-b802-ac7d875a551d",
+                                            "name": "Access review reports returned successfully.",
+                                            "originalRequest": {
+                                                "url": {
+                                                    "path": [
+                                                        "accessReviews",
+                                                        "v2.0",
+                                                        "reports"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [
+                                                        {
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "OData filter expression",
+                                                                "type": "text/plain"
+                                                            },
+                                                            "key": "$filter",
+                                                            "value": "string"
+                                                        },
+                                                        {
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "Maximum number of results to return",
+                                                                "type": "text/plain"
+                                                            },
+                                                            "key": "$top",
+                                                            "value": "2747"
+                                                        }
+                                                    ],
+                                                    "variable": []
+                                                },
+                                                "header": [
+                                                    {
+                                                        "key": "Accept",
+                                                        "value": "application/json"
+                                                    }
+                                                ],
+                                                "method": "GET",
+                                                "body": {}
+                                            },
+                                            "status": "OK",
+                                            "code": 200,
+                                            "header": [
+                                                {
+                                                    "key": "Content-Type",
+                                                    "value": "application/json"
+                                                }
+                                            ],
+                                            "body": "{\n  \"@odata.context\": \"https://api.accessreviews.identitygovernance.azure.com/accessReviews/v2.0/$metadata#reports\",\n  \"@odata.count\": 1,\n  \"value\": [\n    {\n      \"requestId\": \"52a2c256-9a91-4f56-9edc-06969fdcc298\",\n      \"displayName\": \"Quarterly guest access review\",\n      \"status\": \"Completed\",\n      \"reviewedEntityCount\": 42,\n      \"startDateTime\": \"2026-01-27T18:09:30.283Z\",\n      \"endDateTime\": \"2026-02-10T18:09:30.283Z\"\n    }\n  ]\n}",
+                                            "cookie": [],
+                                            "_postman_previewlanguage": "json"
+                                        }
+                                    ],
+                                    "event": [],
+                                    "protocolProfileBehavior": {
+                                        "disableBodyPruning": true
+                                    }
                                 }
                             ]
                         }
