@@ -337,7 +337,7 @@ export const generatedSpecDataByTitle = {
     "specPath": "specifications/nodoc-m365-apps-config/specification/openapi.yml",
     "specSourceUrl": "https://github.com/nathanmcnulty/nodoc/tree/main/specifications/nodoc-m365-apps-config/specification",
     "specDownloadUrl": "https://raw.githubusercontent.com/nathanmcnulty/nodoc/main/specifications/nodoc-m365-apps-config/specification/openapi.yml",
-    "operationCount": 23,
+    "operationCount": 24,
     "tagCount": 6,
     "tagGroupCount": 3,
     "ungroupedTagCount": 0,
@@ -357,7 +357,7 @@ export const generatedSpecDataByTitle = {
     "headerProfileCount": 0,
     "operationContextCount": 0,
     "requestExampleCount": 0,
-    "successResponseExampleCount": 5,
+    "successResponseExampleCount": 6,
     "evidenceMentionCount": 8,
     "maturity": {
       "label": "Advanced",
