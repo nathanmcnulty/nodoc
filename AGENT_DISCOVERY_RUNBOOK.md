@@ -215,6 +215,10 @@ npm run preflight:browser-cdp -- --endpoint http://127.0.0.1:9222 `
 npm run browser:cdp:stop -- --profile-key m365-admin --port 9222
 ```
 
+`--expected-product Edge` matches the Edge product family, including the real
+CDP `Browser` token form `Edg/<version>`. Chrome remains a distinct family and
+must not satisfy an Edge preflight.
+
 `start` is idempotent only for a healthy exact manifest owner. Its
 `authentication-required` next step is deliberate: the command never claims
 that launch alone established portal authentication. The sanitized manifest is

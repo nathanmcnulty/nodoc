@@ -6,6 +6,13 @@ const defaultStabilityMs = 750;
 const defaultPollMs = 150;
 const defaultRejectUrlPattern = /(?:^|\/)login(?:[\/?#]|$)|signin|sign-in/iu;
 const defaultRejectTitlePattern = /sign in|log in|authentication required/iu;
+const productFamilyAliases = new Map([
+  ["edge", "edge"],
+  ["edg", "edge"],
+  ["microsoft edge", "edge"],
+  ["chrome", "chrome"],
+  ["google chrome", "chrome"],
+]);
 const defaultRejectBodyPattern = /sign in|log in|authentication required/iu;
 
 function fail(message) {
@@ -16,6 +23,18 @@ function matchesConfiguredPattern(value, pattern) {
   return pattern instanceof RegExp
     ? pattern.test(String(value))
     : String(value).toLocaleLowerCase().includes(String(pattern).toLocaleLowerCase());
+}
+
+export function normalizeProductFamily(value) {
+  const normalized = String(value ?? "").trim().toLowerCase();
+  if (!normalized) return null;
+  const productToken = normalized.split("/", 1)[0].trim();
+  return productFamilyAliases.get(productToken) ?? null;
+}
+
+export function matchesExpectedProduct(browser, expectedProduct) {
+  const expectedFamily = normalizeProductFamily(expectedProduct);
+  return expectedFamily !== null && normalizeProductFamily(browser) === expectedFamily;
 }
 
 function loopbackEndpoint(value) {
@@ -114,7 +133,7 @@ export async function runBrowserCdpPreflight({
 } = {}) {
   const base = loopbackEndpoint(endpoint);
   const version = await getJson(new URL("/json/version", base), timeoutMs);
-  if (expectedProduct && !String(version.Browser ?? "").toLowerCase().includes(expectedProduct.toLowerCase())) fail(`browser product is not ${expectedProduct}.`);
+  if (expectedProduct && !matchesExpectedProduct(version.Browser, expectedProduct)) fail(`browser product is not ${expectedProduct}.`);
   if (typeof version.webSocketDebuggerUrl !== "string" || !version.webSocketDebuggerUrl.startsWith("ws")) fail("browser WebSocket URL is missing.");
   const criteria = { matchHosts: matchHosts.map((host) => host.toLowerCase()), matchPathPrefixes, urlPattern, titlePattern, expectedTitlePattern, rejectBodyPattern, rejectUrlPattern, authenticationHosts };
   const list = async () => {

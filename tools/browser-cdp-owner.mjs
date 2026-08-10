@@ -7,6 +7,8 @@ import { spawn, spawnSync } from "node:child_process";
 import { setTimeout as delay } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
 
+import { matchesExpectedProduct } from "./browser-cdp-preflight.mjs";
+
 export const DEFAULT_CDP_HOST = "127.0.0.1";
 export const DEFAULT_CDP_PORT = 9222;
 const manifestSchemaVersion = 1;
@@ -180,10 +182,7 @@ export function buildLaunchCommand({
 }
 
 function productMatches(browser, expectedProduct) {
-  const value = String(browser ?? "").toLowerCase();
-  if (expectedProduct === "Edge") return value.includes("microsoft edge") || value.includes("edg/");
-  if (expectedProduct === "Chrome") return value.includes("chrome") && !value.includes("edge") && !value.includes("edg/");
-  return false;
+  return matchesExpectedProduct(browser, expectedProduct);
 }
 
 async function boundedResponseText(response, limit = maxVersionBytes) {

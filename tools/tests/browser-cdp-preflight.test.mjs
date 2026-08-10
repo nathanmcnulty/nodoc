@@ -2,7 +2,11 @@ import assert from "node:assert/strict";
 import { createServer } from "node:http";
 import test from "node:test";
 
-import { runBrowserCdpPreflight } from "../browser-cdp-preflight.mjs";
+import {
+  matchesExpectedProduct,
+  normalizeProductFamily,
+  runBrowserCdpPreflight,
+} from "../browser-cdp-preflight.mjs";
 
 function installWebSocket({ evaluate = { title: "Inventory", url: "https://config.office.com/officeSettings/inventory", bodyText: "Inventory" } } = {}) {
   const original = globalThis.WebSocket;
@@ -14,7 +18,7 @@ function installWebSocket({ evaluate = { title: "Inventory", url: "https://confi
   return () => { globalThis.WebSocket = original; };
 }
 
-async function mockCdp(targets, browser = "Microsoft Edge/140.0") {
+async function mockCdp(targets, browser = "Edg/151.0.4129.72") {
   const server = createServer((request, response) => {
     response.setHeader("content-type", "application/json");
     if (request.url === "/json/version") response.end(JSON.stringify({ Browser: browser, Protocol: "1.3", webSocketDebuggerUrl: "ws://127.0.0.1/devtools/browser/root" }));
@@ -33,8 +37,20 @@ test("accepts one stable authenticated target", async () => {
   try {
     const result = await runBrowserCdpPreflight({ endpoint: cdp.endpoint, expectedProduct: "Edge", matchHosts: ["config.office.com"], matchPathPrefixes: ["/officeSettings/inventory"], stabilityMs: 20, pollMs: 5 });
     assert.equal(result.target.id, "page-1");
-    assert.equal(result.browser, "Microsoft Edge/140.0");
+    assert.equal(result.browser, "Edg/151.0.4129.72");
   } finally { restore(); await cdp.close(); }
+});
+
+test("normalizes explicit Edge and Chrome product aliases without fuzzy matches", () => {
+  assert.equal(normalizeProductFamily("Edg/151.0.4129.72"), "edge");
+  assert.equal(normalizeProductFamily("Microsoft Edge/151.0.4129.72"), "edge");
+  assert.equal(normalizeProductFamily("Google Chrome/140.0.7339.80"), "chrome");
+  assert.equal(matchesExpectedProduct("Edg/151.0.4129.72", "Edge"), true);
+  assert.equal(matchesExpectedProduct("Microsoft Edge/151.0.4129.72", "Edg"), true);
+  assert.equal(matchesExpectedProduct("Google Chrome/140.0.7339.80", "Chrome"), true);
+  assert.equal(matchesExpectedProduct("Edg/151.0.4129.72", "Chrome"), false);
+  assert.equal(matchesExpectedProduct("Google Chrome/140.0.7339.80", "Edge"), false);
+  assert.equal(matchesExpectedProduct("Not Edge/151.0.4129.72", "Edge"), false);
 });
 
 test("fails closed for ambiguous targets", async () => {
