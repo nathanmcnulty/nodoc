@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 import {
   buildCandidateHandoff,
@@ -32,8 +33,21 @@ import {
   writeParentSupervisionFailure,
 } from "./portal-discovery-process.mjs";
 import { runBrowserCdpPreflight } from "./browser-cdp-preflight.mjs";
+import { resolvePageTargetCriteria } from "./portal-discovery-recipe.mjs";
 
 const validPhases = new Set(["all", "analyze", "capture", "plan"]);
+
+export function buildPreflightCriteria(recipe) {
+  const pageTarget = resolvePageTargetCriteria(recipe);
+  return {
+    matchHosts: pageTarget.matchHosts,
+    matchPathPrefixes: pageTarget.matchPathPrefixes,
+    urlPattern: recipe.matchUrlPattern,
+    titlePattern: recipe.matchTitlePattern,
+    expectedTitlePattern: recipe.expectedTitlePattern,
+    rejectBodyPattern: recipe.rejectBodyPattern,
+  };
+}
 
 function parseArgs(argv) {
   const args = {
@@ -749,12 +763,7 @@ async function main() {
       const cdp = await runBrowserCdpPreflight({
         endpoint: args.cdpEndpoint,
         expectedProduct: args.expectedProduct,
-        matchHosts: recipe.matchHosts,
-        matchPathPrefixes: recipe.matchPathPrefixes,
-        urlPattern: recipe.matchUrlPattern,
-        titlePattern: recipe.matchTitlePattern,
-        expectedTitlePattern: recipe.expectedTitlePattern,
-        rejectBodyPattern: recipe.rejectBodyPattern,
+        ...buildPreflightCriteria(recipe),
       });
       args.targetId = cdp.target.id;
     }
@@ -1143,4 +1152,6 @@ async function main() {
   }
 }
 
-await main();
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  await main();
+}
