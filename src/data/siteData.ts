@@ -137,7 +137,7 @@ const apiCatalogSeed: ApiCatalogSeed[] = [
     title: "SharePoint",
     slug: "/sharepoint-admin",
     family: "SharePoint admin center",
-    operations: 41,
+    operations: 42,
     authModel: "Portal session cookie (`FedAuth`) + SharePoint form digest",
     baseUrl: "https://{tenant}-admin.sharepoint.com",
     summary:
