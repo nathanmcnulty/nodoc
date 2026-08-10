@@ -43,6 +43,18 @@ test("filtered M365 Apps Services controller plans select the exact deep recipe"
   );
 });
 
+test("filtered M365 Apps Config controller plans select the exact deep recipe", async () => {
+  const manifest = await buildPortfolioManifest();
+  const config = manifest.portals.find((portal) => portal.specId === "m365-apps-config");
+  assert.equal(config?.recipe, "tools/capture-recipes/m365-apps-config-deep.json");
+
+  const plan = compileOrchestrationPlan({ ...manifest, portals: [config] }, { budgets: { maxCaptures: 1 } });
+  assert.equal(
+    plan.assignments.find((entry) => entry.type === "capture")?.recipe,
+    "tools/capture-recipes/m365-apps-config-deep.json",
+  );
+});
+
 test("disabled and missing recipe portals are blocked without live allocation", async () => {
   const manifest = await buildPortfolioManifest();
   const changed = { ...manifest, portals: [{ ...manifest.portals[0], enabled: false, recipe: null }] };

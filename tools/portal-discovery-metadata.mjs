@@ -606,8 +606,8 @@ export const captureRecipesByTitle = {
     "tools/capture-recipes/m365-admin-seeded-replay.json",
   ],
   "M365 Apps Config": [
-    "tools/capture-recipes/m365-apps-deep.json",
     "tools/capture-recipes/m365-apps-config-deep.json",
+    "tools/capture-recipes/m365-apps-deep.json",
     "tools/capture-recipes/m365-apps-seeded-replay.json",
   ],
   "M365 Apps Inventory": [
