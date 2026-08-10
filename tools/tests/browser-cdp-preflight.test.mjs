@@ -40,7 +40,7 @@ async function mockCdp(targets, browser = "Edg/151.0.4129.72") {
   const server = createServer((request, response) => {
     response.setHeader("content-type", "application/json");
     if (request.url === "/json/version") response.end(JSON.stringify({ Browser: browser, Protocol: "1.3", webSocketDebuggerUrl: "ws://127.0.0.1/devtools/browser/root" }));
-    else if (request.url === "/json/list") response.end(JSON.stringify(targets));
+    else if (request.url === "/json/list") response.end(JSON.stringify(typeof targets === "function" ? targets() : targets));
     else response.writeHead(404).end();
   });
   await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
@@ -104,10 +104,7 @@ test("rejects product mismatch, non-loopback endpoints, and authentication targe
 });
 
 test("aligns one authenticated same-portal bootstrap target without changing its exact ID", async () => {
-  const current = target({
-    title: "Home - Microsoft 365 Apps admin center",
-    url: "https://config.office.com/officeSettings",
-  });
+  const current = target({ title: "Home - Microsoft 365 Apps admin center", url: "https://config.office.com/officeSettings" });
   const restore = installWebSocket({
     evaluate: () => ({
       title: current.title,
@@ -145,6 +142,72 @@ test("aligns one authenticated same-portal bootstrap target without changing its
     assert.equal(result.alignment.targetId, "page-1");
     assert.equal(result.alignment.fromTarget.id, "page-1");
     assert.equal(result.evaluation.url, "https://config.office.com/officeSettings/inventory");
+  } finally {
+    restore();
+    await cdp.close();
+  }
+});
+
+test("waits for the same target ID to publish its navigated URL before strict preflight", async () => {
+  const current = target({ title: "Home - Microsoft 365 Apps admin center", url: "https://config.office.com/officeSettings" });
+  let navigationStarted = false;
+  let listCount = 0;
+  const restore = installWebSocket({
+    evaluate: () => ({ title: current.title, url: current.url, bodyText: current.title === "Inventory" ? "Inventory" : "Home" }),
+    onCommand: (message) => {
+      if (message.method === "Page.navigate") navigationStarted = true;
+      return {};
+    },
+  });
+  const cdp = await mockCdp(() => {
+    listCount += 1;
+    if (navigationStarted && listCount > 4) {
+      current.url = "https://config.office.com/officeSettings/inventory";
+      current.title = "Inventory";
+    }
+    return [current];
+  });
+  try {
+    const result = await alignBrowserCdpTarget({
+      endpoint: cdp.endpoint,
+      expectedProduct: "Edge",
+      entryUrl: "https://config.office.com/officeSettings/inventory",
+      featureCriteria: { matchHosts: ["config.office.com"], matchPathPrefixes: ["/officeSettings/inventory"] },
+      bootstrapCriteria: { matchHosts: ["config.office.com"], matchPathnames: ["/officeSettings"] },
+      stabilityMs: 4,
+      pollMs: 1,
+      timeoutMs: 100,
+    });
+    assert.equal(result.alignment.status, "aligned");
+    assert.equal(result.target.id, "page-1");
+    assert.equal(result.evaluation.url, "https://config.office.com/officeSettings/inventory");
+  } finally {
+    restore();
+    await cdp.close();
+  }
+});
+
+test("fails closed with an explicit readiness timeout when the same target never reaches the entry URL", async () => {
+  const current = target({ title: "Home - Microsoft 365 Apps admin center", url: "https://config.office.com/officeSettings" });
+  let navigationStarted = false;
+  const restore = installWebSocket({ evaluate: () => ({ title: current.title, url: current.url, bodyText: "Home" }), onCommand: (message) => {
+    if (message.method === "Page.navigate") navigationStarted = true;
+    return { frameId: "frame-1" };
+  } });
+  const cdp = await mockCdp(() => navigationStarted ? [] : [current]);
+  try {
+    await assert.rejects(
+      alignBrowserCdpTarget({
+        endpoint: cdp.endpoint,
+        entryUrl: "https://config.office.com/officeSettings/inventory",
+        featureCriteria: { matchHosts: ["config.office.com"], matchPathPrefixes: ["/officeSettings/inventory"] },
+        bootstrapCriteria: { matchHosts: ["config.office.com"], matchPathnames: ["/officeSettings"] },
+        stabilityMs: 1,
+        pollMs: 1,
+        timeoutMs: 50,
+      }),
+      (error) => error.code === "navigation-readiness-timeout",
+    );
   } finally {
     restore();
     await cdp.close();

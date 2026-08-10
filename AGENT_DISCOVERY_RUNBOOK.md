@@ -238,10 +238,13 @@ match; it never kills by process name.
 The required order is: owner ready -> strict feature preflight; only when the
 validated recipe declares it and the feature target is absent, one
 authenticated same-portal bootstrap preflight and exact-target GET alignment ->
-strict same-ID feature preflight -> mutate the ledger. Multiple targets, wrong
-hosts, login barriers, malformed metadata, redirects, and arbitrary operator
-URLs fail closed. The capture worker still receives only the exact target ID and
-does not launch, close, or navigate the browser.
+bounded same-ID navigation readiness -> strict same-ID feature preflight ->
+mutate the ledger. Readiness may tolerate only the target's transient
+post-navigation publication state; it must end in the checked-in entry URL or
+fail with an explicit readiness timeout. Multiple targets, wrong hosts, login
+barriers, malformed metadata, redirects, and arbitrary operator URLs fail
+closed. The capture worker still receives only the exact target ID and does not
+launch, close, or navigate the browser.
 
 For a portal-specific page check, retain the same endpoint and narrow the
 authenticated preflight further:
