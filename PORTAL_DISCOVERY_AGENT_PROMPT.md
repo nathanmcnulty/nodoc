@@ -8,6 +8,10 @@ digest mismatches, incomplete accounting, illegal transitions, or capability
 violations fail closed. Human prose is diagnostic only and must not be used to
 change the ledger or specifications.
 
+Process-improvement assignments/results may classify known deterministic reason
+codes and prepare evidence-linked proposals only; Luna or an operator must
+authorize safety, scope, threshold, and model-disagreement conclusions.
+
 Copy this prompt into a new agent session after the operator has started and
 authenticated the dedicated CDP browser described in
 `AGENT_DISCOVERY_RUNBOOK.md`.

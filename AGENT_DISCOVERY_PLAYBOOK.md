@@ -165,6 +165,34 @@ digests, expected files, deterministic validation commands, budgets, and byte or
 cardinality measurements. The compiler does not edit specs, create branches, or
 open/merge PRs; those actions require an explicit operator boundary.
 
+### Layer 3 feedback loop and accounting
+
+`tools/portal-discovery-retrospective.mjs` consumes only sanitized,
+schema-versioned machine summaries and explicit operator annotations. It
+preserves source IDs/digests, run and assignment scope, exact candidate and
+evidence cardinality, health/saturation, derivative reuse, stage/capture
+durations, retries/recovery, escalation, validation, promotion, CI/PR/review,
+and merge outcomes. Unavailable is represented as `null`; zero is emitted only
+when supplied as a verified zero.
+
+Actual model usage is accepted only from trusted structured telemetry with the
+model, assignment digest, provider/source, and token fields. Tokenizer estimates
+record tokenizer/version, serialized prompt/context bytes, budgets, shared and
+reused context, and confidence separately. Byte proxies and estimates are not
+actual usage. Aggregates keep actual and estimated totals separate; cache/reuse
+avoided-input, escalation, retry, invalid-result, and per-candidate/change/
+merged-result measures are only reported when their inputs support them. Cost
+is unavailable without an explicit versioned pricing table.
+
+Improvement proposals cover deterministic failures, process/documentation
+mismatches, recipe and analyzer gaps, model disagreement, operational
+incidents, schema/ownership ambiguity, CI/workflow gaps, and benchmark
+candidates. Support thresholds and critical invariant reason codes determine
+`proposed` versus `observe`; one anecdote does not become an authoritative
+lesson. Evidence-linked proposals route safety, scope, threshold, and model
+disagreement decisions to Luna/manual review and never auto-edit files or open
+PRs.
+
 Use four bounded roles instead of asking every worker to understand the entire
 research process:
 
