@@ -501,6 +501,22 @@ async function prepareLedgerAttempt(args, specRecord, recipePath) {
     ),
   });
   if (!claimed) {
+    const current = await getLedgerViewFromFile({
+      ledgerPath: args.ledgerPath,
+      filters: { assignmentId },
+      includeAttempts: true,
+    });
+    const assignment = current.assignments[0];
+    const attempt = assignment?.latestAttempt;
+    if (
+      attempt?.status === "running"
+      && attempt.lease?.owner === args.workerId
+      && assignment.endpoint === args.endpoint
+      && assignment.profile === args.profile
+    ) {
+      args.attemptNumber = attempt.attemptNumber;
+      return assignment;
+    }
     throw new Error(
       `Ledger assignment ${assignmentId} is unavailable because its endpoint/profile lease is held or its state conflicts.`,
     );
