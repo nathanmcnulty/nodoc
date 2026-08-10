@@ -45,6 +45,25 @@ Give the agent this repository-relative instruction:
 The prompt is intentionally separate from this runbook so it can be pasted into
 a new agent session without copying the full playbook.
 
+## Promotion preparation (Layer 2)
+
+Promotion preparation is an offline, deterministic compiler. It consumes only
+validated grouped handoffs, canonical health, validated review results, derivative
+recommendations, and checked-in spec inventory. It never calls a model and never
+edits a specification or creates a PR implicitly.
+
+```powershell
+node tools/portal-discovery-promotion-planner.mjs compile .\promotion-input.json
+```
+
+The input must contain tenant-safe candidate/evidence IDs, exact worker approval,
+and explicit budgets. The compiler fails closed for incomplete health, adjacent,
+suppressed, bundle-only, ambiguous, conflicting, or unassigned candidates. It
+emits stable plan/change-group IDs, digests, exact candidate/evidence traceability,
+focused destination-spec PR boundaries, validation commands, measurements, and
+next actions. Applying repository edits is a separate human-controlled boundary
+after review; this command is report-only.
+
 ## Required input
 
 The task must name one portal by title or spec ID, for example `M365 Admin` or
