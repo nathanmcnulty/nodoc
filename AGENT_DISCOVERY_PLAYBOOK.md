@@ -46,7 +46,7 @@ When promoting discoveries into the repository, aim for more than just path cove
 ## Core principles
 
 1. **Traffic first.** Start with real browser traffic before relying on bundle mining.
-2. **Use a dedicated signed-in browser session.** Reuse a persistent Edge or Chrome debug profile so portal-only auth and context survive retries without exposing the user's normal profile.
+2. **Use one browser owner.** The operator starts one Edge root with loopback TCP CDP on an explicit fixed port and a persisted signed-in profile; discovery runs the read-only preflight before capture. Chrome is fallback only, and no Playwright/browser-canvas controller may share the browser, profile, or port.
 3. **Prefer safe reads.** GETs first, then safe POST-backed reads, then intercepted write-shape capture, then reversible writes only if necessary.
 4. **Keep evidence.** Record whether an endpoint is confirmed by live traffic, safe probe, or bundle discovery.
 5. **Separate confidence levels.** Do not present bundle-only discoveries as if they were fully confirmed.
@@ -249,8 +249,9 @@ research process:
      is the only role that turns candidates into repository changes.
 
 On one machine, serialize capture workers because the deterministic driver uses
-one CDP endpoint on port `9222`. Parallelize across isolated machines or over
-completed artifacts, never by sharing a live page target or output directory.
+one operator-owned CDP endpoint and one long-lived portal target. Parallelize
+across isolated machines or over completed artifacts, never by sharing a live
+page target, browser profile, CDP port, or output directory.
 This reduces browser races, duplicate traffic, context consumption, and
 different agents reaching different conclusions from the same evidence.
 

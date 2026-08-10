@@ -25,7 +25,7 @@ import {
   normalizeAttributionUrl,
 } from "./cdp-attribution.mjs";
 
-const apiBase = "http://127.0.0.1:9222";
+let apiBase = "http://127.0.0.1:9222";
 const defaultNavigationTimeoutMs = 15000;
 const defaultNetworkIdleMs = 750;
 const defaultSeedLinkLimit = 12;
@@ -575,6 +575,7 @@ async function parseArgs(argv) {
   const args = {
     actions: [],
     captureScripts: true,
+    cdpEndpoint: "http://127.0.0.1:9222",
     bundleCacheDir: null,
     evaluateTimeoutMs: defaultEvaluateTimeoutMs,
     finalizationTimeoutMs: defaultFinalizationTimeoutMs,
@@ -705,6 +706,17 @@ async function parseArgs(argv) {
 
     if (arg.startsWith("--target-id=")) {
       args.targetId = arg.slice("--target-id=".length).trim();
+      continue;
+    }
+
+    if (arg === "--cdp-endpoint" && next) {
+      args.cdpEndpoint = next;
+      index += 1;
+      continue;
+    }
+
+    if (arg.startsWith("--cdp-endpoint=")) {
+      args.cdpEndpoint = arg.slice("--cdp-endpoint=".length);
       continue;
     }
 
@@ -1961,6 +1973,7 @@ function collectSeededRouteCandidates(seedArtifacts, rootOrigin, args, action) {
 
 async function main() {
   const args = await parseArgs(process.argv.slice(2));
+  apiBase = args.cdpEndpoint.replace(/\/$/u, "");
   runtimeEvaluateTimeoutMs = args.evaluateTimeoutMs;
   const seedArtifacts = args.seedArtifacts
     ? await loadSeedArtifacts(args.seedArtifacts)
