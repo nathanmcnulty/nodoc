@@ -76,14 +76,14 @@ test("validates promotion result capability and exact cardinality", () => {
 });
 
 test("fails closed on incompatible schemas and promotion budgets", () => {
-  const input = fixture();
+  const input = { groupedHandoff: handoff(), specInventory: inventory, workerResults: [] };
   input.budgets = { maxChanges: 1, maxPrs: 1, maxFiles: 1 };
   input.groupedHandoff.partitions.push({
     ...input.groupedHandoff.partitions[0],
     destination: { specId: "missing-spec", hostFamily: "service" },
     candidates: [{ candidateId: "conflict", evidenceFamilyId: "ev-conflict", evidence: "confirmed", documentationStatus: "undocumented", method: "GET", normalizedPath: "/v1/conflict", responseShapeFingerprint: "changed" }],
   });
-  input.groupedHandoff.manifest.totals.candidateCount += 1;
-  input.groupedHandoff.manifest.totals.evidenceFamilyCount += 1;
+  input.groupedHandoff.manifest.totals.candidateCount += 2;
+  input.groupedHandoff.manifest.totals.evidenceFamilyCount += 2;
   assert.throws(() => compilePromotionPlan(input), /candidate cardinality|evidence cardinality|digest/i);
 });

@@ -193,6 +193,44 @@ lesson. Evidence-linked proposals route safety, scope, threshold, and model
 disagreement decisions to Luna/manual review and never auto-edit files or open
 PRs.
 
+### Layer 4 integrated controller
+
+The final layer is a deterministic, report-first coordinator in
+`tools/portal-discovery-controller.mjs`. It accepts an explicit materialized
+portfolio plus validated sanitized stage inputs and composes the existing
+control-plane, review, promotion, retrospective, benchmark, and saturation
+interfaces. It never performs live capture, browser/CDP work, ledger mutation,
+spec edits, PR creation, or merge actions by default. Apply/enqueue remains an
+explicit boundary through the existing safe interfaces.
+
+The controller state machine includes `planned`, `blocked`, `awaiting-auth`,
+`awaiting-capture-lease`, `capture-recommended`, `awaiting-artifacts`,
+`offline-ready`, `review-ready`, `promotion-ready`, `awaiting-PR`,
+`awaiting-CI`, `awaiting-review`, `merge-ready`, `merged`,
+`retrospective-ready`, `saturated-complete`, and `failed`. Invalid transitions,
+unknown reason codes, incompatible schemas, digest tampering, privacy leakage,
+benchmark drift, incomplete health, unknown saturation, and critical frontier
+items fail closed. Identical inputs produce stable execution IDs/digests and
+can be resumed without duplicating work.
+
+The sanitized benchmark corpus is synthetic and schema-versioned. Its scorecard
+checks scenario IDs/digests, exact cardinalities, route and promotion outcomes,
+health/saturation decisions, cache/reuse behavior, and retrospective states.
+Its byte, cardinality, assignment, and explicitly configured tokenizer values
+are proxies only, not real token, cost, quality, or portal-coverage claims.
+
+The unresolved frontier models unvisited states, eligible controls, failed or
+unknown transitions, bundle-only families, missing schemas, adjacent or
+unassigned scope, specification evidence gaps, safety/ownership/schema
+conflicts, incomplete health, and benchmark regressions. Frontier scheduling is
+bounded by action, time, payload, token-estimate, retry, portal, and spec
+budgets. Priority is deterministic across evidence gap, information gain,
+safety, cost proxy, freshness, dependencies, and saturation. Endpoint/profile
+capture work remains serialized by existing lease semantics; only immutable
+offline review work may be parallelized. Saturated completion is allowed only
+when canonical health and saturation gates pass with no unresolved critical
+frontier item.
+
 Use four bounded roles instead of asking every worker to understand the entire
 research process:
 
