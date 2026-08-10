@@ -55,6 +55,18 @@ test("filtered M365 Apps Config controller plans select the exact deep recipe", 
   );
 });
 
+test("filtered M365 Apps Inventory controller plans select the exact deep recipe", async () => {
+  const manifest = await buildPortfolioManifest();
+  const inventory = manifest.portals.find((portal) => portal.specId === "m365-apps-inventory");
+  assert.equal(inventory?.recipe, "tools/capture-recipes/m365-apps-inventory-deep.json");
+
+  const plan = compileOrchestrationPlan({ ...manifest, portals: [inventory] }, { budgets: { maxCaptures: 1 } });
+  assert.equal(
+    plan.assignments.find((entry) => entry.type === "capture")?.recipe,
+    "tools/capture-recipes/m365-apps-inventory-deep.json",
+  );
+});
+
 test("disabled and missing recipe portals are blocked without live allocation", async () => {
   const manifest = await buildPortfolioManifest();
   const changed = { ...manifest, portals: [{ ...manifest.portals[0], enabled: false, recipe: null }] };
