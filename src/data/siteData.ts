@@ -336,7 +336,7 @@ const apiCatalogSeed: ApiCatalogSeed[] = [
     title: "Security Copilot",
     slug: "/security-copilot",
     family: "Security portal",
-    operations: 32,
+    operations: 42,
     authModel: "Portal bearer tokens + workspace context",
     baseUrl: "https://api.securitycopilot.microsoft.com",
     summary:
