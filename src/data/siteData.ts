@@ -390,7 +390,7 @@ const apiCatalogSeed: ApiCatalogSeed[] = [
     title: "Entra IGA",
     slug: "/entra-iga",
     family: "Entra portal",
-    operations: 10,
+    operations: 11,
     authModel: "Azure AD bearer token",
     baseUrl: "https://elm.iga.azure.com",
     summary:
