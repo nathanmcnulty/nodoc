@@ -41,6 +41,7 @@ import {
   resolvePageTargetCriteria,
   validateRecipeTargetMetadata,
 } from "./portal-discovery-recipe.mjs";
+import { planActionBudget } from "./portal-discovery-action-budget.mjs";
 
 const validPhases = new Set(["all", "analyze", "capture", "plan"]);
 
@@ -508,6 +509,10 @@ function buildBrief(specRecord, recipePath) {
   };
 }
 
+export function buildActionBudget(recipe) {
+  return planActionBudget(recipe);
+}
+
 async function writeRunState(artifactDir, payload) {
   if (!artifactDir) {
     return;
@@ -787,10 +792,12 @@ async function main() {
   const specInventory = await buildSpecInventory();
   const specRecord = resolvePortal(specInventory, args.portal);
   const recipePath = await selectRecipe(specRecord, args.recipe);
+  const selectedRecipe = JSON.parse(await readFile(recipePath, "utf8"));
+  const actionBudget = buildActionBudget(selectedRecipe);
   const brief = buildBrief(specRecord, recipePath);
 
   if (args.phase === "plan") {
-    console.log(JSON.stringify({ brief, status: "planned" }, null, 2));
+    console.log(JSON.stringify({ actionBudget, brief, status: "planned" }, null, 2));
     return;
   }
 
@@ -819,9 +826,9 @@ async function main() {
       }
     }
     if (["all", "capture"].includes(args.phase)) {
-      const recipe = JSON.parse(await readFile(recipePath, "utf8"));
+      args.actionBudget = actionBudget;
       const cdp = await preflightRecipeTarget({
-        recipe,
+        recipe: selectedRecipe,
         endpoint: args.cdpEndpoint,
         expectedProduct: args.expectedProduct,
       });
@@ -834,11 +841,15 @@ async function main() {
       artifacts: args.artifacts,
       brief,
       phase: args.phase,
+      actionBudget,
       startedAt: new Date().toISOString(),
       status: "blocked",
       blocker: {
-        code: error?.message?.startsWith("browser-cdp-preflight:") ? "browser-cdp-preflight-failed" : "ledger-dispatch-conflict",
+        code: error?.code === "action-budget-exceeded"
+          ? error.code
+          : error?.message?.startsWith("browser-cdp-preflight:") ? "browser-cdp-preflight-failed" : "ledger-dispatch-conflict",
         detail: error instanceof Error ? error.message : String(error),
+        ...(error?.blocker ?? {}),
         ...(error?.message?.startsWith("browser-cdp-preflight:")
           ? { remediation: "Keep the owner alive for manual sign-in or page repair, rerun the read-only preflight, and mutate the ledger only after it succeeds." }
           : {}),

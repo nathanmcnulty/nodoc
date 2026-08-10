@@ -166,6 +166,10 @@ async function validateRecipeFile(errors, recipePath) {
     fail(errors, `${recipePath}: matchPathPrefixes must be an array when present.`);
   }
 
+  if (recipe.maxActions !== undefined && (!Number.isInteger(recipe.maxActions) || recipe.maxActions < 0)) {
+    fail(errors, `${recipePath}: maxActions must be a non-negative integer when present.`);
+  }
+
   if (recipe.pageTarget !== undefined) {
     if (!recipe.pageTarget || typeof recipe.pageTarget !== "object" || Array.isArray(recipe.pageTarget)) {
       fail(errors, `${recipePath}: pageTarget must be an object when present.`);

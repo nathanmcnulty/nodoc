@@ -43,6 +43,12 @@ report `browser-cdp-preflight-failed`; keep the owner alive when manual sign-in
 or page repair could fix the target. Do not launch, close, click, write, create,
 or replace a browser target, and never invent a URL.
 
+The authorization ceiling covers every counted browser action, including the
+mandatory seed/bootstrap/navigation action and any replay expansion. The
+orchestrator must publish the categorized plan and reject an over-budget plan
+before preflight or ledger-attempt consumption; report the structured blocker
+and remediation instead of truncating or silently omitting actions.
+
 Run the deterministic interface:
 
   npm run discover:portal -- --portal <portal-spec-id> --profile bounded --phase plan --json

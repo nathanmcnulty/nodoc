@@ -65,6 +65,7 @@ export function summarizeActionResults(actionResults, { includeInteractionHealth
     requiredActionCount: actionResults.filter((actionResult) => actionResult.required).length,
     requiredActionFailureCount: requiredFailures.length,
     requiredActionFailures: requiredFailures,
+    countedActionCount: actionResults.length,
   };
 }
 

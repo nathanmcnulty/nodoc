@@ -115,6 +115,11 @@ savings from candidate cardinality alone.
 - GET first
 - dedupe by normalized path
 - keep a request budget and bounded concurrency
+
+The authorization action ceiling is one fail-closed limit for all counted
+browser actions. Include recipe actions, mandatory seed/bootstrap/navigation,
+and expanded replay actions in the categorized plan before browser preflight or
+ledger preparation; reject over-budget plans with structured remediation.
 - preserve page attribution
 - prefer parameters harvested from observed traffic or bundle defaults over empty probes
 - queue entity pages separately from nav pages

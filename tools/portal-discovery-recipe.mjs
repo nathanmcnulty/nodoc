@@ -1,4 +1,5 @@
 import { classifyGetProbeUrl } from "./discovery-safety.mjs";
+import { planActionBudget } from "./portal-discovery-action-budget.mjs";
 
 function actionTypeAndValue(action) {
   if (typeof action === "string") {
@@ -20,6 +21,10 @@ export function getRecipeEntryUrl(recipe) {
     .map(actionTypeAndValue)
     .find((action) => action.type === "navigate" && action.value);
   return firstNavigate?.value || recipe?.url || "";
+}
+
+export function planRecipeActionBudget(recipe, options = {}) {
+  return planActionBudget(recipe, options);
 }
 
 export function resolvePageTargetCriteria(recipe) {

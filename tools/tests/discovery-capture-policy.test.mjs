@@ -192,6 +192,7 @@ test("required action failures are surfaced deterministically", () => {
       type: "click-label",
       value: "Incidents",
     }],
+    countedActionCount: 2,
   });
 });
 
