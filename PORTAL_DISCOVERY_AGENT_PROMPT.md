@@ -28,15 +28,19 @@ dependencies, repair the environment, review unrelated portals, promote
 findings, create a branch or pull request, or merge changes. The orchestrator
 owns those stages.
 
-Before capture, run the required read-only gate. Owner startup only reports
-`lifecycleStatus: owner-ready` and `authenticationStatus: unverified`; only
-this preflight determines whether authentication is confirmed or blocked:
+Before capture, run the required recipe-gated target gate. Owner startup only
+reports `lifecycleStatus: owner-ready` and `authenticationStatus: unverified`;
+only preflight determines whether authentication is confirmed or blocked. If
+the feature target is absent, the checked-in recipe may authorize one exact
+same-portal bootstrap-target GET alignment and then strict preflight on the
+same target ID:
 
-  node tools/browser-cdp-preflight.mjs --endpoint http://127.0.0.1:9222 --expected-product Edge --match-host <portal-host> --match-path-prefix <portal-path>
+  npm run discover:portal -- --portal <portal-spec-id> --profile bounded --phase all --artifacts <fresh-artifact-directory>
 
-If it fails, stop and report `browser-cdp-preflight-failed`; keep the owner alive
-when manual sign-in or page repair could fix the target, and do not launch,
-close, navigate, or replace a browser or invent alternate automation.
+The orchestrator runs this gate before ledger dispatch. If it fails, stop and
+report `browser-cdp-preflight-failed`; keep the owner alive when manual sign-in
+or page repair could fix the target. Do not launch, close, click, write, create,
+or replace a browser target, and never invent a URL.
 
 Run the deterministic interface:
 

@@ -10,7 +10,7 @@ import {
 } from "./portal-discovery-metadata.mjs";
 import {
   resolvePageTargetCriteria,
-  recipeEntryMatchesPageTarget,
+  validateRecipeTargetMetadata,
 } from "./portal-discovery-recipe.mjs";
 
 const supportedRecipeActionTypes = new Set([
@@ -172,9 +172,7 @@ async function validateRecipeFile(errors, recipePath) {
     } else {
       try {
         resolvePageTargetCriteria(recipe);
-        if (!recipeEntryMatchesPageTarget(recipe)) {
-          fail(errors, `${recipePath}: the first navigate action or declared url does not match pageTarget host/path criteria.`);
-        }
+        validateRecipeTargetMetadata(recipe);
       } catch (error) {
         fail(errors, `${recipePath}: ${error.message}`);
       }

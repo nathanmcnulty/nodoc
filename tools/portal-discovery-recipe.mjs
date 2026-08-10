@@ -1,3 +1,5 @@
+import { classifyGetProbeUrl } from "./discovery-safety.mjs";
+
 function actionTypeAndValue(action) {
   if (typeof action === "string") {
     const separator = action.indexOf("=");
@@ -48,6 +50,82 @@ export function resolvePageTargetCriteria(recipe) {
   return {
     matchHosts: [...pageTarget.matchHosts],
     matchPathPrefixes: [...pageTarget.matchPathPrefixes],
+  };
+}
+
+export function resolvePageTargetBootstrapCriteria(recipe) {
+  if (recipe?.pageTarget === undefined) return null;
+  const pageTarget = recipe.pageTarget;
+  if (!pageTarget || typeof pageTarget !== "object" || Array.isArray(pageTarget)) {
+    throw new Error("pageTarget must be an object.");
+  }
+  const bootstrap = pageTarget.bootstrap;
+  if (bootstrap === undefined) return null;
+  if (!bootstrap || typeof bootstrap !== "object" || Array.isArray(bootstrap)) {
+    throw new Error("pageTarget.bootstrap must be an object.");
+  }
+  if (!Array.isArray(bootstrap.matchHosts) || bootstrap.matchHosts.length === 0) {
+    throw new Error("pageTarget.bootstrap.matchHosts must include at least one host.");
+  }
+  if (!Array.isArray(bootstrap.matchPathnames) || bootstrap.matchPathnames.length === 0) {
+    throw new Error("pageTarget.bootstrap.matchPathnames must include at least one pathname.");
+  }
+  if (bootstrap.matchHosts.some((host) => typeof host !== "string" || !host.trim())) {
+    throw new Error("pageTarget.bootstrap.matchHosts must contain non-empty strings.");
+  }
+  if (bootstrap.matchPathnames.some((pathname) => (
+    typeof pathname !== "string"
+    || !pathname.startsWith("/")
+    || pathname.includes("?")
+    || pathname.includes("#")
+  ))) {
+    throw new Error("pageTarget.bootstrap.matchPathnames must contain clean absolute pathnames.");
+  }
+
+  const featureCriteria = resolvePageTargetCriteria(recipe);
+  const featureHosts = new Set(featureCriteria.matchHosts.map((host) => host.toLowerCase()));
+  if (bootstrap.matchHosts.some((host) => !featureHosts.has(host.toLowerCase()))) {
+    throw new Error("pageTarget.bootstrap.matchHosts must be a subset of pageTarget.matchHosts.");
+  }
+
+  return {
+    matchHosts: [...bootstrap.matchHosts].map((host) => host.toLowerCase()),
+    matchPathnames: [...bootstrap.matchPathnames],
+  };
+}
+
+export function validateRecipeTargetMetadata(recipe) {
+  const entryUrlValue = getRecipeEntryUrl(recipe);
+  let entryUrl;
+  let recipeUrl;
+  try {
+    entryUrl = new URL(entryUrlValue);
+    recipeUrl = new URL(recipe?.url);
+  } catch {
+    throw new Error("recipe entry and declared root URLs must be valid URLs.");
+  }
+  if (entryUrl.protocol !== "https:" || entryUrl.username || entryUrl.password || entryUrl.search || entryUrl.hash) {
+    throw new Error("recipe entry URL must be an HTTPS URL without credentials, query, or fragment.");
+  }
+  const classification = classifyGetProbeUrl(entryUrl.href, recipeUrl.href);
+  if (!classification.allowed) {
+    throw new Error(`recipe entry URL is not a safe same-origin GET (${classification.code}).`);
+  }
+  const featureCriteria = resolvePageTargetCriteria(recipe);
+  if (!recipeEntryMatchesPageTarget(recipe)) {
+    throw new Error("recipe entry URL does not match pageTarget host/path criteria.");
+  }
+  const bootstrapCriteria = resolvePageTargetBootstrapCriteria(recipe);
+  if (bootstrapCriteria && (
+    !bootstrapCriteria.matchHosts.includes(recipeUrl.hostname.toLowerCase())
+    || !bootstrapCriteria.matchPathnames.includes(recipeUrl.pathname)
+  )) {
+    throw new Error("declared root URL does not match pageTarget.bootstrap host/path criteria.");
+  }
+  return {
+    entryUrl: entryUrl.href,
+    featureCriteria,
+    bootstrapCriteria,
   };
 }
 

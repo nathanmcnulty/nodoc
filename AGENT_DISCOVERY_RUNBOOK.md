@@ -134,11 +134,13 @@ not discovery work:
    workers must not install or update packages.
 3. Run the portal plan command and require `status: planned`.
 4. Require `npm run browser:cdp:status -- --profile-key <key>` to report the
-   manifest-owned browser as healthy, then run
-   `npm run preflight:browser-cdp -- ...` against that exact loopback endpoint.
-   The authenticated preflight verifies browser metadata, expected product,
-   exactly one matching page, harmless Runtime.evaluate, authentication, and
-   stable identity.
+   manifest-owned browser as healthy, then run the portal driver against that
+   exact loopback endpoint. Its recipe-gated preflight verifies browser metadata,
+   expected product, exactly one matching page, harmless Runtime.evaluate,
+   authentication, and stable identity. If the feature target is absent, a
+   checked-in `pageTarget.bootstrap` may authorize one exact-target GET to the
+   recipe's first navigation URL, followed by strict preflight bound to the same
+   target ID.
 5. Confirm the selected recipe exists and choose a fresh artifact directory.
 
 Do not spend a worker allocation on a missing dependency, invalid portal ID,
@@ -233,9 +235,13 @@ listener, or an occupied port. `stop` terminates only the exact manifest PID
 whose executable, fixed port, dedicated profile, and random owner token all
 match; it never kills by process name.
 
-The required order is: owner ready -> always run read-only preflight -> only
-preflight determines authenticated or blocked -> mutate the ledger after
-successful preflight.
+The required order is: owner ready -> strict feature preflight; only when the
+validated recipe declares it and the feature target is absent, one
+authenticated same-portal bootstrap preflight and exact-target GET alignment ->
+strict same-ID feature preflight -> mutate the ledger. Multiple targets, wrong
+hosts, login barriers, malformed metadata, redirects, and arbitrary operator
+URLs fail closed. The capture worker still receives only the exact target ID and
+does not launch, close, or navigate the browser.
 
 For a portal-specific page check, retain the same endpoint and narrow the
 authenticated preflight further:
@@ -246,10 +252,11 @@ npm run preflight:browser-cdp -- --endpoint http://127.0.0.1:9222 `
   --match-path-prefix /officeSettings/inventory
 ```
 
-Before handing off to an agent, the operator must confirm that the preflight
-passed for the intended portal and is past sign-in. If preflight reports no
-matching target or an authentication barrier, keep the owner alive while manual
-sign-in or page repair could fix it; do not automatically stop or restart it.
+Before handing off to an agent, the coordinator must confirm that the
+recipe-gated preflight passed for the intended portal and is past sign-in. If
+alignment reports no bootstrap target or an authentication barrier, keep the
+owner alive while manual sign-in or page repair could fix it; do not
+automatically stop or restart it.
 Use owner `status` and `stop` only for an explicit safe shutdown or when no
 manual repair opportunity remains, then start the same stable profile key if
 needed. Never close the user's normal browser, copy a normal browser profile,

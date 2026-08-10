@@ -32,8 +32,15 @@ import {
   runNode,
   writeParentSupervisionFailure,
 } from "./portal-discovery-process.mjs";
-import { runBrowserCdpPreflight } from "./browser-cdp-preflight.mjs";
-import { resolvePageTargetCriteria } from "./portal-discovery-recipe.mjs";
+import {
+  alignBrowserCdpTarget,
+  runBrowserCdpPreflight,
+} from "./browser-cdp-preflight.mjs";
+import {
+  resolvePageTargetBootstrapCriteria,
+  resolvePageTargetCriteria,
+  validateRecipeTargetMetadata,
+} from "./portal-discovery-recipe.mjs";
 
 const validPhases = new Set(["all", "analyze", "capture", "plan"]);
 
@@ -47,6 +54,59 @@ export function buildPreflightCriteria(recipe) {
     expectedTitlePattern: recipe.expectedTitlePattern,
     rejectBodyPattern: recipe.rejectBodyPattern,
   };
+}
+
+export function buildBootstrapPreflightCriteria(recipe) {
+  const bootstrap = resolvePageTargetBootstrapCriteria(recipe);
+  if (!bootstrap) return null;
+  return {
+    ...bootstrap,
+    urlPattern: recipe.matchUrlPattern,
+    titlePattern: recipe.matchTitlePattern,
+    expectedTitlePattern: recipe.expectedTitlePattern,
+    rejectBodyPattern: recipe.rejectBodyPattern,
+  };
+}
+
+export async function preflightRecipeTarget({
+  recipe,
+  endpoint,
+  expectedProduct,
+  stabilityMs,
+  pollMs,
+  timeoutMs,
+} = {}) {
+  const metadata = validateRecipeTargetMetadata(recipe);
+  const featureCriteria = buildPreflightCriteria(recipe);
+  const bootstrapCriteria = buildBootstrapPreflightCriteria(recipe);
+  if (!bootstrapCriteria) {
+    const preflight = await runBrowserCdpPreflight({
+      endpoint,
+      expectedProduct,
+      ...featureCriteria,
+      stabilityMs,
+      pollMs,
+      timeoutMs,
+    });
+    return {
+      ...preflight,
+      alignment: {
+        status: "already-aligned",
+        targetState: "feature-target-aligned",
+        targetId: preflight.target.id,
+      },
+    };
+  }
+  return alignBrowserCdpTarget({
+    endpoint,
+    expectedProduct,
+    featureCriteria,
+    bootstrapCriteria,
+    entryUrl: metadata.entryUrl,
+    stabilityMs,
+    pollMs,
+    timeoutMs,
+  });
 }
 
 function parseArgs(argv) {
@@ -760,12 +820,13 @@ async function main() {
     }
     if (["all", "capture"].includes(args.phase)) {
       const recipe = JSON.parse(await readFile(recipePath, "utf8"));
-      const cdp = await runBrowserCdpPreflight({
+      const cdp = await preflightRecipeTarget({
+        recipe,
         endpoint: args.cdpEndpoint,
         expectedProduct: args.expectedProduct,
-        ...buildPreflightCriteria(recipe),
       });
       args.targetId = cdp.target.id;
+      args.preflightAlignment = cdp.alignment;
     }
     ledgerAssignment = await prepareLedgerAttempt(args, specRecord, recipePath);
   } catch (error) {
@@ -795,6 +856,16 @@ async function main() {
     phase: args.phase,
     startedAt: new Date().toISOString(),
     status: "running",
+    preflight: args.preflightAlignment
+      ? {
+          authenticationStatus: "verified",
+          portalTargetStatus: "authenticated-portal-ready",
+          featureTargetStatus: args.preflightAlignment.targetState,
+          status: args.preflightAlignment.status,
+          targetId: args.preflightAlignment.targetId,
+          entryUrl: args.preflightAlignment.entryUrl ?? null,
+        }
+      : null,
     ledger: ledgerAssignment
       ? {
           assignmentId: args.assignmentId,
