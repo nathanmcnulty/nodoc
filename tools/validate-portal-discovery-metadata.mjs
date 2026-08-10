@@ -8,6 +8,10 @@ import {
   crawlMetadataByTitle,
   getCoverageOverlay,
 } from "./portal-discovery-metadata.mjs";
+import {
+  resolvePageTargetCriteria,
+  recipeEntryMatchesPageTarget,
+} from "./portal-discovery-recipe.mjs";
 
 const supportedRecipeActionTypes = new Set([
   "capture",
@@ -160,6 +164,21 @@ async function validateRecipeFile(errors, recipePath) {
 
   if (recipe.matchPathPrefixes && !Array.isArray(recipe.matchPathPrefixes)) {
     fail(errors, `${recipePath}: matchPathPrefixes must be an array when present.`);
+  }
+
+  if (recipe.pageTarget !== undefined) {
+    if (!recipe.pageTarget || typeof recipe.pageTarget !== "object" || Array.isArray(recipe.pageTarget)) {
+      fail(errors, `${recipePath}: pageTarget must be an object when present.`);
+    } else {
+      try {
+        resolvePageTargetCriteria(recipe);
+        if (!recipeEntryMatchesPageTarget(recipe)) {
+          fail(errors, `${recipePath}: the first navigate action or declared url does not match pageTarget host/path criteria.`);
+        }
+      } catch (error) {
+        fail(errors, `${recipePath}: ${error.message}`);
+      }
+    }
   }
 
   validateSeedRouteGroups(errors, recipePath, recipe.seedRouteGroups);
