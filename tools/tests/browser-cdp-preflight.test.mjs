@@ -3,16 +3,34 @@ import { createServer } from "node:http";
 import test from "node:test";
 
 import {
+  alignBrowserCdpTarget,
   matchesExpectedProduct,
   normalizeProductFamily,
   runBrowserCdpPreflight,
 } from "../browser-cdp-preflight.mjs";
 
-function installWebSocket({ evaluate = { title: "Inventory", url: "https://config.office.com/officeSettings/inventory", bodyText: "Inventory" } } = {}) {
+function installWebSocket({
+  evaluate = { title: "Inventory", url: "https://config.office.com/officeSettings/inventory", bodyText: "Inventory" },
+  onCommand = () => null,
+} = {}) {
   const original = globalThis.WebSocket;
   globalThis.WebSocket = class MockWebSocket extends EventTarget {
     constructor() { super(); queueMicrotask(() => this.dispatchEvent(new Event("open"))); }
-    send() { queueMicrotask(() => this.dispatchEvent(new MessageEvent("message", { data: JSON.stringify({ id: 1, result: { result: { value: evaluate } } }) }))); }
+    send(rawMessage) {
+      const message = JSON.parse(rawMessage);
+      queueMicrotask(() => {
+        if (message.method === "Runtime.evaluate") {
+          const value = typeof evaluate === "function" ? evaluate() : evaluate;
+          this.dispatchEvent(new MessageEvent("message", {
+            data: JSON.stringify({ id: message.id, result: { result: { value } } }),
+          }));
+          return;
+        }
+        this.dispatchEvent(new MessageEvent("message", {
+          data: JSON.stringify({ id: message.id, result: onCommand(message) ?? {} }),
+        }));
+      });
+    }
     close() {}
   };
   return () => { globalThis.WebSocket = original; };
@@ -83,4 +101,96 @@ test("rejects product mismatch, non-loopback endpoints, and authentication targe
   const authCdp = await mockCdp([target({ url: "https://login.microsoftonline.com/common/oauth2" })]);
   try { await assert.rejects(runBrowserCdpPreflight({ endpoint: authCdp.endpoint, matchHosts: ["login.microsoftonline.com"] }), /authentication host/); }
   finally { restore(); await authCdp.close(); }
+});
+
+test("aligns one authenticated same-portal bootstrap target without changing its exact ID", async () => {
+  const current = target({
+    title: "Home - Microsoft 365 Apps admin center",
+    url: "https://config.office.com/officeSettings",
+  });
+  const restore = installWebSocket({
+    evaluate: () => ({
+      title: current.title,
+      url: current.url,
+      bodyText: "Home",
+    }),
+    onCommand: (message) => {
+      if (message.method === "Page.navigate") {
+        current.url = message.params.url;
+        current.title = "Inventory";
+        return { frameId: "frame-1" };
+      }
+      return {};
+    },
+  });
+  const cdp = await mockCdp([current]);
+  try {
+    const result = await alignBrowserCdpTarget({
+      endpoint: cdp.endpoint,
+      expectedProduct: "Edge",
+      entryUrl: "https://config.office.com/officeSettings/inventory",
+      featureCriteria: {
+        matchHosts: ["config.office.com"],
+        matchPathPrefixes: ["/officeSettings/inventory"],
+      },
+      bootstrapCriteria: {
+        matchHosts: ["config.office.com"],
+        matchPathnames: ["/officeSettings"],
+      },
+      stabilityMs: 10,
+      pollMs: 2,
+    });
+    assert.equal(result.alignment.status, "aligned");
+    assert.equal(result.target.id, "page-1");
+    assert.equal(result.alignment.targetId, "page-1");
+    assert.equal(result.alignment.fromTarget.id, "page-1");
+    assert.equal(result.evaluation.url, "https://config.office.com/officeSettings/inventory");
+  } finally {
+    restore();
+    await cdp.close();
+  }
+});
+
+test("fails closed when bootstrap selection is ambiguous, wrong-host, or authenticated-blocked", async () => {
+  const bootstrapCriteria = {
+    matchHosts: ["config.office.com"],
+    matchPathnames: ["/officeSettings"],
+  };
+  const featureCriteria = {
+    matchHosts: ["config.office.com"],
+    matchPathPrefixes: ["/officeSettings/inventory"],
+  };
+  const make = async (targets, evaluate) => {
+    const restore = installWebSocket({ evaluate });
+    const cdp = await mockCdp(targets);
+    try {
+      await assert.rejects(
+        alignBrowserCdpTarget({
+          endpoint: cdp.endpoint,
+          entryUrl: "https://config.office.com/officeSettings/inventory",
+          featureCriteria,
+          bootstrapCriteria,
+          stabilityMs: 1,
+          pollMs: 1,
+        }),
+        (error) => error.code === "target-count" || error.message.includes("login barrier"),
+      );
+    } finally {
+      restore();
+      await cdp.close();
+    }
+  };
+
+  await make(
+    [target({ id: "page-1", url: "https://config.office.com/officeSettings" }), target({ id: "page-2", url: "https://config.office.com/officeSettings" })],
+    { title: "Home", url: "https://config.office.com/officeSettings", bodyText: "Home" },
+  );
+  await make(
+    [target({ url: "https://other.office.com/officeSettings" })],
+    { title: "Home", url: "https://other.office.com/officeSettings", bodyText: "Home" },
+  );
+  await make(
+    [target({ url: "https://config.office.com/officeSettings" })],
+    { title: "Sign in", url: "https://config.office.com/officeSettings", bodyText: "Sign in to your account" },
+  );
 });

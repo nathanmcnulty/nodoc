@@ -431,11 +431,14 @@ Preferred flow:
    and `authenticationStatus: unverified`; it does not inspect or report target
    authentication. Leave exactly one intended portal page open, complete sign-in
    only if the browser UI requires it, then run authenticated preflight.
-3. Require owner `status` to be healthy, then **always** run
-   `npm run preflight:browser-cdp -- ...` against `http://127.0.0.1:9222`.
-   Only that read-only preflight determines whether authentication is confirmed
-   or blocked: `/json/version` must identify the expected product, and
-   `/json/list` must contain exactly one intended authenticated portal target.
+3. Require owner `status` to be healthy, then run the recipe-gated preflight
+   against `http://127.0.0.1:9222`. If the exact feature target is missing but
+   the checked-in recipe declares a bootstrap pathname, the controller may
+   validate one authenticated bootstrap page, issue one exact-target GET to the
+   checked-in first navigation URL, and rerun strict preflight with the same
+   target ID. `/json/version` must identify the expected product and
+   `/json/list` must remain exactly-one, same-host, and past authentication at
+   every gate.
 
 Chrome 136+ ignores remote-debugging switches against its default data
 directory unless a nonstandard `--user-data-dir` is supplied, as documented in

@@ -4,9 +4,11 @@ import test from "node:test";
 import {
   getRecipeEntryUrl,
   recipeEntryMatchesPageTarget,
+  resolvePageTargetBootstrapCriteria,
   resolvePageTargetCriteria,
+  validateRecipeTargetMetadata,
 } from "../portal-discovery-recipe.mjs";
-import { buildPreflightCriteria } from "../run-portal-discovery.mjs";
+import { buildBootstrapPreflightCriteria, buildPreflightCriteria } from "../run-portal-discovery.mjs";
 
 const inventoryRecipe = {
   url: "https://config.office.com/officeSettings",
@@ -15,6 +17,10 @@ const inventoryRecipe = {
   pageTarget: {
     matchHosts: ["config.office.com"],
     matchPathPrefixes: ["/officeSettings/inventory"],
+    bootstrap: {
+      matchHosts: ["config.office.com"],
+      matchPathnames: ["/officeSettings"],
+    },
   },
   actions: ["navigate=https://config.office.com/officeSettings/inventory"],
 };
@@ -33,7 +39,23 @@ test("orchestration uses page-target criteria without changing network capture f
     expectedTitlePattern: undefined,
     rejectBodyPattern: undefined,
   });
-  assert.deepEqual(resolvePageTargetCriteria(inventoryRecipe), inventoryRecipe.pageTarget);
+  assert.deepEqual(resolvePageTargetCriteria(inventoryRecipe), {
+    matchHosts: ["config.office.com"],
+    matchPathPrefixes: ["/officeSettings/inventory"],
+  });
+  assert.deepEqual(resolvePageTargetBootstrapCriteria(inventoryRecipe), {
+    matchHosts: ["config.office.com"],
+    matchPathnames: ["/officeSettings"],
+  });
+  assert.equal(validateRecipeTargetMetadata(inventoryRecipe).entryUrl, "https://config.office.com/officeSettings/inventory");
+  assert.deepEqual(buildBootstrapPreflightCriteria(inventoryRecipe), {
+    matchHosts: ["config.office.com"],
+    matchPathnames: ["/officeSettings"],
+    urlPattern: undefined,
+    titlePattern: undefined,
+    expectedTitlePattern: undefined,
+    rejectBodyPattern: undefined,
+  });
   assert.deepEqual(
     { matchHosts: inventoryRecipe.matchHosts, matchPathPrefixes: inventoryRecipe.matchPathPrefixes },
     { matchHosts: ["config.office.com", "query.inventory.insights.office.net"], matchPathPrefixes: ["/inventory"] },
@@ -70,5 +92,32 @@ test("explicit page-target criteria fail closed when malformed or empty", () => 
   assert.throws(
     () => resolvePageTargetCriteria({ pageTarget: { matchHosts: ["config.office.com"], matchPathPrefixes: [null] } }),
     /pageTarget\.matchPathPrefixes must contain non-empty strings/,
+  );
+  assert.throws(
+    () => resolvePageTargetBootstrapCriteria({
+      pageTarget: {
+        matchHosts: ["config.office.com"],
+        matchPathPrefixes: ["/officeSettings/inventory"],
+        bootstrap: { matchHosts: ["other.office.com"], matchPathnames: ["/officeSettings"] },
+      },
+    }),
+    /pageTarget\.bootstrap\.matchHosts must be a subset/,
+  );
+  assert.throws(
+    () => resolvePageTargetBootstrapCriteria({
+      pageTarget: {
+        matchHosts: ["config.office.com"],
+        matchPathPrefixes: ["/officeSettings/inventory"],
+        bootstrap: { matchHosts: ["config.office.com"], matchPathnames: ["officeSettings"] },
+      },
+    }),
+    /clean absolute pathnames/,
+  );
+  assert.throws(
+    () => validateRecipeTargetMetadata({
+      ...inventoryRecipe,
+      actions: ["navigate=https://config.office.com/officeSettings/inventory?operation=delete"],
+    }),
+    /HTTPS URL without credentials, query, or fragment/,
   );
 });

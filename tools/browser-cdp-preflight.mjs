@@ -15,8 +15,21 @@ const productFamilyAliases = new Map([
 ]);
 const defaultRejectBodyPattern = /sign in|log in|authentication required/iu;
 
+export class BrowserCdpPreflightError extends Error {
+  constructor(code, message, details = {}) {
+    super(`browser-cdp-preflight: ${message}`);
+    this.name = "BrowserCdpPreflightError";
+    this.code = code;
+    Object.assign(this, details);
+  }
+}
+
 function fail(message) {
-  throw new Error(`browser-cdp-preflight: ${message}`);
+  throw new BrowserCdpPreflightError("preflight-failed", message);
+}
+
+function failWith(code, message, details = {}) {
+  throw new BrowserCdpPreflightError(code, message, details);
 }
 
 function matchesConfiguredPattern(value, pattern) {
@@ -65,10 +78,14 @@ function targetMatches(target, criteria) {
   if (target?.type !== "page" || typeof target.url !== "string" || typeof target.id !== "string") return false;
   let url;
   try { url = new URL(target.url); } catch { return false; }
+  if (!["http:", "https:"].includes(url.protocol)) return false;
+  if (criteria.targetId && target.id !== criteria.targetId) return false;
   const hosts = criteria.matchHosts ?? [];
   const prefixes = criteria.matchPathPrefixes ?? [];
   if (hosts.length > 0 && !hosts.includes(url.hostname.toLowerCase())) return false;
   if (prefixes.length > 0 && !prefixes.some((prefix) => url.pathname.startsWith(prefix))) return false;
+  const pathnames = criteria.matchPathnames ?? [];
+  if (pathnames.length > 0 && !pathnames.includes(url.pathname)) return false;
   if (criteria.urlPattern && !matchesConfiguredPattern(target.url, criteria.urlPattern)) return false;
   if (criteria.titlePattern && !matchesConfiguredPattern(String(target.title ?? ""), criteria.titlePattern)) return false;
   return true;
@@ -88,7 +105,7 @@ function authenticationFailure(identity, evaluation, criteria) {
   return null;
 }
 
-function connectAndEvaluate(webSocketUrl, timeoutMs) {
+function sendCdpCommand(webSocketUrl, method, params, timeoutMs) {
   return new Promise((resolve, reject) => {
     const socket = new WebSocket(webSocketUrl);
     const timer = setTimeout(() => { socket.close(); reject(new Error("WebSocket connection timed out.")); }, timeoutMs);
@@ -97,22 +114,35 @@ function connectAndEvaluate(webSocketUrl, timeoutMs) {
     socket.addEventListener("open", () => {
       const id = nextId++;
       pending.set(id, { resolve, reject, timer });
-      socket.send(JSON.stringify({ id, method: "Runtime.evaluate", params: {
-        expression: "({ title: document.title, url: location.href, bodyText: document.body?.innerText?.slice(0, 2000) ?? '' })",
-        returnByValue: true,
-      } }));
+      socket.send(JSON.stringify({ id, method, params }));
     });
     socket.addEventListener("message", (event) => {
-      const message = JSON.parse(event.data);
+      let message;
+      try {
+        message = JSON.parse(event.data);
+      } catch {
+        reject(new Error("CDP returned invalid JSON."));
+        return;
+      }
       const request = pending.get(message.id);
       if (!request) return;
       pending.delete(message.id);
       clearTimeout(request.timer);
       socket.close();
-      if (message.error || message.result?.exceptionDetails) reject(new Error("Runtime.evaluate failed."));
-      else resolve(message.result?.result?.value ?? null);
+      if (message.error) reject(new Error(`CDP ${method} failed.`));
+      else resolve(message.result ?? null);
     });
     socket.addEventListener("error", () => reject(new Error("WebSocket connection failed.")));
+  });
+}
+
+function connectAndEvaluate(webSocketUrl, timeoutMs) {
+  return sendCdpCommand(webSocketUrl, "Runtime.evaluate", {
+    expression: "({ title: document.title, url: location.href, bodyText: document.body?.innerText?.slice(0, 2000) ?? '' })",
+    returnByValue: true,
+  }, timeoutMs).then((result) => {
+    if (result?.exceptionDetails) throw new Error("Runtime.evaluate failed.");
+    return result?.result?.value ?? null;
   });
 }
 
@@ -121,6 +151,8 @@ export async function runBrowserCdpPreflight({
   expectedProduct = null,
   matchHosts = [],
   matchPathPrefixes = [],
+  matchPathnames = [],
+  targetId = null,
   urlPattern = null,
   titlePattern = null,
   expectedTitlePattern = null,
@@ -135,14 +167,30 @@ export async function runBrowserCdpPreflight({
   const version = await getJson(new URL("/json/version", base), timeoutMs);
   if (expectedProduct && !matchesExpectedProduct(version.Browser, expectedProduct)) fail(`browser product is not ${expectedProduct}.`);
   if (typeof version.webSocketDebuggerUrl !== "string" || !version.webSocketDebuggerUrl.startsWith("ws")) fail("browser WebSocket URL is missing.");
-  const criteria = { matchHosts: matchHosts.map((host) => host.toLowerCase()), matchPathPrefixes, urlPattern, titlePattern, expectedTitlePattern, rejectBodyPattern, rejectUrlPattern, authenticationHosts };
+  const criteria = {
+    matchHosts: matchHosts.map((host) => host.toLowerCase()),
+    matchPathPrefixes,
+    matchPathnames,
+    targetId,
+    urlPattern,
+    titlePattern,
+    expectedTitlePattern,
+    rejectBodyPattern,
+    rejectUrlPattern,
+    authenticationHosts,
+  };
   const list = async () => {
     const targets = await getJson(new URL("/json/list", base), timeoutMs);
     const matches = targets.filter((target) => targetMatches(target, criteria));
-    if (matches.length !== 1) fail(`expected exactly one matching page target, found ${matches.length}.`);
+    if (matches.length !== 1) {
+      failWith("target-count", `expected exactly one matching page target, found ${matches.length}.`, {
+        targetCount: matches.length,
+      });
+    }
     const identity = targetIdentity(matches[0]);
     if (!identity.webSocketDebuggerUrl) fail("matching target WebSocket URL is missing.");
     const evaluation = await connectAndEvaluate(identity.webSocketDebuggerUrl, timeoutMs);
+    if (!evaluation || typeof evaluation !== "object") fail("Runtime.evaluate returned no page state.");
     const authFailure = authenticationFailure(identity, evaluation, criteria);
     if (authFailure) fail(authFailure);
     return { identity, evaluation };
@@ -159,8 +207,127 @@ export async function runBrowserCdpPreflight({
     browser: String(version.Browser),
     protocolVersion: String(version.Protocol ?? ""),
     browserWebSocketDebuggerUrl: version.webSocketDebuggerUrl,
+    authenticationStatus: "verified",
+    portalTargetStatus: "authenticated-portal-ready",
     target: latest.identity,
     evaluation: { title: latest.evaluation.title, url: latest.evaluation.url },
+  };
+}
+
+function trustedEntryUrl(entryUrl, featureCriteria, bootstrapCriteria) {
+  let parsed;
+  try {
+    parsed = new URL(entryUrl);
+  } catch {
+    failWith("entry-url-invalid", "recipe entry URL must be a valid URL.");
+  }
+  if (parsed.protocol !== "https:" || parsed.username || parsed.password || parsed.search || parsed.hash) {
+    failWith("entry-url-untrusted", "recipe entry URL must be an HTTPS URL without credentials, query, or fragment.");
+  }
+  const hostname = parsed.hostname.toLowerCase();
+  const featureHosts = featureCriteria?.matchHosts ?? [];
+  const bootstrapHosts = bootstrapCriteria?.matchHosts ?? [];
+  if (
+    featureHosts.length === 0
+    || bootstrapHosts.length === 0
+    || !featureHosts.includes(hostname)
+    || !bootstrapHosts.includes(hostname)
+  ) {
+    failWith("entry-url-untrusted", "recipe entry URL host is not owned by both the feature and bootstrap target criteria.");
+  }
+  const featurePrefixes = featureCriteria.matchPathPrefixes ?? [];
+  const featurePathnames = featureCriteria.matchPathnames ?? [];
+  if (
+    (featurePrefixes.length > 0 && !featurePrefixes.some((prefix) => parsed.pathname.startsWith(prefix)))
+    || (featurePathnames.length > 0 && !featurePathnames.includes(parsed.pathname))
+  ) {
+    failWith("entry-url-untrusted", "recipe entry URL path is outside the feature target criteria.");
+  }
+  return parsed.href;
+}
+
+async function navigateExactTarget(target, entryUrl, timeoutMs) {
+  if (!target?.id || !target.webSocketDebuggerUrl) {
+    failWith("target-invalid", "the selected bootstrap target does not have a stable CDP identity.");
+  }
+  let result;
+  try {
+    result = await sendCdpCommand(
+      target.webSocketDebuggerUrl,
+      "Page.navigate",
+      { url: entryUrl },
+      timeoutMs,
+    );
+  } catch (error) {
+    failWith("navigation-failed", error instanceof Error ? error.message : String(error));
+  }
+  if (result?.errorText) {
+    failWith("navigation-failed", `Page.navigate failed: ${result.errorText}.`);
+  }
+}
+
+export async function alignBrowserCdpTarget({
+  entryUrl,
+  featureCriteria,
+  bootstrapCriteria,
+  endpoint = "http://127.0.0.1:9222",
+  expectedProduct = null,
+  stabilityMs = defaultStabilityMs,
+  pollMs = defaultPollMs,
+  timeoutMs = defaultTimeoutMs,
+} = {}) {
+  let featurePreflight;
+  try {
+    featurePreflight = await runBrowserCdpPreflight({
+      endpoint,
+      expectedProduct,
+      ...featureCriteria,
+      stabilityMs,
+      pollMs,
+      timeoutMs,
+    });
+    return {
+      ...featurePreflight,
+      alignment: {
+        status: "already-aligned",
+        targetState: "feature-target-aligned",
+        targetId: featurePreflight.target.id,
+      },
+    };
+  } catch (error) {
+    if (!(error instanceof BrowserCdpPreflightError) || error.code !== "target-count" || error.targetCount !== 0) {
+      throw error;
+    }
+  }
+
+  const trustedUrl = trustedEntryUrl(entryUrl, featureCriteria, bootstrapCriteria);
+  const bootstrapPreflight = await runBrowserCdpPreflight({
+    endpoint,
+    expectedProduct,
+    ...bootstrapCriteria,
+    stabilityMs,
+    pollMs,
+    timeoutMs,
+  });
+  await navigateExactTarget(bootstrapPreflight.target, trustedUrl, timeoutMs);
+  const alignedPreflight = await runBrowserCdpPreflight({
+    endpoint,
+    expectedProduct,
+    ...featureCriteria,
+    targetId: bootstrapPreflight.target.id,
+    stabilityMs,
+    pollMs,
+    timeoutMs,
+  });
+  return {
+    ...alignedPreflight,
+    alignment: {
+      status: "aligned",
+      targetState: "feature-target-aligned",
+      targetId: alignedPreflight.target.id,
+      fromTarget: bootstrapPreflight.target,
+      entryUrl: trustedUrl,
+    },
   };
 }
 
@@ -172,6 +339,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     expectedProduct: value("--expected-product"),
     matchHosts: value("--match-host")?.split(",").filter(Boolean) ?? [],
     matchPathPrefixes: value("--match-path-prefix")?.split(",").filter(Boolean) ?? [],
+    matchPathnames: value("--match-pathname")?.split(",").filter(Boolean) ?? [],
     expectedTitlePattern: value("--expected-title-pattern"),
     stabilityMs: Number(value("--stability-ms", defaultStabilityMs)),
   }).then((result) => console.log(JSON.stringify(result, null, 2))).catch((error) => { console.error(error.message); process.exitCode = 2; });
