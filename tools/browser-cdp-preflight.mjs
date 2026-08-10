@@ -266,6 +266,26 @@ async function navigateExactTarget(target, entryUrl, timeoutMs) {
   }
 }
 
+async function waitForAlignedTarget({ endpoint, expectedProduct, featureCriteria, targetId, stabilityMs, pollMs, timeoutMs }) {
+  const deadline = Date.now() + timeoutMs;
+  let readinessState = "target-missing";
+  while (Date.now() < deadline) {
+    const remainingMs = Math.max(1, deadline - Date.now());
+    const base = loopbackEndpoint(endpoint);
+    const targets = await getJson(new URL("/json/list", base), remainingMs);
+    const exactTarget = targets.find((target) => target?.type === "page" && target.id === targetId);
+    if (exactTarget && targetMatches(exactTarget, { ...featureCriteria, targetId })) {
+      return await runBrowserCdpPreflight({ endpoint, expectedProduct, ...featureCriteria, targetId, stabilityMs, pollMs, timeoutMs: remainingMs });
+    }
+    readinessState = exactTarget ? "target-transitioning" : "target-missing";
+    await delay(Math.min(pollMs, Math.max(1, deadline - Date.now())));
+  }
+  failWith("navigation-readiness-timeout", `target ${targetId} did not reach feature URL readiness before timeout (state: ${readinessState}).`, {
+    targetId,
+    readinessState,
+  });
+}
+
 export async function alignBrowserCdpTarget({
   entryUrl,
   featureCriteria,
@@ -310,7 +330,7 @@ export async function alignBrowserCdpTarget({
     timeoutMs,
   });
   await navigateExactTarget(bootstrapPreflight.target, trustedUrl, timeoutMs);
-  const alignedPreflight = await runBrowserCdpPreflight({
+  const alignedPreflight = await waitForAlignedTarget({
     endpoint,
     expectedProduct,
     ...featureCriteria,
