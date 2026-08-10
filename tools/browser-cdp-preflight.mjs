@@ -4,9 +4,18 @@ import { fileURLToPath } from "node:url";
 const defaultTimeoutMs = 3000;
 const defaultStabilityMs = 750;
 const defaultPollMs = 150;
+const defaultRejectUrlPattern = /(?:^|\/)login(?:[\/?#]|$)|signin|sign-in/iu;
+const defaultRejectTitlePattern = /sign in|log in|authentication required/iu;
+const defaultRejectBodyPattern = /sign in|log in|authentication required/iu;
 
 function fail(message) {
   throw new Error(`browser-cdp-preflight: ${message}`);
+}
+
+function matchesConfiguredPattern(value, pattern) {
+  return pattern instanceof RegExp
+    ? pattern.test(String(value))
+    : String(value).toLocaleLowerCase().includes(String(pattern).toLocaleLowerCase());
 }
 
 function loopbackEndpoint(value) {
@@ -41,8 +50,8 @@ function targetMatches(target, criteria) {
   const prefixes = criteria.matchPathPrefixes ?? [];
   if (hosts.length > 0 && !hosts.includes(url.hostname.toLowerCase())) return false;
   if (prefixes.length > 0 && !prefixes.some((prefix) => url.pathname.startsWith(prefix))) return false;
-  if (criteria.urlPattern && !new RegExp(criteria.urlPattern, "iu").test(target.url)) return false;
-  if (criteria.titlePattern && !new RegExp(criteria.titlePattern, "iu").test(String(target.title ?? ""))) return false;
+  if (criteria.urlPattern && !matchesConfiguredPattern(target.url, criteria.urlPattern)) return false;
+  if (criteria.titlePattern && !matchesConfiguredPattern(String(target.title ?? ""), criteria.titlePattern)) return false;
   return true;
 }
 
@@ -54,9 +63,9 @@ function authenticationFailure(identity, evaluation, criteria) {
   const url = new URL(identity.url);
   const authHosts = criteria.authenticationHosts ?? ["login.live.com", "login.microsoft.com", "login.microsoftonline.com", "login.windows.net"];
   if (authHosts.some((host) => url.hostname === host || url.hostname.endsWith(`.${host}`))) return "target is on an authentication host";
-  if (criteria.rejectUrlPattern && new RegExp(criteria.rejectUrlPattern, "iu").test(identity.url)) return "target URL matches the authentication rejection pattern";
-  if (criteria.expectedTitlePattern && !new RegExp(criteria.expectedTitlePattern, "iu").test(evaluation.title)) return "target title does not meet the authenticated expectation";
-  if (criteria.rejectBodyPattern && new RegExp(criteria.rejectBodyPattern, "iu").test(evaluation.bodyText)) return "target body indicates a login barrier";
+  if (criteria.rejectUrlPattern && matchesConfiguredPattern(identity.url, criteria.rejectUrlPattern)) return "target URL matches the authentication rejection pattern";
+  if (criteria.expectedTitlePattern && !matchesConfiguredPattern(evaluation.title, criteria.expectedTitlePattern)) return "target title does not meet the authenticated expectation";
+  if (criteria.rejectBodyPattern && matchesConfiguredPattern(evaluation.bodyText, criteria.rejectBodyPattern)) return "target body indicates a login barrier";
   return null;
 }
 
@@ -96,8 +105,8 @@ export async function runBrowserCdpPreflight({
   urlPattern = null,
   titlePattern = null,
   expectedTitlePattern = null,
-  rejectBodyPattern = "sign in|log in|authentication required",
-  rejectUrlPattern = "(?:^|/)login(?:[/?#]|$)|signin|sign-in",
+  rejectBodyPattern = defaultRejectBodyPattern,
+  rejectUrlPattern = defaultRejectUrlPattern,
   authenticationHosts,
   stabilityMs = defaultStabilityMs,
   pollMs = defaultPollMs,
