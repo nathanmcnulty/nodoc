@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "corpusId": "portal-discovery-offline-v1",
+  "scenarios": [
+    { "scenarioId": "healthy-complete-capture", "assertions": { "health": "complete", "candidateCount": 2 }, "syntheticResult": { "health": "complete", "candidateCount": 2 } },
+    { "scenarioId": "interrupted-missing-summary", "assertions": { "health": "incomplete" }, "syntheticResult": { "health": "incomplete" } },
+    { "scenarioId": "canonical-health-count-mismatch", "assertions": { "status": "blocked" }, "syntheticResult": { "status": "blocked" } },
+    { "scenarioId": "lease-expiry-renewal-terminal-race", "assertions": { "status": "recovered" }, "syntheticResult": { "status": "recovered" } },
+    { "scenarioId": "duplicate-bundle-cache", "assertions": { "cache": "reused" }, "syntheticResult": { "cache": "reused" } },
+    { "scenarioId": "safety-state-changing-candidate", "assertions": { "route": "luna" }, "syntheticResult": { "route": "luna" } },
+    { "scenarioId": "adjacent-unassigned-scope", "assertions": { "route": "manual" }, "syntheticResult": { "route": "manual" } },
+    { "scenarioId": "graphql-operation-metadata", "assertions": { "metadata": "preserved" }, "syntheticResult": { "metadata": "preserved" } },
+    { "scenarioId": "changed-response-shape", "assertions": { "outcome": "conflict" }, "syntheticResult": { "outcome": "conflict" } },
+    { "scenarioId": "derivative-reuse-compatible", "assertions": { "reuse": "eligible" }, "syntheticResult": { "reuse": "eligible" } },
+    { "scenarioId": "derivative-reuse-incompatible", "assertions": { "reuse": "blocked" }, "syntheticResult": { "reuse": "blocked" } },
+    { "scenarioId": "saturation-reached", "assertions": { "saturation": "reached" }, "syntheticResult": { "saturation": "reached" } },
+    { "scenarioId": "saturation-not-reached", "assertions": { "saturation": "not-reached" }, "syntheticResult": { "saturation": "not-reached" } },
+    { "scenarioId": "saturation-unknown", "assertions": { "saturation": "unknown" }, "syntheticResult": { "saturation": "unknown" } },
+    { "scenarioId": "grouped-handoff-digest-tampering", "assertions": { "status": "blocked" }, "syntheticResult": { "status": "blocked" } },
+    { "scenarioId": "invalid-cheap-capability-worker", "assertions": { "status": "blocked" }, "syntheticResult": { "status": "blocked" } },
+    { "scenarioId": "promotion-exact-extension-new-conflict", "assertions": { "outcomes": 4 }, "syntheticResult": { "outcomes": 4 } },
+    { "scenarioId": "retrospective-actual-estimate-unavailable", "assertions": { "states": 3 }, "syntheticResult": { "states": 3 } },
+    { "scenarioId": "promotion-fixture-regression", "assertions": { "status": "repaired" }, "syntheticResult": { "status": "repaired" } }
+  ]
+}

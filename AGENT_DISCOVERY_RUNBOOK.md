@@ -7,6 +7,18 @@ blocker requires deeper background.
 
 ### Layer 1 controller commands
 
+### Final report-first controller (Layer 4)
+
+The final controller is offline and report-only. It composes the validated portfolio plan, review assignments, promotion plan, retrospective, benchmark scorecard, and unresolved frontier without opening a browser, mutating the runtime ledger, editing specifications, or creating GitHub actions.
+
+```powershell
+node tools/portal-discovery-controller.mjs .\layer4-input.json
+```
+
+Use sanitized checked-in stage inputs and the synthetic benchmark corpus only. The report contains stable execution IDs/digests, capture recommendations, budgets, route assignments, blockers, frontier priorities, and terminal state. `capture-recommended`, `blocked`, and `offline-ready` require human review; `saturated-complete` is valid only when canonical health and saturation gates pass and no critical frontier item remains. Applying or enqueueing work is a separate explicit opt-in through the existing control-plane interfaces.
+
+Benchmark drift, schema mismatch, digest tampering, privacy leakage, incomplete health, unknown saturation, and budget exhaustion fail closed. Re-running the command with identical inputs is idempotent and resumable because stage IDs and serialized output are deterministic.
+
 The checked-in portfolio is validated and materialized from existing spec,
 recipe, crawl, and coverage metadata. These commands are offline and report-only
 unless `--apply` is explicitly supplied:
