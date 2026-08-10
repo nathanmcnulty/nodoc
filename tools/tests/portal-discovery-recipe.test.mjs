@@ -7,6 +7,7 @@ import {
   resolvePageTargetBootstrapCriteria,
   resolvePageTargetCriteria,
   validateRecipeTargetMetadata,
+  planRecipeActionBudget,
 } from "../portal-discovery-recipe.mjs";
 import { buildBootstrapPreflightCriteria, buildPreflightCriteria } from "../run-portal-discovery.mjs";
 
@@ -119,5 +120,16 @@ test("explicit page-target criteria fail closed when malformed or empty", () => 
       actions: ["navigate=https://config.office.com/officeSettings/inventory?operation=delete"],
     }),
     /HTTPS URL without credentials, query, or fragment/,
+  );
+});
+
+test("action budget counts the mandatory orchestration seed", () => {
+  const recipe = { actions: Array.from({ length: 31 }, () => "capture=test"), maxActions: 32 };
+  assert.equal(planRecipeActionBudget(recipe).countedActions, 32);
+  assert.throws(
+    () => planRecipeActionBudget({ ...recipe, actions: [...recipe.actions, "capture=overflow"] }),
+    (error) => error.code === "action-budget-exceeded"
+      && error.blocker.categories.recipeActions === 32
+      && error.blocker.categories.mandatoryOrchestrationActions === 1,
   );
 });

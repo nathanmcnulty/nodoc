@@ -10,6 +10,7 @@ import {
   classifyGetProbeUrl,
   sanitizeObservedTransportUrl,
 } from "./discovery-safety.mjs";
+import { planActionBudget, validateActionBudgetResult } from "./portal-discovery-action-budget.mjs";
 import {
   buildTransitionEvidence,
   decodeBoundedCdpBody,
@@ -569,6 +570,7 @@ function applyRecipeConfig(args, recipeConfig, recipePath) {
   }
 
   args.seedRouteGroups = normalizeSeedRouteGroups(recipeConfig.seedRouteGroups);
+  args.actionBudget = planActionBudget(recipeConfig, { maxActions: recipeConfig.maxActions });
 }
 
 async function parseArgs(argv) {
@@ -599,6 +601,7 @@ async function parseArgs(argv) {
     targetId: null,
     url: null,
     variables: {},
+    actionBudget: null,
   };
 
   let recipePath = null;
@@ -889,6 +892,11 @@ async function parseArgs(argv) {
 
   if (!args.url) {
     throw new Error("Missing required --url argument.");
+  }
+
+  if (args.actionBudget?.maxActions !== null && args.actionBudget?.maxActions !== undefined
+      && args.actionBudget.countedActions > args.actionBudget.maxActions) {
+    throw new Error(`Action budget exceeded before browser interaction: planned ${args.actionBudget.countedActions} browser actions exceeds authorized maximum ${args.actionBudget.maxActions}.`);
   }
 
   if (!args.portal) {
@@ -3262,10 +3270,12 @@ async function main() {
     const actionValidation = summarizeActionResults(actionResults, {
       includeInteractionHealth: true,
     });
+    const actionBudget = validateActionBudgetResult(actionResults, args.actionBudget);
     const summary = {
       schemaVersion: captureArtifactSchemaVersion,
       actionValidation,
       actions: actionResults.length,
+      actionBudget,
       bundleDiscovery: latestBundleSummary,
       capturedApiRequests: capturedRequests.length,
       finalUrl: await getRootUrl(),

@@ -19,6 +19,11 @@ Use sanitized checked-in stage inputs and the synthetic benchmark corpus only. T
 
 Benchmark drift, schema mismatch, digest tampering, privacy leakage, incomplete health, unknown saturation, and budget exhaustion fail closed. Re-running the command with identical inputs is idempotent and resumable because stage IDs and serialized output are deterministic.
 
+The authorization ceiling applies to every counted browser action, including
+implicit seed/bootstrap/navigation and replay expansion. Plan and surface the
+category totals before preflight and ledger-attempt consumption; reject
+over-budget runs with a structured blocker and remediation, never truncation.
+
 The checked-in portfolio is validated and materialized from existing spec,
 recipe, crawl, and coverage metadata. These commands are offline and report-only
 unless `--apply` is explicitly supplied:
