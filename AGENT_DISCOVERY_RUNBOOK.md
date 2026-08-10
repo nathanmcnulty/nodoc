@@ -34,13 +34,19 @@ npm run control:portal-discovery -- compile-plan --json
 npm run control:portal-discovery -- status --json
 ```
 
-The plan has stable IDs and SHA-256 digests. Capture assignments serialize by
-endpoint/profile lease family; only immutable, non-conflicting review work is
-parallelizable. A fresh artifact directory is a runtime precondition and is never
-created in committed data. `--apply` is required before enqueueing and enqueue is
-idempotent through the existing ledger lock. Corrupt or incompatible manifests,
-plans, ledgers, and worker results fail closed; retry only after repairing the
-input or returning the assignment to its legal queued state.
+The plan has stable IDs and SHA-256 digests. Offline per-spec reconciliation and
+review assignments may run concurrently when their artifacts and destination
+files do not conflict. All live browser-owner/CDP work is one global serialized
+lifecycle across every spec and host: owner, preflight, alignment, ledger attempt,
+capture, finalization, and shutdown. The next lifecycle is blocked until terminal
+owner shutdown, artifact/ledger accounting, evidence review, qualified spec/Postman
+PR disposition, and process-improvement disposition are recorded. A fresh artifact
+directory is a runtime precondition and is never created in committed data.
+`--apply` is required before enqueueing and enqueue is idempotent through the
+existing ledger lock. Corrupt or incompatible manifests, plans, ledgers, and worker
+results fail closed; retry only after repairing the input or returning the
+assignment to its legal queued state. Review/controller results must report exact
+runtime model `gpt-5.6-luna`; wrong-model output is rejected.
 
 Endpoint lease identity is canonicalized as lowercase `host:port`: HTTPS URLs and
 bare hosts use port `443`, HTTP URLs use port `80`, and an explicit port is
