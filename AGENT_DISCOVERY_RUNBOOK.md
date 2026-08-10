@@ -37,6 +37,12 @@ idempotent through the existing ledger lock. Corrupt or incompatible manifests,
 plans, ledgers, and worker results fail closed; retry only after repairing the
 input or returning the assignment to its legal queued state.
 
+Endpoint lease identity is canonicalized as lowercase `host:port`: HTTPS URLs and
+bare hosts use port `443`, HTTP URLs use port `80`, and an explicit port is
+preserved. Only an HTTP(S) origin is valid; paths, credentials, queries, hashes,
+different profiles or workers, and expired leases never qualify for running-attempt
+reuse.
+
 Validated grouped handoffs may be converted offline with
 `tools/discovery-review-assignments.mjs`. The schema-versioned plan creates one
 deterministic assignment per partition and contains only digests, counts,

@@ -9,6 +9,7 @@ import {
   claimAssignment,
   enqueueAssignment,
   getLedgerViewFromFile,
+  normalizeEndpoint,
   readLedgerRecords,
   renewAttemptLease,
   resumeAttempt,
@@ -37,6 +38,36 @@ function assignment(ledgerPath, assignmentId, overrides = {}) {
     ...overrides,
   };
 }
+
+test("endpoint normalization shares HTTPS, host, and default-port lease identity", () => {
+  assert.deepEqual(
+    [
+      "https://CONFIG.OFFICE.COM",
+      "config.office.com",
+      "config.office.com:443",
+      "https://config.office.com:443/",
+    ].map(normalizeEndpoint),
+    [
+      "config.office.com:443",
+      "config.office.com:443",
+      "config.office.com:443",
+      "config.office.com:443",
+    ],
+  );
+  assert.equal(normalizeEndpoint("http://config.office.com"), "config.office.com:80");
+  assert.equal(normalizeEndpoint("config.office.com:8443"), "config.office.com:8443");
+});
+
+test("ambiguous endpoint URLs fail closed", () => {
+  for (const endpoint of [
+    "https://config.office.com/api",
+    "https://config.office.com?tenant=example",
+    "https://user:password@config.office.com",
+    "config.office.com/api",
+  ]) {
+    assert.throws(() => normalizeEndpoint(endpoint), /endpoint/u);
+  }
+});
 
 test("enqueue is idempotent and stores portable sanitized paths", async (t) => {
   const ledgerPath = await fixture(t);
@@ -82,6 +113,21 @@ test("concurrent claims serialize and preserve one endpoint lease", async (t) =>
   });
   assert.equal(view.assignments.filter((entry) => entry.state === "capturing").length, 1);
   assert.equal(view.assignments.filter((entry) => entry.state === "queued").length, 1);
+});
+
+test("claim profile filtering prevents a worker from claiming another profile", async (t) => {
+  const ledgerPath = await fixture(t);
+  await enqueueAssignment(assignment(ledgerPath, "job-profile", { profile: "other" }));
+  assert.equal(
+    await claimAssignment({
+      ledgerPath,
+      assignmentId: "job-profile",
+      endpoint: "https://admin.example.test",
+      profile: "bounded",
+      workerId: "worker-1",
+    }),
+    null,
+  );
 });
 
 test("expired leases become stale and can resume deterministically", async (t) => {

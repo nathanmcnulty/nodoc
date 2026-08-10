@@ -20,12 +20,12 @@ import {
   enqueueAssignment,
   ensureLedgerFileReady,
   getLedgerViewFromFile,
-  ledgerLeaseRenewalIntervalMs,
-  ledgerStaleLeaseMs,
+  normalizeEndpoint,
   resumeAttempt,
   updateAttempt,
   updateAttemptFromDiscoveryRun,
 } from "./portal-discovery-ledger.mjs";
+import { prepareLedgerAttempt } from "./portal-discovery-dispatch.mjs";
 import {
   ProcessSupervisionTimeoutError,
   runNode,
@@ -459,72 +459,6 @@ async function persistTerminalRun(args, runState) {
   });
 }
 
-async function prepareLedgerAttempt(args, specRecord, recipePath) {
-  if (args.noLedger || args.phase === "plan" || !args.endpoint) {
-    return null;
-  }
-  const digest = await recipeDigest(recipePath);
-  const assignmentId = args.assignmentId || `${specRecord.specId}-${createHash("sha256")
-      .update(`${specRecord.specId}|${args.endpoint}|${digest}|${args.phase}|${args.priority}`)
-      .digest("hex")
-      .slice(0, 16)}`;
-  if (!args.assignmentId) {
-    await enqueueAssignment({
-      ledgerPath: args.ledgerPath,
-      assignmentId,
-      specId: specRecord.specId,
-      portal: specRecord.title,
-      recipePath,
-      recipeDigest: digest,
-      endpoint: args.endpoint,
-      profile: args.profile,
-      phase: args.phase,
-      priority: args.priority,
-      artifactDir: args.artifacts,
-      model: args.model,
-      reasoning: args.reasoning,
-      workerId: args.workerId,
-    });
-  }
-  args.assignmentId = assignmentId;
-  const claimed = await claimAssignment({
-    ledgerPath: args.ledgerPath,
-    assignmentId,
-    endpoint: args.endpoint,
-    phase: args.phase,
-    workerId: args.workerId,
-    model: args.model,
-    reasoning: args.reasoning,
-    leaseMs: Math.max(
-      ledgerStaleLeaseMs,
-      args.captureSupervisionTimeoutMs + args.supervisionTimeoutMs + ledgerLeaseRenewalIntervalMs,
-    ),
-  });
-  if (!claimed) {
-    const current = await getLedgerViewFromFile({
-      ledgerPath: args.ledgerPath,
-      filters: { assignmentId },
-      includeAttempts: true,
-    });
-    const assignment = current.assignments[0];
-    const attempt = assignment?.latestAttempt;
-    if (
-      attempt?.status === "running"
-      && attempt.lease?.owner === args.workerId
-      && assignment.endpoint === args.endpoint
-      && assignment.profile === args.profile
-    ) {
-      args.attemptNumber = attempt.attemptNumber;
-      return assignment;
-    }
-    throw new Error(
-      `Ledger assignment ${assignmentId} is unavailable because its endpoint/profile lease is held or its state conflicts.`,
-    );
-  }
-  args.attemptNumber = claimed.assignment.latestAttempt.attemptNumber;
-  return claimed.assignment;
-}
-
 async function readInteractionHealth(artifactDir) {
   let summary;
   try {
@@ -673,6 +607,7 @@ async function runLedgerMode(args) {
       assignmentId: args.assignmentId,
       endpoint: args.endpoint,
       phase: args.phase,
+      profile: args.profile,
       workerId: args.workerId,
       model: args.model,
       reasoning: args.reasoning,
@@ -735,9 +670,10 @@ async function runLedgerMode(args) {
     throw new Error(`No checked-in recipe exists for ${spec.title}.`);
   }
   const digest = await recipeDigest(selectedRecipe);
+  const endpoint = normalizeEndpoint(args.endpoint);
   const assignmentId = args.assignmentId
     || `${spec.specId}-${createHash("sha256")
-      .update(`${spec.specId}|${args.endpoint}|${digest}|${args.phase}|${args.priority}`)
+      .update(`${spec.specId}|${endpoint}|${digest}|${args.phase}|${args.priority}`)
       .digest("hex")
       .slice(0, 16)}`;
   const result = await enqueueAssignment({
@@ -747,7 +683,7 @@ async function runLedgerMode(args) {
     portal: spec.title,
     recipePath: selectedRecipe,
     recipeDigest: digest,
-    endpoint: args.endpoint,
+    endpoint,
     profile: args.profile,
     phase: args.phase,
     priority: args.priority,

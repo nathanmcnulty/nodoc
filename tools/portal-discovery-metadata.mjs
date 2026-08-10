@@ -1,3 +1,4 @@
+// Browser origins stay URL-shaped here; runtime capture leases canonicalize them centrally.
 function route(method, path, note) {
   return {
     method: method.toUpperCase(),
