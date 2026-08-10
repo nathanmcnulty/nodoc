@@ -64,6 +64,32 @@ focused destination-spec PR boundaries, validation commands, measurements, and
 next actions. Applying repository edits is a separate human-controlled boundary
 after review; this command is report-only.
 
+## Deterministic retrospectives and accounting (Layer 3)
+
+Compile a sanitized, offline retrospective from structured plan, health,
+assignment/result, promotion, derivative, ledger/process, CI/PR, and operator
+annotation summaries:
+
+```powershell
+npm run retrospect:portal-discovery -- compile .\retrospective-input.json --write .\discovery-retrospective.json
+```
+
+The compiler is report-only and uses an atomic write only when `--write` is
+explicitly supplied. Inputs carry source IDs and digests; raw URLs, tenant or
+credential data, absolute paths, and prompt text are rejected. Missing values
+are `null`/unavailable, never zero. Runtime actual usage requires trusted
+structured telemetry; tokenizer byte/token estimates are separate records and
+are never presented as actual usage. Cost remains unavailable without an
+explicit versioned pricing input.
+
+Improvement proposals are stable, evidence-linked, and default to `observe`
+until the configured support threshold is met. Critical deterministic
+invariants may become `proposed`, but no proposal edits code/docs or opens a
+PR. Cheap workers may classify known reason codes only; Luna/manual approval is
+required for safety, scope, thresholds, and model disagreement. Retries,
+timeouts, recovery, escalation, invalid results, and CI/PR outcomes must be
+reported as structured counts and reason codes.
+
 ## Required input
 
 The task must name one portal by title or spec ID, for example `M365 Admin` or
