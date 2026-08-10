@@ -460,6 +460,26 @@ components:
       required:
         - profileId
         - rulesList
+    ServiceProfileIssues:
+      type: object
+      description: Issues reported for a Cloud Update servicing profile and Office version.
+      properties:
+        serviceProfileId:
+          type: string
+          format: uuid
+        issues:
+          type: array
+          items:
+            $ref: '#/components/schemas/GenericObject'
+        skipToken:
+          type: string
+        count:
+          type: integer
+      required:
+        - serviceProfileId
+        - issues
+        - skipToken
+        - count
     TenantRules:
       type: object
       description: Tenant-wide servicing-profile rules returned by the hidden tenant rules endpoint.
@@ -752,6 +772,25 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/ServiceProfile'
+  /ServiceProfile/v1.0/ServiceProfileAggregator/{profileId}/16.0.20131.20152/Issues:
+   get:
+     tags: [Servicing Profiles]
+     summary: Get servicing profile issues
+     description: Returns issues reported for a servicing profile for the observed Office version.
+     parameters:
+       - $ref: '#/components/parameters/profileId'
+     responses:
+       '200':
+         description: Servicing profile issues
+         content:
+           application/json:
+             schema:
+               $ref: '#/components/schemas/ServiceProfileIssues'
+             example:
+               serviceProfileId: 00000000-0000-0000-0000-000000000000
+               issues: []
+               skipToken: ''
+               count: 0
   /serviceProfile/v3.0/profiles:
     get:
       tags: [Servicing Profiles]
