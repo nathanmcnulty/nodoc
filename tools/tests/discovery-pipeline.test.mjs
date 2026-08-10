@@ -10,7 +10,8 @@ import {
   getEffectiveServerUrls,
   getScopeServerUrls,
 } from "../spec-quality-lib.mjs";
-import { enqueueAssignment } from "../portal-discovery-ledger.mjs";
+import { claimAssignment, enqueueAssignment } from "../portal-discovery-ledger.mjs";
+import { prepareLedgerAttempt } from "../portal-discovery-dispatch.mjs";
 import {
   buildPartitionedCandidateHandoff,
   validatePartitionedCandidateHandoff,
@@ -94,6 +95,74 @@ async function runAnalyze(portal, artifactDir, {
   };
 }
 
+async function runM365AllLeaseCase({
+  assignmentEndpoint = "config.office.com:443",
+  invocationEndpoint = "https://config.office.com",
+  assignmentProfile = "bounded",
+  invocationProfile = "bounded",
+  assignmentWorker = "m365-apps-services-live-gpt56-luna",
+  invocationWorker = assignmentWorker,
+  claimNow = new Date(Date.now() - 1_000).toISOString(),
+  leaseMs,
+} = {}) {
+  const rootDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-m365-lease-"));
+  const ledgerPath = path.join(rootDir, "ledger.jsonl");
+  const artifactDir = path.join(rootDir, "artifacts");
+  const assignmentId = "m365-apps-services-92bc1d847c8537ac";
+  try {
+    await enqueueAssignment({
+      ledgerPath,
+      assignmentId,
+      specId: "m365-apps-services",
+      portal: "M365 Apps Services",
+      recipePath: path.join(repoRoot, "tools", "capture-recipes", "m365-apps-services-deep.json"),
+      recipeDigest: "a".repeat(64),
+      endpoint: assignmentEndpoint,
+      profile: assignmentProfile,
+      phase: "all",
+      workerId: assignmentWorker,
+    });
+    await claimAssignment({
+      ledgerPath,
+      assignmentId,
+      endpoint: assignmentEndpoint,
+      profile: assignmentProfile,
+      workerId: assignmentWorker,
+      now: claimNow,
+      leaseMs,
+    });
+
+    let error;
+    let assignment;
+    try {
+      assignment = await prepareLedgerAttempt(
+        {
+          noLedger: false,
+          phase: "all",
+          endpoint: invocationEndpoint,
+          ledgerPath,
+          assignmentId,
+          profile: invocationProfile,
+          workerId: invocationWorker,
+          model: null,
+          reasoning: null,
+          priority: "normal",
+          artifacts: artifactDir,
+          captureSupervisionTimeoutMs: 1000,
+          supervisionTimeoutMs: 1000,
+        },
+        { specId: "m365-apps-services", title: "M365 Apps Services" },
+        path.join(repoRoot, "tools", "capture-recipes", "m365-apps-services-deep.json"),
+      );
+    } catch (caught) {
+      error = caught;
+    }
+    return { assignment, error };
+  } finally {
+    await rm(rootDir, { force: true, recursive: true });
+  }
+}
+
 test("capture pipeline auto-enqueues and claims a deterministic ledger attempt", async (t) => {
   const artifactDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-ledger-auto-"));
   const ledgerPath = path.join(artifactDir, "ledger.jsonl");
@@ -112,6 +181,66 @@ test("capture pipeline auto-enqueues and claims a deterministic ledger attempt",
     assert.equal(ledger.payload.lease, null);
   } finally {
     await rm(artifactDir, { force: true, recursive: true });
+  }
+});
+
+test("M365 Apps Services reuses an owned canonical lease before browser preflight", async () => {
+  const cases = [
+    {
+      name: "URL",
+      invocationEndpoint: "https://config.office.com",
+      expectedError: false,
+    },
+    {
+      name: "host",
+      invocationEndpoint: "config.office.com",
+      expectedError: false,
+    },
+    {
+      name: "default port",
+      invocationEndpoint: "config.office.com:443",
+      expectedError: false,
+    },
+    {
+      name: "different host",
+      invocationEndpoint: "https://other.office.com",
+      expectedError: true,
+    },
+    {
+      name: "non-default port",
+      invocationEndpoint: "config.office.com:8443",
+      expectedError: true,
+    },
+    {
+      name: "different profile",
+      assignmentProfile: "other",
+      expectedError: true,
+    },
+    {
+      name: "different worker",
+      invocationWorker: "different-worker",
+      expectedError: true,
+    },
+    {
+      name: "expired lease",
+      claimNow: new Date(Date.now() - 10 * 60_000).toISOString(),
+      leaseMs: 100,
+      expectedError: true,
+    },
+    {
+      name: "ambiguous URL",
+      invocationEndpoint: "https://config.office.com/intents",
+      expectedError: true,
+    },
+  ];
+
+  for (const leaseCase of cases) {
+    const result = await runM365AllLeaseCase(leaseCase);
+    assert.equal(Boolean(result.error), leaseCase.expectedError, leaseCase.name);
+    if (!leaseCase.expectedError) {
+      assert.equal(result.assignment.endpoint, "config.office.com:443", leaseCase.name);
+      assert.equal(result.assignment.latestAttempt.attemptNumber, 1, leaseCase.name);
+    }
   }
 });
 

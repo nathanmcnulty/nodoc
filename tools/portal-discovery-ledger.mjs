@@ -97,19 +97,30 @@ function sha256(value) {
   return createHash("sha256").update(String(value ?? "")).digest("hex");
 }
 
-function normalizeEndpoint(value) {
+export function normalizeEndpoint(value) {
   if (typeof value !== "string" || !value.trim()) {
     throw new Error("endpoint must be a non-empty string.");
   }
   const trimmed = value.trim();
   if (/^https?:\/\//iu.test(trimmed)) {
     const parsed = new URL(trimmed);
+    if (
+      parsed.username
+      || parsed.password
+      || (parsed.pathname !== "/" && parsed.pathname !== "")
+      || parsed.search
+      || parsed.hash
+    ) {
+      throw new Error("endpoint URL must contain only an HTTP(S) origin.");
+    }
     return `${parsed.hostname.toLowerCase()}:${parsed.port || (parsed.protocol === "https:" ? "443" : "80")}`;
   }
   if (!/^[a-z0-9.-]+(?::\d{1,5})?$/iu.test(trimmed)) {
     throw new Error("endpoint must be a hostname with an optional port.");
   }
-  return trimmed.toLowerCase();
+  return trimmed.includes(":")
+    ? trimmed.toLowerCase()
+    : `${trimmed.toLowerCase()}:443`;
 }
 
 function normalizePriority(value) {
@@ -629,6 +640,7 @@ export async function claimAssignment(input) {
     const records = await readLedgerRecords(ledgerPath);
     const state = buildLedgerState(records, nowMs);
     const endpoint = input.endpoint ? normalizeEndpoint(input.endpoint) : null;
+    const profile = input.profile ? sanitizeText(input.profile, 50) : null;
     const activeKeys = new Set(
       [...state.assignments.values()]
         .filter((assignment) => assignment.latestAttempt?.status === "running")
@@ -638,6 +650,7 @@ export async function claimAssignment(input) {
       .filter((assignment) => assignment.state === "queued")
       .filter((assignment) => !input.assignmentId || assignment.assignmentId === input.assignmentId)
       .filter((assignment) => !endpoint || assignment.endpoint === endpoint)
+      .filter((assignment) => !profile || assignment.profile === profile)
       .filter((assignment) => !input.phase || input.phase === "all" || assignment.phase === input.phase)
       .filter((assignment) => (
         assignment.phase === "analyze"
