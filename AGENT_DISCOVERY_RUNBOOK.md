@@ -219,15 +219,23 @@ npm run browser:cdp:stop -- --profile-key m365-admin --port 9222
 CDP `Browser` token form `Edg/<version>`. Chrome remains a distinct family and
 must not satisfy an Edge preflight.
 
-`start` is idempotent only for a healthy exact manifest owner. Its
-`authentication-required` next step is deliberate: the command never claims
-that launch alone established portal authentication. The sanitized manifest is
+`start` is idempotent only for a healthy exact manifest owner. A successful
+launch or reuse returns `code: preflight-required`, `lifecycleStatus:
+owner-ready`, and `authenticationStatus: unverified`; owner startup does not
+inspect target authentication. Leave exactly one intended portal page open,
+complete sign-in only if the browser UI requires it, then **always** run the
+read-only authenticated preflight. Only preflight and later capture barrier
+detection may report `authentication-required`. The sanitized manifest is
 stored beneath `%LOCALAPPDATA%\nodoc-cdp\manifests`, outside Git, and contains
 only lifecycle identity needed to prove ownership. `status` and `start` fail
 closed for malformed or stale manifests, a product mismatch, an unknown
 listener, or an occupied port. `stop` terminates only the exact manifest PID
 whose executable, fixed port, dedicated profile, and random owner token all
 match; it never kills by process name.
+
+The required order is: owner ready -> always run read-only preflight -> only
+preflight determines authenticated or blocked -> mutate the ledger after
+successful preflight.
 
 For a portal-specific page check, retain the same endpoint and narrow the
 authenticated preflight further:
@@ -239,11 +247,13 @@ npm run preflight:browser-cdp -- --endpoint http://127.0.0.1:9222 `
 ```
 
 Before handing off to an agent, the operator must confirm that the preflight
-passed for the intended portal and is past sign-in. If an existing endpoint is
-the wrong dedicated session, has stale targets, or times out during attach, the
-operator uses owner `status` and `stop`, then starts the same stable profile key.
-Never close the user's normal browser, copy a normal browser profile, use
-Playwright/browser canvas, or run any second controller against the owner
+passed for the intended portal and is past sign-in. If preflight reports no
+matching target or an authentication barrier, keep the owner alive while manual
+sign-in or page repair could fix it; do not automatically stop or restart it.
+Use owner `status` and `stop` only for an explicit safe shutdown or when no
+manual repair opportunity remains, then start the same stable profile key if
+needed. Never close the user's normal browser, copy a normal browser profile,
+use Playwright/browser canvas, or run any second controller against the owner
 browser, profile, target, or port. A failed preflight does not prepare or mutate
 the discovery ledger.
 
@@ -565,8 +575,8 @@ Return the blocker code and remediation:
 
 | Code | Meaning |
 | --- | --- |
-| `browser-cdp-unavailable` | No authenticated browser is listening on port 9222 |
-| `authentication-required` | The portal redirected to sign-in or returned an auth barrier |
+| `browser-cdp-unavailable` | The CDP endpoint is unavailable or lacks required browser metadata |
+| `authentication-required` | Preflight or capture detected a sign-in redirect or authentication barrier |
 | `artifacts-not-empty` | The capture directory contains evidence from an earlier run |
 | `recipe-missing` | No checked-in deterministic recipe exists |
 | `feature-gated` | The tenant, role, license, or feature flag blocks the surface |

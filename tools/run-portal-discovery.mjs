@@ -778,6 +778,9 @@ async function main() {
       blocker: {
         code: error?.message?.startsWith("browser-cdp-preflight:") ? "browser-cdp-preflight-failed" : "ledger-dispatch-conflict",
         detail: error instanceof Error ? error.message : String(error),
+        ...(error?.message?.startsWith("browser-cdp-preflight:")
+          ? { remediation: "Keep the owner alive for manual sign-in or page repair, rerun the read-only preflight, and mutate the ledger only after it succeeds." }
+          : {}),
       },
     };
     await writeRunState(args.artifacts, runState);

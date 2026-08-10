@@ -1,8 +1,12 @@
 import assert from "node:assert/strict";
+import { mkdtemp, rm } from "node:fs/promises";
 import test from "node:test";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 
 import {
   BrowserCdpOwnerError,
+  OWNER_PREFLIGHT_REQUIRED_CODE,
   assertDedicatedProfilePath,
   buildLaunchCommand,
   getBrowserOwnerStatus,
@@ -63,6 +67,15 @@ function unavailable() {
   return Promise.reject(new BrowserCdpOwnerError("cdp-unavailable", "unavailable"));
 }
 
+function assertOwnerReadyNextStep(nextStep) {
+  assert.equal(nextStep.code, OWNER_PREFLIGHT_REQUIRED_CODE);
+  assert.notEqual(nextStep.code, "authentication-required");
+  assert.equal(nextStep.lifecycleStatus, "owner-ready");
+  assert.equal(nextStep.authenticationStatus, "unverified");
+  assert.match(nextStep.message, /UNVERIFIED until authenticated preflight succeeds/);
+  assert.match(nextStep.message, /Leave exactly one intended portal page open, complete sign-in only if the browser UI requires it, then run authenticated preflight/);
+}
+
 test("rejects default profile keys and normal browser data roots", () => {
   assert.throws(() => validateProfileKey("Default"), (error) => error.code === "default-profile-rejected");
   assert.throws(() => assertDedicatedProfilePath(
@@ -113,8 +126,40 @@ test("reuses an idempotent healthy manifest owner without launching", async () =
   });
   assert.equal(result.reused, true);
   assert.equal(result.pid, 4242);
-  assert.equal(result.nextStep.code, "authentication-required");
+  assertOwnerReadyNextStep(result.nextStep);
   assert.equal(launches, 0);
+});
+
+test("launches a new owner with an unverified preflight contract", async () => {
+  const ownerRoot = await mkdtemp(join(tmpdir(), "nodoc-cdp-owner-"));
+  let launched = false;
+  let writtenManifest;
+  try {
+    const result = await startBrowserOwner(options({ ownerRoot }), {
+      readManifest: async () => null,
+      isPortAvailable: async () => true,
+      resolveBinary: async () => ({ product: "Edge", path: binaryPath }),
+      spawnBrowser: async () => {
+        launched = true;
+        return { pid: 5151 };
+      },
+      writeManifest: async (path, value) => {
+        assert.equal(path, join(ownerRoot, "manifests", "m365-admin-9222.json"));
+        writtenManifest = value;
+      },
+      probeVersion: async () => {
+        if (!launched) throw new BrowserCdpOwnerError("cdp-unavailable", "not launched");
+        return { browser: "Microsoft Edge/140.0", webSocketDebuggerUrl: "ws://127.0.0.1/devtools/browser/root" };
+      },
+      randomUUID: () => ownerToken,
+    });
+    assert.equal(result.reused, false);
+    assert.equal(result.pid, 5151);
+    assertOwnerReadyNextStep(result.nextStep);
+    assert.equal(writtenManifest.ownerToken, ownerToken);
+  } finally {
+    await rm(ownerRoot, { force: true, recursive: true });
+  }
 });
 
 test("reports and refuses a stale manifest until explicit stop cleanup", async () => {
