@@ -46,7 +46,12 @@ When promoting discoveries into the repository, aim for more than just path cove
 ## Core principles
 
 1. **Traffic first.** Start with real browser traffic before relying on bundle mining.
-2. **Use one browser owner.** The operator starts one Edge root with loopback TCP CDP on an explicit fixed port and a persisted signed-in profile; discovery runs the read-only preflight before capture. Chrome is fallback only, and no Playwright/browser-canvas controller may share the browser, profile, or port.
+2. **Use one browser owner.** The operator uses the checked-in owner lifecycle
+   to start one independent Edge root with loopback TCP CDP on an explicit fixed
+   port and a dedicated persistent signed-in profile; discovery runs the
+   read-only authenticated preflight before capture. Chrome is fallback only,
+   and no Playwright/browser-canvas controller may share the browser, profile,
+   target, or port.
 3. **Prefer safe reads.** GETs first, then safe POST-backed reads, then intercepted write-shape capture, then reversible writes only if necessary.
 4. **Keep evidence.** Record whether an endpoint is confirmed by live traffic, safe probe, or bundle discovery.
 5. **Separate confidence levels.** Do not present bundle-only discoveries as if they were fully confirmed.
@@ -418,11 +423,25 @@ be analyzed offline and retain the normal evidence-based recommendation.
 
 Preferred flow:
 
-1. Have the operator start the persistent dedicated Edge or Chrome profile from
-   the runbook and authenticate it.
-2. Attach automation over CDP, usually on `http://127.0.0.1:9222`.
-3. Verify `/json/version` exposes a browser websocket and `/json/list` contains
-   the intended authenticated portal target before capture.
+1. Have the operator run `npm run browser:cdp:start -- --profile-key <key>
+   --portal-url <url> --browser edge --port 9222`. The owner resolves Edge
+   deterministically, launches an independent root, and keeps its dedicated
+   profile beneath `%LOCALAPPDATA%\nodoc-cdp`.
+2. Complete sign-in in that persistent profile; launch intentionally returns an
+   `authentication-required` next step rather than treating a CDP listener as
+   proof of authentication.
+3. Require owner `status` to be healthy, then run
+   `npm run preflight:browser-cdp -- ...` against
+   `http://127.0.0.1:9222`. The bounded `/json/version` check must identify the
+   expected product, and `/json/list` must contain exactly one intended
+   authenticated portal target.
+
+Chrome 136+ ignores remote-debugging switches against its default data
+directory unless a nonstandard `--user-data-dir` is supplied, as documented in
+the first-party
+[Chrome for Developers security announcement](https://developer.chrome.com/blog/remote-debugging-port).
+Apply that Chromium restriction to Edge as well: never attach this workflow to
+the default or normal user-data root.
 
 Practical notes:
 
@@ -430,11 +449,12 @@ Practical notes:
   attach, SPA fallback, checkpoints, scoped capture, bundle mining, and candidate
   generation; do not reproduce those steps interactively.
 - Do not clone a normal browser profile, call CDP `/json/new` manually, or switch
-  to a second browser automation mode after attach trouble.
+  to Playwright, browser canvas, or any second browser automation mode after
+  attach trouble.
 - If the websocket or target attach fails, stop the worker. The operator checks
-  the dedicated session, closes only that dedicated debug browser if needed,
-  relaunches the same persistent profile, verifies both CDP endpoints, and gives
-  the worker a new empty artifact directory.
+  owner `status`; only owner `stop` may terminate the exact manifest-owned PID.
+  The operator then starts the same stable profile key, verifies both CDP
+  endpoints, and gives the worker a new empty artifact directory.
 - Let the checked-in runner use auth and portal headers in memory for same-session
   safe probes. Persisted bodies are token-redacted and persisted headers contain
   metadata rather than raw authorization or cookie values. Other tenant content
@@ -721,7 +741,8 @@ Default policy:
 Preferred write-shape workflow:
 
 1. Open the real UI flow that would issue the write.
-2. Intercept the request with Playwright/CDP routing or equivalent.
+2. Intercept the request through the checked-in runner's CDP Fetch-domain
+   routing.
 3. Capture the request path, headers, and body.
 4. Abort the request before it reaches the backend if the UI allows that safely.
 
@@ -1120,7 +1141,9 @@ What helped:
 
 Current takeaway:
 
-- Attach over CDP to the live signed-in Edge Work profile and keep the browser open; use artifact-scoped scratch scripts and raw captures.
+- Attach over CDP to the dedicated persistent owner profile and keep that
+  independent browser root open; use artifact-scoped scratch scripts and raw
+  captures.
 - For report blades, capture first paint and then a second pass with one safe interaction at a time: filters, date range changes, grouping, row drill-ins, tab switches, sorting, paging, and export-preflight actions.
 - Label every captured request with the exact UI state that triggered it so later safe probes and spec descriptions can explain when each route appears.
 - After traffic capture, diff the page-specific script sets between sibling blades and mine only the unique bundles for hidden sibling routes, default query/body fields, enum values, and request-factory defaults.

@@ -133,9 +133,12 @@ not discovery work:
 2. Restore the repository's locked dependencies when `node_modules` is absent;
    workers must not install or update packages.
 3. Run the portal plan command and require `status: planned`.
-4. Run `tools/browser-cdp-preflight.mjs` against the operator-selected loopback
-   endpoint. It verifies browser metadata, expected product, exactly one matching
-   page, harmless Runtime.evaluate, authentication, and stable identity.
+4. Require `npm run browser:cdp:status -- --profile-key <key>` to report the
+   manifest-owned browser as healthy, then run
+   `npm run preflight:browser-cdp -- ...` against that exact loopback endpoint.
+   The authenticated preflight verifies browser metadata, expected product,
+   exactly one matching page, harmless Runtime.evaluate, authentication, and
+   stable identity.
 5. Confirm the selected recipe exists and choose a fresh artifact directory.
 
 Do not spend a worker allocation on a missing dependency, invalid portal ID,
@@ -178,59 +181,55 @@ interpreted as healthy saturation.
 
 ## Browser prerequisite
 
-The deterministic pipeline attaches to an already authenticated browser. The
-agent must not launch, close, navigate, or repair that browser. The operator
-owns exactly one long-lived portal target and starts one dedicated Edge root with
-loopback TCP CDP on an explicit fixed port (normally `9222`) and an operator-
-selected persisted signed-in profile. Chrome is fallback only. No Playwright,
-browser canvas, or other controller may own that browser, profile, or port
-concurrently. Never use `--remote-allow-origins=*`, kill by process name, or
-transition an existing normal Edge session automatically.
+The deterministic pipeline attaches to an already authenticated browser. A
+capture agent must not launch, close, navigate, or repair that browser. The
+operator controls its lifecycle only through `browser-cdp-owner.mjs`: one
+independent Edge root, one explicit loopback endpoint and fixed port (normally
+`http://127.0.0.1:9222`), one stable portal-specific profile key, and one
+long-lived portal target. The default resolver checks deterministic Edge paths
+before Chrome; use `--browser edge` to prohibit fallback.
 
-Use one persistent dedicated profile per browser and portal so authentication
-survives retries without copying or modifying the user's normal browser profile:
+Chrome 136 stopped honoring `--remote-debugging-port` and
+`--remote-debugging-pipe` for the default data directory unless a nonstandard
+`--user-data-dir` is supplied; see the first-party
+[Chrome for Developers announcement](https://developer.chrome.com/blog/remote-debugging-port).
+Treat this Chromium 136+ restriction as a hard gate for this Edge-oriented
+workflow too. The owner always uses a dedicated persistent directory beneath
+`%LOCALAPPDATA%\nodoc-cdp\profiles\<profile-key>` (or the platform-equivalent
+state root), never a normal browser profile. This both creates an independent
+browser root and preserves portal sign-in across capture retries.
+
+Only the operator invokes these lifecycle commands:
 
 ```powershell
-$portal = "m365-admin"
 $portalUrl = "https://admin.cloud.microsoft"
-$browserName = "edge" # Chrome is fallback only
-$browserCandidates = if ($browserName -eq "edge") {
-   @(
-      (Join-Path ${env:ProgramFiles(x86)} "Microsoft\Edge\Application\msedge.exe"),
-      (Join-Path ${env:ProgramFiles} "Microsoft\Edge\Application\msedge.exe")
-   )
-} else {
-   @(
-      (Join-Path ${env:ProgramFiles} "Google\Chrome\Application\chrome.exe"),
-      (Join-Path ${env:ProgramFiles(x86)} "Google\Chrome\Application\chrome.exe")
-   )
-}
-$browser = $browserCandidates | Where-Object { Test-Path $_ } | Select-Object -First 1
-if (-not $browser) { throw "Could not find $browserName in a standard install path." }
+npm run browser:cdp:status -- --profile-key m365-admin
+npm run browser:cdp:start -- --profile-key m365-admin `
+  --portal-url $portalUrl --browser edge --port 9222
 
-$profileDir = Join-Path $env:LOCALAPPDATA "nodoc-cdp\$browserName-$portal"
-$existingCdp = try {
-   Invoke-RestMethod http://127.0.0.1:9222/json/version -TimeoutSec 2
-} catch {
-   $null
-}
+# Complete sign-in in that dedicated window and leave exactly one portal page open.
+npm run preflight:browser-cdp -- --endpoint http://127.0.0.1:9222 `
+  --expected-product Edge --match-host admin.cloud.microsoft
 
-if (-not $existingCdp) {
-   $listener = Get-NetTCPConnection -LocalPort 9222 -State Listen -ErrorAction SilentlyContinue
-   if ($listener) {
-      throw "Port 9222 is occupied but is not a healthy CDP endpoint. Resolve it manually; do not kill the owning process from an agent run."
-   }
-   Start-Process $browser -ArgumentList @(
-  "--remote-debugging-address=127.0.0.1",
-  "--remote-debugging-port=9222",
-  "--user-data-dir=$profileDir",
-  "--no-first-run",
-  "--no-default-browser-check",
-      $portalUrl
-   ) | Out-Null
-}
+# When operator-owned capture work is finished:
+npm run browser:cdp:stop -- --profile-key m365-admin --port 9222
+```
 
-node tools/browser-cdp-preflight.mjs --endpoint http://127.0.0.1:9222 `
+`start` is idempotent only for a healthy exact manifest owner. Its
+`authentication-required` next step is deliberate: the command never claims
+that launch alone established portal authentication. The sanitized manifest is
+stored beneath `%LOCALAPPDATA%\nodoc-cdp\manifests`, outside Git, and contains
+only lifecycle identity needed to prove ownership. `status` and `start` fail
+closed for malformed or stale manifests, a product mismatch, an unknown
+listener, or an occupied port. `stop` terminates only the exact manifest PID
+whose executable, fixed port, dedicated profile, and random owner token all
+match; it never kills by process name.
+
+For a portal-specific page check, retain the same endpoint and narrow the
+authenticated preflight further:
+
+```powershell
+npm run preflight:browser-cdp -- --endpoint http://127.0.0.1:9222 `
   --expected-product Edge --match-host config.office.com `
   --match-path-prefix /officeSettings/inventory
 ```
@@ -238,10 +237,11 @@ node tools/browser-cdp-preflight.mjs --endpoint http://127.0.0.1:9222 `
 Before handing off to an agent, the operator must confirm that the preflight
 passed for the intended portal and is past sign-in. If an existing endpoint is
 the wrong dedicated session, has stale targets, or times out during attach, the
-operator may close that dedicated debug browser and relaunch the same dedicated
-profile. Never close the user's normal browser, copy a normal browser profile, or
-run two automation modes against the same session. A failed preflight does not
-prepare or mutate the discovery ledger.
+operator uses owner `status` and `stop`, then starts the same stable profile key.
+Never close the user's normal browser, copy a normal browser profile, use
+Playwright/browser canvas, or run any second controller against the owner
+browser, profile, target, or port. A failed preflight does not prepare or mutate
+the discovery ledger.
 
 Every retry after browser recovery uses a new empty artifact directory. A
 healthy completed capture may be analyzed again without reopening the browser.
