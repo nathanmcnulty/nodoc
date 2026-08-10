@@ -746,7 +746,7 @@ async function main() {
         }
       : { mode: "legacy-no-ledger" },
   };
-  const captureCompleteness = await inspectCaptureCompleteness(args.artifacts);
+  let captureCompleteness = await inspectCaptureCompleteness(args.artifacts);
   runState.capture = captureCompleteness;
   runState.recovery = args.phase === "analyze"
     ? { status: "recovered-analysis", source: "immutable-artifacts" }
@@ -888,6 +888,8 @@ async function main() {
       captureSummary = JSON.parse(
         await readFile(path.join(args.artifacts, "summary.json"), "utf8"),
       );
+      captureCompleteness = await inspectCaptureCompleteness(args.artifacts);
+      runState.capture = captureCompleteness;
       interactionHealth = await readInteractionHealth(args.artifacts);
       runState.interactionHealth = interactionHealth;
       const authenticationBarrier = await detectAuthenticationBarrier(

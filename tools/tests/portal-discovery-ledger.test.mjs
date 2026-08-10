@@ -219,6 +219,47 @@ test("terminal reconciliation is idempotent after stale recovery and releases on
   );
 });
 
+test("completed attempts reconcile corrected terminal metadata idempotently", async (t) => {
+  const ledgerPath = await fixture(t);
+  await enqueueAssignment(assignment(ledgerPath, "job-reconcile"));
+  await claimAssignment({
+    ledgerPath,
+    assignmentId: "job-reconcile",
+    endpoint: "admin.example.test:443",
+    workerId: "owner",
+  });
+
+  await updateAttempt({
+    ledgerPath,
+    assignmentId: "job-reconcile",
+    attemptNumber: 1,
+    status: "completed",
+    captureComplete: false,
+    captureStatus: "missing-minimum-artifacts",
+  });
+  const corrected = await updateAttempt({
+    ledgerPath,
+    assignmentId: "job-reconcile",
+    attemptNumber: 1,
+    status: "completed",
+    captureComplete: true,
+    captureStatus: "complete",
+  });
+
+  assert.equal(corrected.noop, false);
+  assert.equal(corrected.assignment.latestAttempt.captureComplete, true);
+  assert.equal(corrected.assignment.latestAttempt.captureStatus, "complete");
+  const repeated = await updateAttempt({
+    ledgerPath,
+    assignmentId: "job-reconcile",
+    attemptNumber: 1,
+    status: "completed",
+    captureComplete: true,
+    captureStatus: "complete",
+  });
+  assert.equal(repeated.noop, true);
+});
+
 test("partial tails are ignored and reported without poisoning valid state", async (t) => {
   const ledgerPath = await fixture(t);
   await enqueueAssignment(assignment(ledgerPath, "job-1"));
