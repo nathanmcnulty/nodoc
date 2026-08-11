@@ -461,8 +461,13 @@ export const coverageOverlayByTitle = {
     knownTelemetryExclusions: [
       route("POST", "/api/log/Put", "Telemetry and performance sink captured from multiple Purview Portal surfaces."),
     ],
+    openGapClasses: ["fresh-capture"],
+    openGaps: [
+      "A fresh runtime capture is still outstanding; checked-in historical evidence exists, but no distinct Purview Portal operation live-capture record or fresh runtime artifact is available.",
+    ],
     notes: [
-      "A live April 2026 same-origin route pass confirmed GET /api/Auth/getSpaAuthCode during home, solution-launcher, and Data Security Investigations navigation.",
+      "Checked-in historical evidence includes a live April 2026 same-origin route pass that confirmed GET /api/Auth/getSpaAuthCode during home, solution-launcher, and Data Security Investigations navigation.",
+      "This coverage is historical only: no distinct Purview Portal operation live-capture ledger record or fresh runtime artifact is currently available.",
     ],
   },
   "Security Copilot": {
@@ -681,6 +686,7 @@ export function getCoverageOverlay(title) {
       knownCandidateExclusions: [],
       knownTelemetryExclusions: [],
       notes: [],
+      openGapClasses: [],
       observedHosts: [],
       openGaps: [],
       promotedDiscoveries: [],
@@ -695,6 +701,7 @@ export function getCoverageOverlay(title) {
     notes: [...(overlay.notes ?? [])],
     observedHosts: uniqueOrdered(overlay.observedHosts ?? []),
     openGaps: [...(overlay.openGaps ?? [])],
+    openGapClasses: [...(overlay.openGapClasses ?? [])],
     promotedDiscoveries: (overlay.promotedDiscoveries ?? []).map(normalizeRouteEntry),
     seedUrls: uniqueOrdered(overlay.seedUrls ?? []),
   };
@@ -750,6 +757,9 @@ export function buildCoverageLedgerEntry(specRecord, recorderPortalIds) {
       : {}),
     knownTelemetryExclusions: [...coverageOverlay.knownTelemetryExclusions],
     openGaps: [...coverageOverlay.openGaps],
+    ...(coverageOverlay.openGapClasses.length > 0
+      ? { openGapClasses: [...coverageOverlay.openGapClasses] }
+      : {}),
     notes: [...coverageOverlay.notes],
   };
 }

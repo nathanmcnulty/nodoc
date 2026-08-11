@@ -13,6 +13,8 @@ import {
   validateRecipeTargetMetadata,
 } from "./portal-discovery-recipe.mjs";
 
+const portfolioManifestPath = path.join(repoRoot, "tools", "portal-discovery-portfolio.json");
+
 const supportedRecipeActionTypes = new Set([
   "capture",
   "click",
@@ -76,6 +78,31 @@ function validateRouteEntries(errors, title, label, entries) {
       fail(errors, `${title}: duplicate ${label} entry "${routeKey}".`);
     }
     seenRoutes.add(routeKey);
+  }
+}
+
+async function validatePortfolioCoverageGapClasses(errors, specInventory) {
+  let portfolio;
+  try {
+    portfolio = JSON.parse(stripBom(await readFile(portfolioManifestPath, "utf8")));
+  } catch (error) {
+    fail(errors, `tools/portal-discovery-portfolio.json: failed to read or parse portfolio JSON (${error.message}).`);
+    return;
+  }
+
+  const portfolioBySpecId = new Map((portfolio.portals ?? []).map((entry) => [entry.specId, entry]));
+  for (const spec of specInventory) {
+    const overlay = getCoverageOverlay(spec.title);
+    if (!Array.isArray(overlay.openGapClasses) || overlay.openGapClasses.length === 0) {
+      continue;
+    }
+
+    const source = portfolioBySpecId.get(spec.specId);
+    const actual = [...(source?.outstandingGapClasses ?? overlay.openGapClasses)].sort();
+    const expected = [...overlay.openGapClasses].sort();
+    if (JSON.stringify(actual) !== JSON.stringify(expected)) {
+      fail(errors, `${spec.title}: portfolio outstandingGapClasses must match the authoritative coverage overlay openGapClasses.`);
+    }
   }
 }
 
@@ -190,6 +217,8 @@ async function main() {
   const specInventory = await buildSpecInventory();
   const specTitles = specInventory.map((record) => record.title);
   const errors = [];
+
+  await validatePortfolioCoverageGapClasses(errors, specInventory);
 
   validateKeyCoverage(errors, "crawl metadata", specTitles, Object.keys(crawlMetadataByTitle));
   validateKeyCoverage(errors, "coverage overlay", specTitles, Object.keys(coverageOverlayByTitle));
