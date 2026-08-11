@@ -47,6 +47,7 @@ const slash = (value) => value.replaceAll("\\", "/");
 const compareText = (left, right) => left < right ? -1 : left > right ? 1 : 0;
 const stableJson = (value, pretty = false) => `${JSON.stringify(value, null, pretty ? 2 : 0)}\n`;
 const digestText = (value) => createHash("sha256").update(value, "utf8").digest("hex");
+const normalizedFileDigest = (value) => digestText(value.replaceAll("\r\n", "\n").replaceAll("\r", "\n"));
 const digestValue = (value) => digestText(stableJson(value));
 const exists = async (filePath) => access(filePath).then(() => true, () => false);
 
@@ -89,7 +90,7 @@ async function sourceFingerprint(specId, moduleFiles) {
   for (const file of [...files, ...sharedFiles].sort()) {
     if (!await exists(file)) continue;
     if (!(await stat(file)).isFile()) continue;
-    entries.push({ path: slash(path.relative(repoRoot, file)), digest: digestText(await readFile(file, "utf8")) });
+    entries.push({ path: slash(path.relative(repoRoot, file)), digest: normalizedFileDigest(await readFile(file, "utf8")) });
   }
   return { digest: digestValue(entries), fileCount: entries.length };
 }
