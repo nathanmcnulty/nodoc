@@ -21,6 +21,24 @@ test("Entra IAM has a stable unique operation ID for every operation", async () 
   });
 });
 
+test("M365 Admin keeps SetTheme on its canonical company theme path", async () => {
+  const specification = await loadBundledSpecification(
+    fileURLToPath(new URL(
+      "../../specifications/nodoc-m365-admin/specification/openapi.yml",
+      import.meta.url,
+    )),
+  );
+
+  assert.equal(
+    specification.paths["/admin/api/Settings/company/theme/v2"].put.operationId,
+    "CompanySettings.SetTheme",
+  );
+  assert.equal(
+    specification.paths["/_api/SPOInternalUseOnly.TenantAdminSettings/AutoQuotaEnabled"].put,
+    undefined,
+  );
+});
+
 test("operation ID validation rejects missing and duplicate IDs", () => {
   assert.throws(
     () => validateOperationIds({ paths: {
