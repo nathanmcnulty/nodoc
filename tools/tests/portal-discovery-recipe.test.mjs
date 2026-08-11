@@ -9,6 +9,7 @@ import { promisify } from "node:util";
 import {
   canonicalizeRecipeForDispatch,
   getRecipeEntryUrl,
+  normalizeRecipeAction,
   recipeEntryMatchesPageTarget,
   resolvePageTargetBootstrapCriteria,
   resolvePageTargetCriteria,
@@ -94,6 +95,13 @@ test("legacy Entra root fragments normalize to the browser origin before dispatc
   }
 });
 
+test("relative Viva Engage navigation resolves against the declared root", async () => {
+  const recipe = await readCaptureRecipe("viva-engage-external-networks-deep.json");
+  const metadata = canonicalizeRecipeForDispatch(recipe);
+  assert.equal(metadata.entryUrl, "https://engage.cloud.microsoft/main/admin/external-networks-settings");
+  assert.equal(metadata.rootUrl, "https://engage.cloud.microsoft/main/admin");
+});
+
 test("active root fragments are rejected before browser-entry normalization", () => {
   for (const hasBootstrap of [false, true]) {
     for (const fragment of ["#/export", "#/save"]) {
@@ -164,8 +172,22 @@ test("declared root fragments remain strict when any explicit navigate exists", 
 test("worker rejects every later fragment navigate before Page.navigate", async () => {
   const tempDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-worker-navigation-"));
   try {
+    const navigationForms = [
+      "navigate=https://example.com/#home",
+      { type: "navigate-root", value: "https://example.com/#save" },
+      { type: " NAVIGATE ", scope: " ROOT ", value: "https://example.com/#/export" },
+    ];
+    assert.deepEqual(normalizeRecipeAction(navigationForms[1]), {
+      raw: JSON.stringify(navigationForms[1]),
+      scope: "root",
+      type: "navigate",
+      value: "https://example.com/#save",
+      highValue: false,
+      optional: false,
+      required: false,
+    });
     for (const hasBootstrap of [false, true]) {
-      for (const fragment of ["#home", "#/export"]) {
+      for (const [formIndex, navigation] of navigationForms.entries()) {
         const recipe = {
           url: "https://example.com/",
           pageTarget: {
@@ -180,11 +202,11 @@ test("worker rejects every later fragment navigate before Page.navigate", async 
           },
           actions: [
             "capture=surface",
-            `navigate=https://example.com/${fragment}`,
+            navigation,
           ],
         };
-        const recipePath = path.join(tempDir, `${hasBootstrap ? "bootstrap" : "legacy"}-${fragment.slice(1).replaceAll("/", "-")}.json`);
-        const outputPath = path.join(tempDir, `${hasBootstrap ? "bootstrap" : "legacy"}-${fragment.slice(1).replaceAll("/", "-")}.out`);
+        const recipePath = path.join(tempDir, `${hasBootstrap ? "bootstrap" : "legacy"}-${formIndex}.json`);
+        const outputPath = path.join(tempDir, `${hasBootstrap ? "bootstrap" : "legacy"}-${formIndex}.out`);
         await writeFile(recipePath, `${JSON.stringify(recipe)}\n`, "utf8");
         await assert.rejects(
           execFileAsync(process.execPath, [

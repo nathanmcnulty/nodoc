@@ -25,7 +25,10 @@ import {
   CdpAttributionRegistry,
   normalizeAttributionUrl,
 } from "./cdp-attribution.mjs";
-import { canonicalizeRecipeForDispatch } from "./portal-discovery-recipe.mjs";
+import {
+  canonicalizeRecipeForDispatch,
+  normalizeRecipeAction,
+} from "./portal-discovery-recipe.mjs";
 
 let apiBase = "http://127.0.0.1:9222";
 const defaultNavigationTimeoutMs = 15000;
@@ -80,45 +83,6 @@ async function writeCaptureFailure(args, error) {
 
 function stripBom(value) {
   return typeof value === "string" ? value.replace(/^\uFEFF/u, "") : value;
-}
-
-function parseActionSpec(value) {
-  const separator = value.indexOf("=");
-  if (separator <= 0) {
-    throw new Error(`Invalid --action value "${value}". Expected type=value.`);
-  }
-
-  const rawType = value.slice(0, separator).trim();
-  const rawValue = value.slice(separator + 1);
-  const normalizedType = rawType.replace(/-(root|iframe)$/u, "");
-  const scope = rawType.endsWith("-root")
-    ? "root"
-    : rawType.endsWith("-iframe")
-      ? "iframe"
-      : "any";
-
-  const type = normalizedType === "click" ? "click-label" : normalizedType;
-  if (![
-    "capture",
-    "click-contains",
-    "click-href",
-    "click-label",
-    "crawl-links",
-    "navigate",
-    "probe-get",
-    "replay-seeded-links",
-    "replay-seeded-routes",
-    "wait-ms",
-  ].includes(type)) {
-    throw new Error(`Unsupported action type "${rawType}".`);
-  }
-
-  return {
-    raw: value,
-    scope,
-    type,
-    value: rawValue,
-  };
 }
 
 function parseVarSpec(value) {
@@ -422,32 +386,6 @@ function expandTemplateVariables(value, variables) {
   }
 
   return value;
-}
-
-function normalizeRecipeAction(action) {
-  if (typeof action === "string") {
-    return parseActionSpec(action);
-  }
-
-  if (!action || typeof action !== "object") {
-    throw new Error("Recipe actions must be strings or objects.");
-  }
-
-  const rawType = String(action.type || "").trim();
-  if (!rawType) {
-    throw new Error("Recipe action objects must include a type.");
-  }
-
-  const scopedType =
-    action.scope && action.scope !== "any"
-      ? `${rawType}-${String(action.scope).trim()}`
-      : rawType;
-  return {
-    ...parseActionSpec(`${scopedType}=${action.value ?? ""}`),
-    highValue: action.highValue === true,
-    optional: action.optional === true,
-    required: Boolean(action.required),
-  };
 }
 
 function resolveRecipePath(value, recipeDir) {
@@ -884,13 +822,13 @@ async function parseArgs(argv) {
     }
 
     if (arg === "--action" && next) {
-      args.actions.push(parseActionSpec(next));
+      args.actions.push(normalizeRecipeAction(next));
       index += 1;
       continue;
     }
 
     if (arg.startsWith("--action=")) {
-      args.actions.push(parseActionSpec(arg.slice("--action=".length)));
+      args.actions.push(normalizeRecipeAction(arg.slice("--action=".length)));
       continue;
     }
   }

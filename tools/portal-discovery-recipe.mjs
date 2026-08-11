@@ -3,32 +3,88 @@ import { createHash } from "node:crypto";
 import { classifyGetProbeUrl } from "./discovery-safety.mjs";
 import { planActionBudget } from "./portal-discovery-action-budget.mjs";
 
-function actionTypeAndValue(action) {
+const supportedActionTypes = new Set([
+  "capture",
+  "click-contains",
+  "click-href",
+  "click-label",
+  "crawl-links",
+  "navigate",
+  "probe-get",
+  "replay-seeded-links",
+  "replay-seeded-routes",
+  "wait-ms",
+]);
+
+export function normalizeRecipeAction(action) {
+  let rawType;
+  let rawValue;
+  let requestedScope = "any";
   if (typeof action === "string") {
     const separator = action.indexOf("=");
-    return separator > 0
-      ? { type: action.slice(0, separator).replace(/-(root|iframe)$/u, ""), value: action.slice(separator + 1) }
-      : { type: action.replace(/-(root|iframe)$/u, ""), value: "" };
+    if (separator <= 0) {
+      throw new Error(`Invalid action "${action}". Expected type=value.`);
+    }
+    rawType = action.slice(0, separator).trim();
+    rawValue = action.slice(separator + 1).trim();
+  } else if (action && typeof action === "object" && !Array.isArray(action)) {
+    rawType = String(action.type ?? "").trim();
+    rawValue = String(action.value ?? "").trim();
+    requestedScope = String(action.scope ?? "any").trim().toLowerCase() || "any";
+    if (!rawType) {
+      throw new Error("Recipe action objects must include a type.");
+    }
+  } else {
+    throw new Error("Recipe actions must be strings or objects.");
   }
 
-  if (action && typeof action === "object") {
-    return { type: String(action.type || ""), value: String(action.value ?? "") };
+  const normalizedRawType = rawType.toLowerCase();
+  if (!["any", "root", "iframe"].includes(requestedScope)) {
+    throw new Error(`Unsupported action scope "${requestedScope}".`);
   }
+  const scopedType = requestedScope !== "any"
+    && !normalizedRawType.endsWith(`-${requestedScope}`)
+    ? `${normalizedRawType}-${requestedScope}`
+    : normalizedRawType;
+  const scope = scopedType.endsWith("-root")
+    ? "root"
+    : scopedType.endsWith("-iframe")
+      ? "iframe"
+      : "any";
+  const normalizedType = scopedType.replace(/-(root|iframe)$/u, "");
+  const type = normalizedType === "click" ? "click-label" : normalizedType;
+  if (!supportedActionTypes.has(type)) {
+    throw new Error(`Unsupported action type "${rawType}".`);
+  }
+  return {
+    raw: typeof action === "string" ? action : JSON.stringify(action),
+    scope,
+    type,
+    value: rawValue,
+    ...(action && typeof action === "object" && !Array.isArray(action)
+      ? {
+        highValue: action.highValue === true,
+        optional: action.optional === true,
+        required: Boolean(action.required),
+      }
+      : {}),
+  };
+}
 
-  return { type: "", value: "" };
+export function normalizeRecipeActions(actions) {
+  return (Array.isArray(actions) ? actions : []).map(normalizeRecipeAction);
 }
 
 function getRecipeNavigateActions(recipe) {
-  return (recipe?.actions ?? [])
-    .map((action, index) => ({ ...actionTypeAndValue(action), index }))
-    .filter((action) => action.type === "navigate" && action.value);
+  return normalizeRecipeActions(recipe?.actions).map((action, index) => ({ ...action, index }))
+    .filter((action) => action.type === "navigate");
 }
 
 function getRecipeEntry(recipe) {
   const navigateActions = getRecipeNavigateActions(recipe);
   return {
     isDeclaredRoot: navigateActions.length === 0,
-    value: navigateActions[0]?.value || recipe?.url || "",
+    value: navigateActions.find((action) => action.value)?.value || recipe?.url || "",
   };
 }
 
@@ -51,10 +107,16 @@ function canonicalizeRecipeRoot(recipe) {
 
 function validateRecipeNavigateActions(recipe, recipeUrl) {
   for (const action of getRecipeNavigateActions(recipe)) {
+    if (!action.value) {
+      throw new Error(`recipe navigate action ${action.index} must include a URL.`);
+    }
     const actionUrl = new URL(action.value, recipeUrl.href);
     const classification = classifyGetProbeUrl(action.value, recipeUrl.href);
     if (!classification.allowed) {
       throw new Error(`recipe navigate action ${action.index} is not a safe same-origin GET (${classification.code}).`);
+    }
+    if (actionUrl.protocol !== "https:" || actionUrl.username || actionUrl.password || actionUrl.search) {
+      throw new Error(`recipe navigate action ${action.index} must be an HTTPS URL without credentials, query, or fragment.`);
     }
     if (actionUrl.hash) {
       throw new Error(`recipe navigate action ${action.index} must be an HTTPS URL without fragment.`);
@@ -148,8 +210,8 @@ export function validateRecipeTargetMetadata(recipe) {
   let entryUrl;
   let recipeUrl;
   try {
-    entryUrl = new URL(entryUrlValue);
     recipeUrl = new URL(recipe?.url);
+    entryUrl = new URL(entryUrlValue, recipeUrl.href);
   } catch {
     throw new Error("recipe entry and declared root URLs must be valid URLs.");
   }
@@ -218,7 +280,8 @@ export function canonicalRecipeDigest(recipe) {
 export function recipeEntryMatchesPageTarget(recipe) {
   let entryUrl;
   try {
-    entryUrl = new URL(getRecipeEntryUrl(recipe));
+    const rootUrl = new URL(recipe?.url);
+    entryUrl = new URL(getRecipeEntryUrl(recipe), rootUrl.href);
   } catch {
     return false;
   }
