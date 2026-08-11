@@ -227,6 +227,12 @@ paths:
         masking, integration, and session-control options.
       operationId: CloudApps.GetSettings
       tags: [CloudApps]
+      x-nodoc-ownership:
+        status: handoff
+        owner: Configuration.GetCloudAppsSettings
+        reason: >-
+          This Cloud Apps declaration is shadowed by the canonical root-indexed
+          Configuration operation for the same route and response schema.
       responses:
         '200':
           description: OK
