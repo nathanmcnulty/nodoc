@@ -38,6 +38,7 @@ import {
 import {
   resolvePageTargetBootstrapCriteria,
   resolvePageTargetCriteria,
+  resolveCaptureSafetyModel,
   validateRecipeTargetMetadata,
 } from "./portal-discovery-recipe.mjs";
 import { planActionBudget } from "./portal-discovery-action-budget.mjs";
@@ -50,15 +51,11 @@ import {
 const validPhases = new Set(["all", "analyze", "capture", "plan"]);
 
 export function buildPreflightCriteria(recipe) {
-  const pageTarget = recipe.pageTarget !== undefined
-    ? resolvePageTargetCriteria(recipe)
-    : {
-        matchHosts: [new URL(recipe.url).hostname],
-        matchPathPrefixes: [],
-      };
+  const pageTarget = resolveCaptureSafetyModel(recipe).pageOwnershipCriteria;
   return {
     matchHosts: pageTarget.matchHosts,
     matchPathPrefixes: pageTarget.matchPathPrefixes,
+    ...(pageTarget.matchPathnames ? { matchPathnames: pageTarget.matchPathnames } : {}),
     urlPattern: recipe.matchUrlPattern,
     titlePattern: recipe.matchTitlePattern,
     expectedTitlePattern: recipe.expectedTitlePattern,
@@ -86,7 +83,7 @@ export async function preflightRecipeTarget({
   pollMs,
   timeoutMs,
 } = {}) {
-  const metadata = validateRecipeTargetMetadata(recipe);
+  const metadata = resolveCaptureSafetyModel(recipe);
   const featureCriteria = buildPreflightCriteria(recipe);
   const bootstrapCriteria = buildBootstrapPreflightCriteria(recipe);
   if (!bootstrapCriteria) {

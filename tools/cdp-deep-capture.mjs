@@ -23,6 +23,8 @@ import {
 } from "./discovery-capture-policy.mjs";
 import {
   buildEffectiveActions,
+  classifyCaptureRequest,
+  DocumentNavigationAuthorization,
   normalizeRecipeAction,
   parseActionSpec,
   resolveStrictNavigationUrl,
@@ -31,8 +33,7 @@ import {
   validateEffectiveActions,
 } from "./portal-discovery-actions.mjs";
 import {
-  resolvePageTargetBootstrapCriteria,
-  resolvePageTargetCriteria,
+  resolveCaptureSafetyModel,
 } from "./portal-discovery-recipe.mjs";
 import {
   buildStableEvidenceId,
@@ -530,12 +531,14 @@ function finalizeActionConfiguration(args) {
     includeInitialNavigation: true,
     initialUrl: args.url,
   });
-  const pageTarget = args.recipeConfig?.pageTarget !== undefined
-    ? resolvePageTargetCriteria(args.recipeConfig)
-    : null;
-  const bootstrapTarget = args.recipeConfig?.pageTarget !== undefined
-    ? resolvePageTargetBootstrapCriteria(args.recipeConfig)
-    : null;
+  const safetyModel = resolveCaptureSafetyModel({
+    ...(args.recipeConfig ?? {}),
+    url: args.url,
+  });
+  const pageTarget = args.recipeConfig?.pageTarget === undefined
+    ? null
+    : safetyModel.pageOwnershipCriteria;
+  const bootstrapTarget = safetyModel.acquisitionCriteria;
   const validatedActions = validateEffectiveActions(rawActions, {
     rootUrl: args.url,
     pageTarget,
@@ -546,6 +549,7 @@ function finalizeActionConfiguration(args) {
   args.actions = validatedActions.slice(1);
   args.pageTargetCriteria = pageTarget;
   args.bootstrapTargetCriteria = bootstrapTarget;
+  args.safetyModel = safetyModel;
   const declaredPathnames = validatedActions
     .filter((action) => action.type === "navigate")
     .map((action) => {
@@ -560,10 +564,7 @@ function finalizeActionConfiguration(args) {
     matchHosts: [new URL(args.url).hostname],
     matchPathnames: Array.from(new Set(declaredPathnames)),
   };
-  args.targetOwnershipCriteria = pageTarget ?? {
-    matchHosts: [new URL(args.url).hostname],
-    matchPathPrefixes: [],
-  };
+  args.targetOwnershipCriteria = safetyModel.pageOwnershipCriteria;
   args.effectiveReplayConfig = {
     ...(args.recipeConfig ?? {}),
     seedLinkLimit: args.seedLinkLimit,
@@ -1342,10 +1343,9 @@ async function resolveTarget(args) {
 }
 
 async function closeTarget(targetId) {
-  try {
-    await fetch(`${apiBase}/json/close/${targetId}`);
-  } catch {
-    // Best effort only.
+  const response = await fetch(`${apiBase}/json/close/${targetId}`);
+  if (!response.ok) {
+    throw new Error(`Failed to close CDP target ${targetId}: HTTP ${response.status}.`);
   }
 }
 
@@ -1358,6 +1358,8 @@ class CdpClient {
     this.socketClosed = false;
     this.closing = false;
     this.closeDetails = null;
+    this.pendingEventHandlers = new Set();
+    this.eventHandlerError = null;
   }
 
   rejectPending(error) {
@@ -1432,9 +1434,23 @@ class CdpClient {
 
       const callbacks = this.listeners.get(message.method) ?? [];
       for (const callback of callbacks) {
-        callback(message.params ?? {}, {
-          sessionId: message.sessionId ?? null,
-        });
+        let result;
+        try {
+          result = callback(message.params ?? {}, {
+            sessionId: message.sessionId ?? null,
+          });
+        } catch (error) {
+          this.eventHandlerError ??= error;
+          continue;
+        }
+        if (!result || typeof result.then !== "function") continue;
+        const handler = Promise.resolve(result);
+        this.pendingEventHandlers.add(handler);
+        handler.catch((error) => {
+          this.eventHandlerError ??= error;
+        }).finally(() => {
+          this.pendingEventHandlers.delete(handler);
+        }).catch(() => {});
       }
     });
   }
@@ -1477,6 +1493,13 @@ class CdpClient {
 
     this.socket.send(payload);
     return response;
+  }
+
+  async awaitEventHandlers() {
+    while (this.pendingEventHandlers.size > 0) {
+      await Promise.allSettled(Array.from(this.pendingEventHandlers));
+    }
+    if (this.eventHandlerError) throw this.eventHandlerError;
   }
 
   async close() {
@@ -2026,7 +2049,10 @@ async function main() {
   await mkdir(args.outDir, { recursive: true });
 
   const target = await resolveTarget(args);
-  const client = new CdpClient(target.webSocketDebuggerUrl);
+  let client = null;
+  let targetClosed = false;
+  try {
+  client = new CdpClient(target.webSocketDebuggerUrl);
   const requestMap = new Map();
   const scriptRequestMap = new Map();
   const scriptBodies = new Map();
@@ -2056,9 +2082,14 @@ async function main() {
   const attributionRegistry = new CdpAttributionRegistry(target, currentContext);
   const sessions = attributionRegistry.sessions;
   let lifecyclePhase = "bootstrap";
-  let currentRequestCriteria = args.bootstrapTargetCriteria ?? args.pageTargetCriteria;
+  const documentAuthorization = new DocumentNavigationAuthorization(
+    args.url,
+    args.initialNavigationUrl,
+    args.bootstrapTargetCriteria,
+  );
   let targetGeneration = 0;
   const pendingTargetHandlers = new Set();
+  const pendingFetchHandlers = new Set();
   let terminalLifecycleError = null;
   let runtimeSafetyError = null;
   let currentLoadResolver = null;
@@ -2143,115 +2174,107 @@ async function main() {
   });
 
   client.on("Fetch.requestPaused", async (params, metadata) => {
+    const handler = (async () => {
     const sessionId = metadata.sessionId ?? null;
-    const requestUrl = params.request?.url;
-    const resourceType = params.resourceType ?? "Document";
+    let disposition = null;
+    const finish = async (method, payload) => {
+      if (disposition) {
+        const error = new Error(`Paused request ${params.requestId} received duplicate terminal disposition.`);
+        error.code = "duplicate-fetch-disposition";
+        throw error;
+      }
+      disposition = method;
+      await client.send(method, payload, sessionId);
+    };
     try {
       if (lifecyclePhase === "frozen") {
         const error = new Error("Request paused after terminal publication was frozen.");
         error.code = "late-terminal-request";
         runtimeSafetyError ??= error;
         terminalLifecycleError ??= error;
-        await client.send("Fetch.failRequest", {
+        await finish("Fetch.failRequest", {
           errorReason: "BlockedByClient",
           requestId: params.requestId,
         }, sessionId);
         return;
       }
       if (runtimeSafetyError) throw runtimeSafetyError;
-      if (String(params.request?.method ?? "GET").toUpperCase() !== "GET") {
-        throw new Error("Only GET requests are permitted by capture safety.");
+      const decision = classifyCaptureRequest({
+        method: params.request?.method,
+        resourceType: params.resourceType,
+        url: params.request?.url,
+      }, {
+        authorization: documentAuthorization,
+        requestCriteria: args.safetyModel.requestCriteria,
+        rootUrl: args.url,
+      });
+      if (!decision.allowed) {
+        const error = new Error(`Paused request rejected by capture safety (${decision.code}).`);
+        error.code = decision.code;
+        throw error;
       }
-      if (!new Set([
-        "Document",
-        "Script",
-        "XHR",
-        "Fetch",
-        "Image",
-        "Stylesheet",
-        "Font",
-        "Media",
-        "TextTrack",
-      ]).has(resourceType)) {
-        throw new Error(`Unsupported request resource type "${resourceType}".`);
-      }
-      if (resourceType === "Document") {
-        resolveStrictNavigationUrl(requestUrl, args.url, {
-          criteria: currentRequestCriteria,
-          label: `paused ${resourceType.toLowerCase()} request`,
-        });
-      } else {
-        const classification = classifyGetProbeUrl(requestUrl, args.url);
-        if (!classification.allowed) {
-          const error = new Error(
-            `Paused ${resourceType.toLowerCase()} request rejected by active-GET safety (${classification.code}).`,
-          );
-          error.code = classification.code;
-          throw error;
-        }
-        const parsed = new URL(requestUrl);
-        parsed.search = "";
-        parsed.hash = "";
-        resolveStrictNavigationUrl(parsed.href, args.url, {
-          criteria: null,
-          label: `paused ${resourceType.toLowerCase()} request`,
-        });
-      }
-      await client.send("Fetch.continueRequest", { requestId: params.requestId }, sessionId);
+      await finish("Fetch.continueRequest", { requestId: params.requestId });
     } catch (error) {
       runtimeSafetyError ??= error;
-      try {
-        await client.send("Fetch.failRequest", {
+      if (!disposition) {
+        try {
+          await finish("Fetch.failRequest", {
           errorReason: "BlockedByClient",
           requestId: params.requestId,
-        }, sessionId);
-      } catch {
-        // The request may already be terminal.
+          });
+        } catch (terminalError) {
+          const dispositionError = new Error(`${error.message}; request terminal disposition failed: ${terminalError.message}`);
+          dispositionError.code = "fetch-disposition-failed";
+          runtimeSafetyError = dispositionError;
+          terminalLifecycleError ??= dispositionError;
+        }
       }
     }
+    })();
+    pendingFetchHandlers.add(handler);
+    handler.finally(() => pendingFetchHandlers.delete(handler)).catch(() => {});
+    await handler;
   });
 
   client.on("Target.attachedToTarget", async (params, metadata) => {
     const childSessionId = params.sessionId ?? null;
     if (!childSessionId || childSessionId === metadata.sessionId) {
+      const error = new Error("Attached target did not provide a distinct child session identity.");
+      error.code = "target-session-invalid";
+      terminalLifecycleError ??= error;
+      runtimeSafetyError ??= error;
       return;
     }
     if (rejectFrozenLifecycleEvent("target-attached")) return;
     targetGeneration += 1;
     const handler = (async () => {
-      if (lifecyclePhase === "closing" || lifecyclePhase === "frozen") {
-        const error = new Error(`Target ${childSessionId} attached after terminal safety began.`);
-        error.code = "late-target-attachment";
-        throw error;
-      }
       const targetInfo = params.targetInfo ?? {};
-      if (!["page", "iframe"].includes(targetInfo.type ?? "page")) {
-        await client.send("Target.detachFromTarget", { sessionId: childSessionId }, metadata.sessionId ?? null);
-        const error = new Error(`Unsupported executable target type "${targetInfo.type ?? "unknown"}".`);
-        error.code = "unsupported-target-type";
-        throw error;
-      }
-      if (!(targetInfo.targetId ?? targetInfo.id)) {
-        throw new Error(`Target ${childSessionId} attached without a stable target identity.`);
-      }
-      if (
-        typeof targetInfo.url !== "string" || !targetInfo.url.trim()
-      ) {
-        const error = new Error(`Target ${childSessionId} attached without an observable URL.`);
-        error.code = "unsafe-navigation";
-        throw error;
-      }
-      resolveStrictNavigationUrl(targetInfo.url, args.url, {
-        criteria: currentRequestCriteria,
-        label: `attached target ${childSessionId}`,
-      });
-      const attachmentGeneration = targetGeneration;
-      attributionRegistry.registerSession(
-        childSessionId,
-        targetInfo,
-        metadata.sessionId ?? null,
-      );
       try {
+        if (lifecyclePhase === "closing" || lifecyclePhase === "frozen") {
+          const error = new Error(`Target ${childSessionId} attached after terminal safety began.`);
+          error.code = "late-target-attachment";
+          throw error;
+        }
+        if (!["page", "iframe"].includes(targetInfo.type ?? "page")) {
+          const error = new Error(`Unsupported executable target type "${targetInfo.type ?? "unknown"}".`);
+          error.code = "unsupported-target-type";
+          throw error;
+        }
+        if (!(targetInfo.targetId ?? targetInfo.id)) {
+          throw new Error(`Target ${childSessionId} attached without a stable target identity.`);
+        }
+        if (typeof targetInfo.url !== "string" || !targetInfo.url.trim()) {
+          const error = new Error(`Target ${childSessionId} attached without an observable URL.`);
+          error.code = "unsafe-navigation";
+          throw error;
+        }
+        documentAuthorization.validate(targetInfo.url, `attached target ${childSessionId}`);
+        const attachmentGeneration = targetGeneration;
+        attributionRegistry.registerSession(
+          childSessionId,
+          targetInfo,
+          metadata.sessionId ?? null,
+        );
         await configureSession(childSessionId);
         if (runtimeSafetyError || targetGeneration !== attachmentGeneration) {
           throw runtimeSafetyError ?? new Error(`Target ${childSessionId} changed during configuration.`);
@@ -2261,10 +2284,7 @@ async function main() {
         if (!liveTarget || typeof liveTarget.url !== "string" || !liveTarget.url.trim()) {
           throw new Error(`Target ${childSessionId} disappeared or lost its URL during configuration.`);
         }
-        resolveStrictNavigationUrl(liveTarget.url, args.url, {
-          criteria: currentRequestCriteria,
-          label: `attached target ${childSessionId}`,
-        });
+        documentAuthorization.validate(liveTarget.url, `attached target ${childSessionId}`);
         if (targetGeneration !== attachmentGeneration || runtimeSafetyError) {
           throw runtimeSafetyError ?? new Error(`Target ${childSessionId} changed before resume.`);
         }
@@ -2273,8 +2293,9 @@ async function main() {
         try {
           await client.send("Target.detachFromTarget", { sessionId: childSessionId }, metadata.sessionId ?? null);
         } catch (detachError) {
-          error = new Error(`${error.message}; target detach failed: ${detachError.message}`);
-          error.code = "target-cleanup-failed";
+          const cleanupError = new Error(`${error.message}; target detach failed: ${detachError.message}`);
+          cleanupError.code = "target-cleanup-failed";
+          throw cleanupError;
         }
         throw error;
       }
@@ -2303,10 +2324,7 @@ async function main() {
     const targetInfo = params.targetInfo ?? {};
     if (["page", "iframe"].includes(targetInfo.type ?? "page")) {
       try {
-        resolveStrictNavigationUrl(targetInfo.url, args.url, {
-          criteria: currentRequestCriteria,
-          label: "target update",
-        });
+        documentAuthorization.validate(targetInfo.url, "target update");
       } catch (error) {
         runtimeSafetyError ??= error;
         return;
@@ -2330,10 +2348,7 @@ async function main() {
     targetGeneration += 1;
     if (params.frame?.url) {
       try {
-        resolveStrictNavigationUrl(params.frame.url, args.url, {
-          criteria: currentRequestCriteria,
-          label: "frame update",
-        });
+        documentAuthorization.validate(params.frame.url, "frame update");
       } catch (error) {
         runtimeSafetyError ??= error;
         return;
@@ -2547,6 +2562,7 @@ async function main() {
       if (
         inFlightRequests.size === 0
         && pendingBodyCaptures.size === 0
+        && pendingFetchHandlers.size === 0
         && idleForMs >= args.networkIdleMs
       ) {
         return {
@@ -2560,6 +2576,7 @@ async function main() {
     return {
       inFlightRequestCount: inFlightRequests.size,
       pendingBodyCaptureCount: pendingBodyCaptures.size,
+      pendingFetchHandlerCount: pendingFetchHandlers.size,
       settled: false,
       waitedMs: Date.now() - startedAt,
     };
@@ -2574,10 +2591,7 @@ async function main() {
 
   function validateCurrentPageUrl(value, label) {
     try {
-      return validatePostNavigationUrl(value, args.url, {
-        criteria: currentRequestCriteria,
-        label,
-      });
+      return documentAuthorization.validate(value, label);
     } catch (error) {
       if (lifecyclePhase !== "bootstrap" || !args.bootstrapTargetCriteria) {
         throw error;
@@ -2634,10 +2648,22 @@ async function main() {
   }
 
   async function awaitTargetHandlers() {
-    await Promise.allSettled(Array.from(pendingTargetHandlers));
+    await withPhaseTimeout(
+      () => Promise.allSettled(Array.from(pendingTargetHandlers)),
+      args.finalizationTimeoutMs,
+      "target-handler-drain",
+    );
     if (terminalLifecycleError || runtimeSafetyError) {
       throw terminalLifecycleError ?? runtimeSafetyError;
     }
+  }
+
+  async function awaitCdpEventHandlers() {
+    await withPhaseTimeout(
+      () => client.awaitEventHandlers(),
+      args.finalizationTimeoutMs,
+      "cdp-event-handler-drain",
+    );
   }
 
   async function reconcileLiveTargets() {
@@ -2667,15 +2693,22 @@ async function main() {
     lifecyclePhase = "closing";
     for (let attempt = 0; attempt < 3; attempt += 1) {
       const generation = targetGeneration;
-      await waitForNetworkIdle(args.postActionSettleMs);
+      await awaitCdpEventHandlers();
+      const settleResult = await waitForNetworkIdle(args.postActionSettleMs);
+      if (!settleResult.settled) {
+        const error = new Error("Network did not reach a settled terminal state.");
+        error.code = "terminal-network-unsettled";
+        throw error;
+      }
       await awaitTargetHandlers();
+      await awaitCdpEventHandlers();
       await reconcileLiveTargets();
       if (targetGeneration !== generation) {
         continue;
       }
       const snapshots = await collectSnapshots();
       const validated = validateObservedTargetUrls(snapshots, "terminal final");
-      if (targetGeneration !== generation || pendingTargetHandlers.size > 0) {
+      if (targetGeneration !== generation || pendingTargetHandlers.size > 0 || pendingFetchHandlers.size > 0) {
         continue;
       }
       return validated;
@@ -3069,12 +3102,16 @@ async function main() {
   async function navigateRoot(targetUrl, {
     initial = false,
     relative = false,
-    criteria = currentRequestCriteria,
+    criteria = args.pageTargetCriteria,
   } = {}) {
     const navigationBase = relative
       ? validateCurrentPageUrl(await getRootUrl(), "relative navigation base")
       : args.url;
     const resolvedUrl = resolveStrictNavigationUrl(targetUrl, navigationBase, {
+      criteria: initial ? args.bootstrapTargetCriteria : criteria,
+      label: initial ? "initial navigation" : "navigation",
+    });
+    documentAuthorization.select(resolvedUrl, {
       criteria: initial ? args.bootstrapTargetCriteria : criteria,
       label: initial ? "initial navigation" : "navigation",
     });
@@ -3102,10 +3139,12 @@ async function main() {
 
     const didLoad = await navigationPromise;
     const settleResult = await waitForNetworkIdle(args.settleMs);
-    const currentUrl = validatePostNavigationUrl(await getRootUrl(), args.url, {
-      criteria: initial ? args.bootstrapTargetCriteria : criteria,
-      label: "final page",
-    });
+    if (!settleResult.settled) {
+      const error = new Error("Navigation did not reach network idle.");
+      error.code = "navigation-network-unsettled";
+      throw error;
+    }
+    const currentUrl = documentAuthorization.validate(await getRootUrl(), "final page");
 
     return {
       didLoad,
@@ -3258,7 +3297,7 @@ async function main() {
           };
         }
         const navigationResult = await navigateRoot(preview.absoluteHref, {
-          criteria: currentRequestCriteria,
+          criteria: args.pageTargetCriteria,
         });
         result = {
           ...preview,
@@ -3572,15 +3611,13 @@ async function main() {
     };
   }
 
-  await client.connect();
-  await configureSession();
-  await client.send("Target.setAutoAttach", {
-    autoAttach: true,
-    flatten: true,
-    waitForDebuggerOnStart: true,
-  });
-
-  try {
+    await client.connect();
+    await configureSession();
+    await client.send("Target.setAutoAttach", {
+      autoAttach: true,
+      flatten: true,
+      waitForDebuggerOnStart: true,
+    });
     setCaptureContext(args.label ?? "seed-00", -1, args.url);
     const initialNavigation = await navigateRoot(args.initialNavigationUrl, { initial: true });
     actionResults.push({
@@ -3595,7 +3632,6 @@ async function main() {
     });
     await captureCheckpoint(currentContext.pageLabel);
     lifecyclePhase = "feature";
-    currentRequestCriteria = args.pageTargetCriteria ?? args.declaredNavigationCriteria;
 
     for (const [index, action] of args.actions.entries()) {
       const pageLabel = buildActionLabel(action, index);
@@ -3636,12 +3672,8 @@ async function main() {
       }
 
       if (action.type === "navigate") {
-        currentRequestCriteria = action.pageTargetApplicable
-          ? args.pageTargetCriteria
-          : args.declaredNavigationCriteria;
-        const navigationResult = await navigateRoot(action.relative ? action.value : action.resolvedUrl, {
-          relative: action.relative === true,
-          criteria: currentRequestCriteria,
+        const navigationResult = await navigateRoot(action.resolvedUrl, {
+          criteria: action.documentCriteria,
         });
         actionResults.push({
           page: pageLabel,
@@ -3764,19 +3796,27 @@ async function main() {
     const terminalSafety = await terminalSafetyBarrier();
     lifecyclePhase = "frozen";
     const frozenGeneration = targetGeneration;
-    if (terminalLifecycleError || runtimeSafetyError || pendingTargetHandlers.size > 0) {
+    if (terminalLifecycleError || runtimeSafetyError || pendingTargetHandlers.size > 0 || pendingFetchHandlers.size > 0) {
       throw terminalLifecycleError ?? runtimeSafetyError
         ?? new Error("Target lifecycle changed before terminal publication.");
     }
     await flushArtifacts();
+    await awaitCdpEventHandlers();
     if (
       terminalLifecycleError
       || runtimeSafetyError
       || targetGeneration !== frozenGeneration
       || pendingTargetHandlers.size > 0
+      || pendingFetchHandlers.size > 0
     ) {
       throw terminalLifecycleError ?? runtimeSafetyError
         ?? new Error("Target lifecycle changed during terminal artifact publication.");
+    }
+    await client.close();
+    await awaitCdpEventHandlers();
+    if (target.closeWhenDone) {
+      await closeTarget(target.id);
+      targetClosed = true;
     }
     const terminalFinalUrl = terminalSafety.rootUrl;
     const filteredRequests = capturedRequests.filter((request) => shouldMatchRequest(request.url, args));
@@ -3820,10 +3860,22 @@ async function main() {
     );
     console.log(JSON.stringify(summary, null, 2));
   } finally {
-    await client.close();
-    if (target.closeWhenDone) {
-      await closeTarget(target.id);
+    let cleanupError = null;
+    if (client) {
+      try {
+        await client.close();
+      } catch (error) {
+        cleanupError = error;
+      }
     }
+    if (target.closeWhenDone && !targetClosed) {
+      try {
+        await closeTarget(target.id);
+      } catch (error) {
+        cleanupError ??= error;
+      }
+    }
+    if (cleanupError) throw cleanupError;
   }
 }
 

@@ -1,6 +1,7 @@
 import { planActionBudget } from "./portal-discovery-action-budget.mjs";
 import {
   buildEffectiveActions,
+  exactDocumentCriteria,
   normalizeRecipeAction,
   pathMatchesCriteria,
   resolveStrictNavigationUrl,
@@ -30,10 +31,8 @@ export function planRecipeActionBudget(recipe, options = {}) {
 
 export function resolvePageTargetCriteria(recipe) {
   if (recipe?.pageTarget === undefined) {
-    return {
-      matchHosts: Array.isArray(recipe?.matchHosts) ? [...recipe.matchHosts] : [],
-      matchPathPrefixes: Array.isArray(recipe?.matchPathPrefixes) ? [...recipe.matchPathPrefixes] : [],
-    };
+    if (!recipe?.url) throw new Error("legacy recipes must declare an initial URL.");
+    return exactDocumentCriteria(recipe.url);
   }
 
   const pageTarget = recipe.pageTarget;
@@ -130,10 +129,28 @@ export function validateRecipeTargetMetadata(recipe, { enforcePageTargetForAll =
     throw new Error("recipe entry URL does not match pageTarget host/path criteria.");
   }
   return {
+    actions: validatedActions,
+    acquisitionCriteria: bootstrapCriteria ?? featureCriteria,
     entryUrl,
     featureCriteria,
+    requestCriteria: {
+      matchHosts: Array.isArray(recipe?.matchHosts) ? [...recipe.matchHosts] : [],
+      matchPathPrefixes: Array.isArray(recipe?.matchPathPrefixes) ? [...recipe.matchPathPrefixes] : [],
+    },
     bootstrapCriteria,
   };
+}
+
+export function resolveCaptureSafetyModel(recipe, options = {}) {
+  const metadata = validateRecipeTargetMetadata(recipe, options);
+  return Object.freeze({
+    acquisitionCriteria: Object.freeze(metadata.acquisitionCriteria),
+    actions: Object.freeze(metadata.actions.map((action) => Object.freeze(action))),
+    entryUrl: metadata.entryUrl,
+    pageOwnershipCriteria: Object.freeze(metadata.featureCriteria),
+    requestCriteria: Object.freeze(metadata.requestCriteria),
+    rootUrl: resolveStrictNavigationUrl(recipe?.url, recipe?.url, { label: "declared root" }),
+  });
 }
 
 export function recipeEntryMatchesPageTarget(recipe) {

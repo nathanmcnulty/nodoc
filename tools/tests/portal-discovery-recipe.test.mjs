@@ -75,13 +75,15 @@ test("page-target validation fails for an entry route outside its criteria", () 
 
 test("legacy recipes continue to use top-level target criteria", () => {
   const recipe = {
+    url: "https://config.office.com/officeSettings",
     matchHosts: ["config.office.com"],
     matchPathPrefixes: ["/officeSettings/inventory"],
     actions: ["navigate=https://config.office.com/officeSettings/inventory"],
   };
   assert.deepEqual(resolvePageTargetCriteria(recipe), {
     matchHosts: ["config.office.com"],
-    matchPathPrefixes: ["/officeSettings/inventory"],
+    matchPathPrefixes: [],
+    matchPathnames: ["/officeSettings"],
   });
 });
 

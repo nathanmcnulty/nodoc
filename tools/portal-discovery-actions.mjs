@@ -18,6 +18,17 @@ const destructiveClickPattern =
 const destructiveCamelPattern =
   /(?:delete|execute|export|generate|invoke|logout|publish|remove|run|save|signout|start|submit|sync|trigger)[A-Z]/u;
 const defaultSeedLinkLimit = 12;
+const permittedRequestResourceTypes = new Set([
+  "Document",
+  "Fetch",
+  "Font",
+  "Image",
+  "Media",
+  "Script",
+  "Stylesheet",
+  "TextTrack",
+  "XHR",
+]);
 
 function actionError(message, code = "invalid-action") {
   const error = new Error(message);
@@ -280,6 +291,16 @@ export function normalizeTargetCriteria(criteria = null) {
   };
 }
 
+export function exactDocumentCriteria(value, rootUrl = value) {
+  const url = resolveStrictNavigationUrl(value, rootUrl, { label: "authorized document" });
+  const parsed = new URL(url);
+  return {
+    matchHosts: [parsed.hostname],
+    matchPathPrefixes: [],
+    matchPathnames: [parsed.pathname],
+  };
+}
+
 export function resolveStrictNavigationUrl(value, rootUrl, {
   criteria = null,
   label = "navigation",
@@ -354,6 +375,7 @@ export function validateEffectiveActions(actions, {
     throw actionError("An initial root URL is required for action validation.", "unsafe-navigation");
   }
   let featureNavigationValidated = false;
+  let declaredNavigationBase = rootUrl;
   return actions.map((action) => {
     const normalized = normalizeRecipeAction(action, {
       source: action?.source ?? "unknown",
@@ -367,23 +389,24 @@ export function validateEffectiveActions(actions, {
       normalized.relative = normalized.source !== "initial"
         && isRelativeNavigationToken(normalized.value);
       const staticRelativeUrl = normalized.relative
-        ? validateRelativeNavigationToken(normalized.value, rootUrl, `${normalized.source} navigation`)
+        ? validateRelativeNavigationToken(normalized.value, declaredNavigationBase, `${normalized.source} navigation`)
         : null;
       normalized.resolvedUrl = normalized.relative
-        ? (normalized.value.startsWith("/")
-          ? resolveStrictNavigationUrl(staticRelativeUrl, rootUrl, {
-            criteria,
-            label: `${normalized.source} navigation`,
-          })
-          : staticRelativeUrl)
-        : resolveStrictNavigationUrl(normalized.value, rootUrl, {
+        ? resolveStrictNavigationUrl(staticRelativeUrl, declaredNavigationBase, {
+          criteria,
+          label: `${normalized.source} navigation`,
+        })
+        : resolveStrictNavigationUrl(normalized.value, declaredNavigationBase, {
           criteria,
           label: `${normalized.source} navigation`,
         });
+      declaredNavigationBase = normalized.resolvedUrl;
+      normalized.documentCriteria = exactDocumentCriteria(normalized.resolvedUrl, rootUrl);
       normalized.pageTargetApplicable = Boolean(criteria);
       if (normalized.source !== "initial" && pageTarget) {
         featureNavigationValidated = true;
       }
+
     } else if (normalized.type === "click-href") {
       if (!normalized.value) {
         throw actionError(
@@ -391,6 +414,7 @@ export function validateEffectiveActions(actions, {
           "unsafe-click",
         );
       }
+
       normalized.resolvedUrl = resolveStrictNavigationUrl(normalized.value, rootUrl, {
         criteria: pageTarget,
         label: `${normalized.source} click-href`,
@@ -410,6 +434,85 @@ export function validateEffectiveActions(actions, {
     }
     return normalized;
   });
+}
+
+export class DocumentNavigationAuthorization {
+  constructor(rootUrl, acquisitionUrl, acquisitionCriteria) {
+    this.rootUrl = rootUrl;
+    this.sequence = 0;
+    this.select(acquisitionUrl, {
+      criteria: acquisitionCriteria,
+      label: "initial acquisition",
+    });
+  }
+
+  select(value, { criteria = null, label = "document navigation" } = {}) {
+    const url = resolveStrictNavigationUrl(value, this.rootUrl, { criteria, label });
+    this.sequence += 1;
+    this.current = Object.freeze({
+      criteria: exactDocumentCriteria(url, this.rootUrl),
+      sequence: this.sequence,
+      url,
+    });
+    return this.current;
+  }
+
+  validate(value, label = "document request") {
+    if (!this.current) {
+      throw actionError(`${label} has no active authorization.`, "document-not-authorized");
+    }
+    const url = resolveStrictNavigationUrl(value, this.rootUrl, {
+      criteria: this.current.criteria,
+      label,
+    });
+    if (url !== this.current.url) {
+      throw actionError(`${label} does not match the currently authorized document URL.`, "document-not-authorized");
+    }
+    return url;
+  }
+}
+
+export function classifyCaptureRequest(request, {
+  authorization,
+  requestCriteria = null,
+  rootUrl,
+} = {}) {
+  const method = String(request?.method ?? "GET").toUpperCase();
+  const resourceType = String(request?.resourceType ?? "Document");
+  const rawUrl = String(request?.url ?? "");
+  if (method !== "GET") return { allowed: false, code: "method-not-allowed" };
+  if (!permittedRequestResourceTypes.has(resourceType)) {
+    return { allowed: false, code: "resource-type-not-allowed" };
+  }
+  let parsed;
+  try {
+    parsed = new URL(rawUrl);
+  } catch {
+    return { allowed: false, code: "invalid-url" };
+  }
+  if (parsed.search || parsed.hash || rawUrl.includes("?") || rawUrl.includes("#")) {
+    return { allowed: false, code: "query-or-fragment-not-allowed" };
+  }
+  try {
+    if (resourceType === "Document") {
+      return { allowed: true, code: "allowed-document", url: authorization.validate(rawUrl) };
+    }
+    const root = new URL(rootUrl);
+    const requestUrl = new URL(rawUrl);
+    const criteria = requestUrl.origin === root.origin
+      ? { matchHosts: [root.hostname], matchPathPrefixes: [] }
+      : requestCriteria;
+    if (!criteria || !Array.isArray(criteria.matchHosts) || criteria.matchHosts.length === 0) {
+      return { allowed: false, code: "request-ownership-mismatch" };
+    }
+    const url = resolveStrictNavigationUrl(rawUrl, `${requestUrl.origin}/`, {
+      criteria,
+      label: `paused ${resourceType.toLowerCase()} request`,
+    });
+    return { allowed: true, code: "allowed-subresource", url };
+  } catch (error) {
+    return { allowed: false, code: error.code ?? "unsafe-request" };
+  }
 }
 
 function positiveInteger(value, label) {

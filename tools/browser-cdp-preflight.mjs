@@ -1,6 +1,7 @@
 import { setTimeout as delay } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
 import { pathMatchesCriteria } from "./portal-discovery-actions.mjs";
+import { classifyGetProbeUrl } from "./discovery-safety.mjs";
 
 const defaultTimeoutMs = 3000;
 const defaultStabilityMs = 750;
@@ -80,6 +81,7 @@ function targetMatches(target, criteria) {
   let url;
   try { url = new URL(target.url); } catch { return false; }
   if (!["http:", "https:"].includes(url.protocol)) return false;
+  if (!classifyGetProbeUrl(url.href, `${url.origin}/`).allowed || url.search || url.hash) return false;
   if (criteria.targetId && target.id !== criteria.targetId) return false;
   const hosts = criteria.matchHosts ?? [];
   const prefixes = criteria.matchPathPrefixes ?? [];
@@ -273,12 +275,18 @@ async function waitForAlignedTarget({ endpoint, expectedProduct, featureCriteria
   while (Date.now() < deadline) {
     const remainingMs = Math.max(1, deadline - Date.now());
     const base = loopbackEndpoint(endpoint);
-    const targets = await getJson(new URL("/json/list", base), remainingMs);
-    const exactTarget = targets.find((target) => target?.type === "page" && target.id === targetId);
-    if (exactTarget && targetMatches(exactTarget, { ...featureCriteria, targetId })) {
-      return await runBrowserCdpPreflight({ endpoint, expectedProduct, ...featureCriteria, targetId, stabilityMs, pollMs, timeoutMs: remainingMs });
+    try {
+      const targets = await getJson(new URL("/json/list", base), remainingMs);
+      const exactTarget = targets.find((target) => target?.type === "page" && target.id === targetId);
+      if (exactTarget && targetMatches(exactTarget, { ...featureCriteria, targetId })) {
+        return await runBrowserCdpPreflight({ endpoint, expectedProduct, ...featureCriteria, targetId, stabilityMs, pollMs, timeoutMs: remainingMs });
+      }
+      readinessState = exactTarget ? "target-transitioning" : "target-missing";
+    } catch (error) {
+      if (error?.name !== "TimeoutError" && error?.name !== "AbortError") throw error;
+      readinessState = "target-probe-timeout";
+      break;
     }
-    readinessState = exactTarget ? "target-transitioning" : "target-missing";
     await delay(Math.min(pollMs, Math.max(1, deadline - Date.now())));
   }
   failWith("navigation-readiness-timeout", `target ${targetId} did not reach feature URL readiness before timeout (state: ${readinessState}).`, {

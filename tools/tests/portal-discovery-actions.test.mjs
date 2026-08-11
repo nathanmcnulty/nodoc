@@ -9,6 +9,8 @@ import { promisify } from "node:util";
 
 import {
   buildEffectiveActions,
+  classifyCaptureRequest,
+  DocumentNavigationAuthorization,
   estimateReplayExpansion,
   resolveStrictNavigationUrl,
   normalizeTargetCriteria,
@@ -263,6 +265,116 @@ test("relative navigation is guarded statically and resolves against the current
     rootUrl: "https://portal.example/safe/",
     pageTarget: { matchHosts: ["portal.example"], matchPathPrefixes: ["/safe"] },
     enforcePageTargetForAll: true,
+  });
+
+  test("sequential declared navigation routes resolve against the preceding effective URL", () => {
+    const validated = validateEffectiveActions(buildEffectiveActions({
+      recipeActions: ["navigate=/safe/", "navigate=child"],
+      includeInitialNavigation: true,
+      initialUrl: "https://portal.example/root",
+    }), {
+      rootUrl: "https://portal.example/root",
+      pageTarget: { matchHosts: ["portal.example"], matchPathPrefixes: ["/safe"] },
+      bootstrapTarget: { matchHosts: ["portal.example"], matchPathnames: ["/root"] },
+      enforcePageTargetForAll: true,
+    });
+    assert.equal(validated[1].resolvedUrl, "https://portal.example/safe/");
+    assert.equal(validated[2].resolvedUrl, "https://portal.example/safe/child");
+  });
+
+  test("document authorization admits only the currently selected route", () => {
+    const authorization = new DocumentNavigationAuthorization(
+      "https://portal.example/root",
+      "https://portal.example/root",
+      { matchHosts: ["portal.example"], matchPathnames: ["/root"] },
+    );
+    assert.equal(authorization.validate("https://portal.example/root"), "https://portal.example/root");
+    assert.throws(
+      () => authorization.validate("https://portal.example/redirected"),
+      /authorized|criteria/u,
+    );
+    authorization.select("https://portal.example/safe", {
+      criteria: { matchHosts: ["portal.example"], matchPathnames: ["/safe"] },
+    });
+    assert.equal(authorization.validate("https://portal.example/safe"), "https://portal.example/safe");
+    assert.throws(() => authorization.validate("https://portal.example/root"), /authorized|criteria/u);
+  });
+
+  test("capture request decisions are zero-effect for unsafe request classes", () => {
+    const authorization = new DocumentNavigationAuthorization(
+      "https://portal.example/root",
+      "https://portal.example/root",
+      { matchHosts: ["portal.example"], matchPathnames: ["/root"] },
+    );
+    const unsafeRequests = [
+      { method: "POST", resourceType: "Document", url: "https://portal.example/root" },
+      { method: "GET", resourceType: "Document", url: "https://portal.example/redirected" },
+      { method: "GET", resourceType: "WebSocket", url: "https://portal.example/root" },
+      { method: "GET", resourceType: "Ping", url: "https://portal.example/root" },
+      { method: "GET", resourceType: "Other", url: "https://portal.example/root" },
+      { method: "GET", resourceType: "EventSource", url: "https://portal.example/root" },
+      { method: "GET", resourceType: "Script", url: "https://portal.example/delete" },
+      { method: "GET", resourceType: "Script", url: "https://portal.example/root?query=1" },
+      { method: "GET", resourceType: "Script", url: "https://portal.example/root#fragment" },
+      { method: "GET", resourceType: "Script", url: "https://other.example/root" },
+      { method: "GET", resourceType: "Script", url: "https://portal.example/%25252e%25252e/delete" },
+    ];
+    for (const request of unsafeRequests) {
+      assert.equal(classifyCaptureRequest(request, {
+        authorization,
+        rootUrl: "https://portal.example/root",
+      }).allowed, false, JSON.stringify(request));
+    }
+    assert.deepEqual(classifyCaptureRequest({
+      method: "GET",
+      resourceType: "Stylesheet",
+      url: "https://portal.example/assets/site.css",
+    }, {
+      authorization,
+      rootUrl: "https://portal.example/root",
+    }), {
+      allowed: true,
+      code: "allowed-subresource",
+      url: "https://portal.example/assets/site.css",
+    });
+  });
+  test("authorized request hosts remain separate from document ownership", () => {
+    const authorization = new DocumentNavigationAuthorization(
+      "https://portal.example/root",
+      "https://portal.example/root",
+      { matchHosts: ["portal.example"], matchPathnames: ["/root"] },
+    );
+    const requestCriteria = { matchHosts: ["api.example"], matchPathPrefixes: ["/inventory"] };
+    assert.equal(classifyCaptureRequest({
+      method: "GET",
+      resourceType: "XHR",
+      url: "https://api.example/inventory/items",
+    }, {
+      authorization,
+      requestCriteria,
+      rootUrl: "https://portal.example/root",
+    }).allowed, true);
+    assert.equal(classifyCaptureRequest({
+      method: "GET",
+      resourceType: "XHR",
+      url: "https://api.example/delete",
+    }, {
+      authorization,
+      requestCriteria,
+      rootUrl: "https://portal.example/root",
+    }).allowed, false);
+  });
+  test("relative routes cannot bypass enforced ownership criteria", () => {
+    assert.throws(() => validateEffectiveActions(buildEffectiveActions({
+      recipeActions: ["navigate=child"],
+      includeInitialNavigation: true,
+      initialUrl: "https://portal.example/root/",
+    }), {
+      rootUrl: "https://portal.example/root/",
+      pageTarget: { matchHosts: ["portal.example"], matchPathPrefixes: ["/safe"] },
+      bootstrapTarget: { matchHosts: ["portal.example"], matchPathnames: ["/root/"] },
+      enforcePageTargetForAll: true,
+    }), (error) => error.code === "page-target-mismatch");
   });
   assert.equal(validated[1].relative, true);
   assert.equal(validated[1].resolvedUrl, "https://portal.example/safe/child");
