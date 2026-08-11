@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 
@@ -40,7 +41,7 @@ test("M365 Admin keeps SetTheme on its canonical company theme path", async () =
   );
 });
 
-test("Teams quality counts operations rather than path keys", async () => {
+test("Teams catalog and quality count operations rather than path keys", async () => {
   const specification = await loadBundledSpecification(
     fileURLToPath(new URL(
       "../../specifications/nodoc-teams/specification/openapi.yml",
@@ -48,9 +49,17 @@ test("Teams quality counts operations rather than path keys", async () => {
     )),
   );
   const qualityByTitle = await buildSpecQuality();
+  const siteDataSource = await readFile(
+    fileURLToPath(new URL("../../src/data/siteData.ts", import.meta.url)),
+    "utf8",
+  );
+  const teamsCatalogSeed = siteDataSource.match(
+    /title: "Teams",[\s\S]*?collectionPath: "postman\/collections\/teams\.collection\.json"/u,
+  )?.[0];
 
   assert.equal(Object.keys(specification.paths).length, 99);
   assert.equal(qualityByTitle.Teams.operationCount, 100);
+  assert.match(teamsCatalogSeed ?? "", /operations: 100/u);
 });
 
 test("operation ID validation rejects missing and duplicate IDs", () => {
