@@ -192,10 +192,15 @@ export const coverageOverlayByTitle = {
       route("POST", "/api/log/Put", "Telemetry and performance sink confirmed during the checked-in Defender verification recipe."),
       route("POST", "/apiproxy/mtp/phoenixSocomatApi/recording/upload/encoded", "Passive UI recording upload confirmed in normal portal traffic; intentionally excluded from the documented API surface and probe planning."),
     ],
+    openGaps: [
+      "No Defender operationLiveCaptureLedger record exists; static evidence must not be promoted as live capture.",
+    ],
     notes: [
       "The checked-in Defender coverage includes same-origin nav, representative entity pages, and MTO-backed proxy APIs.",
       "A dedicated live verification pass confirmed Defender also emits POST /api/log/Put, so candidate diffs now suppress it as telemetry-only traffic.",
       "A bounded normal-UI pass promoted four read-only families and retained the recurring recording upload as a telemetry exclusion.",
+      "Offline structural reconciliation is complete: 602 source declarations partition into 592 emitted, 8 intentionally filtered, 1 Sentinel transport alias, and 1 duplicate-shadowed Cloud Apps declaration, with no unresolved or orphaned identities.",
+      "CloudApps.GetSettings remains an explicit duplicate-shadowed ownership disposition for the root-indexed Configuration.GetCloudAppsSettings operation; it is not an outstanding coverage gap.",
     ],
   },
   "Entra B2C": {
