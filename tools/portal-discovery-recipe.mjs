@@ -110,16 +110,25 @@ export function validateRecipeTargetMetadata(recipe) {
     throw new Error("recipe entry and declared root URLs must be valid URLs.");
   }
   const bootstrapCriteria = resolvePageTargetBootstrapCriteria(recipe);
-  if (!bootstrapCriteria) {
-    entryUrl.hash = "";
-  }
-  if (entryUrl.protocol !== "https:" || entryUrl.username || entryUrl.password || entryUrl.search || entryUrl.hash) {
+  if (entryUrl.protocol !== "https:" || entryUrl.username || entryUrl.password || entryUrl.search) {
     throw new Error("recipe entry URL must be an HTTPS URL without credentials, query, or fragment.");
   }
-  recipeUrl.hash = "";
+  const rootClassification = classifyGetProbeUrl(recipeUrl.href, recipeUrl.href);
+  if (!rootClassification.allowed) {
+    throw new Error(`declared root URL is not a safe same-origin GET (${rootClassification.code}).`);
+  }
   const classification = classifyGetProbeUrl(entryUrl.href, recipeUrl.href);
   if (!classification.allowed) {
     throw new Error(`recipe entry URL is not a safe same-origin GET (${classification.code}).`);
+  }
+  if (bootstrapCriteria && recipeUrl.hash) {
+    throw new Error("declared root URL must be an HTTPS URL without credentials, query, or fragment for bootstrap alignment.");
+  }
+  if (!bootstrapCriteria) {
+    entryUrl.hash = "";
+  }
+  if (entryUrl.hash) {
+    throw new Error("recipe entry URL must be an HTTPS URL without credentials, query, or fragment.");
   }
   const featureCriteria = resolvePageTargetCriteria(recipe);
   if (!recipeEntryMatchesPageTarget(recipe)) {

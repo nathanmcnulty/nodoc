@@ -82,6 +82,30 @@ test("legacy Entra root fragments normalize to the browser origin before dispatc
   }
 });
 
+test("active root fragments are rejected before browser-entry normalization", () => {
+  for (const hasBootstrap of [false, true]) {
+    for (const fragment of ["#/export", "#/save"]) {
+      assert.throws(
+        () => validateRecipeTargetMetadata({
+          url: `https://entra.microsoft.com/${fragment}`,
+          pageTarget: {
+            matchHosts: ["entra.microsoft.com"],
+            matchPathPrefixes: ["/"],
+            ...(hasBootstrap ? {
+              bootstrap: {
+                matchHosts: ["entra.microsoft.com"],
+                matchPathnames: ["/"],
+              },
+            } : {}),
+          },
+          actions: ["capture=surface"],
+        }),
+        /declared root URL is not a safe same-origin GET \(active-get-denied\)/,
+      );
+    }
+  }
+});
+
 test("page-target validation fails for an entry route outside its criteria", () => {
   assert.equal(
     recipeEntryMatchesPageTarget({
@@ -150,6 +174,14 @@ test("explicit page-target criteria fail closed when malformed or empty", () => 
       actions: ["navigate=https://config.office.com/officeSettings/inventory#fragment"],
     }),
     /HTTPS URL without credentials, query, or fragment/,
+  );
+  assert.throws(
+    () => validateRecipeTargetMetadata({
+      ...inventoryRecipe,
+      url: "https://config.office.com/officeSettings#home",
+      actions: ["navigate=https://config.office.com/officeSettings/inventory"],
+    }),
+    /declared root URL must be an HTTPS URL without credentials, query, or fragment for bootstrap alignment/,
   );
 });
 
