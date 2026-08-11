@@ -225,7 +225,7 @@
                                                     "request": {
                                                         "name": "List role assignment requests",
                                                         "description": {
-                                                            "content": "Retrieves role assignment requests (activations, assignments, removals)\nfor the specified provider. Includes pending, approved, denied, and\ncompleted requests.\n",
+                                                            "content": "Retrieves role assignment requests (activations, assignments, removals)\nfor the specified provider. Includes submitted, approved, denied, and\ncompleted requests.\n",
                                                             "type": "text/plain"
                                                         },
                                                         "url": {
@@ -384,7 +384,7 @@
                                                                     "value": "application/json"
                                                                 }
                                                             ],
-                                                            "body": "{}",
+                                                            "body": "{\n  \"value\": [\n    {\n      \"id\": \"7b3b4f66-5879-4d9d-9a0d-e9b49c718615\",\n      \"resourceId\": \"847b5907-ca15-40f4-b171-eb18619dbfab\",\n      \"roleDefinitionId\": \"62e90394-69f5-4237-9190-012177145e10\",\n      \"subjectId\": \"ab69ffc3-e508-4f8e-af8b-8d626d6764c9\",\n      \"assignmentState\": \"Eligible\",\n      \"status\": \"Provisioned\",\n      \"type\": \"AdminAdd\",\n      \"reason\": \"Breakglass renewal\",\n      \"schedule\": {\n        \"type\": \"Once\",\n        \"startDateTime\": \"2026-02-01T08:00:00Z\",\n        \"endDateTime\": \"2026-02-01T16:00:00Z\"\n      }\n    }\n  ]\n}",
                                                             "cookie": [],
                                                             "_postman_previewlanguage": "json"
                                                         }
@@ -623,9 +623,9 @@
                                                             "item": [
                                                                 {
                                                                     "id": "7052853b-eb6d-447d-913c-83abe09b66cf",
-                                                                    "name": "Cancel a pending role assignment request",
+                                                                    "name": "Cancel a submitted role assignment request",
                                                                     "request": {
-                                                                        "name": "Cancel a pending role assignment request",
+                                                                        "name": "Cancel a submitted role assignment request",
                                                                         "description": {},
                                                                         "url": {
                                                                             "path": [
