@@ -14311,6 +14311,127 @@
                             ]
                         }
                     ]
+                },
+                {
+                    "name": "v2",
+                    "description": "",
+                    "item": [
+                        {
+                            "name": "admin",
+                            "description": "",
+                            "item": [
+                                {
+                                    "name": "unifiedApps",
+                                    "description": "",
+                                    "item": [
+                                        {
+                                            "id": "4358af09-703d-44f9-8813-c3f42a39283f",
+                                            "name": "Get unified Teams app catalog entries",
+                                            "request": {
+                                                "name": "Get unified Teams app catalog entries",
+                                                "description": {
+                                                    "content": "Confirmed read observed from the Teams admin portal app catalog surface.\n",
+                                                    "type": "text/plain"
+                                                },
+                                                "url": {
+                                                    "path": [
+                                                        "AdminAppCatalog",
+                                                        "v2",
+                                                        "admin",
+                                                        "unifiedApps"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [],
+                                                    "variable": []
+                                                },
+                                                "header": [
+                                                    {
+                                                        "key": "Accept",
+                                                        "value": "application/json"
+                                                    }
+                                                ],
+                                                "method": "GET",
+                                                "body": {},
+                                                "auth": null
+                                            },
+                                            "response": [
+                                                {
+                                                    "id": "5742e629-7460-4827-a5f2-8663b0fe6d42",
+                                                    "name": "Unified Teams app catalog payload.",
+                                                    "originalRequest": {
+                                                        "url": {
+                                                            "path": [
+                                                                "AdminAppCatalog",
+                                                                "v2",
+                                                                "admin",
+                                                                "unifiedApps"
+                                                            ],
+                                                            "host": [
+                                                                "{{baseUrl}}"
+                                                            ],
+                                                            "query": [],
+                                                            "variable": []
+                                                        },
+                                                        "header": [
+                                                            {
+                                                                "key": "Accept",
+                                                                "value": "application/json"
+                                                            }
+                                                        ],
+                                                        "method": "GET",
+                                                        "body": {}
+                                                    },
+                                                    "status": "OK",
+                                                    "code": 200,
+                                                    "header": [
+                                                        {
+                                                            "key": "Content-Type",
+                                                            "value": "application/json"
+                                                        }
+                                                    ],
+                                                    "body": "{\n  \"key_0\": 9471\n}",
+                                                    "cookie": [],
+                                                    "_postman_previewlanguage": "json"
+                                                },
+                                                {
+                                                    "id": "9271f4c3-9285-4524-96c6-b14d8bf18ac3",
+                                                    "name": "The Teams portal bearer token or session context was invalid or expired.",
+                                                    "originalRequest": {
+                                                        "url": {
+                                                            "path": [
+                                                                "AdminAppCatalog",
+                                                                "v2",
+                                                                "admin",
+                                                                "unifiedApps"
+                                                            ],
+                                                            "host": [
+                                                                "{{baseUrl}}"
+                                                            ],
+                                                            "query": [],
+                                                            "variable": []
+                                                        },
+                                                        "method": "GET",
+                                                        "body": {}
+                                                    },
+                                                    "status": "Unauthorized",
+                                                    "code": 401,
+                                                    "header": [],
+                                                    "cookie": [],
+                                                    "_postman_previewlanguage": "text"
+                                                }
+                                            ],
+                                            "event": [],
+                                            "protocolProfileBehavior": {
+                                                "disableBodyPruning": true
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
                 }
             ]
         },

@@ -26,6 +26,20 @@ Process-improvement assignments/results may classify known deterministic reason
 codes and prepare evidence-linked proposals only; Luna or an operator must
 authorize safety, scope, threshold, and model-disagreement conclusions.
 
+Raw OpenAPI or Postman gaps are candidate deficits, not confirmed true deficits,
+when the converter or generator is unavailable. Before interpreting counts,
+normalize method, path template, and canonical alias, then use mutually
+exclusive sets and require both equations:
+
+```text
+raw observations = emitted + duplicate-shadowed + orphaned + intentional-filtered + alias-observations
+emitted = matched + unresolved
+```
+
+Aliases are counted once as alias observations, and emitted/matched/unresolved
+sets contain canonical keys only. An unbalanced or unavailable reconciliation
+is unknown and cannot justify a coverage claim.
+
 Copy this prompt into a new agent session after the operator has started and
 authenticated the dedicated CDP browser described in
 `AGENT_DISCOVERY_RUNBOOK.md`.
@@ -87,6 +101,15 @@ probes, and bundle-only leads separately; they require explicit specification
 and host-family assignment and are not promotion-ready for the target spec.
 Use the driver's evidence-driven recommended next action. If the driver emits a
 blocker, report its code and remediation rather than improvising around it.
+
+Generated request examples do not reclassify an unsafe `POST`, `PATCH`, or
+`PUT` operation and do not count as live execution or evidence. Operation-count
+or placeholder-count changes require `npm run generate:site-data`; include only
+proven generated `specQuality` or coverage deltas, because spec/Postman parity
+alone is insufficient. Focused generator stabilization also requires a focused
+regression test and two consecutive target runs with byte- and semantic-
+idempotent output. Current-base synchronization and protected merges are
+serialized by the coordinator, with one merge owner at a time.
 
 If command execution finishes but you cannot return a normal response, leave
 the artifact directory unchanged. The orchestrator may inspect

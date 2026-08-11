@@ -19,6 +19,13 @@ test("materialized portfolio and plan are stable and serialize shared capture le
   validateOrchestrationPlan(plan);
 });
 
+test("Purview Portal derives its outstanding freshness gap from coverage metadata", async () => {
+  const manifest = await buildPortfolioManifest();
+  const portal = manifest.portals.find((entry) => entry.specId === "purview-portal");
+  assert.deepEqual(portal?.outstandingGapClasses, ["fresh-capture"]);
+  assert.equal(portal?.source.nextPass, "full-layered-crawl");
+});
+
 test("filtered Intune Autopatch controller plans select the exact deep recipe", async () => {
   const manifest = await buildPortfolioManifest();
   const intune = manifest.portals.find((portal) => portal.specId === "intune-autopatch");
