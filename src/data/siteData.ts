@@ -318,7 +318,7 @@ const apiCatalogSeed: ApiCatalogSeed[] = [
     title: "Purview Portal",
     slug: "/purview-portal",
     family: "Security portal",
-    operations: 6,
+    operations: 8,
     authModel: "Portal session cookie (`sccauth`) + same-origin portal context",
     baseUrl: "https://purview.microsoft.com/api/",
     summary:
