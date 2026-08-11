@@ -1,0 +1,333 @@
+{
+  "schemaVersion": 1,
+  "campaignDigest": "44c1a513a9ebab7c254828205c000531ff86e93039a1830ea1982e3dd8f20baa",
+  "specId": "m365-apps-config",
+  "title": "M365 Apps Config",
+  "inventory": {
+    "specPath": "specifications/nodoc-m365-apps-config/specification/openapi.yml",
+    "sourceFiles": [
+      "specifications/nodoc-m365-apps-config/specification/openapi.yml"
+    ],
+    "versions": {
+      "openapi": "3.0.1",
+      "api": "0.1.0"
+    },
+    "hosts": [
+      "https://config.office.com"
+    ],
+    "pathPrefixes": [
+      "/ServiceProfile/",
+      "/appConfig/",
+      "/endpointprovisionhealth/",
+      "/intents/",
+      "/policyadmin/",
+      "/releases/",
+      "/rollout/",
+      "/serviceProfile/",
+      "/settings/"
+    ],
+    "pathCount": 23,
+    "operationCount": 24,
+    "schemaCount": 20,
+    "schemaNames": [
+      "AuthDeploymentSettingsConfigurationRequest",
+      "BuildVersion",
+      "ConfigNameValue",
+      "DeploymentConfiguration",
+      "ExpressionServiceProfileRule",
+      "GenericObject",
+      "LatestRelease",
+      "NextReleaseVersion",
+      "Policy",
+      "ResidencyInfo",
+      "ScopedServiceProfileRule",
+      "ServiceProfile",
+      "ServiceProfileIssues",
+      "ServiceProfileRule",
+      "ServiceProfileRules",
+      "SettingsCatalogEntry",
+      "ShellInfo",
+      "TenantAssociation",
+      "TenantRules",
+      "UserFlights"
+    ],
+    "operations": [
+      [
+        "GET",
+        "/appConfig/v1.0/ServiceHealth",
+        null
+      ],
+      [
+        "GET",
+        "/appConfig/v1.0/ShellService/GetShellInfo",
+        null
+      ],
+      [
+        "GET",
+        "/appConfig/v1.0/userflights",
+        null
+      ],
+      [
+        "GET",
+        "/endpointprovisionhealth/v1.0/tenantassociation",
+        null
+      ],
+      [
+        "GET",
+        "/intents/v1.0/DeploymentConfiguration/GetConfigurations",
+        null
+      ],
+      [
+        "PUT",
+        "/intents/v1.0/AuthDeploymentSettings/UpdateConfiguration/{configurationId}",
+        null
+      ],
+      [
+        "PUT",
+        "/intents/v1.0/DeploymentConfiguration/UpdateConfiguration/{configurationId}",
+        null
+      ],
+      [
+        "GET",
+        "/policyadmin/v1.0/DbsLicensing/HasDbsLicense",
+        null
+      ],
+      [
+        "GET",
+        "/policyadmin/v1.0/policies",
+        null
+      ],
+      [
+        "GET",
+        "/releases/v1.0/LatestRelease/CurrentChannel",
+        null
+      ],
+      [
+        "GET",
+        "/releases/v1.0/LatestRelease/MonthlyEnterpriseChannel",
+        null
+      ],
+      [
+        "GET",
+        "/releases/v1.0/NextReleaseVersion/MonthlyEnterpriseChannel",
+        null
+      ],
+      [
+        "GET",
+        "/rollout/v1.0/residency",
+        null
+      ],
+      [
+        "GET",
+        "/serviceProfile/v1.0/{profileId}/rules",
+        null
+      ],
+      [
+        "GET",
+        "/ServiceProfile/v1.0/Profiles",
+        null
+      ],
+      [
+        "GET",
+        "/ServiceProfile/v1.0/ServiceProfileAggregator/{profileId}/16.0.20131.20152/Issues",
+        null
+      ],
+      [
+        "GET",
+        "/serviceProfile/v3.0/profiles",
+        null
+      ],
+      [
+        "GET",
+        "/serviceProfile/v1.0/ServiceProfileAggregator/tenantServicingExclusionWindows",
+        null
+      ],
+      [
+        "GET",
+        "/serviceProfile/v1.0/serviceProfileAggregator/filteredDevicesAndGroups",
+        null
+      ],
+      [
+        "GET",
+        "/serviceProfile/v1.0/tenantrules",
+        null
+      ],
+      [
+        "PUT",
+        "/serviceProfile/v1.0/tenantrules",
+        null
+      ],
+      [
+        "GET",
+        "/serviceProfile/v1.0/serviceProfileAggregator/{profileId}/rollbackEntries",
+        null
+      ],
+      [
+        "GET",
+        "/settings/v1.0/SettingsCatalog/Settings",
+        null
+      ],
+      [
+        "GET",
+        "/settings/v1.0/SettingsCatalog/auth/Settings",
+        null
+      ]
+    ],
+    "operationIds": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "evidenceReferences": {
+    "references": [
+      "postman/collections/m365-apps-config.collection.json",
+      "specifications/nodoc-m365-apps-config/specification/openapi.yml",
+      "src/generated/portalCoverageLedger.json",
+      "tools/capture-recipes/m365-apps-config-deep.json",
+      "tools/capture-recipes/m365-apps-deep.json",
+      "tools/capture-recipes/m365-apps-seeded-replay.json"
+    ],
+    "repositoryDiscoveryFiles": [],
+    "generatedLedgers": {
+      "coverage": "src/generated/portalCoverageLedger.json",
+      "operationContext": null,
+      "operationLiveCapture": null
+    },
+    "staticJavascriptBundles": [],
+    "provenanceOperationCount": null,
+    "liveOperationCount": null
+  },
+  "phaseGaps": {
+    "canonicalInventory": {
+      "status": "incomplete",
+      "explanation": "24 operations lack operation IDs.",
+      "evidence": [
+        "specifications/nodoc-m365-apps-config/specification/openapi.yml"
+      ]
+    },
+    "staticSourceDiscovery": {
+      "status": "incomplete",
+      "explanation": "Checked-in metadata and recipes exist, but no explicit comprehensive static-source completion attestation is available.",
+      "evidence": [
+        "tools/capture-recipes/m365-apps-config-deep.json",
+        "tools/capture-recipes/m365-apps-deep.json",
+        "tools/capture-recipes/m365-apps-seeded-replay.json",
+        "tools/portal-discovery-metadata.mjs"
+      ]
+    },
+    "javascriptBundleDiscovery": {
+      "status": "unavailable",
+      "explanation": "No per-spec checked-in JavaScript or bundle artifact is deterministically discoverable in the specification discovery directory.",
+      "evidence": []
+    },
+    "portalApiSpecDiscovery": {
+      "status": "incomplete",
+      "explanation": "Coverage metadata records prior discovery, but it does not attest a full portfolio refresh phase as complete.",
+      "evidence": [
+        "src/generated/portalCoverageLedger.json"
+      ]
+    },
+    "liveReadOnlyEvidence": {
+      "status": "unavailable",
+      "explanation": "No generated live-capture ledger entry exists for this specification.",
+      "evidence": []
+    },
+    "reconciliationPublication": {
+      "status": "unknown",
+      "explanation": "No machine-readable campaign refresh reconciliation/publication attestation exists; derivative parity alone is insufficient.",
+      "evidence": []
+    }
+  },
+  "candidateInputs": {
+    "parityUnresolvedCount": {
+      "status": "complete",
+      "value": 0,
+      "source": "postman/collections/m365-apps-config.collection.json"
+    },
+    "parityOrphanedCount": {
+      "status": "complete",
+      "value": 0,
+      "source": "postman/collections/m365-apps-config.collection.json"
+    },
+    "routingMismatchCount": {
+      "status": "complete",
+      "value": 0,
+      "source": "postman/collections/m365-apps-config.collection.json"
+    },
+    "openGapCount": {
+      "status": "unknown",
+      "value": null,
+      "explanation": "openGaps is not explicitly recorded; absence is not treated as zero.",
+      "source": "tools/portal-discovery-metadata.mjs"
+    },
+    "openGapClassCount": {
+      "status": "unknown",
+      "value": null,
+      "explanation": "openGapClasses is not explicitly recorded; absence is not treated as zero.",
+      "source": "tools/portal-discovery-metadata.mjs"
+    },
+    "promotedDiscoveryCount": {
+      "status": "unknown",
+      "value": null,
+      "source": "tools/portal-discovery-metadata.mjs",
+      "explanation": "promotedDiscoveries is not explicitly recorded; absence is not treated as zero."
+    }
+  },
+  "fingerprints": {
+    "inputs": [
+      {
+        "path": "postman/collections/m365-apps-config.collection.json",
+        "bytes": 186461,
+        "sha256": "78dc3c2088be5521fb4dcafe10275ecab2bcc881f80d566f2e563431bcbc21cf"
+      },
+      {
+        "path": "specifications/nodoc-m365-apps-config/specification/openapi.yml",
+        "bytes": 30517,
+        "sha256": "9686ce48345aa43fcc6b81675347adf2baf24a837dab866cced9b913318f1dcd"
+      },
+      {
+        "path": "src/generated/portalCoverageLedger.json",
+        "bytes": 51980,
+        "sha256": "3de3740782916fb11bbc7832305b0bd64c0333d49f55f24c3331a6a4cf48f82b"
+      },
+      {
+        "path": "tools/capture-recipes/m365-apps-config-deep.json",
+        "bytes": 1163,
+        "sha256": "3a0d3eab885719e83c3961a86090e3dd90426f7a869ec0dfd1b7ce00d7351e44"
+      },
+      {
+        "path": "tools/capture-recipes/m365-apps-deep.json",
+        "bytes": 862,
+        "sha256": "4b3d2561f15d11e10593031628baac05af685b80031dad5116eeb6e4f993cf54"
+      },
+      {
+        "path": "tools/capture-recipes/m365-apps-seeded-replay.json",
+        "bytes": 671,
+        "sha256": "871382c27c37e0bd72ef702a903f475b8cd6c9f153ba0528796b9d10cd936c8e"
+      }
+    ],
+    "aggregateSha256": "dae2926d5ffd31866696b7f28902e8941fb81c8ea2db52edb5761432e99e0bc0"
+  }
+}

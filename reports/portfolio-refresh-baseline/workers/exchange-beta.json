@@ -1,0 +1,523 @@
+{
+  "schemaVersion": 1,
+  "campaignDigest": "44c1a513a9ebab7c254828205c000531ff86e93039a1830ea1982e3dd8f20baa",
+  "specId": "exchange-beta",
+  "title": "Exchange",
+  "inventory": {
+    "specPath": "specifications/nodoc-exchange-beta/specification/openapi.yml",
+    "sourceFiles": [
+      "specifications/nodoc-exchange-beta/specification/openapi.yml"
+    ],
+    "versions": {
+      "openapi": "3.0.1",
+      "api": "0.1.0"
+    },
+    "hosts": [
+      "https://admin.exchange.microsoft.com"
+    ],
+    "pathPrefixes": [
+      "/beta/"
+    ],
+    "pathCount": 61,
+    "operationCount": 61,
+    "schemaCount": 10,
+    "schemaNames": [
+      "ExchangeAcceptedDomain",
+      "ExchangeAcceptedDomainCollectionResponse",
+      "ExchangeLastExecutionData",
+      "ExchangeLastExecutionDataCollectionResponse",
+      "ExchangeMailbox",
+      "ExchangeMailboxStatistics",
+      "ExchangeUserPreferenceWriteRequest",
+      "GenericObject",
+      "ODataCollectionResponse",
+      "ODataStringResponse"
+    ],
+    "operations": [
+      [
+        "GET",
+        "/beta/Shell",
+        "ExchangeBeta.Bootstrap.GetShell"
+      ],
+      [
+        "GET",
+        "/beta/CmdletInfo",
+        "ExchangeBeta.Bootstrap.GetCmdletInfo"
+      ],
+      [
+        "GET",
+        "/beta/TenantDataBoundary",
+        "ExchangeBeta.Bootstrap.GetTenantDataBoundary"
+      ],
+      [
+        "GET",
+        "/beta/TenantMonitoring",
+        "ExchangeBeta.Bootstrap.GetTenantMonitoring"
+      ],
+      [
+        "GET",
+        "/beta/TimeZone",
+        "ExchangeBeta.Bootstrap.ListTimeZones"
+      ],
+      [
+        "GET",
+        "/beta/TimeZone/ExchangeAdminCenter.MyTimeZone",
+        "ExchangeBeta.Bootstrap.GetMyTimeZone"
+      ],
+      [
+        "GET",
+        "/beta/UserProfile",
+        "ExchangeBeta.Preferences.GetUserProfile"
+      ],
+      [
+        "GET",
+        "/beta/UserProfile/ExchangeAdminCenter.GetFeedbackAccessToken()",
+        "ExchangeBeta.Preferences.GetFeedbackAccessToken"
+      ],
+      [
+        "GET",
+        "/beta/UserProfile/ExchangeAdminCenter.GetFeedbackAttribute()",
+        "ExchangeBeta.Preferences.GetFeedbackAttribute"
+      ],
+      [
+        "GET",
+        "/beta/UserProfile/ExchangeAdminCenter.GetOCPSAccessToken()",
+        "ExchangeBeta.Preferences.GetOCPSAccessToken"
+      ],
+      [
+        "POST",
+        "/beta/UserPreference",
+        "ExchangeBeta.Preferences.UpsertUserPreference"
+      ],
+      [
+        "GET",
+        "/beta/UserPreference(PrimaryKey='{primaryKey}')/ExchangeAdminCenter.GetAll()",
+        "ExchangeBeta.Preferences.GetAllForPrimaryKey"
+      ],
+      [
+        "GET",
+        "/beta/UserPreference(PrimaryKey='{primaryKey}')/ExchangeAdminCenter.GetItemInCollection(SubKey='{subKey}')",
+        "ExchangeBeta.Preferences.GetItemInCollection"
+      ],
+      [
+        "GET",
+        "/beta/UserPreference(PrimaryKey='{primaryKey}')",
+        "ExchangeBeta.Preferences.GetRawPreference"
+      ],
+      [
+        "GET",
+        "/beta/AcceptedDomain",
+        "ExchangeBeta.MailFlow.ListAcceptedDomains"
+      ],
+      [
+        "GET",
+        "/beta/AcceptedDomainFullListIC",
+        "ExchangeBeta.MailFlow.ListAcceptedDomainsFull"
+      ],
+      [
+        "GET",
+        "/beta/RemoteDomain",
+        "ExchangeBeta.MailFlow.ListRemoteDomains"
+      ],
+      [
+        "GET",
+        "/beta/InboundConnector",
+        "ExchangeBeta.MailFlow.ListInboundConnectors"
+      ],
+      [
+        "GET",
+        "/beta/OutboundConnector",
+        "ExchangeBeta.MailFlow.ListOutboundConnectors"
+      ],
+      [
+        "GET",
+        "/beta/TransportRule",
+        "ExchangeBeta.MailFlow.ListTransportRules"
+      ],
+      [
+        "GET",
+        "/beta/MailflowReport/ExchangeAdminCenter.ConnectorReport(ReportType='{reportType}',StartDate={startDate},EndDate={endDate})",
+        "ExchangeBeta.MailFlow.GetConnectorReport"
+      ],
+      [
+        "GET",
+        "/beta/MailflowReport/ExchangeAdminCenter.MailflowForwarding(StartDate={startDate},EndDate={endDate})",
+        "ExchangeBeta.MailFlow.GetMailflowForwardingReport"
+      ],
+      [
+        "GET",
+        "/beta/MailflowReport/ExchangeAdminCenter.RecentAlertsReport(StartDate={startDate},EndDate={endDate})",
+        "ExchangeBeta.MailFlow.GetRecentAlertsReport"
+      ],
+      [
+        "GET",
+        "/beta/MailflowReport/ExchangeAdminCenter.EtrLastExecutionData",
+        "ExchangeBeta.MailFlow.GetTransportRuleLastExecutionData"
+      ],
+      [
+        "GET",
+        "/beta/MailflowReportTDP/ExchangeAdminCenter.CustomerInsight(StartDate={startDate},EndDate={endDate},InsightType='{insightType}')",
+        "ExchangeBeta.MailFlow.GetCustomerInsight"
+      ],
+      [
+        "GET",
+        "/beta/ProtectionAlert/ExchangeAdminCenter.GetAlertPolicies()",
+        "ExchangeBeta.MailFlow.GetAlertPolicies"
+      ],
+      [
+        "GET",
+        "/beta/HistoricalSearch",
+        "ExchangeBeta.MailFlow.ListHistoricalSearches"
+      ],
+      [
+        "GET",
+        "/beta/Recipient/ExchangeAdminCenter.GetRecipientsIC",
+        "ExchangeBeta.Objects.GetRecipientsIC"
+      ],
+      [
+        "GET",
+        "/beta/Recipient",
+        "ExchangeBeta.Objects.ListRecipients"
+      ],
+      [
+        "GET",
+        "/beta/Mailbox({mailboxId})",
+        "ExchangeBeta.Objects.GetMailbox"
+      ],
+      [
+        "GET",
+        "/beta/Mailbox({mailboxId})/ExchangeAdminCenter.GetMailboxStatistics(Archive=false)",
+        "ExchangeBeta.Objects.GetMailboxStatistics"
+      ],
+      [
+        "GET",
+        "/beta/Mailbox({mailboxId})/FullAccessPermission",
+        "ExchangeBeta.Objects.GetMailboxFullAccessPermissions"
+      ],
+      [
+        "GET",
+        "/beta/Mailbox({mailboxId})/SendAsPermission",
+        "ExchangeBeta.Objects.GetMailboxSendAsPermissions"
+      ],
+      [
+        "GET",
+        "/beta/Mailbox({mailboxId})/SendOnBehalfPermission",
+        "ExchangeBeta.Objects.GetMailboxSendOnBehalfPermissions"
+      ],
+      [
+        "GET",
+        "/beta/MailboxAutoReplyConfiguration('{mailboxId}')",
+        "ExchangeBeta.Objects.GetMailboxAutoReplyConfiguration"
+      ],
+      [
+        "GET",
+        "/beta/DynamicDistributionGroupIC",
+        "ExchangeBeta.Objects.ListDynamicDistributionGroups"
+      ],
+      [
+        "GET",
+        "/beta/MailContact",
+        "ExchangeBeta.Objects.ListMailContacts"
+      ],
+      [
+        "GET",
+        "/beta/MailUserIC",
+        "ExchangeBeta.Objects.ListMailUsersIC"
+      ],
+      [
+        "GET",
+        "/beta/AddressBookPolicy",
+        "ExchangeBeta.Objects.ListAddressBookPolicies"
+      ],
+      [
+        "GET",
+        "/beta/ResourceMailbox",
+        "ExchangeBeta.Objects.ListResourceMailboxes"
+      ],
+      [
+        "GET",
+        "/beta/ResourceMailbox('{resourceMailboxId}')",
+        "ExchangeBeta.Objects.GetResourceMailbox"
+      ],
+      [
+        "GET",
+        "/beta/OwaMailboxPolicy",
+        "ExchangeBeta.Objects.ListOwaMailboxPolicies"
+      ],
+      [
+        "GET",
+        "/beta/Groupv05('{groupId}')/AcceptMessagesOnlyFromSendersOrMembers",
+        "ExchangeBeta.Objects.ListGroupApprovedSenders"
+      ],
+      [
+        "GET",
+        "/beta/Groupv05('{groupId}')/BypassModerationFromSendersOrMembers",
+        "ExchangeBeta.Objects.ListGroupModerationBypassSenders"
+      ],
+      [
+        "GET",
+        "/beta/Groupv05('{groupId}')/ModeratedBy",
+        "ExchangeBeta.Objects.ListGroupModerators"
+      ],
+      [
+        "GET",
+        "/beta/RoleGroup",
+        "ExchangeBeta.Roles.ListRoleGroups"
+      ],
+      [
+        "GET",
+        "/beta/ManagementRoleV2",
+        "ExchangeBeta.Roles.ListManagementRoles"
+      ],
+      [
+        "GET",
+        "/beta/RoleAssignments",
+        "ExchangeBeta.Roles.ListRoleAssignments"
+      ],
+      [
+        "GET",
+        "/beta/RoleGroup('{roleGroupId}')/ExchangeAdminCenter.GetRoleGroupMembers()",
+        "ExchangeBeta.Roles.GetRoleGroupMembers"
+      ],
+      [
+        "GET",
+        "/beta/ActiveSyncDeviceClass",
+        "ExchangeBeta.Mobile.ListActiveSyncDeviceClasses"
+      ],
+      [
+        "GET",
+        "/beta/ActiveSyncDeviceAccessRule",
+        "ExchangeBeta.Mobile.ListActiveSyncDeviceAccessRules"
+      ],
+      [
+        "GET",
+        "/beta/MobileDevice",
+        "ExchangeBeta.Mobile.ListMobileDevices"
+      ],
+      [
+        "GET",
+        "/beta/MobileDeviceMailboxPolicy",
+        "ExchangeBeta.Mobile.ListMobileDeviceMailboxPolicies"
+      ],
+      [
+        "GET",
+        "/beta/OrganizationRelationship",
+        "ExchangeBeta.Sharing.ListOrganizationRelationships"
+      ],
+      [
+        "GET",
+        "/beta/OrganizationRelationship('{organizationRelationshipId}')",
+        "ExchangeBeta.Sharing.GetOrganizationRelationship"
+      ],
+      [
+        "GET",
+        "/beta/IndividualSharing",
+        "ExchangeBeta.Sharing.ListIndividualSharingPolicies"
+      ],
+      [
+        "GET",
+        "/beta/IndividualSharing({individualSharingId})",
+        "ExchangeBeta.Sharing.GetIndividualSharingPolicy"
+      ],
+      [
+        "GET",
+        "/beta/MigrationBatch",
+        "ExchangeBeta.Migration.ListMigrationBatches"
+      ],
+      [
+        "GET",
+        "/beta/MigrationEndpoint",
+        "ExchangeBeta.Migration.ListMigrationEndpoints"
+      ],
+      [
+        "GET",
+        "/beta/PublicFolder",
+        "ExchangeBeta.Folders.ListPublicFolders"
+      ],
+      [
+        "GET",
+        "/beta/PublicFolderMailbox",
+        "ExchangeBeta.Folders.ListPublicFolderMailboxes"
+      ]
+    ],
+    "operationIds": [
+      "ExchangeBeta.Bootstrap.GetShell",
+      "ExchangeBeta.Bootstrap.GetCmdletInfo",
+      "ExchangeBeta.Bootstrap.GetTenantDataBoundary",
+      "ExchangeBeta.Bootstrap.GetTenantMonitoring",
+      "ExchangeBeta.Bootstrap.ListTimeZones",
+      "ExchangeBeta.Bootstrap.GetMyTimeZone",
+      "ExchangeBeta.Preferences.GetUserProfile",
+      "ExchangeBeta.Preferences.GetFeedbackAccessToken",
+      "ExchangeBeta.Preferences.GetFeedbackAttribute",
+      "ExchangeBeta.Preferences.GetOCPSAccessToken",
+      "ExchangeBeta.Preferences.UpsertUserPreference",
+      "ExchangeBeta.Preferences.GetAllForPrimaryKey",
+      "ExchangeBeta.Preferences.GetItemInCollection",
+      "ExchangeBeta.Preferences.GetRawPreference",
+      "ExchangeBeta.MailFlow.ListAcceptedDomains",
+      "ExchangeBeta.MailFlow.ListAcceptedDomainsFull",
+      "ExchangeBeta.MailFlow.ListRemoteDomains",
+      "ExchangeBeta.MailFlow.ListInboundConnectors",
+      "ExchangeBeta.MailFlow.ListOutboundConnectors",
+      "ExchangeBeta.MailFlow.ListTransportRules",
+      "ExchangeBeta.MailFlow.GetConnectorReport",
+      "ExchangeBeta.MailFlow.GetMailflowForwardingReport",
+      "ExchangeBeta.MailFlow.GetRecentAlertsReport",
+      "ExchangeBeta.MailFlow.GetTransportRuleLastExecutionData",
+      "ExchangeBeta.MailFlow.GetCustomerInsight",
+      "ExchangeBeta.MailFlow.GetAlertPolicies",
+      "ExchangeBeta.MailFlow.ListHistoricalSearches",
+      "ExchangeBeta.Objects.GetRecipientsIC",
+      "ExchangeBeta.Objects.ListRecipients",
+      "ExchangeBeta.Objects.GetMailbox",
+      "ExchangeBeta.Objects.GetMailboxStatistics",
+      "ExchangeBeta.Objects.GetMailboxFullAccessPermissions",
+      "ExchangeBeta.Objects.GetMailboxSendAsPermissions",
+      "ExchangeBeta.Objects.GetMailboxSendOnBehalfPermissions",
+      "ExchangeBeta.Objects.GetMailboxAutoReplyConfiguration",
+      "ExchangeBeta.Objects.ListDynamicDistributionGroups",
+      "ExchangeBeta.Objects.ListMailContacts",
+      "ExchangeBeta.Objects.ListMailUsersIC",
+      "ExchangeBeta.Objects.ListAddressBookPolicies",
+      "ExchangeBeta.Objects.ListResourceMailboxes",
+      "ExchangeBeta.Objects.GetResourceMailbox",
+      "ExchangeBeta.Objects.ListOwaMailboxPolicies",
+      "ExchangeBeta.Objects.ListGroupApprovedSenders",
+      "ExchangeBeta.Objects.ListGroupModerationBypassSenders",
+      "ExchangeBeta.Objects.ListGroupModerators",
+      "ExchangeBeta.Roles.ListRoleGroups",
+      "ExchangeBeta.Roles.ListManagementRoles",
+      "ExchangeBeta.Roles.ListRoleAssignments",
+      "ExchangeBeta.Roles.GetRoleGroupMembers",
+      "ExchangeBeta.Mobile.ListActiveSyncDeviceClasses",
+      "ExchangeBeta.Mobile.ListActiveSyncDeviceAccessRules",
+      "ExchangeBeta.Mobile.ListMobileDevices",
+      "ExchangeBeta.Mobile.ListMobileDeviceMailboxPolicies",
+      "ExchangeBeta.Sharing.ListOrganizationRelationships",
+      "ExchangeBeta.Sharing.GetOrganizationRelationship",
+      "ExchangeBeta.Sharing.ListIndividualSharingPolicies",
+      "ExchangeBeta.Sharing.GetIndividualSharingPolicy",
+      "ExchangeBeta.Migration.ListMigrationBatches",
+      "ExchangeBeta.Migration.ListMigrationEndpoints",
+      "ExchangeBeta.Folders.ListPublicFolders",
+      "ExchangeBeta.Folders.ListPublicFolderMailboxes"
+    ]
+  },
+  "evidenceReferences": {
+    "references": [
+      "postman/collections/exchange-beta.collection.json",
+      "specifications/nodoc-exchange-beta/specification/openapi.yml",
+      "src/generated/portalCoverageLedger.json",
+      "tools/capture-recipes/exchange-deep.json",
+      "tools/capture-recipes/exchange-seeded-replay.json"
+    ],
+    "repositoryDiscoveryFiles": [],
+    "generatedLedgers": {
+      "coverage": "src/generated/portalCoverageLedger.json",
+      "operationContext": null,
+      "operationLiveCapture": null
+    },
+    "staticJavascriptBundles": [],
+    "provenanceOperationCount": null,
+    "liveOperationCount": null
+  },
+  "phaseGaps": {
+    "staticSourceDiscovery": {
+      "status": "incomplete",
+      "explanation": "Checked-in metadata and recipes exist, but no explicit comprehensive static-source completion attestation is available.",
+      "evidence": [
+        "tools/capture-recipes/exchange-deep.json",
+        "tools/capture-recipes/exchange-seeded-replay.json",
+        "tools/portal-discovery-metadata.mjs"
+      ]
+    },
+    "javascriptBundleDiscovery": {
+      "status": "unavailable",
+      "explanation": "No per-spec checked-in JavaScript or bundle artifact is deterministically discoverable in the specification discovery directory.",
+      "evidence": []
+    },
+    "portalApiSpecDiscovery": {
+      "status": "incomplete",
+      "explanation": "Coverage metadata records prior discovery, but it does not attest a full portfolio refresh phase as complete.",
+      "evidence": [
+        "src/generated/portalCoverageLedger.json"
+      ]
+    },
+    "liveReadOnlyEvidence": {
+      "status": "unavailable",
+      "explanation": "No generated live-capture ledger entry exists for this specification.",
+      "evidence": []
+    },
+    "reconciliationPublication": {
+      "status": "unknown",
+      "explanation": "No machine-readable campaign refresh reconciliation/publication attestation exists; derivative parity alone is insufficient.",
+      "evidence": []
+    }
+  },
+  "candidateInputs": {
+    "parityUnresolvedCount": {
+      "status": "complete",
+      "value": 0,
+      "source": "postman/collections/exchange-beta.collection.json"
+    },
+    "parityOrphanedCount": {
+      "status": "complete",
+      "value": 0,
+      "source": "postman/collections/exchange-beta.collection.json"
+    },
+    "routingMismatchCount": {
+      "status": "complete",
+      "value": 0,
+      "source": "postman/collections/exchange-beta.collection.json"
+    },
+    "openGapCount": {
+      "status": "unknown",
+      "value": null,
+      "explanation": "openGaps is not explicitly recorded; absence is not treated as zero.",
+      "source": "tools/portal-discovery-metadata.mjs"
+    },
+    "openGapClassCount": {
+      "status": "unknown",
+      "value": null,
+      "explanation": "openGapClasses is not explicitly recorded; absence is not treated as zero.",
+      "source": "tools/portal-discovery-metadata.mjs"
+    },
+    "promotedDiscoveryCount": {
+      "status": "unknown",
+      "value": null,
+      "source": "tools/portal-discovery-metadata.mjs",
+      "explanation": "promotedDiscoveries is not explicitly recorded; absence is not treated as zero."
+    }
+  },
+  "fingerprints": {
+    "inputs": [
+      {
+        "path": "postman/collections/exchange-beta.collection.json",
+        "bytes": 532906,
+        "sha256": "abd453022f9d8b008ba02ddeff576923ad2066b6fbee1b2e1e8fc8f3f24ed339"
+      },
+      {
+        "path": "specifications/nodoc-exchange-beta/specification/openapi.yml",
+        "bytes": 62378,
+        "sha256": "103e2321b17e10d212876c39a74b852902d0f2f10eb2832935fd604846b26ce4"
+      },
+      {
+        "path": "src/generated/portalCoverageLedger.json",
+        "bytes": 51980,
+        "sha256": "3de3740782916fb11bbc7832305b0bd64c0333d49f55f24c3331a6a4cf48f82b"
+      },
+      {
+        "path": "tools/capture-recipes/exchange-deep.json",
+        "bytes": 1120,
+        "sha256": "d32332e3329efcbd474790ae07ca6494861f8f2ac72df845aa023c47f4a6210d"
+      },
+      {
+        "path": "tools/capture-recipes/exchange-seeded-replay.json",
+        "bytes": 593,
+        "sha256": "9f7f06450a59aa9aaccb7ae119a050b85058e4150825294d066da4326ed6f523"
+      }
+    ],
+    "aggregateSha256": "e31a3e705f8115f10c1c67bf4b297637ee136a39ef47759c7ee6575899997ec8"
+  }
+}

@@ -1,0 +1,1734 @@
+{
+  "schemaVersion": 1,
+  "campaignDigest": "44c1a513a9ebab7c254828205c000531ff86e93039a1830ea1982e3dd8f20baa",
+  "specId": "power-platform",
+  "title": "Power Platform",
+  "inventory": {
+    "specPath": "specifications/nodoc-power-platform/specification/openapi.yml",
+    "sourceFiles": [
+      "specifications/nodoc-power-platform/specification/admin_analytics.yml",
+      "specifications/nodoc-power-platform/specification/admin_portal.yml",
+      "specifications/nodoc-power-platform/specification/business_app_platform.yml",
+      "specifications/nodoc-power-platform/specification/config_analytics.yml",
+      "specifications/nodoc-power-platform/specification/dynamics_crm.yml",
+      "specifications/nodoc-power-platform/specification/licensing.yml",
+      "specifications/nodoc-power-platform/specification/notification_service.yml",
+      "specifications/nodoc-power-platform/specification/openapi.yml",
+      "specifications/nodoc-power-platform/specification/power_pages_portal_infra.yml",
+      "specifications/nodoc-power-platform/specification/tenant_api.yml"
+    ],
+    "versions": {
+      "openapi": "3.0.1",
+      "api": "1.0"
+    },
+    "hosts": [
+      "https://admin.powerplatform.microsoft.com",
+      "https://api.admin.powerplatform.microsoft.com",
+      "https://api.bap.microsoft.com",
+      "https://licensing.powerplatform.microsoft.com",
+      "https://{organizationHost}.crm.dynamics.com",
+      "https://{portalInfraHost}.portal-infra.dynamics.com",
+      "https://{region}.adminanalytics.powerplatform.microsoft.com",
+      "https://{region}.csanalytics.powerplatform.microsoft.com",
+      "https://{tenantHost}.tenant.api.powerplatform.com",
+      "https://{tenantIslandHost}.tenant.api.powerplatform.com"
+    ],
+    "pathPrefixes": [
+      "/api/",
+      "/appmanagement/",
+      "/licensing/",
+      "/notificationservice/",
+      "/providers/",
+      "/v0.1-alpha/",
+      "/v0.1/",
+      "/v1.0/",
+      "/v2.0/"
+    ],
+    "pathCount": 248,
+    "operationCount": 248,
+    "schemaCount": 0,
+    "schemaNames": [],
+    "operations": [
+      [
+        "GET",
+        "/providers/Microsoft.BusinessAppPlatform/environmentGroups",
+        "BusinessAppPlatform_get_providers_Microsoft_BusinessAppPlatform_environmentGroups"
+      ],
+      [
+        "GET",
+        "/providers/Microsoft.BusinessAppPlatform/environmentLocations",
+        "BusinessAppPlatform_get_providers_Microsoft_BusinessAppPlatform_environmentLocations"
+      ],
+      [
+        "GET",
+        "/providers/Microsoft.BusinessAppPlatform/environments",
+        "BusinessAppPlatform_get_providers_Microsoft_BusinessAppPlatform_environments"
+      ],
+      [
+        "POST",
+        "/providers/Microsoft.BusinessAppPlatform/environments/{environmentId}/checkAccess",
+        "BusinessAppPlatform_post_providers_Microsoft_BusinessAppPlatform_environments_environmentId_checkAccess"
+      ],
+      [
+        "GET",
+        "/providers/Microsoft.BusinessAppPlatform/environments/~default",
+        "BusinessAppPlatform_get_providers_Microsoft_BusinessAppPlatform_environments_default"
+      ],
+      [
+        "POST",
+        "/providers/Microsoft.BusinessAppPlatform/environments/getOrCreate",
+        "BusinessAppPlatform_post_providers_Microsoft_BusinessAppPlatform_environments_getOrCreate"
+      ],
+      [
+        "GET",
+        "/providers/Microsoft.BusinessAppPlatform/lifecycleOperations",
+        "BusinessAppPlatform_get_providers_Microsoft_BusinessAppPlatform_lifecycleOperations"
+      ],
+      [
+        "POST",
+        "/providers/Microsoft.BusinessAppPlatform/listTenantSettings",
+        "BusinessAppPlatform_post_providers_Microsoft_BusinessAppPlatform_listTenantSettings"
+      ],
+      [
+        "GET",
+        "/providers/Microsoft.BusinessAppPlatform/locations",
+        "BusinessAppPlatform_get_providers_Microsoft_BusinessAppPlatform_locations"
+      ],
+      [
+        "GET",
+        "/providers/Microsoft.BusinessAppPlatform/locations/{locationName}/environmentCurrencies",
+        "BusinessAppPlatform_get_providers_Microsoft_BusinessAppPlatform_locations_locationName_environmentCurrencies"
+      ],
+      [
+        "GET",
+        "/providers/Microsoft.BusinessAppPlatform/locations/{locationName}/environmentLanguages",
+        "BusinessAppPlatform_get_providers_Microsoft_BusinessAppPlatform_locations_locationName_environmentLanguages"
+      ],
+      [
+        "GET",
+        "/providers/Microsoft.BusinessAppPlatform/locations/unitedstates/templates",
+        "BusinessAppPlatform_get_providers_Microsoft_BusinessAppPlatform_locations_unitedstates_templates"
+      ],
+      [
+        "POST",
+        "/providers/Microsoft.BusinessAppPlatform/scopes/admin/enroll",
+        "BusinessAppPlatform_post_providers_Microsoft_BusinessAppPlatform_scopes_admin_enroll"
+      ],
+      [
+        "GET",
+        "/providers/Microsoft.BusinessAppPlatform/scopes/admin/environments",
+        "BusinessAppPlatform_get_providers_Microsoft_BusinessAppPlatform_scopes_admin_environments"
+      ],
+      [
+        "GET",
+        "/providers/Microsoft.BusinessAppPlatform/scopes/admin/environments/{environmentId}",
+        "BusinessAppPlatform_get_providers_Microsoft_BusinessAppPlatform_scopes_admin_environments_environmentId"
+      ],
+      [
+        "GET",
+        "/providers/Microsoft.BusinessAppPlatform/scopes/admin/environments/{environmentId}/lastActivity",
+        "BusinessAppPlatform_get_providers_Microsoft_BusinessAppPlatform_scopes_admin_environments_environmentId_lastActivity"
+      ],
+      [
+        "GET",
+        "/providers/Microsoft.BusinessAppPlatform/t2tmigrationapprovals",
+        "BusinessAppPlatform_get_providers_Microsoft_BusinessAppPlatform_t2tmigrationapprovals"
+      ],
+      [
+        "GET",
+        "/providers/Microsoft.BusinessAppPlatform/t2tmigrations",
+        "BusinessAppPlatform_get_providers_Microsoft_BusinessAppPlatform_t2tmigrations"
+      ],
+      [
+        "GET",
+        "/providers/Microsoft.BusinessAppPlatform/tenant",
+        "BusinessAppPlatform_get_providers_Microsoft_BusinessAppPlatform_tenant"
+      ],
+      [
+        "GET",
+        "/providers/PowerPlatform.Governance/v1/tenants/{tenantId}/tenantIsolationPolicy",
+        "BusinessAppPlatform_get_tenantIsolationPolicy"
+      ],
+      [
+        "GET",
+        "/api/v1/cds/CategorySeries/Organizations/{organizationId}",
+        "AdminAnalytics_get_api_v1_cds_CategorySeries_Organizations_organizationId"
+      ],
+      [
+        "GET",
+        "/api/v1/cds/OrgInsightsMetrics/List",
+        "AdminAnalytics_get_api_v1_cds_OrgInsightsMetrics_List"
+      ],
+      [
+        "GET",
+        "/api/v1/cds/TimeSeries/Organizations/{organizationId}",
+        "AdminAnalytics_get_api_v1_cds_TimeSeries_Organizations_organizationId"
+      ],
+      [
+        "POST",
+        "/api/v1/metrics/resourceType/copilotstudio/resourceSubType/agent/latest",
+        "AdminAnalytics_post_api_v1_metrics_resourceType_copilotstudio_resourceSubType_agent_latest"
+      ],
+      [
+        "POST",
+        "/api/v1/metrics/resourceType/powerautomate/resourceSubType/cloudflow/latest",
+        "AdminAnalytics_post_api_v1_metrics_resourceType_powerautomate_resourceSubType_cloudflow_latest"
+      ],
+      [
+        "POST",
+        "/api/v1/metrics/resourceType/powerautomate/resourceSubType/desktopflow/latest",
+        "AdminAnalytics_post_api_v1_metrics_resourceType_powerautomate_resourceSubType_desktopflow_latest"
+      ],
+      [
+        "POST",
+        "/api/v1/metrics/resourceType/powerautomate/resourceSubType/workqueue/latest",
+        "AdminAnalytics_post_api_v1_metrics_resourceType_powerautomate_resourceSubType_workqueue_latest"
+      ],
+      [
+        "GET",
+        "/api/v1/tenants/{tenantId}/tenantconsent",
+        "ConfigAnalytics_get_api_v1_tenants_tenantId_tenantconsent"
+      ],
+      [
+        "GET",
+        "/licensing/tenants/{tenantId}/UserPerFlowCapacitySource/TenantContextSummary",
+        "Licensing_get_licensing_tenants_tenantId_UserPerFlowCapacitySource_TenantContextSummary"
+      ],
+      [
+        "GET",
+        "/licensing/tenants/{tenantId}/UserPerFlowCapacitySource/UserContextSummary",
+        "Licensing_get_licensing_tenants_tenantId_UserPerFlowCapacitySource_UserContextSummary"
+      ],
+      [
+        "GET",
+        "/v0.1-alpha/tenants/{tenantId}/BillingPolicies",
+        "Licensing_get_v0_1_alpha_tenants_tenantId_BillingPolicies"
+      ],
+      [
+        "POST",
+        "/v0.1-alpha/tenants/{tenantId}/BillingPolicies/getEnvironmentMap",
+        "Licensing_post_v0_1_alpha_tenants_tenantId_BillingPolicies_getEnvironmentMap"
+      ],
+      [
+        "GET",
+        "/v0.1-alpha/tenants/{tenantId}/CurrencyReports",
+        "Licensing_get_v0_1_alpha_tenants_tenantId_CurrencyReports"
+      ],
+      [
+        "GET",
+        "/v0.1-alpha/tenants/{tenantId}/entitlements/AppPass/trends",
+        "Licensing_get_v0_1_alpha_tenants_tenantId_entitlements_AppPass_trends"
+      ],
+      [
+        "GET",
+        "/v0.1-alpha/tenants/{tenantId}/entitlements/Database/trends",
+        "Licensing_get_v0_1_alpha_tenants_tenantId_entitlements_Database_trends"
+      ],
+      [
+        "GET",
+        "/v0.1-alpha/tenants/{tenantId}/entitlements/extension",
+        "Licensing_get_v0_1_alpha_tenants_tenantId_entitlements_extension"
+      ],
+      [
+        "GET",
+        "/v0.1-alpha/tenants/{tenantId}/entitlements/File/trends",
+        "Licensing_get_v0_1_alpha_tenants_tenantId_entitlements_File_trends"
+      ],
+      [
+        "GET",
+        "/v0.1-alpha/tenants/{tenantId}/entitlements/FinOpsDatabase/trends",
+        "Licensing_get_v0_1_alpha_tenants_tenantId_entitlements_FinOpsDatabase_trends"
+      ],
+      [
+        "GET",
+        "/v0.1-alpha/tenants/{tenantId}/entitlements/FinOpsFile/trends",
+        "Licensing_get_v0_1_alpha_tenants_tenantId_entitlements_FinOpsFile_trends"
+      ],
+      [
+        "GET",
+        "/v0.1-alpha/tenants/{tenantId}/entitlements/Log/trends",
+        "Licensing_get_v0_1_alpha_tenants_tenantId_entitlements_Log_trends"
+      ],
+      [
+        "GET",
+        "/v0.1-alpha/tenants/{tenantId}/entitlements/MCSMessages/snapshot/product",
+        "Licensing_get_v0_1_alpha_tenants_tenantId_entitlements_MCSMessages_snapshot_product"
+      ],
+      [
+        "GET",
+        "/v0.1-alpha/tenants/{tenantId}/entitlements/MCSMessages/snapshot/resources",
+        "Licensing_get_v0_1_alpha_tenants_tenantId_entitlements_MCSMessages_snapshot_resources"
+      ],
+      [
+        "GET",
+        "/v0.1-alpha/tenants/{tenantId}/entitlements/MCSMessages/trends",
+        "Licensing_get_v0_1_alpha_tenants_tenantId_entitlements_MCSMessages_trends"
+      ],
+      [
+        "GET",
+        "/v0.1-alpha/tenants/{tenantId}/environments/capacityTypes/PowerPagesAnonymous/trends",
+        "Licensing_get_v0_1_alpha_tenants_tenantId_environments_capacityTypes_PowerPagesAnonymous_trends"
+      ],
+      [
+        "GET",
+        "/v0.1-alpha/tenants/{tenantId}/environments/capacityTypes/PowerPagesAuthenticated/trends",
+        "Licensing_get_v0_1_alpha_tenants_tenantId_environments_capacityTypes_PowerPagesAuthenticated_trends"
+      ],
+      [
+        "GET",
+        "/v0.1-alpha/tenants/{tenantId}/licenseRequests/all",
+        "Licensing_get_v0_1_alpha_tenants_tenantId_licenseRequests_all"
+      ],
+      [
+        "GET",
+        "/v0.1-alpha/tenants/{tenantId}/TenantCapacity",
+        "Licensing_get_v0_1_alpha_tenants_tenantId_TenantCapacity"
+      ],
+      [
+        "GET",
+        "/v0.1-alpha/tenants/{tenantId}/TenantConsumptionReport/GetAllReports",
+        "Licensing_get_v0_1_alpha_tenants_tenantId_TenantConsumptionReport_GetAllReports"
+      ],
+      [
+        "GET",
+        "/v0.1-alpha/tenants/{tenantId}/TenantLicenseModel",
+        "Licensing_get_v0_1_alpha_tenants_tenantId_TenantLicenseModel"
+      ],
+      [
+        "POST",
+        "/v0.1/tenants/{tenantId}/allocationsV2/getmany",
+        "Licensing_post_v0_1_tenants_tenantId_allocationsV2_getmany"
+      ],
+      [
+        "POST",
+        "/v0.1/tenants/{tenantId}/allocationsV2/overage/getmany",
+        "Licensing_post_v0_1_tenants_tenantId_allocationsV2_overage_getmany"
+      ],
+      [
+        "GET",
+        "/v0.1/tenants/{tenantId}/allocationsV2/sum",
+        "Licensing_get_v0_1_tenants_tenantId_allocationsV2_sum"
+      ],
+      [
+        "GET",
+        "/v1.0/tenants/{tenantId}/capacityTypes/MCSMessages/trends",
+        "Licensing_get_v1_0_tenants_tenantId_capacityTypes_MCSMessages_trends"
+      ],
+      [
+        "GET",
+        "/v1.0/tenants/{tenantId}/capacityTypes/MCSSessions/trends",
+        "Licensing_get_v1_0_tenants_tenantId_capacityTypes_MCSSessions_trends"
+      ],
+      [
+        "GET",
+        "/v1.0/tenants/{tenantId}/CurrencyReports",
+        "Licensing_get_v1_0_tenants_tenantId_CurrencyReports"
+      ],
+      [
+        "GET",
+        "/v1.0/tenants/{tenantId}/Downloads/getAll/EntitlementConsumptionTenantDetailsReport",
+        "Licensing_get_v1_0_tenants_tenantId_Downloads_getAll_EntitlementConsumptionTenantDetailsReport"
+      ],
+      [
+        "GET",
+        "/v1.0/tenants/{tenantId}/Downloads/getAll/PowerAppsTenantLicenseDetailsDownload",
+        "Licensing_get_v1_0_tenants_tenantId_Downloads_getAll_PowerAppsTenantLicenseDetailsDownload"
+      ],
+      [
+        "GET",
+        "/v1.0/tenants/{tenantId}/FinOpsLicensing/GetLicenseSummaryV2",
+        "Licensing_get_v1_0_tenants_tenantId_FinOpsLicensing_GetLicenseSummaryV2"
+      ],
+      [
+        "POST",
+        "/v1.0/tenants/{tenantId}/FinOpsLicensing/GetUserLicenseDetailsV2",
+        "Licensing_post_v1_0_tenants_tenantId_FinOpsLicensing_GetUserLicenseDetailsV2"
+      ],
+      [
+        "GET",
+        "/v1.0/tenants/{tenantId}/FinOpsLicensing/GetUsersExemptFromLicensing",
+        "Licensing_get_v1_0_tenants_tenantId_FinOpsLicensing_GetUsersExemptFromLicensing"
+      ],
+      [
+        "GET",
+        "/v1.0/tenants/{tenantId}/FinOpsLicensing/GetUsersExemptFromLicensing/Count",
+        "Licensing_get_v1_0_tenants_tenantId_FinOpsLicensing_GetUsersExemptFromLicensing_Count"
+      ],
+      [
+        "GET",
+        "/v1.0/tenants/{tenantId}/ManagedEnvironment/GetAllProductSkus",
+        "Licensing_get_v1_0_tenants_tenantId_ManagedEnvironment_GetAllProductSkus"
+      ],
+      [
+        "POST",
+        "/v1.0/tenants/{tenantId}/ManagedEnvironment/PowerApps/GetAppPassEnvironments",
+        "Licensing_post_v1_0_tenants_tenantId_ManagedEnvironment_PowerApps_GetAppPassEnvironments"
+      ],
+      [
+        "GET",
+        "/v1.0/tenants/{tenantId}/ManagedEnvironment/PowerApps/GetLicenseSummary",
+        "Licensing_get_v1_0_tenants_tenantId_ManagedEnvironment_PowerApps_GetLicenseSummary"
+      ],
+      [
+        "POST",
+        "/v1.0/tenants/{tenantId}/ManagedEnvironment/PowerAutomate/GetComplianceSummary",
+        "Licensing_post_v1_0_tenants_tenantId_ManagedEnvironment_PowerAutomate_GetComplianceSummary"
+      ],
+      [
+        "GET",
+        "/v1.0/tenants/{tenantId}/ManagedEnvironment/PowerAutomate/GetLicenseSummary",
+        "Licensing_get_v1_0_tenants_tenantId_ManagedEnvironment_PowerAutomate_GetLicenseSummary"
+      ],
+      [
+        "GET",
+        "/v1.0/tenants/{tenantId}/productCategories/PowerApps/userSubscribedLicenseSummary",
+        "Licensing_get_v1_0_tenants_tenantId_productCategories_PowerApps_userSubscribedLicenseSummary"
+      ],
+      [
+        "POST",
+        "/v1.0/tenants/{tenantId}/productCategories/PowerApps/userSubscribedLicenseTrends",
+        "Licensing_post_v1_0_tenants_tenantId_productCategories_PowerApps_userSubscribedLicenseTrends"
+      ],
+      [
+        "GET",
+        "/v1.0/tenants/{tenantId}/recommendations/PowerAppsUnderlicensedUsers",
+        "Licensing_get_v1_0_tenants_tenantId_recommendations_PowerAppsUnderlicensedUsers"
+      ],
+      [
+        "GET",
+        "/v2.0/tenants/{tenantId}/BillingPolicies",
+        "Licensing_get_v2_0_tenants_tenantId_BillingPolicies"
+      ],
+      [
+        "GET",
+        "/v2.0/tenants/{tenantId}/entitlements/AppPass",
+        "Licensing_get_v2_0_tenants_tenantId_entitlements_AppPass"
+      ],
+      [
+        "GET",
+        "/v2.0/tenants/{tenantId}/entitlements/Database",
+        "Licensing_get_v2_0_tenants_tenantId_entitlements_Database"
+      ],
+      [
+        "GET",
+        "/v2.0/tenants/{tenantId}/entitlements/File",
+        "Licensing_get_v2_0_tenants_tenantId_entitlements_File"
+      ],
+      [
+        "GET",
+        "/v2.0/tenants/{tenantId}/entitlements/FinOpsDatabase",
+        "Licensing_get_v2_0_tenants_tenantId_entitlements_FinOpsDatabase"
+      ],
+      [
+        "GET",
+        "/v2.0/tenants/{tenantId}/entitlements/FinOpsFile",
+        "Licensing_get_v2_0_tenants_tenantId_entitlements_FinOpsFile"
+      ],
+      [
+        "GET",
+        "/v2.0/tenants/{tenantId}/entitlements/Log",
+        "Licensing_get_v2_0_tenants_tenantId_entitlements_Log"
+      ],
+      [
+        "GET",
+        "/v2.0/tenants/{tenantId}/entitlements/MCSMessages",
+        "Licensing_get_v2_0_tenants_tenantId_entitlements_MCSMessages"
+      ],
+      [
+        "GET",
+        "/v2.0/tenants/{tenantId}/entitlements/MCSMessages/resources",
+        "Licensing_get_v2_0_tenants_tenantId_entitlements_MCSMessages_resources"
+      ],
+      [
+        "GET",
+        "/v2.0/tenants/{tenantId}/entitlements/MCSMessages/users",
+        "Licensing_get_v2_0_tenants_tenantId_entitlements_MCSMessages_users"
+      ],
+      [
+        "GET",
+        "/v2.0/tenants/{tenantId}/entitlements/MCSSessions",
+        "Licensing_get_v2_0_tenants_tenantId_entitlements_MCSSessions"
+      ],
+      [
+        "GET",
+        "/v2.0/tenants/{tenantId}/environments/entitlementConsumptions/AppPass",
+        "Licensing_get_v2_0_tenants_tenantId_environments_entitlementConsumptions_AppPass"
+      ],
+      [
+        "GET",
+        "/v2.0/tenants/{tenantId}/environments/entitlementConsumptions/Database",
+        "Licensing_get_v2_0_tenants_tenantId_environments_entitlementConsumptions_Database"
+      ],
+      [
+        "GET",
+        "/v2.0/tenants/{tenantId}/environments/entitlementConsumptions/File",
+        "Licensing_get_v2_0_tenants_tenantId_environments_entitlementConsumptions_File"
+      ],
+      [
+        "GET",
+        "/v2.0/tenants/{tenantId}/environments/entitlementConsumptions/FinOpsDatabase",
+        "Licensing_get_v2_0_tenants_tenantId_environments_entitlementConsumptions_FinOpsDatabase"
+      ],
+      [
+        "GET",
+        "/v2.0/tenants/{tenantId}/environments/entitlementConsumptions/FinOpsFile",
+        "Licensing_get_v2_0_tenants_tenantId_environments_entitlementConsumptions_FinOpsFile"
+      ],
+      [
+        "GET",
+        "/v2.0/tenants/{tenantId}/environments/entitlementConsumptions/Log",
+        "Licensing_get_v2_0_tenants_tenantId_environments_entitlementConsumptions_Log"
+      ],
+      [
+        "GET",
+        "/v2.0/tenants/{tenantId}/environments/entitlementConsumptions/MCSMessages",
+        "Licensing_get_v2_0_tenants_tenantId_environments_entitlementConsumptions_MCSMessages"
+      ],
+      [
+        "GET",
+        "/v2.0/tenants/{tenantId}/environments/entitlementConsumptions/MCSSessions",
+        "Licensing_get_v2_0_tenants_tenantId_environments_entitlementConsumptions_MCSSessions"
+      ],
+      [
+        "GET",
+        "/v2.0/tenants/{tenantId}/environments/entitlements/AppPass",
+        "Licensing_get_v2_0_tenants_tenantId_environments_entitlements_AppPass"
+      ],
+      [
+        "GET",
+        "/v2.0/tenants/{tenantId}/environments/entitlements/Database",
+        "Licensing_get_v2_0_tenants_tenantId_environments_entitlements_Database"
+      ],
+      [
+        "GET",
+        "/v2.0/tenants/{tenantId}/environments/entitlements/File",
+        "Licensing_get_v2_0_tenants_tenantId_environments_entitlements_File"
+      ],
+      [
+        "GET",
+        "/v2.0/tenants/{tenantId}/environments/entitlements/FinOpsDatabase",
+        "Licensing_get_v2_0_tenants_tenantId_environments_entitlements_FinOpsDatabase"
+      ],
+      [
+        "GET",
+        "/v2.0/tenants/{tenantId}/environments/entitlements/FinOpsFile",
+        "Licensing_get_v2_0_tenants_tenantId_environments_entitlements_FinOpsFile"
+      ],
+      [
+        "GET",
+        "/v2.0/tenants/{tenantId}/environments/entitlements/Log",
+        "Licensing_get_v2_0_tenants_tenantId_environments_entitlements_Log"
+      ],
+      [
+        "GET",
+        "/v2.0/tenants/{tenantId}/environments/entitlements/MCSMessages",
+        "Licensing_get_v2_0_tenants_tenantId_environments_entitlements_MCSMessages"
+      ],
+      [
+        "GET",
+        "/v2.0/tenants/{tenantId}/environments/entitlements/MCSSessions",
+        "Licensing_get_v2_0_tenants_tenantId_environments_entitlements_MCSSessions"
+      ],
+      [
+        "GET",
+        "/api/AppManagement/TenantProducts",
+        "AdminPortal_get_api_AppManagement_TenantProducts"
+      ],
+      [
+        "GET",
+        "/api/environments/{environmentsId}/features",
+        "AdminPortal_get_api_environments_environmentsId_features"
+      ],
+      [
+        "GET",
+        "/api/health/ping",
+        "AdminPortal_get_api_health_ping"
+      ],
+      [
+        "GET",
+        "/appmanagement/environments/{environmentId}/AvailablePackages/Microsoft.Crm.Cloud.Pes.Tps.UserGetAvailableInstancePackages(Lcid='1033',InstanceCountryCode='US',CrmVersion='9.2.26031.180')",
+        "TenantApi_get_appmanagement_environments_environmentId_AvailablePackages_Microsoft_Crm_Cloud_Pes_Tps_UserGetAvailableInstancePackages_Lcid_1033_InstanceCountryCode_US_CrmVersion_9_2_26031_180"
+      ],
+      [
+        "GET",
+        "/appmanagement/environments/{environmentId}/InstancePackages/Microsoft.Crm.Cloud.Pes.Tps.UserGetInstancePackages(Lcid='1033')",
+        "TenantApi_get_appmanagement_environments_environmentId_InstancePackages_Microsoft_Crm_Cloud_Pes_Tps_UserGetInstancePackages_Lcid_1033"
+      ],
+      [
+        "GET",
+        "/licensing/autoClaimPolicies",
+        "TenantApi_get_licensing_autoClaimPolicies"
+      ],
+      [
+        "GET",
+        "/notificationservice/notifications/metadata",
+        "NotificationService_get_notificationservice_notifications_metadata"
+      ],
+      [
+        "POST",
+        "/api/data/v9.0/$batch",
+        "DynamicsCrm_post_api_data_v9_0_batch"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/applicationusers",
+        "DynamicsCrm_get_api_data_v9_0_applicationusers"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/appmodules/Microsoft.Dynamics.CRM.RetrieveUnpublishedMultiple()",
+        "DynamicsCrm_get_api_data_v9_0_appmodules_Microsoft_Dynamics_CRM_RetrieveUnpublishedMultiple"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/audits",
+        "DynamicsCrm_get_api_data_v9_0_audits"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/businessunits",
+        "DynamicsCrm_get_api_data_v9_0_businessunits"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/businessunits({businessunitId})",
+        "DynamicsCrm_get_api_data_v9_0_businessunits_businessunitId"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/deploymentpipelines",
+        "DynamicsCrm_get_api_data_v9_0_deploymentpipelines"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/deploymentstageruns",
+        "DynamicsCrm_get_api_data_v9_0_deploymentstageruns"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/EntityDefinitions",
+        "DynamicsCrm_get_api_data_v9_0_EntityDefinitions"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/EntityDefinitions(LogicalName='businessunit')",
+        "DynamicsCrm_get_api_data_v9_0_EntityDefinitions_LogicalName_businessunit"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/EntityDefinitions(LogicalName='role')/Attributes(LogicalName='issytemgenerated')",
+        "DynamicsCrm_get_api_data_v9_0_EntityDefinitions_LogicalName_role_Attributes_LogicalName_issytemgenerated"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/EntityDefinitions(LogicalName='systemuser')",
+        "DynamicsCrm_get_api_data_v9_0_EntityDefinitions_LogicalName_systemuser"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/EntityDefinitions(LogicalName='systemuser')/Attributes(LogicalName='systemmanagedusertype')",
+        "DynamicsCrm_get_api_data_v9_0_EntityDefinitions_LogicalName_systemuser_Attributes_LogicalName_systemmanagedusertype"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/EntityDefinitions(LogicalName='team')",
+        "DynamicsCrm_get_api_data_v9_0_EntityDefinitions_LogicalName_team"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/GetClientMetadata(ClientMetadataQuery=@ClientMetadataQuery)",
+        "DynamicsCrm_get_api_data_v9_0_GetClientMetadata_ClientMetadataQuery_ClientMetadataQuery"
+      ],
+      [
+        "POST",
+        "/api/data/v9.0/GetFeatureEnabledState",
+        "DynamicsCrm_post_api_data_v9_0_GetFeatureEnabledState"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/organizations",
+        "DynamicsCrm_get_api_data_v9_0_organizations"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/privileges",
+        "DynamicsCrm_get_api_data_v9_0_privileges"
+      ],
+      [
+        "POST",
+        "/api/data/v9.0/RetrieveFeatureControlSettingsByNamespace",
+        "DynamicsCrm_post_api_data_v9_0_RetrieveFeatureControlSettingsByNamespace"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=0002921c-d1d0-f011-8543-7c1e52689cc6)",
+        "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_0002921c_d1d0_f011_8543_7c1e52689cc6"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=02123b67-66ae-4a69-8cdc-6473b94ad1a9)",
+        "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_02123b67_66ae_4a69_8cdc_6473b94ad1a9"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=169ead94-a7e8-42c5-9ae8-d81205dfee77)",
+        "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_169ead94_a7e8_42c5_9ae8_d81205dfee77"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=1a6feece-0ba1-4739-8dee-eb83b1b591ea)",
+        "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_1a6feece_0ba1_4739_8dee_eb83b1b591ea"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=1bb44f6d-15a5-48aa-a2f2-8d2cb0095d2d)",
+        "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_1bb44f6d_15a5_48aa_a2f2_8d2cb0095d2d"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=1f6c957f-9851-4dbe-ab1c-508c06faa8be)",
+        "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_1f6c957f_9851_4dbe_ab1c_508c06faa8be"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=20902168-ee38-ea11-a81c-000d3ac3e6d8)",
+        "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_20902168_ee38_ea11_a81c_000d3ac3e6d8"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=25f9a5ed-60fd-4bcf-bf4b-b40296410bf4)",
+        "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_25f9a5ed_60fd_4bcf_bf4b_b40296410bf4"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=2c321cf0-f096-ea11-a81a-000d3a6ecd99)",
+        "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_2c321cf0_f096_ea11_a81a_000d3a6ecd99"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=2fe4d72e-e538-ea11-a81c-000d3ac3e6d8)",
+        "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_2fe4d72e_e538_ea11_a81c_000d3ac3e6d8"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=313995f9-4a4a-4d4a-afd1-c892da78e13e)",
+        "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_313995f9_4a4a_4d4a_afd1_c892da78e13e"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=3f199ebd-977e-43e5-abe5-fe865a1f2904)",
+        "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_3f199ebd_977e_43e5_abe5_fe865a1f2904"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=4931681d-8163-e811-a965-000d3a11fe32)",
+        "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_4931681d_8163_e811_a965_000d3a11fe32"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=4f9dbfce-f797-40d8-a8ac-902e441e371b)",
+        "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_4f9dbfce_f797_40d8_a8ac_902e441e371b"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=500073fc-54f7-429b-822e-f28b01fa5148)",
+        "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_500073fc_54f7_429b_822e_f28b01fa5148"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=5225adeb-859b-42f3-8289-a399e47512d5)",
+        "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_5225adeb_859b_42f3_8289_a399e47512d5"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=6b860c71-0e4e-ec11-b1b5-000d3a6ed5b3)",
+        "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_6b860c71_0e4e_ec11_b1b5_000d3a6ed5b3"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=726d11d6-d9cf-4503-ade9-d6a4be7fa095)",
+        "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_726d11d6_d9cf_4503_ade9_d6a4be7fa095"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=7be5a395-6b58-4f8c-908f-97dc8810fc50)",
+        "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_7be5a395_6b58_4f8c_908f_97dc8810fc50"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=854af338-f3c5-e711-8122-000d3aa01c52)",
+        "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_854af338_f3c5_e711_8122_000d3aa01c52"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=88b87c37-1472-4798-ac48-d56509eb6e1d)",
+        "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_88b87c37_1472_4798_ac48_d56509eb6e1d"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=896a28e5-678d-4fa8-ad59-c606d1aa98ce)",
+        "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_896a28e5_678d_4fa8_ad59_c606d1aa98ce"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=8a2f35d9-e447-4285-974c-81382317ca21)",
+        "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_8a2f35d9_e447_4285_974c_81382317ca21"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=95aa4c68-04e0-4982-b994-7b5ed6c0771d)",
+        "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_95aa4c68_04e0_4982_b994_7b5ed6c0771d"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=979144c2-989b-41a5-a146-6b3ea4130e8c)",
+        "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_979144c2_989b_41a5_a146_6b3ea4130e8c"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=987674dd-f4a4-45a8-a1f7-f2cce1cf87f8)",
+        "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_987674dd_f4a4_45a8_a1f7_f2cce1cf87f8"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=99b7f9c4-5c1e-4b9a-b756-fdfa137b6f85)",
+        "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_99b7f9c4_5c1e_4b9a_b756_fdfa137b6f85"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=9f572d55-6090-493b-904a-3956bdc55343)",
+        "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_9f572d55_6090_493b_904a_3956bdc55343"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=a0537877-879d-4b70-a391-bb07b94fbba2)",
+        "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_a0537877_879d_4b70_a391_bb07b94fbba2"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=a0a59a4a-b5a8-4e6f-a094-a866573c17d4)",
+        "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_a0a59a4a_b5a8_4e6f_a094_a866573c17d4"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=a1801436-efd6-e811-a96e-000d3a3ab886)",
+        "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_a1801436_efd6_e811_a96e_000d3a3ab886"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=ab8b8c58-1f50-4037-8b26-7523d6145cc3)",
+        "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_ab8b8c58_1f50_4037_8b26_7523d6145cc3"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=b21a7144-299d-4c21-a116-30f60e9c159a)",
+        "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_b21a7144_299d_4c21_a116_30f60e9c159a"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=b9b08637-acf6-e711-a95a-000d3a11f5ee)",
+        "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_b9b08637_acf6_e711_a95a_000d3a11f5ee"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=bdf1780b-2867-4c3e-8957-dce785eac543)",
+        "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_bdf1780b_2867_4c3e_8957_dce785eac543"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=c95980b3-97dc-4762-a037-c15fe02dae8c)",
+        "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_c95980b3_97dc_4762_a037_c15fe02dae8c"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=d19d7df9-96e3-440a-ada1-7f469d2a00d1)",
+        "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_d19d7df9_96e3_440a_ada1_7f469d2a00d1"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=d58407f2-48d5-e711-a82c-000d3a37c848)",
+        "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_d58407f2_48d5_e711_a82c_000d3a37c848"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=d6e926ad-4afc-42fb-97f1-6e50c2ef174e)",
+        "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_d6e926ad_4afc_42fb_97f1_6e50c2ef174e"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=e0d2794e-82f3-e811-a951-000d3a1bcf17)",
+        "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_e0d2794e_82f3_e811_a951_000d3a1bcf17"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=e389a4a6-b53b-4828-bca9-4b5d25f1763b)",
+        "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_e389a4a6_b53b_4828_bca9_4b5d25f1763b"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=e57bff35-58b4-4725-aee2-40fb18f4c8bd)",
+        "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_e57bff35_58b4_4725_aee2_40fb18f4c8bd"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=edfcbfd2-358f-ea11-a81f-000d3a6eafd3)",
+        "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_edfcbfd2_358f_ea11_a81f_000d3a6eafd3"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=ee18dcf2-6f83-4cd7-aa5c-1d8a88947d51)",
+        "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_ee18dcf2_6f83_4cd7_aa5c_1d8a88947d51"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=ee2c8e11-6d57-4c5d-9f84-659c0db132bb)",
+        "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_ee2c8e11_6d57_4c5d_9f84_659c0db132bb"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=ee7bc749-3dd6-45ac-b95d-a3031463380b)",
+        "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_ee7bc749_3dd6_45ac_b95d_a3031463380b"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=f600921c-d1d0-f011-8543-7c1e52689cc6)",
+        "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_f600921c_d1d0_f011_8543_7c1e52689cc6"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=f9e46d0f-d53e-4d5c-b06b-24948b4606ed)",
+        "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_f9e46d0f_d53e_4d5c_b06b_24948b4606ed"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=fc3e65d9-450a-4301-933b-f9bcaee20521)",
+        "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_fc3e65d9_450a_4301_933b_f9bcaee20521"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=ffadce64-3542-4bf1-a83a-ac9941104680)",
+        "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_ffadce64_3542_4bf1_a83a_ac9941104680"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/RetrieveSetting(SettingName='CrossRegionDeploymentEnabled')",
+        "DynamicsCrm_get_api_data_v9_0_RetrieveSetting_SettingName_CrossRegionDeploymentEnabled"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/RetrieveSetting(SettingName='DefaultCustomPipelinesHostEnvForTenant')",
+        "DynamicsCrm_get_api_data_v9_0_RetrieveSetting_SettingName_DefaultCustomPipelinesHostEnvForTenant"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/RetrieveSetting(SettingName='EnablePipelinesManagedEnvironmentCompliance')",
+        "DynamicsCrm_get_api_data_v9_0_RetrieveSetting_SettingName_EnablePipelinesManagedEnvironmentCompliance"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/RetrieveSetting(SettingName='EnableSolutionImportFromPipelineHost')",
+        "DynamicsCrm_get_api_data_v9_0_RetrieveSetting_SettingName_EnableSolutionImportFromPipelineHost"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/roleeditorlayouts",
+        "DynamicsCrm_get_api_data_v9_0_roleeditorlayouts"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/roles",
+        "DynamicsCrm_get_api_data_v9_0_roles"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/roles(roleid = 0002921c-d1d0-f011-8543-7c1e52689cc6)",
+        "DynamicsCrm_get_api_data_v9_0_roles_roleid_0002921c_d1d0_f011_8543_7c1e52689cc6"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/roles(roleid = 02123b67-66ae-4a69-8cdc-6473b94ad1a9)",
+        "DynamicsCrm_get_api_data_v9_0_roles_roleid_02123b67_66ae_4a69_8cdc_6473b94ad1a9"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/roles(roleid = 169ead94-a7e8-42c5-9ae8-d81205dfee77)",
+        "DynamicsCrm_get_api_data_v9_0_roles_roleid_169ead94_a7e8_42c5_9ae8_d81205dfee77"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/roles(roleid = 1a6feece-0ba1-4739-8dee-eb83b1b591ea)",
+        "DynamicsCrm_get_api_data_v9_0_roles_roleid_1a6feece_0ba1_4739_8dee_eb83b1b591ea"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/roles(roleid = 1bb44f6d-15a5-48aa-a2f2-8d2cb0095d2d)",
+        "DynamicsCrm_get_api_data_v9_0_roles_roleid_1bb44f6d_15a5_48aa_a2f2_8d2cb0095d2d"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/roles(roleid = 1f6c957f-9851-4dbe-ab1c-508c06faa8be)",
+        "DynamicsCrm_get_api_data_v9_0_roles_roleid_1f6c957f_9851_4dbe_ab1c_508c06faa8be"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/roles(roleid = 20902168-ee38-ea11-a81c-000d3ac3e6d8)",
+        "DynamicsCrm_get_api_data_v9_0_roles_roleid_20902168_ee38_ea11_a81c_000d3ac3e6d8"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/roles(roleid = 25f9a5ed-60fd-4bcf-bf4b-b40296410bf4)",
+        "DynamicsCrm_get_api_data_v9_0_roles_roleid_25f9a5ed_60fd_4bcf_bf4b_b40296410bf4"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/roles(roleid = 2c321cf0-f096-ea11-a81a-000d3a6ecd99)",
+        "DynamicsCrm_get_api_data_v9_0_roles_roleid_2c321cf0_f096_ea11_a81a_000d3a6ecd99"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/roles(roleid = 2fe4d72e-e538-ea11-a81c-000d3ac3e6d8)",
+        "DynamicsCrm_get_api_data_v9_0_roles_roleid_2fe4d72e_e538_ea11_a81c_000d3ac3e6d8"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/roles(roleid = 313995f9-4a4a-4d4a-afd1-c892da78e13e)",
+        "DynamicsCrm_get_api_data_v9_0_roles_roleid_313995f9_4a4a_4d4a_afd1_c892da78e13e"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/roles(roleid = 3f199ebd-977e-43e5-abe5-fe865a1f2904)",
+        "DynamicsCrm_get_api_data_v9_0_roles_roleid_3f199ebd_977e_43e5_abe5_fe865a1f2904"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/roles(roleid = 4931681d-8163-e811-a965-000d3a11fe32)",
+        "DynamicsCrm_get_api_data_v9_0_roles_roleid_4931681d_8163_e811_a965_000d3a11fe32"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/roles(roleid = 4f9dbfce-f797-40d8-a8ac-902e441e371b)",
+        "DynamicsCrm_get_api_data_v9_0_roles_roleid_4f9dbfce_f797_40d8_a8ac_902e441e371b"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/roles(roleid = 500073fc-54f7-429b-822e-f28b01fa5148)",
+        "DynamicsCrm_get_api_data_v9_0_roles_roleid_500073fc_54f7_429b_822e_f28b01fa5148"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/roles(roleid = 5225adeb-859b-42f3-8289-a399e47512d5)",
+        "DynamicsCrm_get_api_data_v9_0_roles_roleid_5225adeb_859b_42f3_8289_a399e47512d5"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/roles(roleid = 6b860c71-0e4e-ec11-b1b5-000d3a6ed5b3)",
+        "DynamicsCrm_get_api_data_v9_0_roles_roleid_6b860c71_0e4e_ec11_b1b5_000d3a6ed5b3"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/roles(roleid = 726d11d6-d9cf-4503-ade9-d6a4be7fa095)",
+        "DynamicsCrm_get_api_data_v9_0_roles_roleid_726d11d6_d9cf_4503_ade9_d6a4be7fa095"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/roles(roleid = 7be5a395-6b58-4f8c-908f-97dc8810fc50)",
+        "DynamicsCrm_get_api_data_v9_0_roles_roleid_7be5a395_6b58_4f8c_908f_97dc8810fc50"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/roles(roleid = 854af338-f3c5-e711-8122-000d3aa01c52)",
+        "DynamicsCrm_get_api_data_v9_0_roles_roleid_854af338_f3c5_e711_8122_000d3aa01c52"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/roles(roleid = 88b87c37-1472-4798-ac48-d56509eb6e1d)",
+        "DynamicsCrm_get_api_data_v9_0_roles_roleid_88b87c37_1472_4798_ac48_d56509eb6e1d"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/roles(roleid = 896a28e5-678d-4fa8-ad59-c606d1aa98ce)",
+        "DynamicsCrm_get_api_data_v9_0_roles_roleid_896a28e5_678d_4fa8_ad59_c606d1aa98ce"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/roles(roleid = 8a2f35d9-e447-4285-974c-81382317ca21)",
+        "DynamicsCrm_get_api_data_v9_0_roles_roleid_8a2f35d9_e447_4285_974c_81382317ca21"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/roles(roleid = 95aa4c68-04e0-4982-b994-7b5ed6c0771d)",
+        "DynamicsCrm_get_api_data_v9_0_roles_roleid_95aa4c68_04e0_4982_b994_7b5ed6c0771d"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/roles(roleid = 979144c2-989b-41a5-a146-6b3ea4130e8c)",
+        "DynamicsCrm_get_api_data_v9_0_roles_roleid_979144c2_989b_41a5_a146_6b3ea4130e8c"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/roles(roleid = 987674dd-f4a4-45a8-a1f7-f2cce1cf87f8)",
+        "DynamicsCrm_get_api_data_v9_0_roles_roleid_987674dd_f4a4_45a8_a1f7_f2cce1cf87f8"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/roles(roleid = 99b7f9c4-5c1e-4b9a-b756-fdfa137b6f85)",
+        "DynamicsCrm_get_api_data_v9_0_roles_roleid_99b7f9c4_5c1e_4b9a_b756_fdfa137b6f85"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/roles(roleid = 9f572d55-6090-493b-904a-3956bdc55343)",
+        "DynamicsCrm_get_api_data_v9_0_roles_roleid_9f572d55_6090_493b_904a_3956bdc55343"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/roles(roleid = a0537877-879d-4b70-a391-bb07b94fbba2)",
+        "DynamicsCrm_get_api_data_v9_0_roles_roleid_a0537877_879d_4b70_a391_bb07b94fbba2"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/roles(roleid = a0a59a4a-b5a8-4e6f-a094-a866573c17d4)",
+        "DynamicsCrm_get_api_data_v9_0_roles_roleid_a0a59a4a_b5a8_4e6f_a094_a866573c17d4"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/roles(roleid = a1801436-efd6-e811-a96e-000d3a3ab886)",
+        "DynamicsCrm_get_api_data_v9_0_roles_roleid_a1801436_efd6_e811_a96e_000d3a3ab886"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/roles(roleid = ab8b8c58-1f50-4037-8b26-7523d6145cc3)",
+        "DynamicsCrm_get_api_data_v9_0_roles_roleid_ab8b8c58_1f50_4037_8b26_7523d6145cc3"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/roles(roleid = b21a7144-299d-4c21-a116-30f60e9c159a)",
+        "DynamicsCrm_get_api_data_v9_0_roles_roleid_b21a7144_299d_4c21_a116_30f60e9c159a"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/roles(roleid = b9b08637-acf6-e711-a95a-000d3a11f5ee)",
+        "DynamicsCrm_get_api_data_v9_0_roles_roleid_b9b08637_acf6_e711_a95a_000d3a11f5ee"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/roles(roleid = bdf1780b-2867-4c3e-8957-dce785eac543)",
+        "DynamicsCrm_get_api_data_v9_0_roles_roleid_bdf1780b_2867_4c3e_8957_dce785eac543"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/roles(roleid = c95980b3-97dc-4762-a037-c15fe02dae8c)",
+        "DynamicsCrm_get_api_data_v9_0_roles_roleid_c95980b3_97dc_4762_a037_c15fe02dae8c"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/roles(roleid = d19d7df9-96e3-440a-ada1-7f469d2a00d1)",
+        "DynamicsCrm_get_api_data_v9_0_roles_roleid_d19d7df9_96e3_440a_ada1_7f469d2a00d1"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/roles(roleid = d58407f2-48d5-e711-a82c-000d3a37c848)",
+        "DynamicsCrm_get_api_data_v9_0_roles_roleid_d58407f2_48d5_e711_a82c_000d3a37c848"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/roles(roleid = d6e926ad-4afc-42fb-97f1-6e50c2ef174e)",
+        "DynamicsCrm_get_api_data_v9_0_roles_roleid_d6e926ad_4afc_42fb_97f1_6e50c2ef174e"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/roles(roleid = e0d2794e-82f3-e811-a951-000d3a1bcf17)",
+        "DynamicsCrm_get_api_data_v9_0_roles_roleid_e0d2794e_82f3_e811_a951_000d3a1bcf17"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/roles(roleid = e389a4a6-b53b-4828-bca9-4b5d25f1763b)",
+        "DynamicsCrm_get_api_data_v9_0_roles_roleid_e389a4a6_b53b_4828_bca9_4b5d25f1763b"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/roles(roleid = e57bff35-58b4-4725-aee2-40fb18f4c8bd)",
+        "DynamicsCrm_get_api_data_v9_0_roles_roleid_e57bff35_58b4_4725_aee2_40fb18f4c8bd"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/roles(roleid = edfcbfd2-358f-ea11-a81f-000d3a6eafd3)",
+        "DynamicsCrm_get_api_data_v9_0_roles_roleid_edfcbfd2_358f_ea11_a81f_000d3a6eafd3"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/roles(roleid = ee18dcf2-6f83-4cd7-aa5c-1d8a88947d51)",
+        "DynamicsCrm_get_api_data_v9_0_roles_roleid_ee18dcf2_6f83_4cd7_aa5c_1d8a88947d51"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/roles(roleid = ee2c8e11-6d57-4c5d-9f84-659c0db132bb)",
+        "DynamicsCrm_get_api_data_v9_0_roles_roleid_ee2c8e11_6d57_4c5d_9f84_659c0db132bb"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/roles(roleid = ee7bc749-3dd6-45ac-b95d-a3031463380b)",
+        "DynamicsCrm_get_api_data_v9_0_roles_roleid_ee7bc749_3dd6_45ac_b95d_a3031463380b"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/roles(roleid = f600921c-d1d0-f011-8543-7c1e52689cc6)",
+        "DynamicsCrm_get_api_data_v9_0_roles_roleid_f600921c_d1d0_f011_8543_7c1e52689cc6"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/roles(roleid = f9e46d0f-d53e-4d5c-b06b-24948b4606ed)",
+        "DynamicsCrm_get_api_data_v9_0_roles_roleid_f9e46d0f_d53e_4d5c_b06b_24948b4606ed"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/roles(roleid = fc3e65d9-450a-4301-933b-f9bcaee20521)",
+        "DynamicsCrm_get_api_data_v9_0_roles_roleid_fc3e65d9_450a_4301_933b_f9bcaee20521"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/roles(roleid = ffadce64-3542-4bf1-a83a-ac9941104680)",
+        "DynamicsCrm_get_api_data_v9_0_roles_roleid_ffadce64_3542_4bf1_a83a_ac9941104680"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/savedqueries",
+        "DynamicsCrm_get_api_data_v9_0_savedqueries"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/solutions",
+        "DynamicsCrm_get_api_data_v9_0_solutions"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/solutions({solutionId})",
+        "DynamicsCrm_get_api_data_v9_0_solutions_solutionId"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/systemusers",
+        "DynamicsCrm_get_api_data_v9_0_systemusers"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/systemusers({systemuserId})/Microsoft.Dynamics.CRM.RetrieveUserPrivileges",
+        "DynamicsCrm_get_api_data_v9_0_systemusers_systemuserId_Microsoft_Dynamics_CRM_RetrieveUserPrivileges"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/systemusers({systemuserId})/Microsoft.Dynamics.CRM.RetrieveUsersPrivilegesThroughTeams(ExcludeOrgDisabledPrivileges=true,IncludeSetupUserFiltering=true)",
+        "DynamicsCrm_get_api_data_v9_0_systemusers_systemuserId_Microsoft_Dynamics_CRM_RetrieveUsersPrivilegesThroughTeams_ExcludeOrgDisabledPrivileges_true_IncludeSetupUserFiltering_true"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/teammemberships",
+        "DynamicsCrm_get_api_data_v9_0_teammemberships"
+      ],
+      [
+        "GET",
+        "/api/data/v9.0/teams",
+        "DynamicsCrm_get_api_data_v9_0_teams"
+      ],
+      [
+        "GET",
+        "/api/data/v9.1/systemusers",
+        "DynamicsCrm_get_api_data_v9_1_systemusers"
+      ],
+      [
+        "GET",
+        "/api/nosql/audit/isreadenabled",
+        "DynamicsCrm_get_api_nosql_audit_isreadenabled"
+      ],
+      [
+        "GET",
+        "/api/v1/powerPortal/environment/CoreEntitiesPackageInstallStatus",
+        "PowerPagesPortalInfra_get_api_v1_powerPortal_environment_CoreEntitiesPackageInstallStatus"
+      ],
+      [
+        "GET",
+        "/api/v1/powerPortal/environment/optInStatus",
+        "PowerPagesPortalInfra_get_api_v1_powerPortal_environment_optInStatus"
+      ],
+      [
+        "GET",
+        "/api/v1/powerPortal/FeatureConfiguration/GetFeatureControlValues",
+        "PowerPagesPortalInfra_get_api_v1_powerPortal_FeatureConfiguration_GetFeatureControlValues"
+      ],
+      [
+        "GET",
+        "/api/v1/powerPortal/GetEnvironment",
+        "PowerPagesPortalInfra_get_api_v1_powerPortal_GetEnvironment"
+      ],
+      [
+        "GET",
+        "/api/v1/powerPortal/IsCDSOrg",
+        "PowerPagesPortalInfra_get_api_v1_powerPortal_IsCDSOrg"
+      ],
+      [
+        "GET",
+        "/api/v1/powerPortal/ListPortals",
+        "PowerPagesPortalInfra_get_api_v1_powerPortal_ListPortals"
+      ],
+      [
+        "GET",
+        "/api/v1/powerPortal/ListPortalsByOrgId",
+        "PowerPagesPortalInfra_get_api_v1_powerPortal_ListPortalsByOrgId"
+      ],
+      [
+        "GET",
+        "/api/v1/powerPortal/tps/GetAvailablePackages",
+        "PowerPagesPortalInfra_get_api_v1_powerPortal_tps_GetAvailablePackages"
+      ],
+      [
+        "GET",
+        "/api/v1/powerPortal/tps/GetInstancePackages",
+        "PowerPagesPortalInfra_get_api_v1_powerPortal_tps_GetInstancePackages"
+      ],
+      [
+        "GET",
+        "/api/v1/powerPortal/ZAP/GetDeepScanEnabledPortalByTenant",
+        "PowerPagesPortalInfra_get_api_v1_powerPortal_ZAP_GetDeepScanEnabledPortalByTenant"
+      ]
+    ],
+    "operationIds": [
+      "BusinessAppPlatform_get_providers_Microsoft_BusinessAppPlatform_environmentGroups",
+      "BusinessAppPlatform_get_providers_Microsoft_BusinessAppPlatform_environmentLocations",
+      "BusinessAppPlatform_get_providers_Microsoft_BusinessAppPlatform_environments",
+      "BusinessAppPlatform_post_providers_Microsoft_BusinessAppPlatform_environments_environmentId_checkAccess",
+      "BusinessAppPlatform_get_providers_Microsoft_BusinessAppPlatform_environments_default",
+      "BusinessAppPlatform_post_providers_Microsoft_BusinessAppPlatform_environments_getOrCreate",
+      "BusinessAppPlatform_get_providers_Microsoft_BusinessAppPlatform_lifecycleOperations",
+      "BusinessAppPlatform_post_providers_Microsoft_BusinessAppPlatform_listTenantSettings",
+      "BusinessAppPlatform_get_providers_Microsoft_BusinessAppPlatform_locations",
+      "BusinessAppPlatform_get_providers_Microsoft_BusinessAppPlatform_locations_locationName_environmentCurrencies",
+      "BusinessAppPlatform_get_providers_Microsoft_BusinessAppPlatform_locations_locationName_environmentLanguages",
+      "BusinessAppPlatform_get_providers_Microsoft_BusinessAppPlatform_locations_unitedstates_templates",
+      "BusinessAppPlatform_post_providers_Microsoft_BusinessAppPlatform_scopes_admin_enroll",
+      "BusinessAppPlatform_get_providers_Microsoft_BusinessAppPlatform_scopes_admin_environments",
+      "BusinessAppPlatform_get_providers_Microsoft_BusinessAppPlatform_scopes_admin_environments_environmentId",
+      "BusinessAppPlatform_get_providers_Microsoft_BusinessAppPlatform_scopes_admin_environments_environmentId_lastActivity",
+      "BusinessAppPlatform_get_providers_Microsoft_BusinessAppPlatform_t2tmigrationapprovals",
+      "BusinessAppPlatform_get_providers_Microsoft_BusinessAppPlatform_t2tmigrations",
+      "BusinessAppPlatform_get_providers_Microsoft_BusinessAppPlatform_tenant",
+      "BusinessAppPlatform_get_tenantIsolationPolicy",
+      "AdminAnalytics_get_api_v1_cds_CategorySeries_Organizations_organizationId",
+      "AdminAnalytics_get_api_v1_cds_OrgInsightsMetrics_List",
+      "AdminAnalytics_get_api_v1_cds_TimeSeries_Organizations_organizationId",
+      "AdminAnalytics_post_api_v1_metrics_resourceType_copilotstudio_resourceSubType_agent_latest",
+      "AdminAnalytics_post_api_v1_metrics_resourceType_powerautomate_resourceSubType_cloudflow_latest",
+      "AdminAnalytics_post_api_v1_metrics_resourceType_powerautomate_resourceSubType_desktopflow_latest",
+      "AdminAnalytics_post_api_v1_metrics_resourceType_powerautomate_resourceSubType_workqueue_latest",
+      "ConfigAnalytics_get_api_v1_tenants_tenantId_tenantconsent",
+      "Licensing_get_licensing_tenants_tenantId_UserPerFlowCapacitySource_TenantContextSummary",
+      "Licensing_get_licensing_tenants_tenantId_UserPerFlowCapacitySource_UserContextSummary",
+      "Licensing_get_v0_1_alpha_tenants_tenantId_BillingPolicies",
+      "Licensing_post_v0_1_alpha_tenants_tenantId_BillingPolicies_getEnvironmentMap",
+      "Licensing_get_v0_1_alpha_tenants_tenantId_CurrencyReports",
+      "Licensing_get_v0_1_alpha_tenants_tenantId_entitlements_AppPass_trends",
+      "Licensing_get_v0_1_alpha_tenants_tenantId_entitlements_Database_trends",
+      "Licensing_get_v0_1_alpha_tenants_tenantId_entitlements_extension",
+      "Licensing_get_v0_1_alpha_tenants_tenantId_entitlements_File_trends",
+      "Licensing_get_v0_1_alpha_tenants_tenantId_entitlements_FinOpsDatabase_trends",
+      "Licensing_get_v0_1_alpha_tenants_tenantId_entitlements_FinOpsFile_trends",
+      "Licensing_get_v0_1_alpha_tenants_tenantId_entitlements_Log_trends",
+      "Licensing_get_v0_1_alpha_tenants_tenantId_entitlements_MCSMessages_snapshot_product",
+      "Licensing_get_v0_1_alpha_tenants_tenantId_entitlements_MCSMessages_snapshot_resources",
+      "Licensing_get_v0_1_alpha_tenants_tenantId_entitlements_MCSMessages_trends",
+      "Licensing_get_v0_1_alpha_tenants_tenantId_environments_capacityTypes_PowerPagesAnonymous_trends",
+      "Licensing_get_v0_1_alpha_tenants_tenantId_environments_capacityTypes_PowerPagesAuthenticated_trends",
+      "Licensing_get_v0_1_alpha_tenants_tenantId_licenseRequests_all",
+      "Licensing_get_v0_1_alpha_tenants_tenantId_TenantCapacity",
+      "Licensing_get_v0_1_alpha_tenants_tenantId_TenantConsumptionReport_GetAllReports",
+      "Licensing_get_v0_1_alpha_tenants_tenantId_TenantLicenseModel",
+      "Licensing_post_v0_1_tenants_tenantId_allocationsV2_getmany",
+      "Licensing_post_v0_1_tenants_tenantId_allocationsV2_overage_getmany",
+      "Licensing_get_v0_1_tenants_tenantId_allocationsV2_sum",
+      "Licensing_get_v1_0_tenants_tenantId_capacityTypes_MCSMessages_trends",
+      "Licensing_get_v1_0_tenants_tenantId_capacityTypes_MCSSessions_trends",
+      "Licensing_get_v1_0_tenants_tenantId_CurrencyReports",
+      "Licensing_get_v1_0_tenants_tenantId_Downloads_getAll_EntitlementConsumptionTenantDetailsReport",
+      "Licensing_get_v1_0_tenants_tenantId_Downloads_getAll_PowerAppsTenantLicenseDetailsDownload",
+      "Licensing_get_v1_0_tenants_tenantId_FinOpsLicensing_GetLicenseSummaryV2",
+      "Licensing_post_v1_0_tenants_tenantId_FinOpsLicensing_GetUserLicenseDetailsV2",
+      "Licensing_get_v1_0_tenants_tenantId_FinOpsLicensing_GetUsersExemptFromLicensing",
+      "Licensing_get_v1_0_tenants_tenantId_FinOpsLicensing_GetUsersExemptFromLicensing_Count",
+      "Licensing_get_v1_0_tenants_tenantId_ManagedEnvironment_GetAllProductSkus",
+      "Licensing_post_v1_0_tenants_tenantId_ManagedEnvironment_PowerApps_GetAppPassEnvironments",
+      "Licensing_get_v1_0_tenants_tenantId_ManagedEnvironment_PowerApps_GetLicenseSummary",
+      "Licensing_post_v1_0_tenants_tenantId_ManagedEnvironment_PowerAutomate_GetComplianceSummary",
+      "Licensing_get_v1_0_tenants_tenantId_ManagedEnvironment_PowerAutomate_GetLicenseSummary",
+      "Licensing_get_v1_0_tenants_tenantId_productCategories_PowerApps_userSubscribedLicenseSummary",
+      "Licensing_post_v1_0_tenants_tenantId_productCategories_PowerApps_userSubscribedLicenseTrends",
+      "Licensing_get_v1_0_tenants_tenantId_recommendations_PowerAppsUnderlicensedUsers",
+      "Licensing_get_v2_0_tenants_tenantId_BillingPolicies",
+      "Licensing_get_v2_0_tenants_tenantId_entitlements_AppPass",
+      "Licensing_get_v2_0_tenants_tenantId_entitlements_Database",
+      "Licensing_get_v2_0_tenants_tenantId_entitlements_File",
+      "Licensing_get_v2_0_tenants_tenantId_entitlements_FinOpsDatabase",
+      "Licensing_get_v2_0_tenants_tenantId_entitlements_FinOpsFile",
+      "Licensing_get_v2_0_tenants_tenantId_entitlements_Log",
+      "Licensing_get_v2_0_tenants_tenantId_entitlements_MCSMessages",
+      "Licensing_get_v2_0_tenants_tenantId_entitlements_MCSMessages_resources",
+      "Licensing_get_v2_0_tenants_tenantId_entitlements_MCSMessages_users",
+      "Licensing_get_v2_0_tenants_tenantId_entitlements_MCSSessions",
+      "Licensing_get_v2_0_tenants_tenantId_environments_entitlementConsumptions_AppPass",
+      "Licensing_get_v2_0_tenants_tenantId_environments_entitlementConsumptions_Database",
+      "Licensing_get_v2_0_tenants_tenantId_environments_entitlementConsumptions_File",
+      "Licensing_get_v2_0_tenants_tenantId_environments_entitlementConsumptions_FinOpsDatabase",
+      "Licensing_get_v2_0_tenants_tenantId_environments_entitlementConsumptions_FinOpsFile",
+      "Licensing_get_v2_0_tenants_tenantId_environments_entitlementConsumptions_Log",
+      "Licensing_get_v2_0_tenants_tenantId_environments_entitlementConsumptions_MCSMessages",
+      "Licensing_get_v2_0_tenants_tenantId_environments_entitlementConsumptions_MCSSessions",
+      "Licensing_get_v2_0_tenants_tenantId_environments_entitlements_AppPass",
+      "Licensing_get_v2_0_tenants_tenantId_environments_entitlements_Database",
+      "Licensing_get_v2_0_tenants_tenantId_environments_entitlements_File",
+      "Licensing_get_v2_0_tenants_tenantId_environments_entitlements_FinOpsDatabase",
+      "Licensing_get_v2_0_tenants_tenantId_environments_entitlements_FinOpsFile",
+      "Licensing_get_v2_0_tenants_tenantId_environments_entitlements_Log",
+      "Licensing_get_v2_0_tenants_tenantId_environments_entitlements_MCSMessages",
+      "Licensing_get_v2_0_tenants_tenantId_environments_entitlements_MCSSessions",
+      "AdminPortal_get_api_AppManagement_TenantProducts",
+      "AdminPortal_get_api_environments_environmentsId_features",
+      "AdminPortal_get_api_health_ping",
+      "TenantApi_get_appmanagement_environments_environmentId_AvailablePackages_Microsoft_Crm_Cloud_Pes_Tps_UserGetAvailableInstancePackages_Lcid_1033_InstanceCountryCode_US_CrmVersion_9_2_26031_180",
+      "TenantApi_get_appmanagement_environments_environmentId_InstancePackages_Microsoft_Crm_Cloud_Pes_Tps_UserGetInstancePackages_Lcid_1033",
+      "TenantApi_get_licensing_autoClaimPolicies",
+      "NotificationService_get_notificationservice_notifications_metadata",
+      "DynamicsCrm_post_api_data_v9_0_batch",
+      "DynamicsCrm_get_api_data_v9_0_applicationusers",
+      "DynamicsCrm_get_api_data_v9_0_appmodules_Microsoft_Dynamics_CRM_RetrieveUnpublishedMultiple",
+      "DynamicsCrm_get_api_data_v9_0_audits",
+      "DynamicsCrm_get_api_data_v9_0_businessunits",
+      "DynamicsCrm_get_api_data_v9_0_businessunits_businessunitId",
+      "DynamicsCrm_get_api_data_v9_0_deploymentpipelines",
+      "DynamicsCrm_get_api_data_v9_0_deploymentstageruns",
+      "DynamicsCrm_get_api_data_v9_0_EntityDefinitions",
+      "DynamicsCrm_get_api_data_v9_0_EntityDefinitions_LogicalName_businessunit",
+      "DynamicsCrm_get_api_data_v9_0_EntityDefinitions_LogicalName_role_Attributes_LogicalName_issytemgenerated",
+      "DynamicsCrm_get_api_data_v9_0_EntityDefinitions_LogicalName_systemuser",
+      "DynamicsCrm_get_api_data_v9_0_EntityDefinitions_LogicalName_systemuser_Attributes_LogicalName_systemmanagedusertype",
+      "DynamicsCrm_get_api_data_v9_0_EntityDefinitions_LogicalName_team",
+      "DynamicsCrm_get_api_data_v9_0_GetClientMetadata_ClientMetadataQuery_ClientMetadataQuery",
+      "DynamicsCrm_post_api_data_v9_0_GetFeatureEnabledState",
+      "DynamicsCrm_get_api_data_v9_0_organizations",
+      "DynamicsCrm_get_api_data_v9_0_privileges",
+      "DynamicsCrm_post_api_data_v9_0_RetrieveFeatureControlSettingsByNamespace",
+      "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_0002921c_d1d0_f011_8543_7c1e52689cc6",
+      "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_02123b67_66ae_4a69_8cdc_6473b94ad1a9",
+      "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_169ead94_a7e8_42c5_9ae8_d81205dfee77",
+      "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_1a6feece_0ba1_4739_8dee_eb83b1b591ea",
+      "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_1bb44f6d_15a5_48aa_a2f2_8d2cb0095d2d",
+      "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_1f6c957f_9851_4dbe_ab1c_508c06faa8be",
+      "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_20902168_ee38_ea11_a81c_000d3ac3e6d8",
+      "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_25f9a5ed_60fd_4bcf_bf4b_b40296410bf4",
+      "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_2c321cf0_f096_ea11_a81a_000d3a6ecd99",
+      "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_2fe4d72e_e538_ea11_a81c_000d3ac3e6d8",
+      "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_313995f9_4a4a_4d4a_afd1_c892da78e13e",
+      "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_3f199ebd_977e_43e5_abe5_fe865a1f2904",
+      "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_4931681d_8163_e811_a965_000d3a11fe32",
+      "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_4f9dbfce_f797_40d8_a8ac_902e441e371b",
+      "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_500073fc_54f7_429b_822e_f28b01fa5148",
+      "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_5225adeb_859b_42f3_8289_a399e47512d5",
+      "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_6b860c71_0e4e_ec11_b1b5_000d3a6ed5b3",
+      "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_726d11d6_d9cf_4503_ade9_d6a4be7fa095",
+      "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_7be5a395_6b58_4f8c_908f_97dc8810fc50",
+      "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_854af338_f3c5_e711_8122_000d3aa01c52",
+      "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_88b87c37_1472_4798_ac48_d56509eb6e1d",
+      "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_896a28e5_678d_4fa8_ad59_c606d1aa98ce",
+      "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_8a2f35d9_e447_4285_974c_81382317ca21",
+      "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_95aa4c68_04e0_4982_b994_7b5ed6c0771d",
+      "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_979144c2_989b_41a5_a146_6b3ea4130e8c",
+      "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_987674dd_f4a4_45a8_a1f7_f2cce1cf87f8",
+      "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_99b7f9c4_5c1e_4b9a_b756_fdfa137b6f85",
+      "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_9f572d55_6090_493b_904a_3956bdc55343",
+      "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_a0537877_879d_4b70_a391_bb07b94fbba2",
+      "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_a0a59a4a_b5a8_4e6f_a094_a866573c17d4",
+      "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_a1801436_efd6_e811_a96e_000d3a3ab886",
+      "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_ab8b8c58_1f50_4037_8b26_7523d6145cc3",
+      "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_b21a7144_299d_4c21_a116_30f60e9c159a",
+      "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_b9b08637_acf6_e711_a95a_000d3a11f5ee",
+      "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_bdf1780b_2867_4c3e_8957_dce785eac543",
+      "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_c95980b3_97dc_4762_a037_c15fe02dae8c",
+      "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_d19d7df9_96e3_440a_ada1_7f469d2a00d1",
+      "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_d58407f2_48d5_e711_a82c_000d3a37c848",
+      "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_d6e926ad_4afc_42fb_97f1_6e50c2ef174e",
+      "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_e0d2794e_82f3_e811_a951_000d3a1bcf17",
+      "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_e389a4a6_b53b_4828_bca9_4b5d25f1763b",
+      "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_e57bff35_58b4_4725_aee2_40fb18f4c8bd",
+      "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_edfcbfd2_358f_ea11_a81f_000d3a6eafd3",
+      "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_ee18dcf2_6f83_4cd7_aa5c_1d8a88947d51",
+      "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_ee2c8e11_6d57_4c5d_9f84_659c0db132bb",
+      "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_ee7bc749_3dd6_45ac_b95d_a3031463380b",
+      "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_f600921c_d1d0_f011_8543_7c1e52689cc6",
+      "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_f9e46d0f_d53e_4d5c_b06b_24948b4606ed",
+      "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_fc3e65d9_450a_4301_933b_f9bcaee20521",
+      "DynamicsCrm_get_api_data_v9_0_RetrieveRolePrivilegesRole_RoleId_ffadce64_3542_4bf1_a83a_ac9941104680",
+      "DynamicsCrm_get_api_data_v9_0_RetrieveSetting_SettingName_CrossRegionDeploymentEnabled",
+      "DynamicsCrm_get_api_data_v9_0_RetrieveSetting_SettingName_DefaultCustomPipelinesHostEnvForTenant",
+      "DynamicsCrm_get_api_data_v9_0_RetrieveSetting_SettingName_EnablePipelinesManagedEnvironmentCompliance",
+      "DynamicsCrm_get_api_data_v9_0_RetrieveSetting_SettingName_EnableSolutionImportFromPipelineHost",
+      "DynamicsCrm_get_api_data_v9_0_roleeditorlayouts",
+      "DynamicsCrm_get_api_data_v9_0_roles",
+      "DynamicsCrm_get_api_data_v9_0_roles_roleid_0002921c_d1d0_f011_8543_7c1e52689cc6",
+      "DynamicsCrm_get_api_data_v9_0_roles_roleid_02123b67_66ae_4a69_8cdc_6473b94ad1a9",
+      "DynamicsCrm_get_api_data_v9_0_roles_roleid_169ead94_a7e8_42c5_9ae8_d81205dfee77",
+      "DynamicsCrm_get_api_data_v9_0_roles_roleid_1a6feece_0ba1_4739_8dee_eb83b1b591ea",
+      "DynamicsCrm_get_api_data_v9_0_roles_roleid_1bb44f6d_15a5_48aa_a2f2_8d2cb0095d2d",
+      "DynamicsCrm_get_api_data_v9_0_roles_roleid_1f6c957f_9851_4dbe_ab1c_508c06faa8be",
+      "DynamicsCrm_get_api_data_v9_0_roles_roleid_20902168_ee38_ea11_a81c_000d3ac3e6d8",
+      "DynamicsCrm_get_api_data_v9_0_roles_roleid_25f9a5ed_60fd_4bcf_bf4b_b40296410bf4",
+      "DynamicsCrm_get_api_data_v9_0_roles_roleid_2c321cf0_f096_ea11_a81a_000d3a6ecd99",
+      "DynamicsCrm_get_api_data_v9_0_roles_roleid_2fe4d72e_e538_ea11_a81c_000d3ac3e6d8",
+      "DynamicsCrm_get_api_data_v9_0_roles_roleid_313995f9_4a4a_4d4a_afd1_c892da78e13e",
+      "DynamicsCrm_get_api_data_v9_0_roles_roleid_3f199ebd_977e_43e5_abe5_fe865a1f2904",
+      "DynamicsCrm_get_api_data_v9_0_roles_roleid_4931681d_8163_e811_a965_000d3a11fe32",
+      "DynamicsCrm_get_api_data_v9_0_roles_roleid_4f9dbfce_f797_40d8_a8ac_902e441e371b",
+      "DynamicsCrm_get_api_data_v9_0_roles_roleid_500073fc_54f7_429b_822e_f28b01fa5148",
+      "DynamicsCrm_get_api_data_v9_0_roles_roleid_5225adeb_859b_42f3_8289_a399e47512d5",
+      "DynamicsCrm_get_api_data_v9_0_roles_roleid_6b860c71_0e4e_ec11_b1b5_000d3a6ed5b3",
+      "DynamicsCrm_get_api_data_v9_0_roles_roleid_726d11d6_d9cf_4503_ade9_d6a4be7fa095",
+      "DynamicsCrm_get_api_data_v9_0_roles_roleid_7be5a395_6b58_4f8c_908f_97dc8810fc50",
+      "DynamicsCrm_get_api_data_v9_0_roles_roleid_854af338_f3c5_e711_8122_000d3aa01c52",
+      "DynamicsCrm_get_api_data_v9_0_roles_roleid_88b87c37_1472_4798_ac48_d56509eb6e1d",
+      "DynamicsCrm_get_api_data_v9_0_roles_roleid_896a28e5_678d_4fa8_ad59_c606d1aa98ce",
+      "DynamicsCrm_get_api_data_v9_0_roles_roleid_8a2f35d9_e447_4285_974c_81382317ca21",
+      "DynamicsCrm_get_api_data_v9_0_roles_roleid_95aa4c68_04e0_4982_b994_7b5ed6c0771d",
+      "DynamicsCrm_get_api_data_v9_0_roles_roleid_979144c2_989b_41a5_a146_6b3ea4130e8c",
+      "DynamicsCrm_get_api_data_v9_0_roles_roleid_987674dd_f4a4_45a8_a1f7_f2cce1cf87f8",
+      "DynamicsCrm_get_api_data_v9_0_roles_roleid_99b7f9c4_5c1e_4b9a_b756_fdfa137b6f85",
+      "DynamicsCrm_get_api_data_v9_0_roles_roleid_9f572d55_6090_493b_904a_3956bdc55343",
+      "DynamicsCrm_get_api_data_v9_0_roles_roleid_a0537877_879d_4b70_a391_bb07b94fbba2",
+      "DynamicsCrm_get_api_data_v9_0_roles_roleid_a0a59a4a_b5a8_4e6f_a094_a866573c17d4",
+      "DynamicsCrm_get_api_data_v9_0_roles_roleid_a1801436_efd6_e811_a96e_000d3a3ab886",
+      "DynamicsCrm_get_api_data_v9_0_roles_roleid_ab8b8c58_1f50_4037_8b26_7523d6145cc3",
+      "DynamicsCrm_get_api_data_v9_0_roles_roleid_b21a7144_299d_4c21_a116_30f60e9c159a",
+      "DynamicsCrm_get_api_data_v9_0_roles_roleid_b9b08637_acf6_e711_a95a_000d3a11f5ee",
+      "DynamicsCrm_get_api_data_v9_0_roles_roleid_bdf1780b_2867_4c3e_8957_dce785eac543",
+      "DynamicsCrm_get_api_data_v9_0_roles_roleid_c95980b3_97dc_4762_a037_c15fe02dae8c",
+      "DynamicsCrm_get_api_data_v9_0_roles_roleid_d19d7df9_96e3_440a_ada1_7f469d2a00d1",
+      "DynamicsCrm_get_api_data_v9_0_roles_roleid_d58407f2_48d5_e711_a82c_000d3a37c848",
+      "DynamicsCrm_get_api_data_v9_0_roles_roleid_d6e926ad_4afc_42fb_97f1_6e50c2ef174e",
+      "DynamicsCrm_get_api_data_v9_0_roles_roleid_e0d2794e_82f3_e811_a951_000d3a1bcf17",
+      "DynamicsCrm_get_api_data_v9_0_roles_roleid_e389a4a6_b53b_4828_bca9_4b5d25f1763b",
+      "DynamicsCrm_get_api_data_v9_0_roles_roleid_e57bff35_58b4_4725_aee2_40fb18f4c8bd",
+      "DynamicsCrm_get_api_data_v9_0_roles_roleid_edfcbfd2_358f_ea11_a81f_000d3a6eafd3",
+      "DynamicsCrm_get_api_data_v9_0_roles_roleid_ee18dcf2_6f83_4cd7_aa5c_1d8a88947d51",
+      "DynamicsCrm_get_api_data_v9_0_roles_roleid_ee2c8e11_6d57_4c5d_9f84_659c0db132bb",
+      "DynamicsCrm_get_api_data_v9_0_roles_roleid_ee7bc749_3dd6_45ac_b95d_a3031463380b",
+      "DynamicsCrm_get_api_data_v9_0_roles_roleid_f600921c_d1d0_f011_8543_7c1e52689cc6",
+      "DynamicsCrm_get_api_data_v9_0_roles_roleid_f9e46d0f_d53e_4d5c_b06b_24948b4606ed",
+      "DynamicsCrm_get_api_data_v9_0_roles_roleid_fc3e65d9_450a_4301_933b_f9bcaee20521",
+      "DynamicsCrm_get_api_data_v9_0_roles_roleid_ffadce64_3542_4bf1_a83a_ac9941104680",
+      "DynamicsCrm_get_api_data_v9_0_savedqueries",
+      "DynamicsCrm_get_api_data_v9_0_solutions",
+      "DynamicsCrm_get_api_data_v9_0_solutions_solutionId",
+      "DynamicsCrm_get_api_data_v9_0_systemusers",
+      "DynamicsCrm_get_api_data_v9_0_systemusers_systemuserId_Microsoft_Dynamics_CRM_RetrieveUserPrivileges",
+      "DynamicsCrm_get_api_data_v9_0_systemusers_systemuserId_Microsoft_Dynamics_CRM_RetrieveUsersPrivilegesThroughTeams_ExcludeOrgDisabledPrivileges_true_IncludeSetupUserFiltering_true",
+      "DynamicsCrm_get_api_data_v9_0_teammemberships",
+      "DynamicsCrm_get_api_data_v9_0_teams",
+      "DynamicsCrm_get_api_data_v9_1_systemusers",
+      "DynamicsCrm_get_api_nosql_audit_isreadenabled",
+      "PowerPagesPortalInfra_get_api_v1_powerPortal_environment_CoreEntitiesPackageInstallStatus",
+      "PowerPagesPortalInfra_get_api_v1_powerPortal_environment_optInStatus",
+      "PowerPagesPortalInfra_get_api_v1_powerPortal_FeatureConfiguration_GetFeatureControlValues",
+      "PowerPagesPortalInfra_get_api_v1_powerPortal_GetEnvironment",
+      "PowerPagesPortalInfra_get_api_v1_powerPortal_IsCDSOrg",
+      "PowerPagesPortalInfra_get_api_v1_powerPortal_ListPortals",
+      "PowerPagesPortalInfra_get_api_v1_powerPortal_ListPortalsByOrgId",
+      "PowerPagesPortalInfra_get_api_v1_powerPortal_tps_GetAvailablePackages",
+      "PowerPagesPortalInfra_get_api_v1_powerPortal_tps_GetInstancePackages",
+      "PowerPagesPortalInfra_get_api_v1_powerPortal_ZAP_GetDeepScanEnabledPortalByTenant"
+    ]
+  },
+  "evidenceReferences": {
+    "references": [
+      "postman/collections/power-platform.collection.json",
+      "specifications/nodoc-power-platform/specification/admin_analytics.yml",
+      "specifications/nodoc-power-platform/specification/admin_portal.yml",
+      "specifications/nodoc-power-platform/specification/business_app_platform.yml",
+      "specifications/nodoc-power-platform/specification/config_analytics.yml",
+      "specifications/nodoc-power-platform/specification/dynamics_crm.yml",
+      "specifications/nodoc-power-platform/specification/licensing.yml",
+      "specifications/nodoc-power-platform/specification/notification_service.yml",
+      "specifications/nodoc-power-platform/specification/openapi.yml",
+      "specifications/nodoc-power-platform/specification/power_pages_portal_infra.yml",
+      "specifications/nodoc-power-platform/specification/tenant_api.yml",
+      "src/generated/operationContextLedger.json",
+      "src/generated/operationLiveCaptureLedger.json",
+      "src/generated/portalCoverageLedger.json",
+      "tools/capture-recipes/power-platform-deep.json",
+      "tools/capture-recipes/power-platform-seeded-replay.json"
+    ],
+    "repositoryDiscoveryFiles": [],
+    "generatedLedgers": {
+      "coverage": "src/generated/portalCoverageLedger.json",
+      "operationContext": "src/generated/operationContextLedger.json",
+      "operationLiveCapture": "src/generated/operationLiveCaptureLedger.json"
+    },
+    "staticJavascriptBundles": [],
+    "provenanceOperationCount": 10,
+    "liveOperationCount": 248
+  },
+  "phaseGaps": {
+    "derivativeParity": {
+      "status": "incomplete",
+      "explanation": "0 normalized Postman parity differences and 248 routing mismatches remain.",
+      "evidence": [
+        "postman/collections/power-platform.collection.json"
+      ]
+    },
+    "staticSourceDiscovery": {
+      "status": "incomplete",
+      "explanation": "Checked-in metadata and recipes exist, but no explicit comprehensive static-source completion attestation is available.",
+      "evidence": [
+        "tools/capture-recipes/power-platform-deep.json",
+        "tools/capture-recipes/power-platform-seeded-replay.json",
+        "tools/portal-discovery-metadata.mjs"
+      ]
+    },
+    "javascriptBundleDiscovery": {
+      "status": "unavailable",
+      "explanation": "No per-spec checked-in JavaScript or bundle artifact is deterministically discoverable in the specification discovery directory.",
+      "evidence": []
+    },
+    "portalApiSpecDiscovery": {
+      "status": "incomplete",
+      "explanation": "Coverage metadata records prior discovery, but it does not attest a full portfolio refresh phase as complete.",
+      "evidence": [
+        "src/generated/portalCoverageLedger.json"
+      ]
+    },
+    "liveReadOnlyEvidence": {
+      "status": "incomplete",
+      "explanation": "Live evidence exists for 248 operations, without an all-operations refresh completion attestation.",
+      "evidence": [
+        "src/generated/operationLiveCaptureLedger.json"
+      ]
+    },
+    "reconciliationPublication": {
+      "status": "unknown",
+      "explanation": "No machine-readable campaign refresh reconciliation/publication attestation exists; derivative parity alone is insufficient.",
+      "evidence": []
+    }
+  },
+  "candidateInputs": {
+    "parityUnresolvedCount": {
+      "status": "complete",
+      "value": 0,
+      "source": "postman/collections/power-platform.collection.json"
+    },
+    "parityOrphanedCount": {
+      "status": "complete",
+      "value": 0,
+      "source": "postman/collections/power-platform.collection.json"
+    },
+    "routingMismatchCount": {
+      "status": "complete",
+      "value": 248,
+      "source": "postman/collections/power-platform.collection.json"
+    },
+    "openGapCount": {
+      "status": "complete",
+      "value": 3,
+      "explanation": "openGaps is explicitly recorded in the authoritative coverage overlay.",
+      "source": "tools/portal-discovery-metadata.mjs"
+    },
+    "openGapClassCount": {
+      "status": "unknown",
+      "value": null,
+      "explanation": "openGapClasses is not explicitly recorded; absence is not treated as zero.",
+      "source": "tools/portal-discovery-metadata.mjs"
+    },
+    "promotedDiscoveryCount": {
+      "status": "complete",
+      "value": 4,
+      "source": "tools/portal-discovery-metadata.mjs"
+    }
+  },
+  "fingerprints": {
+    "inputs": [
+      {
+        "path": "postman/collections/power-platform.collection.json",
+        "bytes": 1859533,
+        "sha256": "ffdb438d9a8132f87a346eaee1f415a0a0a10d2d58e65a26ac6d2c5d4ba28939"
+      },
+      {
+        "path": "specifications/nodoc-power-platform/specification/admin_analytics.yml",
+        "bytes": 15171,
+        "sha256": "9818e3678ec8b7ebe10f73379eaf77f11183803d435d8fbf5e2272fd6edb286d"
+      },
+      {
+        "path": "specifications/nodoc-power-platform/specification/admin_portal.yml",
+        "bytes": 3130,
+        "sha256": "d5a52f46f291d7fa4b9a6a7c64960bfb2f4781356024ccdb98579820512e4156"
+      },
+      {
+        "path": "specifications/nodoc-power-platform/specification/business_app_platform.yml",
+        "bytes": 26633,
+        "sha256": "f18e9527846b37f0c4f559da42c5128d6e41eefd1ca2349438cd4df2b8afd881"
+      },
+      {
+        "path": "specifications/nodoc-power-platform/specification/config_analytics.yml",
+        "bytes": 1399,
+        "sha256": "f1f212f7190d0ab201f63ca46d2d765b7fd825d57409b2b50790164e663209cf"
+      },
+      {
+        "path": "specifications/nodoc-power-platform/specification/dynamics_crm.yml",
+        "bytes": 187347,
+        "sha256": "26e75269e9f7df1ab844cf97ede9044f7b356cbfc756e7b401f650145397f06a"
+      },
+      {
+        "path": "specifications/nodoc-power-platform/specification/licensing.yml",
+        "bytes": 83517,
+        "sha256": "2ab83378cc0b34bc61b464c1f3c6d53e25c51f1a715177c3c86001b81a39b41d"
+      },
+      {
+        "path": "specifications/nodoc-power-platform/specification/notification_service.yml",
+        "bytes": 2559,
+        "sha256": "64afcd5d3075c277c35878edaf4f792d20e5af8aab0fb80355e6237162972966"
+      },
+      {
+        "path": "specifications/nodoc-power-platform/specification/openapi.yml",
+        "bytes": 52678,
+        "sha256": "53aeb00b2a632a3f26164261cf7a092c434d7870ecf06580cea661bc39624254"
+      },
+      {
+        "path": "specifications/nodoc-power-platform/specification/power_pages_portal_infra.yml",
+        "bytes": 12872,
+        "sha256": "157f3a96c0e5baee0e9f05c0b195cec562c3ea29570af973109d2503c06cdad8"
+      },
+      {
+        "path": "specifications/nodoc-power-platform/specification/tenant_api.yml",
+        "bytes": 8316,
+        "sha256": "83ded83944ba69d8f94de2efa8d5cd99ab2eb5433e296ebb749612b2be230970"
+      },
+      {
+        "path": "src/generated/operationContextLedger.json",
+        "bytes": 162058,
+        "sha256": "439ff921d2ae7407d0ffef71d7b83d99fe2fb066dfa38afb861bf01afe8201c4"
+      },
+      {
+        "path": "src/generated/operationLiveCaptureLedger.json",
+        "bytes": 178401,
+        "sha256": "c8b748443ca3613e76dc66ad4bcf259351728a6d5c51dfc502554937b14049bb"
+      },
+      {
+        "path": "src/generated/portalCoverageLedger.json",
+        "bytes": 51980,
+        "sha256": "3de3740782916fb11bbc7832305b0bd64c0333d49f55f24c3331a6a4cf48f82b"
+      },
+      {
+        "path": "tools/capture-recipes/power-platform-deep.json",
+        "bytes": 763,
+        "sha256": "2c203489637461c1c71573ece09ee08059c50e8d1b0cdca586a8bd7db6f1d43d"
+      },
+      {
+        "path": "tools/capture-recipes/power-platform-seeded-replay.json",
+        "bytes": 401,
+        "sha256": "d94caf98c83ceaf99dd03e591853a4dc2463553e203d224eee5f9003f2bdc1e4"
+      }
+    ],
+    "aggregateSha256": "44fed48eeaacd0a98f2ce21f05ac26cdb42677b0eafa64ad7b419fcdca49b8e9"
+  }
+}

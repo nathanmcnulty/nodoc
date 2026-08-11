@@ -1,0 +1,231 @@
+{
+  "schemaVersion": 1,
+  "campaignDigest": "44c1a513a9ebab7c254828205c000531ff86e93039a1830ea1982e3dd8f20baa",
+  "specId": "m365-apps-services",
+  "title": "M365 Apps Services",
+  "inventory": {
+    "specPath": "specifications/nodoc-m365-apps-services/specification/openapi.yml",
+    "sourceFiles": [
+      "specifications/nodoc-m365-apps-services/specification/openapi.yml"
+    ],
+    "versions": {
+      "openapi": "3.0.1",
+      "api": "0.1.0"
+    },
+    "hosts": [
+      "https://clients.config.office.net"
+    ],
+    "pathPrefixes": [
+      "/intents/",
+      "/odbhealth/",
+      "/onboarding/",
+      "/releases/"
+    ],
+    "pathCount": 8,
+    "operationCount": 9,
+    "schemaCount": 13,
+    "schemaNames": [
+      "AgreementResponse",
+      "EligibilityRecord",
+      "FeatureDataResponse",
+      "FeatureDefinition",
+      "FeatureProvisionRecord",
+      "FeatureProvisionResponse",
+      "GenericObject",
+      "IndexedCountMap",
+      "ODataBooleanResponse",
+      "OfficeReleaseChannel",
+      "OfficeVersion",
+      "OneDriveSyncCountRequest",
+      "OneDriveVersionCount"
+    ],
+    "operations": [
+      [
+        "POST",
+        "/intents/v1.0/ComponentGroupIntentShard",
+        null
+      ],
+      [
+        "POST",
+        "/odbhealth/v1.0/synchealth/reports/count",
+        null
+      ],
+      [
+        "GET",
+        "/odbhealth/v1.0/synchealth/reports/versioncount",
+        null
+      ],
+      [
+        "GET",
+        "/onboarding/odata/v1.0/EligibilityRecord",
+        null
+      ],
+      [
+        "GET",
+        "/onboarding/odata/v1.0/Agreementdata",
+        null
+      ],
+      [
+        "GET",
+        "/onboarding/odata/v1.0/FeatureData",
+        null
+      ],
+      [
+        "GET",
+        "/onboarding/odata/v1.0/FeatureProvisiondata",
+        null
+      ],
+      [
+        "POST",
+        "/onboarding/odata/v1.0/FeatureProvisiondata",
+        null
+      ],
+      [
+        "GET",
+        "/releases/v1.0/OfficeReleases",
+        null
+      ]
+    ],
+    "operationIds": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "evidenceReferences": {
+    "references": [
+      "postman/collections/m365-apps-services.collection.json",
+      "specifications/nodoc-m365-apps-services/specification/openapi.yml",
+      "src/generated/portalCoverageLedger.json",
+      "tools/capture-recipes/m365-apps-deep.json",
+      "tools/capture-recipes/m365-apps-seeded-replay.json",
+      "tools/capture-recipes/m365-apps-services-deep.json"
+    ],
+    "repositoryDiscoveryFiles": [],
+    "generatedLedgers": {
+      "coverage": "src/generated/portalCoverageLedger.json",
+      "operationContext": null,
+      "operationLiveCapture": null
+    },
+    "staticJavascriptBundles": [],
+    "provenanceOperationCount": null,
+    "liveOperationCount": null
+  },
+  "phaseGaps": {
+    "canonicalInventory": {
+      "status": "incomplete",
+      "explanation": "9 operations lack operation IDs.",
+      "evidence": [
+        "specifications/nodoc-m365-apps-services/specification/openapi.yml"
+      ]
+    },
+    "staticSourceDiscovery": {
+      "status": "incomplete",
+      "explanation": "Checked-in metadata and recipes exist, but no explicit comprehensive static-source completion attestation is available.",
+      "evidence": [
+        "tools/capture-recipes/m365-apps-deep.json",
+        "tools/capture-recipes/m365-apps-seeded-replay.json",
+        "tools/capture-recipes/m365-apps-services-deep.json",
+        "tools/portal-discovery-metadata.mjs"
+      ]
+    },
+    "javascriptBundleDiscovery": {
+      "status": "unavailable",
+      "explanation": "No per-spec checked-in JavaScript or bundle artifact is deterministically discoverable in the specification discovery directory.",
+      "evidence": []
+    },
+    "portalApiSpecDiscovery": {
+      "status": "incomplete",
+      "explanation": "Coverage metadata records prior discovery, but it does not attest a full portfolio refresh phase as complete.",
+      "evidence": [
+        "src/generated/portalCoverageLedger.json"
+      ]
+    },
+    "liveReadOnlyEvidence": {
+      "status": "unavailable",
+      "explanation": "No generated live-capture ledger entry exists for this specification.",
+      "evidence": []
+    },
+    "reconciliationPublication": {
+      "status": "unknown",
+      "explanation": "No machine-readable campaign refresh reconciliation/publication attestation exists; derivative parity alone is insufficient.",
+      "evidence": []
+    }
+  },
+  "candidateInputs": {
+    "parityUnresolvedCount": {
+      "status": "complete",
+      "value": 0,
+      "source": "postman/collections/m365-apps-services.collection.json"
+    },
+    "parityOrphanedCount": {
+      "status": "complete",
+      "value": 0,
+      "source": "postman/collections/m365-apps-services.collection.json"
+    },
+    "routingMismatchCount": {
+      "status": "complete",
+      "value": 0,
+      "source": "postman/collections/m365-apps-services.collection.json"
+    },
+    "openGapCount": {
+      "status": "unknown",
+      "value": null,
+      "explanation": "openGaps is not explicitly recorded; absence is not treated as zero.",
+      "source": "tools/portal-discovery-metadata.mjs"
+    },
+    "openGapClassCount": {
+      "status": "unknown",
+      "value": null,
+      "explanation": "openGapClasses is not explicitly recorded; absence is not treated as zero.",
+      "source": "tools/portal-discovery-metadata.mjs"
+    },
+    "promotedDiscoveryCount": {
+      "status": "unknown",
+      "value": null,
+      "source": "tools/portal-discovery-metadata.mjs",
+      "explanation": "promotedDiscoveries is not explicitly recorded; absence is not treated as zero."
+    }
+  },
+  "fingerprints": {
+    "inputs": [
+      {
+        "path": "postman/collections/m365-apps-services.collection.json",
+        "bytes": 62905,
+        "sha256": "c308a4fb2d585e86aeb959fafa185212a53851633c9b50dba032e9902e635eb2"
+      },
+      {
+        "path": "specifications/nodoc-m365-apps-services/specification/openapi.yml",
+        "bytes": 11629,
+        "sha256": "dbfab999f379447ba9fc94380d3e9df3b4492c1a3a488392e720651d49016de3"
+      },
+      {
+        "path": "src/generated/portalCoverageLedger.json",
+        "bytes": 51980,
+        "sha256": "3de3740782916fb11bbc7832305b0bd64c0333d49f55f24c3331a6a4cf48f82b"
+      },
+      {
+        "path": "tools/capture-recipes/m365-apps-deep.json",
+        "bytes": 862,
+        "sha256": "4b3d2561f15d11e10593031628baac05af685b80031dad5116eeb6e4f993cf54"
+      },
+      {
+        "path": "tools/capture-recipes/m365-apps-seeded-replay.json",
+        "bytes": 671,
+        "sha256": "871382c27c37e0bd72ef702a903f475b8cd6c9f153ba0528796b9d10cd936c8e"
+      },
+      {
+        "path": "tools/capture-recipes/m365-apps-services-deep.json",
+        "bytes": 933,
+        "sha256": "c0dbe1b2796416584e4a9a44a6e431340b5155e76c49e434a0518de72cd7f03b"
+      }
+    ],
+    "aggregateSha256": "55f773a2807f6736b93fc0015a6ea7983b99a4f9075fd62ab17e4323a83c81e2"
+  }
+}

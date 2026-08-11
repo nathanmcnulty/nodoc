@@ -1,0 +1,571 @@
+{
+  "schemaVersion": 1,
+  "campaignDigest": "44c1a513a9ebab7c254828205c000531ff86e93039a1830ea1982e3dd8f20baa",
+  "specId": "intune-autopatch",
+  "title": "Intune Autopatch",
+  "inventory": {
+    "specPath": "specifications/nodoc-intune-autopatch/specification/openapi.yml",
+    "sourceFiles": [
+      "specifications/nodoc-intune-autopatch/specification/openapi.yml"
+    ],
+    "versions": {
+      "openapi": "3.0.1",
+      "api": "0.1.0"
+    },
+    "hosts": [
+      "https://services.autopatch.microsoft.com"
+    ],
+    "pathPrefixes": [
+      "/access-control/",
+      "/api/",
+      "/device/",
+      "/reporting/",
+      "/support/",
+      "/tenant-management/",
+      "/unified-reporting/",
+      "/update-management/"
+    ],
+    "pathCount": 49,
+    "operationCount": 53,
+    "schemaCount": 85,
+    "schemaNames": [
+      "AccessControlUserToken",
+      "AdminAction",
+      "AdminActionStatusResponse",
+      "AutopatchGroup",
+      "AutopatchReportPage",
+      "AutopatchReportTrendRow",
+      "AutopatchTrendDuration",
+      "CustomerCommMessage",
+      "DeploymentGroup",
+      "FeatureEnablementStatusResponse",
+      "FeatureUpdateCompletionPhaseInfo",
+      "FeatureUpdateCompletionRelease",
+      "FeatureUpdateCompletionReleasesRequest",
+      "FeatureUpdateCompletionReleasesResponse",
+      "FeatureUpdateDetailsExportRequest",
+      "FeatureUpdateDetailsRequest",
+      "FeatureUpdateDetailsResponse",
+      "FeatureUpdateDeviceDetail",
+      "FeatureUpdateDistinctColumnsRecord",
+      "FeatureUpdateDistinctColumnsResponse",
+      "FeatureUpdatePhaseSummary",
+      "FeatureUpdatePhaseSummaryResponse",
+      "FeatureUpdateReleaseSummary",
+      "FeatureUpdateReleaseSummaryResponse",
+      "FeatureUpdateSummaryMetricRow",
+      "FeatureUpdateSummaryMetricsRequest",
+      "FeatureUpdateSummaryMetricsResponse",
+      "FeatureUpdateSummaryPhasesRequest",
+      "FeatureUpdateSummaryReleasesRequest",
+      "FeatureUpdateTrendingRequest",
+      "FeatureUpdateTrendingResponse",
+      "FlightingResponse",
+      "GenericObject",
+      "ManagedServicePlan",
+      "ManagedServiceStatus",
+      "ODataBooleanResponse",
+      "ODataGenericCollection",
+      "ODataStringCollection",
+      "QualityUpdateBusinessGroupSummary",
+      "QualityUpdateBusinessGroupSummaryResponse",
+      "QualityUpdateDeploymentGroupSummary",
+      "QualityUpdateDeploymentGroupSummaryResponse",
+      "QualityUpdateDetailsExportRequest",
+      "QualityUpdateDetailsRequest",
+      "QualityUpdateDetailsResponse",
+      "QualityUpdateDeviceDetail",
+      "QualityUpdateDistinctColumnsRecord",
+      "QualityUpdateDistinctColumnsResponse",
+      "QualityUpdateSummaryBusinessGroupsRequest",
+      "QualityUpdateSummaryDeploymentGroupsRequest",
+      "QualityUpdateSummaryMetricRow",
+      "QualityUpdateSummaryMetricsRequest",
+      "QualityUpdateSummaryMetricsResponse",
+      "QualityUpdateTrendingRequest",
+      "QualityUpdateTrendingResponse",
+      "ReportExportStartResponse",
+      "ReportExportStatusResponse",
+      "RequestTypeNode",
+      "ResourceOperation",
+      "ResourceOperationCollection",
+      "ResourceOperationPermission",
+      "RoleDefinition",
+      "RoleDefinitionCollection",
+      "SupportLanguage",
+      "SupportRequest",
+      "SupportRequestActivityCollection",
+      "SupportRequestAddNoteRequest",
+      "SupportRequestContact",
+      "SupportRequestCreateRequest",
+      "SupportRequestCreateResponse",
+      "SupportRequestUpdateContactRequest",
+      "SupportRequestUpdateRequest",
+      "SupportRequestUploadAttachmentRequest",
+      "TenantPlanState",
+      "TenantResolveResponse",
+      "TenantSettingState",
+      "TenantSettingUpdateRequest",
+      "WindowsFeatureUpdateDistinctColumnsODataCollection",
+      "WindowsFeatureUpdateDistinctColumnsRecord",
+      "WindowsFeatureUpdateSummaryMetricRecord",
+      "WindowsFeatureUpdateSummaryMetricsODataCollection",
+      "WindowsFeatureUpdateSummaryReleaseODataCollection",
+      "WindowsFeatureUpdateSummaryReleaseRecord",
+      "WindowsFeatureUpdateTrendRecord",
+      "WindowsFeatureUpdateTrendingODataCollection"
+    ],
+    "operations": [
+      [
+        "GET",
+        "/api/Flighting",
+        "IntuneAutopatch.Platform.GetFlighting"
+      ],
+      [
+        "GET",
+        "/api/v1.0/tenant/resolve",
+        "IntuneAutopatch.Tenant.Resolve"
+      ],
+      [
+        "GET",
+        "/tenant-management/v1/Enrollment/Starter/featureEnablementStatus",
+        "IntuneAutopatch.Tenant.GetFeatureEnablementStatus"
+      ],
+      [
+        "GET",
+        "/tenant-management/v2/AdminActionsV",
+        "IntuneAutopatch.Tenant.ListAdminActions"
+      ],
+      [
+        "POST",
+        "/tenant-management/v2/AdminActionsV",
+        "IntuneAutopatch.Tenant.SubmitAdminActions"
+      ],
+      [
+        "GET",
+        "/tenant-management/v2/AdminActionsV/actionStatus",
+        "IntuneAutopatch.Tenant.GetAdminActionStatus"
+      ],
+      [
+        "GET",
+        "/update-management/partnergraph/1.0/tenantSettings/mdmAppSettings",
+        "IntuneAutopatch.Tenant.GetMdmAppSettings"
+      ],
+      [
+        "GET",
+        "/access-control/odata/v1/EffectivePermissions",
+        "IntuneAutopatch.Roles.GetEffectivePermissions"
+      ],
+      [
+        "GET",
+        "/access-control/odata/v1/ResourceOperations",
+        "IntuneAutopatch.Roles.ListResourceOperations"
+      ],
+      [
+        "GET",
+        "/access-control/odata/v1/RoleDefinitions",
+        "IntuneAutopatch.Roles.ListRoleDefinitions"
+      ],
+      [
+        "GET",
+        "/access-control/odata/v1/RoleAssignments",
+        "IntuneAutopatch.Roles.ListRoleAssignments"
+      ],
+      [
+        "GET",
+        "/access-control/odata/v1/ScopeTags",
+        "IntuneAutopatch.Roles.GetScopeTags"
+      ],
+      [
+        "GET",
+        "/access-control/odata/v1/ScopedForResources",
+        "IntuneAutopatch.Roles.GetScopedForResources"
+      ],
+      [
+        "GET",
+        "/access-control/v1/UserToken",
+        "IntuneAutopatch.Roles.GetUserToken"
+      ],
+      [
+        "GET",
+        "/device/v2/autopatchGroups",
+        "IntuneAutopatch.AutopatchGroups.List"
+      ],
+      [
+        "GET",
+        "/unified-reporting/odata/1.0/AutopatchGroupMembershipRegistered",
+        "IntuneAutopatch.AutopatchGroups.ListMembershipRegistered"
+      ],
+      [
+        "GET",
+        "/unified-reporting/odata/1.0/AutopatchManagementStatusSummary",
+        "IntuneAutopatch.Reporting.GetManagementStatusSummaryOData"
+      ],
+      [
+        "POST",
+        "/reporting/reports/v2/deviceAccounting/wqu/summary/businessgroups",
+        "IntuneAutopatch.Reporting.ListQualityUpdateBusinessGroups"
+      ],
+      [
+        "POST",
+        "/reporting/reports/v2/deviceAccounting/wqu/summaryMetrics",
+        "IntuneAutopatch.Reporting.GetQualityUpdateSummaryMetrics"
+      ],
+      [
+        "POST",
+        "/reporting/reports/v2/deviceAccounting/wqu/trending",
+        "IntuneAutopatch.Reporting.ListQualityUpdateTrending"
+      ],
+      [
+        "POST",
+        "/reporting/reports/v2/deviceAccounting/wqu/summary/deploymentgroups",
+        "IntuneAutopatch.Reporting.ListQualityUpdateDeploymentGroups"
+      ],
+      [
+        "POST",
+        "/reporting/reports/v2/deviceAccounting/wqu/details",
+        "IntuneAutopatch.Reporting.ListQualityUpdateDetails"
+      ],
+      [
+        "POST",
+        "/reporting/reports/v2/deviceAccounting/wqu/distinct/selectedColumns",
+        "IntuneAutopatch.Reporting.GetQualityUpdateDistinctColumns"
+      ],
+      [
+        "POST",
+        "/reporting/reports/v2/deviceAccounting/wqu/detailsExport",
+        "IntuneAutopatch.Reporting.StartQualityUpdateDetailsExport"
+      ],
+      [
+        "POST",
+        "/reporting/reports/v2/windowsFeatureUpdates/summary/releases",
+        "IntuneAutopatch.Reporting.ListFeatureUpdateReleases"
+      ],
+      [
+        "POST",
+        "/reporting/reports/v2/windowsFeatureUpdates/summaryMetrics",
+        "IntuneAutopatch.Reporting.GetFeatureUpdateSummaryMetrics"
+      ],
+      [
+        "POST",
+        "/reporting/reports/v2/windowsFeatureUpdates/trending",
+        "IntuneAutopatch.Reporting.ListFeatureUpdateTrending"
+      ],
+      [
+        "POST",
+        "/reporting/reports/v2/windowsFeatureUpdates/completion/releases",
+        "IntuneAutopatch.Reporting.ListFeatureUpdateCompletionReleases"
+      ],
+      [
+        "POST",
+        "/reporting/reports/v2/windowsFeatureUpdates/summary/phases",
+        "IntuneAutopatch.Reporting.ListFeatureUpdatePhases"
+      ],
+      [
+        "POST",
+        "/reporting/reports/v2/windowsFeatureUpdates/details",
+        "IntuneAutopatch.Reporting.ListFeatureUpdateDetails"
+      ],
+      [
+        "POST",
+        "/reporting/reports/v2/windowsFeatureUpdates/distinct/planTypes/{plan}",
+        "IntuneAutopatch.Reporting.GetFeatureUpdateDistinctColumns"
+      ],
+      [
+        "POST",
+        "/reporting/reports/v2/windowsFeatureUpdates/detailsExport",
+        "IntuneAutopatch.Reporting.StartFeatureUpdateDetailsExport"
+      ],
+      [
+        "GET",
+        "/reporting/reports/v1/export/status/",
+        "IntuneAutopatch.Reporting.GetExportStatus"
+      ],
+      [
+        "GET",
+        "/unified-reporting/odata/1.0/WindowsFeatureUpdatesSummaryRelease",
+        "IntuneAutopatch.Reporting.ListFeatureUpdateSummaryReleaseOData"
+      ],
+      [
+        "GET",
+        "/unified-reporting/odata/1.0/WindowsFeatureUpdatesSummaryMetrics",
+        "IntuneAutopatch.Reporting.ListFeatureUpdateSummaryMetricsOData"
+      ],
+      [
+        "GET",
+        "/unified-reporting/odata/1.0/WindowsFeatureUpdatesDistinctColumns",
+        "IntuneAutopatch.Reporting.ListFeatureUpdateDistinctColumnsOData"
+      ],
+      [
+        "GET",
+        "/unified-reporting/odata/1.0/WindowsFeatureUpdatesTrending",
+        "IntuneAutopatch.Reporting.ListFeatureUpdateTrendingOData"
+      ],
+      [
+        "GET",
+        "/support/v1/Messages/CustomerComms",
+        "IntuneAutopatch.Messages.ListCustomerComms"
+      ],
+      [
+        "GET",
+        "/support/odata/v1/supportRequests",
+        "IntuneAutopatch.Support.ListSupportRequests"
+      ],
+      [
+        "POST",
+        "/support/odata/v1/supportRequests",
+        "IntuneAutopatch.Support.CreateSupportRequest"
+      ],
+      [
+        "GET",
+        "/support/odata/v1/supportRequests('{supportRequestId}')",
+        "IntuneAutopatch.Support.GetSupportRequest"
+      ],
+      [
+        "PATCH",
+        "/support/odata/v1/supportRequests('{supportRequestId}')",
+        "IntuneAutopatch.Support.UpdateSupportRequest"
+      ],
+      [
+        "GET",
+        "/support/odata/v1/supportRequests('{supportRequestId}')/activities",
+        "IntuneAutopatch.Support.ListSupportRequestActivities"
+      ],
+      [
+        "POST",
+        "/support/odata/v1/supportRequests('{supportRequestId}')/UpdateContact",
+        "IntuneAutopatch.Support.UpdateSupportRequestContact"
+      ],
+      [
+        "POST",
+        "/support/odata/v1/supportRequests('{supportRequestId}')/addNote",
+        "IntuneAutopatch.Support.AddSupportRequestNote"
+      ],
+      [
+        "POST",
+        "/support/odata/v1/supportRequests('{supportRequestId}')/UploadAttachment",
+        "IntuneAutopatch.Support.UploadSupportRequestAttachment"
+      ],
+      [
+        "POST",
+        "/support/odata/v1/supportRequests('{supportRequestId}')/Reactivate",
+        "IntuneAutopatch.Support.ReactivateSupportRequest"
+      ],
+      [
+        "GET",
+        "/support/v1/Languages",
+        "IntuneAutopatch.Support.ListLanguages"
+      ],
+      [
+        "GET",
+        "/support/v1/RequestTypeHierarchy",
+        "IntuneAutopatch.Support.GetRequestTypeHierarchy"
+      ],
+      [
+        "GET",
+        "/support/v1/tenants/getSupportEntitlementInfo",
+        "IntuneAutopatch.Support.GetEntitlementInfo"
+      ],
+      [
+        "GET",
+        "/support/v1.0/Tenants/GetTenantManagedService/{plan}",
+        "IntuneAutopatch.Support.GetTenantManagedService"
+      ],
+      [
+        "GET",
+        "/tenant-management/v1/TenantSetting",
+        "IntuneAutopatch.Tenant.GetSetting"
+      ],
+      [
+        "POST",
+        "/tenant-management/v1/TenantSetting",
+        "IntuneAutopatch.Tenant.UpdateSetting"
+      ]
+    ],
+    "operationIds": [
+      "IntuneAutopatch.Platform.GetFlighting",
+      "IntuneAutopatch.Tenant.Resolve",
+      "IntuneAutopatch.Tenant.GetFeatureEnablementStatus",
+      "IntuneAutopatch.Tenant.ListAdminActions",
+      "IntuneAutopatch.Tenant.SubmitAdminActions",
+      "IntuneAutopatch.Tenant.GetAdminActionStatus",
+      "IntuneAutopatch.Tenant.GetMdmAppSettings",
+      "IntuneAutopatch.Roles.GetEffectivePermissions",
+      "IntuneAutopatch.Roles.ListResourceOperations",
+      "IntuneAutopatch.Roles.ListRoleDefinitions",
+      "IntuneAutopatch.Roles.ListRoleAssignments",
+      "IntuneAutopatch.Roles.GetScopeTags",
+      "IntuneAutopatch.Roles.GetScopedForResources",
+      "IntuneAutopatch.Roles.GetUserToken",
+      "IntuneAutopatch.AutopatchGroups.List",
+      "IntuneAutopatch.AutopatchGroups.ListMembershipRegistered",
+      "IntuneAutopatch.Reporting.GetManagementStatusSummaryOData",
+      "IntuneAutopatch.Reporting.ListQualityUpdateBusinessGroups",
+      "IntuneAutopatch.Reporting.GetQualityUpdateSummaryMetrics",
+      "IntuneAutopatch.Reporting.ListQualityUpdateTrending",
+      "IntuneAutopatch.Reporting.ListQualityUpdateDeploymentGroups",
+      "IntuneAutopatch.Reporting.ListQualityUpdateDetails",
+      "IntuneAutopatch.Reporting.GetQualityUpdateDistinctColumns",
+      "IntuneAutopatch.Reporting.StartQualityUpdateDetailsExport",
+      "IntuneAutopatch.Reporting.ListFeatureUpdateReleases",
+      "IntuneAutopatch.Reporting.GetFeatureUpdateSummaryMetrics",
+      "IntuneAutopatch.Reporting.ListFeatureUpdateTrending",
+      "IntuneAutopatch.Reporting.ListFeatureUpdateCompletionReleases",
+      "IntuneAutopatch.Reporting.ListFeatureUpdatePhases",
+      "IntuneAutopatch.Reporting.ListFeatureUpdateDetails",
+      "IntuneAutopatch.Reporting.GetFeatureUpdateDistinctColumns",
+      "IntuneAutopatch.Reporting.StartFeatureUpdateDetailsExport",
+      "IntuneAutopatch.Reporting.GetExportStatus",
+      "IntuneAutopatch.Reporting.ListFeatureUpdateSummaryReleaseOData",
+      "IntuneAutopatch.Reporting.ListFeatureUpdateSummaryMetricsOData",
+      "IntuneAutopatch.Reporting.ListFeatureUpdateDistinctColumnsOData",
+      "IntuneAutopatch.Reporting.ListFeatureUpdateTrendingOData",
+      "IntuneAutopatch.Messages.ListCustomerComms",
+      "IntuneAutopatch.Support.ListSupportRequests",
+      "IntuneAutopatch.Support.CreateSupportRequest",
+      "IntuneAutopatch.Support.GetSupportRequest",
+      "IntuneAutopatch.Support.UpdateSupportRequest",
+      "IntuneAutopatch.Support.ListSupportRequestActivities",
+      "IntuneAutopatch.Support.UpdateSupportRequestContact",
+      "IntuneAutopatch.Support.AddSupportRequestNote",
+      "IntuneAutopatch.Support.UploadSupportRequestAttachment",
+      "IntuneAutopatch.Support.ReactivateSupportRequest",
+      "IntuneAutopatch.Support.ListLanguages",
+      "IntuneAutopatch.Support.GetRequestTypeHierarchy",
+      "IntuneAutopatch.Support.GetEntitlementInfo",
+      "IntuneAutopatch.Support.GetTenantManagedService",
+      "IntuneAutopatch.Tenant.GetSetting",
+      "IntuneAutopatch.Tenant.UpdateSetting"
+    ]
+  },
+  "evidenceReferences": {
+    "references": [
+      "postman/collections/intune-autopatch.collection.json",
+      "specifications/nodoc-intune-autopatch/specification/openapi.yml",
+      "src/generated/operationLiveCaptureLedger.json",
+      "src/generated/portalCoverageLedger.json",
+      "tools/capture-recipes/intune-autopatch-deep.json",
+      "tools/capture-recipes/intune-deep.json",
+      "tools/capture-recipes/intune-seeded-replay.json"
+    ],
+    "repositoryDiscoveryFiles": [],
+    "generatedLedgers": {
+      "coverage": "src/generated/portalCoverageLedger.json",
+      "operationContext": null,
+      "operationLiveCapture": "src/generated/operationLiveCaptureLedger.json"
+    },
+    "staticJavascriptBundles": [],
+    "provenanceOperationCount": null,
+    "liveOperationCount": 4
+  },
+  "phaseGaps": {
+    "staticSourceDiscovery": {
+      "status": "incomplete",
+      "explanation": "Checked-in metadata and recipes exist, but no explicit comprehensive static-source completion attestation is available.",
+      "evidence": [
+        "tools/capture-recipes/intune-autopatch-deep.json",
+        "tools/capture-recipes/intune-deep.json",
+        "tools/capture-recipes/intune-seeded-replay.json",
+        "tools/portal-discovery-metadata.mjs"
+      ]
+    },
+    "javascriptBundleDiscovery": {
+      "status": "unavailable",
+      "explanation": "No per-spec checked-in JavaScript or bundle artifact is deterministically discoverable in the specification discovery directory.",
+      "evidence": []
+    },
+    "portalApiSpecDiscovery": {
+      "status": "incomplete",
+      "explanation": "Coverage metadata records prior discovery, but it does not attest a full portfolio refresh phase as complete.",
+      "evidence": [
+        "src/generated/portalCoverageLedger.json"
+      ]
+    },
+    "liveReadOnlyEvidence": {
+      "status": "incomplete",
+      "explanation": "Live evidence exists for 4 operations, without an all-operations refresh completion attestation.",
+      "evidence": [
+        "src/generated/operationLiveCaptureLedger.json"
+      ]
+    },
+    "reconciliationPublication": {
+      "status": "unknown",
+      "explanation": "No machine-readable campaign refresh reconciliation/publication attestation exists; derivative parity alone is insufficient.",
+      "evidence": []
+    }
+  },
+  "candidateInputs": {
+    "parityUnresolvedCount": {
+      "status": "complete",
+      "value": 0,
+      "source": "postman/collections/intune-autopatch.collection.json"
+    },
+    "parityOrphanedCount": {
+      "status": "complete",
+      "value": 0,
+      "source": "postman/collections/intune-autopatch.collection.json"
+    },
+    "routingMismatchCount": {
+      "status": "complete",
+      "value": 0,
+      "source": "postman/collections/intune-autopatch.collection.json"
+    },
+    "openGapCount": {
+      "status": "unknown",
+      "value": null,
+      "explanation": "openGaps is not explicitly recorded; absence is not treated as zero.",
+      "source": "tools/portal-discovery-metadata.mjs"
+    },
+    "openGapClassCount": {
+      "status": "unknown",
+      "value": null,
+      "explanation": "openGapClasses is not explicitly recorded; absence is not treated as zero.",
+      "source": "tools/portal-discovery-metadata.mjs"
+    },
+    "promotedDiscoveryCount": {
+      "status": "complete",
+      "value": 1,
+      "source": "tools/portal-discovery-metadata.mjs"
+    }
+  },
+  "fingerprints": {
+    "inputs": [
+      {
+        "path": "postman/collections/intune-autopatch.collection.json",
+        "bytes": 937186,
+        "sha256": "6d525da753e311d6749fca8eafa3b3c9f54b388bfb025a72abeff6792300edcd"
+      },
+      {
+        "path": "specifications/nodoc-intune-autopatch/specification/openapi.yml",
+        "bytes": 108111,
+        "sha256": "1edf8b60e2383aa75cfb476f88be1710ce8a157eb26eba8296243ccfe9389250"
+      },
+      {
+        "path": "src/generated/operationLiveCaptureLedger.json",
+        "bytes": 178401,
+        "sha256": "c8b748443ca3613e76dc66ad4bcf259351728a6d5c51dfc502554937b14049bb"
+      },
+      {
+        "path": "src/generated/portalCoverageLedger.json",
+        "bytes": 51980,
+        "sha256": "3de3740782916fb11bbc7832305b0bd64c0333d49f55f24c3331a6a4cf48f82b"
+      },
+      {
+        "path": "tools/capture-recipes/intune-autopatch-deep.json",
+        "bytes": 837,
+        "sha256": "33e76b760749593749c2c489cf8d5bc73dd4f11e2e607ed397549e06cfb5e716"
+      },
+      {
+        "path": "tools/capture-recipes/intune-deep.json",
+        "bytes": 793,
+        "sha256": "fca728e0568dba52a9cd705e6182377305d8de425564509bbae5cf40e0d38e4c"
+      },
+      {
+        "path": "tools/capture-recipes/intune-seeded-replay.json",
+        "bytes": 874,
+        "sha256": "f9ef9e3129a724cd7e9e8a0d7d2e20e4977946494ad261a6a907ae91422e4d35"
+      }
+    ],
+    "aggregateSha256": "2b37c96fe566c019ccb6351770f420cf6b39a5b76980a8766c66a4145be3df54"
+  }
+}

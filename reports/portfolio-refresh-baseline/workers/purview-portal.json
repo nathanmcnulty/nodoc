@@ -1,0 +1,211 @@
+{
+  "schemaVersion": 1,
+  "campaignDigest": "44c1a513a9ebab7c254828205c000531ff86e93039a1830ea1982e3dd8f20baa",
+  "specId": "purview-portal",
+  "title": "Purview Portal",
+  "inventory": {
+    "specPath": "specifications/nodoc-purview-portal/specification/openapi.yml",
+    "sourceFiles": [
+      "specifications/nodoc-purview-portal/specification/openapi.yml"
+    ],
+    "versions": {
+      "openapi": "3.0.1",
+      "api": "0.1.0"
+    },
+    "hosts": [
+      "https://purview.microsoft.com"
+    ],
+    "pathPrefixes": [
+      "/api/"
+    ],
+    "pathCount": 8,
+    "operationCount": 8,
+    "schemaCount": 11,
+    "schemaNames": [
+      "ErrorResponse",
+      "GenericObject",
+      "PurviewPortalAdminAuditLogConfig",
+      "PurviewPortalCachedRolesResponse",
+      "PurviewPortalLabelActivityRequest",
+      "PurviewPortalLabelActivityResponse",
+      "PurviewPortalRoleCheckRequest",
+      "PurviewPortalRoleCheckResponse",
+      "PurviewPortalSpaAuthCodeResponse",
+      "PurviewPortalTokenResponse",
+      "PurviewPortalUser"
+    ],
+    "operations": [
+      [
+        "GET",
+        "/api/Auth/getToken",
+        "PurviewPortal.Auth.GetToken"
+      ],
+      [
+        "GET",
+        "/api/Auth/getSpaAuthCode",
+        "PurviewPortal.Auth.GetSpaAuthCode"
+      ],
+      [
+        "GET",
+        "/api/v2/auth/GetCachedRoles",
+        "PurviewPortal.Auth.GetCachedRoles"
+      ],
+      [
+        "POST",
+        "/api/auth/IsInRoles",
+        "PurviewPortal.Auth.IsInRoles"
+      ],
+      [
+        "GET",
+        "/api/adminauditlogconfig/",
+        "PurviewPortal.Audit.GetAdminAuditLogConfig"
+      ],
+      [
+        "GET",
+        "/api/user/",
+        "PurviewPortal.Users.Search"
+      ],
+      [
+        "POST",
+        "/api/LabelUserActivityLog/GetChartData",
+        "PurviewPortal.Analytics.GetLabelUserActivityChartData"
+      ],
+      [
+        "POST",
+        "/api/Report/GetReportSummaryData",
+        "PurviewPortal.Analytics.GetReportSummaryData"
+      ]
+    ],
+    "operationIds": [
+      "PurviewPortal.Auth.GetToken",
+      "PurviewPortal.Auth.GetSpaAuthCode",
+      "PurviewPortal.Auth.GetCachedRoles",
+      "PurviewPortal.Auth.IsInRoles",
+      "PurviewPortal.Audit.GetAdminAuditLogConfig",
+      "PurviewPortal.Users.Search",
+      "PurviewPortal.Analytics.GetLabelUserActivityChartData",
+      "PurviewPortal.Analytics.GetReportSummaryData"
+    ]
+  },
+  "evidenceReferences": {
+    "references": [
+      "postman/collections/purview-portal.collection.json",
+      "specifications/nodoc-purview-portal/specification/openapi.yml",
+      "src/generated/operationContextLedger.json",
+      "src/generated/portalCoverageLedger.json",
+      "tools/capture-recipes/purview-portal-deep.json",
+      "tools/capture-recipes/purview-portal-seeded-replay.json"
+    ],
+    "repositoryDiscoveryFiles": [],
+    "generatedLedgers": {
+      "coverage": "src/generated/portalCoverageLedger.json",
+      "operationContext": "src/generated/operationContextLedger.json",
+      "operationLiveCapture": null
+    },
+    "staticJavascriptBundles": [],
+    "provenanceOperationCount": 4,
+    "liveOperationCount": null
+  },
+  "phaseGaps": {
+    "staticSourceDiscovery": {
+      "status": "incomplete",
+      "explanation": "Checked-in metadata and recipes exist, but no explicit comprehensive static-source completion attestation is available.",
+      "evidence": [
+        "tools/capture-recipes/purview-portal-deep.json",
+        "tools/capture-recipes/purview-portal-seeded-replay.json",
+        "tools/portal-discovery-metadata.mjs"
+      ]
+    },
+    "javascriptBundleDiscovery": {
+      "status": "unavailable",
+      "explanation": "No per-spec checked-in JavaScript or bundle artifact is deterministically discoverable in the specification discovery directory.",
+      "evidence": []
+    },
+    "portalApiSpecDiscovery": {
+      "status": "incomplete",
+      "explanation": "Coverage metadata records prior discovery, but it does not attest a full portfolio refresh phase as complete.",
+      "evidence": [
+        "src/generated/portalCoverageLedger.json"
+      ]
+    },
+    "liveReadOnlyEvidence": {
+      "status": "unavailable",
+      "explanation": "No generated live-capture ledger entry exists for this specification.",
+      "evidence": []
+    },
+    "reconciliationPublication": {
+      "status": "unknown",
+      "explanation": "No machine-readable campaign refresh reconciliation/publication attestation exists; derivative parity alone is insufficient.",
+      "evidence": []
+    }
+  },
+  "candidateInputs": {
+    "parityUnresolvedCount": {
+      "status": "complete",
+      "value": 0,
+      "source": "postman/collections/purview-portal.collection.json"
+    },
+    "parityOrphanedCount": {
+      "status": "complete",
+      "value": 0,
+      "source": "postman/collections/purview-portal.collection.json"
+    },
+    "routingMismatchCount": {
+      "status": "complete",
+      "value": 0,
+      "source": "postman/collections/purview-portal.collection.json"
+    },
+    "openGapCount": {
+      "status": "complete",
+      "value": 1,
+      "explanation": "openGaps is explicitly recorded in the authoritative coverage overlay.",
+      "source": "tools/portal-discovery-metadata.mjs"
+    },
+    "openGapClassCount": {
+      "status": "complete",
+      "value": 1,
+      "explanation": "openGapClasses is explicitly recorded in the authoritative coverage overlay.",
+      "source": "tools/portal-discovery-metadata.mjs"
+    },
+    "promotedDiscoveryCount": {
+      "status": "complete",
+      "value": 2,
+      "source": "tools/portal-discovery-metadata.mjs"
+    }
+  },
+  "fingerprints": {
+    "inputs": [
+      {
+        "path": "postman/collections/purview-portal.collection.json",
+        "bytes": 117566,
+        "sha256": "3e97c7e6f900be2c5a2fe1fc302a3b4b3ab964f4b9ab61230feef2f2da53db0d"
+      },
+      {
+        "path": "specifications/nodoc-purview-portal/specification/openapi.yml",
+        "bytes": 23913,
+        "sha256": "f76840fa4c091a706fb1bf071b2bb06c054808d1bb6250222ac2dafb239e46e6"
+      },
+      {
+        "path": "src/generated/operationContextLedger.json",
+        "bytes": 162058,
+        "sha256": "439ff921d2ae7407d0ffef71d7b83d99fe2fb066dfa38afb861bf01afe8201c4"
+      },
+      {
+        "path": "src/generated/portalCoverageLedger.json",
+        "bytes": 51980,
+        "sha256": "3de3740782916fb11bbc7832305b0bd64c0333d49f55f24c3331a6a4cf48f82b"
+      },
+      {
+        "path": "tools/capture-recipes/purview-portal-deep.json",
+        "bytes": 1305,
+        "sha256": "8c341bc23bd8c6ac9b632827a439ca5263fff3df6cd8b502bc090106a54f2ae0"
+      },
+      {
+        "path": "tools/capture-recipes/purview-portal-seeded-replay.json",
+        "bytes": 653,
+        "sha256": "fe4b9dea2dc1ddca2e7cf4b07ddf796089c80f56602ad4182933ed7e9cf9d2d4"
+      }
+    ],
+    "aggregateSha256": "70ff70e35a315d02fffa66d4c118cb68fa87e0968130d2d91850ebbfb8b69367"
+  }
+}

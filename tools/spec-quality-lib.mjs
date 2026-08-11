@@ -411,10 +411,9 @@ export function reconcileOperationSets(openapiOperations, postmanCollection, opt
   };
 }
 
-export function validatePostmanServerRouting(
+export function analyzePostmanServerRouting(
   operations,
   collection,
-  context = "OpenAPI/Postman collection",
 ) {
   const openapi = operations.map((entry) => ({
     key: canonicalOperationKey(entry),
@@ -446,21 +445,29 @@ export function validatePostmanServerRouting(
     }
   }
 
-  if (mismatches.length > 0) {
-    const details = mismatches
+  return {
+    operationCount: openapi.length,
+    requestCount: postman.length,
+    validatedOperationCount: openapi.filter((entry) => entry.serverUrls.length > 0).length,
+    mismatches,
+  };
+}
+
+export function validatePostmanServerRouting(
+  operations,
+  collection,
+  context = "OpenAPI/Postman collection",
+) {
+  const result = analyzePostmanServerRouting(operations, collection);
+  if (result.mismatches.length > 0) {
+    const details = result.mismatches
       .map((entry) => (
         `${entry.key} expected ${entry.expectedHosts.join("|")} but generated ${entry.actualHost ?? "missing"}`
       ))
       .join("; ");
     throw new Error(`${context} has invalid server routing (${details}).`);
   }
-
-  return {
-    operationCount: openapi.length,
-    requestCount: postman.length,
-    validatedOperationCount: openapi.filter((entry) => entry.serverUrls.length > 0).length,
-    mismatches: [],
-  };
+  return result;
 }
 
 function getOperations(specification) {

@@ -1,0 +1,340 @@
+{
+  "schemaVersion": 1,
+  "campaignDigest": "44c1a513a9ebab7c254828205c000531ff86e93039a1830ea1982e3dd8f20baa",
+  "specId": "m365-apps-inventory",
+  "title": "M365 Apps Inventory",
+  "inventory": {
+    "specPath": "specifications/nodoc-m365-apps-inventory/specification/openapi.yml",
+    "sourceFiles": [
+      "specifications/nodoc-m365-apps-inventory/specification/openapi.yml"
+    ],
+    "versions": {
+      "openapi": "3.0.1",
+      "api": "0.1.0"
+    },
+    "hosts": [
+      "https://query.inventory.insights.office.net"
+    ],
+    "pathPrefixes": [
+      "/inventory/"
+    ],
+    "pathCount": 25,
+    "operationCount": 27,
+    "schemaCount": 17,
+    "schemaNames": [
+      "DeviceSummary",
+      "DeviceUpdateProgressChannelSummary",
+      "DeviceUpdateProgressSummaryResponse",
+      "DeviceUpdateStatusSummary",
+      "GenericObject",
+      "InventoryCollection",
+      "InventorySettings",
+      "InventorySettingsDeltaRequest",
+      "InventorySettingsUpdateRequest",
+      "LatestPatchDate",
+      "OnboardingState",
+      "PlainInteger",
+      "SecurityCurrencyGoal",
+      "SecurityCurrencyGoalUpdate",
+      "SecurityCurrencyMetrics",
+      "SecurityRelease",
+      "SecurityReleaseCollection"
+    ],
+    "operations": [
+      [
+        "GET",
+        "/inventory/api/DeviceActions/GetUpdateProgressSummaryByChannel()",
+        null
+      ],
+      [
+        "GET",
+        "/inventory/api/Devices",
+        null
+      ],
+      [
+        "GET",
+        "/inventory/api/Devices/GetDeviceSummary",
+        null
+      ],
+      [
+        "GET",
+        "/inventory/api/DevicesWithCloudManagementInfo",
+        null
+      ],
+      [
+        "GET",
+        "/inventory/api/DevicesWithMetadata/GetOfficeBuildChannelSummaryWithMetadata",
+        null
+      ],
+      [
+        "GET",
+        "/inventory/api/DevicesWithMetadata/GetOfficeBuildDeviceSummaryWithMetadata",
+        null
+      ],
+      [
+        "GET",
+        "/inventory/api/OfficeAddins",
+        null
+      ],
+      [
+        "GET",
+        "/inventory/api/OfficeAddins/$Count",
+        null
+      ],
+      [
+        "GET",
+        "/inventory/api/Languages",
+        null
+      ],
+      [
+        "GET",
+        "/inventory/api/OfficeApplications",
+        null
+      ],
+      [
+        "GET",
+        "/inventory/api/OfficeAddinVersions",
+        null
+      ],
+      [
+        "GET",
+        "/inventory/api/Onboarding",
+        null
+      ],
+      [
+        "POST",
+        "/inventory/api/Onboarding/Onboard()",
+        null
+      ],
+      [
+        "POST",
+        "/inventory/api/Onboarding/Offboard",
+        null
+      ],
+      [
+        "GET",
+        "/inventory/api/SecurityCurrencyDevices/GetLatestPatchDate",
+        null
+      ],
+      [
+        "GET",
+        "/inventory/api/SecurityCurrencyDevices/GetLatestSecurityReleasesPerServicingChannel",
+        null
+      ],
+      [
+        "GET",
+        "/inventory/api/SecurityCurrencyDevices/GetSecurityUpdateStatusMetrics",
+        null
+      ],
+      [
+        "GET",
+        "/inventory/api/SecurityCurrencyDevices/GetSecurityUpdateStatusMetricsByChannel",
+        null
+      ],
+      [
+        "GET",
+        "/inventory/api/SecurityCurrencyGoal",
+        null
+      ],
+      [
+        "POST",
+        "/inventory/api/SecurityCurrencyGoal",
+        null
+      ],
+      [
+        "PATCH",
+        "/inventory/api/SecurityCurrencyGoal({goalId})",
+        null
+      ],
+      [
+        "GET",
+        "/inventory/api/SecurityVulnerabilities/GetSecurityVulnerabilityByChannel",
+        null
+      ],
+      [
+        "GET",
+        "/inventory/api/SecurityVulnerabilities/GetSecurityVulnerabilityByReleaseDate",
+        null
+      ],
+      [
+        "GET",
+        "/inventory/api/SecurityVulnerabilitiesDevices/GetSecurityVulnerabilityForEveryDevice()",
+        null
+      ],
+      [
+        "GET",
+        "/inventory/api/Settings",
+        null
+      ],
+      [
+        "POST",
+        "/inventory/api/Settings",
+        null
+      ],
+      [
+        "PATCH",
+        "/inventory/api/Settings({settingsId})",
+        null
+      ]
+    ],
+    "operationIds": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "evidenceReferences": {
+    "references": [
+      "postman/collections/m365-apps-inventory.collection.json",
+      "specifications/nodoc-m365-apps-inventory/specification/openapi.yml",
+      "src/generated/portalCoverageLedger.json",
+      "tools/capture-recipes/m365-apps-deep.json",
+      "tools/capture-recipes/m365-apps-inventory-deep.json",
+      "tools/capture-recipes/m365-apps-seeded-replay.json"
+    ],
+    "repositoryDiscoveryFiles": [],
+    "generatedLedgers": {
+      "coverage": "src/generated/portalCoverageLedger.json",
+      "operationContext": null,
+      "operationLiveCapture": null
+    },
+    "staticJavascriptBundles": [],
+    "provenanceOperationCount": null,
+    "liveOperationCount": null
+  },
+  "phaseGaps": {
+    "canonicalInventory": {
+      "status": "incomplete",
+      "explanation": "27 operations lack operation IDs.",
+      "evidence": [
+        "specifications/nodoc-m365-apps-inventory/specification/openapi.yml"
+      ]
+    },
+    "staticSourceDiscovery": {
+      "status": "incomplete",
+      "explanation": "Checked-in metadata and recipes exist, but no explicit comprehensive static-source completion attestation is available.",
+      "evidence": [
+        "tools/capture-recipes/m365-apps-deep.json",
+        "tools/capture-recipes/m365-apps-inventory-deep.json",
+        "tools/capture-recipes/m365-apps-seeded-replay.json",
+        "tools/portal-discovery-metadata.mjs"
+      ]
+    },
+    "javascriptBundleDiscovery": {
+      "status": "unavailable",
+      "explanation": "No per-spec checked-in JavaScript or bundle artifact is deterministically discoverable in the specification discovery directory.",
+      "evidence": []
+    },
+    "portalApiSpecDiscovery": {
+      "status": "incomplete",
+      "explanation": "Coverage metadata records prior discovery, but it does not attest a full portfolio refresh phase as complete.",
+      "evidence": [
+        "src/generated/portalCoverageLedger.json"
+      ]
+    },
+    "liveReadOnlyEvidence": {
+      "status": "unavailable",
+      "explanation": "No generated live-capture ledger entry exists for this specification.",
+      "evidence": []
+    },
+    "reconciliationPublication": {
+      "status": "unknown",
+      "explanation": "No machine-readable campaign refresh reconciliation/publication attestation exists; derivative parity alone is insufficient.",
+      "evidence": []
+    }
+  },
+  "candidateInputs": {
+    "parityUnresolvedCount": {
+      "status": "complete",
+      "value": 0,
+      "source": "postman/collections/m365-apps-inventory.collection.json"
+    },
+    "parityOrphanedCount": {
+      "status": "complete",
+      "value": 0,
+      "source": "postman/collections/m365-apps-inventory.collection.json"
+    },
+    "routingMismatchCount": {
+      "status": "complete",
+      "value": 0,
+      "source": "postman/collections/m365-apps-inventory.collection.json"
+    },
+    "openGapCount": {
+      "status": "unknown",
+      "value": null,
+      "explanation": "openGaps is not explicitly recorded; absence is not treated as zero.",
+      "source": "tools/portal-discovery-metadata.mjs"
+    },
+    "openGapClassCount": {
+      "status": "unknown",
+      "value": null,
+      "explanation": "openGapClasses is not explicitly recorded; absence is not treated as zero.",
+      "source": "tools/portal-discovery-metadata.mjs"
+    },
+    "promotedDiscoveryCount": {
+      "status": "unknown",
+      "value": null,
+      "source": "tools/portal-discovery-metadata.mjs",
+      "explanation": "promotedDiscoveries is not explicitly recorded; absence is not treated as zero."
+    }
+  },
+  "fingerprints": {
+    "inputs": [
+      {
+        "path": "postman/collections/m365-apps-inventory.collection.json",
+        "bytes": 354175,
+        "sha256": "88bff0a50d4c17f6053cf8131075707f8ce0aeb28e2e08f431ef4368e954bc40"
+      },
+      {
+        "path": "specifications/nodoc-m365-apps-inventory/specification/openapi.yml",
+        "bytes": 33631,
+        "sha256": "5900666334da5caf6891d81c06e7e1c1c5205304dee3486999a74347ff25afce"
+      },
+      {
+        "path": "src/generated/portalCoverageLedger.json",
+        "bytes": 51980,
+        "sha256": "3de3740782916fb11bbc7832305b0bd64c0333d49f55f24c3331a6a4cf48f82b"
+      },
+      {
+        "path": "tools/capture-recipes/m365-apps-deep.json",
+        "bytes": 862,
+        "sha256": "4b3d2561f15d11e10593031628baac05af685b80031dad5116eeb6e4f993cf54"
+      },
+      {
+        "path": "tools/capture-recipes/m365-apps-inventory-deep.json",
+        "bytes": 2048,
+        "sha256": "4377df1164c17b7ca3f3abf598a8093640e7ab6b57ff9e3d631b7d19f3aeffcd"
+      },
+      {
+        "path": "tools/capture-recipes/m365-apps-seeded-replay.json",
+        "bytes": 671,
+        "sha256": "871382c27c37e0bd72ef702a903f475b8cd6c9f153ba0528796b9d10cd936c8e"
+      }
+    ],
+    "aggregateSha256": "c9d6f430ab5202e9dac9ab010b0485161c2342aefb3d5198d4b55b505bbcf16c"
+  }
+}

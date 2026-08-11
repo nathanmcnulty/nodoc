@@ -1,0 +1,441 @@
+{
+  "schemaVersion": 1,
+  "campaignDigest": "44c1a513a9ebab7c254828205c000531ff86e93039a1830ea1982e3dd8f20baa",
+  "specId": "security-copilot",
+  "title": "Security Copilot",
+  "inventory": {
+    "specPath": "specifications/nodoc-security-copilot/specification/openapi.yml",
+    "sourceFiles": [
+      "specifications/nodoc-security-copilot/specification/openapi.yml"
+    ],
+    "versions": {
+      "openapi": "3.0.1",
+      "api": "0.1.1"
+    },
+    "hosts": [
+      "https://api.securitycopilot.microsoft.com",
+      "https://api.securityplatform.microsoft.com",
+      "https://ecs.office.com",
+      "https://prod.cds.securitycopilot.microsoft.com",
+      "https://securitymarketplaceapi-prod.microsoft.com",
+      "https://us.api.securityplatform.microsoft.com"
+    ],
+    "pathPrefixes": [
+      "/account/",
+      "/api/",
+      "/auth/",
+      "/catalog/",
+      "/config/",
+      "/graphData/",
+      "/pods/",
+      "/provisioning/",
+      "/settings/",
+      "/trial/",
+      "/usage/",
+      "/userPreferences/",
+      "/users/"
+    ],
+    "pathCount": 42,
+    "operationCount": 42,
+    "schemaCount": 19,
+    "schemaNames": [
+      "AgentsResponse",
+      "ContainerPermissionCheckRequest",
+      "ContainerPermissionCheckResponse",
+      "DataShareSettings",
+      "FeatureFlagsResponse",
+      "GenericListEnvelope",
+      "GenericObject",
+      "GraphDetailsRequest",
+      "GraphDetailsResponse",
+      "MarketplaceClientConfigResponse",
+      "MarketplaceSearchResponse",
+      "PersonaValuesResponse",
+      "ProvisioningAccountResponse",
+      "SessionsResponse",
+      "TrialRecord",
+      "UserActivityResponse",
+      "UserInfoResponse",
+      "WorkspaceListResponse",
+      "WorkspacePreference"
+    ],
+    "operations": [
+      [
+        "GET",
+        "/auth",
+        "SecurityCopilotPortal.Auth.Probe"
+      ],
+      [
+        "GET",
+        "/auth/userInfo",
+        "SecurityCopilotPortal.Auth.GetUserInfo"
+      ],
+      [
+        "GET",
+        "/auth/expiryDate",
+        "SecurityCopilotPortal.Auth.GetExpiryDate"
+      ],
+      [
+        "GET",
+        "/users/features",
+        "SecurityCopilotPortal.Users.GetFeatures"
+      ],
+      [
+        "GET",
+        "/settings/datashare",
+        "SecurityCopilotPortal.Settings.GetDataShare"
+      ],
+      [
+        "GET",
+        "/settings/datashare/defaultWorkspace",
+        "SecurityCopilotPortal.Settings.GetDefaultWorkspace"
+      ],
+      [
+        "GET",
+        "/userPreferences/currentWorkspace",
+        "SecurityCopilotPortal.UserPreferences.GetCurrentWorkspace"
+      ],
+      [
+        "GET",
+        "/usage/capacities",
+        "SecurityCopilotPortal.Usage.ListCapacities"
+      ],
+      [
+        "GET",
+        "/trial",
+        "SecurityCopilotPortal.Trial.List"
+      ],
+      [
+        "POST",
+        "/graphData/details",
+        "SecurityCopilotPortal.GraphData.GetDetails"
+      ],
+      [
+        "POST",
+        "/pods/{podId}/workspaces/{workspaceName}/securitycopilot/graphData/details",
+        "SecurityCopilotPortal.GraphData.GetWorkspaceDetails"
+      ],
+      [
+        "POST",
+        "/provisioning/create",
+        "SecurityCopilotPortal.Provisioning.CreateWhatIf"
+      ],
+      [
+        "GET",
+        "/provisioning/account",
+        "SecurityCopilotPortal.Provisioning.GetAccount"
+      ],
+      [
+        "GET",
+        "/account/workspaces",
+        "SecurityCopilotPortal.Account.ListWorkspaces"
+      ],
+      [
+        "POST",
+        "/api/gateway/actions/containers/me",
+        "SecurityCopilotPortal.ActionGateway.EvaluateContainerPermissions"
+      ],
+      [
+        "POST",
+        "/api/gateway/actions/collections/me",
+        "SecurityCopilotPortal.ActionGateway.EvaluateCollectionPermissions"
+      ],
+      [
+        "GET",
+        "/provisioning/checkTenant",
+        "SecurityCopilotPortal.Provisioning.CheckTenant"
+      ],
+      [
+        "GET",
+        "/pods/{podId}/workspaces/{workspaceName}",
+        "SecurityCopilotPortal.Workspaces.Get"
+      ],
+      [
+        "GET",
+        "/pods/{podId}/policystore/workspaces/{workspaceName}/workspacePolicy",
+        "SecurityCopilotPortal.WorkspacePolicy.Get"
+      ],
+      [
+        "GET",
+        "/pods/{podId}/workspaces/{workspaceName}/securitycopilot/personas/values",
+        "SecurityCopilotPortal.Personas.ListValues"
+      ],
+      [
+        "GET",
+        "/pods/{podId}/workspaces/{workspaceName}/securitycopilot/personas/skillsets",
+        "SecurityCopilotPortal.Personas.ListSkillsets"
+      ],
+      [
+        "GET",
+        "/pods/{podId}/workspaces/{workspaceName}/securitycopilot/users/{userId}/activities",
+        "SecurityCopilotPortal.Users.GetActivities"
+      ],
+      [
+        "GET",
+        "/pods/{podId}/workspaces/{workspaceName}/securitycopilot/availabletrials",
+        "SecurityCopilotPortal.Workspace.ListAvailableTrials"
+      ],
+      [
+        "GET",
+        "/pods/{podId}/workspaces/{workspaceName}/securitycopilot/sessions",
+        "SecurityCopilotPortal.Sessions.List"
+      ],
+      [
+        "GET",
+        "/pods/{podId}/workspaces/{workspaceName}/securitycopilot/sessions/prompts",
+        "SecurityCopilotPortal.Sessions.ListPrompts"
+      ],
+      [
+        "GET",
+        "/pods/{podId}/workspaces/{workspaceName}/securitycopilot/promptbooks",
+        "SecurityCopilotPortal.Promptbooks.List"
+      ],
+      [
+        "GET",
+        "/pods/{podId}/workspaces/{workspaceName}/securitycopilot/agents",
+        "SecurityCopilotPortal.Agents.List"
+      ],
+      [
+        "GET",
+        "/pods/{podId}/workspaces/{workspaceName}/securitycopilot/agentdefinitions",
+        "SecurityCopilotPortal.AgentDefinitions.List"
+      ],
+      [
+        "GET",
+        "/pods/{podId}/workspaces/{workspaceName}/securitycopilot/prompt-suggestions/personas",
+        "SecurityCopilotPortal.PromptSuggestions.ListByPersona"
+      ],
+      [
+        "GET",
+        "/pods/{podId}/workspaces/{workspaceName}/securitycopilot/skillsets",
+        "SecurityCopilotPortal.Skillsets.List"
+      ],
+      [
+        "GET",
+        "/pods/{podId}/workspaces/{workspaceName}/securitycopilot/skillsets/authSettings",
+        "SecurityCopilotPortal.Skillsets.GetAuthSettings"
+      ],
+      [
+        "GET",
+        "/pods/{podId}/workspaces/{workspaceName}/securitycopilot/skillsets/Fusion/icon",
+        "SecurityCopilotPortal.Skillsets.GetFusionIcon"
+      ],
+      [
+        "GET",
+        "/pods/{podId}/workspaces/{workspaceName}/securitycopilot/skillsets/KnowledgeBase/icon",
+        "SecurityCopilotPortal.Skillsets.GetKnowledgeBaseIcon"
+      ],
+      [
+        "GET",
+        "/pods/{podId}/workspaces/{workspaceName}/securitycopilot/skillsets/configurations",
+        "SecurityCopilotPortal.Skillsets.ListConfigurations"
+      ],
+      [
+        "GET",
+        "/pods/{podId}/workspaces/{workspaceName}/securitycopilot/skillsets/checkRequirements",
+        "SecurityCopilotPortal.Skillsets.CheckRequirements"
+      ],
+      [
+        "GET",
+        "/pods/{podId}/workspaces/{workspaceName}/securitycopilot/WorkspaceSettings",
+        "SecurityCopilotPortal.Workspace.GetSettings"
+      ],
+      [
+        "GET",
+        "/pods/{podId}/workspaces/{workspaceName}/securitycopilot/skillsets/{skillsetName}/skills",
+        "SecurityCopilotPortal.Skillsets.ListSkills"
+      ],
+      [
+        "GET",
+        "/config/v1/SecurityMarketplaceClient/1.0.0",
+        "SecurityCopilotPortal.Store.GetClientConfiguration"
+      ],
+      [
+        "GET",
+        "/config/v1/SecurityCopilotClient/1.0.0",
+        "SecurityCopilotPortal.Store.GetCopilotClientConfiguration"
+      ],
+      [
+        "GET",
+        "/config/v1/LokiService/1.0.0.0",
+        "SecurityCopilotPortal.Store.GetLokiServiceClientConfiguration"
+      ],
+      [
+        "GET",
+        "/config/v1/YammerClients/0.0.1",
+        "SecurityCopilotPortal.Store.GetYammerClientConfiguration"
+      ],
+      [
+        "GET",
+        "/catalog/search",
+        "SecurityCopilotPortal.Store.SearchCatalog"
+      ]
+    ],
+    "operationIds": [
+      "SecurityCopilotPortal.Auth.Probe",
+      "SecurityCopilotPortal.Auth.GetUserInfo",
+      "SecurityCopilotPortal.Auth.GetExpiryDate",
+      "SecurityCopilotPortal.Users.GetFeatures",
+      "SecurityCopilotPortal.Settings.GetDataShare",
+      "SecurityCopilotPortal.Settings.GetDefaultWorkspace",
+      "SecurityCopilotPortal.UserPreferences.GetCurrentWorkspace",
+      "SecurityCopilotPortal.Usage.ListCapacities",
+      "SecurityCopilotPortal.Trial.List",
+      "SecurityCopilotPortal.GraphData.GetDetails",
+      "SecurityCopilotPortal.GraphData.GetWorkspaceDetails",
+      "SecurityCopilotPortal.Provisioning.CreateWhatIf",
+      "SecurityCopilotPortal.Provisioning.GetAccount",
+      "SecurityCopilotPortal.Account.ListWorkspaces",
+      "SecurityCopilotPortal.ActionGateway.EvaluateContainerPermissions",
+      "SecurityCopilotPortal.ActionGateway.EvaluateCollectionPermissions",
+      "SecurityCopilotPortal.Provisioning.CheckTenant",
+      "SecurityCopilotPortal.Workspaces.Get",
+      "SecurityCopilotPortal.WorkspacePolicy.Get",
+      "SecurityCopilotPortal.Personas.ListValues",
+      "SecurityCopilotPortal.Personas.ListSkillsets",
+      "SecurityCopilotPortal.Users.GetActivities",
+      "SecurityCopilotPortal.Workspace.ListAvailableTrials",
+      "SecurityCopilotPortal.Sessions.List",
+      "SecurityCopilotPortal.Sessions.ListPrompts",
+      "SecurityCopilotPortal.Promptbooks.List",
+      "SecurityCopilotPortal.Agents.List",
+      "SecurityCopilotPortal.AgentDefinitions.List",
+      "SecurityCopilotPortal.PromptSuggestions.ListByPersona",
+      "SecurityCopilotPortal.Skillsets.List",
+      "SecurityCopilotPortal.Skillsets.GetAuthSettings",
+      "SecurityCopilotPortal.Skillsets.GetFusionIcon",
+      "SecurityCopilotPortal.Skillsets.GetKnowledgeBaseIcon",
+      "SecurityCopilotPortal.Skillsets.ListConfigurations",
+      "SecurityCopilotPortal.Skillsets.CheckRequirements",
+      "SecurityCopilotPortal.Workspace.GetSettings",
+      "SecurityCopilotPortal.Skillsets.ListSkills",
+      "SecurityCopilotPortal.Store.GetClientConfiguration",
+      "SecurityCopilotPortal.Store.GetCopilotClientConfiguration",
+      "SecurityCopilotPortal.Store.GetLokiServiceClientConfiguration",
+      "SecurityCopilotPortal.Store.GetYammerClientConfiguration",
+      "SecurityCopilotPortal.Store.SearchCatalog"
+    ]
+  },
+  "evidenceReferences": {
+    "references": [
+      "postman/collections/security-copilot.collection.json",
+      "specifications/nodoc-security-copilot/specification/openapi.yml",
+      "src/generated/portalCoverageLedger.json",
+      "tools/capture-recipes/security-copilot-builder-followup.json",
+      "tools/capture-recipes/security-copilot-deep.json",
+      "tools/capture-recipes/security-copilot-seeded-replay.json"
+    ],
+    "repositoryDiscoveryFiles": [],
+    "generatedLedgers": {
+      "coverage": "src/generated/portalCoverageLedger.json",
+      "operationContext": null,
+      "operationLiveCapture": null
+    },
+    "staticJavascriptBundles": [],
+    "provenanceOperationCount": null,
+    "liveOperationCount": null
+  },
+  "phaseGaps": {
+    "staticSourceDiscovery": {
+      "status": "incomplete",
+      "explanation": "Checked-in metadata and recipes exist, but no explicit comprehensive static-source completion attestation is available.",
+      "evidence": [
+        "tools/capture-recipes/security-copilot-builder-followup.json",
+        "tools/capture-recipes/security-copilot-deep.json",
+        "tools/capture-recipes/security-copilot-seeded-replay.json",
+        "tools/portal-discovery-metadata.mjs"
+      ]
+    },
+    "javascriptBundleDiscovery": {
+      "status": "unavailable",
+      "explanation": "No per-spec checked-in JavaScript or bundle artifact is deterministically discoverable in the specification discovery directory.",
+      "evidence": []
+    },
+    "portalApiSpecDiscovery": {
+      "status": "incomplete",
+      "explanation": "Coverage metadata records prior discovery, but it does not attest a full portfolio refresh phase as complete.",
+      "evidence": [
+        "src/generated/portalCoverageLedger.json"
+      ]
+    },
+    "liveReadOnlyEvidence": {
+      "status": "unavailable",
+      "explanation": "No generated live-capture ledger entry exists for this specification.",
+      "evidence": []
+    },
+    "reconciliationPublication": {
+      "status": "unknown",
+      "explanation": "No machine-readable campaign refresh reconciliation/publication attestation exists; derivative parity alone is insufficient.",
+      "evidence": []
+    }
+  },
+  "candidateInputs": {
+    "parityUnresolvedCount": {
+      "status": "complete",
+      "value": 0,
+      "source": "postman/collections/security-copilot.collection.json"
+    },
+    "parityOrphanedCount": {
+      "status": "complete",
+      "value": 0,
+      "source": "postman/collections/security-copilot.collection.json"
+    },
+    "routingMismatchCount": {
+      "status": "complete",
+      "value": 0,
+      "source": "postman/collections/security-copilot.collection.json"
+    },
+    "openGapCount": {
+      "status": "complete",
+      "value": 2,
+      "explanation": "openGaps is explicitly recorded in the authoritative coverage overlay.",
+      "source": "tools/portal-discovery-metadata.mjs"
+    },
+    "openGapClassCount": {
+      "status": "unknown",
+      "value": null,
+      "explanation": "openGapClasses is not explicitly recorded; absence is not treated as zero.",
+      "source": "tools/portal-discovery-metadata.mjs"
+    },
+    "promotedDiscoveryCount": {
+      "status": "complete",
+      "value": 4,
+      "source": "tools/portal-discovery-metadata.mjs"
+    }
+  },
+  "fingerprints": {
+    "inputs": [
+      {
+        "path": "postman/collections/security-copilot.collection.json",
+        "bytes": 466166,
+        "sha256": "985a0a5589cc49d4916819d66262acdd59dc3ce1209cb6445867a02ed331faa7"
+      },
+      {
+        "path": "specifications/nodoc-security-copilot/specification/openapi.yml",
+        "bytes": 51360,
+        "sha256": "a2385a3870a03ae7f27fa06603ead0a3f4fd28140235720a21a23d66828a2a30"
+      },
+      {
+        "path": "src/generated/portalCoverageLedger.json",
+        "bytes": 51980,
+        "sha256": "3de3740782916fb11bbc7832305b0bd64c0333d49f55f24c3331a6a4cf48f82b"
+      },
+      {
+        "path": "tools/capture-recipes/security-copilot-builder-followup.json",
+        "bytes": 1004,
+        "sha256": "3bf07f3b465067b25e1fc88cca96e429654cdc42d4c5721c34ae8fc1a083330f"
+      },
+      {
+        "path": "tools/capture-recipes/security-copilot-deep.json",
+        "bytes": 1414,
+        "sha256": "230163a73257fe3834c0880fc5eb7cd2fc61f99b891868c47d0eb92a5adf310a"
+      },
+      {
+        "path": "tools/capture-recipes/security-copilot-seeded-replay.json",
+        "bytes": 1197,
+        "sha256": "6ad38bfe708388b153241742aa0a4189f74b2c49cc4b0fdd6484d60d74f3fd5e"
+      }
+    ],
+    "aggregateSha256": "f27791677e03b0a10156a65fb8e204890473e38fe4449871b121f2f96db2de78"
+  }
+}

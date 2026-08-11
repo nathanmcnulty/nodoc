@@ -1,0 +1,238 @@
+{
+  "schemaVersion": 1,
+  "campaignDigest": "44c1a513a9ebab7c254828205c000531ff86e93039a1830ea1982e3dd8f20baa",
+  "specId": "viva-engage",
+  "title": "Viva Engage",
+  "inventory": {
+    "specPath": "specifications/nodoc-viva-engage/specification/openapi.yml",
+    "sourceFiles": [
+      "specifications/nodoc-viva-engage/specification/openapi.yml"
+    ],
+    "versions": {
+      "openapi": "3.0.1",
+      "api": "0.4.2"
+    },
+    "hosts": [
+      "https://api.engage.cloud.microsoft",
+      "https://engage.cloud.microsoft",
+      "https://{relayHost}.rt.yammer.com"
+    ],
+    "pathPrefixes": [
+      "/api/",
+      "/cometd/",
+      "/graphql/"
+    ],
+    "pathCount": 5,
+    "operationCount": 5,
+    "schemaCount": 9,
+    "schemaNames": [
+      "GraphQLError",
+      "GraphQLErrorLocation",
+      "GraphQLRequest",
+      "GraphQLResponse",
+      "PersistedQueryDescriptor",
+      "RealtimeCometdEnvelope",
+      "RealtimeCometdMessage",
+      "YammerTreatment",
+      "YammerTreatmentsExtension"
+    ],
+    "operations": [
+      [
+        "POST",
+        "/graphql",
+        "AdminGraphQL_PostGraphql"
+      ],
+      [
+        "GET",
+        "/api/v1/oauth2/aad_access_token",
+        "AuthHelpers_GetAadAccessToken"
+      ],
+      [
+        "POST",
+        "/cometd/handshake",
+        "RealtimeRelay_PostHandshake"
+      ],
+      [
+        "POST",
+        "/cometd/",
+        "RealtimeRelay_PostSubscribe"
+      ],
+      [
+        "POST",
+        "/cometd/connect",
+        "RealtimeRelay_PostConnect"
+      ]
+    ],
+    "operationIds": [
+      "AdminGraphQL_PostGraphql",
+      "AuthHelpers_GetAadAccessToken",
+      "RealtimeRelay_PostHandshake",
+      "RealtimeRelay_PostSubscribe",
+      "RealtimeRelay_PostConnect"
+    ]
+  },
+  "evidenceReferences": {
+    "references": [
+      "postman/collections/viva-engage.collection.json",
+      "specifications/nodoc-viva-engage/specification/discovery/viva-engage-adjacent-scope-review.md",
+      "specifications/nodoc-viva-engage/specification/openapi.yml",
+      "src/generated/operationContextLedger.json",
+      "src/generated/portalCoverageLedger.json",
+      "tools/capture-recipes/viva-engage-admin-deep.json",
+      "tools/capture-recipes/viva-engage-admin-roles-deep.json",
+      "tools/capture-recipes/viva-engage-external-networks-deep.json",
+      "tools/capture-recipes/viva-engage-segmentation-deep.json",
+      "tools/capture-recipes/viva-engage-setup-external-network-deep.json",
+      "tools/capture-recipes/viva-engage-tenant-settings-deep.json"
+    ],
+    "repositoryDiscoveryFiles": [
+      "specifications/nodoc-viva-engage/specification/discovery/viva-engage-adjacent-scope-review.md"
+    ],
+    "generatedLedgers": {
+      "coverage": "src/generated/portalCoverageLedger.json",
+      "operationContext": "src/generated/operationContextLedger.json",
+      "operationLiveCapture": null
+    },
+    "staticJavascriptBundles": [],
+    "provenanceOperationCount": 5,
+    "liveOperationCount": null
+  },
+  "phaseGaps": {
+    "derivativeParity": {
+      "status": "incomplete",
+      "explanation": "0 normalized Postman parity differences and 3 routing mismatches remain.",
+      "evidence": [
+        "postman/collections/viva-engage.collection.json"
+      ]
+    },
+    "staticSourceDiscovery": {
+      "status": "incomplete",
+      "explanation": "Checked-in metadata and recipes exist, but no explicit comprehensive static-source completion attestation is available.",
+      "evidence": [
+        "tools/capture-recipes/viva-engage-admin-deep.json",
+        "tools/capture-recipes/viva-engage-admin-roles-deep.json",
+        "tools/capture-recipes/viva-engage-external-networks-deep.json",
+        "tools/capture-recipes/viva-engage-segmentation-deep.json",
+        "tools/capture-recipes/viva-engage-setup-external-network-deep.json",
+        "tools/capture-recipes/viva-engage-tenant-settings-deep.json",
+        "tools/portal-discovery-metadata.mjs"
+      ]
+    },
+    "javascriptBundleDiscovery": {
+      "status": "unavailable",
+      "explanation": "No per-spec checked-in JavaScript or bundle artifact is deterministically discoverable in the specification discovery directory.",
+      "evidence": []
+    },
+    "portalApiSpecDiscovery": {
+      "status": "incomplete",
+      "explanation": "Coverage metadata records prior discovery, but it does not attest a full portfolio refresh phase as complete.",
+      "evidence": [
+        "src/generated/portalCoverageLedger.json"
+      ]
+    },
+    "liveReadOnlyEvidence": {
+      "status": "unavailable",
+      "explanation": "No generated live-capture ledger entry exists for this specification.",
+      "evidence": []
+    },
+    "reconciliationPublication": {
+      "status": "unknown",
+      "explanation": "No machine-readable campaign refresh reconciliation/publication attestation exists; derivative parity alone is insufficient.",
+      "evidence": []
+    }
+  },
+  "candidateInputs": {
+    "parityUnresolvedCount": {
+      "status": "complete",
+      "value": 0,
+      "source": "postman/collections/viva-engage.collection.json"
+    },
+    "parityOrphanedCount": {
+      "status": "complete",
+      "value": 0,
+      "source": "postman/collections/viva-engage.collection.json"
+    },
+    "routingMismatchCount": {
+      "status": "complete",
+      "value": 3,
+      "source": "postman/collections/viva-engage.collection.json"
+    },
+    "openGapCount": {
+      "status": "complete",
+      "value": 1,
+      "explanation": "openGaps is explicitly recorded in the authoritative coverage overlay.",
+      "source": "tools/portal-discovery-metadata.mjs"
+    },
+    "openGapClassCount": {
+      "status": "unknown",
+      "value": null,
+      "explanation": "openGapClasses is not explicitly recorded; absence is not treated as zero.",
+      "source": "tools/portal-discovery-metadata.mjs"
+    },
+    "promotedDiscoveryCount": {
+      "status": "complete",
+      "value": 5,
+      "source": "tools/portal-discovery-metadata.mjs"
+    }
+  },
+  "fingerprints": {
+    "inputs": [
+      {
+        "path": "postman/collections/viva-engage.collection.json",
+        "bytes": 47387,
+        "sha256": "d1189bc74c16cf97b2291ee5300ae4e92a34c48993039c75889b6c1a913c4f19"
+      },
+      {
+        "path": "specifications/nodoc-viva-engage/specification/discovery/viva-engage-adjacent-scope-review.md",
+        "bytes": 5959,
+        "sha256": "28d93611481a411baccb151ff131db6437b02b0cf6d6f1a9303093a3f870bb12"
+      },
+      {
+        "path": "specifications/nodoc-viva-engage/specification/openapi.yml",
+        "bytes": 41942,
+        "sha256": "c1cd648a55f9ec60b020cf0d69f5928743b890da7c1429bc535ef9477088cef7"
+      },
+      {
+        "path": "src/generated/operationContextLedger.json",
+        "bytes": 162058,
+        "sha256": "439ff921d2ae7407d0ffef71d7b83d99fe2fb066dfa38afb861bf01afe8201c4"
+      },
+      {
+        "path": "src/generated/portalCoverageLedger.json",
+        "bytes": 51980,
+        "sha256": "3de3740782916fb11bbc7832305b0bd64c0333d49f55f24c3331a6a4cf48f82b"
+      },
+      {
+        "path": "tools/capture-recipes/viva-engage-admin-deep.json",
+        "bytes": 1229,
+        "sha256": "a068822250cbbe201a2ed98659cb18a71984593b1c4bcb1cc18c2c551601dc57"
+      },
+      {
+        "path": "tools/capture-recipes/viva-engage-admin-roles-deep.json",
+        "bytes": 426,
+        "sha256": "0dc509625b5d59bda567070c27bb481a6e1be930eeb012dfaf5c1356b25b7876"
+      },
+      {
+        "path": "tools/capture-recipes/viva-engage-external-networks-deep.json",
+        "bytes": 485,
+        "sha256": "2f64b3d05894bdb69933a7443355a6da16a58f43afc852051b142b0cd1ff7491"
+      },
+      {
+        "path": "tools/capture-recipes/viva-engage-segmentation-deep.json",
+        "bytes": 466,
+        "sha256": "2c49df60fa722cd434b0692801bc8154e91a362ce0d16caa2cf6466af27a3cb9"
+      },
+      {
+        "path": "tools/capture-recipes/viva-engage-setup-external-network-deep.json",
+        "bytes": 418,
+        "sha256": "58d3982490efbe60389ade956711fdb52b39d17a5105d8bb4979b345b472d309"
+      },
+      {
+        "path": "tools/capture-recipes/viva-engage-tenant-settings-deep.json",
+        "bytes": 430,
+        "sha256": "bd86b973c4086d1abba7b3aba08070fbac15170598fbc1c7119282e9cd4bcd42"
+      }
+    ],
+    "aggregateSha256": "d3bcede3d71d44b9ed33938acf58d8ec150b918a44c0083b704e72fa0f936526"
+  }
+}

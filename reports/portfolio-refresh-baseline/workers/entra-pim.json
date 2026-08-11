@@ -1,0 +1,256 @@
+{
+  "schemaVersion": 1,
+  "campaignDigest": "44c1a513a9ebab7c254828205c000531ff86e93039a1830ea1982e3dd8f20baa",
+  "specId": "entra-pim",
+  "title": "Entra PIM",
+  "inventory": {
+    "specPath": "specifications/nodoc-entra-pim/specification/openapi.yml",
+    "sourceFiles": [
+      "specifications/nodoc-entra-pim/specification/openapi.yml"
+    ],
+    "versions": {
+      "openapi": "3.0.1",
+      "api": "0.1.0"
+    },
+    "hosts": [
+      "https://api.azrbac.mspim.azure.com"
+    ],
+    "pathPrefixes": [
+      "/api/"
+    ],
+    "pathCount": 14,
+    "operationCount": 16,
+    "schemaCount": 6,
+    "schemaNames": [
+      "GovernancePermission",
+      "GovernancePermissionsResponse",
+      "GovernanceRoleAssignment",
+      "GovernanceRoleAssignmentListResponse",
+      "GovernanceRoleDefinitionSummary",
+      "GovernanceSubjectSummary"
+    ],
+    "operations": [
+      [
+        "GET",
+        "/api/v2/privilegedAccess/{provider}/roleAssignments",
+        null
+      ],
+      [
+        "GET",
+        "/api/v2/privilegedAccess/{provider}/roleAssignmentRequests",
+        null
+      ],
+      [
+        "POST",
+        "/api/v2/privilegedAccess/{provider}/roleAssignmentRequests",
+        null
+      ],
+      [
+        "POST",
+        "/api/v2/privilegedAccess/{provider}/roleAssignmentRequests/{requestId}/cancel",
+        null
+      ],
+      [
+        "GET",
+        "/api/v2/privilegedAccess/{provider}/resources",
+        null
+      ],
+      [
+        "GET",
+        "/api/v2/privilegedAccess/{provider}/resources/{resourceId}/roleDefinitions",
+        null
+      ],
+      [
+        "GET",
+        "/api/v2/privilegedAccess/{provider}/resources/{resourceId}/roleDefinitions/{roleDefinitionId}",
+        null
+      ],
+      [
+        "GET",
+        "/api/v2/privilegedAccess/{provider}/resources/{resourceId}/roleSettings",
+        null
+      ],
+      [
+        "GET",
+        "/api/v2/privilegedAccess/{provider}/resources/{resourceId}/roleSettings/{roleSettingId}",
+        null
+      ],
+      [
+        "PATCH",
+        "/api/v2/privilegedAccess/{provider}/resources/{resourceId}/roleSettings/{roleSettingId}",
+        null
+      ],
+      [
+        "GET",
+        "/api/v2/privilegedAccess/{provider}/resources/{resourceId}/permissions",
+        null
+      ],
+      [
+        "GET",
+        "/api/v2/privilegedAccess/{provider}/resources/{resourceId}/alerts",
+        null
+      ],
+      [
+        "GET",
+        "/api/v2/privilegedAccess/{provider}/resources/{resourceId}/alerts/{alertId}",
+        null
+      ],
+      [
+        "GET",
+        "/api/v2/privilegedAccess/{provider}/resources/{resourceId}/alerts/{alertId}/alertIncidents",
+        null
+      ],
+      [
+        "GET",
+        "/api/v2/privilegedAccess/{provider}/activities",
+        null
+      ],
+      [
+        "GET",
+        "/api/v2/privilegedAccess/{provider}/activities/getExpiredAssignmentAudits(roleAssignmentLevel='{level}',resourceId='{resourceId}',subjectId='{subjectId}')",
+        null
+      ]
+    ],
+    "operationIds": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "evidenceReferences": {
+    "references": [
+      "postman/collections/entra-pim.collection.json",
+      "specifications/nodoc-entra-pim/specification/openapi.yml",
+      "src/generated/portalCoverageLedger.json",
+      "tools/capture-recipes/entra-pim-deep.json",
+      "tools/capture-recipes/entra-pim-seeded-replay.json"
+    ],
+    "repositoryDiscoveryFiles": [],
+    "generatedLedgers": {
+      "coverage": "src/generated/portalCoverageLedger.json",
+      "operationContext": null,
+      "operationLiveCapture": null
+    },
+    "staticJavascriptBundles": [],
+    "provenanceOperationCount": null,
+    "liveOperationCount": null
+  },
+  "phaseGaps": {
+    "canonicalInventory": {
+      "status": "incomplete",
+      "explanation": "16 operations lack operation IDs.",
+      "evidence": [
+        "specifications/nodoc-entra-pim/specification/openapi.yml"
+      ]
+    },
+    "staticSourceDiscovery": {
+      "status": "incomplete",
+      "explanation": "Checked-in metadata and recipes exist, but no explicit comprehensive static-source completion attestation is available.",
+      "evidence": [
+        "tools/capture-recipes/entra-pim-deep.json",
+        "tools/capture-recipes/entra-pim-seeded-replay.json",
+        "tools/portal-discovery-metadata.mjs"
+      ]
+    },
+    "javascriptBundleDiscovery": {
+      "status": "unavailable",
+      "explanation": "No per-spec checked-in JavaScript or bundle artifact is deterministically discoverable in the specification discovery directory.",
+      "evidence": []
+    },
+    "portalApiSpecDiscovery": {
+      "status": "incomplete",
+      "explanation": "Coverage metadata records prior discovery, but it does not attest a full portfolio refresh phase as complete.",
+      "evidence": [
+        "src/generated/portalCoverageLedger.json"
+      ]
+    },
+    "liveReadOnlyEvidence": {
+      "status": "unavailable",
+      "explanation": "No generated live-capture ledger entry exists for this specification.",
+      "evidence": []
+    },
+    "reconciliationPublication": {
+      "status": "unknown",
+      "explanation": "No machine-readable campaign refresh reconciliation/publication attestation exists; derivative parity alone is insufficient.",
+      "evidence": []
+    }
+  },
+  "candidateInputs": {
+    "parityUnresolvedCount": {
+      "status": "complete",
+      "value": 0,
+      "source": "postman/collections/entra-pim.collection.json"
+    },
+    "parityOrphanedCount": {
+      "status": "complete",
+      "value": 0,
+      "source": "postman/collections/entra-pim.collection.json"
+    },
+    "routingMismatchCount": {
+      "status": "complete",
+      "value": 0,
+      "source": "postman/collections/entra-pim.collection.json"
+    },
+    "openGapCount": {
+      "status": "complete",
+      "value": 0,
+      "explanation": "openGaps is explicitly recorded in the authoritative coverage overlay.",
+      "source": "tools/portal-discovery-metadata.mjs"
+    },
+    "openGapClassCount": {
+      "status": "unknown",
+      "value": null,
+      "explanation": "openGapClasses is not explicitly recorded; absence is not treated as zero.",
+      "source": "tools/portal-discovery-metadata.mjs"
+    },
+    "promotedDiscoveryCount": {
+      "status": "unknown",
+      "value": null,
+      "source": "tools/portal-discovery-metadata.mjs",
+      "explanation": "promotedDiscoveries is not explicitly recorded; absence is not treated as zero."
+    }
+  },
+  "fingerprints": {
+    "inputs": [
+      {
+        "path": "postman/collections/entra-pim.collection.json",
+        "bytes": 250522,
+        "sha256": "7d30e55a7289f1c4344650aaf2243085c40bf22d0d9deaab283977a3a1750cb0"
+      },
+      {
+        "path": "specifications/nodoc-entra-pim/specification/openapi.yml",
+        "bytes": 26393,
+        "sha256": "06ba6f4249b471bc471b4ec5d385b3f50b8bc0d2b9cd8e94e7c72628f5fd8a5d"
+      },
+      {
+        "path": "src/generated/portalCoverageLedger.json",
+        "bytes": 51980,
+        "sha256": "3de3740782916fb11bbc7832305b0bd64c0333d49f55f24c3331a6a4cf48f82b"
+      },
+      {
+        "path": "tools/capture-recipes/entra-pim-deep.json",
+        "bytes": 12404,
+        "sha256": "a8284f9949ba2766e8be22293cfbf43693eda7b999135d769b77a7dc801bbc1c"
+      },
+      {
+        "path": "tools/capture-recipes/entra-pim-seeded-replay.json",
+        "bytes": 531,
+        "sha256": "fccd75fc9d5b966387a27261630a48cfe2b4c5dc2efcf149e9b1f6fd95552ec3"
+      }
+    ],
+    "aggregateSha256": "b6630aa1b0ec7bbced904aed2a073df72e8c90eed7df8f7681a9f35dd0d3fbd7"
+  }
+}
