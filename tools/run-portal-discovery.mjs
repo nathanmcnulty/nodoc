@@ -50,7 +50,12 @@ import {
 const validPhases = new Set(["all", "analyze", "capture", "plan"]);
 
 export function buildPreflightCriteria(recipe) {
-  const pageTarget = resolvePageTargetCriteria(recipe);
+  const pageTarget = recipe.pageTarget !== undefined
+    ? resolvePageTargetCriteria(recipe)
+    : {
+        matchHosts: [new URL(recipe.url).hostname],
+        matchPathPrefixes: [],
+      };
   return {
     matchHosts: pageTarget.matchHosts,
     matchPathPrefixes: pageTarget.matchPathPrefixes,
@@ -418,7 +423,6 @@ async function inspectRecipeSafety(recipePath) {
       pageTarget: recipe.pageTarget === undefined ? null : resolvePageTargetCriteria(recipe),
       bootstrapTarget: recipe.pageTarget === undefined ? null : resolvePageTargetBootstrapCriteria(recipe),
       enforcePageTargetForAll: false,
-      enforcePageTargetForAll: true,
     });
     validateSelectedReplayRouteTemplates(recipe.seedRouteGroups, actions, {
       rootUrl: recipe.url,

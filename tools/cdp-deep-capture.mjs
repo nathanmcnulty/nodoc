@@ -2043,6 +2043,7 @@ async function main() {
   const attributionRegistry = new CdpAttributionRegistry(target, currentContext);
   const sessions = attributionRegistry.sessions;
   let lifecyclePhase = "bootstrap";
+  let currentRequestCriteria = args.bootstrapTargetCriteria ?? args.pageTargetCriteria;
   let targetGeneration = 0;
   const pendingTargetHandlers = new Set();
   let terminalLifecycleError = null;
@@ -2057,6 +2058,10 @@ async function main() {
     terminalLifecycleError ??= error;
     runtimeSafetyError ??= error;
     return true;
+  }
+
+  function rejectFrozenNetworkEvent(kind) {
+    return rejectFrozenLifecycleEvent(`network-${kind}`);
   }
 
   function setCaptureContext(pageLabel, actionIndex = currentActionIndex, pageUrl = null, attempt = 0) {
@@ -2144,11 +2149,22 @@ async function main() {
       if (String(params.request?.method ?? "GET").toUpperCase() !== "GET") {
         throw new Error("Only GET requests are permitted by capture safety.");
       }
+      if (!new Set([
+        "Document",
+        "Script",
+        "XHR",
+        "Fetch",
+        "Image",
+        "Stylesheet",
+        "Font",
+        "Media",
+        "TextTrack",
+      ]).has(resourceType)) {
+        throw new Error(`Unsupported request resource type "${resourceType}".`);
+      }
       if (resourceType === "Document") {
         resolveStrictNavigationUrl(requestUrl, args.url, {
-          criteria: lifecyclePhase === "bootstrap"
-            ? (args.bootstrapTargetCriteria ?? args.pageTargetCriteria)
-            : args.pageTargetCriteria,
+          criteria: currentRequestCriteria,
           label: `paused ${resourceType.toLowerCase()} request`,
         });
       } else {
@@ -2197,6 +2213,7 @@ async function main() {
       }
       const targetInfo = params.targetInfo ?? {};
       if (!["page", "iframe"].includes(targetInfo.type ?? "page")) {
+        await client.send("Target.detachFromTarget", { sessionId: childSessionId }, metadata.sessionId ?? null);
         const error = new Error(`Unsupported executable target type "${targetInfo.type ?? "unknown"}".`);
         error.code = "unsupported-target-type";
         throw error;
@@ -2212,9 +2229,7 @@ async function main() {
         throw error;
       }
       resolveStrictNavigationUrl(targetInfo.url, args.url, {
-        criteria: lifecyclePhase === "bootstrap"
-          ? (args.bootstrapTargetCriteria ?? args.pageTargetCriteria)
-          : args.pageTargetCriteria,
+        criteria: currentRequestCriteria,
         label: `attached target ${childSessionId}`,
       });
       const attachmentGeneration = targetGeneration;
@@ -2234,9 +2249,7 @@ async function main() {
           throw new Error(`Target ${childSessionId} disappeared or lost its URL during configuration.`);
         }
         resolveStrictNavigationUrl(liveTarget.url, args.url, {
-          criteria: lifecyclePhase === "bootstrap"
-            ? (args.bootstrapTargetCriteria ?? args.pageTargetCriteria)
-            : args.pageTargetCriteria,
+          criteria: currentRequestCriteria,
           label: `attached target ${childSessionId}`,
         });
         if (targetGeneration !== attachmentGeneration || runtimeSafetyError) {
@@ -2274,9 +2287,7 @@ async function main() {
     if (["page", "iframe"].includes(targetInfo.type ?? "page")) {
       try {
         resolveStrictNavigationUrl(targetInfo.url, args.url, {
-          criteria: lifecyclePhase === "bootstrap"
-            ? (args.bootstrapTargetCriteria ?? args.pageTargetCriteria)
-            : args.pageTargetCriteria,
+          criteria: currentRequestCriteria,
           label: "target update",
         });
       } catch (error) {
@@ -2303,9 +2314,7 @@ async function main() {
     if (params.frame?.url) {
       try {
         resolveStrictNavigationUrl(params.frame.url, args.url, {
-          criteria: lifecyclePhase === "bootstrap"
-            ? (args.bootstrapTargetCriteria ?? args.pageTargetCriteria)
-            : args.pageTargetCriteria,
+          criteria: currentRequestCriteria,
           label: "frame update",
         });
       } catch (error) {
@@ -2328,6 +2337,7 @@ async function main() {
   });
 
   client.on("Network.requestWillBeSent", (params, metadata) => {
+    if (rejectFrozenNetworkEvent("request")) return;
     const resourceType = params.type ?? params.initiator?.type ?? "";
     const requestUrl = params.request?.url;
     const sessionId = metadata.sessionId ?? null;
@@ -2406,6 +2416,7 @@ async function main() {
   });
 
   client.on("Network.responseReceived", (params, metadata) => {
+    if (rejectFrozenNetworkEvent("response")) return;
     const key = requestKey(params.requestId, metadata.sessionId);
     const scriptRecord = scriptRequestMap.get(key);
     if (scriptRecord) {
@@ -2454,6 +2465,7 @@ async function main() {
   });
 
   client.on("Network.loadingFailed", (params, metadata) => {
+    if (rejectFrozenNetworkEvent("loading-failed")) return;
     const key = requestKey(params.requestId, metadata.sessionId);
     inFlightRequests.delete(key);
     lastNetworkActivityAt = Date.now();
@@ -2469,6 +2481,7 @@ async function main() {
   });
 
   client.on("Network.loadingFinished", (params, metadata) => {
+    if (rejectFrozenNetworkEvent("loading-finished")) return;
     const key = requestKey(params.requestId, metadata.sessionId);
     const captureResponseBody = async () => {
       scriptRequestMap.delete(key);
@@ -3563,6 +3576,7 @@ async function main() {
     });
     await captureCheckpoint(currentContext.pageLabel);
     lifecyclePhase = "feature";
+    currentRequestCriteria = args.pageTargetCriteria;
 
     for (const [index, action] of args.actions.entries()) {
       const pageLabel = buildActionLabel(action, index);
@@ -3603,6 +3617,7 @@ async function main() {
       }
 
       if (action.type === "navigate") {
+        currentRequestCriteria = action.pageTargetApplicable ? args.pageTargetCriteria : null;
         const navigationResult = await navigateRoot(action.relative ? action.value : action.resolvedUrl, {
           relative: action.relative === true,
           criteria: action.pageTargetApplicable ? args.pageTargetCriteria : null,
