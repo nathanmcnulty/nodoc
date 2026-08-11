@@ -150,7 +150,12 @@ function hostnameMatchesPattern(hostname, pattern) {
 }
 
 function pathMatchesCriteria(pathname, prefixes) {
-  return prefixes.length === 0 || prefixes.some((prefix) => pathname.startsWith(String(prefix)));
+  return prefixes.length === 0 || prefixes.some((prefix) => {
+    const normalized = String(prefix).trim().replace(/\/+$/u, "") || "/";
+    return normalized === "/"
+      ? pathname.startsWith("/")
+      : pathname === normalized || pathname.startsWith(`${normalized}/`);
+  });
 }
 
 function pathnameMatchesCriteria(pathname, pathnames) {
@@ -180,7 +185,7 @@ function validateRelativeNavigationToken(value, rootUrl, label) {
   }
   let decoded = token;
   try {
-    for (let pass = 0; pass < 3 && /%[0-9a-f]{2}/iu.test(decoded); pass += 1) {
+    for (let pass = 0; pass < 8 && /%[0-9a-f]{2}/iu.test(decoded); pass += 1) {
       decoded = decodeURIComponent(decoded);
     }
   } catch {
@@ -190,6 +195,7 @@ function validateRelativeNavigationToken(value, rootUrl, label) {
     decoded.includes("\\")
     || decoded.includes("?")
     || decoded.includes("#")
+    || decoded.includes("%")
     || /(?:^|[/])\.\.(?:[/]|$)/u.test(decoded)
   ) {
     throw actionError(
@@ -213,7 +219,7 @@ function validateCanonicalPathSafety(rawValue, target, label) {
     throw actionError(`${label} URL contains malformed percent encoding.`, "unsafe-encoding");
   }
   try {
-    for (let pass = 0; pass < 4 && /%[0-9a-f]{2}/iu.test(decoded); pass += 1) {
+    for (let pass = 0; pass < 8 && /%[0-9a-f]{2}/iu.test(decoded); pass += 1) {
       decoded = decodeURIComponent(decoded);
     }
   } catch {
@@ -221,6 +227,8 @@ function validateCanonicalPathSafety(rawValue, target, label) {
   }
   if (
     /(?:^|[/])\.\.(?:[/]|$)/u.test(decoded)
+    || decoded.includes("%")
+    || decoded.includes("//")
     || decoded.includes("\\")
     || decoded.includes("?")
     || decoded.includes("#")

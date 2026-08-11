@@ -539,7 +539,7 @@ function finalizeActionConfiguration(args) {
     rootUrl: args.url,
     pageTarget,
     bootstrapTarget,
-    enforcePageTargetForAll: args.recipeConfig?.pageTarget === undefined,
+    enforcePageTargetForAll: true,
   });
   args.initialNavigationUrl = validatedActions[0].resolvedUrl;
   args.actions = validatedActions.slice(1);
@@ -1578,12 +1578,21 @@ function buildDomSnapshotExpression() {
   })()`;
 }
 
-function buildClickExpression(action) {
+function buildClickExpression(action, dispatch = true, expectedHref = null) {
   const encodedMode = JSON.stringify(action.type);
   const encodedValue = JSON.stringify(String(action.value || ""));
+  const encodedExpectedHref = JSON.stringify(expectedHref);
+  const dispatchCode = dispatch
+    ? `match.element.scrollIntoView({ block: "center", inline: "center" });
+    match.element.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, composed: true }));
+    if (typeof match.element.click === "function") {
+      match.element.click();
+    }`
+    : "";
   return `(() => {
     const mode = ${encodedMode};
     const rawValue = ${encodedValue};
+    const expectedHref = ${encodedExpectedHref};
     const normalizeText = (value) => String(value || "").replace(/\\s+/g, " ").trim();
     const normalizedNeedle = normalizeText(rawValue);
     const lowerNeedle = normalizedNeedle.toLowerCase();
@@ -1642,7 +1651,7 @@ function buildClickExpression(action) {
       }
 
       return haystacks.some((item) => item === lowerNeedle);
-    });
+    }).filter((candidate) => !expectedHref || candidate.absoluteHref === expectedHref);
 
     if (matches.length === 0) {
       return { clicked: false };
@@ -1653,11 +1662,7 @@ function buildClickExpression(action) {
     }
 
     const match = matches[0];
-    match.element.scrollIntoView({ block: "center", inline: "center" });
-    match.element.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, composed: true }));
-    if (typeof match.element.click === "function") {
-      match.element.click();
-    }
+    ${dispatchCode}
 
     return {
       absoluteHref: match.absoluteHref,
@@ -2119,14 +2124,29 @@ async function main() {
     }
     targetGeneration += 1;
     const handler = (async () => {
-      if (lifecyclePhase === "closing") {
+      if (lifecyclePhase === "closing" || lifecyclePhase === "frozen") {
         const error = new Error(`Target ${childSessionId} attached after terminal safety began.`);
         error.code = "late-target-attachment";
         throw error;
       }
+      const targetInfo = params.targetInfo ?? {};
+      if (
+        ["page", "iframe"].includes(targetInfo.type ?? "page")
+        && (typeof targetInfo.url !== "string" || !targetInfo.url.trim())
+      ) {
+        const error = new Error(`Target ${childSessionId} attached without an observable URL.`);
+        error.code = "unsafe-navigation";
+        throw error;
+      }
+      if (["page", "iframe"].includes(targetInfo.type ?? "page")) {
+        resolveStrictNavigationUrl(targetInfo.url, args.url, {
+          criteria: args.pageTargetCriteria,
+          label: `attached target ${childSessionId}`,
+        });
+      }
       attributionRegistry.registerSession(
         childSessionId,
-        params.targetInfo ?? {},
+        targetInfo,
         metadata.sessionId ?? null,
       );
       try {
@@ -2941,12 +2961,26 @@ async function main() {
       });
   }
 
-  async function runClickAction(action, preActionSnapshots = null) {
+  async function runClickAction(action, preActionSnapshots = null, inventoryGeneration = targetGeneration) {
     const beforeUrl = validateCurrentPageUrl(await getRootUrl(), "pre-click page");
     const beforeStateFingerprint = await getRootStateFingerprint();
     const beforeTargetIds = new Set(sessions.keys());
     const beforeSnapshots = preActionSnapshots ?? await collectSnapshots();
     const eligibility = deriveActionEligibility(action, beforeSnapshots);
+    if (inventoryGeneration !== targetGeneration || pendingTargetHandlers.size > 0) {
+      return {
+        afterUrl: beforeUrl,
+        beforeUrl,
+        clicked: false,
+        eligibility: {
+          candidateCount: null,
+          reason: "pre-action-inventory-changed",
+          status: "unknown",
+          targetFrameInventory: [],
+        },
+        reason: "incomplete-action-inventory",
+      };
+    }
     if (eligibility?.status === "ambiguous") {
       return {
         afterUrl: beforeUrl,
@@ -2956,11 +2990,53 @@ async function main() {
         reason: "ambiguous-control-match",
       };
     }
+    if (eligibility?.status === "unknown") {
+      return {
+        afterUrl: beforeUrl,
+        beforeUrl,
+        clicked: false,
+        eligibility,
+        reason: "incomplete-action-inventory",
+      };
+    }
     for (const [sessionId, targetInfo] of getOrderedSessions(action.scope)) {
       let result;
       try {
         attributionRegistry.setSessionContext(sessionId, currentContext);
-        result = await evaluateJson(client, buildClickExpression(action), sessionId);
+        const preview = await evaluateJson(client, buildClickExpression(action, false), sessionId);
+        if (!preview?.clicked) {
+          continue;
+        }
+        if (preview.tag === "a") {
+          if (!preview.href || !preview.absoluteHref) {
+            const error = new Error("Matched anchor did not expose a safe URL before click.");
+            error.code = "unsafe-navigation";
+            throw error;
+          }
+          validatePostNavigationUrl(preview.absoluteHref, args.url, {
+            criteria: args.pageTargetCriteria,
+            label: "pre-click anchor",
+          });
+        }
+        if (inventoryGeneration !== targetGeneration || pendingTargetHandlers.size > 0) {
+          return {
+            afterUrl: beforeUrl,
+            beforeUrl,
+            clicked: false,
+            eligibility: {
+              candidateCount: null,
+              reason: "pre-click-inventory-changed",
+              status: "unknown",
+              targetFrameInventory: [],
+            },
+            reason: "incomplete-action-inventory",
+          };
+        }
+        result = await evaluateJson(
+          client,
+          buildClickExpression(action, true, preview.tag === "a" ? preview.absoluteHref : null),
+          sessionId,
+        );
       } catch {
         // Try the next session.
       }
@@ -3418,11 +3494,12 @@ async function main() {
         continue;
       }
 
+      const beforeSnapshotGeneration = targetGeneration;
       const beforeSnapshots = await collectSnapshots();
       const beforePageState = pageStates.at(-1);
       const beforeUrl = validateCurrentPageUrl(await getRootUrl(), "pre-click page");
       const beforeRequestFamilies = new Set(capturedRequests.map(requestFamily));
-      const clickResult = await runClickAction(action, beforeSnapshots);
+      const clickResult = await runClickAction(action, beforeSnapshots, beforeSnapshotGeneration);
       const actionResult = {
         effectiveIndex: action.effectiveIndex,
         highValue: action.highValue === true,
@@ -3451,8 +3528,17 @@ async function main() {
       });
     }
 
-    const { rootUrl: terminalFinalUrl } = await terminalSafetyBarrier();
+    const terminalSafety = await terminalSafetyBarrier();
+    lifecyclePhase = "frozen";
+    const frozenGeneration = targetGeneration;
+    if (terminalLifecycleError || pendingTargetHandlers.size > 0) {
+      throw terminalLifecycleError ?? new Error("Target lifecycle changed before terminal publication.");
+    }
     await flushArtifacts();
+    if (terminalLifecycleError || targetGeneration !== frozenGeneration || pendingTargetHandlers.size > 0) {
+      throw terminalLifecycleError ?? new Error("Target lifecycle changed during terminal artifact publication.");
+    }
+    const terminalFinalUrl = terminalSafety.rootUrl;
     const filteredRequests = capturedRequests.filter((request) => shouldMatchRequest(request.url, args));
     const scopedHosts = uniqueSorted(filteredRequests.map((request) => {
       try {

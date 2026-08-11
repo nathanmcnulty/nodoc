@@ -94,6 +94,8 @@ test("strict navigation rejects unsafe routes and page-target mismatches", () =>
     "/safe/%252fadmin",
     "/safe/%3fquery",
     "/safe/%253fquery",
+    "/safe/%25%32%66admin",
+    "/safe/%252525252",
   ];
   for (const route of unsafeRoutes) {
     assert.throws(
@@ -154,6 +156,12 @@ test("strict navigation rejects unsafe routes and page-target mismatches", () =>
   assert.throws(
     () => resolveStrictNavigationUrl("/wrong", "https://portal.example/root", {
       criteria: { matchHosts: ["portal.example"], matchPathnames: ["/root"] },
+    }),
+    /page-target criteria/u,
+  );
+  assert.throws(
+    () => validatePostNavigationUrl("https://portal.example/safe-evil", "https://portal.example/safe", {
+      criteria: { matchHosts: ["portal.example"], matchPathPrefixes: ["/safe"] },
     }),
     /page-target criteria/u,
   );
@@ -369,6 +377,7 @@ test("click safety rejects padded destructive and empty labels, and ambiguity is
     [{
       sessionId: "root",
       targetType: "page",
+      targetUrl: "https://portal.example/safe",
       controls: [
         { text: "Read" },
         { ariaLabel: "Read" },
@@ -377,6 +386,13 @@ test("click safety rejects padded destructive and empty labels, and ambiguity is
   );
   assert.equal(eligibility.status, "ambiguous");
   assert.equal(eligibility.candidateCount, 2);
+  assert.equal(
+    deriveActionEligibility(
+      { type: "click-label", scope: "root", value: "Read" },
+      [{ sessionId: "root", targetType: "page", error: "detached during inventory" }],
+    ).status,
+    "unknown",
+  );
 });
 
 test("replay expansion is bounded before browser interaction", () => {

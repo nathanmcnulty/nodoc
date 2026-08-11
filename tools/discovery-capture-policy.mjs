@@ -129,8 +129,18 @@ export function deriveActionEligibility(action, snapshots) {
 
   const targetFrameInventory = [];
   let candidateCount = 0;
+  let applicableSnapshotCount = 0;
+  let incomplete = false;
   for (const snapshot of snapshots) {
-    if (snapshot?.error || !scopeMatchesSnapshot(action.scope, snapshot)) {
+    if (!scopeMatchesSnapshot(action.scope, snapshot)) {
+      continue;
+    }
+    applicableSnapshotCount += 1;
+    if (
+      snapshot?.error
+      || !(typeof snapshot?.url === "string" || typeof snapshot?.targetUrl === "string")
+    ) {
+      incomplete = true;
       continue;
     }
     const controls = Array.isArray(snapshot.controls) ? snapshot.controls : [];
@@ -145,6 +155,15 @@ export function deriveActionEligibility(action, snapshots) {
       targetType: snapshot.targetType ?? "page",
       targetUrl: snapshot.targetUrl ?? snapshot.url ?? null,
     });
+  }
+
+  if (incomplete || applicableSnapshotCount === 0) {
+    return {
+      candidateCount: null,
+      reason: "pre-action-inventory-incomplete",
+      status: "unknown",
+      targetFrameInventory,
+    };
   }
 
   return {
