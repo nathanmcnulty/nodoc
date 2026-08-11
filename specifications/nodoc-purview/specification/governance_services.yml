@@ -147,38 +147,6 @@ paths:
         '404':
           $ref: common.yml#/components/responses/NotFound
 
-  "/gws/ipmlservice/CategoryTrainingModel//ModelMetadata":
-    get:
-      operationId: getTrainableClassifierModelMetadata
-      summary: Get trainable classifier model metadata
-      description: >-
-        Retrieve metadata for trainable classifier models. Returns information about
-        available classification models including their training status and accuracy.
-      tags: [GovernanceServices]
-      parameters:
-        - name: type
-          in: query
-          required: false
-          description: The type of classifier model to retrieve metadata for.
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                description: pending
-        '401':
-          $ref: common.yml#/components/responses/Unauthorized
-
-        '403':
-          $ref: common.yml#/components/responses/Forbidden
-
-        '404':
-          $ref: common.yml#/components/responses/NotFound
-
   /gws/ipmlservice/CategoryTrainingModel/ModelMetadata:
     get:
       operationId: getTrainableClassifierModelMetadataCanonical

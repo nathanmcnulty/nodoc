@@ -137,7 +137,7 @@ const apiCatalogSeed: ApiCatalogSeed[] = [
     title: "SharePoint",
     slug: "/sharepoint-admin",
     family: "SharePoint admin center",
-    operations: 41,
+    operations: 42,
     authModel: "Portal session cookie (`FedAuth`) + SharePoint form digest",
     baseUrl: "https://{tenant}-admin.sharepoint.com",
     summary:
@@ -264,7 +264,7 @@ const apiCatalogSeed: ApiCatalogSeed[] = [
     title: "Intune Portal",
     slug: "/intune-portal",
     family: "Intune admin center",
-    operations: 3,
+    operations: 5,
     authModel: "Portal bearer token + same-origin portal context",
     baseUrl: "https://intune.microsoft.com/api",
     summary:
@@ -336,7 +336,7 @@ const apiCatalogSeed: ApiCatalogSeed[] = [
     title: "Security Copilot",
     slug: "/security-copilot",
     family: "Security portal",
-    operations: 32,
+    operations: 42,
     authModel: "Portal bearer tokens + workspace context",
     baseUrl: "https://api.securitycopilot.microsoft.com",
     summary:
@@ -390,7 +390,7 @@ const apiCatalogSeed: ApiCatalogSeed[] = [
     title: "Entra IGA",
     slug: "/entra-iga",
     family: "Entra portal",
-    operations: 10,
+    operations: 11,
     authModel: "Azure AD bearer token",
     baseUrl: "https://elm.iga.azure.com",
     summary:

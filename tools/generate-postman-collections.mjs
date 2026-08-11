@@ -402,6 +402,10 @@ function mergeRequestExamples(currentRequest, previousRequest) {
   return mergedRequest;
 }
 
+export function mergeCollectionVariables(currentVariables, previousVariables) {
+  return mergeNamedExamples(currentVariables, previousVariables);
+}
+
 function normalizePostmanUrl(url) {
   if (!url || typeof url !== "object") {
     return url;
@@ -478,6 +482,10 @@ function stabilizeCollection(openapiPath, collectionPath, previousCollection) {
     collection.info._postman_id = previousIndex.postmanId;
   }
 
+  if (previousCollection?.variable && Array.isArray(collection.variable)) {
+    collection.variable = mergeCollectionVariables(collection.variable, previousCollection.variable);
+  }
+
   visitItems(collection.item, (item, ancestors) => {
     const itemKey = getItemKey(ancestors, item);
     const previousItem = previousIndex?.items.get(itemKey);
@@ -530,6 +538,7 @@ function stabilizeCollection(openapiPath, collectionPath, previousCollection) {
   writeFileSync(collectionPath, `${JSON.stringify(collection, null, 4)}\n`);
 }
 
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
 mkdirSync(outputDir, { recursive: true });
 
 const tempDir = mkdtempSync(path.join(os.tmpdir(), "nodoc-postman-"));
@@ -580,4 +589,5 @@ try {
   }
 } finally {
   rmSync(tempDir, { recursive: true, force: true });
+}
 }

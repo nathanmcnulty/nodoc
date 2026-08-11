@@ -1,4 +1,11 @@
-import { buildOperationContextLedger, buildSpecQuality } from "./spec-quality-lib.mjs";
+import { fileURLToPath } from "node:url";
+
+import {
+  buildOperationContextLedger,
+  buildSpecQuality,
+  loadBundledSpecification,
+  validateOperationIds,
+} from "./spec-quality-lib.mjs";
 
 function collectFailures(qualityByTitle) {
   const failures = [];
@@ -54,10 +61,30 @@ async function collectOperationContextFailures() {
   }
 }
 
+async function collectIbizaIamOperationIdFailures() {
+  try {
+    const specification = await loadBundledSpecification(
+      fileURLToPath(new URL(
+        "../specifications/nodoc-ibiza-iam/specification/openapi.yml",
+        import.meta.url,
+      )),
+    );
+    validateOperationIds(specification, "Entra IAM");
+    return [];
+  } catch (error) {
+    return [{
+      title: "Entra IAM",
+      issue: "operation-ids",
+      detail: error instanceof Error ? error.message : String(error),
+    }];
+  }
+}
+
 const qualityByTitle = await buildSpecQuality();
 const failures = [
   ...collectFailures(qualityByTitle),
   ...(await collectOperationContextFailures()),
+  ...(await collectIbizaIamOperationIdFailures()),
 ];
 
 if (failures.length > 0) {

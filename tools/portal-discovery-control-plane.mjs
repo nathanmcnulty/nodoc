@@ -14,12 +14,14 @@ import { buildSpecInventory, repoRoot } from "./spec-quality-lib.mjs";
 export const portfolioManifestSchemaVersion = 1;
 export const orchestrationPlanSchemaVersion = 1;
 export const workerResultSchemaVersion = 1;
+export const requiredReviewModel = "gpt-5.6-luna";
 export const defaultPortfolioManifestPath = path.join(repoRoot, "tools", "portal-discovery-portfolio.json");
 
 const routes = new Set(["cheap", "luna", "manual", "orchestrator"]);
 const assignmentTypes = new Set(["capture", "review", "promotion-preparation", "process-improvement"]);
 const statuses = new Set(["planned", "queued", "running", "completed", "blocked", "failed", "rejected"]);
 const decisions = new Set(["accept", "reject", "escalate", "block", "retry", "no-action"]);
+const terminalReviewDecisions = new Set(["accept", "reject", "escalate", "block", "no-action"]);
 const transitions = {
   planned: new Set(["queued", "running", "blocked", "failed", "rejected"]),
   queued: new Set(["running", "blocked", "failed", "rejected"]),
@@ -81,6 +83,7 @@ export function validatePortfolioManifest(raw, inventory = null) {
   if (inventory) {
     const ids = new Set(inventory.map((entry) => entry.specId));
     for (const portal of raw.portals) if (!ids.has(portal.specId)) throw new Error(`Portfolio references unknown spec ${portal.specId}.`);
+    for (const entry of inventory) if (!seen.has(entry.specId)) throw new Error(`Specification ${entry.specId} is missing from the durable discovery queue.`);
   }
   return clone(raw);
 }
@@ -117,7 +120,7 @@ export function materializePortfolioManifest(raw, inventory) {
         captureBudget: { timeoutMs: positiveInteger(captureBudget.timeoutMs ?? 900000, `${spec.specId}: capture timeoutMs`), retryCount: positiveInteger(captureBudget.retryCount ?? 1, `${spec.specId}: capture retryCount`), actionCount: positiveInteger(captureBudget.actionCount ?? 80, `${spec.specId}: capture actionCount`) },
         priority: source.priority ?? defaults.priority ?? 20,
         compatibility: source.compatibility ?? { derivativeSchema: null, freshnessClass: "untracked" },
-        outstandingGapClasses: sorted(source.outstandingGapClasses ?? overlay.openGaps ?? []),
+        outstandingGapClasses: sorted(source.outstandingGapClasses ?? overlay.openGapClasses ?? overlay.openGaps ?? []),
         source: { specPath: spec.specPath, operationCount: spec.operationCount, serverUrls: sorted(spec.serverUrls), nextPass: metadata.nextPass },
       };
     }).sort((left, right) => left.specId.localeCompare(right.specId)),
@@ -165,7 +168,7 @@ export function compileOrchestrationPlan(manifest, { ledger = {}, budgets = {}, 
   for (const capture of serializedCaptures) if (captureIds.has(capture.assignmentId)) assignments.push(capture);
   for (const portal of manifest.portals) {
     const route = routeForPortal(portal, summary);
-    const review = { type: "review", specId: portal.specId, portal: portal.title, route: route.route, model: route.route === "cheap" ? "gpt-5.3-codex-spark" : route.route === "luna" ? "gpt-5.6-luna" : "manual", reasoning: route.route === "cheap" ? "low" : route.route === "luna" ? "high" : "manual", budgets: { timeoutMs: budgets.reviewTimeoutMs ?? 120000, retryCount: budgets.retryCount ?? 1, maxPayloadBytes: budgets.maxPayloadBytes ?? 262144 }, preconditions: ["capture-summary-sanitized", "assignment-scope-known"], completionGates: ["exact-candidate-accounting", "exact-evidence-accounting", "legal-decision"], blockers: route.reasonCodes, terminal: route.route === "orchestrator" ? "blocked" : "worker-result-required", nextAction: route.route === "orchestrator" ? "repair-preconditions" : "validate-worker-result", scope: { candidateIds: [], evidenceIds: [] } };
+    const review = { type: "review", specId: portal.specId, portal: portal.title, route: route.route, model: requiredReviewModel, reasoning: "high", budgets: { timeoutMs: budgets.reviewTimeoutMs ?? 120000, retryCount: budgets.retryCount ?? 1, maxPayloadBytes: budgets.maxPayloadBytes ?? 262144 }, preconditions: ["capture-summary-sanitized", "assignment-scope-known"], completionGates: ["exact-candidate-accounting", "exact-evidence-accounting", "legal-decision", "terminal-live-lifecycle-accounted", "process-improvement-dispositioned"], blockers: route.reasonCodes, terminal: route.route === "orchestrator" ? "blocked" : "worker-result-required", nextAction: route.route === "orchestrator" ? "repair-preconditions" : "validate-worker-result", scope: { candidateIds: [], evidenceIds: [] } };
     review.assignmentId = `review-${digest(review).slice(0, 24)}`;
     review.assignmentDigest = assignmentDigest(review);
     assignments.push(review);
@@ -205,8 +208,12 @@ export function validateWorkerResult(result, plan) {
   if (!assignmentTypes.has(result.assignmentType) || result.assignmentType !== assignment.type) throw new Error("Worker assignment type is outside the assigned scope.");
   if (!statuses.has(result.status) || !transitions["running"].has(result.status) && result.status !== "completed") throw new Error(`Illegal worker result status ${result.status}.`);
   if (!decisions.has(result.decision)) throw new Error("Worker result decision is invalid.");
+  if (assignment.type === "review" && result.model !== requiredReviewModel) throw new Error(`Review result requires exact runtime model ${requiredReviewModel}.`);
+  if (assignment.type === "review" && !terminalReviewDecisions.has(result.decision)) throw new Error("Review result must have a terminal disposition.");
   if (!Array.isArray(result.reasonCodes) || result.reasonCodes.some((code) => typeof code !== "string")) throw new Error("Worker result reasonCodes are required.");
-  for (const key of ["blockers", "metrics", "recommendedNextAction"]) if (result[key] === undefined) throw new Error(`Worker result requires ${key}.`);
+  for (const key of ["blockers", "metrics", "recommendedNextAction", "lessons", "lifecycleAccounting", "processImprovementDisposition"]) if (result[key] === undefined) throw new Error(`Worker result requires ${key}.`);
+  if (!Array.isArray(result.lessons)) throw new Error("Worker result lessons must be an array.");
+  if (result.lifecycleAccounting?.terminalOwnerShutdown !== true || result.lifecycleAccounting?.artifactLedgerAccounting !== true) throw new Error("Worker result must account for terminal owner shutdown and artifact/ledger accounting.");
   const candidateIds = new Set(assignment.scope?.candidateIds ?? []);
   const evidenceIds = new Set(assignment.scope?.evidenceIds ?? []);
   const candidateAccounting = result.candidateAccounting ?? { accepted: [], rejected: [], escalated: [], blocked: [] };

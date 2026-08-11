@@ -187,7 +187,7 @@ function bundleSpecification(fileSystem) {
   return expandNode(entry.specification, ".");
 }
 
-async function loadBundledSpecification(specPath) {
+export async function loadBundledSpecification(specPath) {
   const fileSystem = await load(specPath, {
     plugins: [readFiles()],
   });
@@ -362,6 +362,32 @@ export function reconcileOperationSets(openapiOperations, postmanCollection, opt
 
 function getOperations(specification) {
   return getOperationEntries(specification).map(({ operation }) => operation);
+}
+
+export function validateOperationIds(specification, context = "OpenAPI specification") {
+  const entries = getOperationEntries(specification);
+  const missing = entries
+    .filter(({ operation }) => typeof operation.operationId !== "string" || !operation.operationId.trim())
+    .map(({ method, path: operationPath }) => `${method} ${operationPath}`);
+  const ids = entries
+    .map(({ operation }) => operation.operationId)
+    .filter((operationId) => typeof operationId === "string" && operationId.trim());
+  const duplicateIds = [...new Set(ids.filter((operationId, index) => ids.indexOf(operationId) !== index))]
+    .sort((left, right) => left.localeCompare(right));
+
+  if (missing.length === 0 && duplicateIds.length === 0) {
+    return { operationCount: entries.length, operationIds: ids.length };
+  }
+
+  const details = [];
+  if (missing.length > 0) {
+    details.push(`missing: ${missing.join(", ")}`);
+  }
+  if (duplicateIds.length > 0) {
+    details.push(`duplicates: ${duplicateIds.join(", ")}`);
+  }
+
+  throw new Error(`${context} has invalid operation IDs (${details.join("; ")}).`);
 }
 
 function normalizeLiveCaptureMetadata(value, context) {
