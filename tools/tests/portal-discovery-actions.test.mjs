@@ -88,13 +88,19 @@ test("strict navigation rejects unsafe routes and page-target mismatches", () =>
     "/read?mode=view",
     "/read#fragment",
     "/export",
+    "/safe/%2e%2e/admin",
+    "/safe/%252e%252e/admin",
+    "/safe/%2fadmin",
+    "/safe/%252fadmin",
+    "/safe/%3fquery",
+    "/safe/%253fquery",
   ];
   for (const route of unsafeRoutes) {
     assert.throws(
       () => resolveStrictNavigationUrl(route, "https://portal.example/root", {
         criteria: { matchHosts: ["portal.example"], matchPathPrefixes: ["/read"] },
       }),
-      /HTTPS URL without credentials|active-GET safety|page-target criteria/u,
+      /HTTPS URL without credentials|active-GET safety|page-target criteria|unsafe|ambiguous/u,
     );
   }
   assert.equal(
@@ -102,6 +108,12 @@ test("strict navigation rejects unsafe routes and page-target mismatches", () =>
       criteria: { matchHosts: ["portal.example"], matchPathPrefixes: ["/read"] },
     }),
     "https://portal.example/read/items",
+  );
+  assert.equal(
+    resolveStrictNavigationUrl("/read/%20items", "https://portal.example/root", {
+      criteria: { matchHosts: ["portal.example"], matchPathPrefixes: ["/read"] },
+    }),
+    "https://portal.example/read/%20items",
   );
   assert.throws(
     () => validateEffectiveActions(
@@ -143,6 +155,14 @@ test("strict navigation rejects unsafe routes and page-target mismatches", () =>
     () => resolveStrictNavigationUrl("/wrong", "https://portal.example/root", {
       criteria: { matchHosts: ["portal.example"], matchPathnames: ["/root"] },
     }),
+    /page-target criteria/u,
+  );
+  assert.throws(
+    () => validatePostNavigationUrl(
+      "https://config.office.com/officeSettings",
+      "https://config.office.com/officeSettings",
+      { criteria: { matchHosts: ["config.office.com"], matchPathPrefixes: ["/officeSettings/inventory"] } },
+    ),
     /page-target criteria/u,
   );
 });
@@ -260,6 +280,10 @@ test("all click-affected page and frame URLs share the same sink policy", () => 
   assert.throws(
     () => validatePostNavigationUrl("https://portal.example/export", "https://portal.example/safe"),
     /active-GET safety/u,
+  );
+  assert.throws(
+    () => validatePostNavigationUrl("https://portal.example/safe/%252e%252e/admin", "https://portal.example/safe"),
+    /unsafe|ambiguous/u,
   );
   assert.throws(
     () => validatePostNavigationUrl("https://portal.example/export%", "https://portal.example/safe"),

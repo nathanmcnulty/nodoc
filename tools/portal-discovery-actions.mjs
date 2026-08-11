@@ -175,9 +175,12 @@ function validateRelativeNavigationToken(value, rootUrl, label) {
       "unsafe-navigation",
     );
   }
+  if (/%(?![0-9a-f]{2})/iu.test(token)) {
+    throw actionError(`${label} relative route contains malformed percent encoding.`, "unsafe-encoding");
+  }
   let decoded = token;
   try {
-    for (let pass = 0; pass < 3 && decoded.includes("%"); pass += 1) {
+    for (let pass = 0; pass < 3 && /%[0-9a-f]{2}/iu.test(decoded); pass += 1) {
       decoded = decodeURIComponent(decoded);
     }
   } catch {
@@ -195,6 +198,38 @@ function validateRelativeNavigationToken(value, rootUrl, label) {
     );
   }
   return resolveStrictNavigationUrl(token, rootUrl, { label });
+}
+
+function validateCanonicalPathSafety(rawValue, target, label) {
+  const raw = String(rawValue ?? "");
+  if (raw.includes("\\") || /(?:^|[/])\.\.(?:[/]|$)/u.test(raw)) {
+    throw actionError(`${label} URL contains ambiguous path traversal.`, "unsafe-navigation");
+  }
+  if (target.pathname.normalize("NFKC") !== target.pathname) {
+    throw actionError(`${label} URL contains ambiguous Unicode path characters.`, "unsafe-navigation");
+  }
+  let decoded = target.pathname;
+  if (/%(?![0-9a-f]{2})/iu.test(target.pathname)) {
+    throw actionError(`${label} URL contains malformed percent encoding.`, "unsafe-encoding");
+  }
+  try {
+    for (let pass = 0; pass < 4 && /%[0-9a-f]{2}/iu.test(decoded); pass += 1) {
+      decoded = decodeURIComponent(decoded);
+    }
+  } catch {
+    throw actionError(`${label} URL contains malformed or unsafe percent encoding.`, "unsafe-encoding");
+  }
+  if (
+    /(?:^|[/])\.\.(?:[/]|$)/u.test(decoded)
+    || decoded.includes("\\")
+    || decoded.includes("?")
+    || decoded.includes("#")
+    || /%(?:25)*2f|%(?:25)*5c|%(?:25)*3f|%(?:25)*23/iu.test(target.pathname)
+    || /%(?:25)*2e/iu.test(target.pathname)
+    || decoded.normalize("NFKC") !== decoded
+  ) {
+    throw actionError(`${label} URL contains an ownership-ambiguous encoded path.`, "unsafe-navigation");
+  }
 }
 
 export function normalizeTargetCriteria(criteria = null) {
@@ -223,6 +258,7 @@ export function resolveStrictNavigationUrl(value, rootUrl, {
   } catch {
     throw actionError(`${label} URL is invalid.`, "unsafe-navigation");
   }
+  validateCanonicalPathSafety(value, target, label);
   if (
     base.protocol !== "https:"
     || base.username

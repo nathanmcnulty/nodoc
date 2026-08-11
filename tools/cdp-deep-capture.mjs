@@ -1493,11 +1493,8 @@ function requestFamily(request) {
 }
 
 function isDomCapableTarget(sessionId, targetInfo) {
-  if (sessionId === null) {
-    return true;
-  }
-
-  return ["iframe", "page"].includes(targetInfo?.targetType ?? "");
+  return targetInfo?.attached !== false
+    && (sessionId === null || ["iframe", "page"].includes(targetInfo?.targetType ?? ""));
 }
 
 async function evaluateJson(client, expression, sessionId = null, timeoutMs = runtimeEvaluateTimeoutMs) {
@@ -2046,6 +2043,10 @@ async function main() {
   };
   const attributionRegistry = new CdpAttributionRegistry(target, currentContext);
   const sessions = attributionRegistry.sessions;
+  let lifecyclePhase = "bootstrap";
+  let targetGeneration = 0;
+  const pendingTargetHandlers = new Set();
+  let terminalLifecycleError = null;
   let currentLoadResolver = null;
   let lastNetworkActivityAt = Date.now();
 
@@ -2116,33 +2117,50 @@ async function main() {
     if (!childSessionId || childSessionId === metadata.sessionId) {
       return;
     }
-
-    attributionRegistry.registerSession(
-      childSessionId,
-      params.targetInfo ?? {},
-      metadata.sessionId ?? null,
-    );
-
-    try {
-      await configureSession(childSessionId);
-      await client.send("Runtime.runIfWaitingForDebugger", {}, childSessionId);
-    } catch {
-      // Best effort only.
-    }
+    targetGeneration += 1;
+    const handler = (async () => {
+      if (lifecyclePhase === "closing") {
+        const error = new Error(`Target ${childSessionId} attached after terminal safety began.`);
+        error.code = "late-target-attachment";
+        throw error;
+      }
+      attributionRegistry.registerSession(
+        childSessionId,
+        params.targetInfo ?? {},
+        metadata.sessionId ?? null,
+      );
+      try {
+        await configureSession(childSessionId);
+        await client.send("Runtime.runIfWaitingForDebugger", {}, childSessionId);
+      } catch (error) {
+        if (lifecyclePhase === "closing") {
+          throw error;
+        }
+      }
+    })();
+    pendingTargetHandlers.add(handler);
+    handler.catch((error) => {
+      terminalLifecycleError ??= error;
+    }).finally(() => {
+      pendingTargetHandlers.delete(handler);
+    }).catch(() => {});
   });
 
   client.on("Target.detachedFromTarget", (params, metadata) => {
     const detachedSessionId = params.sessionId ?? null;
     if (detachedSessionId) {
+      targetGeneration += 1;
       attributionRegistry.markDetached(detachedSessionId);
     }
   });
 
   client.on("Target.targetInfoChanged", (params, metadata) => {
+    targetGeneration += 1;
     attributionRegistry.updateTarget(metadata.sessionId ?? null, params.targetInfo ?? {});
   });
 
   client.on("Page.frameAttached", (params, metadata) => {
+    targetGeneration += 1;
     attributionRegistry.recordFrameAttached(
       metadata.sessionId ?? null,
       params.frameId,
@@ -2151,10 +2169,12 @@ async function main() {
   });
 
   client.on("Page.frameNavigated", (params, metadata) => {
+    targetGeneration += 1;
     attributionRegistry.recordFrameNavigated(metadata.sessionId ?? null, params.frame);
   });
 
   client.on("Page.frameDetached", (params, metadata) => {
+    targetGeneration += 1;
     const sessionId = metadata.sessionId ?? null;
     const entry = sessions.get(sessionId);
     if (entry?.frameId === params.frameId) {
@@ -2380,7 +2400,7 @@ async function main() {
         label,
       });
     } catch (error) {
-      if (!args.bootstrapTargetCriteria) {
+      if (lifecyclePhase !== "bootstrap" || !args.bootstrapTargetCriteria) {
         throw error;
       }
       return validatePostNavigationUrl(value, args.url, {
@@ -2421,6 +2441,58 @@ async function main() {
       throw error;
     }
     return { rootUrl };
+  }
+
+  async function awaitTargetHandlers() {
+    await Promise.allSettled(Array.from(pendingTargetHandlers));
+    if (terminalLifecycleError) {
+      throw terminalLifecycleError;
+    }
+  }
+
+  async function reconcileLiveTargets() {
+    const liveTargets = (await listTargets())
+      .filter((entry) => ["page", "iframe"].includes(entry?.type ?? ""))
+      .filter((entry) => entry?.id);
+    const liveIds = new Set(liveTargets.map((entry) => entry.id));
+    for (const [sessionId, targetInfo] of sessions.entries()) {
+      if (sessionId !== null && targetInfo?.targetId && !liveIds.has(targetInfo.targetId)) {
+        attributionRegistry.markDetached(sessionId);
+      }
+    }
+    const knownIds = new Set(
+      Array.from(sessions.values())
+        .map((entry) => entry.targetId)
+        .filter(Boolean),
+    );
+    const unknownTargets = liveTargets.filter((entry) => !knownIds.has(entry.id));
+    if (unknownTargets.length > 0) {
+      const error = new Error("A live page target was not attached and reconciled before terminal safety validation.");
+      error.code = "late-target-attachment";
+      throw error;
+    }
+  }
+
+  async function terminalSafetyBarrier() {
+    lifecyclePhase = "closing";
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      const generation = targetGeneration;
+      await waitForNetworkIdle(args.postActionSettleMs);
+      await awaitTargetHandlers();
+      await reconcileLiveTargets();
+      if (targetGeneration !== generation) {
+        continue;
+      }
+      const snapshots = await collectSnapshots();
+      const validated = validateObservedTargetUrls(snapshots, "terminal final");
+      if (targetGeneration !== generation || pendingTargetHandlers.size > 0) {
+        continue;
+      }
+      return validated;
+    }
+    const error = new Error("Target lifecycle did not reach a stable terminal safety barrier.");
+    error.code = "terminal-target-race";
+    throw error;
   }
 
   async function getRootStateFingerprint() {
@@ -3217,6 +3289,7 @@ async function main() {
       value: args.url,
     });
     await captureCheckpoint(currentContext.pageLabel);
+    lifecyclePhase = "feature";
 
     for (const [index, action] of args.actions.entries()) {
       const pageLabel = buildActionLabel(action, index);
@@ -3378,12 +3451,7 @@ async function main() {
       });
     }
 
-    await waitForNetworkIdle(args.postActionSettleMs);
-    const terminalSnapshots = await collectSnapshots();
-    const { rootUrl: terminalFinalUrl } = validateObservedTargetUrls(
-      terminalSnapshots,
-      "terminal final",
-    );
+    const { rootUrl: terminalFinalUrl } = await terminalSafetyBarrier();
     await flushArtifacts();
     const filteredRequests = capturedRequests.filter((request) => shouldMatchRequest(request.url, args));
     const scopedHosts = uniqueSorted(filteredRequests.map((request) => {
