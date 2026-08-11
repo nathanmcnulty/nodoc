@@ -119,7 +119,10 @@ only preflight determines whether authentication is confirmed or blocked. If
 the feature target is absent, the checked-in recipe may authorize one exact
 same-portal bootstrap-target GET alignment, bounded same-ID navigation
 readiness, and then strict preflight on the same target ID. Readiness must
-reach the checked-in entry URL or fail closed; it is not an arbitrary wait:
+reach the checked-in entry URL or fail closed; it is not an arbitrary wait.
+Legacy browser-entry fragments are stripped only when no bootstrap alignment is
+declared and must never be reused for network/API dispatch, ownership, ledger
+identity, or operation reconciliation:
 
   npm run discover:portal -- --portal <portal-spec-id> --profile bounded --phase all --artifacts <fresh-artifact-directory>
 

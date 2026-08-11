@@ -109,9 +109,14 @@ export function validateRecipeTargetMetadata(recipe) {
   } catch {
     throw new Error("recipe entry and declared root URLs must be valid URLs.");
   }
+  const bootstrapCriteria = resolvePageTargetBootstrapCriteria(recipe);
+  if (!bootstrapCriteria) {
+    entryUrl.hash = "";
+  }
   if (entryUrl.protocol !== "https:" || entryUrl.username || entryUrl.password || entryUrl.search || entryUrl.hash) {
     throw new Error("recipe entry URL must be an HTTPS URL without credentials, query, or fragment.");
   }
+  recipeUrl.hash = "";
   const classification = classifyGetProbeUrl(entryUrl.href, recipeUrl.href);
   if (!classification.allowed) {
     throw new Error(`recipe entry URL is not a safe same-origin GET (${classification.code}).`);
@@ -120,7 +125,6 @@ export function validateRecipeTargetMetadata(recipe) {
   if (!recipeEntryMatchesPageTarget(recipe)) {
     throw new Error("recipe entry URL does not match pageTarget host/path criteria.");
   }
-  const bootstrapCriteria = resolvePageTargetBootstrapCriteria(recipe);
   if (bootstrapCriteria && (
     !bootstrapCriteria.matchHosts.includes(recipeUrl.hostname.toLowerCase())
     || !bootstrapCriteria.matchPathnames.includes(recipeUrl.pathname)

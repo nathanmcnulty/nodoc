@@ -479,7 +479,9 @@ Preferred flow:
    checked-in first navigation URL, and rerun strict preflight with the same
    target ID. `/json/version` must identify the expected product and
    `/json/list` must remain exactly-one, same-host, and past authentication at
-   every gate.
+   every gate. Legacy browser-entry fragments are normalized away only when no
+   bootstrap alignment is declared; they are never valid network/API dispatch,
+   ownership, ledger-identity, or reconciliation input.
 
 Chrome 136+ ignores remote-debugging switches against its default data
 directory unless a nonstandard `--user-data-dir` is supplied, as documented in

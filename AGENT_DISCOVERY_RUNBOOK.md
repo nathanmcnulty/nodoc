@@ -335,8 +335,11 @@ mutate the ledger. Readiness may tolerate only the target's transient
 post-navigation publication state; it must end in the checked-in entry URL or
 fail with an explicit readiness timeout. Multiple targets, wrong hosts, login
 barriers, malformed metadata, redirects, and arbitrary operator URLs fail
-closed. The capture worker still receives only the exact target ID and does not
-launch, close, or navigate the browser.
+closed. A legacy browser-entry fragment is stripped only when the recipe has no
+bootstrap alignment; fragments never enter network/API dispatch, ownership,
+ledger identity, or reconciliation. Bootstrap-aligned entry routes remain
+strictly fragment-free. The capture worker still receives only the exact target
+ID and does not launch, close, or navigate the browser.
 
 For a portal-specific page check, retain the same endpoint and narrow the
 authenticated preflight further:

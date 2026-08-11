@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 import {
@@ -25,6 +26,10 @@ const inventoryRecipe = {
   },
   actions: ["navigate=https://config.office.com/officeSettings/inventory"],
 };
+
+async function readCaptureRecipe(name) {
+  return JSON.parse(await readFile(new URL(`../capture-recipes/${name}`, import.meta.url), "utf8"));
+}
 
 test("page-target validation uses the first navigate entry route", () => {
   assert.equal(getRecipeEntryUrl(inventoryRecipe), "https://config.office.com/officeSettings/inventory");
@@ -61,6 +66,20 @@ test("orchestration uses page-target criteria without changing network capture f
     { matchHosts: inventoryRecipe.matchHosts, matchPathPrefixes: inventoryRecipe.matchPathPrefixes },
     { matchHosts: ["config.office.com", "query.inventory.insights.office.net"], matchPathPrefixes: ["/inventory"] },
   );
+});
+
+test("legacy Entra root fragments normalize to the browser origin before dispatch", async () => {
+  for (const [name, networkPath] of [
+    ["entra-b2c-deep.json", "/api"],
+    ["entra-idgov-deep.json", "/accessReviews"],
+  ]) {
+    const recipe = await readCaptureRecipe(name);
+    const metadata = validateRecipeTargetMetadata(recipe);
+    assert.equal(metadata.entryUrl, "https://entra.microsoft.com/");
+    assert.equal(metadata.entryUrl.includes("#"), false);
+    assert.deepEqual(metadata.featureCriteria.matchPathPrefixes, ["/"]);
+    assert.deepEqual(recipe.matchPathPrefixes, [networkPath]);
+  }
 });
 
 test("page-target validation fails for an entry route outside its criteria", () => {
@@ -118,6 +137,17 @@ test("explicit page-target criteria fail closed when malformed or empty", () => 
     () => validateRecipeTargetMetadata({
       ...inventoryRecipe,
       actions: ["navigate=https://config.office.com/officeSettings/inventory?operation=delete"],
+    }),
+    /HTTPS URL without credentials, query, or fragment/,
+  );
+  assert.throws(
+    () => validateRecipeTargetMetadata({
+      ...inventoryRecipe,
+      pageTarget: {
+        ...inventoryRecipe.pageTarget,
+        bootstrap: { ...inventoryRecipe.pageTarget.bootstrap },
+      },
+      actions: ["navigate=https://config.office.com/officeSettings/inventory#fragment"],
     }),
     /HTTPS URL without credentials, query, or fragment/,
   );
