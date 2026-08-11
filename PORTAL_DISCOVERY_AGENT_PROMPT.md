@@ -1,12 +1,26 @@
 # Portal discovery agent prompt
 
+Offline per-spec reconciliation and review assignments may execute concurrently,
+but every live browser-owner/CDP lifecycle is globally serialized across all specs
+and portal hosts. Exactly one owner, preflight, alignment, ledger attempt, capture,
+finalization, and shutdown lifecycle may be active at a time. A next live lifecycle
+waits for terminal owner shutdown, artifact/ledger accounting, evidence review,
+qualified spec/Postman PR disposition, and process-improvement disposition. Review
+and controller sessions require exact runtime model `gpt-5.6-luna`; wrong-model
+output is rejected.
+
 Workers receive one schema-versioned assignment from the offline controller. The
 worker must return the assignment ID and digest, assignment type, terminal status,
 decision, reason codes, blockers, metrics, exact candidate/evidence accounting,
-and one recommended next action. The controller is authoritative: unknown IDs,
+one recommended next action, reusable lessons, lifecycle accounting, and
+process-improvement disposition. The controller is authoritative: unknown IDs,
 digest mismatches, incomplete accounting, illegal transitions, or capability
 violations fail closed. Human prose is diagnostic only and must not be used to
 change the ledger or specifications.
+
+Every directory under `specifications` has a durable queued/attempted/reviewed
+state. Missing directories are blockers and cannot silently disappear from the
+queue.
 
 Process-improvement assignments/results may classify known deterministic reason
 codes and prepare evidence-linked proposals only; Luna or an operator must
