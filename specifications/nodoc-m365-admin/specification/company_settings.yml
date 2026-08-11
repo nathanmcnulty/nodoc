@@ -22,6 +22,29 @@ paths:
 
         '404':
           $ref: common.yml#/components/responses/NotFound
+    put:
+      summary: Set company theme
+      description: >-
+        Update the company branding theme settings.
+      operationId: CompanySettings.SetTheme
+      tags: [CompanySettings]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: pending - theme update body
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+        '404':
+          $ref: common.yml#/components/responses/NotFound
 
   /_api/SPO.Tenant/GetSPOSiteCreationSources:
     get:
@@ -165,30 +188,6 @@ paths:
 
         '404':
           $ref: common.yml#/components/responses/NotFound
-    put:
-      summary: Set company theme
-      description: >-
-        Update the company branding theme settings.
-      operationId: CompanySettings.SetTheme
-      tags: [CompanySettings]
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              description: pending - theme update body
-      responses:
-        '200':
-          description: OK
-        '401':
-          $ref: common.yml#/components/responses/Unauthorized
-
-        '403':
-          $ref: common.yml#/components/responses/Forbidden
-
-        '404':
-          $ref: common.yml#/components/responses/NotFound
-
   /admin/api/Settings/company/profile:
     get:
       summary: Get company profile
