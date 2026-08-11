@@ -15,17 +15,19 @@ export function planActionBudget(recipe = {}, {
   expandedReplayActions,
   cliActions = [],
 } = {}) {
-  const recipeActions = buildEffectiveActions({
+  const normalizedRecipeActions = buildEffectiveActions({
     recipeActions: recipe?.actions ?? [],
+  }).map((action) => normalizeRecipeAction(action));
+  const normalizedCliActions = buildEffectiveActions({
     cliActions,
-  });
-  const normalizedRecipeActions = recipeActions.map((action) => normalizeRecipeAction(action));
+  }).map((action) => normalizeRecipeAction(action));
+  const effectiveActions = [...normalizedRecipeActions, ...normalizedCliActions];
   const replayExpansion = expandedReplayActions === undefined
-    ? estimateReplayExpansion(normalizedRecipeActions, recipe)
+    ? estimateReplayExpansion(effectiveActions, recipe)
     : expandedReplayActions;
   const categories = {
-    recipeActions: nonNegativeInteger(recipeActions.length, "recipeActions"),
-    cliActions: nonNegativeInteger(cliActions.length, "cliActions"),
+    recipeActions: nonNegativeInteger(normalizedRecipeActions.length, "recipeActions"),
+    cliActions: nonNegativeInteger(normalizedCliActions.length, "cliActions"),
     mandatoryOrchestrationActions: nonNegativeInteger(mandatoryOrchestrationActions, "mandatoryOrchestrationActions"),
     expandedReplayActions: nonNegativeInteger(replayExpansion, "expandedReplayActions"),
   };

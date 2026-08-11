@@ -23,6 +23,7 @@ import {
   normalizeRecipeAction,
   parseActionSpec,
   resolveStrictNavigationUrl,
+  validatePostNavigationUrl,
   validateEffectiveActions,
 } from "./portal-discovery-actions.mjs";
 import {
@@ -540,8 +541,20 @@ function finalizeActionConfiguration(args) {
   args.actions = validatedActions.slice(1);
   args.pageTargetCriteria = pageTarget;
   args.bootstrapTargetCriteria = bootstrapTarget;
+  const ownershipCriteria = args.recipeConfig
+    ? resolvePageTargetCriteria(args.recipeConfig)
+    : { matchHosts: args.matchHosts, matchPathPrefixes: args.matchPathPrefixes };
+  args.targetOwnershipCriteria = ownershipCriteria.matchHosts.length > 0
+    || ownershipCriteria.matchPathPrefixes.length > 0
+    ? ownershipCriteria
+    : null;
+  args.effectiveReplayConfig = {
+    ...(args.recipeConfig ?? {}),
+    seedLinkLimit: args.seedLinkLimit,
+    seedRouteGroups: args.seedRouteGroups,
+  };
   args.actionBudget = planActionBudget(
-    args.recipeConfig ?? { actions: [], url: args.url },
+    args.effectiveReplayConfig,
     { maxActions: args.recipeConfig?.maxActions, cliActions: args.cliActions },
   );
 }
@@ -1271,29 +1284,30 @@ async function resolveTarget(args) {
   if (!target.webSocketDebuggerUrl) {
     throw new Error(`CDP target ${JSON.stringify(args.targetId)} does not expose a websocket debugger URL.`);
   }
-  if (args.recipeConfig?.pageTarget) {
-    const targetUrl = target.url || target.title || "";
-    const criteria = args.pageTargetCriteria;
-    const bootstrapCriteria = args.bootstrapTargetCriteria;
-    let matches = false;
-    for (const applicableCriteria of [bootstrapCriteria, criteria]) {
-      if (!applicableCriteria) continue;
-      try {
-        resolveStrictNavigationUrl(targetUrl, args.url, {
-          criteria: applicableCriteria,
-          label: "existing target",
-        });
-        matches = true;
-        break;
-      } catch {
-        // Try the other applicable page-target criterion.
-      }
+  if (target.type !== "page" || typeof target.url !== "string" || !target.url.trim()) {
+    throw new Error(`CDP target ${JSON.stringify(args.targetId)} is not a URL-bearing page target.`);
+  }
+  if (!args.targetOwnershipCriteria) {
+    throw new Error(`CDP target ${JSON.stringify(args.targetId)} cannot be owned without page-target criteria.`);
+  }
+  let matches = false;
+  for (const applicableCriteria of [args.bootstrapTargetCriteria, args.targetOwnershipCriteria]) {
+    if (!applicableCriteria) continue;
+    try {
+      resolveStrictNavigationUrl(target.url, args.url, {
+        criteria: applicableCriteria,
+        label: "existing target",
+      });
+      matches = true;
+      break;
+    } catch {
+      // Try the other applicable page-target criterion.
     }
-    if (!matches) {
-      throw new Error(
-        `CDP target ${JSON.stringify(args.targetId)} does not match the recipe page-target criteria.`,
-      );
-    }
+  }
+  if (!matches) {
+    throw new Error(
+      `CDP target ${JSON.stringify(args.targetId)} does not match the recipe page-target criteria.`,
+    );
   }
 
   return {
@@ -2751,18 +2765,11 @@ async function main() {
     }
 
     const didLoad = await navigationPromise;
-    let settleResult = await waitForNetworkIdle(args.settleMs);
-
-    let currentUrl = await getRootUrl();
-    if (currentUrl !== resolvedUrl) {
-      const currentOrigin = new URL(currentUrl).origin;
-      const targetOrigin = new URL(resolvedUrl).origin;
-      if (currentOrigin === targetOrigin) {
-        await evaluateJson(client, `location.href = ${JSON.stringify(resolvedUrl)}`);
-        settleResult = await waitForNetworkIdle(args.settleMs);
-        currentUrl = await getRootUrl();
-      }
-    }
+    const settleResult = await waitForNetworkIdle(args.settleMs);
+    const currentUrl = validatePostNavigationUrl(await getRootUrl(), args.url, {
+      criteria: initial ? args.bootstrapTargetCriteria : criteria,
+      label: "final page",
+    });
 
     return {
       didLoad,
@@ -2823,7 +2830,10 @@ async function main() {
         }
 
         const settleResult = await waitForNetworkIdle(args.postActionSettleMs);
-        const afterUrl = await getRootUrl();
+        const afterUrl = validatePostNavigationUrl(await getRootUrl(), args.url, {
+          criteria: args.pageTargetCriteria,
+          label: "post-click page",
+        });
         const afterStateFingerprint = await getRootStateFingerprint();
         return {
           ...result,
@@ -2846,7 +2856,10 @@ async function main() {
           targetType: targetInfo?.targetType ?? "page",
           targetUrl: targetInfo?.targetUrl ?? null,
         };
-      } catch {
+      } catch (error) {
+        if (["unsafe-navigation", "active-get-denied", "page-target-mismatch"].includes(error?.code)) {
+          throw error;
+        }
         // Try the next session.
       }
     }

@@ -1,3 +1,5 @@
+import { classifyGetProbeUrl } from "./discovery-safety.mjs";
+
 export const supportedActionTypes = new Set([
   "capture",
   "click-contains",
@@ -167,6 +169,13 @@ export function resolveStrictNavigationUrl(value, rootUrl, {
       "unsafe-navigation",
     );
   }
+  const classification = classifyGetProbeUrl(target.href, base.href);
+  if (!classification.allowed) {
+    throw actionError(
+      `${label} URL is rejected by active-GET safety (${classification.code}).`,
+      classification.code,
+    );
+  }
   const matchHosts = Array.isArray(criteria?.matchHosts) ? criteria.matchHosts : [];
   const matchPathPrefixes = Array.isArray(criteria?.matchPathPrefixes) ? criteria.matchPathPrefixes : [];
   if (
@@ -176,6 +185,13 @@ export function resolveStrictNavigationUrl(value, rootUrl, {
     throw actionError(`${label} URL does not match the applicable page-target criteria.`, "page-target-mismatch");
   }
   return target.href;
+}
+
+export function validatePostNavigationUrl(value, rootUrl, options = {}) {
+  return resolveStrictNavigationUrl(value, rootUrl, {
+    ...options,
+    label: options.label ?? "final page",
+  });
 }
 
 export function isDestructiveClickValue(value) {

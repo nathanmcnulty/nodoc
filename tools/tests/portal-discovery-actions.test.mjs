@@ -11,10 +11,12 @@ import {
   buildEffectiveActions,
   estimateReplayExpansion,
   resolveStrictNavigationUrl,
+  validatePostNavigationUrl,
   validateEffectiveActions,
 } from "../portal-discovery-actions.mjs";
 import { planActionBudget } from "../portal-discovery-action-budget.mjs";
 import { deriveActionEligibility } from "../discovery-capture-policy.mjs";
+import { validateRecipeTargetMetadata } from "../portal-discovery-recipe.mjs";
 
 const execFileAsync = promisify(execFile);
 const repoRoot = path.resolve(import.meta.dirname, "..", "..");
@@ -83,13 +85,14 @@ test("strict navigation rejects unsafe routes and page-target mismatches", () =>
     "https://portal.example/read#fragment",
     "/read?mode=view",
     "/read#fragment",
+    "/export",
   ];
   for (const route of unsafeRoutes) {
     assert.throws(
       () => resolveStrictNavigationUrl(route, "https://portal.example/root", {
         criteria: { matchHosts: ["portal.example"], matchPathPrefixes: ["/read"] },
       }),
-      /HTTPS URL without credentials|page-target criteria/u,
+      /HTTPS URL without credentials|active-GET safety|page-target criteria/u,
     );
   }
   assert.equal(
@@ -97,6 +100,40 @@ test("strict navigation rejects unsafe routes and page-target mismatches", () =>
       criteria: { matchHosts: ["portal.example"], matchPathPrefixes: ["/read"] },
     }),
     "https://portal.example/read/items",
+  );
+  assert.throws(
+    () => validateEffectiveActions(
+      buildEffectiveActions({
+        recipeActions: ["click-href=/export"],
+        includeInitialNavigation: true,
+        initialUrl: "https://portal.example/root",
+      }),
+      { rootUrl: "https://portal.example/root" },
+    ),
+    /active-GET safety/u,
+  );
+});
+
+test("post-navigation guard rejects redirect escapes and active/page-target redirects", () => {
+  assert.equal(
+    validatePostNavigationUrl("https://portal.example/safe", "https://portal.example/root", {
+      criteria: { matchHosts: ["portal.example"], matchPathPrefixes: ["/safe"] },
+    }),
+    "https://portal.example/safe",
+  );
+  assert.throws(
+    () => validatePostNavigationUrl("https://other.example/safe", "https://portal.example/root"),
+    /HTTPS URL without credentials/u,
+  );
+  assert.throws(
+    () => validatePostNavigationUrl("https://portal.example/export", "https://portal.example/root"),
+    /active-GET safety/u,
+  );
+  assert.throws(
+    () => validatePostNavigationUrl("https://portal.example/wrong", "https://portal.example/root", {
+      criteria: { matchHosts: ["portal.example"], matchPathPrefixes: ["/safe"] },
+    }),
+    /page-target criteria/u,
   );
 });
 
@@ -186,6 +223,33 @@ test("replay expansion is bounded before browser interaction", () => {
     5,
   );
   assert.equal(planActionBudget(recipe).countedActions, 8);
+  const exactBudget = planActionBudget(
+    { url: recipe.url, actions: ["capture=recipe"] },
+    { cliActions: ["wait-ms=1"] },
+  );
+  assert.deepEqual(exactBudget.categories, {
+    recipeActions: 1,
+    cliActions: 1,
+    mandatoryOrchestrationActions: 1,
+    expandedReplayActions: 0,
+  });
+
+  test("query-bearing replay templates remain explicitly blocked", () => {
+    assert.throws(
+      () => validateRecipeTargetMetadata({
+        url: "https://security.microsoft.com/incidents",
+        actions: ["replay-seeded-routes=urls"],
+        seedRouteGroups: {
+          urls: {
+            limit: 2,
+            routeTemplates: ["https://security.microsoft.com/url/overview?url={encoded}"],
+          },
+        },
+      }),
+      /query|active-GET/u,
+    );
+  });
+  assert.equal(exactBudget.countedActions, 3);
   assert.throws(
     () => planActionBudget({
       url: recipe.url,
@@ -194,6 +258,47 @@ test("replay expansion is bounded before browser interaction", () => {
     }),
     /bounded/u,
   );
+});
+
+test("CLI replay limit is included in the pre-CDP authorization ceiling", async () => {
+  const rootDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-cli-replay-budget-"));
+  const recipePath = path.join(rootDir, "recipe.json");
+  const artifactDir = path.join(rootDir, "artifacts");
+  const server = createServer((_request, response) => {
+    response.writeHead(500);
+    response.end();
+  });
+  await writeFile(recipePath, `${JSON.stringify({
+    portal: "CLI replay budget",
+    url: "https://portal.example/root",
+    maxActions: 3,
+    seedLinkLimit: 1,
+    actions: ["replay-seeded-links=all"],
+  })}\n`, "utf8");
+  await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+  let requests = 0;
+  server.on("request", () => { requests += 1; });
+  const { port } = server.address();
+  try {
+    await assert.rejects(
+      execFileAsync(process.execPath, [
+        workerPath,
+        "--recipe",
+        recipePath,
+        "--seed-link-limit",
+        "10",
+        "--out",
+        artifactDir,
+        "--cdp-endpoint",
+        `http://127.0.0.1:${port}`,
+      ], { cwd: repoRoot }),
+      /Action budget exceeded/u,
+    );
+    assert.equal(requests, 0);
+  } finally {
+    await new Promise((resolve) => server.close(resolve));
+    await rm(rootDir, { recursive: true, force: true });
+  }
 });
 
 test("worker rejects an unsafe direct initial URL before contacting CDP", async () => {
@@ -328,5 +433,74 @@ test("worker rejects a mismatched target-id before opening its websocket", async
   } finally {
     await new Promise((resolve) => server.close(resolve));
     await rm(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("worker rejects legacy target-id ownership mismatches and missing target URLs", async () => {
+  const cases = [
+    {
+      target: {
+        type: "page",
+        url: "https://other.example/wrong",
+        title: "Wrong host",
+      },
+      expected: /does not match the recipe page-target criteria/u,
+    },
+    {
+      target: {
+        type: "page",
+        title: "Missing URL",
+      },
+      expected: /not a URL-bearing page target/u,
+    },
+  ];
+  for (const { target, expected } of cases) {
+    const rootDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-legacy-target-"));
+    const recipePath = path.join(rootDir, "recipe.json");
+    const artifactDir = path.join(rootDir, "artifacts");
+    let websocketUpgrades = 0;
+    const server = createServer((request, response) => {
+      if (request.url === "/json/list") {
+        response.writeHead(200, { "content-type": "application/json" });
+        response.end(JSON.stringify([{
+          id: "legacy-mismatch",
+          webSocketDebuggerUrl: "ws://127.0.0.1:1/devtools/page/legacy-mismatch",
+          ...target,
+        }]));
+        return;
+      }
+      response.writeHead(404);
+      response.end();
+    });
+    server.on("upgrade", () => { websocketUpgrades += 1; });
+    await writeFile(recipePath, `${JSON.stringify({
+      portal: "Legacy target mismatch",
+      url: "https://portal.example/root",
+      matchHosts: ["portal.example"],
+      matchPathPrefixes: ["/safe"],
+      actions: ["navigate=/safe"],
+    })}\n`, "utf8");
+    await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+    const { port } = server.address();
+    try {
+      await assert.rejects(
+        execFileAsync(process.execPath, [
+          workerPath,
+          "--recipe",
+          recipePath,
+          "--out",
+          artifactDir,
+          "--target-id",
+          "legacy-mismatch",
+          "--cdp-endpoint",
+          `http://127.0.0.1:${port}`,
+        ], { cwd: repoRoot }),
+        expected,
+      );
+      assert.equal(websocketUpgrades, 0);
+    } finally {
+      await new Promise((resolve) => server.close(resolve));
+      await rm(rootDir, { recursive: true, force: true });
+    }
   }
 });

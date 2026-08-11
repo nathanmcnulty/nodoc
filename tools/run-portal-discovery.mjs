@@ -301,7 +301,15 @@ function parseArgs(argv) {
     throw new Error("Invalid --ledger value. Use enqueue, status, claim, update, or resume.");
   }
   const forbiddenOverrides = argv.filter((argument) =>
-    ["--url", "--action", "--target-id"].some((option) =>
+    [
+      "--url",
+      "--action",
+      "--target-id",
+      "--seed-artifacts",
+      "--seed-link-limit",
+      "--seed-page",
+      "--seed-link-contains",
+    ].some((option) =>
       argument === option || argument.startsWith(`${option}=`),
     ),
   );

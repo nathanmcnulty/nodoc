@@ -114,6 +114,14 @@ export function validateRecipeTargetMetadata(recipe) {
     pageTarget: recipe?.pageTarget === undefined ? null : featureCriteria,
     bootstrapTarget: recipe?.pageTarget === undefined ? null : bootstrapCriteria,
   });
+  for (const [groupName, group] of Object.entries(recipe?.seedRouteGroups ?? {})) {
+    for (const routeTemplate of group?.routeTemplates ?? []) {
+      resolveStrictNavigationUrl(routeTemplate, recipeUrl, {
+        criteria: recipe?.pageTarget === undefined ? null : featureCriteria,
+        label: `seedRouteGroups.${groupName}`,
+      });
+    }
+  }
   const entryUrl = validatedActions.find((action) => action.source !== "initial" && action.type === "navigate")?.resolvedUrl
     ?? validatedActions[0].resolvedUrl;
   if (
