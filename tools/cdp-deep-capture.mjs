@@ -7,7 +7,6 @@ import { mineJavascriptBundles } from "./mine-javascript-bundles.mjs";
 import {
   activeGetPathPattern,
   activeGetQueryPattern,
-  classifyGetProbeUrl,
   sanitizeObservedTransportUrl,
 } from "./discovery-safety.mjs";
 import { planActionBudget, validateActionBudgetResult } from "./portal-discovery-action-budget.mjs";
@@ -19,6 +18,17 @@ import {
   shouldRequestResponseBody,
   summarizeActionResults,
 } from "./discovery-capture-policy.mjs";
+import {
+  buildEffectiveActions,
+  normalizeRecipeAction,
+  parseActionSpec,
+  resolveStrictNavigationUrl,
+  validateEffectiveActions,
+} from "./portal-discovery-actions.mjs";
+import {
+  resolvePageTargetBootstrapCriteria,
+  resolvePageTargetCriteria,
+} from "./portal-discovery-recipe.mjs";
 import {
   buildStableEvidenceId,
   captureArtifactSchemaVersion,
@@ -79,45 +89,6 @@ async function writeCaptureFailure(args, error) {
 
 function stripBom(value) {
   return typeof value === "string" ? value.replace(/^\uFEFF/u, "") : value;
-}
-
-function parseActionSpec(value) {
-  const separator = value.indexOf("=");
-  if (separator <= 0) {
-    throw new Error(`Invalid --action value "${value}". Expected type=value.`);
-  }
-
-  const rawType = value.slice(0, separator).trim();
-  const rawValue = value.slice(separator + 1);
-  const normalizedType = rawType.replace(/-(root|iframe)$/u, "");
-  const scope = rawType.endsWith("-root")
-    ? "root"
-    : rawType.endsWith("-iframe")
-      ? "iframe"
-      : "any";
-
-  const type = normalizedType === "click" ? "click-label" : normalizedType;
-  if (![
-    "capture",
-    "click-contains",
-    "click-href",
-    "click-label",
-    "crawl-links",
-    "navigate",
-    "probe-get",
-    "replay-seeded-links",
-    "replay-seeded-routes",
-    "wait-ms",
-  ].includes(type)) {
-    throw new Error(`Unsupported action type "${rawType}".`);
-  }
-
-  return {
-    raw: value,
-    scope,
-    type,
-    value: rawValue,
-  };
 }
 
 function parseVarSpec(value) {
@@ -423,32 +394,6 @@ function expandTemplateVariables(value, variables) {
   return value;
 }
 
-function normalizeRecipeAction(action) {
-  if (typeof action === "string") {
-    return parseActionSpec(action);
-  }
-
-  if (!action || typeof action !== "object") {
-    throw new Error("Recipe actions must be strings or objects.");
-  }
-
-  const rawType = String(action.type || "").trim();
-  if (!rawType) {
-    throw new Error("Recipe action objects must include a type.");
-  }
-
-  const scopedType =
-    action.scope && action.scope !== "any"
-      ? `${rawType}-${String(action.scope).trim()}`
-      : rawType;
-  return {
-    ...parseActionSpec(`${scopedType}=${action.value ?? ""}`),
-    highValue: action.highValue === true,
-    optional: action.optional === true,
-    required: Boolean(action.required),
-  };
-}
-
 function resolveRecipePath(value, recipeDir) {
   if (!value) {
     return null;
@@ -561,21 +506,52 @@ function applyRecipeConfig(args, recipeConfig, recipePath) {
     }
   }
 
-  if (recipeConfig.actions) {
-    args.actions = ensureArray(recipeConfig.actions).map(normalizeRecipeAction);
-  }
+  args.recipeConfig = recipeConfig;
+  args.recipeActions = ensureArray(recipeConfig.actions).map((action, index) =>
+    normalizeRecipeAction(action, { source: "recipe", sourceIndex: index }),
+  );
 
   if (recipeConfig.captureScripts !== undefined) {
     args.captureScripts = Boolean(recipeConfig.captureScripts);
   }
 
   args.seedRouteGroups = normalizeSeedRouteGroups(recipeConfig.seedRouteGroups);
-  args.actionBudget = planActionBudget(recipeConfig, { maxActions: recipeConfig.maxActions });
+}
+
+function finalizeActionConfiguration(args) {
+  const rawActions = buildEffectiveActions({
+    recipeActions: args.recipeActions,
+    cliActions: args.cliActions,
+    includeInitialNavigation: true,
+    initialUrl: args.url,
+  });
+  const pageTarget = args.recipeConfig?.pageTarget !== undefined
+    ? resolvePageTargetCriteria(args.recipeConfig)
+    : null;
+  const bootstrapTarget = args.recipeConfig?.pageTarget !== undefined
+    ? resolvePageTargetBootstrapCriteria(args.recipeConfig)
+    : null;
+  const validatedActions = validateEffectiveActions(rawActions, {
+    rootUrl: args.url,
+    pageTarget,
+    bootstrapTarget,
+  });
+  args.initialNavigationUrl = validatedActions[0].resolvedUrl;
+  args.actions = validatedActions.slice(1);
+  args.pageTargetCriteria = pageTarget;
+  args.bootstrapTargetCriteria = bootstrapTarget;
+  args.actionBudget = planActionBudget(
+    args.recipeConfig ?? { actions: [], url: args.url },
+    { maxActions: args.recipeConfig?.maxActions, cliActions: args.cliActions },
+  );
 }
 
 async function parseArgs(argv) {
   const args = {
     actions: [],
+    recipeActions: [],
+    cliActions: [],
+    recipeConfig: null,
     captureScripts: true,
     cdpEndpoint: "http://127.0.0.1:9222",
     bundleCacheDir: null,
@@ -879,13 +855,19 @@ async function parseArgs(argv) {
     }
 
     if (arg === "--action" && next) {
-      args.actions.push(parseActionSpec(next));
+      args.cliActions.push(parseActionSpec(next, {
+        source: "cli",
+        sourceIndex: args.cliActions.length,
+      }));
       index += 1;
       continue;
     }
 
     if (arg.startsWith("--action=")) {
-      args.actions.push(parseActionSpec(arg.slice("--action=".length)));
+      args.cliActions.push(parseActionSpec(arg.slice("--action=".length), {
+        source: "cli",
+        sourceIndex: args.cliActions.length,
+      }));
       continue;
     }
   }
@@ -893,6 +875,8 @@ async function parseArgs(argv) {
   if (!args.url) {
     throw new Error("Missing required --url argument.");
   }
+
+  finalizeActionConfiguration(args);
 
   if (args.actionBudget?.maxActions !== null && args.actionBudget?.maxActions !== undefined
       && args.actionBudget.countedActions > args.actionBudget.maxActions) {
@@ -1287,6 +1271,30 @@ async function resolveTarget(args) {
   if (!target.webSocketDebuggerUrl) {
     throw new Error(`CDP target ${JSON.stringify(args.targetId)} does not expose a websocket debugger URL.`);
   }
+  if (args.recipeConfig?.pageTarget) {
+    const targetUrl = target.url || target.title || "";
+    const criteria = args.pageTargetCriteria;
+    const bootstrapCriteria = args.bootstrapTargetCriteria;
+    let matches = false;
+    for (const applicableCriteria of [bootstrapCriteria, criteria]) {
+      if (!applicableCriteria) continue;
+      try {
+        resolveStrictNavigationUrl(targetUrl, args.url, {
+          criteria: applicableCriteria,
+          label: "existing target",
+        });
+        matches = true;
+        break;
+      } catch {
+        // Try the other applicable page-target criterion.
+      }
+    }
+    if (!matches) {
+      throw new Error(
+        `CDP target ${JSON.stringify(args.targetId)} does not match the recipe page-target criteria.`,
+      );
+    }
+  }
 
   return {
     ...target,
@@ -1623,11 +1631,9 @@ function buildClickExpression(action) {
       return { clicked: false };
     }
 
-    matches.sort((left, right) => {
-      const leftScore = (left.role === "tab" ? 3 : 0) + (left.tag === "a" ? 2 : 0) + (left.tag === "button" ? 1 : 0);
-      const rightScore = (right.role === "tab" ? 3 : 0) + (right.tag === "a" ? 2 : 0) + (right.tag === "button" ? 1 : 0);
-      return rightScore - leftScore;
-    });
+    if (matches.length > 1) {
+      return { clicked: false, reason: "ambiguous-control-match" };
+    }
 
     const match = matches[0];
     match.element.scrollIntoView({ block: "center", inline: "center" });
@@ -1816,15 +1822,6 @@ function resolveMaybeRelativeUrl(value, baseUrl) {
   }
 }
 
-function isAbsoluteUrl(value) {
-  try {
-    new URL(value);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
 function slugify(value) {
   const normalized = String(value || "")
     .replace(/^https?:\/\/[^/]+/iu, "")
@@ -1895,16 +1892,23 @@ function collectSeededLinkCandidates(seedPageStates, rootOrigin, args, action, l
           continue;
         }
 
-        const parsed = new URL(resolvedUrl);
-        const normalizedUrl = parsed.toString();
-        const normalizedUrlLower = normalizedUrl.toLowerCase();
+        let strictUrl;
+        try {
+          strictUrl = resolveStrictNavigationUrl(resolvedUrl, args.url, {
+            criteria: args.pageTargetCriteria,
+            label: "seeded link",
+          });
+        } catch {
+          continue;
+        }
         if (
-          parsed.origin !== rootOrigin
-          || excludedLinks.has(normalizedUrlLower)
-          || !classifyGetProbeUrl(normalizedUrl, rootOrigin).allowed
+          new URL(strictUrl).origin !== rootOrigin
+          || excludedLinks.has(strictUrl.toLowerCase())
         ) {
           continue;
         }
+        const normalizedUrl = strictUrl;
+        const normalizedUrlLower = normalizedUrl.toLowerCase();
 
         if (linkContainsFilters.length > 0 && !linkContainsFilters.some((value) => normalizedUrlLower.includes(value))) {
           continue;
@@ -1946,15 +1950,13 @@ function collectSeededRouteCandidates(seedArtifacts, rootOrigin, args, action) {
       for (const routeTemplate of seedRouteGroup.routeTemplates) {
         try {
           const url = buildSeedRouteUrl(routeTemplate, seedValue, rootOrigin);
-          const parsed = new URL(url);
-          if (parsed.origin !== rootOrigin) {
-            continue;
-          }
-
-          const normalizedUrl = parsed.toString();
+          const normalizedUrl = resolveStrictNavigationUrl(url, args.url, {
+            criteria: args.pageTargetCriteria,
+            label: "seeded route",
+          });
+          if (new URL(normalizedUrl).origin !== rootOrigin) continue;
           if (
             seenUrls.has(normalizedUrl)
-            || !classifyGetProbeUrl(normalizedUrl, rootOrigin).allowed
           ) {
             continue;
           }
@@ -2721,10 +2723,11 @@ async function main() {
     };
   }
 
-  async function navigateRoot(targetUrl) {
-    const resolvedUrl = isAbsoluteUrl(targetUrl)
-      ? String(targetUrl)
-      : resolveMaybeRelativeUrl(targetUrl, await getRootUrl());
+  async function navigateRoot(targetUrl, { initial = false, criteria = args.pageTargetCriteria } = {}) {
+    const resolvedUrl = resolveStrictNavigationUrl(targetUrl, args.url, {
+      criteria: initial ? args.bootstrapTargetCriteria : criteria,
+      label: initial ? "initial navigation" : "navigation",
+    });
     const navigationPromise = new Promise((resolve) => {
       const timeout = setTimeout(() => {
         currentLoadResolver = null;
@@ -2802,6 +2805,15 @@ async function main() {
     const beforeTargetIds = new Set(sessions.keys());
     const beforeSnapshots = preActionSnapshots ?? await collectSnapshots();
     const eligibility = deriveActionEligibility(action, beforeSnapshots);
+    if (eligibility?.status === "ambiguous") {
+      return {
+        afterUrl: beforeUrl,
+        beforeUrl,
+        clicked: false,
+        eligibility,
+        reason: "ambiguous-control-match",
+      };
+    }
     for (const [sessionId, targetInfo] of getOrderedSessions(action.scope)) {
       try {
         attributionRegistry.setSessionContext(sessionId, currentContext);
@@ -2870,6 +2882,9 @@ async function main() {
           ...navigationResult,
           sourcePage: seededLink.sourcePage,
         },
+        source: action.source,
+        sourceIndex: action.sourceIndex,
+        effectiveIndex: action.effectiveIndex,
         scope: action.scope,
         sourcePage: seededLink.sourcePage,
         type: action.type,
@@ -2909,6 +2924,9 @@ async function main() {
           seedValue: seededRoute.seedValue,
           sourceArtifact: seededRoute.sourceArtifact,
         },
+        source: action.source,
+        sourceIndex: action.sourceIndex,
+        effectiveIndex: action.effectiveIndex,
         scope: action.scope,
         sourceArtifact: seededRoute.sourceArtifact,
         type: action.type,
@@ -3000,6 +3018,9 @@ async function main() {
           repeatedState,
           sourcePage: candidate.sourcePage,
         },
+        source: action.source,
+        sourceIndex: action.sourceIndex,
+        effectiveIndex: action.effectiveIndex,
         scope: action.scope,
         sourcePage: candidate.sourcePage,
         type: action.type,
@@ -3113,12 +3134,14 @@ async function main() {
 
   try {
     setCaptureContext(args.label ?? "seed-00", -1, args.url);
-    const initialNavigation = await navigateRoot(args.url);
+    const initialNavigation = await navigateRoot(args.initialNavigationUrl, { initial: true });
     actionResults.push({
       allowCanonicalRedirect: true,
       page: currentContext.pageLabel,
       required: true,
       result: initialNavigation,
+      source: "initial",
+      sourceIndex: -1,
       type: "navigate",
       value: args.url,
     });
@@ -3135,6 +3158,9 @@ async function main() {
           page: pageLabel,
           required: action.required,
           result: { waitedMs: Number(action.value) },
+          source: action.source,
+          sourceIndex: action.sourceIndex,
+          effectiveIndex: action.effectiveIndex,
           scope: action.scope,
           type: action.type,
           value: action.value,
@@ -3148,6 +3174,9 @@ async function main() {
           page: pageLabel,
           required: action.required,
           result: { capturedOnly: true },
+          source: action.source,
+          sourceIndex: action.sourceIndex,
+          effectiveIndex: action.effectiveIndex,
           scope: action.scope,
           type: action.type,
           value: action.value,
@@ -3157,11 +3186,16 @@ async function main() {
       }
 
       if (action.type === "navigate") {
-        const navigationResult = await navigateRoot(action.value);
+        const navigationResult = await navigateRoot(action.resolvedUrl, {
+          criteria: action.pageTargetApplicable ? args.pageTargetCriteria : null,
+        });
         actionResults.push({
           page: pageLabel,
           required: action.required,
           result: navigationResult,
+          source: action.source,
+          sourceIndex: action.sourceIndex,
+          effectiveIndex: action.effectiveIndex,
           scope: action.scope,
           type: action.type,
           value: action.value,
@@ -3176,6 +3210,9 @@ async function main() {
           page: pageLabel,
           required: action.required,
           result: probeResult,
+          source: action.source,
+          sourceIndex: action.sourceIndex,
+          effectiveIndex: action.effectiveIndex,
           scope: action.scope,
           type: action.type,
           value: action.value,
@@ -3191,6 +3228,9 @@ async function main() {
           page: pageLabel,
           required: action.required,
           result: crawlResult,
+          source: action.source,
+          sourceIndex: action.sourceIndex,
+          effectiveIndex: action.effectiveIndex,
           scope: action.scope,
           type: action.type,
           value: action.value,
@@ -3205,6 +3245,9 @@ async function main() {
           page: pageLabel,
           required: action.required,
           result: replayResult,
+          source: action.source,
+          sourceIndex: action.sourceIndex,
+          effectiveIndex: action.effectiveIndex,
           scope: action.scope,
           type: action.type,
           value: action.value,
@@ -3219,6 +3262,9 @@ async function main() {
           page: pageLabel,
           required: action.required,
           result: replayResult,
+          source: action.source,
+          sourceIndex: action.sourceIndex,
+          effectiveIndex: action.effectiveIndex,
           scope: action.scope,
           type: action.type,
           value: action.value,
@@ -3233,10 +3279,13 @@ async function main() {
       const beforeRequestFamilies = new Set(capturedRequests.map(requestFamily));
       const clickResult = await runClickAction(action, beforeSnapshots);
       const actionResult = {
+        effectiveIndex: action.effectiveIndex,
         highValue: action.highValue === true,
         page: pageLabel,
         required: action.required,
         result: clickResult,
+        source: action.source,
+        sourceIndex: action.sourceIndex,
         scope: action.scope,
         type: action.type,
         value: action.value,

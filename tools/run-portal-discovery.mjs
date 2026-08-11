@@ -9,7 +9,6 @@ import {
 } from "./discovery-candidate-handoff.mjs";
 import { aggregateInteractionHealth, sanitizeInteractionHealth } from "./discovery-capture-policy.mjs";
 import { evaluateDiscoverySaturation } from "./discovery-saturation.mjs";
-import { classifyGetProbeUrl } from "./discovery-safety.mjs";
 import {
   captureRecipesByTitle,
   crawlMetadataByTitle,
@@ -42,6 +41,11 @@ import {
   validateRecipeTargetMetadata,
 } from "./portal-discovery-recipe.mjs";
 import { planActionBudget } from "./portal-discovery-action-budget.mjs";
+import {
+  resolveStrictNavigationUrl,
+  validateEffectiveActions,
+  buildEffectiveActions,
+} from "./portal-discovery-actions.mjs";
 
 const validPhases = new Set(["all", "analyze", "capture", "plan"]);
 
@@ -296,6 +300,14 @@ function parseArgs(argv) {
   if (!new Set(["enqueue", "status", "claim", "update", "resume"]).has(args.ledgerMode)) {
     throw new Error("Invalid --ledger value. Use enqueue, status, claim, update, or resume.");
   }
+  const forbiddenOverrides = argv.filter((argument) =>
+    ["--url", "--action", "--target-id"].some((option) =>
+      argument === option || argument.startsWith(`${option}=`),
+    ),
+  );
+  if (forbiddenOverrides.length > 0) {
+    throw new Error(`Ledger mode does not accept worker execution overrides: ${forbiddenOverrides.join(", ")}.`);
+  }
   if (args.ledgerMode === "enqueue" && (!args.endpoint || (!args.portal && !args.specId))) {
     throw new Error("Ledger enqueue requires --endpoint and either --portal or --spec-id.");
   }
@@ -385,35 +397,32 @@ async function selectRecipe(specRecord, explicitRecipe) {
 
 async function inspectRecipeSafety(recipePath) {
   const recipe = JSON.parse(await readFile(recipePath, "utf8"));
-  const unsafeActionPattern =
-    /(?:^|[\s/_-])(?:delete|execute|export|generate|invoke|log-?out|publish|remove|run|save|sign-?out|start|submit|sync|trigger)(?:$|[\s/_.?&=-])/iu;
   const unsafeActions = [];
-
-  for (const action of recipe.actions ?? []) {
-    const rawType = typeof action === "string"
-      ? action.split("=", 1)[0]
-      : String(action?.type || "");
-    const value = typeof action === "string"
-      ? action.slice(action.indexOf("=") + 1)
-      : String(action?.value || "");
-    const type = rawType.replace(/-(?:root|iframe)$/u, "");
-    if (type.startsWith("click") && unsafeActionPattern.test(value)) {
-      unsafeActions.push(`${rawType}=${value}`);
-    }
-    if (type === "navigate") {
-      const classification = classifyGetProbeUrl(value, recipe.url);
-      if (!classification.allowed) {
-        unsafeActions.push(`${rawType}=${value} (${classification.code})`);
-      }
-    }
+  try {
+    const actions = buildEffectiveActions({
+      recipeActions: recipe.actions ?? [],
+      includeInitialNavigation: true,
+      initialUrl: recipe.url,
+    });
+    validateEffectiveActions(actions, {
+      rootUrl: recipe.url,
+      pageTarget: recipe.pageTarget === undefined ? null : resolvePageTargetCriteria(recipe),
+      bootstrapTarget: recipe.pageTarget === undefined ? null : resolvePageTargetBootstrapCriteria(recipe),
+    });
+  } catch (error) {
+    unsafeActions.push(error instanceof Error ? error.message : String(error));
   }
 
   for (const [groupName, group] of Object.entries(recipe.seedRouteGroups ?? {})) {
     for (const routeTemplate of group?.routeTemplates ?? []) {
-      const classification = classifyGetProbeUrl(routeTemplate, recipe.url);
-      if (!classification.allowed) {
+      try {
+        resolveStrictNavigationUrl(routeTemplate, recipe.url, {
+          criteria: recipe.pageTarget === undefined ? null : resolvePageTargetCriteria(recipe),
+          label: `seedRouteGroups.${groupName}`,
+        });
+      } catch (error) {
         unsafeActions.push(
-          `seedRouteGroups.${groupName}=${routeTemplate} (${classification.code})`,
+          `seedRouteGroups.${groupName}=${routeTemplate} (${error instanceof Error ? error.message : String(error)})`,
         );
       }
     }

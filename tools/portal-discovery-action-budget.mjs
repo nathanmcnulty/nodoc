@@ -1,23 +1,46 @@
-const budgetCategories = ["recipeActions", "mandatoryOrchestrationActions", "expandedReplayActions"];
+import {
+  buildEffectiveActions,
+  estimateReplayExpansion,
+  normalizeRecipeAction,
+} from "./portal-discovery-actions.mjs";
 
 function nonNegativeInteger(value, label) {
   if (!Number.isInteger(value) || value < 0) throw new Error(`${label} must be a non-negative integer.`);
   return value;
 }
 
-export function planActionBudget(recipe, { maxActions = recipe?.maxActions, mandatoryOrchestrationActions = 1, expandedReplayActions = 0 } = {}) {
-  const recipeActions = Array.isArray(recipe?.actions) ? recipe.actions.length : 0;
+export function planActionBudget(recipe = {}, {
+  maxActions = recipe?.maxActions,
+  mandatoryOrchestrationActions = 1,
+  expandedReplayActions,
+  cliActions = [],
+} = {}) {
+  const recipeActions = buildEffectiveActions({
+    recipeActions: recipe?.actions ?? [],
+    cliActions,
+  });
+  const normalizedRecipeActions = recipeActions.map((action) => normalizeRecipeAction(action));
+  const replayExpansion = expandedReplayActions === undefined
+    ? estimateReplayExpansion(normalizedRecipeActions, recipe)
+    : expandedReplayActions;
   const categories = {
-    recipeActions: nonNegativeInteger(recipeActions, "recipeActions"),
+    recipeActions: nonNegativeInteger(recipeActions.length, "recipeActions"),
+    cliActions: nonNegativeInteger(cliActions.length, "cliActions"),
     mandatoryOrchestrationActions: nonNegativeInteger(mandatoryOrchestrationActions, "mandatoryOrchestrationActions"),
-    expandedReplayActions: nonNegativeInteger(expandedReplayActions, "expandedReplayActions"),
+    expandedReplayActions: nonNegativeInteger(replayExpansion, "expandedReplayActions"),
   };
-  const total = budgetCategories.reduce((sum, category) => sum + categories[category], 0);
+  const total = Object.values(categories).reduce((sum, category) => sum + category, 0);
   const plan = {
     categories,
     countedActions: total,
     maxActions: maxActions === undefined || maxActions === null ? null : nonNegativeInteger(maxActions, "maxActions"),
-    budgetCategories,
+    budgetCategories: Object.keys(categories),
+    effectiveActions: buildEffectiveActions({
+      recipeActions: recipe?.actions ?? [],
+      cliActions,
+      includeInitialNavigation: mandatoryOrchestrationActions > 0,
+      initialUrl: recipe?.url ?? "https://invalid.initial-root.invalid/",
+    }).map(({ raw, ...action }) => action),
   };
   if (plan.maxActions !== null && total > plan.maxActions) {
     const error = new Error(`Action budget exceeded: planned ${total} browser actions exceeds authorized maximum ${plan.maxActions}.`);

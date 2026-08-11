@@ -1,19 +1,18 @@
-import { classifyGetProbeUrl } from "./discovery-safety.mjs";
 import { planActionBudget } from "./portal-discovery-action-budget.mjs";
+import {
+  buildEffectiveActions,
+  normalizeRecipeAction,
+  resolveStrictNavigationUrl,
+  validateEffectiveActions,
+} from "./portal-discovery-actions.mjs";
 
 function actionTypeAndValue(action) {
-  if (typeof action === "string") {
-    const separator = action.indexOf("=");
-    return separator > 0
-      ? { type: action.slice(0, separator).replace(/-(root|iframe)$/u, ""), value: action.slice(separator + 1) }
-      : { type: action.replace(/-(root|iframe)$/u, ""), value: "" };
+  try {
+    const normalized = normalizeRecipeAction(action);
+    return { type: normalized.type, value: normalized.value };
+  } catch {
+    return { type: "", value: "" };
   }
-
-  if (action && typeof action === "object") {
-    return { type: String(action.type || ""), value: String(action.value ?? "") };
-  }
-
-  return { type: "", value: "" };
 }
 
 export function getRecipeEntryUrl(recipe) {
@@ -100,35 +99,31 @@ export function resolvePageTargetBootstrapCriteria(recipe) {
 }
 
 export function validateRecipeTargetMetadata(recipe) {
-  const entryUrlValue = getRecipeEntryUrl(recipe);
-  let entryUrl;
-  let recipeUrl;
-  try {
-    entryUrl = new URL(entryUrlValue);
-    recipeUrl = new URL(recipe?.url);
-  } catch {
-    throw new Error("recipe entry and declared root URLs must be valid URLs.");
-  }
-  if (entryUrl.protocol !== "https:" || entryUrl.username || entryUrl.password || entryUrl.search || entryUrl.hash) {
-    throw new Error("recipe entry URL must be an HTTPS URL without credentials, query, or fragment.");
-  }
-  const classification = classifyGetProbeUrl(entryUrl.href, recipeUrl.href);
-  if (!classification.allowed) {
-    throw new Error(`recipe entry URL is not a safe same-origin GET (${classification.code}).`);
-  }
   const featureCriteria = resolvePageTargetCriteria(recipe);
-  if (!recipeEntryMatchesPageTarget(recipe)) {
+  const bootstrapCriteria = resolvePageTargetBootstrapCriteria(recipe);
+  const recipeUrl = resolveStrictNavigationUrl(recipe?.url, recipe?.url, {
+    label: "declared root",
+  });
+  const effectiveActions = buildEffectiveActions({
+    recipeActions: recipe?.actions ?? [],
+    includeInitialNavigation: true,
+    initialUrl: recipeUrl,
+  });
+  const validatedActions = validateEffectiveActions(effectiveActions, {
+    rootUrl: recipeUrl,
+    pageTarget: recipe?.pageTarget === undefined ? null : featureCriteria,
+    bootstrapTarget: recipe?.pageTarget === undefined ? null : bootstrapCriteria,
+  });
+  const entryUrl = validatedActions.find((action) => action.source !== "initial" && action.type === "navigate")?.resolvedUrl
+    ?? validatedActions[0].resolvedUrl;
+  if (
+    recipe?.pageTarget !== undefined
+    && !recipeEntryMatchesPageTarget({ ...recipe, actions: [{ type: "navigate", value: entryUrl }] })
+  ) {
     throw new Error("recipe entry URL does not match pageTarget host/path criteria.");
   }
-  const bootstrapCriteria = resolvePageTargetBootstrapCriteria(recipe);
-  if (bootstrapCriteria && (
-    !bootstrapCriteria.matchHosts.includes(recipeUrl.hostname.toLowerCase())
-    || !bootstrapCriteria.matchPathnames.includes(recipeUrl.pathname)
-  )) {
-    throw new Error("declared root URL does not match pageTarget.bootstrap host/path criteria.");
-  }
   return {
-    entryUrl: entryUrl.href,
+    entryUrl,
     featureCriteria,
     bootstrapCriteria,
   };
@@ -137,7 +132,7 @@ export function validateRecipeTargetMetadata(recipe) {
 export function recipeEntryMatchesPageTarget(recipe) {
   let entryUrl;
   try {
-    entryUrl = new URL(getRecipeEntryUrl(recipe));
+    entryUrl = new URL(getRecipeEntryUrl(recipe), recipe?.url);
   } catch {
     return false;
   }

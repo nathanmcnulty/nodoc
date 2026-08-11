@@ -149,10 +149,14 @@ export function deriveActionEligibility(action, snapshots) {
 
   return {
     candidateCount,
-    reason: candidateCount > 0
+    reason: candidateCount > 1
+      ? "ambiguous-selector-candidates"
+      : candidateCount > 0
       ? "selector-candidate-present"
       : "control-absent-or-not-applicable",
-    status: candidateCount > 0 ? "eligible" : "absent-not-applicable",
+    status: candidateCount > 1
+      ? "ambiguous"
+      : candidateCount > 0 ? "eligible" : "absent-not-applicable",
     targetFrameInventory,
   };
 }

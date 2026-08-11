@@ -1,0 +1,259 @@
+export const supportedActionTypes = new Set([
+  "capture",
+  "click-contains",
+  "click-href",
+  "click-label",
+  "crawl-links",
+  "navigate",
+  "probe-get",
+  "replay-seeded-links",
+  "replay-seeded-routes",
+  "wait-ms",
+]);
+
+const destructiveClickPattern =
+  /(?:^|[\s/_-])(?:delete|execute|export|generate|invoke|log-?out|publish|remove|run|save|sign-?out|start|submit|sync|trigger)(?:$|[\s/_.?&=-])/iu;
+const defaultSeedLinkLimit = 12;
+
+function actionError(message, code = "invalid-action") {
+  const error = new Error(message);
+  error.code = code;
+  return error;
+}
+
+function normalizeScope(value) {
+  const scope = String(value ?? "any").trim().toLowerCase();
+  if (!["any", "root", "iframe"].includes(scope)) {
+    throw actionError(`Unsupported action scope "${value}".`);
+  }
+  return scope;
+}
+
+export function normalizeActionType(value) {
+  const rawType = String(value ?? "").trim().toLowerCase();
+  if (!rawType) {
+    throw actionError("Action type must be a non-empty string.");
+  }
+  const scopeMatch = rawType.match(/-(root|iframe)$/u);
+  const scope = scopeMatch?.[1] ?? "any";
+  const baseType = scopeMatch ? rawType.slice(0, -scopeMatch[0].length) : rawType;
+  const type = baseType === "click" ? "click-label" : baseType;
+  if (!supportedActionTypes.has(type)) {
+    throw actionError(`Unsupported action type "${value}".`);
+  }
+  return { scope, type };
+}
+
+export function parseActionSpec(value, provenance = {}) {
+  if (typeof value !== "string") {
+    throw actionError("String action specifications must be strings.");
+  }
+  const separator = value.indexOf("=");
+  if (separator <= 0) {
+    throw actionError(`Invalid action value "${value}". Expected type=value.`);
+  }
+  const rawType = value.slice(0, separator).trim();
+  const rawValue = value.slice(separator + 1);
+  const normalized = normalizeActionType(rawType);
+  return {
+    ...provenance,
+    raw: value,
+    scope: normalized.scope,
+    type: normalized.type,
+    value: rawValue.trim(),
+  };
+}
+
+export function normalizeRecipeAction(action, provenance = {}) {
+  if (typeof action === "string") {
+    return parseActionSpec(action, provenance);
+  }
+  if (!action || typeof action !== "object" || Array.isArray(action)) {
+    throw actionError("Recipe actions must be strings or objects.");
+  }
+  const normalized = normalizeActionType(action.type);
+  const scope = action.scope === undefined ? normalized.scope : normalizeScope(action.scope);
+  return {
+    ...provenance,
+    raw: action,
+    scope: scope === "any" ? normalized.scope : scope,
+    type: normalized.type,
+    value: String(action.value ?? "").trim(),
+    highValue: action.highValue === true,
+    optional: action.optional === true,
+    required: Boolean(action.required),
+  };
+}
+
+export function buildEffectiveActions({
+  recipeActions = [],
+  cliActions = [],
+  includeInitialNavigation = false,
+  initialUrl = null,
+} = {}) {
+  const recipe = (Array.isArray(recipeActions) ? recipeActions : [recipeActions])
+    .filter((action) => action !== undefined && action !== null)
+    .map((action, index) => normalizeRecipeAction(action, {
+      source: "recipe",
+      sourceIndex: index,
+    }));
+  const cli = (Array.isArray(cliActions) ? cliActions : [cliActions])
+    .filter((action) => action !== undefined && action !== null)
+    .map((action, index) => (
+      typeof action === "string"
+        ? parseActionSpec(action, { source: "cli", sourceIndex: index })
+        : normalizeRecipeAction(action, { source: "cli", sourceIndex: index })
+    ));
+  const actions = [...recipe, ...cli];
+  if (includeInitialNavigation) {
+    if (!initialUrl) {
+      throw actionError("An initial URL is required for the effective action stream.");
+    }
+    actions.unshift({
+      source: "initial",
+      sourceIndex: -1,
+      raw: initialUrl,
+      scope: "root",
+      type: "navigate",
+      value: String(initialUrl).trim(),
+      required: true,
+    });
+  }
+  return actions.map((action, index) => ({ ...action, effectiveIndex: index }));
+}
+
+function hostnameMatchesPattern(hostname, pattern) {
+  const normalizedHostname = String(hostname || "").trim().toLowerCase();
+  const normalizedPattern = String(pattern || "").trim().toLowerCase();
+  if (!normalizedHostname || !normalizedPattern) return false;
+  if (normalizedPattern.startsWith("*.")) {
+    const suffix = normalizedPattern.slice(1);
+    return normalizedHostname.length > suffix.length && normalizedHostname.endsWith(suffix);
+  }
+  return normalizedHostname === normalizedPattern;
+}
+
+function pathMatchesCriteria(pathname, prefixes) {
+  return prefixes.length === 0 || prefixes.some((prefix) => pathname.startsWith(String(prefix)));
+}
+
+export function resolveStrictNavigationUrl(value, rootUrl, {
+  criteria = null,
+  label = "navigation",
+} = {}) {
+  let base;
+  let target;
+  try {
+    base = new URL(String(rootUrl).trim());
+    target = new URL(String(value).trim(), base);
+  } catch {
+    throw actionError(`${label} URL is invalid.`, "unsafe-navigation");
+  }
+  if (
+    base.protocol !== "https:"
+    || base.username
+    || base.password
+    || base.search
+    || base.hash
+    || target.protocol !== "https:"
+    || target.username
+    || target.password
+    || target.search
+    || target.hash
+    || target.origin !== base.origin
+  ) {
+    throw actionError(
+      `${label} URL must be an HTTPS URL without credentials, query, or fragment and must remain same-origin.`,
+      "unsafe-navigation",
+    );
+  }
+  const matchHosts = Array.isArray(criteria?.matchHosts) ? criteria.matchHosts : [];
+  const matchPathPrefixes = Array.isArray(criteria?.matchPathPrefixes) ? criteria.matchPathPrefixes : [];
+  if (
+    (matchHosts.length > 0 && !matchHosts.some((pattern) => hostnameMatchesPattern(target.hostname, pattern)))
+    || !pathMatchesCriteria(target.pathname, matchPathPrefixes)
+  ) {
+    throw actionError(`${label} URL does not match the applicable page-target criteria.`, "page-target-mismatch");
+  }
+  return target.href;
+}
+
+export function isDestructiveClickValue(value) {
+  const normalized = String(value ?? "").replace(/\s+/gu, " ").trim();
+  return !normalized || destructiveClickPattern.test(normalized);
+}
+
+export function validateEffectiveActions(actions, {
+  rootUrl,
+  pageTarget = null,
+  bootstrapTarget = null,
+} = {}) {
+  if (!rootUrl) {
+    throw actionError("An initial root URL is required for action validation.", "unsafe-navigation");
+  }
+  let featureNavigationValidated = false;
+  return actions.map((action) => {
+    const normalized = normalizeRecipeAction(action, {
+      source: action?.source ?? "unknown",
+      sourceIndex: action?.sourceIndex ?? null,
+      effectiveIndex: action?.effectiveIndex ?? null,
+    });
+    if (normalized.type === "navigate") {
+      const criteria = normalized.source === "initial"
+        ? (bootstrapTarget ?? pageTarget)
+        : !featureNavigationValidated ? pageTarget : null;
+      normalized.resolvedUrl = resolveStrictNavigationUrl(normalized.value, rootUrl, {
+        criteria,
+        label: `${normalized.source} navigation`,
+      });
+      normalized.pageTargetApplicable = Boolean(criteria);
+      if (normalized.source !== "initial" && pageTarget) {
+        featureNavigationValidated = true;
+      }
+    } else if (normalized.type === "click-href") {
+      normalized.resolvedUrl = resolveStrictNavigationUrl(normalized.value, rootUrl, {
+        criteria: pageTarget,
+        label: `${normalized.source} click-href`,
+      });
+    } else if (normalized.type.startsWith("click")) {
+      if (isDestructiveClickValue(normalized.value)) {
+        throw actionError(
+          `${normalized.source} click action must contain a non-destructive, non-empty value.`,
+          "unsafe-click",
+        );
+      }
+    }
+    return normalized;
+  });
+}
+
+function positiveInteger(value, label) {
+  if (!Number.isInteger(value) || value < 0) {
+    throw actionError(`${label} must be a non-negative integer.`, "unbounded-replay");
+  }
+  return value;
+}
+
+export function estimateReplayExpansion(actions, recipe = {}) {
+  let expandedReplayActions = 0;
+  for (const action of actions) {
+    if (action.type === "replay-seeded-links" || action.type === "crawl-links") {
+      const limit = recipe.seedLinkLimit ?? defaultSeedLinkLimit;
+      if (!Number.isInteger(limit) || limit <= 0) {
+        throw actionError(`Replay action "${action.type}" requires a bounded positive seedLinkLimit.`, "unbounded-replay");
+      }
+      expandedReplayActions += limit;
+    } else if (action.type === "replay-seeded-routes") {
+      const group = recipe.seedRouteGroups?.[action.value];
+      const limit = group?.limit;
+      if (!Number.isInteger(limit) || limit <= 0) {
+        throw actionError(
+          `Replay route group "${action.value}" requires a bounded positive limit.`,
+          "unbounded-replay",
+        );
+      }
+      expandedReplayActions += limit;
+    }
+  }
+  return expandedReplayActions;
+}
