@@ -546,11 +546,24 @@ function finalizeActionConfiguration(args) {
   args.actions = validatedActions.slice(1);
   args.pageTargetCriteria = pageTarget;
   args.bootstrapTargetCriteria = bootstrapTarget;
-  args.targetOwnershipCriteria = pageTarget ?? (
-    args.matchHosts.length > 0 || args.matchPathPrefixes.length > 0
-      ? { matchHosts: args.matchHosts, matchPathPrefixes: args.matchPathPrefixes }
-      : null
-  );
+  const declaredPathnames = validatedActions
+    .filter((action) => action.type === "navigate")
+    .map((action) => {
+      try {
+        return new URL(action.resolvedUrl).pathname;
+      } catch {
+        return null;
+      }
+    })
+    .filter(Boolean);
+  args.declaredNavigationCriteria = {
+    matchHosts: [new URL(args.url).hostname],
+    matchPathnames: Array.from(new Set(declaredPathnames)),
+  };
+  args.targetOwnershipCriteria = pageTarget ?? {
+    matchHosts: [new URL(args.url).hostname],
+    matchPathPrefixes: [],
+  };
   args.effectiveReplayConfig = {
     ...(args.recipeConfig ?? {}),
     seedLinkLimit: args.seedLinkLimit,
@@ -2257,9 +2270,13 @@ async function main() {
         }
         await client.send("Runtime.runIfWaitingForDebugger", {}, childSessionId);
       } catch (error) {
-        if (lifecyclePhase === "closing") {
-          throw error;
+        try {
+          await client.send("Target.detachFromTarget", { sessionId: childSessionId }, metadata.sessionId ?? null);
+        } catch (detachError) {
+          error = new Error(`${error.message}; target detach failed: ${detachError.message}`);
+          error.code = "target-cleanup-failed";
         }
+        throw error;
       }
     })();
     pendingTargetHandlers.add(handler);
@@ -2433,6 +2450,7 @@ async function main() {
   });
 
   client.on("Network.webSocketCreated", (params, metadata) => {
+    if (rejectFrozenNetworkEvent("websocket-created")) return;
     const attribution = resolveEventAttribution(metadata.sessionId ?? null, params);
     const sanitizedUrl = sanitizeObservedTransportUrl(params.url);
     if (!sanitizedUrl) {
@@ -2449,6 +2467,7 @@ async function main() {
   });
 
   client.on("Network.webTransportCreated", (params, metadata) => {
+    if (rejectFrozenNetworkEvent("webtransport-created")) return;
     const attribution = resolveEventAttribution(metadata.sessionId ?? null, params);
     const sanitizedUrl = sanitizeObservedTransportUrl(params.url);
     if (!sanitizedUrl) {
@@ -2556,7 +2575,7 @@ async function main() {
   function validateCurrentPageUrl(value, label) {
     try {
       return validatePostNavigationUrl(value, args.url, {
-        criteria: args.pageTargetCriteria,
+        criteria: currentRequestCriteria,
         label,
       });
     } catch (error) {
@@ -3050,7 +3069,7 @@ async function main() {
   async function navigateRoot(targetUrl, {
     initial = false,
     relative = false,
-    criteria = args.pageTargetCriteria,
+    criteria = currentRequestCriteria,
   } = {}) {
     const navigationBase = relative
       ? validateCurrentPageUrl(await getRootUrl(), "relative navigation base")
@@ -3239,7 +3258,7 @@ async function main() {
           };
         }
         const navigationResult = await navigateRoot(preview.absoluteHref, {
-          criteria: args.pageTargetCriteria,
+          criteria: currentRequestCriteria,
         });
         result = {
           ...preview,
@@ -3576,7 +3595,7 @@ async function main() {
     });
     await captureCheckpoint(currentContext.pageLabel);
     lifecyclePhase = "feature";
-    currentRequestCriteria = args.pageTargetCriteria;
+    currentRequestCriteria = args.pageTargetCriteria ?? args.declaredNavigationCriteria;
 
     for (const [index, action] of args.actions.entries()) {
       const pageLabel = buildActionLabel(action, index);
@@ -3617,10 +3636,12 @@ async function main() {
       }
 
       if (action.type === "navigate") {
-        currentRequestCriteria = action.pageTargetApplicable ? args.pageTargetCriteria : null;
+        currentRequestCriteria = action.pageTargetApplicable
+          ? args.pageTargetCriteria
+          : args.declaredNavigationCriteria;
         const navigationResult = await navigateRoot(action.relative ? action.value : action.resolvedUrl, {
           relative: action.relative === true,
-          criteria: action.pageTargetApplicable ? args.pageTargetCriteria : null,
+          criteria: currentRequestCriteria,
         });
         actionResults.push({
           page: pageLabel,

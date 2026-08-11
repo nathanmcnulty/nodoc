@@ -712,7 +712,7 @@ test("worker rejects a mismatched target-id before opening its websocket", async
         id: "mismatch",
         type: "page",
         title: "Wrong page",
-        url: "https://portal.example/wrong",
+        url: "https://other.example/wrong",
         webSocketDebuggerUrl: "ws://127.0.0.1:1/devtools/page/mismatch",
       }]));
       return;
@@ -765,7 +765,7 @@ test("worker rejects legacy target-id ownership mismatches and missing target UR
     {
       target: {
         type: "page",
-        url: "https://portal.example/wrong",
+        url: "https://other.example/wrong",
         title: "Wrong host",
       },
       expected: /does not match the recipe page-target criteria|initial navigation/u,
