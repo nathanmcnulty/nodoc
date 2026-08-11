@@ -264,7 +264,7 @@ const apiCatalogSeed: ApiCatalogSeed[] = [
     title: "Intune Portal",
     slug: "/intune-portal",
     family: "Intune admin center",
-    operations: 3,
+    operations: 5,
     authModel: "Portal bearer token + same-origin portal context",
     baseUrl: "https://intune.microsoft.com/api",
     summary:
