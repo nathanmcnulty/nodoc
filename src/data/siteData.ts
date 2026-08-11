@@ -155,7 +155,7 @@ const apiCatalogSeed: ApiCatalogSeed[] = [
     title: "Teams",
     slug: "/teams",
     family: "Teams admin center",
-    operations: 99,
+    operations: 100,
     authModel: "Portal bearer token + same-origin portal context",
     baseUrl: "https://admin.teams.microsoft.com",
     summary:
