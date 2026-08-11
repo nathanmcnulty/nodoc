@@ -120,7 +120,7 @@ export function materializePortfolioManifest(raw, inventory) {
         captureBudget: { timeoutMs: positiveInteger(captureBudget.timeoutMs ?? 900000, `${spec.specId}: capture timeoutMs`), retryCount: positiveInteger(captureBudget.retryCount ?? 1, `${spec.specId}: capture retryCount`), actionCount: positiveInteger(captureBudget.actionCount ?? 80, `${spec.specId}: capture actionCount`) },
         priority: source.priority ?? defaults.priority ?? 20,
         compatibility: source.compatibility ?? { derivativeSchema: null, freshnessClass: "untracked" },
-        outstandingGapClasses: sorted(source.outstandingGapClasses ?? overlay.openGaps ?? []),
+        outstandingGapClasses: sorted(source.outstandingGapClasses ?? overlay.openGapClasses ?? overlay.openGaps ?? []),
         source: { specPath: spec.specPath, operationCount: spec.operationCount, serverUrls: sorted(spec.serverUrls), nextPass: metadata.nextPass },
       };
     }).sort((left, right) => left.specId.localeCompare(right.specId)),
