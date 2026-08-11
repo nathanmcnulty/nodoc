@@ -417,6 +417,8 @@ async function inspectRecipeSafety(recipePath) {
       rootUrl: recipe.url,
       pageTarget: recipe.pageTarget === undefined ? null : resolvePageTargetCriteria(recipe),
       bootstrapTarget: recipe.pageTarget === undefined ? null : resolvePageTargetBootstrapCriteria(recipe),
+      enforcePageTargetForAll: true,
+      enforcePageTargetForAll: true,
     });
     validateSelectedReplayRouteTemplates(recipe.seedRouteGroups, actions, {
       rootUrl: recipe.url,

@@ -80,6 +80,7 @@ export function controlIdentity(control = {}) {
     normalizeText(control.text),
     normalizeText(control.ariaLabel),
     normalizeText(control.automationId),
+    normalizeText(control.id),
     normalizeText(control.href),
     normalizeText(control.role),
     normalizeText(control.tag),
@@ -107,11 +108,15 @@ function controlMatchesAction(control, action, snapshot) {
     control?.text,
     control?.ariaLabel,
     control?.automationId,
+    control?.id,
+    control?.role,
   ].map((item) => normalizeText(item).toLowerCase()).filter(Boolean);
   if ([
     control?.text,
     control?.ariaLabel,
     control?.automationId,
+    control?.id,
+    control?.role,
     control?.href,
   ].filter((value) => String(value ?? "").trim())
     .some((value) => isDestructiveClickValue(value))) {

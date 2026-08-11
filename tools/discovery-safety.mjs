@@ -5,8 +5,11 @@ export const activeGetQueryPattern =
 
 function decodeRepeatedly(value) {
   let decoded = value;
-  for (let pass = 0; pass < 3 && decoded.includes("%"); pass += 1) {
+  for (let pass = 0; pass < 8 && /%[0-9a-f]{2}/iu.test(decoded); pass += 1) {
     decoded = decodeURIComponent(decoded);
+  }
+  if (decoded.includes("%")) {
+    throw new URIError("Residual percent encoding.");
   }
   return decoded;
 }

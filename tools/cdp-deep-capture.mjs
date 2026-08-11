@@ -1,4 +1,4 @@
-import { createHash } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
@@ -21,7 +21,6 @@ import {
 } from "./discovery-capture-policy.mjs";
 import {
   buildEffectiveActions,
-  isDestructiveClickValue,
   normalizeRecipeAction,
   parseActionSpec,
   resolveStrictNavigationUrl,
@@ -1543,6 +1542,7 @@ function buildDomSnapshotExpression() {
         ariaLabel: normalizeText(element.getAttribute("aria-label")),
         automationId: normalizeText(element.getAttribute("data-automation-id")),
         href: element.getAttribute("href"),
+        id: normalizeText(element.id),
         role: element.getAttribute("role"),
         tag: element.tagName.toLowerCase(),
         text: normalizeText(element.textContent),
@@ -1580,11 +1580,12 @@ function buildDomSnapshotExpression() {
   })()`;
 }
 
-function buildClickExpression(action, dispatch = true, expectedHref = null, expectedControlIdentity = null) {
+function buildClickExpression(action, dispatch = true, expectedHref = null, expectedControlIdentity = null, bindingToken = null) {
   const encodedMode = JSON.stringify(action.type);
   const encodedValue = JSON.stringify(String(action.value || ""));
   const encodedExpectedHref = JSON.stringify(expectedHref);
   const encodedExpectedControlIdentity = JSON.stringify(expectedControlIdentity);
+  const encodedBindingToken = JSON.stringify(bindingToken);
   const dispatchCode = dispatch
     ? `match.element.scrollIntoView({ block: "center", inline: "center" });
     match.element.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, composed: true }));
@@ -1597,10 +1598,12 @@ function buildClickExpression(action, dispatch = true, expectedHref = null, expe
     const rawValue = ${encodedValue};
     const expectedHref = ${encodedExpectedHref};
     const expectedControlIdentity = ${encodedExpectedControlIdentity};
+    const bindingToken = ${encodedBindingToken};
     const controlIdentity = (candidate) => JSON.stringify([
       normalizeText(candidate.text),
       normalizeText(candidate.ariaLabel),
       normalizeText(candidate.automationId),
+      normalizeText(candidate.id),
       normalizeText(candidate.href),
       normalizeText(candidate.role),
       normalizeText(candidate.tag),
@@ -1636,6 +1639,7 @@ function buildClickExpression(action, dispatch = true, expectedHref = null, expe
         automationId: normalizeText(element.getAttribute("data-automation-id")),
         element,
         href: element.getAttribute("href"),
+        id: normalizeText(element.id),
         role: element.getAttribute("role"),
         tag: element.tagName.toLowerCase(),
         text: normalizeText(element.textContent),
@@ -1650,6 +1654,8 @@ function buildClickExpression(action, dispatch = true, expectedHref = null, expe
         .every((value) => value.length <= 200))
       .slice(0, 300);
 
+    const bindingStore = globalThis.__nodocCaptureClickBindings
+      ??= new Map();
     const matches = candidates.filter((candidate) => {
       if (mode === "click-href") {
         return candidate.href === rawValue || candidate.absoluteHref === rawValue;
@@ -1676,7 +1682,27 @@ function buildClickExpression(action, dispatch = true, expectedHref = null, expe
       return { clicked: false, reason: "ambiguous-control-match" };
     }
 
-    const match = matches[0];
+    if (!dispatch) {
+      if (bindingToken) bindingStore.set(bindingToken, matches[0]);
+      return {
+        absoluteHref: matches[0].absoluteHref,
+        ariaLabel: matches[0].ariaLabel,
+        automationId: matches[0].automationId,
+        clicked: true,
+        href: matches[0].href,
+        id: matches[0].id,
+        role: matches[0].role,
+        tag: matches[0].tag,
+        text: matches[0].text,
+      };
+    }
+    const match = bindingToken ? bindingStore.get(bindingToken) : matches[0];
+    if (bindingToken) {
+      bindingStore.delete(bindingToken);
+      if (!match?.element || !document.contains(match.element)) {
+        return { clicked: false, reason: "bound-control-detached" };
+      }
+    }
     ${dispatchCode}
 
     return {
@@ -1685,6 +1711,7 @@ function buildClickExpression(action, dispatch = true, expectedHref = null, expe
       automationId: match.automationId,
       clicked: true,
       href: match.href,
+      id: match.id,
       role: match.role,
       tag: match.tag,
       text: match.text,
@@ -2149,20 +2176,28 @@ async function main() {
         throw error;
       }
       const targetInfo = params.targetInfo ?? {};
+      if (!["page", "iframe"].includes(targetInfo.type ?? "page")) {
+        const error = new Error(`Unsupported executable target type "${targetInfo.type ?? "unknown"}".`);
+        error.code = "unsupported-target-type";
+        throw error;
+      }
+      if (!(targetInfo.targetId ?? targetInfo.id)) {
+        throw new Error(`Target ${childSessionId} attached without a stable target identity.`);
+      }
       if (
-        ["page", "iframe"].includes(targetInfo.type ?? "page")
-        && (typeof targetInfo.url !== "string" || !targetInfo.url.trim())
+        typeof targetInfo.url !== "string" || !targetInfo.url.trim()
       ) {
         const error = new Error(`Target ${childSessionId} attached without an observable URL.`);
         error.code = "unsafe-navigation";
         throw error;
       }
-      if (["page", "iframe"].includes(targetInfo.type ?? "page")) {
-        resolveStrictNavigationUrl(targetInfo.url, args.url, {
-          criteria: args.pageTargetCriteria,
-          label: `attached target ${childSessionId}`,
-        });
-      }
+      resolveStrictNavigationUrl(targetInfo.url, args.url, {
+        criteria: lifecyclePhase === "bootstrap"
+          ? (args.bootstrapTargetCriteria ?? args.pageTargetCriteria)
+          : args.pageTargetCriteria,
+        label: `attached target ${childSessionId}`,
+      });
+      const attachmentGeneration = targetGeneration;
       attributionRegistry.registerSession(
         childSessionId,
         targetInfo,
@@ -2170,6 +2205,23 @@ async function main() {
       );
       try {
         await configureSession(childSessionId);
+        if (runtimeSafetyError || targetGeneration !== attachmentGeneration) {
+          throw runtimeSafetyError ?? new Error(`Target ${childSessionId} changed during configuration.`);
+        }
+        const liveTarget = (await listTargets())
+          .find((entry) => entry?.id === (targetInfo.targetId ?? targetInfo.id));
+        if (!liveTarget || typeof liveTarget.url !== "string" || !liveTarget.url.trim()) {
+          throw new Error(`Target ${childSessionId} disappeared or lost its URL during configuration.`);
+        }
+        resolveStrictNavigationUrl(liveTarget.url, args.url, {
+          criteria: lifecyclePhase === "bootstrap"
+            ? (args.bootstrapTargetCriteria ?? args.pageTargetCriteria)
+            : args.pageTargetCriteria,
+          label: `attached target ${childSessionId}`,
+        });
+        if (targetGeneration !== attachmentGeneration || runtimeSafetyError) {
+          throw runtimeSafetyError ?? new Error(`Target ${childSessionId} changed before resume.`);
+        }
         await client.send("Runtime.runIfWaitingForDebugger", {}, childSessionId);
       } catch (error) {
         if (lifecyclePhase === "closing") {
@@ -2202,7 +2254,9 @@ async function main() {
     if (["page", "iframe"].includes(targetInfo.type ?? "page")) {
       try {
         resolveStrictNavigationUrl(targetInfo.url, args.url, {
-          criteria: args.pageTargetCriteria,
+          criteria: lifecyclePhase === "bootstrap"
+            ? (args.bootstrapTargetCriteria ?? args.pageTargetCriteria)
+            : args.pageTargetCriteria,
           label: "target update",
         });
       } catch (error) {
@@ -2229,7 +2283,9 @@ async function main() {
     if (params.frame?.url) {
       try {
         resolveStrictNavigationUrl(params.frame.url, args.url, {
-          criteria: args.pageTargetCriteria,
+          criteria: lifecyclePhase === "bootstrap"
+            ? (args.bootstrapTargetCriteria ?? args.pageTargetCriteria)
+            : args.pageTargetCriteria,
           label: "frame update",
         });
       } catch (error) {
@@ -2483,6 +2539,8 @@ async function main() {
 
   function validateObservedTargetUrls(snapshots, label) {
     let rootUrl = null;
+    const seenSessions = new Set();
+    const seenTargets = new Set();
     for (const snapshot of snapshots) {
       if (!["iframe", "page"].includes(snapshot?.targetType ?? "page")) {
         continue;
@@ -2492,7 +2550,16 @@ async function main() {
         error.code = "unsafe-navigation";
         throw error;
       }
-      const observedUrl = snapshot.url ?? snapshot.targetUrl;
+      const sessionId = snapshot.sessionId ?? "root";
+      const targetId = snapshot.targetId;
+      if (seenSessions.has(sessionId) || !targetId || seenTargets.has(targetId)) {
+        const error = new Error(`${label} target snapshot coverage was duplicate or missing identity.`);
+        error.code = "unsafe-navigation";
+        throw error;
+      }
+      seenSessions.add(sessionId);
+      seenTargets.add(targetId);
+      const observedUrl = snapshot.url;
       if (typeof observedUrl !== "string" || !observedUrl.trim()) {
         const error = new Error(`${label} target URL was absent at the end of the bounded settle window.`);
         error.code = "unsafe-navigation";
@@ -3088,7 +3155,12 @@ async function main() {
       let result;
       try {
         attributionRegistry.setSessionContext(sessionId, currentContext);
-        const preview = await evaluateJson(client, buildClickExpression(action, false), sessionId);
+        const bindingToken = randomUUID();
+        const preview = await evaluateJson(
+          client,
+          buildClickExpression(action, false, null, null, bindingToken),
+          sessionId,
+        );
         if (!preview?.clicked) {
           continue;
         }
@@ -3122,16 +3194,15 @@ async function main() {
             reason: "incomplete-action-inventory",
           };
         }
-        result = await evaluateJson(
-          client,
-          buildClickExpression(
-            action,
-            true,
-            preview.absoluteHref,
-            boundFrame.controlIdentities[0],
-          ),
-          sessionId,
-        );
+        const navigationResult = await navigateRoot(preview.absoluteHref, {
+          criteria: args.pageTargetCriteria,
+        });
+        result = {
+          ...preview,
+          ...navigationResult,
+          clicked: true,
+          navigationOnly: true,
+        };
       } catch {
         // Try the next session.
       }
