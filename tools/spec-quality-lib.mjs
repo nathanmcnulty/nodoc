@@ -262,6 +262,104 @@ function getOperationEntries(specification) {
   ));
 }
 
+export function normalizeCanonicalPath(pathname) {
+  return `/${String(pathname ?? "")
+    .replace(/^\/+|\/+$/gu, "")
+    .replace(/\/+/gu, "/")
+    .replace(/\{\{([^{}]+)\}\}/gu, "{$1}")
+    .replace(/:([^/]+)/gu, "{$1}")}`;
+}
+
+export function canonicalOperationKey({ method, path: pathname }) {
+  return `${String(method).toUpperCase()} ${normalizeCanonicalPath(pathname)}`;
+}
+
+function getPostmanItems(items, output = []) {
+  for (const item of items ?? []) {
+    if (item?.request) {
+      const pathname = Array.isArray(item.request.url?.path)
+        ? `/${item.request.url.path.join("/")}`
+        : null;
+      if (pathname && item.request.method) {
+        output.push({
+          key: canonicalOperationKey({ method: item.request.method, path: pathname }),
+          method: String(item.request.method).toUpperCase(),
+          path: normalizeCanonicalPath(pathname),
+        });
+      }
+    }
+    getPostmanItems(item?.item, output);
+  }
+  return output;
+}
+
+export function reconcileOpenApiPostman(operations, collection) {
+  const openapi = operations.map((entry) => ({
+    key: canonicalOperationKey(entry),
+    method: entry.method,
+    path: normalizeCanonicalPath(entry.path),
+    operationId: entry.operationId ?? null,
+  }));
+  const postman = getPostmanItems(collection?.item);
+  const postmanKeys = new Set(postman.map((entry) => entry.key));
+  const openapiKeys = new Set(openapi.map((entry) => entry.key));
+  const emitted = openapi.filter((entry) => postmanKeys.has(entry.key));
+  const unresolved = openapi.filter((entry) => !postmanKeys.has(entry.key));
+  const postmanOnly = postman.filter((entry) => !openapiKeys.has(entry.key));
+
+  return {
+    schemaVersion: 1,
+    openapiOperationCount: openapi.length,
+    postmanRequestCount: postman.length,
+    emitted,
+    intentionallyFiltered: [],
+    orphaned: postmanOnly,
+    duplicateShadowed: [],
+    unresolved,
+    counts: {
+      emitted: emitted.length,
+      intentionallyFiltered: 0,
+      orphaned: postmanOnly.length,
+      duplicateShadowed: 0,
+      unresolved: unresolved.length,
+    },
+  };
+}
+
+export function reconcileOperationSets(openapiOperations, postmanCollection, options = {}) {
+  const duplicateShadowed = options.duplicateShadowed ?? [];
+  const intentionallyFiltered = options.intentionallyFiltered ?? [];
+  const aliases = options.aliases ?? [];
+  const base = reconcileOpenApiPostman(openapiOperations, postmanCollection);
+  const shadowedKeys = new Set(duplicateShadowed.map((entry) => entry.key));
+  const filteredKeys = new Set(intentionallyFiltered.map((entry) => entry.key));
+  const aliasKeys = new Set(aliases.map((entry) => entry.key));
+  const unresolved = base.unresolved.filter(
+    (entry) => !shadowedKeys.has(entry.key) && !filteredKeys.has(entry.key),
+  );
+  const emitted = base.emitted.filter(
+    (entry) => !shadowedKeys.has(entry.key) && !filteredKeys.has(entry.key) && !aliasKeys.has(entry.key),
+  );
+
+  return {
+    ...base,
+    emitted,
+    intentionallyFiltered,
+    postmanFiltered: base.emitted.filter((entry) => filteredKeys.has(entry.key)),
+    duplicateShadowed,
+    aliases,
+    unresolved,
+    counts: {
+      emitted: emitted.length,
+      intentionallyFiltered: intentionallyFiltered.length,
+      orphaned: base.orphaned.length,
+      duplicateShadowed: duplicateShadowed.length,
+      aliases: aliases.length,
+      unresolved: unresolved.length,
+    },
+  };
+}
+
 function getOperations(specification) {
   return getOperationEntries(specification).map(({ operation }) => operation);
 }
