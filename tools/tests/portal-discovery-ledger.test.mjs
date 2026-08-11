@@ -111,6 +111,19 @@ test("concurrent claims serialize and preserve one endpoint lease", async (t) =>
     ledgerPath,
     now: Date.parse("2026-01-01T00:00:01.000Z"),
   });
+
+  test("live claims serialize globally while offline analysis remains concurrent", async (t) => {
+    const ledgerPath = await fixture(t);
+    await enqueueAssignment(assignment(ledgerPath, "live-a", { endpoint: "https://a.example.test", phase: "all" }));
+    await enqueueAssignment(assignment(ledgerPath, "live-b", { endpoint: "https://b.example.test", phase: "all" }));
+    await enqueueAssignment(assignment(ledgerPath, "review-a", { endpoint: "https://a.example.test", phase: "analyze" }));
+    await enqueueAssignment(assignment(ledgerPath, "review-b", { endpoint: "https://b.example.test", phase: "analyze" }));
+
+    assert.equal((await claimAssignment({ ledgerPath, assignmentId: "live-a", workerId: "owner" }))?.assignment.assignmentId, "live-a");
+    assert.equal(await claimAssignment({ ledgerPath, assignmentId: "live-b", workerId: "other" }), null);
+    assert.equal((await claimAssignment({ ledgerPath, assignmentId: "review-a", workerId: "reviewer-a" }))?.assignment.assignmentId, "review-a");
+    assert.equal((await claimAssignment({ ledgerPath, assignmentId: "review-b", workerId: "reviewer-b" }))?.assignment.assignmentId, "review-b");
+  });
   assert.equal(view.assignments.filter((entry) => entry.state === "capturing").length, 1);
   assert.equal(view.assignments.filter((entry) => entry.state === "queued").length, 1);
 });
