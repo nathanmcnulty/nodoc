@@ -2010,6 +2010,121 @@
                             ]
                         }
                     ]
+                },
+                {
+                    "name": "PowerPlatform.Governance",
+                    "description": "",
+                    "item": [
+                        {
+                            "name": "v1",
+                            "description": "",
+                            "item": [
+                                {
+                                    "name": "tenants",
+                                    "description": "",
+                                    "item": [
+                                        {
+                                            "name": "{tenantId}",
+                                            "description": "",
+                                            "item": [
+                                                {
+                                                    "name": "tenantIsolationPolicy",
+                                                    "description": "",
+                                                    "item": [
+                                                        {
+                                                            "id": "a9082c06-513e-41f4-ae32-aaba34005966",
+                                                            "name": "GET /providers/PowerPlatform.Governance/v1/tenants/{tenantId}/tenantIsolationPolicy",
+                                                            "request": {
+                                                                "name": "GET /providers/PowerPlatform.Governance/v1/tenants/{tenantId}/tenantIsolationPolicy",
+                                                                "description": {
+                                                                    "content": "Retrieve the tenant isolation policy used by the Power Platform security overview.",
+                                                                    "type": "text/plain"
+                                                                },
+                                                                "url": {
+                                                                    "path": [
+                                                                        "providers",
+                                                                        "PowerPlatform.Governance",
+                                                                        "v1",
+                                                                        "tenants",
+                                                                        ":tenantId",
+                                                                        "tenantIsolationPolicy"
+                                                                    ],
+                                                                    "host": [
+                                                                        "{{baseUrl}}"
+                                                                    ],
+                                                                    "query": [],
+                                                                    "variable": [
+                                                                        {
+                                                                            "type": "any",
+                                                                            "value": "49bfc5c6-8e98-77d2-8b7b-96e42dcf6e79",
+                                                                            "key": "tenantId",
+                                                                            "disabled": false,
+                                                                            "description": {
+                                                                                "content": "(Required) The tenant identifier.",
+                                                                                "type": "text/plain"
+                                                                            }
+                                                                        }
+                                                                    ]
+                                                                },
+                                                                "method": "GET",
+                                                                "body": {},
+                                                                "auth": null
+                                                            },
+                                                            "response": [
+                                                                {
+                                                                    "id": "4cd96680-376b-4c26-8b3f-873d68cfe993",
+                                                                    "name": "Tenant isolation policy response observed in normal portal traffic.",
+                                                                    "originalRequest": {
+                                                                        "url": {
+                                                                            "path": [
+                                                                                "providers",
+                                                                                "PowerPlatform.Governance",
+                                                                                "v1",
+                                                                                "tenants",
+                                                                                ":tenantId",
+                                                                                "tenantIsolationPolicy"
+                                                                            ],
+                                                                            "host": [
+                                                                                "{{baseUrl}}"
+                                                                            ],
+                                                                            "query": [],
+                                                                            "variable": [
+                                                                                {
+                                                                                    "disabled": false,
+                                                                                    "description": {
+                                                                                        "content": "(Required) The tenant identifier.",
+                                                                                        "type": "text/plain"
+                                                                                    },
+                                                                                    "type": "any",
+                                                                                    "value": "49bfc5c6-8e98-77d2-8b7b-96e42dcf6e79",
+                                                                                    "key": "tenantId"
+                                                                                }
+                                                                            ]
+                                                                        },
+                                                                        "method": "GET",
+                                                                        "body": {}
+                                                                    },
+                                                                    "status": "OK",
+                                                                    "code": 200,
+                                                                    "header": [],
+                                                                    "cookie": [],
+                                                                    "_postman_previewlanguage": "text"
+                                                                }
+                                                            ],
+                                                            "event": [],
+                                                            "protocolProfileBehavior": {
+                                                                "disableBodyPruning": true
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
                 }
             ]
         },
@@ -17536,6 +17651,137 @@
                                                                     }
                                                                 }
                                                             ]
+                                                        },
+                                                        {
+                                                            "name": "resources",
+                                                            "description": "",
+                                                            "item": [
+                                                                {
+                                                                    "id": "afc97d2e-bea2-4d4c-82e5-aefe37b6b918",
+                                                                    "name": "GET /v0.1-alpha/tenants/{tenantId}/entitlements/MCSMessages/snapshot/resources",
+                                                                    "request": {
+                                                                        "name": "GET /v0.1-alpha/tenants/{tenantId}/entitlements/MCSMessages/snapshot/resources",
+                                                                        "description": {
+                                                                            "content": "Retrieve the legacy resource-level Copilot Studio message entitlement snapshot for a date range.",
+                                                                            "type": "text/plain"
+                                                                        },
+                                                                        "url": {
+                                                                            "path": [
+                                                                                "v0.1-alpha",
+                                                                                "tenants",
+                                                                                ":tenantId",
+                                                                                "entitlements",
+                                                                                "MCSMessages",
+                                                                                "snapshot",
+                                                                                "resources"
+                                                                            ],
+                                                                            "host": [
+                                                                                "{{baseUrl}}"
+                                                                            ],
+                                                                            "query": [
+                                                                                {
+                                                                                    "disabled": false,
+                                                                                    "description": {
+                                                                                        "content": "",
+                                                                                        "type": "text/plain"
+                                                                                    },
+                                                                                    "key": "fromDate",
+                                                                                    "value": "1955-09-09"
+                                                                                },
+                                                                                {
+                                                                                    "disabled": false,
+                                                                                    "description": {
+                                                                                        "content": "",
+                                                                                        "type": "text/plain"
+                                                                                    },
+                                                                                    "key": "toDate",
+                                                                                    "value": "1955-09-09"
+                                                                                }
+                                                                            ],
+                                                                            "variable": [
+                                                                                {
+                                                                                    "type": "any",
+                                                                                    "value": "49bfc5c6-8e98-77d2-8b7b-96e42dcf6e79",
+                                                                                    "key": "tenantId",
+                                                                                    "disabled": false,
+                                                                                    "description": {
+                                                                                        "content": "(Required) The tenant identifier.",
+                                                                                        "type": "text/plain"
+                                                                                    }
+                                                                                }
+                                                                            ]
+                                                                        },
+                                                                        "method": "GET",
+                                                                        "body": {},
+                                                                        "auth": null
+                                                                    },
+                                                                    "response": [
+                                                                        {
+                                                                            "id": "e848100e-b597-462d-9726-c5b9daf39bc0",
+                                                                            "name": "Not-found response observed in normal portal traffic.",
+                                                                            "originalRequest": {
+                                                                                "url": {
+                                                                                    "path": [
+                                                                                        "v0.1-alpha",
+                                                                                        "tenants",
+                                                                                        ":tenantId",
+                                                                                        "entitlements",
+                                                                                        "MCSMessages",
+                                                                                        "snapshot",
+                                                                                        "resources"
+                                                                                    ],
+                                                                                    "host": [
+                                                                                        "{{baseUrl}}"
+                                                                                    ],
+                                                                                    "query": [
+                                                                                        {
+                                                                                            "disabled": false,
+                                                                                            "description": {
+                                                                                                "content": "",
+                                                                                                "type": "text/plain"
+                                                                                            },
+                                                                                            "key": "fromDate",
+                                                                                            "value": "1955-09-09"
+                                                                                        },
+                                                                                        {
+                                                                                            "disabled": false,
+                                                                                            "description": {
+                                                                                                "content": "",
+                                                                                                "type": "text/plain"
+                                                                                            },
+                                                                                            "key": "toDate",
+                                                                                            "value": "1955-09-09"
+                                                                                        }
+                                                                                    ],
+                                                                                    "variable": [
+                                                                                        {
+                                                                                            "disabled": false,
+                                                                                            "description": {
+                                                                                                "content": "(Required) The tenant identifier.",
+                                                                                                "type": "text/plain"
+                                                                                            },
+                                                                                            "type": "any",
+                                                                                            "value": "49bfc5c6-8e98-77d2-8b7b-96e42dcf6e79",
+                                                                                            "key": "tenantId"
+                                                                                        }
+                                                                                    ]
+                                                                                },
+                                                                                "method": "GET",
+                                                                                "body": {}
+                                                                            },
+                                                                            "status": "Not Found",
+                                                                            "code": 404,
+                                                                            "header": [],
+                                                                            "cookie": [],
+                                                                            "_postman_previewlanguage": "text"
+                                                                        }
+                                                                    ],
+                                                                    "event": [],
+                                                                    "protocolProfileBehavior": {
+                                                                        "disableBodyPruning": true
+                                                                    }
+                                                                }
+                                                            ]
                                                         }
                                                     ]
                                                 },
@@ -21192,6 +21438,300 @@
                                                     "protocolProfileBehavior": {
                                                         "disableBodyPruning": true
                                                     }
+                                                },
+                                                {
+                                                    "name": "resources",
+                                                    "description": "",
+                                                    "item": [
+                                                        {
+                                                            "id": "eed1aa25-ea9d-4e36-9852-74c94d9c0dd2",
+                                                            "name": "GET /v2.0/tenants/{tenantId}/entitlements/MCSMessages/resources",
+                                                            "request": {
+                                                                "name": "GET /v2.0/tenants/{tenantId}/entitlements/MCSMessages/resources",
+                                                                "description": {
+                                                                    "content": "Retrieve resource-level Copilot Studio message entitlement usage for a date range.",
+                                                                    "type": "text/plain"
+                                                                },
+                                                                "url": {
+                                                                    "path": [
+                                                                        "v2.0",
+                                                                        "tenants",
+                                                                        ":tenantId",
+                                                                        "entitlements",
+                                                                        "MCSMessages",
+                                                                        "resources"
+                                                                    ],
+                                                                    "host": [
+                                                                        "{{baseUrl}}"
+                                                                    ],
+                                                                    "query": [
+                                                                        {
+                                                                            "disabled": false,
+                                                                            "description": {
+                                                                                "content": "",
+                                                                                "type": "text/plain"
+                                                                            },
+                                                                            "key": "fromDate",
+                                                                            "value": "1955-09-09"
+                                                                        },
+                                                                        {
+                                                                            "disabled": false,
+                                                                            "description": {
+                                                                                "content": "",
+                                                                                "type": "text/plain"
+                                                                            },
+                                                                            "key": "toDate",
+                                                                            "value": "1955-09-09"
+                                                                        },
+                                                                        {
+                                                                            "disabled": false,
+                                                                            "description": {
+                                                                                "content": "",
+                                                                                "type": "text/plain"
+                                                                            },
+                                                                            "key": "pageSize",
+                                                                            "value": "579"
+                                                                        },
+                                                                        {
+                                                                            "disabled": false,
+                                                                            "description": {
+                                                                                "content": "Related fields to include with each resource; `users` was observed in portal traffic.",
+                                                                                "type": "text/plain"
+                                                                            },
+                                                                            "key": "includeFields",
+                                                                            "value": "string"
+                                                                        }
+                                                                    ],
+                                                                    "variable": [
+                                                                        {
+                                                                            "type": "any",
+                                                                            "value": "49bfc5c6-8e98-77d2-8b7b-96e42dcf6e79",
+                                                                            "key": "tenantId",
+                                                                            "disabled": false,
+                                                                            "description": {
+                                                                                "content": "(Required) The tenant identifier.",
+                                                                                "type": "text/plain"
+                                                                            }
+                                                                        }
+                                                                    ]
+                                                                },
+                                                                "method": "GET",
+                                                                "body": {},
+                                                                "auth": null
+                                                            },
+                                                            "response": [
+                                                                {
+                                                                    "id": "6cca7744-7d3d-4e69-803e-88bc48614ac0",
+                                                                    "name": "Resource entitlement usage observed in normal portal traffic; exact response schema pending.",
+                                                                    "originalRequest": {
+                                                                        "url": {
+                                                                            "path": [
+                                                                                "v2.0",
+                                                                                "tenants",
+                                                                                ":tenantId",
+                                                                                "entitlements",
+                                                                                "MCSMessages",
+                                                                                "resources"
+                                                                            ],
+                                                                            "host": [
+                                                                                "{{baseUrl}}"
+                                                                            ],
+                                                                            "query": [
+                                                                                {
+                                                                                    "disabled": false,
+                                                                                    "description": {
+                                                                                        "content": "",
+                                                                                        "type": "text/plain"
+                                                                                    },
+                                                                                    "key": "fromDate",
+                                                                                    "value": "1955-09-09"
+                                                                                },
+                                                                                {
+                                                                                    "disabled": false,
+                                                                                    "description": {
+                                                                                        "content": "",
+                                                                                        "type": "text/plain"
+                                                                                    },
+                                                                                    "key": "toDate",
+                                                                                    "value": "1955-09-09"
+                                                                                },
+                                                                                {
+                                                                                    "disabled": false,
+                                                                                    "description": {
+                                                                                        "content": "",
+                                                                                        "type": "text/plain"
+                                                                                    },
+                                                                                    "key": "pageSize",
+                                                                                    "value": "579"
+                                                                                },
+                                                                                {
+                                                                                    "disabled": false,
+                                                                                    "description": {
+                                                                                        "content": "Related fields to include with each resource; `users` was observed in portal traffic.",
+                                                                                        "type": "text/plain"
+                                                                                    },
+                                                                                    "key": "includeFields",
+                                                                                    "value": "string"
+                                                                                }
+                                                                            ],
+                                                                            "variable": [
+                                                                                {
+                                                                                    "disabled": false,
+                                                                                    "description": {
+                                                                                        "content": "(Required) The tenant identifier.",
+                                                                                        "type": "text/plain"
+                                                                                    },
+                                                                                    "type": "any",
+                                                                                    "value": "49bfc5c6-8e98-77d2-8b7b-96e42dcf6e79",
+                                                                                    "key": "tenantId"
+                                                                                }
+                                                                            ]
+                                                                        },
+                                                                        "method": "GET",
+                                                                        "body": {}
+                                                                    },
+                                                                    "status": "OK",
+                                                                    "code": 200,
+                                                                    "header": [],
+                                                                    "cookie": [],
+                                                                    "_postman_previewlanguage": "text"
+                                                                }
+                                                            ],
+                                                            "event": [],
+                                                            "protocolProfileBehavior": {
+                                                                "disableBodyPruning": true
+                                                            }
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "name": "users",
+                                                    "description": "",
+                                                    "item": [
+                                                        {
+                                                            "id": "d5080e35-9906-41ed-b90d-04660ee2c7d6",
+                                                            "name": "GET /v2.0/tenants/{tenantId}/entitlements/MCSMessages/users",
+                                                            "request": {
+                                                                "name": "GET /v2.0/tenants/{tenantId}/entitlements/MCSMessages/users",
+                                                                "description": {
+                                                                    "content": "Retrieve user-level Copilot Studio message entitlement usage for a date range.",
+                                                                    "type": "text/plain"
+                                                                },
+                                                                "url": {
+                                                                    "path": [
+                                                                        "v2.0",
+                                                                        "tenants",
+                                                                        ":tenantId",
+                                                                        "entitlements",
+                                                                        "MCSMessages",
+                                                                        "users"
+                                                                    ],
+                                                                    "host": [
+                                                                        "{{baseUrl}}"
+                                                                    ],
+                                                                    "query": [
+                                                                        {
+                                                                            "disabled": false,
+                                                                            "description": {
+                                                                                "content": "",
+                                                                                "type": "text/plain"
+                                                                            },
+                                                                            "key": "fromDate",
+                                                                            "value": "1955-09-09"
+                                                                        },
+                                                                        {
+                                                                            "disabled": false,
+                                                                            "description": {
+                                                                                "content": "",
+                                                                                "type": "text/plain"
+                                                                            },
+                                                                            "key": "toDate",
+                                                                            "value": "1955-09-09"
+                                                                        }
+                                                                    ],
+                                                                    "variable": [
+                                                                        {
+                                                                            "type": "any",
+                                                                            "value": "49bfc5c6-8e98-77d2-8b7b-96e42dcf6e79",
+                                                                            "key": "tenantId",
+                                                                            "disabled": false,
+                                                                            "description": {
+                                                                                "content": "(Required) The tenant identifier.",
+                                                                                "type": "text/plain"
+                                                                            }
+                                                                        }
+                                                                    ]
+                                                                },
+                                                                "method": "GET",
+                                                                "body": {},
+                                                                "auth": null
+                                                            },
+                                                            "response": [
+                                                                {
+                                                                    "id": "69af3500-3834-4d9f-9664-7caa10d0164c",
+                                                                    "name": "User entitlement usage observed in normal portal traffic; exact response schema pending.",
+                                                                    "originalRequest": {
+                                                                        "url": {
+                                                                            "path": [
+                                                                                "v2.0",
+                                                                                "tenants",
+                                                                                ":tenantId",
+                                                                                "entitlements",
+                                                                                "MCSMessages",
+                                                                                "users"
+                                                                            ],
+                                                                            "host": [
+                                                                                "{{baseUrl}}"
+                                                                            ],
+                                                                            "query": [
+                                                                                {
+                                                                                    "disabled": false,
+                                                                                    "description": {
+                                                                                        "content": "",
+                                                                                        "type": "text/plain"
+                                                                                    },
+                                                                                    "key": "fromDate",
+                                                                                    "value": "1955-09-09"
+                                                                                },
+                                                                                {
+                                                                                    "disabled": false,
+                                                                                    "description": {
+                                                                                        "content": "",
+                                                                                        "type": "text/plain"
+                                                                                    },
+                                                                                    "key": "toDate",
+                                                                                    "value": "1955-09-09"
+                                                                                }
+                                                                            ],
+                                                                            "variable": [
+                                                                                {
+                                                                                    "disabled": false,
+                                                                                    "description": {
+                                                                                        "content": "(Required) The tenant identifier.",
+                                                                                        "type": "text/plain"
+                                                                                    },
+                                                                                    "type": "any",
+                                                                                    "value": "49bfc5c6-8e98-77d2-8b7b-96e42dcf6e79",
+                                                                                    "key": "tenantId"
+                                                                                }
+                                                                            ]
+                                                                        },
+                                                                        "method": "GET",
+                                                                        "body": {}
+                                                                    },
+                                                                    "status": "OK",
+                                                                    "code": 200,
+                                                                    "header": [],
+                                                                    "cookie": [],
+                                                                    "_postman_previewlanguage": "text"
+                                                                }
+                                                            ],
+                                                            "event": [],
+                                                            "protocolProfileBehavior": {
+                                                                "disableBodyPruning": true
+                                                            }
+                                                        }
+                                                    ]
                                                 }
                                             ]
                                         },
@@ -23299,7 +23839,7 @@
         "name": "Power Platform",
         "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
         "description": {
-            "content": "The Power Platform API is used by the Power Platform admin center (`admin.powerplatform.microsoft.com`) for tenant administration across environment management, analytics, licensing, governance, tenant settings, notifications, and application inventory.\n  - Business App Platform resource provider (`api.bap.microsoft.com`)\n  - Admin analytics (`{region}.adminanalytics.powerplatform.microsoft.com`)\n  - Config analytics (`{region}.csanalytics.powerplatform.microsoft.com`)\n  - Licensing (`licensing.powerplatform.microsoft.com`)\n  - Admin portal helpers (`api.admin.powerplatform.microsoft.com`)\n  - Tenant-scoped APIs (`{tenantHost}.tenant.api.powerplatform.com`)\n  - Tenant island notification APIs (`{tenantIslandHost}.tenant.api.powerplatform.com`)\n  - Dynamics CRM Web API (`{organizationHost}.crm.dynamics.com`)\n  - Power Pages portal infrastructure (`{portalInfraHost}.portal-infra.dynamics.com`)\nRequests were live-captured from exhaustive same-origin browsing of left-nav routes, list/detail drill-ins, read-only pivots, and safe report interactions across home, manage, security, Copilot, monitor, deployment, licensing, capacity, support, and environment hub surfaces.\nMost backend families use browser-obtained bearer tokens with service-specific audiences plus correlation and session headers such as `X-Correlation-ID`, `x-ms-client-request-id`, `x-ms-client-session-id`, `x-ms-client-tenant-id`, and `x-ms-client-principal-id`.\nSome families add service-specific headers such as `x-ms-organization-id` for Dataverse analytics or `x-ms-mac-*` headers for tenant-scoped Power Platform APIs.\nSome same-origin routes remained tenant-dependent in this capture set: `copilot/getstarted` and `copilot/copilotstudio` were feature-limited, `manage/usage`, `security/portals`, and `copilot/dynamics365-sales` stayed no-data, several Dataverse user and security-role detail blades were permission-limited, and one Copilot Studio resource row exposed a missing same-origin link.\nThe operations below exclude `graph.microsoft.com` traffic and static locale assets. The admin health ping is unauthenticated; most other operations require a portal-derived bearer token.\nDocumentation and specifications have been provided on a best-effort basis and may not be 100% accurate.\n\n\nContact Support:\n Name: nodoc",
+            "content": "The Power Platform API is used by the Power Platform admin center (`admin.powerplatform.microsoft.com`) for tenant administration across environment management, analytics, licensing, governance, tenant settings, notifications, and application inventory.\n\n  - Business App Platform resource provider (`api.bap.microsoft.com`)\n  - Admin analytics (`{region}.adminanalytics.powerplatform.microsoft.com`)\n  - Config analytics (`{region}.csanalytics.powerplatform.microsoft.com`)\n  - Licensing (`licensing.powerplatform.microsoft.com`)\n  - Admin portal helpers (`api.admin.powerplatform.microsoft.com`)\n  - Tenant-scoped APIs (`{tenantHost}.tenant.api.powerplatform.com`)\n  - Tenant island notification APIs (`{tenantIslandHost}.tenant.api.powerplatform.com`)\n  - Dynamics CRM Web API (`{organizationHost}.crm.dynamics.com`)\n  - Power Pages portal infrastructure (`{portalInfraHost}.portal-infra.dynamics.com`)\n\nRequests were live-captured from exhaustive same-origin browsing of left-nav routes, list/detail drill-ins, read-only pivots, and safe report interactions across home, manage, security, Copilot, monitor, deployment, licensing, capacity, support, and environment hub surfaces.\n\nMost backend families use browser-obtained bearer tokens with service-specific audiences plus correlation and session headers such as `X-Correlation-ID`, `x-ms-client-request-id`, `x-ms-client-session-id`, `x-ms-client-tenant-id`, and `x-ms-client-principal-id`.\nSome families add service-specific headers such as `x-ms-organization-id` for Dataverse analytics or `x-ms-mac-*` headers for tenant-scoped Power Platform APIs.\n\nSome same-origin routes remained tenant-dependent in this capture set: `copilot/getstarted` and `copilot/copilotstudio` were feature-limited, `manage/usage`, `security/portals`, and `copilot/dynamics365-sales` stayed no-data, several Dataverse user and security-role detail blades were permission-limited, and one Copilot Studio resource row exposed a missing same-origin link.\n\nThe operations below exclude `graph.microsoft.com` traffic and static locale assets. The admin health ping is unauthenticated; most other operations require a portal-derived bearer token.\n\nDocumentation and specifications have been provided on a best-effort basis and may not be 100% accurate.\n\n\nContact Support:\n Name: nodoc",
             "type": "text/plain"
         }
     }
