@@ -44,6 +44,7 @@ const collectionNames = new Map([
 ]);
 
 const slash = (value) => value.replaceAll("\\", "/");
+const compareText = (left, right) => left < right ? -1 : left > right ? 1 : 0;
 const stableJson = (value, pretty = false) => `${JSON.stringify(value, null, pretty ? 2 : 0)}\n`;
 const digestText = (value) => createHash("sha256").update(value, "utf8").digest("hex");
 const digestValue = (value) => digestText(stableJson(value));
@@ -61,7 +62,7 @@ function operationEntries(specification) {
         summary: operation.summary ?? null,
         serverUrls: getEffectiveServerUrls(specification, pathItem, operation),
       }))
-  )).sort((left, right) => left.key.localeCompare(right.key));
+  )).sort((left, right) => compareText(left.key, right.key));
 }
 
 async function authoritativeSpecs() {
@@ -168,7 +169,7 @@ async function buildSpecRecord(specId, liveById) {
       requestCount: report.postmanRequestCount,
       digest: digestValue({ counts: report.counts, emitted: report.emitted.map(({ key }) => key), unresolved: report.unresolved.map(({ key }) => key), orphaned: report.orphaned.map(({ key }) => key) }),
       exceptions: [...report.unresolved.map(({ key }) => ({ kind: "unresolved", key })), ...report.orphaned.map(({ key }) => ({ kind: "orphaned", key }))]
-        .sort((left, right) => `${left.kind}:${left.key}`.localeCompare(`${right.kind}:${right.key}`)),
+        .sort((left, right) => compareText(`${left.kind}:${left.key}`, `${right.kind}:${right.key}`)),
     };
   } else {
     parity = { state: "unknown", path: collectionPath, counts: { emitted: null, intentionallyFiltered: null, orphaned: null, duplicateShadowed: null, unresolved: null }, requestCount: null, digest: null, exceptions: [] };
@@ -187,7 +188,7 @@ async function buildSpecRecord(specId, liveById) {
   const candidates = [
     ...overlay.openGaps.map((reason) => ({ kind: "openGap", reason })),
     ...parity.exceptions.map(({ kind, key }) => ({ kind, key })),
-  ].sort((left, right) => stableJson(left).localeCompare(stableJson(right)));
+  ].sort((left, right) => compareText(stableJson(left), stableJson(right)));
   return {
     index: {
       id: specId,
