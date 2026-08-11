@@ -1,8 +1,10 @@
 import assert from "node:assert/strict";
+import { execFile } from "node:child_process";
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
+import { promisify } from "node:util";
 
 import {
   canonicalizeRecipeForDispatch,
@@ -15,6 +17,9 @@ import {
 } from "../portal-discovery-recipe.mjs";
 import { buildCaptureWorkerArgs, buildBootstrapPreflightCriteria, buildPreflightCriteria } from "../run-portal-discovery.mjs";
 import { buildRecipeAssignmentId, recipeDigest } from "../portal-discovery-dispatch.mjs";
+
+const execFileAsync = promisify(execFile);
+const repoRoot = path.resolve(import.meta.dirname, "..", "..");
 
 const inventoryRecipe = {
   url: "https://config.office.com/officeSettings",
@@ -123,8 +128,84 @@ test("explicit passive-fragment navigate routes remain strict", () => {
       },
       actions: ["navigate=https://example.com/#home"],
     }),
-    /recipe entry URL must be an HTTPS URL without credentials, query, or fragment/,
+    /recipe navigate action 0 must be an HTTPS URL without fragment/,
   );
+});
+
+test("declared root fragments remain strict when any explicit navigate exists", async () => {
+  const recipe = {
+    url: "https://example.com/#home",
+    pageTarget: {
+      matchHosts: ["example.com"],
+      matchPathPrefixes: ["/"],
+    },
+    actions: ["navigate=https://example.com/"],
+  };
+  assert.throws(
+    () => validateRecipeTargetMetadata(recipe),
+    /declared root URL must be an HTTPS URL without credentials, query, or fragment when explicit navigation is configured/,
+  );
+
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-explicit-root-digest-"));
+  try {
+    const cleanVariant = { ...recipe, url: "https://example.com/" };
+    const fragmentPath = path.join(tempDir, "fragment.json");
+    const cleanPath = path.join(tempDir, "clean.json");
+    await Promise.all([
+      writeFile(fragmentPath, `${JSON.stringify(recipe)}\n`, "utf8"),
+      writeFile(cleanPath, `${JSON.stringify(cleanVariant)}\n`, "utf8"),
+    ]);
+    assert.notEqual(await recipeDigest(fragmentPath), await recipeDigest(cleanPath));
+  } finally {
+    await rm(tempDir, { force: true, recursive: true });
+  }
+});
+
+test("worker rejects every later fragment navigate before Page.navigate", async () => {
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-worker-navigation-"));
+  try {
+    for (const hasBootstrap of [false, true]) {
+      for (const fragment of ["#home", "#/export"]) {
+        const recipe = {
+          url: "https://example.com/",
+          pageTarget: {
+            matchHosts: ["example.com"],
+            matchPathPrefixes: ["/"],
+            ...(hasBootstrap ? {
+              bootstrap: {
+                matchHosts: ["example.com"],
+                matchPathnames: ["/"],
+              },
+            } : {}),
+          },
+          actions: [
+            "capture=surface",
+            `navigate=https://example.com/${fragment}`,
+          ],
+        };
+        const recipePath = path.join(tempDir, `${hasBootstrap ? "bootstrap" : "legacy"}-${fragment.slice(1).replaceAll("/", "-")}.json`);
+        const outputPath = path.join(tempDir, `${hasBootstrap ? "bootstrap" : "legacy"}-${fragment.slice(1).replaceAll("/", "-")}.out`);
+        await writeFile(recipePath, `${JSON.stringify(recipe)}\n`, "utf8");
+        await assert.rejects(
+          execFileAsync(process.execPath, [
+            path.join(repoRoot, "tools", "cdp-deep-capture.mjs"),
+            "--recipe",
+            recipePath,
+            "--url",
+            "https://example.com/",
+            "--portal",
+            "test",
+            "--out",
+            outputPath,
+          ]),
+          (error) => error.code === 1
+            && /recipe navigate action 1/u.test(error.stderr),
+        );
+      }
+    }
+  } finally {
+    await rm(tempDir, { force: true, recursive: true });
+  }
 });
 
 test("canonical root URL is passed to the capture worker command", () => {
@@ -258,7 +339,7 @@ test("explicit page-target criteria fail closed when malformed or empty", () => 
       },
       actions: ["navigate=https://config.office.com/officeSettings/inventory#fragment"],
     }),
-    /HTTPS URL without credentials, query, or fragment/,
+    /recipe navigate action 0 must be an HTTPS URL without fragment/,
   );
   assert.throws(
     () => validateRecipeTargetMetadata({
@@ -266,7 +347,7 @@ test("explicit page-target criteria fail closed when malformed or empty", () => 
       url: "https://config.office.com/officeSettings#home",
       actions: ["navigate=https://config.office.com/officeSettings/inventory"],
     }),
-    /declared root URL must be an HTTPS URL without credentials, query, or fragment for bootstrap alignment/,
+    /declared root URL must be an HTTPS URL without credentials, query, or fragment when explicit navigation is configured/,
   );
 });
 
