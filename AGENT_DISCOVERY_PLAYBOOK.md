@@ -481,7 +481,8 @@ Preferred flow:
    `/json/list` must remain exactly-one, same-host, and past authentication at
    every gate. Legacy browser-entry fragments are normalized away only when no
    bootstrap alignment is declared; they are never valid network/API dispatch,
-   ownership, ledger-identity, or reconciliation input.
+   ownership, ledger-identity, or reconciliation input. The worker receives
+   that canonical root and revalidates it at the initial Page.navigate boundary.
 
 Chrome 136+ ignores remote-debugging switches against its default data
 directory unless a nonstandard `--user-data-dir` is supplied, as documented in

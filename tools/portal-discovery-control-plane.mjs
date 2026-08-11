@@ -10,6 +10,7 @@ import {
 } from "./portal-discovery-metadata.mjs";
 import { getLedgerViewFromFile, enqueueAssignment } from "./portal-discovery-ledger.mjs";
 import { buildSpecInventory, repoRoot } from "./spec-quality-lib.mjs";
+import { canonicalRecipeDigest } from "./portal-discovery-recipe.mjs";
 
 export const portfolioManifestSchemaVersion = 1;
 export const orchestrationPlanSchemaVersion = 1;
@@ -246,7 +247,8 @@ export async function enqueueOrchestrationPlan(plan, { ledgerPath, apply = false
   if (!apply) throw new Error("Applying an orchestration plan requires explicit apply opt-in.");
   const results = [];
   for (const assignment of plan.assignments.filter((entry) => entry.type === "capture" && entry.route === "orchestrator")) {
-    results.push(await enqueueAssignment({ ledgerPath, assignmentId: assignment.assignmentId, specId: assignment.specId, portal: assignment.portal, recipePath: assignment.recipe, recipeDigest: digest(assignment.recipe), endpoint: assignment.endpointLease.split("|")[0], profile: assignment.profile, phase: "all", model: "deterministic", reasoning: "none", priority: 20 }));
+    const recipe = JSON.parse(await readFile(path.resolve(repoRoot, assignment.recipe), "utf8"));
+    results.push(await enqueueAssignment({ ledgerPath, assignmentId: assignment.assignmentId, specId: assignment.specId, portal: assignment.portal, recipePath: assignment.recipe, recipeDigest: canonicalRecipeDigest(recipe), endpoint: assignment.endpointLease.split("|")[0], profile: assignment.profile, phase: "all", model: "deterministic", reasoning: "none", priority: 20 }));
   }
   return results;
 }

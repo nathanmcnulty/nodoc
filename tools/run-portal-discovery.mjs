@@ -1,4 +1,3 @@
-import { createHash } from "node:crypto";
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -26,7 +25,11 @@ import {
   updateAttempt,
   updateAttemptFromDiscoveryRun,
 } from "./portal-discovery-ledger.mjs";
-import { prepareLedgerAttempt } from "./portal-discovery-dispatch.mjs";
+import {
+  buildRecipeAssignmentId,
+  prepareLedgerAttempt,
+  recipeDigest,
+} from "./portal-discovery-dispatch.mjs";
 import {
   ProcessSupervisionTimeoutError,
   runNode,
@@ -37,9 +40,9 @@ import {
   runBrowserCdpPreflight,
 } from "./browser-cdp-preflight.mjs";
 import {
+  canonicalizeRecipeForDispatch,
   resolvePageTargetBootstrapCriteria,
   resolvePageTargetCriteria,
-  validateRecipeTargetMetadata,
 } from "./portal-discovery-recipe.mjs";
 import { planActionBudget } from "./portal-discovery-action-budget.mjs";
 
@@ -69,6 +72,35 @@ export function buildBootstrapPreflightCriteria(recipe) {
   };
 }
 
+export function buildCaptureWorkerArgs({
+  recipePath,
+  artifacts,
+  targetId,
+  cdpEndpoint,
+  rootUrl,
+  seedArtifacts,
+  bundleCacheDir,
+  variables = [],
+  finalizationTimeoutMs,
+} = {}) {
+  const captureArgs = ["--recipe", recipePath, "--out", artifacts];
+  if (targetId) {
+    captureArgs.push("--target-id", targetId);
+  }
+  captureArgs.push("--cdp-endpoint", cdpEndpoint, "--url", rootUrl);
+  if (seedArtifacts) {
+    captureArgs.push("--seed-artifacts", seedArtifacts);
+  }
+  if (bundleCacheDir) {
+    captureArgs.push("--bundle-cache-dir", bundleCacheDir);
+  }
+  for (const variable of variables) {
+    captureArgs.push("--var", variable);
+  }
+  captureArgs.push("--finalization-timeout-ms", String(finalizationTimeoutMs));
+  return captureArgs;
+}
+
 export async function preflightRecipeTarget({
   recipe,
   endpoint,
@@ -77,7 +109,7 @@ export async function preflightRecipeTarget({
   pollMs,
   timeoutMs,
 } = {}) {
-  const metadata = validateRecipeTargetMetadata(recipe);
+  const metadata = canonicalizeRecipeForDispatch(recipe);
   const featureCriteria = buildPreflightCriteria(recipe);
   const bootstrapCriteria = buildBootstrapPreflightCriteria(recipe);
   if (!bootstrapCriteria) {
@@ -315,10 +347,6 @@ function parseJsonArgument(raw) {
     const [code, ...detail] = raw.split(":");
     return { code: code.trim(), detail: detail.join(":").trim() || null };
   }
-}
-
-async function recipeDigest(recipePath) {
-  return createHash("sha256").update(await readFile(recipePath, "utf8")).digest("hex");
 }
 
 function resolveLedgerSpec(specInventory, args) {
@@ -759,11 +787,13 @@ async function runLedgerMode(args) {
   }
   const digest = await recipeDigest(selectedRecipe);
   const endpoint = normalizeEndpoint(args.endpoint);
-  const assignmentId = args.assignmentId
-    || `${spec.specId}-${createHash("sha256")
-      .update(`${spec.specId}|${endpoint}|${digest}|${args.phase}|${args.priority}`)
-      .digest("hex")
-      .slice(0, 16)}`;
+  const assignmentId = args.assignmentId || buildRecipeAssignmentId({
+    specId: spec.specId,
+    endpoint,
+    digest,
+    phase: args.phase,
+    priority: args.priority,
+  });
   const result = await enqueueAssignment({
     ledgerPath: args.ledgerPath,
     assignmentId,
@@ -802,6 +832,7 @@ async function main() {
   }
 
   let ledgerAssignment = null;
+  let recipeMetadata = null;
   try {
     if (["all", "capture"].includes(args.phase)) {
       const existingArtifacts = await findExistingCaptureArtifacts(args.artifacts);
@@ -826,6 +857,7 @@ async function main() {
       }
     }
     if (["all", "capture"].includes(args.phase)) {
+      recipeMetadata = canonicalizeRecipeForDispatch(selectedRecipe);
       args.actionBudget = actionBudget;
       const cdp = await preflightRecipeTarget({
         recipe: selectedRecipe,
@@ -936,26 +968,17 @@ async function main() {
         return;
       }
 
-      const captureArgs = [
-        "--recipe",
+      const captureArgs = buildCaptureWorkerArgs({
         recipePath,
-        "--out",
-        args.artifacts,
-      ];
-      if (args.targetId) {
-        captureArgs.push("--target-id", args.targetId);
-      }
-      captureArgs.push("--cdp-endpoint", args.cdpEndpoint);
-      if (args.seedArtifacts) {
-        captureArgs.push("--seed-artifacts", args.seedArtifacts);
-      }
-      if (args.bundleCacheDir) {
-        captureArgs.push("--bundle-cache-dir", args.bundleCacheDir);
-      }
-      for (const variable of args.variables) {
-        captureArgs.push("--var", variable);
-      }
-      captureArgs.push("--finalization-timeout-ms", String(args.supervisionTimeoutMs));
+        artifacts: args.artifacts,
+        targetId: args.targetId,
+        cdpEndpoint: args.cdpEndpoint,
+        rootUrl: recipeMetadata.rootUrl,
+        seedArtifacts: args.seedArtifacts,
+        bundleCacheDir: args.bundleCacheDir,
+        variables: args.variables,
+        finalizationTimeoutMs: args.supervisionTimeoutMs,
+      });
       try {
         await runNode(
           path.join(repoRoot, "tools", "cdp-deep-capture.mjs"),

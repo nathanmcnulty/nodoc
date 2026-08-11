@@ -1,3 +1,5 @@
+import { createHash } from "node:crypto";
+
 import { classifyGetProbeUrl } from "./discovery-safety.mjs";
 import { planActionBudget } from "./portal-discovery-action-budget.mjs";
 
@@ -16,11 +18,31 @@ function actionTypeAndValue(action) {
   return { type: "", value: "" };
 }
 
-export function getRecipeEntryUrl(recipe) {
+function getRecipeEntry(recipe) {
   const firstNavigate = (recipe?.actions ?? [])
     .map(actionTypeAndValue)
     .find((action) => action.type === "navigate" && action.value);
-  return firstNavigate?.value || recipe?.url || "";
+  return {
+    isDeclaredRoot: !firstNavigate,
+    value: firstNavigate?.value || recipe?.url || "",
+  };
+}
+
+function canonicalizeRecipeRoot(recipe) {
+  try {
+    const rootUrl = new URL(recipe?.url);
+    const rootClassification = classifyGetProbeUrl(rootUrl.href, rootUrl.href);
+    if (recipe?.pageTarget?.bootstrap === undefined && rootClassification.allowed) {
+      rootUrl.hash = "";
+    }
+    return rootUrl.href;
+  } catch {
+    return recipe?.url ?? "";
+  }
+}
+
+export function getRecipeEntryUrl(recipe) {
+  return getRecipeEntry(recipe).value;
 }
 
 export function planRecipeActionBudget(recipe, options = {}) {
@@ -100,7 +122,8 @@ export function resolvePageTargetBootstrapCriteria(recipe) {
 }
 
 export function validateRecipeTargetMetadata(recipe) {
-  const entryUrlValue = getRecipeEntryUrl(recipe);
+  const entry = getRecipeEntry(recipe);
+  const entryUrlValue = entry.value;
   let entryUrl;
   let recipeUrl;
   try {
@@ -124,7 +147,7 @@ export function validateRecipeTargetMetadata(recipe) {
   if (bootstrapCriteria && recipeUrl.hash) {
     throw new Error("declared root URL must be an HTTPS URL without credentials, query, or fragment for bootstrap alignment.");
   }
-  if (!bootstrapCriteria) {
+  if (!bootstrapCriteria && entry.isDeclaredRoot) {
     entryUrl.hash = "";
   }
   if (entryUrl.hash) {
@@ -140,11 +163,34 @@ export function validateRecipeTargetMetadata(recipe) {
   )) {
     throw new Error("declared root URL does not match pageTarget.bootstrap host/path criteria.");
   }
+  const rootUrl = canonicalizeRecipeRoot(recipe);
   return {
     entryUrl: entryUrl.href,
+    rootUrl,
     featureCriteria,
     bootstrapCriteria,
   };
+}
+
+export function canonicalizeRecipeForDispatch(recipe) {
+  const metadata = validateRecipeTargetMetadata(recipe);
+  return {
+    ...metadata,
+    recipe: {
+      ...recipe,
+      url: metadata.rootUrl,
+    },
+  };
+}
+
+export function canonicalRecipeDigest(recipe) {
+  const canonicalRecipe = {
+    ...recipe,
+    url: canonicalizeRecipeRoot(recipe),
+  };
+  return createHash("sha256")
+    .update(`${JSON.stringify(canonicalRecipe)}\n`, "utf8")
+    .digest("hex");
 }
 
 export function recipeEntryMatchesPageTarget(recipe) {

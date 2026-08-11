@@ -1,8 +1,11 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
 import test from "node:test";
 
 import {
+  canonicalizeRecipeForDispatch,
   getRecipeEntryUrl,
   recipeEntryMatchesPageTarget,
   resolvePageTargetBootstrapCriteria,
@@ -10,7 +13,8 @@ import {
   validateRecipeTargetMetadata,
   planRecipeActionBudget,
 } from "../portal-discovery-recipe.mjs";
-import { buildBootstrapPreflightCriteria, buildPreflightCriteria } from "../run-portal-discovery.mjs";
+import { buildCaptureWorkerArgs, buildBootstrapPreflightCriteria, buildPreflightCriteria } from "../run-portal-discovery.mjs";
+import { buildRecipeAssignmentId, recipeDigest } from "../portal-discovery-dispatch.mjs";
 
 const inventoryRecipe = {
   url: "https://config.office.com/officeSettings",
@@ -74,8 +78,11 @@ test("legacy Entra root fragments normalize to the browser origin before dispatc
     ["entra-idgov-deep.json", "/accessReviews"],
   ]) {
     const recipe = await readCaptureRecipe(name);
-    const metadata = validateRecipeTargetMetadata(recipe);
+    const metadata = canonicalizeRecipeForDispatch(recipe);
     assert.equal(metadata.entryUrl, "https://entra.microsoft.com/");
+    assert.equal(metadata.rootUrl, "https://entra.microsoft.com/");
+    assert.equal(metadata.recipe.url, "https://entra.microsoft.com/");
+    assert.match(recipe.url, /#/u);
     assert.equal(metadata.entryUrl.includes("#"), false);
     assert.deepEqual(metadata.featureCriteria.matchPathPrefixes, ["/"]);
     assert.deepEqual(recipe.matchPathPrefixes, [networkPath]);
@@ -103,6 +110,84 @@ test("active root fragments are rejected before browser-entry normalization", ()
         /declared root URL is not a safe same-origin GET \(active-get-denied\)/,
       );
     }
+  }
+});
+
+test("explicit passive-fragment navigate routes remain strict", () => {
+  assert.throws(
+    () => validateRecipeTargetMetadata({
+      url: "https://example.com/",
+      pageTarget: {
+        matchHosts: ["example.com"],
+        matchPathPrefixes: ["/"],
+      },
+      actions: ["navigate=https://example.com/#home"],
+    }),
+    /recipe entry URL must be an HTTPS URL without credentials, query, or fragment/,
+  );
+});
+
+test("canonical root URL is passed to the capture worker command", () => {
+  const args = buildCaptureWorkerArgs({
+    recipePath: "tools/capture-recipes/entra-b2c-deep.json",
+    artifacts: "artifacts",
+    targetId: "page-1",
+    cdpEndpoint: "http://127.0.0.1:9222",
+    rootUrl: "https://entra.microsoft.com/",
+    finalizationTimeoutMs: 30000,
+  });
+  const urlIndex = args.indexOf("--url");
+  assert.equal(args[urlIndex + 1], "https://entra.microsoft.com/");
+});
+
+test("permitted passive root variants share identity while safety changes do not", async () => {
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-recipe-digest-"));
+  try {
+    const recipe = await readCaptureRecipe("entra-b2c-deep.json");
+    const passiveVariant = {
+      ...recipe,
+      url: "https://entra.microsoft.com/#home",
+    };
+    const safetyVariant = {
+      ...recipe,
+      matchPathPrefixes: ["/different-safety-scope"],
+    };
+    const paths = {
+      recipe: path.join(tempDir, "recipe.json"),
+      passive: path.join(tempDir, "passive.json"),
+      safety: path.join(tempDir, "safety.json"),
+    };
+    await Promise.all([
+      writeFile(paths.recipe, `${JSON.stringify(recipe)}\n`, "utf8"),
+      writeFile(paths.passive, `${JSON.stringify(passiveVariant)}\n`, "utf8"),
+      writeFile(paths.safety, `${JSON.stringify(safetyVariant)}\n`, "utf8"),
+    ]);
+    const [firstDigest, passiveDigest, safetyDigest] = await Promise.all([
+      recipeDigest(paths.recipe),
+      recipeDigest(paths.passive),
+      recipeDigest(paths.safety),
+    ]);
+    assert.equal(firstDigest, passiveDigest);
+    assert.notEqual(firstDigest, safetyDigest);
+    const firstAssignment = buildRecipeAssignmentId({
+      specId: "entra-b2c",
+      endpoint: "entra.microsoft.com:443",
+      digest: firstDigest,
+    });
+    const passiveAssignment = buildRecipeAssignmentId({
+      specId: "entra-b2c",
+      endpoint: "entra.microsoft.com:443",
+      digest: passiveDigest,
+    });
+    const safetyAssignment = buildRecipeAssignmentId({
+      specId: "entra-b2c",
+      endpoint: "entra.microsoft.com:443",
+      digest: safetyDigest,
+    });
+    assert.equal(firstAssignment, passiveAssignment);
+    assert.notEqual(firstAssignment, safetyAssignment);
+  } finally {
+    await rm(tempDir, { force: true, recursive: true });
   }
 });
 

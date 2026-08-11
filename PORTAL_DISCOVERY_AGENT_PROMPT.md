@@ -122,7 +122,8 @@ readiness, and then strict preflight on the same target ID. Readiness must
 reach the checked-in entry URL or fail closed; it is not an arbitrary wait.
 Legacy browser-entry fragments are stripped only when no bootstrap alignment is
 declared and must never be reused for network/API dispatch, ownership, ledger
-identity, or operation reconciliation:
+identity, or operation reconciliation. The worker receives the canonical root
+and revalidates it at the initial Page.navigate boundary:
 
   npm run discover:portal -- --portal <portal-spec-id> --profile bounded --phase all --artifacts <fresh-artifact-directory>
 

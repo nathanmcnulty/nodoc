@@ -9,9 +9,18 @@ import {
   ledgerStaleLeaseMs,
   normalizeEndpoint,
 } from "./portal-discovery-ledger.mjs";
+import { canonicalRecipeDigest } from "./portal-discovery-recipe.mjs";
 
-async function recipeDigest(recipePath) {
-  return createHash("sha256").update(await readFile(recipePath, "utf8")).digest("hex");
+export async function recipeDigest(recipePath) {
+  const recipe = JSON.parse(await readFile(recipePath, "utf8"));
+  return canonicalRecipeDigest(recipe);
+}
+
+export function buildRecipeAssignmentId({ specId, endpoint, digest, phase = "all", priority = "normal" }) {
+  return `${specId}-${createHash("sha256")
+    .update(`${specId}|${endpoint}|${digest}|${phase}|${priority}`)
+    .digest("hex")
+    .slice(0, 16)}`;
 }
 
 export async function prepareLedgerAttempt(args, specRecord, recipePath) {
@@ -20,10 +29,13 @@ export async function prepareLedgerAttempt(args, specRecord, recipePath) {
   }
   const digest = await recipeDigest(recipePath);
   const endpoint = normalizeEndpoint(args.endpoint);
-  const assignmentId = args.assignmentId || `${specRecord.specId}-${createHash("sha256")
-      .update(`${specRecord.specId}|${endpoint}|${digest}|${args.phase}|${args.priority}`)
-      .digest("hex")
-      .slice(0, 16)}`;
+  const assignmentId = args.assignmentId || buildRecipeAssignmentId({
+    specId: specRecord.specId,
+    endpoint,
+    digest,
+    phase: args.phase,
+    priority: args.priority,
+  });
   if (!args.assignmentId) {
     await enqueueAssignment({
       ledgerPath: args.ledgerPath,

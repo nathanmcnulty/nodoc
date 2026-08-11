@@ -25,6 +25,7 @@ import {
   CdpAttributionRegistry,
   normalizeAttributionUrl,
 } from "./cdp-attribution.mjs";
+import { canonicalizeRecipeForDispatch } from "./portal-discovery-recipe.mjs";
 
 let apiBase = "http://127.0.0.1:9222";
 const defaultNavigationTimeoutMs = 15000;
@@ -592,6 +593,8 @@ async function parseArgs(argv) {
     portal: null,
     postActionSettleMs: defaultPostActionSettleMs,
     recipePath: null,
+    recipe: null,
+    recipeMetadata: null,
     seedArtifacts: null,
     seedLinkContains: [],
     seedLinkLimit: defaultSeedLinkLimit,
@@ -605,6 +608,7 @@ async function parseArgs(argv) {
   };
 
   let recipePath = null;
+  let expandedRecipe = null;
   const cliVariables = {};
 
   for (let index = 0; index < argv.length; index += 1) {
@@ -638,7 +642,7 @@ async function parseArgs(argv) {
 
   if (recipePath) {
     const recipeSource = JSON.parse(stripBom(await readFile(recipePath, "utf8")));
-    const expandedRecipe = expandTemplateVariables(
+    expandedRecipe = expandTemplateVariables(
       recipeSource,
       {
         ...(recipeSource.variables ?? {}),
@@ -647,6 +651,7 @@ async function parseArgs(argv) {
     );
     applyRecipeConfig(args, expandedRecipe, recipePath);
     args.recipePath = recipePath;
+    args.recipe = expandedRecipe;
     args.variables = cliVariables;
   }
 
@@ -892,6 +897,15 @@ async function parseArgs(argv) {
 
   if (!args.url) {
     throw new Error("Missing required --url argument.");
+  }
+
+  if (args.recipe) {
+    const metadata = canonicalizeRecipeForDispatch(args.recipe);
+    if (args.url !== args.recipe.url && args.url !== metadata.rootUrl) {
+      throw new Error("Worker navigation URL does not match the checked-in or canonical recipe root URL.");
+    }
+    args.recipeMetadata = metadata;
+    args.url = metadata.rootUrl;
   }
 
   if (args.actionBudget?.maxActions !== null && args.actionBudget?.maxActions !== undefined
@@ -2721,10 +2735,16 @@ async function main() {
     };
   }
 
-  async function navigateRoot(targetUrl) {
+  async function navigateRoot(targetUrl, { initial = false } = {}) {
     const resolvedUrl = isAbsoluteUrl(targetUrl)
       ? String(targetUrl)
       : resolveMaybeRelativeUrl(targetUrl, await getRootUrl());
+    if (initial && args.recipeMetadata) {
+      const metadata = canonicalizeRecipeForDispatch(args.recipe);
+      if (metadata.rootUrl !== resolvedUrl || args.url !== resolvedUrl) {
+        throw new Error("Initial Page.navigate URL is not the revalidated canonical recipe root.");
+      }
+    }
     const navigationPromise = new Promise((resolve) => {
       const timeout = setTimeout(() => {
         currentLoadResolver = null;
@@ -3113,7 +3133,7 @@ async function main() {
 
   try {
     setCaptureContext(args.label ?? "seed-00", -1, args.url);
-    const initialNavigation = await navigateRoot(args.url);
+    const initialNavigation = await navigateRoot(args.url, { initial: true });
     actionResults.push({
       allowCanonicalRedirect: true,
       page: currentContext.pageLabel,
