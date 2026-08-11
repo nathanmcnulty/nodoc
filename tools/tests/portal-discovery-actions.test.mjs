@@ -112,7 +112,18 @@ test("strict navigation rejects unsafe routes and page-target mismatches", () =>
       }),
       { rootUrl: "https://portal.example/root" },
     ),
-    /active-GET safety/u,
+    /active-GET safety|non-destructive, non-empty/u,
+  );
+  assert.throws(
+    () => validateEffectiveActions(
+      buildEffectiveActions({
+        recipeActions: ["click-href=   "],
+        includeInitialNavigation: true,
+        initialUrl: "https://portal.example/root",
+      }),
+      { rootUrl: "https://portal.example/root" },
+    ),
+    /non-empty value/u,
   );
   assert.deepEqual(normalizeTargetCriteria({
     matchHosts: ["portal.example"],
@@ -174,6 +185,7 @@ test("legacy host and path criteria remain effective for every worker navigation
     includeInitialNavigation: true,
     initialUrl: "https://portal.example/safe",
   });
+
   assert.doesNotThrow(() => validateEffectiveActions(actions, {
     rootUrl: "https://portal.example/safe",
     pageTarget: {
@@ -196,6 +208,62 @@ test("legacy host and path criteria remain effective for every worker navigation
       enforcePageTargetForAll: true,
     }),
     /page-target criteria/u,
+  );
+});
+
+test("relative navigation is guarded statically and resolves against the current page at execution", () => {
+  const validated = validateEffectiveActions(buildEffectiveActions({
+    recipeActions: [
+      "navigate=child",
+    ],
+    includeInitialNavigation: true,
+    initialUrl: "https://portal.example/safe/",
+  }), {
+    rootUrl: "https://portal.example/safe/",
+    pageTarget: { matchHosts: ["portal.example"], matchPathPrefixes: ["/safe"] },
+    enforcePageTargetForAll: true,
+  });
+  assert.equal(validated[1].relative, true);
+  assert.equal(validated[1].resolvedUrl, "https://portal.example/safe/child");
+  for (const value of ["../admin", "%2e%2e/admin", "child?query=blocked", "child#fragment"]) {
+    assert.throws(
+      () => validateEffectiveActions(buildEffectiveActions({
+        recipeActions: [`navigate=${value}`],
+        includeInitialNavigation: true,
+        initialUrl: "https://portal.example/safe/",
+      }), { rootUrl: "https://portal.example/safe/" }),
+      /forbidden|encoded|query|fragment/u,
+    );
+  }
+});
+
+test("all click-affected page and frame URLs share the same sink policy", () => {
+  const affectedTargets = [
+    { label: "root", url: "https://portal.example/safe" },
+    { label: "iframe", url: "https://other.example/safe" },
+    { label: "popup", url: "https://portal.example/safe/child" },
+  ];
+  assert.equal(
+    affectedTargets.find((target) => target.label === "popup").url,
+    validatePostNavigationUrl("https://portal.example/safe/child", "https://portal.example/safe", {
+      criteria: { matchHosts: ["portal.example"], matchPathPrefixes: ["/safe"] },
+    }),
+  );
+  assert.throws(
+    () => validatePostNavigationUrl(
+      affectedTargets.find((target) => target.label === "iframe").url,
+      "https://portal.example/safe",
+      { criteria: { matchHosts: ["portal.example"], matchPathPrefixes: ["/safe"] } },
+    ),
+    /HTTPS URL without credentials/u,
+  );
+  assert.throws(
+    () => validatePostNavigationUrl("https://portal.example/export", "https://portal.example/safe"),
+    /active-GET safety/u,
+  );
+  assert.throws(
+    () => validatePostNavigationUrl("https://portal.example/export%", "https://portal.example/safe"),
+    /unsafe|encoding/u,
   );
 });
 
@@ -526,8 +594,10 @@ test("worker rejects unsafe CLI navigation and click overrides before contacting
     "navigate=https://portal.example/root?query=blocked",
     "navigate=https://user:password@portal.example/root",
     "navigate=https://portal.example/root#fragment",
+    "navigate=/export%",
     "click-label=   DELETE   ",
     "click-contains=   ",
+    "click-href=   ",
   ];
   for (const override of unsafeOverrides) {
     const artifactDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-unsafe-override-"));

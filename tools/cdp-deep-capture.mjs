@@ -2373,6 +2373,56 @@ async function main() {
     return evaluateJson(client, "location.href");
   }
 
+  function validateCurrentPageUrl(value, label) {
+    try {
+      return validatePostNavigationUrl(value, args.url, {
+        criteria: args.pageTargetCriteria,
+        label,
+      });
+    } catch (error) {
+      if (!args.bootstrapTargetCriteria) {
+        throw error;
+      }
+      return validatePostNavigationUrl(value, args.url, {
+        criteria: args.bootstrapTargetCriteria,
+        label,
+      });
+    }
+  }
+
+  function validateObservedTargetUrls(snapshots, label) {
+    let rootUrl = null;
+    for (const snapshot of snapshots) {
+      if (!["iframe", "page"].includes(snapshot?.targetType ?? "page")) {
+        continue;
+      }
+      if (snapshot.error) {
+        const error = new Error(`${label} target URL could not be observed: ${snapshot.error}`);
+        error.code = "unsafe-navigation";
+        throw error;
+      }
+      const observedUrl = snapshot.url ?? snapshot.targetUrl;
+      if (typeof observedUrl !== "string" || !observedUrl.trim()) {
+        const error = new Error(`${label} target URL was absent at the end of the bounded settle window.`);
+        error.code = "unsafe-navigation";
+        throw error;
+      }
+      const validatedUrl = validateCurrentPageUrl(
+        observedUrl,
+        `${label} ${snapshot.sessionId ?? "target"}`,
+      );
+      if (snapshot.sessionId === "root") {
+        rootUrl = validatedUrl;
+      }
+    }
+    if (!rootUrl) {
+      const error = new Error(`${label} root page URL was not observed.`);
+      error.code = "unsafe-navigation";
+      throw error;
+    }
+    return { rootUrl };
+  }
+
   async function getRootStateFingerprint() {
     try {
       return stateFingerprintFromSnapshot(
@@ -2743,8 +2793,15 @@ async function main() {
     };
   }
 
-  async function navigateRoot(targetUrl, { initial = false, criteria = args.pageTargetCriteria } = {}) {
-    const resolvedUrl = resolveStrictNavigationUrl(targetUrl, args.url, {
+  async function navigateRoot(targetUrl, {
+    initial = false,
+    relative = false,
+    criteria = args.pageTargetCriteria,
+  } = {}) {
+    const navigationBase = relative
+      ? validateCurrentPageUrl(await getRootUrl(), "relative navigation base")
+      : args.url;
+    const resolvedUrl = resolveStrictNavigationUrl(targetUrl, navigationBase, {
       criteria: initial ? args.bootstrapTargetCriteria : criteria,
       label: initial ? "initial navigation" : "navigation",
     });
@@ -2813,7 +2870,7 @@ async function main() {
   }
 
   async function runClickAction(action, preActionSnapshots = null) {
-    const beforeUrl = await getRootUrl();
+    const beforeUrl = validateCurrentPageUrl(await getRootUrl(), "pre-click page");
     const beforeStateFingerprint = await getRootStateFingerprint();
     const beforeTargetIds = new Set(sessions.keys());
     const beforeSnapshots = preActionSnapshots ?? await collectSnapshots();
@@ -2828,46 +2885,41 @@ async function main() {
       };
     }
     for (const [sessionId, targetInfo] of getOrderedSessions(action.scope)) {
+      let result;
       try {
         attributionRegistry.setSessionContext(sessionId, currentContext);
-        const result = await evaluateJson(client, buildClickExpression(action), sessionId);
-        if (!result?.clicked) {
-          continue;
-        }
-
-        const settleResult = await waitForNetworkIdle(args.postActionSettleMs);
-        const afterUrl = validatePostNavigationUrl(await getRootUrl(), args.url, {
-          criteria: args.pageTargetCriteria,
-          label: "post-click page",
-        });
-        const afterStateFingerprint = await getRootStateFingerprint();
-        return {
-          ...result,
-          afterStateFingerprint,
-          afterUrl,
-          beforeUrl,
-          beforeStateFingerprint,
-          eligibility,
-          sessionId: sessionId ?? "root",
-          settleResult,
-          stateTransition: Boolean(
-            beforeStateFingerprint
-            && afterStateFingerprint
-            && beforeStateFingerprint !== afterStateFingerprint,
-          ),
-          targetTransition: Array.from(sessions.keys()).some(
-            (targetId) => !beforeTargetIds.has(targetId),
-          ),
-          targetTitle: targetInfo?.targetTitle ?? null,
-          targetType: targetInfo?.targetType ?? "page",
-          targetUrl: targetInfo?.targetUrl ?? null,
-        };
-      } catch (error) {
-        if (["unsafe-navigation", "active-get-denied", "page-target-mismatch"].includes(error?.code)) {
-          throw error;
-        }
+        result = await evaluateJson(client, buildClickExpression(action), sessionId);
+      } catch {
         // Try the next session.
       }
+      if (!result?.clicked) {
+        continue;
+      }
+      const settleResult = await waitForNetworkIdle(args.postActionSettleMs);
+      const afterSnapshots = await collectSnapshots();
+      const { rootUrl: afterUrl } = validateObservedTargetUrls(afterSnapshots, "post-click");
+      const afterStateFingerprint = await getRootStateFingerprint();
+      return {
+        ...result,
+        afterStateFingerprint,
+        afterUrl,
+        beforeUrl,
+        beforeStateFingerprint,
+        eligibility,
+        sessionId: sessionId ?? "root",
+        settleResult,
+        stateTransition: Boolean(
+          beforeStateFingerprint
+          && afterStateFingerprint
+          && beforeStateFingerprint !== afterStateFingerprint,
+        ),
+        targetTransition: Array.from(sessions.keys()).some(
+          (targetId) => !beforeTargetIds.has(targetId),
+        ),
+        targetTitle: targetInfo?.targetTitle ?? null,
+        targetType: targetInfo?.targetType ?? "page",
+        targetUrl: targetInfo?.targetUrl ?? null,
+      };
     }
 
     return {
@@ -3205,7 +3257,8 @@ async function main() {
       }
 
       if (action.type === "navigate") {
-        const navigationResult = await navigateRoot(action.resolvedUrl, {
+        const navigationResult = await navigateRoot(action.relative ? action.value : action.resolvedUrl, {
+          relative: action.relative === true,
           criteria: action.pageTargetApplicable ? args.pageTargetCriteria : null,
         });
         actionResults.push({
@@ -3294,7 +3347,7 @@ async function main() {
 
       const beforeSnapshots = await collectSnapshots();
       const beforePageState = pageStates.at(-1);
-      const beforeUrl = await getRootUrl();
+      const beforeUrl = validateCurrentPageUrl(await getRootUrl(), "pre-click page");
       const beforeRequestFamilies = new Set(capturedRequests.map(requestFamily));
       const clickResult = await runClickAction(action, beforeSnapshots);
       const actionResult = {
@@ -3315,7 +3368,7 @@ async function main() {
       actionResult.result.transitionEvidence = buildTransitionEvidence({
         afterPageState: checkpoint?.pageState,
         afterSnapshots: checkpoint?.snapshots,
-        afterUrl: clickResult.afterUrl ?? await getRootUrl(),
+        afterUrl: clickResult.afterUrl ?? validateCurrentPageUrl(await getRootUrl(), "post-click page"),
         beforePageState,
         beforeSnapshots,
         beforeUrl,
@@ -3326,11 +3379,12 @@ async function main() {
     }
 
     await waitForNetworkIdle(args.postActionSettleMs);
+    const terminalSnapshots = await collectSnapshots();
+    const { rootUrl: terminalFinalUrl } = validateObservedTargetUrls(
+      terminalSnapshots,
+      "terminal final",
+    );
     await flushArtifacts();
-    const terminalFinalUrl = validatePostNavigationUrl(await getRootUrl(), args.url, {
-      criteria: args.pageTargetCriteria,
-      label: "terminal final page",
-    });
     const filteredRequests = capturedRequests.filter((request) => shouldMatchRequest(request.url, args));
     const scopedHosts = uniqueSorted(filteredRequests.map((request) => {
       try {

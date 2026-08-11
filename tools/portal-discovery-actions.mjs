@@ -57,12 +57,19 @@ export function parseActionSpec(value, provenance = {}) {
   const rawType = value.slice(0, separator).trim();
   const rawValue = value.slice(separator + 1);
   const normalized = normalizeActionType(rawType);
+  const normalizedValue = rawValue.trim();
+  if (normalized.type.startsWith("click") && isDestructiveClickValue(normalizedValue)) {
+    throw actionError(
+      "Click actions must contain a non-destructive, non-empty value.",
+      "unsafe-click",
+    );
+  }
   return {
     ...provenance,
     raw: value,
     scope: normalized.scope,
     type: normalized.type,
-    value: rawValue.trim(),
+    value: normalizedValue,
   };
 }
 
@@ -75,12 +82,19 @@ export function normalizeRecipeAction(action, provenance = {}) {
   }
   const normalized = normalizeActionType(action.type);
   const scope = action.scope === undefined ? normalized.scope : normalizeScope(action.scope);
+  const value = String(action.value ?? "").trim();
+  if (normalized.type.startsWith("click") && isDestructiveClickValue(value)) {
+    throw actionError(
+      "Click actions must contain a non-destructive, non-empty value.",
+      "unsafe-click",
+    );
+  }
   return {
     ...provenance,
     raw: action,
     scope: scope === "any" ? normalized.scope : scope,
     type: normalized.type,
-    value: String(action.value ?? "").trim(),
+    value,
     highValue: action.highValue === true,
     optional: action.optional === true,
     required: Boolean(action.required),
@@ -141,6 +155,46 @@ function pathMatchesCriteria(pathname, prefixes) {
 
 function pathnameMatchesCriteria(pathname, pathnames) {
   return pathnames.length === 0 || pathnames.includes(pathname);
+}
+
+function isRelativeNavigationToken(value) {
+  return !/^[a-z][a-z0-9+.-]*:/iu.test(value) && !value.startsWith("//");
+}
+
+function validateRelativeNavigationToken(value, rootUrl, label) {
+  const token = String(value).trim();
+  if (
+    !token
+    || token.includes("\\")
+    || token.includes("?")
+    || token.includes("#")
+    || /(?:^|[/])\.\.(?:[/]|$)/u.test(token)
+  ) {
+    throw actionError(
+      `${label} relative route contains a forbidden traversal, query, or fragment.`,
+      "unsafe-navigation",
+    );
+  }
+  let decoded = token;
+  try {
+    for (let pass = 0; pass < 3 && decoded.includes("%"); pass += 1) {
+      decoded = decodeURIComponent(decoded);
+    }
+  } catch {
+    throw actionError(`${label} relative route contains unsafe URL encoding.`, "unsafe-encoding");
+  }
+  if (
+    decoded.includes("\\")
+    || decoded.includes("?")
+    || decoded.includes("#")
+    || /(?:^|[/])\.\.(?:[/]|$)/u.test(decoded)
+  ) {
+    throw actionError(
+      `${label} relative route contains encoded traversal, query, or fragment.`,
+      "unsafe-navigation",
+    );
+  }
+  return resolveStrictNavigationUrl(token, rootUrl, { label });
 }
 
 export function normalizeTargetCriteria(criteria = null) {
@@ -238,15 +292,33 @@ export function validateEffectiveActions(actions, {
       const criteria = normalized.source === "initial"
         ? (bootstrapTarget ?? pageTarget)
         : (enforcePageTargetForAll || !featureNavigationValidated ? pageTarget : null);
-      normalized.resolvedUrl = resolveStrictNavigationUrl(normalized.value, rootUrl, {
-        criteria,
-        label: `${normalized.source} navigation`,
-      });
+      normalized.relative = normalized.source !== "initial"
+        && isRelativeNavigationToken(normalized.value);
+      const staticRelativeUrl = normalized.relative
+        ? validateRelativeNavigationToken(normalized.value, rootUrl, `${normalized.source} navigation`)
+        : null;
+      normalized.resolvedUrl = normalized.relative
+        ? (normalized.value.startsWith("/")
+          ? resolveStrictNavigationUrl(staticRelativeUrl, rootUrl, {
+            criteria,
+            label: `${normalized.source} navigation`,
+          })
+          : staticRelativeUrl)
+        : resolveStrictNavigationUrl(normalized.value, rootUrl, {
+          criteria,
+          label: `${normalized.source} navigation`,
+        });
       normalized.pageTargetApplicable = Boolean(criteria);
       if (normalized.source !== "initial" && pageTarget) {
         featureNavigationValidated = true;
       }
     } else if (normalized.type === "click-href") {
+      if (!normalized.value) {
+        throw actionError(
+          `${normalized.source} click-href must contain a non-empty value.`,
+          "unsafe-click",
+        );
+      }
       normalized.resolvedUrl = resolveStrictNavigationUrl(normalized.value, rootUrl, {
         criteria: pageTarget,
         label: `${normalized.source} click-href`,
