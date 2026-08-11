@@ -3284,6 +3284,141 @@
                                     ]
                                 },
                                 {
+                                    "name": "AutopatchManagementStatusSummary",
+                                    "description": "",
+                                    "item": [
+                                        {
+                                            "id": "a5176bda-0bc6-4e07-9e65-c358d48d2eff",
+                                            "name": "Get Autopatch management status summary via URS",
+                                            "request": {
+                                                "name": "Get Autopatch management status summary via URS",
+                                                "description": {
+                                                    "content": "Returns tenant-level Autopatch management counts surfaced by device-focused overview\nexperiences in the Intune admin center. Confirmed live from a deeper interaction pass.\n",
+                                                    "type": "text/plain"
+                                                },
+                                                "url": {
+                                                    "path": [
+                                                        "unified-reporting",
+                                                        "odata",
+                                                        "1.0",
+                                                        "AutopatchManagementStatusSummary"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [],
+                                                    "variable": []
+                                                },
+                                                "header": [
+                                                    {
+                                                        "key": "Accept",
+                                                        "value": "application/json"
+                                                    }
+                                                ],
+                                                "method": "GET",
+                                                "body": {},
+                                                "auth": null
+                                            },
+                                            "response": [
+                                                {
+                                                    "id": "28fdee31-67eb-4d1a-aa3c-ab405ecedcf5",
+                                                    "name": "Autopatch management summary returned successfully.",
+                                                    "originalRequest": {
+                                                        "url": {
+                                                            "path": [
+                                                                "unified-reporting",
+                                                                "odata",
+                                                                "1.0",
+                                                                "AutopatchManagementStatusSummary"
+                                                            ],
+                                                            "host": [
+                                                                "{{baseUrl}}"
+                                                            ],
+                                                            "query": [],
+                                                            "variable": []
+                                                        },
+                                                        "header": [
+                                                            {
+                                                                "key": "Accept",
+                                                                "value": "application/json"
+                                                            }
+                                                        ],
+                                                        "method": "GET",
+                                                        "body": {}
+                                                    },
+                                                    "status": "OK",
+                                                    "code": 200,
+                                                    "header": [
+                                                        {
+                                                            "key": "Content-Type",
+                                                            "value": "application/json"
+                                                        }
+                                                    ],
+                                                    "body": "{\n  \"@odata.context\": \"http://qBEwbeELgkEsYL.msvbOa+XbD-AOnujChv0kul4KOuc1QKt+ynCQxViorob6p.jP8eHYgg9MLYM\",\n  \"value\": [\n    {\n      \"tenantId\": \"899e5376-b48d-26d8-5eb9-79b480a262bd\",\n      \"totalDeviceCount\": 576,\n      \"quManagedCount\": 2824,\n      \"fuManagedCount\": 8591,\n      \"duManagedCount\": 3909,\n      \"updateRingManagedCount\": 1209,\n      \"cloudManagedCount\": 7604,\n      \"unmanagedCount\": 1171,\n      \"totalUpToDateDeviceCount\": 9509\n    },\n    {\n      \"tenantId\": \"5bd47e14-957d-5f91-e184-b767c9e85063\",\n      \"totalDeviceCount\": 7540,\n      \"quManagedCount\": 6023,\n      \"fuManagedCount\": 4579,\n      \"duManagedCount\": 232,\n      \"updateRingManagedCount\": 1063,\n      \"cloudManagedCount\": 4950,\n      \"unmanagedCount\": 6873,\n      \"totalUpToDateDeviceCount\": 2197\n    }\n  ]\n}",
+                                                    "cookie": [],
+                                                    "_postman_previewlanguage": "json"
+                                                },
+                                                {
+                                                    "id": "239cb5ff-782c-45cc-a206-aefd26be0d50",
+                                                    "name": "Authentication is required or the browser token is no longer valid.",
+                                                    "originalRequest": {
+                                                        "url": {
+                                                            "path": [
+                                                                "unified-reporting",
+                                                                "odata",
+                                                                "1.0",
+                                                                "AutopatchManagementStatusSummary"
+                                                            ],
+                                                            "host": [
+                                                                "{{baseUrl}}"
+                                                            ],
+                                                            "query": [],
+                                                            "variable": []
+                                                        },
+                                                        "method": "GET",
+                                                        "body": {}
+                                                    },
+                                                    "status": "Unauthorized",
+                                                    "code": 401,
+                                                    "header": [],
+                                                    "cookie": [],
+                                                    "_postman_previewlanguage": "text"
+                                                },
+                                                {
+                                                    "id": "27686588-b555-485d-8754-9f401b5ce8c0",
+                                                    "name": "The authenticated principal does not have access to the requested Autopatch data.",
+                                                    "originalRequest": {
+                                                        "url": {
+                                                            "path": [
+                                                                "unified-reporting",
+                                                                "odata",
+                                                                "1.0",
+                                                                "AutopatchManagementStatusSummary"
+                                                            ],
+                                                            "host": [
+                                                                "{{baseUrl}}"
+                                                            ],
+                                                            "query": [],
+                                                            "variable": []
+                                                        },
+                                                        "method": "GET",
+                                                        "body": {}
+                                                    },
+                                                    "status": "Forbidden",
+                                                    "code": 403,
+                                                    "header": [],
+                                                    "cookie": [],
+                                                    "_postman_previewlanguage": "text"
+                                                }
+                                            ],
+                                            "event": [],
+                                            "protocolProfileBehavior": {
+                                                "disableBodyPruning": true
+                                            }
+                                        }
+                                    ]
+                                },
+                                {
                                     "name": "WindowsFeatureUpdatesSummaryRelease",
                                     "description": "",
                                     "item": [
@@ -11073,7 +11208,7 @@
         },
         {
             "key": "supportRequestId",
-            "value": "2cb251c2-c1b0-9237-ce7f-15c833a7348b"
+            "value": "4f42a026-ef6f-07c4-938e-bab97e02bdcf"
         }
     ],
     "info": {
