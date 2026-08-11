@@ -759,22 +759,32 @@ If the answer is “one unresolved family and one thin recipe”, update the rec
 
 Raw observations and generated counts are not comparable until every operation is
 normalized by uppercase method, path template, and canonical alias. Keep the
-following categories mutually exclusive and record their exact counts:
+raw/source reconciliation categories mutually exclusive and record exact counts:
 
 ```text
-observations = promoted_or_matched + alias + intentionally_filtered + duplicate_shadowed + orphaned + unresolved
+raw observations = emitted + duplicate-shadowed + orphaned + intentional-filtered + alias-observations
+emitted = matched + unresolved
 ```
 
-The six categories are mutually exclusive and exhaustive. `promoted_or_matched` means the normalized canonical key is either already
-promoted or exactly matches a checked-in specification operation; `unresolved`
-matches neither. Aliases map to one canonical key and are counted only in
-`alias`. Keep separate inspected-
-surface lists (nav/routes, entity/detail states, interaction states, child
-targets, host families) and evidence-partition lists (confirmed traffic, safe
-probes, bundle-only leads, suppressed candidates, and adjacent/scope-review
-candidates). Missing evidence is unavailable, not zero. Offline completeness and
-runtime completeness are separate; `live-evidence-blocked` is valid. Declaration
-parity is not specification completeness.
+The first equation reconciles raw/source observations to emitted observations;
+the second partitions emitted observations. These ledgers are not additive
+across one another and must not double-count. For the separate candidate-review
+inventory, use mutually exclusive dispositions:
+
+```text
+candidate observations = promoted_or_matched + alias + intentionally_filtered + duplicate_shadowed + orphaned + unresolved
+```
+
+`promoted_or_matched` means the normalized canonical key is already promoted or
+exactly matches a checked-in specification operation; `unresolved` matches
+neither. Alias observations map to one canonical key and count only in `alias`.
+Keep separate inspected-surface lists (nav/routes, entity/detail states,
+interaction states, child targets, host families) and evidence-partition lists
+(confirmed traffic, safe probes, bundle-only leads, suppressed candidates, and
+adjacent/scope-review candidates). Missing evidence is unavailable, not zero.
+Offline completeness and runtime completeness are separate;
+`live-evidence-blocked` is valid. Declaration parity is not specification
+completeness.
 
 ### 6. Promote discoveries carefully
 

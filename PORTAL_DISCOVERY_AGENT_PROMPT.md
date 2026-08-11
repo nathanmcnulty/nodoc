@@ -78,10 +78,20 @@ representative probe materializes accepted output.
 
 Before interpreting counts, normalize each observation and checked-in
 specification operation to an uppercase method, path template, and canonical
-alias key. Use these mutually exclusive, exhaustive dispositions:
+alias key. Keep raw/source reconciliation categories mutually exclusive:
 
 ```text
-observations = promoted_or_matched + alias + intentionally_filtered + duplicate_shadowed + orphaned + unresolved
+raw observations = emitted + duplicate-shadowed + orphaned + intentional-filtered + alias-observations
+emitted = matched + unresolved
+```
+
+The first equation reconciles raw/source observations to emitted observations;
+the second partitions emitted observations. These ledgers are not additive
+across one another and must not double-count. Track the separate candidate-review
+inventory with mutually exclusive dispositions:
+
+```text
+candidate observations = promoted_or_matched + alias + intentionally_filtered + duplicate_shadowed + orphaned + unresolved
 ```
 
 `promoted_or_matched` means the normalized canonical key is already promoted or

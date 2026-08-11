@@ -126,18 +126,28 @@ either is unavailable, raw OpenAPI or Postman gaps remain candidate deficits;
 they are not confirmed true deficits and must not change a coverage claim.
 
 Before interpreting any raw count, normalize every observation and spec
-operation to an uppercase method, path template, and canonical alias key. Use
-mutually exclusive categories and record exact integer counts for each:
+operation to an uppercase method, path template, and canonical alias key. Keep
+the raw/source reconciliation categories mutually exclusive and record exact
+integer counts:
 
 ```text
-observations = promoted_or_matched + alias + intentionally_filtered + duplicate_shadowed + orphaned + unresolved
+raw observations = emitted + duplicate-shadowed + orphaned + intentional-filtered + alias-observations
+emitted = matched + unresolved
 ```
 
-The six categories are mutually exclusive and exhaustive. `promoted_or_matched`
-means the normalized canonical key is either already promoted or exactly matches
-a checked-in specification operation; `unresolved` means it matches neither.
-Alias
-observations map to one canonical key and are counted only in `alias`.
+The first equation reconciles raw/source observations to emitted observations;
+the second partitions emitted observations. These ledgers are not additive
+across one another and must not double-count. For the separate candidate-review
+inventory, use mutually exclusive dispositions:
+
+```text
+candidate observations = promoted_or_matched + alias + intentionally_filtered + duplicate_shadowed + orphaned + unresolved
+```
+
+`promoted_or_matched` means the normalized canonical key is either already
+promoted or exactly matches a checked-in specification operation; `unresolved`
+means it matches neither. Alias observations map to one canonical key and are
+counted only in `alias`.
 Maintain separate inspected-surface lists (nav/routes, entity/detail states,
 interaction states, child targets, host families) and evidence-partition lists
 (confirmed traffic, safe probes, bundle-only leads, suppressed candidates, and
@@ -200,8 +210,8 @@ request, then escalates exactly from Spark to exactly `gpt-5.6-luna` if that
 retry remains null. Assignments already routed to Luna or manual review keep
 that route. Preserve every materialized failed-worker artifact and record its
 hash; retain useful artifacts for recovery.
-Do not launch a broad wave until a
-representative probe has materialized accepted output. A no-change result is
+Do not launch a broad wave until a representative probe has materialized
+accepted output. A no-change result is
 not evidence of completeness.
 
 ## Orchestrator preflight
