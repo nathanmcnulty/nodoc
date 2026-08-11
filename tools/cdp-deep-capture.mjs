@@ -14,12 +14,14 @@ import {
   buildTransitionEvidence,
   decodeBoundedCdpBody,
   deriveActionEligibility,
+  controlIdentity,
   responseBodyCaptureLimit,
   shouldRequestResponseBody,
   summarizeActionResults,
 } from "./discovery-capture-policy.mjs";
 import {
   buildEffectiveActions,
+  isDestructiveClickValue,
   normalizeRecipeAction,
   parseActionSpec,
   resolveStrictNavigationUrl,
@@ -1578,10 +1580,11 @@ function buildDomSnapshotExpression() {
   })()`;
 }
 
-function buildClickExpression(action, dispatch = true, expectedHref = null) {
+function buildClickExpression(action, dispatch = true, expectedHref = null, expectedControlIdentity = null) {
   const encodedMode = JSON.stringify(action.type);
   const encodedValue = JSON.stringify(String(action.value || ""));
   const encodedExpectedHref = JSON.stringify(expectedHref);
+  const encodedExpectedControlIdentity = JSON.stringify(expectedControlIdentity);
   const dispatchCode = dispatch
     ? `match.element.scrollIntoView({ block: "center", inline: "center" });
     match.element.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, composed: true }));
@@ -1593,6 +1596,15 @@ function buildClickExpression(action, dispatch = true, expectedHref = null) {
     const mode = ${encodedMode};
     const rawValue = ${encodedValue};
     const expectedHref = ${encodedExpectedHref};
+    const expectedControlIdentity = ${encodedExpectedControlIdentity};
+    const controlIdentity = (candidate) => JSON.stringify([
+      normalizeText(candidate.text),
+      normalizeText(candidate.ariaLabel),
+      normalizeText(candidate.automationId),
+      normalizeText(candidate.href),
+      normalizeText(candidate.role),
+      normalizeText(candidate.tag),
+    ]);
     const normalizeText = (value) => String(value || "").replace(/\\s+/g, " ").trim();
     const normalizedNeedle = normalizeText(rawValue);
     const lowerNeedle = normalizedNeedle.toLowerCase();
@@ -1651,7 +1663,10 @@ function buildClickExpression(action, dispatch = true, expectedHref = null) {
       }
 
       return haystacks.some((item) => item === lowerNeedle);
-    }).filter((candidate) => !expectedHref || candidate.absoluteHref === expectedHref);
+    }).filter((candidate) => (
+      (!expectedHref || candidate.absoluteHref === expectedHref)
+      && (!expectedControlIdentity || controlIdentity(candidate) === expectedControlIdentity)
+    ));
 
     if (matches.length === 0) {
       return { clicked: false };
@@ -2052,6 +2067,7 @@ async function main() {
   let targetGeneration = 0;
   const pendingTargetHandlers = new Set();
   let terminalLifecycleError = null;
+  let runtimeSafetyError = null;
   let currentLoadResolver = null;
   let lastNetworkActivityAt = Date.now();
 
@@ -2122,6 +2138,9 @@ async function main() {
     if (!childSessionId || childSessionId === metadata.sessionId) {
       return;
     }
+    if (lifecyclePhase === "frozen") {
+      return;
+    }
     targetGeneration += 1;
     const handler = (async () => {
       if (lifecyclePhase === "closing" || lifecyclePhase === "frozen") {
@@ -2161,12 +2180,14 @@ async function main() {
     pendingTargetHandlers.add(handler);
     handler.catch((error) => {
       terminalLifecycleError ??= error;
+      runtimeSafetyError ??= error;
     }).finally(() => {
       pendingTargetHandlers.delete(handler);
     }).catch(() => {});
   });
 
   client.on("Target.detachedFromTarget", (params, metadata) => {
+    if (lifecyclePhase === "frozen") return;
     const detachedSessionId = params.sessionId ?? null;
     if (detachedSessionId) {
       targetGeneration += 1;
@@ -2175,11 +2196,25 @@ async function main() {
   });
 
   client.on("Target.targetInfoChanged", (params, metadata) => {
+    if (lifecyclePhase === "frozen") return;
     targetGeneration += 1;
-    attributionRegistry.updateTarget(metadata.sessionId ?? null, params.targetInfo ?? {});
+    const targetInfo = params.targetInfo ?? {};
+    if (["page", "iframe"].includes(targetInfo.type ?? "page")) {
+      try {
+        resolveStrictNavigationUrl(targetInfo.url, args.url, {
+          criteria: args.pageTargetCriteria,
+          label: "target update",
+        });
+      } catch (error) {
+        runtimeSafetyError ??= error;
+        return;
+      }
+    }
+    attributionRegistry.updateTarget(metadata.sessionId ?? null, targetInfo);
   });
 
   client.on("Page.frameAttached", (params, metadata) => {
+    if (lifecyclePhase === "frozen") return;
     targetGeneration += 1;
     attributionRegistry.recordFrameAttached(
       metadata.sessionId ?? null,
@@ -2189,11 +2224,24 @@ async function main() {
   });
 
   client.on("Page.frameNavigated", (params, metadata) => {
+    if (lifecyclePhase === "frozen") return;
     targetGeneration += 1;
+    if (params.frame?.url) {
+      try {
+        resolveStrictNavigationUrl(params.frame.url, args.url, {
+          criteria: args.pageTargetCriteria,
+          label: "frame update",
+        });
+      } catch (error) {
+        runtimeSafetyError ??= error;
+        return;
+      }
+    }
     attributionRegistry.recordFrameNavigated(metadata.sessionId ?? null, params.frame);
   });
 
   client.on("Page.frameDetached", (params, metadata) => {
+    if (lifecyclePhase === "frozen") return;
     targetGeneration += 1;
     const sessionId = metadata.sessionId ?? null;
     const entry = sessions.get(sessionId);
@@ -2410,6 +2458,9 @@ async function main() {
   }
 
   async function getRootUrl() {
+    if (runtimeSafetyError) {
+      throw runtimeSafetyError;
+    }
     return evaluateJson(client, "location.href");
   }
 
@@ -2465,8 +2516,8 @@ async function main() {
 
   async function awaitTargetHandlers() {
     await Promise.allSettled(Array.from(pendingTargetHandlers));
-    if (terminalLifecycleError) {
-      throw terminalLifecycleError;
+    if (terminalLifecycleError || runtimeSafetyError) {
+      throw terminalLifecycleError ?? runtimeSafetyError;
     }
   }
 
@@ -2535,8 +2586,18 @@ async function main() {
       try {
         const snapshot = await evaluateJson(client, buildDomSnapshotExpression(), sessionId);
         if (!snapshot) {
+          if (targetInfo?.attached === false) continue;
+          snapshots.push({
+            schemaVersion: captureArtifactSchemaVersion,
+            error: "target snapshot returned no value",
+            sessionId: sessionId ?? "root",
+            targetId: targetInfo?.targetId ?? null,
+            targetType: targetInfo?.targetType ?? "page",
+            targetUrl: targetInfo?.targetUrl ?? null,
+          });
           continue;
         }
+        if (targetInfo?.attached === false) continue;
 
         snapshots.push({
           schemaVersion: captureArtifactSchemaVersion,
@@ -2550,6 +2611,7 @@ async function main() {
           ...snapshot,
         });
       } catch (error) {
+        if (targetInfo?.attached === false) continue;
         snapshots.push({
           schemaVersion: captureArtifactSchemaVersion,
           targetId: targetInfo?.targetId ?? null,
@@ -2999,13 +3061,41 @@ async function main() {
         reason: "incomplete-action-inventory",
       };
     }
-    for (const [sessionId, targetInfo] of getOrderedSessions(action.scope)) {
+    if (eligibility?.status !== "eligible") {
+      return {
+        afterUrl: beforeUrl,
+        beforeUrl,
+        clicked: false,
+        eligibility,
+        reason: "control-not-proven-by-inventory",
+      };
+    }
+    const boundFrames = eligibility.targetFrameInventory
+      .filter((frame) => frame.candidateCount === 1 && frame.controlIdentities?.length === 1);
+    if (boundFrames.length !== 1) {
+      return {
+        afterUrl: beforeUrl,
+        beforeUrl,
+        clicked: false,
+        eligibility: { ...eligibility, status: "ambiguous", reason: "control-inventory-binding-ambiguous" },
+        reason: "control-inventory-binding-ambiguous",
+      };
+    }
+    const boundFrame = boundFrames[0];
+    const boundSessionId = boundFrame.sessionId === "root" ? null : boundFrame.sessionId;
+    for (const [sessionId, targetInfo] of getOrderedSessions(action.scope)
+      .filter(([candidateSessionId]) => candidateSessionId === boundSessionId)) {
       let result;
       try {
         attributionRegistry.setSessionContext(sessionId, currentContext);
         const preview = await evaluateJson(client, buildClickExpression(action, false), sessionId);
         if (!preview?.clicked) {
           continue;
+        }
+        if (preview.tag !== "a") {
+          const error = new Error("Non-anchor controls are not supported for safety-bounded capture clicks.");
+          error.code = "unsafe-click";
+          throw error;
         }
         if (preview.tag === "a") {
           if (!preview.href || !preview.absoluteHref) {
@@ -3034,7 +3124,12 @@ async function main() {
         }
         result = await evaluateJson(
           client,
-          buildClickExpression(action, true, preview.tag === "a" ? preview.absoluteHref : null),
+          buildClickExpression(
+            action,
+            true,
+            preview.absoluteHref,
+            boundFrame.controlIdentities[0],
+          ),
           sessionId,
         );
       } catch {
@@ -3262,11 +3357,11 @@ async function main() {
     for (const [attempt, [sessionId, targetInfo]] of getOrderedSessions(action.scope).entries()) {
       try {
         attributionRegistry.setSessionContext(sessionId, currentContext);
-        const probeUrl = await evaluateJson(
-          client,
-          `new URL(${JSON.stringify(String(action.value || ""))}, location.href).toString()`,
-          sessionId,
-        );
+        const probeBaseUrl = validateCurrentPageUrl(await getRootUrl(), "probe base");
+        const probeUrl = resolveStrictNavigationUrl(action.value, probeBaseUrl, {
+          criteria: args.pageTargetCriteria,
+          label: "probe-get",
+        });
         const attribution = attributionRegistry.resolve({
           sessionId,
           targetUrl: targetInfo?.targetUrl ?? null,
@@ -3286,7 +3381,7 @@ async function main() {
         );
         const result = await evaluateJson(
           client,
-          buildProbeExpression(action.value),
+          buildProbeExpression(probeUrl),
           sessionId,
           Math.max(runtimeEvaluateTimeoutMs, args.navigationTimeoutMs),
         );
@@ -3531,12 +3626,19 @@ async function main() {
     const terminalSafety = await terminalSafetyBarrier();
     lifecyclePhase = "frozen";
     const frozenGeneration = targetGeneration;
-    if (terminalLifecycleError || pendingTargetHandlers.size > 0) {
-      throw terminalLifecycleError ?? new Error("Target lifecycle changed before terminal publication.");
+    if (terminalLifecycleError || runtimeSafetyError || pendingTargetHandlers.size > 0) {
+      throw terminalLifecycleError ?? runtimeSafetyError
+        ?? new Error("Target lifecycle changed before terminal publication.");
     }
     await flushArtifacts();
-    if (terminalLifecycleError || targetGeneration !== frozenGeneration || pendingTargetHandlers.size > 0) {
-      throw terminalLifecycleError ?? new Error("Target lifecycle changed during terminal artifact publication.");
+    if (
+      terminalLifecycleError
+      || runtimeSafetyError
+      || targetGeneration !== frozenGeneration
+      || pendingTargetHandlers.size > 0
+    ) {
+      throw terminalLifecycleError ?? runtimeSafetyError
+        ?? new Error("Target lifecycle changed during terminal artifact publication.");
     }
     const terminalFinalUrl = terminalSafety.rootUrl;
     const filteredRequests = capturedRequests.filter((request) => shouldMatchRequest(request.url, args));

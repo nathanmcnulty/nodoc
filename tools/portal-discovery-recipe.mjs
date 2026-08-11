@@ -2,6 +2,7 @@ import { planActionBudget } from "./portal-discovery-action-budget.mjs";
 import {
   buildEffectiveActions,
   normalizeRecipeAction,
+  pathMatchesCriteria,
   resolveStrictNavigationUrl,
   validateSelectedReplayRouteTemplates,
   validateEffectiveActions,
@@ -152,7 +153,6 @@ export function recipeEntryMatchesPageTarget(recipe) {
   const normalizedHost = entryUrl.hostname.toLowerCase();
   const hostMatches = matchHosts.length === 0
     || matchHosts.some((host) => String(host).toLowerCase() === normalizedHost);
-  const pathMatches = matchPathPrefixes.length === 0
-    || matchPathPrefixes.some((prefix) => entryUrl.pathname.startsWith(String(prefix)));
+  const pathMatches = pathMatchesCriteria(entryUrl.pathname, matchPathPrefixes);
   return hostMatches && pathMatches;
 }

@@ -1,3 +1,5 @@
+import { isDestructiveClickValue } from "./portal-discovery-actions.mjs";
+
 export const responseBodyCaptureLimit = 512 * 1024;
 
 export function decodeBoundedCdpBody(payload, limit = responseBodyCaptureLimit) {
@@ -73,6 +75,17 @@ function normalizeText(value) {
   return String(value ?? "").replace(/\s+/gu, " ").trim();
 }
 
+export function controlIdentity(control = {}) {
+  return JSON.stringify([
+    normalizeText(control.text),
+    normalizeText(control.ariaLabel),
+    normalizeText(control.automationId),
+    normalizeText(control.href),
+    normalizeText(control.role),
+    normalizeText(control.tag),
+  ]);
+}
+
 function isClickAction(action) {
   return String(action?.type || "").startsWith("click");
 }
@@ -95,6 +108,15 @@ function controlMatchesAction(control, action, snapshot) {
     control?.ariaLabel,
     control?.automationId,
   ].map((item) => normalizeText(item).toLowerCase()).filter(Boolean);
+  if ([
+    control?.text,
+    control?.ariaLabel,
+    control?.automationId,
+    control?.href,
+  ].filter((value) => String(value ?? "").trim())
+    .some((value) => isDestructiveClickValue(value))) {
+    return false;
+  }
 
   if (action?.type === "click-href") {
     if (normalizeText(control?.href) === value) {
@@ -151,6 +173,7 @@ export function deriveActionEligibility(action, snapshots) {
     targetFrameInventory.push({
       candidateCount: matchingControls.length,
       controlCount: controls.length,
+      controlIdentities: matchingControls.map((control) => controlIdentity(control)),
       sessionId: snapshot.sessionId ?? null,
       targetType: snapshot.targetType ?? "page",
       targetUrl: snapshot.targetUrl ?? snapshot.url ?? null,

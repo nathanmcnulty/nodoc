@@ -139,6 +139,19 @@ test("strict navigation rejects unsafe routes and page-target mismatches", () =>
     ),
     /non-empty value/u,
   );
+  for (const probe of ["probe-get=/safe?x=1", "probe-get=/safe/%2e%2e/admin"]) {
+    assert.throws(
+      () => validateEffectiveActions(
+        buildEffectiveActions({
+          recipeActions: [probe],
+          includeInitialNavigation: true,
+          initialUrl: "https://portal.example/safe",
+        }),
+        { rootUrl: "https://portal.example/safe" },
+      ),
+      /query|traversal|fragment|page-target|ownership-ambiguous/u,
+    );
+  }
   assert.deepEqual(normalizeTargetCriteria({
     matchHosts: ["portal.example"],
     matchPathnames: ["/root"],
@@ -392,6 +405,18 @@ test("click safety rejects padded destructive and empty labels, and ambiguity is
       [{ sessionId: "root", targetType: "page", error: "detached during inventory" }],
     ).status,
     "unknown",
+  );
+  assert.equal(
+    deriveActionEligibility(
+      { type: "click-contains", scope: "root", value: "del" },
+      [{
+        sessionId: "root",
+        targetType: "page",
+        targetUrl: "https://portal.example/safe",
+        controls: [{ text: "Delete account" }],
+      }],
+    ).candidateCount,
+    0,
   );
 });
 

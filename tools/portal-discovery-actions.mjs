@@ -15,6 +15,8 @@ export const supportedActionTypes = new Set([
 
 const destructiveClickPattern =
   /(?:^|[\s/_-])(?:delete|execute|export|generate|invoke|log-?out|publish|remove|run|save|sign-?out|start|submit|sync|trigger)(?:$|[\s/_.?&=-])/iu;
+const destructiveCamelPattern =
+  /(?:delete|execute|export|generate|invoke|logout|publish|remove|run|save|signout|start|submit|sync|trigger)[A-Z]/u;
 const defaultSeedLinkLimit = 12;
 
 function actionError(message, code = "invalid-action") {
@@ -149,7 +151,7 @@ function hostnameMatchesPattern(hostname, pattern) {
   return normalizedHostname === normalizedPattern;
 }
 
-function pathMatchesCriteria(pathname, prefixes) {
+export function pathMatchesCriteria(pathname, prefixes) {
   return prefixes.length === 0 || prefixes.some((prefix) => {
     const normalized = String(prefix).trim().replace(/\/+$/u, "") || "/";
     return normalized === "/"
@@ -213,6 +215,30 @@ function validateCanonicalPathSafety(rawValue, target, label) {
   }
   if (target.pathname.normalize("NFKC") !== target.pathname) {
     throw actionError(`${label} URL contains ambiguous Unicode path characters.`, "unsafe-navigation");
+  }
+  const rawPath = raw
+    .replace(/^[a-z][a-z0-9+.-]*:\/\/[^/]*(?=\/|$)/iu, "")
+    .split(/[?#]/u, 1)[0];
+  if (/%(?![0-9a-f]{2})/iu.test(rawPath)) {
+    throw actionError(`${label} URL contains malformed percent encoding.`, "unsafe-encoding");
+  }
+  let decodedRawPath = rawPath;
+  try {
+    for (let pass = 0; pass < 8 && /%[0-9a-f]{2}/iu.test(decodedRawPath); pass += 1) {
+      decodedRawPath = decodeURIComponent(decodedRawPath);
+    }
+  } catch {
+    throw actionError(`${label} URL contains malformed or unsafe percent encoding.`, "unsafe-encoding");
+  }
+  if (
+    /(?:^|[/])\.\.(?:[/]|$)/u.test(decodedRawPath)
+    || decodedRawPath.includes("//")
+    || decodedRawPath.includes("\\")
+    || decodedRawPath.includes("?")
+    || decodedRawPath.includes("#")
+    || decodedRawPath.includes("%")
+  ) {
+    throw actionError(`${label} URL contains an ownership-ambiguous encoded path.`, "unsafe-navigation");
   }
   let decoded = target.pathname;
   if (/%(?![0-9a-f]{2})/iu.test(target.pathname)) {
@@ -313,7 +339,9 @@ export function validatePostNavigationUrl(value, rootUrl, options = {}) {
 
 export function isDestructiveClickValue(value) {
   const normalized = String(value ?? "").replace(/\s+/gu, " ").trim();
-  return !normalized || destructiveClickPattern.test(normalized);
+  return !normalized
+    || destructiveClickPattern.test(normalized)
+    || destructiveCamelPattern.test(normalized);
 }
 
 export function validateEffectiveActions(actions, {
@@ -366,6 +394,11 @@ export function validateEffectiveActions(actions, {
       normalized.resolvedUrl = resolveStrictNavigationUrl(normalized.value, rootUrl, {
         criteria: pageTarget,
         label: `${normalized.source} click-href`,
+      });
+    } else if (normalized.type === "probe-get") {
+      normalized.probeUrl = resolveStrictNavigationUrl(normalized.value, rootUrl, {
+        criteria: pageTarget,
+        label: `${normalized.source} probe-get`,
       });
     } else if (normalized.type.startsWith("click")) {
       if (isDestructiveClickValue(normalized.value)) {

@@ -1,5 +1,6 @@
 import { setTimeout as delay } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
+import { pathMatchesCriteria } from "./portal-discovery-actions.mjs";
 
 const defaultTimeoutMs = 3000;
 const defaultStabilityMs = 750;
@@ -83,7 +84,7 @@ function targetMatches(target, criteria) {
   const hosts = criteria.matchHosts ?? [];
   const prefixes = criteria.matchPathPrefixes ?? [];
   if (hosts.length > 0 && !hosts.includes(url.hostname.toLowerCase())) return false;
-  if (prefixes.length > 0 && !prefixes.some((prefix) => url.pathname.startsWith(prefix))) return false;
+  if (!pathMatchesCriteria(url.pathname, prefixes)) return false;
   const pathnames = criteria.matchPathnames ?? [];
   if (pathnames.length > 0 && !pathnames.includes(url.pathname)) return false;
   if (criteria.urlPattern && !matchesConfiguredPattern(target.url, criteria.urlPattern)) return false;
@@ -238,7 +239,7 @@ function trustedEntryUrl(entryUrl, featureCriteria, bootstrapCriteria) {
   const featurePrefixes = featureCriteria.matchPathPrefixes ?? [];
   const featurePathnames = featureCriteria.matchPathnames ?? [];
   if (
-    (featurePrefixes.length > 0 && !featurePrefixes.some((prefix) => parsed.pathname.startsWith(prefix)))
+    !pathMatchesCriteria(parsed.pathname, featurePrefixes)
     || (featurePathnames.length > 0 && !featurePathnames.includes(parsed.pathname))
   ) {
     failWith("entry-url-untrusted", "recipe entry URL path is outside the feature target criteria.");
