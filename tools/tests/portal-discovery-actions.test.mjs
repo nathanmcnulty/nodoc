@@ -11,6 +11,8 @@ import {
   buildEffectiveActions,
   estimateReplayExpansion,
   resolveStrictNavigationUrl,
+  normalizeTargetCriteria,
+  validateSelectedReplayRouteTemplates,
   validatePostNavigationUrl,
   validateEffectiveActions,
 } from "../portal-discovery-actions.mjs";
@@ -112,6 +114,26 @@ test("strict navigation rejects unsafe routes and page-target mismatches", () =>
     ),
     /active-GET safety/u,
   );
+  assert.deepEqual(normalizeTargetCriteria({
+    matchHosts: ["portal.example"],
+    matchPathnames: ["/root"],
+  }), {
+    matchHosts: ["portal.example"],
+    matchPathPrefixes: [],
+    matchPathnames: ["/root"],
+  });
+  assert.equal(
+    resolveStrictNavigationUrl("/root", "https://portal.example/root", {
+      criteria: { matchHosts: ["portal.example"], matchPathnames: ["/root"] },
+    }),
+    "https://portal.example/root",
+  );
+  assert.throws(
+    () => resolveStrictNavigationUrl("/wrong", "https://portal.example/root", {
+      criteria: { matchHosts: ["portal.example"], matchPathnames: ["/root"] },
+    }),
+    /page-target criteria/u,
+  );
 });
 
 test("post-navigation guard rejects redirect escapes and active/page-target redirects", () => {
@@ -132,6 +154,12 @@ test("post-navigation guard rejects redirect escapes and active/page-target redi
   assert.throws(
     () => validatePostNavigationUrl("https://portal.example/wrong", "https://portal.example/root", {
       criteria: { matchHosts: ["portal.example"], matchPathPrefixes: ["/safe"] },
+    }),
+    /page-target criteria/u,
+  );
+  assert.throws(
+    () => validatePostNavigationUrl("https://portal.example/wrong", "https://portal.example/root", {
+      criteria: { matchHosts: ["portal.example"], matchPathnames: ["/root"] },
     }),
     /page-target criteria/u,
   );
@@ -234,21 +262,6 @@ test("replay expansion is bounded before browser interaction", () => {
     expandedReplayActions: 0,
   });
 
-  test("query-bearing replay templates remain explicitly blocked", () => {
-    assert.throws(
-      () => validateRecipeTargetMetadata({
-        url: "https://security.microsoft.com/incidents",
-        actions: ["replay-seeded-routes=urls"],
-        seedRouteGroups: {
-          urls: {
-            limit: 2,
-            routeTemplates: ["https://security.microsoft.com/url/overview?url={encoded}"],
-          },
-        },
-      }),
-      /query|active-GET/u,
-    );
-  });
   assert.equal(exactBudget.countedActions, 3);
   assert.throws(
     () => planActionBudget({
@@ -258,6 +271,88 @@ test("replay expansion is bounded before browser interaction", () => {
     }),
     /bounded/u,
   );
+});
+
+test("query-bearing replay templates remain explicitly blocked", () => {
+  assert.throws(
+    () => validateRecipeTargetMetadata({
+      url: "https://security.microsoft.com/incidents",
+      actions: ["replay-seeded-routes=urls"],
+      seedRouteGroups: {
+        urls: {
+          limit: 2,
+          routeTemplates: ["https://security.microsoft.com/url/overview?url={encoded}"],
+        },
+      },
+    }),
+    /query|active-GET/u,
+  );
+});
+
+test("unselected invalid replay groups do not block non-replay actions", () => {
+  assert.doesNotThrow(() => validateSelectedReplayRouteTemplates({
+    ignored: {
+      limit: 1,
+      routeTemplates: ["https://portal.example/export?mode=blocked"],
+    },
+  }, buildEffectiveActions({ recipeActions: ["capture=only"] }), {
+    rootUrl: "https://portal.example/root",
+  }));
+  assert.doesNotThrow(() => validateSelectedReplayRouteTemplates({
+    selected: {
+      limit: 2,
+      routeTemplates: ["/items/{id}", "/items/{value}"],
+    },
+  }, buildEffectiveActions({ recipeActions: ["replay-seeded-routes=selected"] }), {
+    rootUrl: "https://portal.example/root",
+  }));
+});
+
+test("direct worker rejects selected unsafe replay templates before contacting CDP", async () => {
+  const rootDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-selected-replay-template-"));
+  const recipePath = path.join(rootDir, "recipe.json");
+  const artifactDir = path.join(rootDir, "artifacts");
+  let requests = 0;
+  const server = createServer((_request, response) => {
+    requests += 1;
+    response.writeHead(500);
+    response.end();
+  });
+  await writeFile(recipePath, `${JSON.stringify({
+    portal: "Selected replay template",
+    url: "https://portal.example/root",
+    actions: ["replay-seeded-routes=unsafe"],
+    seedRouteGroups: {
+      unsafe: {
+        limit: 2,
+        routeTemplates: ["https://portal.example/export?mode=blocked"],
+      },
+      ignored: {
+        limit: 2,
+        routeTemplates: ["https://other.example/wrong"],
+      },
+    },
+  })}\n`, "utf8");
+  await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+  const { port } = server.address();
+  try {
+    await assert.rejects(
+      execFileAsync(process.execPath, [
+        workerPath,
+        "--recipe",
+        recipePath,
+        "--out",
+        artifactDir,
+        "--cdp-endpoint",
+        `http://127.0.0.1:${port}`,
+      ], { cwd: repoRoot }),
+      /seedRouteGroups\.unsafe|query|active-GET/u,
+    );
+    assert.equal(requests, 0);
+  } finally {
+    await new Promise((resolve) => server.close(resolve));
+    await rm(rootDir, { recursive: true, force: true });
+  }
 });
 
 test("CLI replay limit is included in the pre-CDP authorization ceiling", async () => {
@@ -388,7 +483,7 @@ test("worker rejects a mismatched target-id before opening its websocket", async
         id: "mismatch",
         type: "page",
         title: "Wrong page",
-        url: "https://other.example/wrong",
+        url: "https://portal.example/wrong",
         webSocketDebuggerUrl: "ws://127.0.0.1:1/devtools/page/mismatch",
       }]));
       return;

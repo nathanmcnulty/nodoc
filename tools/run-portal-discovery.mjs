@@ -42,7 +42,7 @@ import {
 } from "./portal-discovery-recipe.mjs";
 import { planActionBudget } from "./portal-discovery-action-budget.mjs";
 import {
-  resolveStrictNavigationUrl,
+  validateSelectedReplayRouteTemplates,
   validateEffectiveActions,
   buildEffectiveActions,
 } from "./portal-discovery-actions.mjs";
@@ -406,8 +406,9 @@ async function selectRecipe(specRecord, explicitRecipe) {
 async function inspectRecipeSafety(recipePath) {
   const recipe = JSON.parse(await readFile(recipePath, "utf8"));
   const unsafeActions = [];
+  let actions = [];
   try {
-    const actions = buildEffectiveActions({
+    actions = buildEffectiveActions({
       recipeActions: recipe.actions ?? [],
       includeInitialNavigation: true,
       initialUrl: recipe.url,
@@ -417,23 +418,12 @@ async function inspectRecipeSafety(recipePath) {
       pageTarget: recipe.pageTarget === undefined ? null : resolvePageTargetCriteria(recipe),
       bootstrapTarget: recipe.pageTarget === undefined ? null : resolvePageTargetBootstrapCriteria(recipe),
     });
+    validateSelectedReplayRouteTemplates(recipe.seedRouteGroups, actions, {
+      rootUrl: recipe.url,
+      criteria: recipe.pageTarget === undefined ? null : resolvePageTargetCriteria(recipe),
+    });
   } catch (error) {
     unsafeActions.push(error instanceof Error ? error.message : String(error));
-  }
-
-  for (const [groupName, group] of Object.entries(recipe.seedRouteGroups ?? {})) {
-    for (const routeTemplate of group?.routeTemplates ?? []) {
-      try {
-        resolveStrictNavigationUrl(routeTemplate, recipe.url, {
-          criteria: recipe.pageTarget === undefined ? null : resolvePageTargetCriteria(recipe),
-          label: `seedRouteGroups.${groupName}`,
-        });
-      } catch (error) {
-        unsafeActions.push(
-          `seedRouteGroups.${groupName}=${routeTemplate} (${error instanceof Error ? error.message : String(error)})`,
-        );
-      }
-    }
   }
 
   return {

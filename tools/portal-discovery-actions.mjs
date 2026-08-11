@@ -139,6 +139,24 @@ function pathMatchesCriteria(pathname, prefixes) {
   return prefixes.length === 0 || prefixes.some((prefix) => pathname.startsWith(String(prefix)));
 }
 
+function pathnameMatchesCriteria(pathname, pathnames) {
+  return pathnames.length === 0 || pathnames.includes(pathname);
+}
+
+export function normalizeTargetCriteria(criteria = null) {
+  return {
+    matchHosts: Array.isArray(criteria?.matchHosts)
+      ? criteria.matchHosts.map((value) => String(value).trim()).filter(Boolean)
+      : [],
+    matchPathPrefixes: Array.isArray(criteria?.matchPathPrefixes)
+      ? criteria.matchPathPrefixes.map((value) => String(value).trim()).filter(Boolean)
+      : [],
+    matchPathnames: Array.isArray(criteria?.matchPathnames)
+      ? criteria.matchPathnames.map((value) => String(value).trim()).filter(Boolean)
+      : [],
+  };
+}
+
 export function resolveStrictNavigationUrl(value, rootUrl, {
   criteria = null,
   label = "navigation",
@@ -176,11 +194,12 @@ export function resolveStrictNavigationUrl(value, rootUrl, {
       classification.code,
     );
   }
-  const matchHosts = Array.isArray(criteria?.matchHosts) ? criteria.matchHosts : [];
-  const matchPathPrefixes = Array.isArray(criteria?.matchPathPrefixes) ? criteria.matchPathPrefixes : [];
+  const normalizedCriteria = normalizeTargetCriteria(criteria);
   if (
-    (matchHosts.length > 0 && !matchHosts.some((pattern) => hostnameMatchesPattern(target.hostname, pattern)))
-    || !pathMatchesCriteria(target.pathname, matchPathPrefixes)
+    (normalizedCriteria.matchHosts.length > 0
+      && !normalizedCriteria.matchHosts.some((pattern) => hostnameMatchesPattern(target.hostname, pattern)))
+    || !pathMatchesCriteria(target.pathname, normalizedCriteria.matchPathPrefixes)
+    || !pathnameMatchesCriteria(target.pathname, normalizedCriteria.matchPathnames)
   ) {
     throw actionError(`${label} URL does not match the applicable page-target criteria.`, "page-target-mismatch");
   }
@@ -272,4 +291,43 @@ export function estimateReplayExpansion(actions, recipe = {}) {
     }
   }
   return expandedReplayActions;
+}
+
+export function validateSelectedReplayRouteTemplates(groups, actions, {
+  rootUrl,
+  criteria = null,
+} = {}) {
+  const selectedGroups = new Set(
+    actions
+      .filter((action) => action.type === "replay-seeded-routes")
+      .map((action) => String(action.value).trim()),
+  );
+  for (const groupName of selectedGroups) {
+    const group = groups?.[groupName];
+    if (!group || !Array.isArray(group.routeTemplates) || group.routeTemplates.length === 0) {
+      throw actionError(
+        `Replay route group "${groupName}" must declare at least one route template.`,
+        "invalid-replay-template",
+      );
+    }
+    for (const routeTemplate of group.routeTemplates) {
+      if (typeof routeTemplate !== "string" || !routeTemplate.trim()) {
+        throw actionError(
+          `Replay route group "${groupName}" contains an invalid route template.`,
+          "invalid-replay-template",
+        );
+      }
+      const placeholders = [...routeTemplate.matchAll(/\{([^}]+)\}/gu)].map((match) => match[1]);
+      if (placeholders.some((placeholder) => !["encoded", "id", "value"].includes(placeholder))) {
+        throw actionError(
+          `Replay route group "${groupName}" contains an unsupported route placeholder.`,
+          "invalid-replay-template",
+        );
+      }
+      resolveStrictNavigationUrl(routeTemplate, rootUrl, {
+        criteria,
+        label: `seedRouteGroups.${groupName}`,
+      });
+    }
+  }
 }

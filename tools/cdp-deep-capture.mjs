@@ -24,6 +24,7 @@ import {
   parseActionSpec,
   resolveStrictNavigationUrl,
   validatePostNavigationUrl,
+  validateSelectedReplayRouteTemplates,
   validateEffectiveActions,
 } from "./portal-discovery-actions.mjs";
 import {
@@ -553,6 +554,14 @@ function finalizeActionConfiguration(args) {
     seedLinkLimit: args.seedLinkLimit,
     seedRouteGroups: args.seedRouteGroups,
   };
+  validateSelectedReplayRouteTemplates(
+    args.recipeConfig?.seedRouteGroups ?? args.seedRouteGroups,
+    args.actions,
+    {
+      rootUrl: args.url,
+      criteria: args.pageTargetCriteria,
+    },
+  );
   args.actionBudget = planActionBudget(
     args.effectiveReplayConfig,
     { maxActions: args.recipeConfig?.maxActions, cliActions: args.cliActions },
