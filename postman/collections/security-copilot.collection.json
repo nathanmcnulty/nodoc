@@ -903,732 +903,6 @@
             ]
         },
         {
-            "name": "provisioning",
-            "description": "",
-            "item": [
-                {
-                    "name": "create",
-                    "description": "",
-                    "item": [
-                        {
-                            "id": "137520cb-5c83-4e94-842d-3e0430e4fd0a",
-                            "name": "Run Security Copilot create-capacity what-if",
-                            "request": {
-                                "name": "Run Security Copilot create-capacity what-if",
-                                "description": {
-                                    "content": "Triggers the initial Security Platform provisioning preflight used by the create-capacity flow.\nIn the captured run this was opened from the startup dialog and then canceled before submission;\nthe request body was `{}` and the response body was the literal string `OperationWhatIfSuccess`.\n",
-                                    "type": "text/plain"
-                                },
-                                "url": {
-                                    "path": [
-                                        "provisioning",
-                                        "create"
-                                    ],
-                                    "host": [
-                                        "{{baseUrl}}"
-                                    ],
-                                    "query": [
-                                        {
-                                            "disabled": false,
-                                            "description": {
-                                                "content": "(Required) Preview API version observed on Security Platform provisioning helpers.",
-                                                "type": "text/plain"
-                                            },
-                                            "key": "api-version",
-                                            "value": "2024-03-01-preview"
-                                        }
-                                    ],
-                                    "variable": []
-                                },
-                                "header": [
-                                    {
-                                        "key": "Content-Type",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Accept",
-                                        "value": "text/plain"
-                                    }
-                                ],
-                                "method": "POST",
-                                "body": {
-                                    "mode": "raw",
-                                    "raw": "{}",
-                                    "options": {
-                                        "raw": {
-                                            "headerFamily": "json",
-                                            "language": "json"
-                                        }
-                                    }
-                                },
-                                "auth": null
-                            },
-                            "response": [
-                                {
-                                    "id": "4bb1458c-a55f-4a8c-bb5b-b7acd9d3a216",
-                                    "name": "The provisioning preflight completed successfully.",
-                                    "originalRequest": {
-                                        "url": {
-                                            "path": [
-                                                "provisioning",
-                                                "create"
-                                            ],
-                                            "host": [
-                                                "{{baseUrl}}"
-                                            ],
-                                            "query": [
-                                                {
-                                                    "disabled": false,
-                                                    "description": {
-                                                        "content": "(Required) Preview API version observed on Security Platform provisioning helpers.",
-                                                        "type": "text/plain"
-                                                    },
-                                                    "key": "api-version",
-                                                    "value": "2024-03-01-preview"
-                                                }
-                                            ],
-                                            "variable": []
-                                        },
-                                        "header": [
-                                            {
-                                                "key": "Content-Type",
-                                                "value": "application/json"
-                                            },
-                                            {
-                                                "key": "Accept",
-                                                "value": "text/plain"
-                                            }
-                                        ],
-                                        "method": "POST",
-                                        "body": {
-                                            "mode": "raw",
-                                            "raw": "{}",
-                                            "options": {
-                                                "raw": {
-                                                    "headerFamily": "json",
-                                                    "language": "json"
-                                                }
-                                            }
-                                        }
-                                    },
-                                    "status": "OK",
-                                    "code": 200,
-                                    "header": [
-                                        {
-                                            "key": "Content-Type",
-                                            "value": "text/plain"
-                                        }
-                                    ],
-                                    "body": "OperationWhatIfSuccess",
-                                    "cookie": [],
-                                    "_postman_previewlanguage": "text"
-                                }
-                            ],
-                            "event": [],
-                            "protocolProfileBehavior": {
-                                "disableBodyPruning": true
-                            }
-                        }
-                    ]
-                },
-                {
-                    "name": "account",
-                    "description": "",
-                    "item": [
-                        {
-                            "id": "8c835347-77d4-42a5-863f-2ab702a4cbf0",
-                            "name": "Get Security Platform account and pod inventory",
-                            "request": {
-                                "name": "Get Security Platform account and pod inventory",
-                                "description": {
-                                    "content": "Retrieves the Security Platform account record and regional pod inventory backing the current tenant.",
-                                    "type": "text/plain"
-                                },
-                                "url": {
-                                    "path": [
-                                        "provisioning",
-                                        "account"
-                                    ],
-                                    "host": [
-                                        "{{baseUrl}}"
-                                    ],
-                                    "query": [
-                                        {
-                                            "disabled": false,
-                                            "description": {
-                                                "content": "(Required) Preview API version observed on Security Platform provisioning helpers.",
-                                                "type": "text/plain"
-                                            },
-                                            "key": "api-version",
-                                            "value": "2024-03-01-preview"
-                                        }
-                                    ],
-                                    "variable": []
-                                },
-                                "header": [
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json"
-                                    }
-                                ],
-                                "method": "GET",
-                                "body": {},
-                                "auth": null
-                            },
-                            "response": [
-                                {
-                                    "id": "7ef99b77-4198-4ec4-8aa1-ce78db492f13",
-                                    "name": "Account inventory returned successfully.",
-                                    "originalRequest": {
-                                        "url": {
-                                            "path": [
-                                                "provisioning",
-                                                "account"
-                                            ],
-                                            "host": [
-                                                "{{baseUrl}}"
-                                            ],
-                                            "query": [
-                                                {
-                                                    "disabled": false,
-                                                    "description": {
-                                                        "content": "(Required) Preview API version observed on Security Platform provisioning helpers.",
-                                                        "type": "text/plain"
-                                                    },
-                                                    "key": "api-version",
-                                                    "value": "2024-03-01-preview"
-                                                }
-                                            ],
-                                            "variable": []
-                                        },
-                                        "header": [
-                                            {
-                                                "key": "Accept",
-                                                "value": "application/json"
-                                            }
-                                        ],
-                                        "method": "GET",
-                                        "body": {}
-                                    },
-                                    "status": "OK",
-                                    "code": 200,
-                                    "header": [
-                                        {
-                                            "key": "Content-Type",
-                                            "value": "application/json"
-                                        }
-                                    ],
-                                    "body": "{\n  \"key_0\": 1421.7184253443204\n}",
-                                    "cookie": [],
-                                    "_postman_previewlanguage": "json"
-                                }
-                            ],
-                            "event": [],
-                            "protocolProfileBehavior": {
-                                "disableBodyPruning": true
-                            }
-                        }
-                    ]
-                },
-                {
-                    "name": "checkTenant",
-                    "description": "",
-                    "item": [
-                        {
-                            "id": "9a4b4fb1-cba8-499b-9a57-e10df459ccf6",
-                            "name": "Check Security Platform tenant eligibility",
-                            "request": {
-                                "name": "Check Security Platform tenant eligibility",
-                                "description": {
-                                    "content": "Retrieves the Security Platform tenant account type and tenant geo used during startup and provisioning decisions.",
-                                    "type": "text/plain"
-                                },
-                                "url": {
-                                    "path": [
-                                        "provisioning",
-                                        "checkTenant"
-                                    ],
-                                    "host": [
-                                        "{{baseUrl}}"
-                                    ],
-                                    "query": [
-                                        {
-                                            "disabled": false,
-                                            "description": {
-                                                "content": "(Required) Preview API version observed on Security Platform provisioning helpers.",
-                                                "type": "text/plain"
-                                            },
-                                            "key": "api-version",
-                                            "value": "2024-03-01-preview"
-                                        }
-                                    ],
-                                    "variable": []
-                                },
-                                "header": [
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json"
-                                    }
-                                ],
-                                "method": "GET",
-                                "body": {},
-                                "auth": null
-                            },
-                            "response": [
-                                {
-                                    "id": "164e590c-da3a-41d5-b463-4ac70e25ede9",
-                                    "name": "Tenant provisioning context returned successfully.",
-                                    "originalRequest": {
-                                        "url": {
-                                            "path": [
-                                                "provisioning",
-                                                "checkTenant"
-                                            ],
-                                            "host": [
-                                                "{{baseUrl}}"
-                                            ],
-                                            "query": [
-                                                {
-                                                    "disabled": false,
-                                                    "description": {
-                                                        "content": "(Required) Preview API version observed on Security Platform provisioning helpers.",
-                                                        "type": "text/plain"
-                                                    },
-                                                    "key": "api-version",
-                                                    "value": "2024-03-01-preview"
-                                                }
-                                            ],
-                                            "variable": []
-                                        },
-                                        "header": [
-                                            {
-                                                "key": "Accept",
-                                                "value": "application/json"
-                                            }
-                                        ],
-                                        "method": "GET",
-                                        "body": {}
-                                    },
-                                    "status": "OK",
-                                    "code": 200,
-                                    "header": [
-                                        {
-                                            "key": "Content-Type",
-                                            "value": "application/json"
-                                        }
-                                    ],
-                                    "body": "{\n  \"key_0\": 7674.619337764436,\n  \"key_1\": false,\n  \"key_2\": 4293\n}",
-                                    "cookie": [],
-                                    "_postman_previewlanguage": "json"
-                                }
-                            ],
-                            "event": [],
-                            "protocolProfileBehavior": {
-                                "disableBodyPruning": true
-                            }
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "account",
-            "description": "",
-            "item": [
-                {
-                    "name": "workspaces",
-                    "description": "",
-                    "item": [
-                        {
-                            "id": "792d7074-1faf-4128-a445-64f94dd2f1d8",
-                            "name": "List Security Copilot workspaces",
-                            "request": {
-                                "name": "List Security Copilot workspaces",
-                                "description": {
-                                    "content": "Lists Security Copilot workspaces attached to the current Security Platform account.",
-                                    "type": "text/plain"
-                                },
-                                "url": {
-                                    "path": [
-                                        "account",
-                                        "workspaces"
-                                    ],
-                                    "host": [
-                                        "{{baseUrl}}"
-                                    ],
-                                    "query": [
-                                        {
-                                            "disabled": false,
-                                            "description": {
-                                                "content": "(Required) Preview API version observed on workspace list and workspace detail requests.",
-                                                "type": "text/plain"
-                                            },
-                                            "key": "api-version",
-                                            "value": "2023-12-01-preview"
-                                        }
-                                    ],
-                                    "variable": []
-                                },
-                                "header": [
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json"
-                                    }
-                                ],
-                                "method": "GET",
-                                "body": {},
-                                "auth": null
-                            },
-                            "response": [
-                                {
-                                    "id": "d635074a-2168-4b4d-9324-132274b8cb0b",
-                                    "name": "Workspace list returned successfully.",
-                                    "originalRequest": {
-                                        "url": {
-                                            "path": [
-                                                "account",
-                                                "workspaces"
-                                            ],
-                                            "host": [
-                                                "{{baseUrl}}"
-                                            ],
-                                            "query": [
-                                                {
-                                                    "disabled": false,
-                                                    "description": {
-                                                        "content": "(Required) Preview API version observed on workspace list and workspace detail requests.",
-                                                        "type": "text/plain"
-                                                    },
-                                                    "key": "api-version",
-                                                    "value": "2023-12-01-preview"
-                                                }
-                                            ],
-                                            "variable": []
-                                        },
-                                        "header": [
-                                            {
-                                                "key": "Accept",
-                                                "value": "application/json"
-                                            }
-                                        ],
-                                        "method": "GET",
-                                        "body": {}
-                                    },
-                                    "status": "OK",
-                                    "code": 200,
-                                    "header": [
-                                        {
-                                            "key": "Content-Type",
-                                            "value": "application/json"
-                                        }
-                                    ],
-                                    "body": "{\n  \"key_0\": 5759,\n  \"key_1\": 5762,\n  \"key_2\": 6785\n}",
-                                    "cookie": [],
-                                    "_postman_previewlanguage": "json"
-                                }
-                            ],
-                            "event": [],
-                            "protocolProfileBehavior": {
-                                "disableBodyPruning": true
-                            }
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "api",
-            "description": "",
-            "item": [
-                {
-                    "name": "gateway",
-                    "description": "",
-                    "item": [
-                        {
-                            "name": "actions",
-                            "description": "",
-                            "item": [
-                                {
-                                    "name": "containers",
-                                    "description": "",
-                                    "item": [
-                                        {
-                                            "name": "me",
-                                            "description": "",
-                                            "item": [
-                                                {
-                                                    "id": "65ba891b-186f-4e0d-a555-2efb06d5cbf8",
-                                                    "name": "Evaluate current-container permissions",
-                                                    "request": {
-                                                        "name": "Evaluate current-container permissions",
-                                                        "description": {
-                                                            "content": "Evaluates container permissions for the current user during startup and workspace write-light-up checks.",
-                                                            "type": "text/plain"
-                                                        },
-                                                        "url": {
-                                                            "path": [
-                                                                "api",
-                                                                "gateway",
-                                                                "actions",
-                                                                "containers",
-                                                                "me"
-                                                            ],
-                                                            "host": [
-                                                                "{{baseUrl}}"
-                                                            ],
-                                                            "query": [
-                                                                {
-                                                                    "disabled": false,
-                                                                    "description": {
-                                                                        "content": "(Required) Preview API version observed on Security Platform provisioning helpers.",
-                                                                        "type": "text/plain"
-                                                                    },
-                                                                    "key": "api-version",
-                                                                    "value": "2024-03-01-preview"
-                                                                }
-                                                            ],
-                                                            "variable": []
-                                                        },
-                                                        "header": [
-                                                            {
-                                                                "key": "Content-Type",
-                                                                "value": "application/json"
-                                                            },
-                                                            {
-                                                                "key": "Accept",
-                                                                "value": "application/json"
-                                                            }
-                                                        ],
-                                                        "method": "POST",
-                                                        "body": {
-                                                            "mode": "raw",
-                                                            "raw": "[\n  \"string\",\n  \"string\"\n]",
-                                                            "options": {
-                                                                "raw": {
-                                                                    "headerFamily": "json",
-                                                                    "language": "json"
-                                                                }
-                                                            }
-                                                        },
-                                                        "auth": null
-                                                    },
-                                                    "response": [
-                                                        {
-                                                            "id": "a2f57f6f-b8e3-41c0-9218-d2264c5847ac",
-                                                            "name": "Permission evaluation returned successfully.",
-                                                            "originalRequest": {
-                                                                "url": {
-                                                                    "path": [
-                                                                        "api",
-                                                                        "gateway",
-                                                                        "actions",
-                                                                        "containers",
-                                                                        "me"
-                                                                    ],
-                                                                    "host": [
-                                                                        "{{baseUrl}}"
-                                                                    ],
-                                                                    "query": [
-                                                                        {
-                                                                            "disabled": false,
-                                                                            "description": {
-                                                                                "content": "(Required) Preview API version observed on Security Platform provisioning helpers.",
-                                                                                "type": "text/plain"
-                                                                            },
-                                                                            "key": "api-version",
-                                                                            "value": "2024-03-01-preview"
-                                                                        }
-                                                                    ],
-                                                                    "variable": []
-                                                                },
-                                                                "header": [
-                                                                    {
-                                                                        "key": "Content-Type",
-                                                                        "value": "application/json"
-                                                                    },
-                                                                    {
-                                                                        "key": "Accept",
-                                                                        "value": "application/json"
-                                                                    }
-                                                                ],
-                                                                "method": "POST",
-                                                                "body": {
-                                                                    "mode": "raw",
-                                                                    "raw": "[\n  \"string\",\n  \"string\"\n]",
-                                                                    "options": {
-                                                                        "raw": {
-                                                                            "headerFamily": "json",
-                                                                            "language": "json"
-                                                                        }
-                                                                    }
-                                                                }
-                                                            },
-                                                            "status": "OK",
-                                                            "code": 200,
-                                                            "header": [
-                                                                {
-                                                                    "key": "Content-Type",
-                                                                    "value": "application/json"
-                                                                }
-                                                            ],
-                                                            "body": "{\n  \"key_0\": \"string\"\n}",
-                                                            "cookie": [],
-                                                            "_postman_previewlanguage": "json"
-                                                        }
-                                                    ],
-                                                    "event": [],
-                                                    "protocolProfileBehavior": {
-                                                        "disableBodyPruning": true
-                                                    }
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                },
-                                {
-                                    "name": "collections",
-                                    "description": "",
-                                    "item": [
-                                        {
-                                            "name": "me",
-                                            "description": "",
-                                            "item": [
-                                                {
-                                                    "id": "0a15c369-c13e-43da-bbee-e3590ef9aad4",
-                                                    "name": "Evaluate collection permissions",
-                                                    "request": {
-                                                        "name": "Evaluate collection permissions",
-                                                        "description": {
-                                                            "content": "Evaluates collection-level permissions for the current user during startup and collection selection flows.",
-                                                            "type": "text/plain"
-                                                        },
-                                                        "url": {
-                                                            "path": [
-                                                                "api",
-                                                                "gateway",
-                                                                "actions",
-                                                                "collections",
-                                                                "me"
-                                                            ],
-                                                            "host": [
-                                                                "{{baseUrl}}"
-                                                            ],
-                                                            "query": [
-                                                                {
-                                                                    "disabled": false,
-                                                                    "description": {
-                                                                        "content": "(Required) Preview API version observed on Security Platform provisioning helpers.",
-                                                                        "type": "text/plain"
-                                                                    },
-                                                                    "key": "api-version",
-                                                                    "value": "2024-03-01-preview"
-                                                                }
-                                                            ],
-                                                            "variable": []
-                                                        },
-                                                        "header": [
-                                                            {
-                                                                "key": "Content-Type",
-                                                                "value": "application/json"
-                                                            },
-                                                            {
-                                                                "key": "Accept",
-                                                                "value": "application/json"
-                                                            }
-                                                        ],
-                                                        "method": "POST",
-                                                        "body": {
-                                                            "mode": "raw",
-                                                            "raw": "[\n  \"string\",\n  \"string\"\n]",
-                                                            "options": {
-                                                                "raw": {
-                                                                    "headerFamily": "json",
-                                                                    "language": "json"
-                                                                }
-                                                            }
-                                                        },
-                                                        "auth": null
-                                                    },
-                                                    "response": [
-                                                        {
-                                                            "id": "1e0a80a4-93b9-4137-8d1e-050c1e354f10",
-                                                            "name": "Collection permission evaluation returned successfully.",
-                                                            "originalRequest": {
-                                                                "url": {
-                                                                    "path": [
-                                                                        "api",
-                                                                        "gateway",
-                                                                        "actions",
-                                                                        "collections",
-                                                                        "me"
-                                                                    ],
-                                                                    "host": [
-                                                                        "{{baseUrl}}"
-                                                                    ],
-                                                                    "query": [
-                                                                        {
-                                                                            "disabled": false,
-                                                                            "description": {
-                                                                                "content": "(Required) Preview API version observed on Security Platform provisioning helpers.",
-                                                                                "type": "text/plain"
-                                                                            },
-                                                                            "key": "api-version",
-                                                                            "value": "2024-03-01-preview"
-                                                                        }
-                                                                    ],
-                                                                    "variable": []
-                                                                },
-                                                                "header": [
-                                                                    {
-                                                                        "key": "Content-Type",
-                                                                        "value": "application/json"
-                                                                    },
-                                                                    {
-                                                                        "key": "Accept",
-                                                                        "value": "application/json"
-                                                                    }
-                                                                ],
-                                                                "method": "POST",
-                                                                "body": {
-                                                                    "mode": "raw",
-                                                                    "raw": "[\n  \"string\",\n  \"string\"\n]",
-                                                                    "options": {
-                                                                        "raw": {
-                                                                            "headerFamily": "json",
-                                                                            "language": "json"
-                                                                        }
-                                                                    }
-                                                                }
-                                                            },
-                                                            "status": "OK",
-                                                            "code": 200,
-                                                            "header": [
-                                                                {
-                                                                    "key": "Content-Type",
-                                                                    "value": "application/json"
-                                                                }
-                                                            ],
-                                                            "body": "{\n  \"key_0\": 6182\n}",
-                                                            "cookie": [],
-                                                            "_postman_previewlanguage": "json"
-                                                        }
-                                                    ],
-                                                    "event": [],
-                                                    "protocolProfileBehavior": {
-                                                        "disableBodyPruning": true
-                                                    }
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                }
-                            ]
-                        }
-                    ]
-                }
-            ]
-        },
-        {
             "name": "pods",
             "description": "",
             "item": [
@@ -1645,148 +919,172 @@
                                     "description": "",
                                     "item": [
                                         {
-                                            "id": "4ba82ec8-4b35-456f-ac98-632bc7523034",
-                                            "name": "Get workspace metadata",
-                                            "request": {
-                                                "name": "Get workspace metadata",
-                                                "description": {
-                                                    "content": "Retrieves the Security Copilot workspace record from the regional Security Platform content plane.",
-                                                    "type": "text/plain"
-                                                },
-                                                "url": {
-                                                    "path": [
-                                                        "pods",
-                                                        ":podId",
-                                                        "workspaces",
-                                                        ":workspaceName"
-                                                    ],
-                                                    "host": [
-                                                        "{{baseUrl}}"
-                                                    ],
-                                                    "query": [
-                                                        {
-                                                            "disabled": false,
-                                                            "description": {
-                                                                "content": "(Required) Preview API version observed on workspace list and workspace detail requests.",
-                                                                "type": "text/plain"
-                                                            },
-                                                            "key": "api-version",
-                                                            "value": "2023-12-01-preview"
-                                                        }
-                                                    ],
-                                                    "variable": [
-                                                        {
-                                                            "type": "any",
-                                                            "value": "11111111-2222-3333-4444-555555555555",
-                                                            "key": "podId",
-                                                            "disabled": false,
-                                                            "description": {
-                                                                "content": "(Required) Regional Security Platform pod identifier for the active account.",
-                                                                "type": "text/plain"
-                                                            }
-                                                        },
-                                                        {
-                                                            "type": "any",
-                                                            "value": "security-copilot",
-                                                            "key": "workspaceName",
-                                                            "disabled": false,
-                                                            "description": {
-                                                                "content": "(Required) Security Copilot workspace name.",
-                                                                "type": "text/plain"
-                                                            }
-                                                        }
-                                                    ]
-                                                },
-                                                "header": [
-                                                    {
-                                                        "key": "Accept",
-                                                        "value": "application/json"
-                                                    }
-                                                ],
-                                                "method": "GET",
-                                                "body": {},
-                                                "auth": null
-                                            },
-                                            "response": [
-                                                {
-                                                    "id": "641329da-d6f2-4a11-b364-160eca5b19b7",
-                                                    "name": "Workspace metadata returned successfully.",
-                                                    "originalRequest": {
-                                                        "url": {
-                                                            "path": [
-                                                                "pods",
-                                                                ":podId",
-                                                                "workspaces",
-                                                                ":workspaceName"
-                                                            ],
-                                                            "host": [
-                                                                "{{baseUrl}}"
-                                                            ],
-                                                            "query": [
-                                                                {
-                                                                    "disabled": false,
-                                                                    "description": {
-                                                                        "content": "(Required) Preview API version observed on workspace list and workspace detail requests.",
-                                                                        "type": "text/plain"
-                                                                    },
-                                                                    "key": "api-version",
-                                                                    "value": "2023-12-01-preview"
-                                                                }
-                                                            ],
-                                                            "variable": [
-                                                                {
-                                                                    "disabled": false,
-                                                                    "description": {
-                                                                        "content": "(Required) Regional Security Platform pod identifier for the active account.",
-                                                                        "type": "text/plain"
-                                                                    },
-                                                                    "type": "any",
-                                                                    "value": "11111111-2222-3333-4444-555555555555",
-                                                                    "key": "podId"
-                                                                },
-                                                                {
-                                                                    "disabled": false,
-                                                                    "description": {
-                                                                        "content": "(Required) Security Copilot workspace name.",
-                                                                        "type": "text/plain"
-                                                                    },
-                                                                    "type": "any",
-                                                                    "value": "security-copilot",
-                                                                    "key": "workspaceName"
-                                                                }
-                                                            ]
-                                                        },
-                                                        "header": [
-                                                            {
-                                                                "key": "Accept",
-                                                                "value": "application/json"
-                                                            }
-                                                        ],
-                                                        "method": "GET",
-                                                        "body": {}
-                                                    },
-                                                    "status": "OK",
-                                                    "code": 200,
-                                                    "header": [
-                                                        {
-                                                            "key": "Content-Type",
-                                                            "value": "application/json"
-                                                        }
-                                                    ],
-                                                    "body": "{\n  \"key_0\": 7674.619337764436,\n  \"key_1\": false,\n  \"key_2\": 4293\n}",
-                                                    "cookie": [],
-                                                    "_postman_previewlanguage": "json"
-                                                }
-                                            ],
-                                            "event": [],
-                                            "protocolProfileBehavior": {
-                                                "disableBodyPruning": true
-                                            }
-                                        },
-                                        {
                                             "name": "securitycopilot",
                                             "description": "",
                                             "item": [
+                                                {
+                                                    "name": "graphData",
+                                                    "description": "",
+                                                    "item": [
+                                                        {
+                                                            "name": "details",
+                                                            "description": "",
+                                                            "item": [
+                                                                {
+                                                                    "id": "1a3ec087-f6c1-4377-beb0-4b4460cdee8d",
+                                                                    "name": "Resolve Security Copilot workspace graph data details",
+                                                                    "request": {
+                                                                        "name": "Resolve Security Copilot workspace graph data details",
+                                                                        "description": {
+                                                                            "content": "Resolves user, role, group, and service-principal identifiers for a selected workspace context.",
+                                                                            "type": "text/plain"
+                                                                        },
+                                                                        "url": {
+                                                                            "path": [
+                                                                                "pods",
+                                                                                ":podId",
+                                                                                "workspaces",
+                                                                                ":workspaceName",
+                                                                                "securitycopilot",
+                                                                                "graphData",
+                                                                                "details"
+                                                                            ],
+                                                                            "host": [
+                                                                                "{{baseUrl}}"
+                                                                            ],
+                                                                            "query": [],
+                                                                            "variable": [
+                                                                                {
+                                                                                    "type": "any",
+                                                                                    "value": "11111111-2222-3333-4444-555555555555",
+                                                                                    "key": "podId",
+                                                                                    "disabled": false,
+                                                                                    "description": {
+                                                                                        "content": "(Required) Regional Security Platform pod identifier for the active account.",
+                                                                                        "type": "text/plain"
+                                                                                    }
+                                                                                },
+                                                                                {
+                                                                                    "type": "any",
+                                                                                    "value": "security-copilot",
+                                                                                    "key": "workspaceName",
+                                                                                    "disabled": false,
+                                                                                    "description": {
+                                                                                        "content": "(Required) Security Copilot workspace name.",
+                                                                                        "type": "text/plain"
+                                                                                    }
+                                                                                }
+                                                                            ]
+                                                                        },
+                                                                        "header": [
+                                                                            {
+                                                                                "key": "Content-Type",
+                                                                                "value": "application/json"
+                                                                            },
+                                                                            {
+                                                                                "key": "Accept",
+                                                                                "value": "application/json"
+                                                                            }
+                                                                        ],
+                                                                        "method": "POST",
+                                                                        "body": {
+                                                                            "mode": "raw",
+                                                                            "raw": "{\n  \"key_0\": 1648.2071731261094,\n  \"key_1\": 5286,\n  \"key_2\": 503.86276824881617\n}",
+                                                                            "options": {
+                                                                                "raw": {
+                                                                                    "headerFamily": "json",
+                                                                                    "language": "json"
+                                                                                }
+                                                                            }
+                                                                        },
+                                                                        "auth": null
+                                                                    },
+                                                                    "response": [
+                                                                        {
+                                                                            "id": "45313446-0d05-45c4-97a2-2b00efafbf85",
+                                                                            "name": "Workspace graph data details returned successfully.",
+                                                                            "originalRequest": {
+                                                                                "url": {
+                                                                                    "path": [
+                                                                                        "pods",
+                                                                                        ":podId",
+                                                                                        "workspaces",
+                                                                                        ":workspaceName",
+                                                                                        "securitycopilot",
+                                                                                        "graphData",
+                                                                                        "details"
+                                                                                    ],
+                                                                                    "host": [
+                                                                                        "{{baseUrl}}"
+                                                                                    ],
+                                                                                    "query": [],
+                                                                                    "variable": [
+                                                                                        {
+                                                                                            "disabled": false,
+                                                                                            "description": {
+                                                                                                "content": "(Required) Regional Security Platform pod identifier for the active account.",
+                                                                                                "type": "text/plain"
+                                                                                            },
+                                                                                            "type": "any",
+                                                                                            "value": "11111111-2222-3333-4444-555555555555",
+                                                                                            "key": "podId"
+                                                                                        },
+                                                                                        {
+                                                                                            "disabled": false,
+                                                                                            "description": {
+                                                                                                "content": "(Required) Security Copilot workspace name.",
+                                                                                                "type": "text/plain"
+                                                                                            },
+                                                                                            "type": "any",
+                                                                                            "value": "security-copilot",
+                                                                                            "key": "workspaceName"
+                                                                                        }
+                                                                                    ]
+                                                                                },
+                                                                                "header": [
+                                                                                    {
+                                                                                        "key": "Content-Type",
+                                                                                        "value": "application/json"
+                                                                                    },
+                                                                                    {
+                                                                                        "key": "Accept",
+                                                                                        "value": "application/json"
+                                                                                    }
+                                                                                ],
+                                                                                "method": "POST",
+                                                                                "body": {
+                                                                                    "mode": "raw",
+                                                                                    "raw": "{\n  \"key_0\": 1648.2071731261094,\n  \"key_1\": 5286,\n  \"key_2\": 503.86276824881617\n}",
+                                                                                    "options": {
+                                                                                        "raw": {
+                                                                                            "headerFamily": "json",
+                                                                                            "language": "json"
+                                                                                        }
+                                                                                    }
+                                                                                }
+                                                                            },
+                                                                            "status": "OK",
+                                                                            "code": 200,
+                                                                            "header": [
+                                                                                {
+                                                                                    "key": "Content-Type",
+                                                                                    "value": "application/json"
+                                                                                }
+                                                                            ],
+                                                                            "body": "{\n  \"key_0\": \"string\",\n  \"key_1\": 2553.0618367602065,\n  \"key_2\": 8594.821165766356,\n  \"key_3\": \"string\"\n}",
+                                                                            "cookie": [],
+                                                                            "_postman_previewlanguage": "json"
+                                                                        }
+                                                                    ],
+                                                                    "event": [],
+                                                                    "protocolProfileBehavior": {
+                                                                        "disableBodyPruning": true
+                                                                    }
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
+                                                },
                                                 {
                                                     "name": "personas",
                                                     "description": "",
@@ -4432,6 +3730,145 @@
                                                     ]
                                                 }
                                             ]
+                                        },
+                                        {
+                                            "id": "4ba82ec8-4b35-456f-ac98-632bc7523034",
+                                            "name": "Get workspace metadata",
+                                            "request": {
+                                                "name": "Get workspace metadata",
+                                                "description": {
+                                                    "content": "Retrieves the Security Copilot workspace record from the regional Security Platform content plane.",
+                                                    "type": "text/plain"
+                                                },
+                                                "url": {
+                                                    "path": [
+                                                        "pods",
+                                                        ":podId",
+                                                        "workspaces",
+                                                        ":workspaceName"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [
+                                                        {
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "(Required) Preview API version observed on workspace list and workspace detail requests.",
+                                                                "type": "text/plain"
+                                                            },
+                                                            "key": "api-version",
+                                                            "value": "2023-12-01-preview"
+                                                        }
+                                                    ],
+                                                    "variable": [
+                                                        {
+                                                            "type": "any",
+                                                            "value": "11111111-2222-3333-4444-555555555555",
+                                                            "key": "podId",
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "(Required) Regional Security Platform pod identifier for the active account.",
+                                                                "type": "text/plain"
+                                                            }
+                                                        },
+                                                        {
+                                                            "type": "any",
+                                                            "value": "security-copilot",
+                                                            "key": "workspaceName",
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "(Required) Security Copilot workspace name.",
+                                                                "type": "text/plain"
+                                                            }
+                                                        }
+                                                    ]
+                                                },
+                                                "header": [
+                                                    {
+                                                        "key": "Accept",
+                                                        "value": "application/json"
+                                                    }
+                                                ],
+                                                "method": "GET",
+                                                "body": {},
+                                                "auth": null
+                                            },
+                                            "response": [
+                                                {
+                                                    "id": "641329da-d6f2-4a11-b364-160eca5b19b7",
+                                                    "name": "Workspace metadata returned successfully.",
+                                                    "originalRequest": {
+                                                        "url": {
+                                                            "path": [
+                                                                "pods",
+                                                                ":podId",
+                                                                "workspaces",
+                                                                ":workspaceName"
+                                                            ],
+                                                            "host": [
+                                                                "{{baseUrl}}"
+                                                            ],
+                                                            "query": [
+                                                                {
+                                                                    "disabled": false,
+                                                                    "description": {
+                                                                        "content": "(Required) Preview API version observed on workspace list and workspace detail requests.",
+                                                                        "type": "text/plain"
+                                                                    },
+                                                                    "key": "api-version",
+                                                                    "value": "2023-12-01-preview"
+                                                                }
+                                                            ],
+                                                            "variable": [
+                                                                {
+                                                                    "disabled": false,
+                                                                    "description": {
+                                                                        "content": "(Required) Regional Security Platform pod identifier for the active account.",
+                                                                        "type": "text/plain"
+                                                                    },
+                                                                    "type": "any",
+                                                                    "value": "11111111-2222-3333-4444-555555555555",
+                                                                    "key": "podId"
+                                                                },
+                                                                {
+                                                                    "disabled": false,
+                                                                    "description": {
+                                                                        "content": "(Required) Security Copilot workspace name.",
+                                                                        "type": "text/plain"
+                                                                    },
+                                                                    "type": "any",
+                                                                    "value": "security-copilot",
+                                                                    "key": "workspaceName"
+                                                                }
+                                                            ]
+                                                        },
+                                                        "header": [
+                                                            {
+                                                                "key": "Accept",
+                                                                "value": "application/json"
+                                                            }
+                                                        ],
+                                                        "method": "GET",
+                                                        "body": {}
+                                                    },
+                                                    "status": "OK",
+                                                    "code": 200,
+                                                    "header": [
+                                                        {
+                                                            "key": "Content-Type",
+                                                            "value": "application/json"
+                                                        }
+                                                    ],
+                                                    "body": "{\n  \"key_0\": 7674.619337764436,\n  \"key_1\": false,\n  \"key_2\": 4293\n}",
+                                                    "cookie": [],
+                                                    "_postman_previewlanguage": "json"
+                                                }
+                                            ],
+                                            "event": [],
+                                            "protocolProfileBehavior": {
+                                                "disableBodyPruning": true
+                                            }
                                         }
                                     ]
                                 }
@@ -4597,6 +4034,732 @@
                                                             }
                                                         }
                                                     ]
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "provisioning",
+            "description": "",
+            "item": [
+                {
+                    "name": "create",
+                    "description": "",
+                    "item": [
+                        {
+                            "id": "137520cb-5c83-4e94-842d-3e0430e4fd0a",
+                            "name": "Run Security Copilot create-capacity what-if",
+                            "request": {
+                                "name": "Run Security Copilot create-capacity what-if",
+                                "description": {
+                                    "content": "Triggers the initial Security Platform provisioning preflight used by the create-capacity flow.\nIn the captured run this was opened from the startup dialog and then canceled before submission;\nthe request body was `{}` and the response body was the literal string `OperationWhatIfSuccess`.\n",
+                                    "type": "text/plain"
+                                },
+                                "url": {
+                                    "path": [
+                                        "provisioning",
+                                        "create"
+                                    ],
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "query": [
+                                        {
+                                            "disabled": false,
+                                            "description": {
+                                                "content": "(Required) Preview API version observed on Security Platform provisioning helpers.",
+                                                "type": "text/plain"
+                                            },
+                                            "key": "api-version",
+                                            "value": "2024-03-01-preview"
+                                        }
+                                    ],
+                                    "variable": []
+                                },
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Accept",
+                                        "value": "text/plain"
+                                    }
+                                ],
+                                "method": "POST",
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{}",
+                                    "options": {
+                                        "raw": {
+                                            "headerFamily": "json",
+                                            "language": "json"
+                                        }
+                                    }
+                                },
+                                "auth": null
+                            },
+                            "response": [
+                                {
+                                    "id": "4bb1458c-a55f-4a8c-bb5b-b7acd9d3a216",
+                                    "name": "The provisioning preflight completed successfully.",
+                                    "originalRequest": {
+                                        "url": {
+                                            "path": [
+                                                "provisioning",
+                                                "create"
+                                            ],
+                                            "host": [
+                                                "{{baseUrl}}"
+                                            ],
+                                            "query": [
+                                                {
+                                                    "disabled": false,
+                                                    "description": {
+                                                        "content": "(Required) Preview API version observed on Security Platform provisioning helpers.",
+                                                        "type": "text/plain"
+                                                    },
+                                                    "key": "api-version",
+                                                    "value": "2024-03-01-preview"
+                                                }
+                                            ],
+                                            "variable": []
+                                        },
+                                        "header": [
+                                            {
+                                                "key": "Content-Type",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Accept",
+                                                "value": "text/plain"
+                                            }
+                                        ],
+                                        "method": "POST",
+                                        "body": {
+                                            "mode": "raw",
+                                            "raw": "{}",
+                                            "options": {
+                                                "raw": {
+                                                    "headerFamily": "json",
+                                                    "language": "json"
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "status": "OK",
+                                    "code": 200,
+                                    "header": [
+                                        {
+                                            "key": "Content-Type",
+                                            "value": "text/plain"
+                                        }
+                                    ],
+                                    "body": "OperationWhatIfSuccess",
+                                    "cookie": [],
+                                    "_postman_previewlanguage": "text"
+                                }
+                            ],
+                            "event": [],
+                            "protocolProfileBehavior": {
+                                "disableBodyPruning": true
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "account",
+                    "description": "",
+                    "item": [
+                        {
+                            "id": "8c835347-77d4-42a5-863f-2ab702a4cbf0",
+                            "name": "Get Security Platform account and pod inventory",
+                            "request": {
+                                "name": "Get Security Platform account and pod inventory",
+                                "description": {
+                                    "content": "Retrieves the Security Platform account record and regional pod inventory backing the current tenant.",
+                                    "type": "text/plain"
+                                },
+                                "url": {
+                                    "path": [
+                                        "provisioning",
+                                        "account"
+                                    ],
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "query": [
+                                        {
+                                            "disabled": false,
+                                            "description": {
+                                                "content": "(Required) Preview API version observed on Security Platform provisioning helpers.",
+                                                "type": "text/plain"
+                                            },
+                                            "key": "api-version",
+                                            "value": "2024-03-01-preview"
+                                        }
+                                    ],
+                                    "variable": []
+                                },
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "method": "GET",
+                                "body": {},
+                                "auth": null
+                            },
+                            "response": [
+                                {
+                                    "id": "7ef99b77-4198-4ec4-8aa1-ce78db492f13",
+                                    "name": "Account inventory returned successfully.",
+                                    "originalRequest": {
+                                        "url": {
+                                            "path": [
+                                                "provisioning",
+                                                "account"
+                                            ],
+                                            "host": [
+                                                "{{baseUrl}}"
+                                            ],
+                                            "query": [
+                                                {
+                                                    "disabled": false,
+                                                    "description": {
+                                                        "content": "(Required) Preview API version observed on Security Platform provisioning helpers.",
+                                                        "type": "text/plain"
+                                                    },
+                                                    "key": "api-version",
+                                                    "value": "2024-03-01-preview"
+                                                }
+                                            ],
+                                            "variable": []
+                                        },
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            }
+                                        ],
+                                        "method": "GET",
+                                        "body": {}
+                                    },
+                                    "status": "OK",
+                                    "code": 200,
+                                    "header": [
+                                        {
+                                            "key": "Content-Type",
+                                            "value": "application/json"
+                                        }
+                                    ],
+                                    "body": "{\n  \"key_0\": 1421.7184253443204\n}",
+                                    "cookie": [],
+                                    "_postman_previewlanguage": "json"
+                                }
+                            ],
+                            "event": [],
+                            "protocolProfileBehavior": {
+                                "disableBodyPruning": true
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "checkTenant",
+                    "description": "",
+                    "item": [
+                        {
+                            "id": "9a4b4fb1-cba8-499b-9a57-e10df459ccf6",
+                            "name": "Check Security Platform tenant eligibility",
+                            "request": {
+                                "name": "Check Security Platform tenant eligibility",
+                                "description": {
+                                    "content": "Retrieves the Security Platform tenant account type and tenant geo used during startup and provisioning decisions.",
+                                    "type": "text/plain"
+                                },
+                                "url": {
+                                    "path": [
+                                        "provisioning",
+                                        "checkTenant"
+                                    ],
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "query": [
+                                        {
+                                            "disabled": false,
+                                            "description": {
+                                                "content": "(Required) Preview API version observed on Security Platform provisioning helpers.",
+                                                "type": "text/plain"
+                                            },
+                                            "key": "api-version",
+                                            "value": "2024-03-01-preview"
+                                        }
+                                    ],
+                                    "variable": []
+                                },
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "method": "GET",
+                                "body": {},
+                                "auth": null
+                            },
+                            "response": [
+                                {
+                                    "id": "164e590c-da3a-41d5-b463-4ac70e25ede9",
+                                    "name": "Tenant provisioning context returned successfully.",
+                                    "originalRequest": {
+                                        "url": {
+                                            "path": [
+                                                "provisioning",
+                                                "checkTenant"
+                                            ],
+                                            "host": [
+                                                "{{baseUrl}}"
+                                            ],
+                                            "query": [
+                                                {
+                                                    "disabled": false,
+                                                    "description": {
+                                                        "content": "(Required) Preview API version observed on Security Platform provisioning helpers.",
+                                                        "type": "text/plain"
+                                                    },
+                                                    "key": "api-version",
+                                                    "value": "2024-03-01-preview"
+                                                }
+                                            ],
+                                            "variable": []
+                                        },
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            }
+                                        ],
+                                        "method": "GET",
+                                        "body": {}
+                                    },
+                                    "status": "OK",
+                                    "code": 200,
+                                    "header": [
+                                        {
+                                            "key": "Content-Type",
+                                            "value": "application/json"
+                                        }
+                                    ],
+                                    "body": "{\n  \"key_0\": 7674.619337764436,\n  \"key_1\": false,\n  \"key_2\": 4293\n}",
+                                    "cookie": [],
+                                    "_postman_previewlanguage": "json"
+                                }
+                            ],
+                            "event": [],
+                            "protocolProfileBehavior": {
+                                "disableBodyPruning": true
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "account",
+            "description": "",
+            "item": [
+                {
+                    "name": "workspaces",
+                    "description": "",
+                    "item": [
+                        {
+                            "id": "792d7074-1faf-4128-a445-64f94dd2f1d8",
+                            "name": "List Security Copilot workspaces",
+                            "request": {
+                                "name": "List Security Copilot workspaces",
+                                "description": {
+                                    "content": "Lists Security Copilot workspaces attached to the current Security Platform account.",
+                                    "type": "text/plain"
+                                },
+                                "url": {
+                                    "path": [
+                                        "account",
+                                        "workspaces"
+                                    ],
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "query": [
+                                        {
+                                            "disabled": false,
+                                            "description": {
+                                                "content": "(Required) Preview API version observed on workspace list and workspace detail requests.",
+                                                "type": "text/plain"
+                                            },
+                                            "key": "api-version",
+                                            "value": "2023-12-01-preview"
+                                        }
+                                    ],
+                                    "variable": []
+                                },
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "method": "GET",
+                                "body": {},
+                                "auth": null
+                            },
+                            "response": [
+                                {
+                                    "id": "d635074a-2168-4b4d-9324-132274b8cb0b",
+                                    "name": "Workspace list returned successfully.",
+                                    "originalRequest": {
+                                        "url": {
+                                            "path": [
+                                                "account",
+                                                "workspaces"
+                                            ],
+                                            "host": [
+                                                "{{baseUrl}}"
+                                            ],
+                                            "query": [
+                                                {
+                                                    "disabled": false,
+                                                    "description": {
+                                                        "content": "(Required) Preview API version observed on workspace list and workspace detail requests.",
+                                                        "type": "text/plain"
+                                                    },
+                                                    "key": "api-version",
+                                                    "value": "2023-12-01-preview"
+                                                }
+                                            ],
+                                            "variable": []
+                                        },
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            }
+                                        ],
+                                        "method": "GET",
+                                        "body": {}
+                                    },
+                                    "status": "OK",
+                                    "code": 200,
+                                    "header": [
+                                        {
+                                            "key": "Content-Type",
+                                            "value": "application/json"
+                                        }
+                                    ],
+                                    "body": "{\n  \"key_0\": 5759,\n  \"key_1\": 5762,\n  \"key_2\": 6785\n}",
+                                    "cookie": [],
+                                    "_postman_previewlanguage": "json"
+                                }
+                            ],
+                            "event": [],
+                            "protocolProfileBehavior": {
+                                "disableBodyPruning": true
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "api",
+            "description": "",
+            "item": [
+                {
+                    "name": "gateway",
+                    "description": "",
+                    "item": [
+                        {
+                            "name": "actions",
+                            "description": "",
+                            "item": [
+                                {
+                                    "name": "containers",
+                                    "description": "",
+                                    "item": [
+                                        {
+                                            "name": "me",
+                                            "description": "",
+                                            "item": [
+                                                {
+                                                    "id": "65ba891b-186f-4e0d-a555-2efb06d5cbf8",
+                                                    "name": "Evaluate current-container permissions",
+                                                    "request": {
+                                                        "name": "Evaluate current-container permissions",
+                                                        "description": {
+                                                            "content": "Evaluates container permissions for the current user during startup and workspace write-light-up checks.",
+                                                            "type": "text/plain"
+                                                        },
+                                                        "url": {
+                                                            "path": [
+                                                                "api",
+                                                                "gateway",
+                                                                "actions",
+                                                                "containers",
+                                                                "me"
+                                                            ],
+                                                            "host": [
+                                                                "{{baseUrl}}"
+                                                            ],
+                                                            "query": [
+                                                                {
+                                                                    "disabled": false,
+                                                                    "description": {
+                                                                        "content": "(Required) Preview API version observed on Security Platform provisioning helpers.",
+                                                                        "type": "text/plain"
+                                                                    },
+                                                                    "key": "api-version",
+                                                                    "value": "2024-03-01-preview"
+                                                                }
+                                                            ],
+                                                            "variable": []
+                                                        },
+                                                        "header": [
+                                                            {
+                                                                "key": "Content-Type",
+                                                                "value": "application/json"
+                                                            },
+                                                            {
+                                                                "key": "Accept",
+                                                                "value": "application/json"
+                                                            }
+                                                        ],
+                                                        "method": "POST",
+                                                        "body": {
+                                                            "mode": "raw",
+                                                            "raw": "[\n  \"string\",\n  \"string\"\n]",
+                                                            "options": {
+                                                                "raw": {
+                                                                    "headerFamily": "json",
+                                                                    "language": "json"
+                                                                }
+                                                            }
+                                                        },
+                                                        "auth": null
+                                                    },
+                                                    "response": [
+                                                        {
+                                                            "id": "a2f57f6f-b8e3-41c0-9218-d2264c5847ac",
+                                                            "name": "Permission evaluation returned successfully.",
+                                                            "originalRequest": {
+                                                                "url": {
+                                                                    "path": [
+                                                                        "api",
+                                                                        "gateway",
+                                                                        "actions",
+                                                                        "containers",
+                                                                        "me"
+                                                                    ],
+                                                                    "host": [
+                                                                        "{{baseUrl}}"
+                                                                    ],
+                                                                    "query": [
+                                                                        {
+                                                                            "disabled": false,
+                                                                            "description": {
+                                                                                "content": "(Required) Preview API version observed on Security Platform provisioning helpers.",
+                                                                                "type": "text/plain"
+                                                                            },
+                                                                            "key": "api-version",
+                                                                            "value": "2024-03-01-preview"
+                                                                        }
+                                                                    ],
+                                                                    "variable": []
+                                                                },
+                                                                "header": [
+                                                                    {
+                                                                        "key": "Content-Type",
+                                                                        "value": "application/json"
+                                                                    },
+                                                                    {
+                                                                        "key": "Accept",
+                                                                        "value": "application/json"
+                                                                    }
+                                                                ],
+                                                                "method": "POST",
+                                                                "body": {
+                                                                    "mode": "raw",
+                                                                    "raw": "[\n  \"string\",\n  \"string\"\n]",
+                                                                    "options": {
+                                                                        "raw": {
+                                                                            "headerFamily": "json",
+                                                                            "language": "json"
+                                                                        }
+                                                                    }
+                                                                }
+                                                            },
+                                                            "status": "OK",
+                                                            "code": 200,
+                                                            "header": [
+                                                                {
+                                                                    "key": "Content-Type",
+                                                                    "value": "application/json"
+                                                                }
+                                                            ],
+                                                            "body": "{\n  \"key_0\": \"string\"\n}",
+                                                            "cookie": [],
+                                                            "_postman_previewlanguage": "json"
+                                                        }
+                                                    ],
+                                                    "event": [],
+                                                    "protocolProfileBehavior": {
+                                                        "disableBodyPruning": true
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    "name": "collections",
+                                    "description": "",
+                                    "item": [
+                                        {
+                                            "name": "me",
+                                            "description": "",
+                                            "item": [
+                                                {
+                                                    "id": "0a15c369-c13e-43da-bbee-e3590ef9aad4",
+                                                    "name": "Evaluate collection permissions",
+                                                    "request": {
+                                                        "name": "Evaluate collection permissions",
+                                                        "description": {
+                                                            "content": "Evaluates collection-level permissions for the current user during startup and collection selection flows.",
+                                                            "type": "text/plain"
+                                                        },
+                                                        "url": {
+                                                            "path": [
+                                                                "api",
+                                                                "gateway",
+                                                                "actions",
+                                                                "collections",
+                                                                "me"
+                                                            ],
+                                                            "host": [
+                                                                "{{baseUrl}}"
+                                                            ],
+                                                            "query": [
+                                                                {
+                                                                    "disabled": false,
+                                                                    "description": {
+                                                                        "content": "(Required) Preview API version observed on Security Platform provisioning helpers.",
+                                                                        "type": "text/plain"
+                                                                    },
+                                                                    "key": "api-version",
+                                                                    "value": "2024-03-01-preview"
+                                                                }
+                                                            ],
+                                                            "variable": []
+                                                        },
+                                                        "header": [
+                                                            {
+                                                                "key": "Content-Type",
+                                                                "value": "application/json"
+                                                            },
+                                                            {
+                                                                "key": "Accept",
+                                                                "value": "application/json"
+                                                            }
+                                                        ],
+                                                        "method": "POST",
+                                                        "body": {
+                                                            "mode": "raw",
+                                                            "raw": "[\n  \"string\",\n  \"string\"\n]",
+                                                            "options": {
+                                                                "raw": {
+                                                                    "headerFamily": "json",
+                                                                    "language": "json"
+                                                                }
+                                                            }
+                                                        },
+                                                        "auth": null
+                                                    },
+                                                    "response": [
+                                                        {
+                                                            "id": "1e0a80a4-93b9-4137-8d1e-050c1e354f10",
+                                                            "name": "Collection permission evaluation returned successfully.",
+                                                            "originalRequest": {
+                                                                "url": {
+                                                                    "path": [
+                                                                        "api",
+                                                                        "gateway",
+                                                                        "actions",
+                                                                        "collections",
+                                                                        "me"
+                                                                    ],
+                                                                    "host": [
+                                                                        "{{baseUrl}}"
+                                                                    ],
+                                                                    "query": [
+                                                                        {
+                                                                            "disabled": false,
+                                                                            "description": {
+                                                                                "content": "(Required) Preview API version observed on Security Platform provisioning helpers.",
+                                                                                "type": "text/plain"
+                                                                            },
+                                                                            "key": "api-version",
+                                                                            "value": "2024-03-01-preview"
+                                                                        }
+                                                                    ],
+                                                                    "variable": []
+                                                                },
+                                                                "header": [
+                                                                    {
+                                                                        "key": "Content-Type",
+                                                                        "value": "application/json"
+                                                                    },
+                                                                    {
+                                                                        "key": "Accept",
+                                                                        "value": "application/json"
+                                                                    }
+                                                                ],
+                                                                "method": "POST",
+                                                                "body": {
+                                                                    "mode": "raw",
+                                                                    "raw": "[\n  \"string\",\n  \"string\"\n]",
+                                                                    "options": {
+                                                                        "raw": {
+                                                                            "headerFamily": "json",
+                                                                            "language": "json"
+                                                                        }
+                                                                    }
+                                                                }
+                                                            },
+                                                            "status": "OK",
+                                                            "code": 200,
+                                                            "header": [
+                                                                {
+                                                                    "key": "Content-Type",
+                                                                    "value": "application/json"
+                                                                }
+                                                            ],
+                                                            "body": "{\n  \"key_0\": 6182\n}",
+                                                            "cookie": [],
+                                                            "_postman_previewlanguage": "json"
+                                                        }
+                                                    ],
+                                                    "event": [],
+                                                    "protocolProfileBehavior": {
+                                                        "disableBodyPruning": true
+                                                    }
                                                 }
                                             ]
                                         }

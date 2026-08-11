@@ -5,6 +5,466 @@
             "description": "",
             "item": [
                 {
+                    "name": "Portal",
+                    "description": "",
+                    "item": [
+                        {
+                            "name": "GetEarlyUserData",
+                            "description": "",
+                            "item": [
+                                {
+                                    "id": "af6ac9f6-fb0b-424f-9f01-644af37455e7",
+                                    "name": "Get early portal bootstrap data",
+                                    "request": {
+                                        "name": "Get early portal bootstrap data",
+                                        "description": {
+                                            "content": "Loads the initial Intune shell bootstrap payload used during first paint. Confirmed live\nwhile opening Windows Autopatch report blades, where the request asked for sections such\nas dashboard metadata, portal settings, outages, and experimentation variants.\n",
+                                            "type": "text/plain"
+                                        },
+                                        "url": {
+                                            "path": [
+                                                "api",
+                                                "Portal",
+                                                "GetEarlyUserData"
+                                            ],
+                                            "host": [
+                                                "{{baseUrl}}"
+                                            ],
+                                            "query": [],
+                                            "variable": []
+                                        },
+                                        "header": [
+                                            {
+                                                "key": "Content-Type",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            }
+                                        ],
+                                        "method": "POST",
+                                        "body": {
+                                            "mode": "raw",
+                                            "raw": "{\n  \"queries\": [\n    \"whatsNew\",\n    \"tracing\",\n    \"extensionsAuthMetadata\",\n    \"settings\",\n    \"outages\",\n    \"dashboardMetadata\",\n    \"variants\"\n  ],\n  \"portalAuthorization\": \"\",\n  \"altPortalAuthorization\": \"\",\n  \"dashboardId\": \"string\",\n  \"armAuthorizationHeader\": \"Bearer <ARM token>\",\n  \"flightedCustomDomainClientId\": \"string\",\n  \"version\": \"2019-10-01\"\n}",
+                                            "options": {
+                                                "raw": {
+                                                    "headerFamily": "json",
+                                                    "language": "json"
+                                                }
+                                            }
+                                        },
+                                        "auth": null
+                                    },
+                                    "response": [
+                                        {
+                                            "id": "61dffed9-61c1-4f93-bb3d-7ae727078dd8",
+                                            "name": "Early portal bootstrap data returned successfully.",
+                                            "originalRequest": {
+                                                "url": {
+                                                    "path": [
+                                                        "api",
+                                                        "Portal",
+                                                        "GetEarlyUserData"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [],
+                                                    "variable": []
+                                                },
+                                                "header": [
+                                                    {
+                                                        "key": "Content-Type",
+                                                        "value": "application/json"
+                                                    },
+                                                    {
+                                                        "key": "Accept",
+                                                        "value": "application/json"
+                                                    }
+                                                ],
+                                                "method": "POST",
+                                                "body": {
+                                                    "mode": "raw",
+                                                    "raw": "{\n  \"queries\": [\n    \"whatsNew\",\n    \"tracing\",\n    \"extensionsAuthMetadata\",\n    \"settings\",\n    \"outages\",\n    \"dashboardMetadata\",\n    \"variants\"\n  ],\n  \"portalAuthorization\": \"\",\n  \"altPortalAuthorization\": \"\",\n  \"dashboardId\": \"string\",\n  \"armAuthorizationHeader\": \"Bearer <ARM token>\",\n  \"flightedCustomDomainClientId\": \"string\",\n  \"version\": \"2019-10-01\"\n}",
+                                                    "options": {
+                                                        "raw": {
+                                                            "headerFamily": "json",
+                                                            "language": "json"
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            "status": "OK",
+                                            "code": 200,
+                                            "header": [
+                                                {
+                                                    "key": "Content-Type",
+                                                    "value": "application/json"
+                                                }
+                                            ],
+                                            "body": "{\n  \"dashboardMetadata\": {},\n  \"settings\": {},\n  \"variants\": {\n    \"assignmentContext\": \"\",\n    \"flights\": [],\n    \"variables\": {},\n    \"dataVersion\": 0\n  },\n  \"outages\": []\n}",
+                                            "cookie": [],
+                                            "_postman_previewlanguage": "json"
+                                        },
+                                        {
+                                            "id": "3e6427df-fac0-422e-ae06-2e460e11cc98",
+                                            "name": "The request shape or parameters were invalid.",
+                                            "originalRequest": {
+                                                "url": {
+                                                    "path": [
+                                                        "api",
+                                                        "Portal",
+                                                        "GetEarlyUserData"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [],
+                                                    "variable": []
+                                                },
+                                                "header": [
+                                                    {
+                                                        "key": "Content-Type",
+                                                        "value": "application/json"
+                                                    }
+                                                ],
+                                                "method": "POST",
+                                                "body": {
+                                                    "mode": "raw",
+                                                    "raw": "{\n  \"queries\": [\n    \"whatsNew\",\n    \"tracing\",\n    \"extensionsAuthMetadata\",\n    \"settings\",\n    \"outages\",\n    \"dashboardMetadata\",\n    \"variants\"\n  ],\n  \"portalAuthorization\": \"\",\n  \"altPortalAuthorization\": \"\",\n  \"dashboardId\": \"string\",\n  \"armAuthorizationHeader\": \"Bearer <ARM token>\",\n  \"flightedCustomDomainClientId\": \"string\",\n  \"version\": \"2019-10-01\"\n}",
+                                                    "options": {
+                                                        "raw": {
+                                                            "headerFamily": "json",
+                                                            "language": "json"
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            "status": "Bad Request",
+                                            "code": 400,
+                                            "header": [],
+                                            "cookie": [],
+                                            "_postman_previewlanguage": "text"
+                                        },
+                                        {
+                                            "id": "4623a1bc-438e-4311-ace4-04d649fd2a71",
+                                            "name": "Authentication is required or the browser token is no longer valid.",
+                                            "originalRequest": {
+                                                "url": {
+                                                    "path": [
+                                                        "api",
+                                                        "Portal",
+                                                        "GetEarlyUserData"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [],
+                                                    "variable": []
+                                                },
+                                                "header": [
+                                                    {
+                                                        "key": "Content-Type",
+                                                        "value": "application/json"
+                                                    }
+                                                ],
+                                                "method": "POST",
+                                                "body": {
+                                                    "mode": "raw",
+                                                    "raw": "{\n  \"queries\": [\n    \"whatsNew\",\n    \"tracing\",\n    \"extensionsAuthMetadata\",\n    \"settings\",\n    \"outages\",\n    \"dashboardMetadata\",\n    \"variants\"\n  ],\n  \"portalAuthorization\": \"\",\n  \"altPortalAuthorization\": \"\",\n  \"dashboardId\": \"string\",\n  \"armAuthorizationHeader\": \"Bearer <ARM token>\",\n  \"flightedCustomDomainClientId\": \"string\",\n  \"version\": \"2019-10-01\"\n}",
+                                                    "options": {
+                                                        "raw": {
+                                                            "headerFamily": "json",
+                                                            "language": "json"
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            "status": "Unauthorized",
+                                            "code": 401,
+                                            "header": [],
+                                            "cookie": [],
+                                            "_postman_previewlanguage": "text"
+                                        },
+                                        {
+                                            "id": "3d139f4b-032b-49da-96bc-2209d1fdd981",
+                                            "name": "The authenticated principal does not have access to the requested portal data.",
+                                            "originalRequest": {
+                                                "url": {
+                                                    "path": [
+                                                        "api",
+                                                        "Portal",
+                                                        "GetEarlyUserData"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [],
+                                                    "variable": []
+                                                },
+                                                "header": [
+                                                    {
+                                                        "key": "Content-Type",
+                                                        "value": "application/json"
+                                                    }
+                                                ],
+                                                "method": "POST",
+                                                "body": {
+                                                    "mode": "raw",
+                                                    "raw": "{\n  \"queries\": [\n    \"whatsNew\",\n    \"tracing\",\n    \"extensionsAuthMetadata\",\n    \"settings\",\n    \"outages\",\n    \"dashboardMetadata\",\n    \"variants\"\n  ],\n  \"portalAuthorization\": \"\",\n  \"altPortalAuthorization\": \"\",\n  \"dashboardId\": \"string\",\n  \"armAuthorizationHeader\": \"Bearer <ARM token>\",\n  \"flightedCustomDomainClientId\": \"string\",\n  \"version\": \"2019-10-01\"\n}",
+                                                    "options": {
+                                                        "raw": {
+                                                            "headerFamily": "json",
+                                                            "language": "json"
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            "status": "Forbidden",
+                                            "code": 403,
+                                            "header": [],
+                                            "cookie": [],
+                                            "_postman_previewlanguage": "text"
+                                        }
+                                    ],
+                                    "event": [],
+                                    "protocolProfileBehavior": {
+                                        "disableBodyPruning": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "GetLazyUserData",
+                            "description": "",
+                            "item": [
+                                {
+                                    "id": "310269c6-93e0-45f8-bebe-2303d07465f8",
+                                    "name": "Get deferred portal bootstrap data",
+                                    "request": {
+                                        "name": "Get deferred portal bootstrap data",
+                                        "description": {
+                                            "content": "Loads deferred Intune shell bootstrap data after the initial shell render completes.\nConfirmed live while opening Windows Autopatch report blades, where the response included\nsubscription summaries, Azure locations, and recent-resource containers.\n",
+                                            "type": "text/plain"
+                                        },
+                                        "url": {
+                                            "path": [
+                                                "api",
+                                                "Portal",
+                                                "GetLazyUserData"
+                                            ],
+                                            "host": [
+                                                "{{baseUrl}}"
+                                            ],
+                                            "query": [],
+                                            "variable": []
+                                        },
+                                        "header": [
+                                            {
+                                                "key": "Content-Type",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            }
+                                        ],
+                                        "method": "POST",
+                                        "body": {
+                                            "mode": "raw",
+                                            "raw": "{\n  \"queries\": [\n    \"whatsNew\",\n    \"tracing\",\n    \"extensionsAuthMetadata\",\n    \"settings\",\n    \"outages\",\n    \"dashboardMetadata\",\n    \"variants\"\n  ],\n  \"portalAuthorization\": \"\",\n  \"altPortalAuthorization\": \"\",\n  \"dashboardId\": \"string\",\n  \"armAuthorizationHeader\": \"Bearer <ARM token>\",\n  \"flightedCustomDomainClientId\": \"string\",\n  \"version\": \"2019-10-01\"\n}",
+                                            "options": {
+                                                "raw": {
+                                                    "headerFamily": "json",
+                                                    "language": "json"
+                                                }
+                                            }
+                                        },
+                                        "auth": null
+                                    },
+                                    "response": [
+                                        {
+                                            "id": "58c384cc-3993-4c55-8f12-1c39a53c2b6e",
+                                            "name": "Deferred portal bootstrap data returned successfully.",
+                                            "originalRequest": {
+                                                "url": {
+                                                    "path": [
+                                                        "api",
+                                                        "Portal",
+                                                        "GetLazyUserData"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [],
+                                                    "variable": []
+                                                },
+                                                "header": [
+                                                    {
+                                                        "key": "Content-Type",
+                                                        "value": "application/json"
+                                                    },
+                                                    {
+                                                        "key": "Accept",
+                                                        "value": "application/json"
+                                                    }
+                                                ],
+                                                "method": "POST",
+                                                "body": {
+                                                    "mode": "raw",
+                                                    "raw": "{\n  \"queries\": [\n    \"whatsNew\",\n    \"tracing\",\n    \"extensionsAuthMetadata\",\n    \"settings\",\n    \"outages\",\n    \"dashboardMetadata\",\n    \"variants\"\n  ],\n  \"portalAuthorization\": \"\",\n  \"altPortalAuthorization\": \"\",\n  \"dashboardId\": \"string\",\n  \"armAuthorizationHeader\": \"Bearer <ARM token>\",\n  \"flightedCustomDomainClientId\": \"string\",\n  \"version\": \"2019-10-01\"\n}",
+                                                    "options": {
+                                                        "raw": {
+                                                            "headerFamily": "json",
+                                                            "language": "json"
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            "status": "OK",
+                                            "code": 200,
+                                            "header": [
+                                                {
+                                                    "key": "Content-Type",
+                                                    "value": "application/json"
+                                                }
+                                            ],
+                                            "body": "{\n  \"firstPageSubscriptions\": {},\n  \"locations\": {},\n  \"recentResources\": {},\n  \"serviceHealthAlerts\": {}\n}",
+                                            "cookie": [],
+                                            "_postman_previewlanguage": "json"
+                                        },
+                                        {
+                                            "id": "c611f5b9-a372-4a90-9bb0-d81ffa6e3c83",
+                                            "name": "The request shape or parameters were invalid.",
+                                            "originalRequest": {
+                                                "url": {
+                                                    "path": [
+                                                        "api",
+                                                        "Portal",
+                                                        "GetLazyUserData"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [],
+                                                    "variable": []
+                                                },
+                                                "header": [
+                                                    {
+                                                        "key": "Content-Type",
+                                                        "value": "application/json"
+                                                    }
+                                                ],
+                                                "method": "POST",
+                                                "body": {
+                                                    "mode": "raw",
+                                                    "raw": "{\n  \"queries\": [\n    \"whatsNew\",\n    \"tracing\",\n    \"extensionsAuthMetadata\",\n    \"settings\",\n    \"outages\",\n    \"dashboardMetadata\",\n    \"variants\"\n  ],\n  \"portalAuthorization\": \"\",\n  \"altPortalAuthorization\": \"\",\n  \"dashboardId\": \"string\",\n  \"armAuthorizationHeader\": \"Bearer <ARM token>\",\n  \"flightedCustomDomainClientId\": \"string\",\n  \"version\": \"2019-10-01\"\n}",
+                                                    "options": {
+                                                        "raw": {
+                                                            "headerFamily": "json",
+                                                            "language": "json"
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            "status": "Bad Request",
+                                            "code": 400,
+                                            "header": [],
+                                            "cookie": [],
+                                            "_postman_previewlanguage": "text"
+                                        },
+                                        {
+                                            "id": "e8322ca4-fd8b-4794-ad6b-fc80eee02a33",
+                                            "name": "Authentication is required or the browser token is no longer valid.",
+                                            "originalRequest": {
+                                                "url": {
+                                                    "path": [
+                                                        "api",
+                                                        "Portal",
+                                                        "GetLazyUserData"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [],
+                                                    "variable": []
+                                                },
+                                                "header": [
+                                                    {
+                                                        "key": "Content-Type",
+                                                        "value": "application/json"
+                                                    }
+                                                ],
+                                                "method": "POST",
+                                                "body": {
+                                                    "mode": "raw",
+                                                    "raw": "{\n  \"queries\": [\n    \"whatsNew\",\n    \"tracing\",\n    \"extensionsAuthMetadata\",\n    \"settings\",\n    \"outages\",\n    \"dashboardMetadata\",\n    \"variants\"\n  ],\n  \"portalAuthorization\": \"\",\n  \"altPortalAuthorization\": \"\",\n  \"dashboardId\": \"string\",\n  \"armAuthorizationHeader\": \"Bearer <ARM token>\",\n  \"flightedCustomDomainClientId\": \"string\",\n  \"version\": \"2019-10-01\"\n}",
+                                                    "options": {
+                                                        "raw": {
+                                                            "headerFamily": "json",
+                                                            "language": "json"
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            "status": "Unauthorized",
+                                            "code": 401,
+                                            "header": [],
+                                            "cookie": [],
+                                            "_postman_previewlanguage": "text"
+                                        },
+                                        {
+                                            "id": "97acc2e9-e636-4348-93be-f645c10046cf",
+                                            "name": "The authenticated principal does not have access to the requested portal data.",
+                                            "originalRequest": {
+                                                "url": {
+                                                    "path": [
+                                                        "api",
+                                                        "Portal",
+                                                        "GetLazyUserData"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [],
+                                                    "variable": []
+                                                },
+                                                "header": [
+                                                    {
+                                                        "key": "Content-Type",
+                                                        "value": "application/json"
+                                                    }
+                                                ],
+                                                "method": "POST",
+                                                "body": {
+                                                    "mode": "raw",
+                                                    "raw": "{\n  \"queries\": [\n    \"whatsNew\",\n    \"tracing\",\n    \"extensionsAuthMetadata\",\n    \"settings\",\n    \"outages\",\n    \"dashboardMetadata\",\n    \"variants\"\n  ],\n  \"portalAuthorization\": \"\",\n  \"altPortalAuthorization\": \"\",\n  \"dashboardId\": \"string\",\n  \"armAuthorizationHeader\": \"Bearer <ARM token>\",\n  \"flightedCustomDomainClientId\": \"string\",\n  \"version\": \"2019-10-01\"\n}",
+                                                    "options": {
+                                                        "raw": {
+                                                            "headerFamily": "json",
+                                                            "language": "json"
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            "status": "Forbidden",
+                                            "code": 403,
+                                            "header": [],
+                                            "cookie": [],
+                                            "_postman_previewlanguage": "text"
+                                        }
+                                    ],
+                                    "event": [],
+                                    "protocolProfileBehavior": {
+                                        "disableBodyPruning": true
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
                     "name": "Experimentation",
                     "description": "",
                     "item": [

@@ -34,13 +34,19 @@ npm run control:portal-discovery -- compile-plan --json
 npm run control:portal-discovery -- status --json
 ```
 
-The plan has stable IDs and SHA-256 digests. Capture assignments serialize by
-endpoint/profile lease family; only immutable, non-conflicting review work is
-parallelizable. A fresh artifact directory is a runtime precondition and is never
-created in committed data. `--apply` is required before enqueueing and enqueue is
-idempotent through the existing ledger lock. Corrupt or incompatible manifests,
-plans, ledgers, and worker results fail closed; retry only after repairing the
-input or returning the assignment to its legal queued state.
+The plan has stable IDs and SHA-256 digests. Offline per-spec reconciliation and
+review assignments may run concurrently when their artifacts and destination
+files do not conflict. All live browser-owner/CDP work is one global serialized
+lifecycle across every spec and host: owner, preflight, alignment, ledger attempt,
+capture, finalization, and shutdown. The next lifecycle is blocked until terminal
+owner shutdown, artifact/ledger accounting, evidence review, qualified spec/Postman
+PR disposition, and process-improvement disposition are recorded. A fresh artifact
+directory is a runtime precondition and is never created in committed data.
+`--apply` is required before enqueueing and enqueue is idempotent through the
+existing ledger lock. Corrupt or incompatible manifests, plans, ledgers, and worker
+results fail closed; retry only after repairing the input or returning the
+assignment to its legal queued state. Review/controller results must report exact
+runtime model `gpt-5.6-luna`; wrong-model output is rejected.
 
 Endpoint lease identity is canonicalized as lowercase `host:port`: HTTPS URLs and
 bare hosts use port `443`, HTTP URLs use port `80`, and an explicit port is
@@ -112,6 +118,44 @@ PR. Cheap workers may classify known reason codes only; Luna/manual approval is
 required for safety, scope, thresholds, and model disagreement. Retries,
 timeouts, recovery, escalation, invalid results, and CI/PR outcomes must be
 reported as structured counts and reason codes.
+
+## Reconciliation, publication, and merge gates
+
+Treat converter and generator availability as part of reconciliation health. If
+either is unavailable, raw OpenAPI or Postman gaps remain candidate deficits;
+they are not confirmed true deficits and must not change a coverage claim.
+
+Before interpreting any raw count, normalize every observation and spec
+operation to an uppercase method, path template, and canonical alias key. Use
+mutually exclusive categories and record exact integer counts for each:
+
+```text
+raw observations = emitted + duplicate-shadowed + orphaned + intentional-filtered + alias-observations
+emitted = matched + unresolved
+```
+
+`matched` means an emitted canonical key matches the checked-in operation;
+`unresolved` means it does not. Alias observations map to one canonical key and
+are not counted again in emitted, matched, or unresolved. A reconciliation is
+unknown, not zero, when a category or input is unavailable, and an unbalanced
+equation blocks interpretation or publication.
+
+Canonical operation-count or placeholder-count changes require
+`npm run generate:site-data` before publication. Include only proven generated
+`specQuality` or coverage deltas in the change; spec/Postman parity alone is
+insufficient. A focused generator stabilization change additionally requires a
+focused regression test and two consecutive target runs whose outputs are byte-
+and semantically idempotent.
+
+Current-base synchronization and protected merges are serialized separately from
+offline reconciliation. One merge owner refreshes the current base, performs
+the protected merge, and reruns exact-head and relevant validation checks before
+another merge owner may proceed. Concurrent merge attempts are not a recovery
+strategy for stale exact-head checks.
+
+Generated request examples are documentation fixtures only. They do not
+reclassify unsafe `POST`, `PATCH`, or `PUT` operations and do not constitute live
+execution or evidence.
 
 ## Required input
 
