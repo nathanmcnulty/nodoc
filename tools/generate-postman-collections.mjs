@@ -371,7 +371,7 @@ function mergeUrlExamples(currentUrl, previousUrl) {
   return mergedUrl;
 }
 
-function mergeRequestExamples(currentRequest, previousRequest) {
+export function mergeRequestExamples(currentRequest, previousRequest) {
   if (!currentRequest || !previousRequest) {
     return currentRequest;
   }
@@ -396,6 +396,17 @@ function mergeRequestExamples(currentRequest, previousRequest) {
     mergedRequest.body = {
       ...currentRequest.body,
       raw: previousRequest.body.raw,
+    };
+  }
+
+  if (
+    currentRequest.body?.mode === "formdata"
+    && previousRequest.body?.mode === "formdata"
+    && Array.isArray(currentRequest.body.formdata)
+  ) {
+    mergedRequest.body = {
+      ...currentRequest.body,
+      formdata: mergeNamedExamples(currentRequest.body.formdata, previousRequest.body.formdata),
     };
   }
 
