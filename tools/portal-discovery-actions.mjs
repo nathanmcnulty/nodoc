@@ -222,6 +222,7 @@ export function validateEffectiveActions(actions, {
   rootUrl,
   pageTarget = null,
   bootstrapTarget = null,
+  enforcePageTargetForAll = false,
 } = {}) {
   if (!rootUrl) {
     throw actionError("An initial root URL is required for action validation.", "unsafe-navigation");
@@ -236,7 +237,7 @@ export function validateEffectiveActions(actions, {
     if (normalized.type === "navigate") {
       const criteria = normalized.source === "initial"
         ? (bootstrapTarget ?? pageTarget)
-        : !featureNavigationValidated ? pageTarget : null;
+        : (enforcePageTargetForAll || !featureNavigationValidated ? pageTarget : null);
       normalized.resolvedUrl = resolveStrictNavigationUrl(normalized.value, rootUrl, {
         criteria,
         label: `${normalized.source} navigation`,

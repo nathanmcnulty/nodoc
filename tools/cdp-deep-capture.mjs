@@ -529,7 +529,9 @@ function finalizeActionConfiguration(args) {
   });
   const pageTarget = args.recipeConfig?.pageTarget !== undefined
     ? resolvePageTargetCriteria(args.recipeConfig)
-    : null;
+    : (args.matchHosts.length > 0 || args.matchPathPrefixes.length > 0
+      ? { matchHosts: args.matchHosts, matchPathPrefixes: args.matchPathPrefixes }
+      : null);
   const bootstrapTarget = args.recipeConfig?.pageTarget !== undefined
     ? resolvePageTargetBootstrapCriteria(args.recipeConfig)
     : null;
@@ -537,18 +539,13 @@ function finalizeActionConfiguration(args) {
     rootUrl: args.url,
     pageTarget,
     bootstrapTarget,
+    enforcePageTargetForAll: args.recipeConfig?.pageTarget === undefined,
   });
   args.initialNavigationUrl = validatedActions[0].resolvedUrl;
   args.actions = validatedActions.slice(1);
   args.pageTargetCriteria = pageTarget;
   args.bootstrapTargetCriteria = bootstrapTarget;
-  const ownershipCriteria = args.recipeConfig
-    ? resolvePageTargetCriteria(args.recipeConfig)
-    : { matchHosts: args.matchHosts, matchPathPrefixes: args.matchPathPrefixes };
-  args.targetOwnershipCriteria = ownershipCriteria.matchHosts.length > 0
-    || ownershipCriteria.matchPathPrefixes.length > 0
-    ? ownershipCriteria
-    : null;
+  args.targetOwnershipCriteria = pageTarget;
   args.effectiveReplayConfig = {
     ...(args.recipeConfig ?? {}),
     seedLinkLimit: args.seedLinkLimit,
@@ -3330,6 +3327,10 @@ async function main() {
 
     await waitForNetworkIdle(args.postActionSettleMs);
     await flushArtifacts();
+    const terminalFinalUrl = validatePostNavigationUrl(await getRootUrl(), args.url, {
+      criteria: args.pageTargetCriteria,
+      label: "terminal final page",
+    });
     const filteredRequests = capturedRequests.filter((request) => shouldMatchRequest(request.url, args));
     const scopedHosts = uniqueSorted(filteredRequests.map((request) => {
       try {
@@ -3349,7 +3350,7 @@ async function main() {
       actionBudget,
       bundleDiscovery: latestBundleSummary,
       capturedApiRequests: capturedRequests.length,
-      finalUrl: await getRootUrl(),
+      finalUrl: terminalFinalUrl,
       interactionHealth: actionValidation.interactionHealth,
       outDir: args.outDir,
       pageCount: pageStates.length,

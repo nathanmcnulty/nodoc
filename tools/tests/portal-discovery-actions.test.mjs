@@ -165,6 +165,58 @@ test("post-navigation guard rejects redirect escapes and active/page-target redi
   );
 });
 
+test("legacy host and path criteria remain effective for every worker navigation", () => {
+  const actions = buildEffectiveActions({
+    recipeActions: [
+      "navigate=/safe",
+      "navigate=/safe/items",
+    ],
+    includeInitialNavigation: true,
+    initialUrl: "https://portal.example/safe",
+  });
+  assert.doesNotThrow(() => validateEffectiveActions(actions, {
+    rootUrl: "https://portal.example/safe",
+    pageTarget: {
+      matchHosts: ["portal.example"],
+      matchPathPrefixes: ["/safe"],
+    },
+    enforcePageTargetForAll: true,
+  }));
+  assert.throws(
+    () => validateEffectiveActions(buildEffectiveActions({
+      recipeActions: ["navigate=/admin"],
+      includeInitialNavigation: true,
+      initialUrl: "https://portal.example/safe",
+    }), {
+      rootUrl: "https://portal.example/safe",
+      pageTarget: {
+        matchHosts: ["portal.example"],
+        matchPathPrefixes: ["/safe"],
+      },
+      enforcePageTargetForAll: true,
+    }),
+    /page-target criteria/u,
+  );
+});
+
+test("terminal final URL guard catches a delayed redirect before summary success", () => {
+  let finalUrl = "https://portal.example/safe";
+  const readFinalUrl = () => finalUrl;
+  assert.equal(
+    validatePostNavigationUrl(readFinalUrl(), "https://portal.example/safe", {
+      criteria: { matchHosts: ["portal.example"], matchPathPrefixes: ["/safe"] },
+    }),
+    "https://portal.example/safe",
+  );
+  finalUrl = "https://other.example/export";
+  assert.throws(
+    () => validatePostNavigationUrl(readFinalUrl(), "https://portal.example/safe", {
+      criteria: { matchHosts: ["portal.example"], matchPathPrefixes: ["/safe"] },
+    }),
+    /HTTPS URL without credentials/u,
+  );
+});
+
 test("all navigation positions are validated before execution", () => {
   assert.throws(
     () => validateEffectiveActions(
@@ -404,6 +456,7 @@ test("worker rejects an unsafe direct initial URL before contacting CDP", async 
     response.writeHead(500);
     response.end();
   });
+
   await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
   const { port } = server.address();
   try {
@@ -425,6 +478,45 @@ test("worker rejects an unsafe direct initial URL before contacting CDP", async 
   } finally {
     await new Promise((resolve) => server.close(resolve));
     await rm(artifactDir, { recursive: true, force: true });
+  }
+});
+
+test("no-target-id legacy wrong-path navigation is rejected before target creation", async () => {
+  const rootDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-legacy-no-target-"));
+  const recipePath = path.join(rootDir, "recipe.json");
+  const artifactDir = path.join(rootDir, "artifacts");
+  let requests = 0;
+  const server = createServer((_request, response) => {
+    requests += 1;
+    response.writeHead(500);
+    response.end();
+  });
+  await writeFile(recipePath, `${JSON.stringify({
+    portal: "Legacy no target",
+    url: "https://portal.example/safe",
+    matchHosts: ["portal.example"],
+    matchPathPrefixes: ["/safe"],
+    actions: ["navigate=/admin"],
+  })}\n`, "utf8");
+  await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+  const { port } = server.address();
+  try {
+    await assert.rejects(
+      execFileAsync(process.execPath, [
+        workerPath,
+        "--recipe",
+        recipePath,
+        "--out",
+        artifactDir,
+        "--cdp-endpoint",
+        `http://127.0.0.1:${port}`,
+      ], { cwd: repoRoot }),
+      /page-target criteria/u,
+    );
+    assert.equal(requests, 0);
+  } finally {
+    await new Promise((resolve) => server.close(resolve));
+    await rm(rootDir, { recursive: true, force: true });
   }
 });
 
@@ -536,10 +628,10 @@ test("worker rejects legacy target-id ownership mismatches and missing target UR
     {
       target: {
         type: "page",
-        url: "https://other.example/wrong",
+        url: "https://portal.example/wrong",
         title: "Wrong host",
       },
-      expected: /does not match the recipe page-target criteria/u,
+      expected: /does not match the recipe page-target criteria|initial navigation/u,
     },
     {
       target: {
@@ -570,7 +662,7 @@ test("worker rejects legacy target-id ownership mismatches and missing target UR
     server.on("upgrade", () => { websocketUpgrades += 1; });
     await writeFile(recipePath, `${JSON.stringify({
       portal: "Legacy target mismatch",
-      url: "https://portal.example/root",
+      url: "https://portal.example/safe",
       matchHosts: ["portal.example"],
       matchPathPrefixes: ["/safe"],
       actions: ["navigate=/safe"],
