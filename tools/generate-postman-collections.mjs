@@ -9,115 +9,12 @@ import {
   getPreferredServerUrls,
   validatePostmanServerRouting,
 } from "./spec-quality-lib.mjs";
+import { collectionDefinitions } from "./postman-collection-definitions.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, "..");
 const outputDir = path.join(repoRoot, "postman", "collections");
 const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
-
-const collectionDefinitions = [
-  {
-    name: "Defender",
-    spec: "specifications/nodoc-defender-xdr/specification/openapi.yml",
-    output: "postman/collections/defender.collection.json",
-  },
-  {
-    name: "M365 Admin",
-    spec: "specifications/nodoc-m365-admin/specification/openapi.yml",
-    output: "postman/collections/m365-admin.collection.json",
-  },
-  {
-    name: "Exchange",
-    spec: "specifications/nodoc-exchange-beta/specification/openapi.yml",
-    output: "postman/collections/exchange-beta.collection.json",
-  },
-  {
-    name: "SharePoint",
-    spec: "specifications/nodoc-sharepoint-admin/specification/openapi.yml",
-    output: "postman/collections/sharepoint-admin.collection.json",
-  },
-  {
-    name: "Teams",
-    spec: "specifications/nodoc-teams/specification/openapi.yml",
-    output: "postman/collections/teams.collection.json",
-  },
-  {
-    name: "Viva Engage",
-    spec: "specifications/nodoc-viva-engage/specification/openapi.yml",
-    output: "postman/collections/viva-engage.collection.json",
-  },
-  {
-    name: "M365 Apps Config",
-    spec: "specifications/nodoc-m365-apps-config/specification/openapi.yml",
-    output: "postman/collections/m365-apps-config.collection.json",
-  },
-  {
-    name: "M365 Apps Services",
-    spec: "specifications/nodoc-m365-apps-services/specification/openapi.yml",
-    output: "postman/collections/m365-apps-services.collection.json",
-  },
-  {
-    name: "M365 Apps Inventory",
-    spec: "specifications/nodoc-m365-apps-inventory/specification/openapi.yml",
-    output: "postman/collections/m365-apps-inventory.collection.json",
-  },
-  {
-    name: "Intune Autopatch",
-    spec: "specifications/nodoc-intune-autopatch/specification/openapi.yml",
-    output: "postman/collections/intune-autopatch.collection.json",
-  },
-  {
-    name: "Intune Portal",
-    spec: "specifications/nodoc-intune-portal/specification/openapi.yml",
-    output: "postman/collections/intune-portal.collection.json",
-  },
-  {
-    name: "Power Platform",
-    spec: "specifications/nodoc-power-platform/specification/openapi.yml",
-    output: "postman/collections/power-platform.collection.json",
-  },
-  {
-    name: "Purview",
-    spec: "specifications/nodoc-purview/specification/openapi.yml",
-    output: "postman/collections/purview.collection.json",
-  },
-  {
-    name: "Purview Portal",
-    spec: "specifications/nodoc-purview-portal/specification/openapi.yml",
-    output: "postman/collections/purview-portal.collection.json",
-  },
-  {
-    name: "Security Copilot",
-    spec: "specifications/nodoc-security-copilot/specification/openapi.yml",
-    output: "postman/collections/security-copilot.collection.json",
-    hostRouting: true,
-  },
-  {
-    name: "Entra IAM",
-    spec: "specifications/nodoc-ibiza-iam/specification/openapi.yml",
-    output: "postman/collections/entra-iam.collection.json",
-  },
-  {
-    name: "Entra PIM",
-    spec: "specifications/nodoc-entra-pim/specification/openapi.yml",
-    output: "postman/collections/entra-pim.collection.json",
-  },
-  {
-    name: "Entra IGA",
-    spec: "specifications/nodoc-entra-iga/specification/openapi.yml",
-    output: "postman/collections/entra-iga.collection.json",
-  },
-  {
-    name: "Entra IDGov",
-    spec: "specifications/nodoc-entra-idgov/specification/openapi.yml",
-    output: "postman/collections/entra-idgov.collection.json",
-  },
-  {
-    name: "Entra B2C",
-    spec: "specifications/nodoc-entra-b2c/specification/openapi.yml",
-    output: "postman/collections/entra-b2c.collection.json",
-  },
-];
 
 function normalizeCollectionSelector(value) {
   return value.toLowerCase().replace(/[^a-z0-9]+/gu, "");

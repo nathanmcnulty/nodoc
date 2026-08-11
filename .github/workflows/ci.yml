@@ -20,6 +20,7 @@ on:
       - tsconfig.json
       - tools/capture-recipes/**
       - tools/generate-postman-collections.mjs
+      - tools/postman-collection-definitions.mjs
       - tools/discovery-derivative-families.mjs
       - tools/tests/discovery-derivative-families.test.mjs
       - tools/discovery-review-assignments.mjs
@@ -38,6 +39,9 @@ on:
       - tools/tests/browser-cdp-preflight.test.mjs
       - tools/tests/portal-discovery-ledger.test.mjs
       - tools/spec-quality-lib.mjs
+      - tools/discovery-evidence-inputs.mjs
+      - tools/inspect-discovery-inputs.mjs
+      - tools/tests/discovery-evidence-inputs.test.mjs
       - tools/validate-portal-discovery-metadata.mjs
       - tools/validate-spec-quality.mjs
   push:
@@ -61,6 +65,7 @@ on:
       - tsconfig.json
       - tools/capture-recipes/**
       - tools/generate-postman-collections.mjs
+      - tools/postman-collection-definitions.mjs
       - tools/discovery-derivative-families.mjs
       - tools/tests/discovery-derivative-families.test.mjs
       - tools/discovery-review-assignments.mjs
@@ -79,6 +84,9 @@ on:
       - tools/tests/browser-cdp-preflight.test.mjs
       - tools/tests/portal-discovery-ledger.test.mjs
       - tools/spec-quality-lib.mjs
+      - tools/discovery-evidence-inputs.mjs
+      - tools/inspect-discovery-inputs.mjs
+      - tools/tests/discovery-evidence-inputs.test.mjs
       - tools/validate-portal-discovery-metadata.mjs
       - tools/validate-spec-quality.mjs
   workflow_dispatch:
@@ -108,6 +116,9 @@ jobs:
 
       - name: Validate portal discovery metadata
         run: npm run validate:portal-discovery
+
+      - name: Test discovery semantic inputs
+        run: npm run test:discovery-inputs
 
       - name: Validate generated site data
         run: npm run validate:site-data
