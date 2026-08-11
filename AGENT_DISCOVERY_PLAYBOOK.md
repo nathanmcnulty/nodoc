@@ -313,8 +313,11 @@ Use capability tiers rather than sending every stage to the strongest model:
    - Prefer `gpt-5.3-codex-spark` with low reasoning. Give it only one portal,
      the execution prompt, and its artifact assignment.
 3. **Fallback execution: inexpensive general worker**
-   - Use `gpt-5.6-luna` when Spark is unavailable or repeatedly fails to execute
-     tools. Do not escalate merely because the portal produced few candidates.
+   - Use `gpt-5.6-luna` only after the null-output recovery gate: no materialized
+     usable capture or report exists, the compact read-only retry remains null,
+     and the low-capability capture route has been attempted. Do not bypass
+     complete-capture analysis or incomplete-capture seeded retry, and do not
+     escalate merely because the portal produced few candidates.
 4. **Scope, safety, selector repair, and promotion review: stronger reviewer**
    - Escalate only decisions that require judgment, as listed in the runbook.
 
@@ -358,6 +361,24 @@ extend them. Terminal updates release the lease exactly once. If stale recovery
 or another worker has already persisted a terminal state, later finalization is
 idempotent, preserves the authoritative blocker and provenance, and must not
 turn the discovery run into a secondary pipeline-failed transition error.
+
+### Delegation, acceptance, and recovery
+
+The first delegated action switches to the named target worktree, or uses
+absolute `git -C <target-worktree>` paths. The worker records and verifies the
+expected kickoff SHA against the target's actual SHA and clean/dirty status, then
+reports the expected final SHA, actual final SHA, and clean/dirty status. Idle,
+completed, or success status is not acceptance: require materialized non-null
+assistant output, an explicit cross-session report, an immutable hashed artifact,
+or a commit. For a capture execution assigned to the low-capability route, use
+exactly `gpt-5.3-codex-spark`. After null output, retry exactly once with a
+compact read-only report-first request; if that retry remains null, escalate
+exactly from `gpt-5.3-codex-spark` to exactly `gpt-5.6-luna`; assignments already
+routed to Luna or manual review keep that route. Preserve every materialized
+failed-worker artifact and record its hash; retain useful artifacts for recovery,
+and do not
+launch a broad wave until a representative probe materializes output. A no-change
+result cannot establish completeness.
 
 ### Token-minimizing handoffs
 
@@ -738,18 +759,32 @@ If the answer is “one unresolved family and one thin recipe”, update the rec
 
 Raw observations and generated counts are not comparable until every operation is
 normalized by uppercase method, path template, and canonical alias. Keep the
-following categories mutually exclusive and record their exact counts:
+raw/source reconciliation categories mutually exclusive and record exact counts:
 
 ```text
 raw observations = emitted + duplicate-shadowed + orphaned + intentional-filtered + alias-observations
 emitted = matched + unresolved
 ```
 
-Aliases map observations to one canonical key and are counted only in
-`alias-observations`; they are not emitted or matched a second time. `matched`
-means the canonical key is in the checked-in spec, while `unresolved` means it
-is not. Missing converter/generator inputs make the reconciliation unknown, not
-zero, so raw gaps cannot be promoted to true deficits.
+The first equation reconciles raw/source observations to emitted observations;
+the second partitions emitted observations. These ledgers are not additive
+across one another and must not double-count. For the separate candidate-review
+inventory, use mutually exclusive dispositions:
+
+```text
+candidate observations = promoted_or_matched + alias + intentionally_filtered + duplicate_shadowed + orphaned + unresolved
+```
+
+`promoted_or_matched` means the normalized canonical key is already promoted or
+exactly matches a checked-in specification operation; `unresolved` matches
+neither. Alias observations map to one canonical key and count only in `alias`.
+Keep separate inspected-surface lists (nav/routes, entity/detail states,
+interaction states, child targets, host families) and evidence-partition lists
+(confirmed traffic, safe probes, bundle-only leads, suppressed candidates, and
+adjacent/scope-review candidates). Missing evidence is unavailable, not zero.
+Offline completeness and runtime completeness are separate;
+`live-evidence-blocked` is valid. Declaration parity is not specification
+completeness.
 
 ### 6. Promote discoveries carefully
 
@@ -775,7 +810,8 @@ Interpret probe results carefully:
 
 ### 7. Capture write shapes without persisting changes
 
-Default policy:
+Default policy: browser/CDP/live capture and write execution require explicit
+operator authorization.
 
 - Treat every `POST`, `PUT`, `PATCH`, and `DELETE` as a real write unless proven otherwise.
 - Generated request examples do not change that classification and are not live

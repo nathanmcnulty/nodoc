@@ -126,19 +126,35 @@ either is unavailable, raw OpenAPI or Postman gaps remain candidate deficits;
 they are not confirmed true deficits and must not change a coverage claim.
 
 Before interpreting any raw count, normalize every observation and spec
-operation to an uppercase method, path template, and canonical alias key. Use
-mutually exclusive categories and record exact integer counts for each:
+operation to an uppercase method, path template, and canonical alias key. Keep
+the raw/source reconciliation categories mutually exclusive and record exact
+integer counts:
 
 ```text
 raw observations = emitted + duplicate-shadowed + orphaned + intentional-filtered + alias-observations
 emitted = matched + unresolved
 ```
 
-`matched` means an emitted canonical key matches the checked-in operation;
-`unresolved` means it does not. Alias observations map to one canonical key and
-are not counted again in emitted, matched, or unresolved. A reconciliation is
-unknown, not zero, when a category or input is unavailable, and an unbalanced
-equation blocks interpretation or publication.
+The first equation reconciles raw/source observations to emitted observations;
+the second partitions emitted observations. These ledgers are not additive
+across one another and must not double-count. For the separate candidate-review
+inventory, use mutually exclusive dispositions:
+
+```text
+candidate observations = promoted_or_matched + alias + intentionally_filtered + duplicate_shadowed + orphaned + unresolved
+```
+
+`promoted_or_matched` means the normalized canonical key is either already
+promoted or exactly matches a checked-in specification operation; `unresolved`
+means it matches neither. Alias observations map to one canonical key and are
+counted only in `alias`.
+Maintain separate inspected-surface lists (nav/routes, entity/detail states,
+interaction states, child targets, host families) and evidence-partition lists
+(confirmed traffic, safe probes, bundle-only leads, suppressed candidates, and
+adjacent/scope-review candidates). Missing evidence is unavailable, not zero.
+Offline completeness and runtime completeness are separate; `live-evidence-blocked`
+is a valid terminal disposition. Declaration parity is not specification
+completeness, and no-change is not a completeness claim.
 
 Canonical operation-count or placeholder-count changes require
 `npm run generate:site-data` before publication. Include only proven generated
@@ -171,6 +187,32 @@ The task must name one portal by title or spec ID, for example `M365 Admin` or
 The worker assignment must also include one explicit artifact directory or
 instruct the worker to create one fresh directory. A worker owns exactly one
 portal, one recipe, one CDP endpoint, and one artifact directory.
+
+### Delegated worktree and acceptance gate
+
+The first delegated action must switch to the named target worktree, or use
+absolute `git -C <target-worktree>` paths for every Git command. Before any
+other work, record the target path, expected kickoff SHA, actual kickoff SHA,
+and clean/dirty status; reject the assignment if the target SHA does not match
+the orchestrator baseline. The final report must repeat the target path,
+expected final SHA, actual final SHA, and clean/dirty status.
+
+Idle, completed, and success states are not acceptance. Accept only materialized
+non-null assistant output, an explicit cross-session report, an immutable
+artifact with a recorded hash, or a commit. Apply recovery in this order: a
+complete immutable capture artifact is accepted evidence; analyze it once and
+reconstruct the report instead of retrying the worker. An incomplete capture is
+not accepted evidence; preserve it, record its hash, and use the seeded retry in
+a new artifact directory. Only when no materialized usable capture or report
+exists after null output, a low-capability capture execution uses exactly
+`gpt-5.3-codex-spark`, retries exactly once with a compact read-only report-first
+request, then escalates exactly from Spark to exactly `gpt-5.6-luna` if that
+retry remains null. Assignments already routed to Luna or manual review keep
+that route. Preserve every materialized failed-worker artifact and record its
+hash; retain useful artifacts for recovery.
+Do not launch a broad wave until a representative probe has materialized
+accepted output. A no-change result is
+not evidence of completeness.
 
 ## Orchestrator preflight
 
@@ -250,7 +292,8 @@ workflow too. The owner always uses a dedicated persistent directory beneath
 state root), never a normal browser profile. This both creates an independent
 browser root and preserves portal sign-in across capture retries.
 
-Only the operator invokes these lifecycle commands:
+Browser/CDP/live capture and any write execution require explicit operator
+authorization. Only the operator invokes these lifecycle commands:
 
 ```powershell
 $portalUrl = "https://admin.cloud.microsoft"
@@ -362,7 +405,10 @@ healthy completed capture may be analyzed again without reopening the browser.
        npm run discover:portal -- --portal m365-admin --profile bounded --phase all --artifacts $retryArtifacts --seed-artifacts $artifacts
        ```
 
-    Never resume `capture` or `all` into a non-empty directory, merge artifact
+    This recovery path is distinct from the delegated null-output contract: it
+    recovers a materialized capture, not a missing worker response, and each
+    seeded retry uses a new attempt and fresh artifact directory. Never resume
+    `capture` or `all` into a non-empty directory, merge artifact
     directories, or use `analyze` as a substitute for an incomplete capture.
     Body draining, script/bundle processing, and artifact finalization are bounded
     by `--supervision-timeout-ms`. Productive capture has a separate total
@@ -524,9 +570,11 @@ CPU reduction only and does not claim downstream token savings.
 - Treat `candidate-handoff.json` and the driver's `recommendedNextAction` as the
    work queue. Do not create a second speculative mapping from raw bundle output.
 - Prefer the cheapest supported worker model that can execute tools reliably,
-  currently `gpt-5.3-codex-spark` at low reasoning. Use `gpt-5.6-luna` only when
-  Spark is unavailable or repeatedly fails to execute the deterministic
-  contract. Model fallback does not relax safety or evidence rules.
+  currently `gpt-5.3-codex-spark` at low reasoning. Use `gpt-5.6-luna` only
+  after the null-output recovery gate: no materialized usable capture or report
+  exists and the compact read-only retry remains null. Complete captures use
+  analyze-only recovery; incomplete captures use a seeded retry in a new
+  directory. Model fallback does not relax safety or evidence rules.
 - On a single CDP endpoint, the maximum live capture concurrency is one. The
   orchestrator may queue additional portals, but must not start their capture
   workers until the current owner has released the endpoint. Offline analysis
@@ -534,9 +582,12 @@ CPU reduction only and does not claim downstream token savings.
   directories.
 - Treat a worker that returns no message separately from a failed pipeline.
   Inspect the assigned directory for `discovery-run.json`. If capture artifacts
-  are complete, run `analyze` once against that directory and reconstruct the
-  completion response from the primary outputs. If capture is incomplete,
-  preserve it and use the documented seeded retry in a new directory.
+  are complete, they are accepted immutable evidence: run `analyze` once
+  against that directory and reconstruct the completion response from the
+  primary outputs; do not perform the null-output retry. If capture is
+  incomplete, preserve it and use the documented seeded retry in a new
+  directory. Apply the null-output retry and Spark-to-Luna escalation only
+  when no accepted artifact or report exists.
 
 ## Review and landing gates
 
@@ -654,8 +705,19 @@ Return this compact structure:
 
 ```text
 Portal:
+Assignment ID:
+Assignment digest:
+Assignment type:
+Target worktree:
+Expected kickoff SHA:
+Actual kickoff SHA:
+Kickoff status: clean | dirty
 Status: completed | blocked | failed
-Artifacts:
+Decision:
+Reason codes:
+Blockers:
+Metrics:
+Artifacts (path, immutable status, SHA-256 hash):
 Confirmed reads ready for review:
 Confirmed safety-classification candidates:
 Successful probe candidates:
@@ -670,6 +732,12 @@ Passive streaming endpoints:
 Coverage gaps:
 Blocker code:
 Recommended next action:
+Reusable lessons:
+Lifecycle accounting:
+Process-improvement disposition:
+Expected final SHA:
+Actual final SHA:
+Final status: clean | dirty
 ```
 
 Do not claim exhaustive coverage. Completion means the bounded recipe finished,
