@@ -1,0 +1,20 @@
+export const collectionDefinitions = [
+  ["Defender", "defender-xdr", "defender"], ["M365 Admin", "m365-admin"],
+  ["Exchange", "exchange-beta"], ["SharePoint", "sharepoint-admin"],
+  ["Teams", "teams"], ["Viva Engage", "viva-engage"],
+  ["M365 Apps Config", "m365-apps-config"],
+  ["M365 Apps Services", "m365-apps-services"],
+  ["M365 Apps Inventory", "m365-apps-inventory"],
+  ["Intune Autopatch", "intune-autopatch"], ["Intune Portal", "intune-portal"],
+  ["Power Platform", "power-platform"], ["Purview", "purview"],
+  ["Purview Portal", "purview-portal"], ["Security Copilot", "security-copilot", null, true],
+  ["Entra IAM", "ibiza-iam", "entra-iam"], ["Entra PIM", "entra-pim"],
+  ["Entra IGA", "entra-iga"], ["Entra IDGov", "entra-idgov"],
+  ["Entra B2C", "entra-b2c"],
+].map(([name, specId, outputId = specId, hostRouting = false]) => ({
+  name,
+  specId,
+  spec: `specifications/nodoc-${specId}/specification/openapi.yml`,
+  output: `postman/collections/${outputId ?? specId}.collection.json`,
+  ...(hostRouting ? { hostRouting } : {}),
+}));

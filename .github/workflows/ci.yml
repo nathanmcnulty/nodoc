@@ -19,6 +19,11 @@ on:
       - static/**
       - tsconfig.json
       - tools/capture-recipes/**
+      - tools/portal-discovery-portfolio.json
+      - tools/postman-collection-definitions.mjs
+      - tools/discovery-evidence-inputs.mjs
+      - tools/inspect-discovery-inputs.mjs
+      - tools/tests/discovery-evidence-inputs.test.mjs
       - tools/generate-postman-collections.mjs
       - tools/discovery-derivative-families.mjs
       - tools/tests/discovery-derivative-families.test.mjs
@@ -60,6 +65,11 @@ on:
       - static/**
       - tsconfig.json
       - tools/capture-recipes/**
+      - tools/portal-discovery-portfolio.json
+      - tools/postman-collection-definitions.mjs
+      - tools/discovery-evidence-inputs.mjs
+      - tools/inspect-discovery-inputs.mjs
+      - tools/tests/discovery-evidence-inputs.test.mjs
       - tools/generate-postman-collections.mjs
       - tools/discovery-derivative-families.mjs
       - tools/tests/discovery-derivative-families.test.mjs
@@ -108,6 +118,9 @@ jobs:
 
       - name: Validate portal discovery metadata
         run: npm run validate:portal-discovery
+
+      - name: Validate discovery evidence inputs
+        run: npm run validate:discovery-inputs
 
       - name: Validate generated site data
         run: npm run validate:site-data
