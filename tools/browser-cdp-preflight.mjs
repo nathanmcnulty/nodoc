@@ -246,46 +246,6 @@ function trustedEntryUrl(entryUrl, featureCriteria, bootstrapCriteria) {
   return parsed.href;
 }
 
-async function navigateExactTarget(target, entryUrl, timeoutMs) {
-  if (!target?.id || !target.webSocketDebuggerUrl) {
-    failWith("target-invalid", "the selected bootstrap target does not have a stable CDP identity.");
-  }
-  let result;
-  try {
-    result = await sendCdpCommand(
-      target.webSocketDebuggerUrl,
-      "Page.navigate",
-      { url: entryUrl },
-      timeoutMs,
-    );
-  } catch (error) {
-    failWith("navigation-failed", error instanceof Error ? error.message : String(error));
-  }
-  if (result?.errorText) {
-    failWith("navigation-failed", `Page.navigate failed: ${result.errorText}.`);
-  }
-}
-
-async function waitForAlignedTarget({ endpoint, expectedProduct, featureCriteria, targetId, stabilityMs, pollMs, timeoutMs }) {
-  const deadline = Date.now() + timeoutMs;
-  let readinessState = "target-missing";
-  while (Date.now() < deadline) {
-    const remainingMs = Math.max(1, deadline - Date.now());
-    const base = loopbackEndpoint(endpoint);
-    const targets = await getJson(new URL("/json/list", base), remainingMs);
-    const exactTarget = targets.find((target) => target?.type === "page" && target.id === targetId);
-    if (exactTarget && targetMatches(exactTarget, { ...featureCriteria, targetId })) {
-      return await runBrowserCdpPreflight({ endpoint, expectedProduct, ...featureCriteria, targetId, stabilityMs, pollMs, timeoutMs: remainingMs });
-    }
-    readinessState = exactTarget ? "target-transitioning" : "target-missing";
-    await delay(Math.min(pollMs, Math.max(1, deadline - Date.now())));
-  }
-  failWith("navigation-readiness-timeout", `target ${targetId} did not reach feature URL readiness before timeout (state: ${readinessState}).`, {
-    targetId,
-    readinessState,
-  });
-}
-
 export async function alignBrowserCdpTarget({
   entryUrl,
   featureCriteria,
@@ -329,22 +289,12 @@ export async function alignBrowserCdpTarget({
     pollMs,
     timeoutMs,
   });
-  await navigateExactTarget(bootstrapPreflight.target, trustedUrl, timeoutMs);
-  const alignedPreflight = await waitForAlignedTarget({
-    endpoint,
-    expectedProduct,
-    ...featureCriteria,
-    targetId: bootstrapPreflight.target.id,
-    stabilityMs,
-    pollMs,
-    timeoutMs,
-  });
   return {
-    ...alignedPreflight,
+    ...bootstrapPreflight,
     alignment: {
-      status: "aligned",
-      targetState: "feature-target-aligned",
-      targetId: alignedPreflight.target.id,
+      status: "bootstrap-selected",
+      targetState: "bootstrap-target-selected",
+      targetId: bootstrapPreflight.target.id,
       fromTarget: bootstrapPreflight.target,
       entryUrl: trustedUrl,
     },

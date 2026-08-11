@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, rename, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
 
@@ -25,6 +25,7 @@ import {
   CdpAttributionRegistry,
   normalizeAttributionUrl,
 } from "./cdp-attribution.mjs";
+import { DisposableCaptureLifecycle } from "./cdp-capture-lifecycle.mjs";
 
 let apiBase = "http://127.0.0.1:9222";
 const defaultNavigationTimeoutMs = 15000;
@@ -1312,6 +1313,8 @@ class CdpClient {
     this.socketClosed = false;
     this.closing = false;
     this.closeDetails = null;
+    this.pendingEventHandlers = new Set();
+    this.eventHandlerError = null;
   }
 
   rejectPending(error) {
@@ -1386,9 +1389,16 @@ class CdpClient {
 
       const callbacks = this.listeners.get(message.method) ?? [];
       for (const callback of callbacks) {
-        callback(message.params ?? {}, {
+        const result = callback(message.params ?? {}, {
           sessionId: message.sessionId ?? null,
         });
+        if (result && typeof result.then === "function") {
+          const handler = Promise.resolve(result);
+          this.pendingEventHandlers.add(handler);
+          handler.catch((error) => { this.eventHandlerError ??= error; }).finally(() => {
+            this.pendingEventHandlers.delete(handler);
+          }).catch(() => {});
+        }
       }
     });
   }
@@ -1431,6 +1441,11 @@ class CdpClient {
 
     this.socket.send(payload);
     return response;
+  }
+
+  async awaitEventHandlers() {
+    await Promise.allSettled(Array.from(this.pendingEventHandlers));
+    if (this.eventHandlerError) throw this.eventHandlerError;
   }
 
   async close() {
@@ -1993,6 +2008,12 @@ async function main() {
         sessionSnapshots: [],
       };
   await mkdir(args.outDir, { recursive: true });
+  const summaryPath = path.join(args.outDir, "summary.json");
+  const pendingSummaryPath = path.join(args.outDir, ".summary.pending.json");
+  await Promise.all([
+    rm(summaryPath, { force: true }),
+    rm(pendingSummaryPath, { force: true }),
+  ]);
 
   const target = await resolveTarget(args);
   const client = new CdpClient(target.webSocketDebuggerUrl);
@@ -2026,6 +2047,12 @@ async function main() {
   const sessions = attributionRegistry.sessions;
   let currentLoadResolver = null;
   let lastNetworkActivityAt = Date.now();
+  const lifecycle = new DisposableCaptureLifecycle({
+    authorizedHosts: args.matchHosts,
+    client,
+    documentUrl: args.url,
+    timeoutMs: args.finalizationTimeoutMs,
+  });
 
   function setCaptureContext(pageLabel, actionIndex = currentActionIndex, pageUrl = null, attempt = 0) {
     currentContext = {
@@ -2054,6 +2081,7 @@ async function main() {
       return;
     }
 
+    await lifecycle.enableSession(sessionId);
     try {
       await client.send("Network.enable", {
         maxPostDataSize: 1024 * 128,
@@ -2082,6 +2110,7 @@ async function main() {
   }
 
   client.on("Page.loadEventFired", (_params, metadata) => {
+    lifecycle.observeEvent("page-load");
     if (metadata.sessionId) {
       return;
     }
@@ -2090,6 +2119,7 @@ async function main() {
   });
 
   client.on("Target.attachedToTarget", async (params, metadata) => {
+    lifecycle.observeEvent("target-attached");
     const childSessionId = params.sessionId ?? null;
     if (!childSessionId || childSessionId === metadata.sessionId) {
       return;
@@ -2101,15 +2131,12 @@ async function main() {
       metadata.sessionId ?? null,
     );
 
-    try {
-      await configureSession(childSessionId);
-      await client.send("Runtime.runIfWaitingForDebugger", {}, childSessionId);
-    } catch {
-      // Best effort only.
-    }
+    await configureSession(childSessionId);
+    await client.send("Runtime.runIfWaitingForDebugger", {}, childSessionId);
   });
 
   client.on("Target.detachedFromTarget", (params, metadata) => {
+    lifecycle.observeEvent("target-detached");
     const detachedSessionId = params.sessionId ?? null;
     if (detachedSessionId) {
       attributionRegistry.markDetached(detachedSessionId);
@@ -2117,10 +2144,12 @@ async function main() {
   });
 
   client.on("Target.targetInfoChanged", (params, metadata) => {
+    lifecycle.observeEvent("target-info-changed");
     attributionRegistry.updateTarget(metadata.sessionId ?? null, params.targetInfo ?? {});
   });
 
   client.on("Page.frameAttached", (params, metadata) => {
+    lifecycle.observeEvent("frame-attached");
     attributionRegistry.recordFrameAttached(
       metadata.sessionId ?? null,
       params.frameId,
@@ -2129,10 +2158,12 @@ async function main() {
   });
 
   client.on("Page.frameNavigated", (params, metadata) => {
+    lifecycle.observeEvent("frame-navigated");
     attributionRegistry.recordFrameNavigated(metadata.sessionId ?? null, params.frame);
   });
 
   client.on("Page.frameDetached", (params, metadata) => {
+    lifecycle.observeEvent("frame-detached");
     const sessionId = metadata.sessionId ?? null;
     const entry = sessions.get(sessionId);
     if (entry?.frameId === params.frameId) {
@@ -2141,7 +2172,12 @@ async function main() {
     }
   });
 
+  client.on("Fetch.requestPaused", (params, metadata) => (
+    lifecycle.handlePaused(params, metadata.sessionId ?? null)
+  ));
+
   client.on("Network.requestWillBeSent", (params, metadata) => {
+    lifecycle.observeEvent("network-request");
     const resourceType = params.type ?? params.initiator?.type ?? "";
     const requestUrl = params.request?.url;
     const sessionId = metadata.sessionId ?? null;
@@ -2220,6 +2256,7 @@ async function main() {
   });
 
   client.on("Network.responseReceived", (params, metadata) => {
+    lifecycle.observeEvent("network-response");
     const key = requestKey(params.requestId, metadata.sessionId);
     const scriptRecord = scriptRequestMap.get(key);
     if (scriptRecord) {
@@ -2268,6 +2305,7 @@ async function main() {
   });
 
   client.on("Network.loadingFailed", (params, metadata) => {
+    lifecycle.observeEvent("network-failed");
     const key = requestKey(params.requestId, metadata.sessionId);
     inFlightRequests.delete(key);
     lastNetworkActivityAt = Date.now();
@@ -2283,6 +2321,7 @@ async function main() {
   });
 
   client.on("Network.loadingFinished", (params, metadata) => {
+    lifecycle.observeEvent("network-finished");
     const key = requestKey(params.requestId, metadata.sessionId);
     const captureResponseBody = async () => {
       scriptRequestMap.delete(key);
@@ -2738,28 +2777,12 @@ async function main() {
       };
     });
 
-    const navigateIssued = await Promise.race([
-      client.send("Page.navigate", { url: resolvedUrl }).then(() => true).catch(() => false),
-      delay(Math.min(args.navigationTimeoutMs, 5000)).then(() => false),
-    ]);
-
-    if (!navigateIssued) {
-      await evaluateJson(client, `location.href = ${JSON.stringify(resolvedUrl)}`);
-    }
+    await client.send("Page.navigate", { url: resolvedUrl });
 
     const didLoad = await navigationPromise;
     let settleResult = await waitForNetworkIdle(args.settleMs);
 
-    let currentUrl = await getRootUrl();
-    if (currentUrl !== resolvedUrl) {
-      const currentOrigin = new URL(currentUrl).origin;
-      const targetOrigin = new URL(resolvedUrl).origin;
-      if (currentOrigin === targetOrigin) {
-        await evaluateJson(client, `location.href = ${JSON.stringify(resolvedUrl)}`);
-        settleResult = await waitForNetworkIdle(args.settleMs);
-        currentUrl = await getRootUrl();
-      }
-    }
+    const currentUrl = await getRootUrl();
 
     return {
       didLoad,
@@ -3257,8 +3280,12 @@ async function main() {
       });
     }
 
-    await waitForNetworkIdle(args.postActionSettleMs);
-    await flushArtifacts();
+    const finalUrl = await getRootUrl();
+    await lifecycle.finalize({
+      disconnect: () => client.close(),
+      flush: () => flushArtifacts(),
+      quiesce: () => waitForNetworkIdle(args.postActionSettleMs),
+    });
     const filteredRequests = capturedRequests.filter((request) => shouldMatchRequest(request.url, args));
     const scopedHosts = uniqueSorted(filteredRequests.map((request) => {
       try {
@@ -3278,7 +3305,7 @@ async function main() {
       actionBudget,
       bundleDiscovery: latestBundleSummary,
       capturedApiRequests: capturedRequests.length,
-      finalUrl: await getRootUrl(),
+      finalUrl,
       interactionHealth: actionValidation.interactionHealth,
       outDir: args.outDir,
       pageCount: pageStates.length,
@@ -3293,14 +3320,11 @@ async function main() {
       targetId: target.id ?? args.targetId ?? null,
     };
 
-    await writeFile(
-      path.join(args.outDir, "summary.json"),
-      `${JSON.stringify(summary, null, 2)}\n`,
-      "utf8",
-    );
+    await writeFile(pendingSummaryPath, `${JSON.stringify(summary, null, 2)}\n`, "utf8");
+    await rename(pendingSummaryPath, summaryPath);
     console.log(JSON.stringify(summary, null, 2));
   } finally {
-    await client.close();
+    if (!client.socketClosed) await client.close();
     if (target.closeWhenDone) {
       await closeTarget(target.id);
     }

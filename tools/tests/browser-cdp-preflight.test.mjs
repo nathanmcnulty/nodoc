@@ -103,7 +103,7 @@ test("rejects product mismatch, non-loopback endpoints, and authentication targe
   finally { restore(); await authCdp.close(); }
 });
 
-test("aligns one authenticated same-portal bootstrap target without changing its exact ID", async () => {
+test("selects one authenticated same-portal bootstrap target without dispatching navigation", async () => {
   const current = target({ title: "Home - Microsoft 365 Apps admin center", url: "https://config.office.com/officeSettings" });
   const restore = installWebSocket({
     evaluate: () => ({
@@ -112,11 +112,7 @@ test("aligns one authenticated same-portal bootstrap target without changing its
       bodyText: "Home",
     }),
     onCommand: (message) => {
-      if (message.method === "Page.navigate") {
-        current.url = message.params.url;
-        current.title = "Inventory";
-        return { frameId: "frame-1" };
-      }
+      assert.notEqual(message.method, "Page.navigate");
       return {};
     },
   });
@@ -137,36 +133,28 @@ test("aligns one authenticated same-portal bootstrap target without changing its
       stabilityMs: 10,
       pollMs: 2,
     });
-    assert.equal(result.alignment.status, "aligned");
+    assert.equal(result.alignment.status, "bootstrap-selected");
     assert.equal(result.target.id, "page-1");
     assert.equal(result.alignment.targetId, "page-1");
     assert.equal(result.alignment.fromTarget.id, "page-1");
-    assert.equal(result.evaluation.url, "https://config.office.com/officeSettings/inventory");
+    assert.equal(result.evaluation.url, "https://config.office.com/officeSettings");
+    assert.equal(result.alignment.entryUrl, "https://config.office.com/officeSettings/inventory");
   } finally {
     restore();
     await cdp.close();
   }
 });
 
-test("waits for the same target ID to publish its navigated URL before strict preflight", async () => {
+test("bootstrap selection never waits for or causes target navigation", async () => {
   const current = target({ title: "Home - Microsoft 365 Apps admin center", url: "https://config.office.com/officeSettings" });
-  let navigationStarted = false;
-  let listCount = 0;
   const restore = installWebSocket({
     evaluate: () => ({ title: current.title, url: current.url, bodyText: current.title === "Inventory" ? "Inventory" : "Home" }),
     onCommand: (message) => {
-      if (message.method === "Page.navigate") navigationStarted = true;
+      assert.notEqual(message.method, "Page.navigate");
       return {};
     },
   });
-  const cdp = await mockCdp(() => {
-    listCount += 1;
-    if (navigationStarted && listCount > 4) {
-      current.url = "https://config.office.com/officeSettings/inventory";
-      current.title = "Inventory";
-    }
-    return [current];
-  });
+  const cdp = await mockCdp([current]);
   try {
     const result = await alignBrowserCdpTarget({
       endpoint: cdp.endpoint,
@@ -178,26 +166,24 @@ test("waits for the same target ID to publish its navigated URL before strict pr
       pollMs: 1,
       timeoutMs: 100,
     });
-    assert.equal(result.alignment.status, "aligned");
+    assert.equal(result.alignment.status, "bootstrap-selected");
     assert.equal(result.target.id, "page-1");
-    assert.equal(result.evaluation.url, "https://config.office.com/officeSettings/inventory");
+    assert.equal(result.evaluation.url, "https://config.office.com/officeSettings");
   } finally {
     restore();
     await cdp.close();
   }
 });
 
-test("fails closed with an explicit readiness timeout when the same target never reaches the entry URL", async () => {
+test("returns bootstrap ownership to the worker even when the entry URL is not loaded", async () => {
   const current = target({ title: "Home - Microsoft 365 Apps admin center", url: "https://config.office.com/officeSettings" });
-  let navigationStarted = false;
   const restore = installWebSocket({ evaluate: () => ({ title: current.title, url: current.url, bodyText: "Home" }), onCommand: (message) => {
-    if (message.method === "Page.navigate") navigationStarted = true;
-    return { frameId: "frame-1" };
+    assert.notEqual(message.method, "Page.navigate");
+    return {};
   } });
-  const cdp = await mockCdp(() => navigationStarted ? [] : [current]);
+  const cdp = await mockCdp([current]);
   try {
-    await assert.rejects(
-      alignBrowserCdpTarget({
+    const result = await alignBrowserCdpTarget({
         endpoint: cdp.endpoint,
         entryUrl: "https://config.office.com/officeSettings/inventory",
         featureCriteria: { matchHosts: ["config.office.com"], matchPathPrefixes: ["/officeSettings/inventory"] },
@@ -205,9 +191,9 @@ test("fails closed with an explicit readiness timeout when the same target never
         stabilityMs: 1,
         pollMs: 1,
         timeoutMs: 50,
-      }),
-      (error) => error.code === "navigation-readiness-timeout",
-    );
+      });
+    assert.equal(result.alignment.status, "bootstrap-selected");
+    assert.equal(result.target.id, "page-1");
   } finally {
     restore();
     await cdp.close();
