@@ -3162,6 +3162,368 @@
                             ]
                         },
                         {
+                            "name": "GetAdminReportMetadata",
+                            "description": "",
+                            "item": [
+                                {
+                                    "id": "0ac4a981-4561-4d06-9244-83d8a4c398b5",
+                                    "name": "Get admin report metadata",
+                                    "request": {
+                                        "name": "Get admin report metadata",
+                                        "description": {
+                                            "content": "Returns report metadata for selected admin datasets in the SharePoint\nadmin center. The call is observed as a JSON POST and includes a\n`dataset` array in the request body.\n",
+                                            "type": "text/plain"
+                                        },
+                                        "url": {
+                                            "path": [
+                                                "_api",
+                                                "SPO.Tenant",
+                                                "GetAdminReportMetadata"
+                                            ],
+                                            "host": [
+                                                "{{baseUrl}}"
+                                            ],
+                                            "query": [],
+                                            "variable": []
+                                        },
+                                        "header": [
+                                            {
+                                                "disabled": false,
+                                                "description": {
+                                                    "content": "(Required) SharePoint form digest value issued by the current admin page.",
+                                                    "type": "text/plain"
+                                                },
+                                                "key": "x-requestdigest",
+                                                "value": "string"
+                                            },
+                                            {
+                                                "disabled": false,
+                                                "description": {
+                                                    "content": "Portal SDK identifier observed on same-origin SharePoint admin POST requests.",
+                                                    "type": "text/plain"
+                                                },
+                                                "key": "SdkVersion",
+                                                "value": "SPFx/TenantAdmin/6e1c1298-7b8e-4a08-a24f-769aafae45c5/Is3PRequest:0"
+                                            },
+                                            {
+                                                "disabled": false,
+                                                "description": {
+                                                    "content": "OData protocol version used by the SharePoint admin portal.",
+                                                    "type": "text/plain"
+                                                },
+                                                "key": "odata-version",
+                                                "value": "4.0"
+                                            },
+                                            {
+                                                "key": "Content-Type",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            }
+                                        ],
+                                        "method": "POST",
+                                        "body": {
+                                            "mode": "raw",
+                                            "raw": "{\n  \"dataset\": [\n    \"string\",\n    \"string\"\n  ]\n}",
+                                            "options": {
+                                                "raw": {
+                                                    "headerFamily": "json",
+                                                    "language": "json"
+                                                }
+                                            }
+                                        },
+                                        "auth": null
+                                    },
+                                    "response": [
+                                        {
+                                            "id": "f24cbb09-7d4b-4265-9b0f-53ec38d98d20",
+                                            "name": "Admin report metadata returned successfully.",
+                                            "originalRequest": {
+                                                "url": {
+                                                    "path": [
+                                                        "_api",
+                                                        "SPO.Tenant",
+                                                        "GetAdminReportMetadata"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [],
+                                                    "variable": []
+                                                },
+                                                "header": [
+                                                    {
+                                                        "disabled": false,
+                                                        "description": {
+                                                            "content": "(Required) SharePoint form digest value issued by the current admin page.",
+                                                            "type": "text/plain"
+                                                        },
+                                                        "key": "x-requestdigest",
+                                                        "value": "string"
+                                                    },
+                                                    {
+                                                        "disabled": false,
+                                                        "description": {
+                                                            "content": "Portal SDK identifier observed on same-origin SharePoint admin POST requests.",
+                                                            "type": "text/plain"
+                                                        },
+                                                        "key": "SdkVersion",
+                                                        "value": "SPFx/TenantAdmin/6e1c1298-7b8e-4a08-a24f-769aafae45c5/Is3PRequest:0"
+                                                    },
+                                                    {
+                                                        "disabled": false,
+                                                        "description": {
+                                                            "content": "OData protocol version used by the SharePoint admin portal.",
+                                                            "type": "text/plain"
+                                                        },
+                                                        "key": "odata-version",
+                                                        "value": "4.0"
+                                                    },
+                                                    {
+                                                        "key": "Content-Type",
+                                                        "value": "application/json"
+                                                    },
+                                                    {
+                                                        "key": "Accept",
+                                                        "value": "application/json"
+                                                    }
+                                                ],
+                                                "method": "POST",
+                                                "body": {
+                                                    "mode": "raw",
+                                                    "raw": "{\n  \"dataset\": [\n    \"string\",\n    \"string\"\n  ]\n}",
+                                                    "options": {
+                                                        "raw": {
+                                                            "headerFamily": "json",
+                                                            "language": "json"
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            "status": "OK",
+                                            "code": 200,
+                                            "header": [
+                                                {
+                                                    "key": "Content-Type",
+                                                    "value": "application/json"
+                                                }
+                                            ],
+                                            "body": "{\n  \"key_0\": \"string\"\n}",
+                                            "cookie": [],
+                                            "_postman_previewlanguage": "json"
+                                        },
+                                        {
+                                            "id": "7678d265-d82b-4efb-9383-654670bf93ae",
+                                            "name": "The request shape or parameters were invalid.",
+                                            "originalRequest": {
+                                                "url": {
+                                                    "path": [
+                                                        "_api",
+                                                        "SPO.Tenant",
+                                                        "GetAdminReportMetadata"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [],
+                                                    "variable": []
+                                                },
+                                                "header": [
+                                                    {
+                                                        "disabled": false,
+                                                        "description": {
+                                                            "content": "(Required) SharePoint form digest value issued by the current admin page.",
+                                                            "type": "text/plain"
+                                                        },
+                                                        "key": "x-requestdigest",
+                                                        "value": "string"
+                                                    },
+                                                    {
+                                                        "disabled": false,
+                                                        "description": {
+                                                            "content": "Portal SDK identifier observed on same-origin SharePoint admin POST requests.",
+                                                            "type": "text/plain"
+                                                        },
+                                                        "key": "SdkVersion",
+                                                        "value": "SPFx/TenantAdmin/6e1c1298-7b8e-4a08-a24f-769aafae45c5/Is3PRequest:0"
+                                                    },
+                                                    {
+                                                        "disabled": false,
+                                                        "description": {
+                                                            "content": "OData protocol version used by the SharePoint admin portal.",
+                                                            "type": "text/plain"
+                                                        },
+                                                        "key": "odata-version",
+                                                        "value": "4.0"
+                                                    },
+                                                    {
+                                                        "key": "Content-Type",
+                                                        "value": "application/json"
+                                                    }
+                                                ],
+                                                "method": "POST",
+                                                "body": {
+                                                    "mode": "raw",
+                                                    "raw": "{\n  \"dataset\": [\n    \"string\",\n    \"string\"\n  ]\n}",
+                                                    "options": {
+                                                        "raw": {
+                                                            "headerFamily": "json",
+                                                            "language": "json"
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            "status": "Bad Request",
+                                            "code": 400,
+                                            "header": [],
+                                            "cookie": [],
+                                            "_postman_previewlanguage": "text"
+                                        },
+                                        {
+                                            "id": "a47578e3-85ab-43a9-a84c-ceb3bc3b176f",
+                                            "name": "Authentication is required or the SharePoint admin browser session is no longer valid.",
+                                            "originalRequest": {
+                                                "url": {
+                                                    "path": [
+                                                        "_api",
+                                                        "SPO.Tenant",
+                                                        "GetAdminReportMetadata"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [],
+                                                    "variable": []
+                                                },
+                                                "header": [
+                                                    {
+                                                        "disabled": false,
+                                                        "description": {
+                                                            "content": "(Required) SharePoint form digest value issued by the current admin page.",
+                                                            "type": "text/plain"
+                                                        },
+                                                        "key": "x-requestdigest",
+                                                        "value": "string"
+                                                    },
+                                                    {
+                                                        "disabled": false,
+                                                        "description": {
+                                                            "content": "Portal SDK identifier observed on same-origin SharePoint admin POST requests.",
+                                                            "type": "text/plain"
+                                                        },
+                                                        "key": "SdkVersion",
+                                                        "value": "SPFx/TenantAdmin/6e1c1298-7b8e-4a08-a24f-769aafae45c5/Is3PRequest:0"
+                                                    },
+                                                    {
+                                                        "disabled": false,
+                                                        "description": {
+                                                            "content": "OData protocol version used by the SharePoint admin portal.",
+                                                            "type": "text/plain"
+                                                        },
+                                                        "key": "odata-version",
+                                                        "value": "4.0"
+                                                    },
+                                                    {
+                                                        "key": "Content-Type",
+                                                        "value": "application/json"
+                                                    }
+                                                ],
+                                                "method": "POST",
+                                                "body": {
+                                                    "mode": "raw",
+                                                    "raw": "{\n  \"dataset\": [\n    \"string\",\n    \"string\"\n  ]\n}",
+                                                    "options": {
+                                                        "raw": {
+                                                            "headerFamily": "json",
+                                                            "language": "json"
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            "status": "Unauthorized",
+                                            "code": 401,
+                                            "header": [],
+                                            "cookie": [],
+                                            "_postman_previewlanguage": "text"
+                                        },
+                                        {
+                                            "id": "b2a1d418-aab0-44fc-827d-b1a6a473aebd",
+                                            "name": "The authenticated principal does not have access to the requested SharePoint admin data.",
+                                            "originalRequest": {
+                                                "url": {
+                                                    "path": [
+                                                        "_api",
+                                                        "SPO.Tenant",
+                                                        "GetAdminReportMetadata"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [],
+                                                    "variable": []
+                                                },
+                                                "header": [
+                                                    {
+                                                        "disabled": false,
+                                                        "description": {
+                                                            "content": "(Required) SharePoint form digest value issued by the current admin page.",
+                                                            "type": "text/plain"
+                                                        },
+                                                        "key": "x-requestdigest",
+                                                        "value": "string"
+                                                    },
+                                                    {
+                                                        "disabled": false,
+                                                        "description": {
+                                                            "content": "Portal SDK identifier observed on same-origin SharePoint admin POST requests.",
+                                                            "type": "text/plain"
+                                                        },
+                                                        "key": "SdkVersion",
+                                                        "value": "SPFx/TenantAdmin/6e1c1298-7b8e-4a08-a24f-769aafae45c5/Is3PRequest:0"
+                                                    },
+                                                    {
+                                                        "disabled": false,
+                                                        "description": {
+                                                            "content": "OData protocol version used by the SharePoint admin portal.",
+                                                            "type": "text/plain"
+                                                        },
+                                                        "key": "odata-version",
+                                                        "value": "4.0"
+                                                    },
+                                                    {
+                                                        "key": "Content-Type",
+                                                        "value": "application/json"
+                                                    }
+                                                ],
+                                                "method": "POST",
+                                                "body": {
+                                                    "mode": "raw",
+                                                    "raw": "{\n  \"dataset\": [\n    \"string\",\n    \"string\"\n  ]\n}",
+                                                    "options": {
+                                                        "raw": {
+                                                            "headerFamily": "json",
+                                                            "language": "json"
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            "status": "Forbidden",
+                                            "code": 403,
+                                            "header": [],
+                                            "cookie": [],
+                                            "_postman_previewlanguage": "text"
+                                        }
+                                    ],
+                                    "event": [],
+                                    "protocolProfileBehavior": {
+                                        "disableBodyPruning": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
                             "name": "sites('{siteId}')",
                             "description": "",
                             "item": [
