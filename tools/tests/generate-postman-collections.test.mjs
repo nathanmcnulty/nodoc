@@ -2,7 +2,10 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 
-import { mergeCollectionVariables } from "../generate-postman-collections.mjs";
+import {
+  mergeCollectionVariables,
+  mergeRequestExamples,
+} from "../generate-postman-collections.mjs";
 
 test("preserves matching collection variable values while retaining current-only values", () => {
   const current = [
@@ -26,6 +29,43 @@ test("leaves generated variables unchanged when no prior collection exists", () 
   ];
 
   assert.deepEqual(mergeCollectionVariables(current, undefined), current);
+});
+
+test("preserves matching multipart form-data values from the prior collection", () => {
+  const current = {
+    method: "POST",
+    body: {
+      mode: "formdata",
+      formdata: [
+        { key: "file", type: "file" },
+        { key: "hasParameters", value: "true", type: "text" },
+        { key: "overrideIfExists", value: "true", type: "text" },
+      ],
+    },
+  };
+  const previous = {
+    method: "POST",
+    body: {
+      mode: "formdata",
+      formdata: [
+        { key: "file", type: "file" },
+        { key: "hasParameters", value: "false", type: "text" },
+        { key: "overrideIfExists", value: "false", type: "text" },
+      ],
+    },
+  };
+
+  assert.deepEqual(mergeRequestExamples(current, previous), {
+    ...current,
+    body: {
+      ...current.body,
+      formdata: [
+        { key: "file", type: "file" },
+        { key: "hasParameters", value: "false", type: "text" },
+        { key: "overrideIfExists", value: "false", type: "text" },
+      ],
+    },
+  });
 });
 
 test("pins the external Postman generation tools to exact versions", () => {
