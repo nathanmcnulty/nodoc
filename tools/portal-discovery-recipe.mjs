@@ -2,78 +2,19 @@ import { createHash } from "node:crypto";
 
 import { classifyGetProbeUrl } from "./discovery-safety.mjs";
 import { planActionBudget } from "./portal-discovery-action-budget.mjs";
+import {
+  buildEffectiveRecipeActions,
+  normalizeRecipeAction,
+  normalizeRecipeActions,
+  validateEffectiveRecipeActions,
+} from "./portal-discovery-actions.mjs";
 
-const supportedActionTypes = new Set([
-  "capture",
-  "click-contains",
-  "click-href",
-  "click-label",
-  "crawl-links",
-  "navigate",
-  "probe-get",
-  "replay-seeded-links",
-  "replay-seeded-routes",
-  "wait-ms",
-]);
-
-export function normalizeRecipeAction(action) {
-  let rawType;
-  let rawValue;
-  let requestedScope = "any";
-  if (typeof action === "string") {
-    const separator = action.indexOf("=");
-    if (separator <= 0) {
-      throw new Error(`Invalid action "${action}". Expected type=value.`);
-    }
-    rawType = action.slice(0, separator).trim();
-    rawValue = action.slice(separator + 1).trim();
-  } else if (action && typeof action === "object" && !Array.isArray(action)) {
-    rawType = String(action.type ?? "").trim();
-    rawValue = String(action.value ?? "").trim();
-    requestedScope = String(action.scope ?? "any").trim().toLowerCase() || "any";
-    if (!rawType) {
-      throw new Error("Recipe action objects must include a type.");
-    }
-  } else {
-    throw new Error("Recipe actions must be strings or objects.");
-  }
-
-  const normalizedRawType = rawType.toLowerCase();
-  if (!["any", "root", "iframe"].includes(requestedScope)) {
-    throw new Error(`Unsupported action scope "${requestedScope}".`);
-  }
-  const scopedType = requestedScope !== "any"
-    && !normalizedRawType.endsWith(`-${requestedScope}`)
-    ? `${normalizedRawType}-${requestedScope}`
-    : normalizedRawType;
-  const scope = scopedType.endsWith("-root")
-    ? "root"
-    : scopedType.endsWith("-iframe")
-      ? "iframe"
-      : "any";
-  const normalizedType = scopedType.replace(/-(root|iframe)$/u, "");
-  const type = normalizedType === "click" ? "click-label" : normalizedType;
-  if (!supportedActionTypes.has(type)) {
-    throw new Error(`Unsupported action type "${rawType}".`);
-  }
-  return {
-    raw: typeof action === "string" ? action : JSON.stringify(action),
-    scope,
-    type,
-    value: rawValue,
-    ...(action && typeof action === "object" && !Array.isArray(action)
-      ? {
-        highValue: action.highValue === true,
-        optional: action.optional === true,
-        required: Boolean(action.required),
-      }
-      : {}),
-  };
-}
-
-export function normalizeRecipeActions(actions) {
-  return (Array.isArray(actions) ? actions : []).map(normalizeRecipeAction);
-}
+export {
+  buildEffectiveRecipeActions,
+  normalizeRecipeAction,
+  normalizeRecipeActions,
+  validateEffectiveRecipeActions,
+} from "./portal-discovery-actions.mjs";
 
 function getRecipeNavigateActions(recipe) {
   return normalizeRecipeActions(recipe?.actions).map((action, index) => ({ ...action, index }))
@@ -88,13 +29,13 @@ function getRecipeEntry(recipe) {
   };
 }
 
-function canonicalizeRecipeRoot(recipe) {
+function canonicalizeRecipeRoot(recipe, actions = normalizeRecipeActions(recipe?.actions)) {
   try {
     const rootUrl = new URL(recipe?.url);
     const rootClassification = classifyGetProbeUrl(rootUrl.href, rootUrl.href);
     if (
       recipe?.pageTarget?.bootstrap === undefined
-      && getRecipeNavigateActions(recipe).length === 0
+      && !actions.some((action) => action.type === "navigate")
       && rootClassification.allowed
     ) {
       rootUrl.hash = "";
@@ -102,25 +43,6 @@ function canonicalizeRecipeRoot(recipe) {
     return rootUrl.href;
   } catch {
     return recipe?.url ?? "";
-  }
-}
-
-function validateRecipeNavigateActions(recipe, recipeUrl) {
-  for (const action of getRecipeNavigateActions(recipe)) {
-    if (!action.value) {
-      throw new Error(`recipe navigate action ${action.index} must include a URL.`);
-    }
-    const actionUrl = new URL(action.value, recipeUrl.href);
-    const classification = classifyGetProbeUrl(action.value, recipeUrl.href);
-    if (!classification.allowed) {
-      throw new Error(`recipe navigate action ${action.index} is not a safe same-origin GET (${classification.code}).`);
-    }
-    if (actionUrl.protocol !== "https:" || actionUrl.username || actionUrl.password || actionUrl.search) {
-      throw new Error(`recipe navigate action ${action.index} must be an HTTPS URL without credentials, query, or fragment.`);
-    }
-    if (actionUrl.hash) {
-      throw new Error(`recipe navigate action ${action.index} must be an HTTPS URL without fragment.`);
-    }
   }
 }
 
@@ -204,8 +126,9 @@ export function resolvePageTargetBootstrapCriteria(recipe) {
   };
 }
 
-export function validateRecipeTargetMetadata(recipe) {
-  const entry = getRecipeEntry(recipe);
+export function validateRecipeTargetMetadata(recipe, { actions = buildEffectiveRecipeActions(recipe?.actions) } = {}) {
+  const normalizedActions = normalizeRecipeActions(actions);
+  const entry = getRecipeEntry({ ...recipe, actions: normalizedActions });
   const entryUrlValue = entry.value;
   let entryUrl;
   let recipeUrl;
@@ -219,7 +142,7 @@ export function validateRecipeTargetMetadata(recipe) {
   if (entryUrl.protocol !== "https:" || entryUrl.username || entryUrl.password || entryUrl.search) {
     throw new Error("recipe entry URL must be an HTTPS URL without credentials, query, or fragment.");
   }
-  validateRecipeNavigateActions(recipe, recipeUrl);
+  validateEffectiveRecipeActions(normalizedActions, recipeUrl.href);
   const rootClassification = classifyGetProbeUrl(recipeUrl.href, recipeUrl.href);
   if (!rootClassification.allowed) {
     throw new Error(`declared root URL is not a safe same-origin GET (${rootClassification.code}).`);
@@ -228,7 +151,7 @@ export function validateRecipeTargetMetadata(recipe) {
   if (!classification.allowed) {
     throw new Error(`recipe entry URL is not a safe same-origin GET (${classification.code}).`);
   }
-  if ((bootstrapCriteria || getRecipeNavigateActions(recipe).length > 0) && recipeUrl.hash) {
+  if ((bootstrapCriteria || normalizedActions.some((action) => action.type === "navigate")) && recipeUrl.hash) {
     throw new Error("declared root URL must be an HTTPS URL without credentials, query, or fragment when explicit navigation is configured.");
   }
   if (!bootstrapCriteria && entry.isDeclaredRoot) {
@@ -247,7 +170,7 @@ export function validateRecipeTargetMetadata(recipe) {
   )) {
     throw new Error("declared root URL does not match pageTarget.bootstrap host/path criteria.");
   }
-  const rootUrl = canonicalizeRecipeRoot(recipe);
+  const rootUrl = canonicalizeRecipeRoot(recipe, normalizedActions);
   return {
     entryUrl: entryUrl.href,
     rootUrl,
@@ -256,10 +179,12 @@ export function validateRecipeTargetMetadata(recipe) {
   };
 }
 
-export function canonicalizeRecipeForDispatch(recipe) {
-  const metadata = validateRecipeTargetMetadata(recipe);
+export function canonicalizeRecipeForDispatch(recipe, { actionOverrides = [] } = {}) {
+  const actions = buildEffectiveRecipeActions(recipe?.actions, actionOverrides);
+  const metadata = validateRecipeTargetMetadata(recipe, { actions });
   return {
     ...metadata,
+    actions,
     recipe: {
       ...recipe,
       url: metadata.rootUrl,
@@ -268,9 +193,11 @@ export function canonicalizeRecipeForDispatch(recipe) {
 }
 
 export function canonicalRecipeDigest(recipe) {
+  const actions = normalizeRecipeActions(recipe?.actions);
   const canonicalRecipe = {
     ...recipe,
-    url: canonicalizeRecipeRoot(recipe),
+    actions,
+    url: canonicalizeRecipeRoot(recipe, actions),
   };
   return createHash("sha256")
     .update(`${JSON.stringify(canonicalRecipe)}\n`, "utf8")

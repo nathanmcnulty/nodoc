@@ -44,6 +44,7 @@ import {
   resolvePageTargetBootstrapCriteria,
   resolvePageTargetCriteria,
 } from "./portal-discovery-recipe.mjs";
+import { normalizeRecipeActions } from "./portal-discovery-actions.mjs";
 import { planActionBudget } from "./portal-discovery-action-budget.mjs";
 
 const validPhases = new Set(["all", "analyze", "capture", "plan"]);
@@ -417,21 +418,16 @@ async function inspectRecipeSafety(recipePath) {
     /(?:^|[\s/_-])(?:delete|execute|export|generate|invoke|log-?out|publish|remove|run|save|sign-?out|start|submit|sync|trigger)(?:$|[\s/_.?&=-])/iu;
   const unsafeActions = [];
 
-  for (const action of recipe.actions ?? []) {
-    const rawType = typeof action === "string"
-      ? action.split("=", 1)[0]
-      : String(action?.type || "");
-    const value = typeof action === "string"
-      ? action.slice(action.indexOf("=") + 1)
-      : String(action?.value || "");
-    const type = rawType.replace(/-(?:root|iframe)$/u, "");
+  for (const [index, action] of normalizeRecipeActions(recipe.actions).entries()) {
+    const value = action.value;
+    const type = action.type;
     if (type.startsWith("click") && unsafeActionPattern.test(value)) {
-      unsafeActions.push(`${rawType}=${value}`);
+      unsafeActions.push(`actions[${index}]=${type}=${value}`);
     }
     if (type === "navigate") {
       const classification = classifyGetProbeUrl(value, recipe.url);
       if (!classification.allowed) {
-        unsafeActions.push(`${rawType}=${value} (${classification.code})`);
+        unsafeActions.push(`actions[${index}]=navigate=${value} (${classification.code})`);
       }
     }
   }

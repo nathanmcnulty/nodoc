@@ -1,3 +1,5 @@
+import { normalizeRecipeActions } from "./portal-discovery-actions.mjs";
+
 const budgetCategories = ["recipeActions", "mandatoryOrchestrationActions", "expandedReplayActions"];
 
 function nonNegativeInteger(value, label) {
@@ -6,7 +8,7 @@ function nonNegativeInteger(value, label) {
 }
 
 export function planActionBudget(recipe, { maxActions = recipe?.maxActions, mandatoryOrchestrationActions = 1, expandedReplayActions = 0 } = {}) {
-  const recipeActions = Array.isArray(recipe?.actions) ? recipe.actions.length : 0;
+  const recipeActions = normalizeRecipeActions(recipe?.actions).length;
   const categories = {
     recipeActions: nonNegativeInteger(recipeActions, "recipeActions"),
     mandatoryOrchestrationActions: nonNegativeInteger(mandatoryOrchestrationActions, "mandatoryOrchestrationActions"),

@@ -9,25 +9,12 @@ import {
   getCoverageOverlay,
 } from "./portal-discovery-metadata.mjs";
 import {
+  canonicalizeRecipeForDispatch,
+  normalizeRecipeActions,
   resolvePageTargetCriteria,
-  validateRecipeTargetMetadata,
 } from "./portal-discovery-recipe.mjs";
 
 const portfolioManifestPath = path.join(repoRoot, "tools", "portal-discovery-portfolio.json");
-
-const supportedRecipeActionTypes = new Set([
-  "capture",
-  "click",
-  "click-contains",
-  "click-href",
-  "click-label",
-  "crawl-links",
-  "navigate",
-  "probe-get",
-  "replay-seeded-links",
-  "replay-seeded-routes",
-  "wait-ms",
-]);
 
 function stripBom(value) {
   return typeof value === "string" ? value.replace(/^\uFEFF/u, "") : value;
@@ -106,28 +93,6 @@ async function validatePortfolioCoverageGapClasses(errors, specInventory) {
   }
 }
 
-function validateRecipeAction(errors, recipePath, action) {
-  if (typeof action === "string") {
-    const separator = action.indexOf("=");
-    const rawType = separator > 0 ? action.slice(0, separator) : action;
-    const normalizedType = rawType.replace(/-(root|iframe)$/u, "");
-    if (!supportedRecipeActionTypes.has(normalizedType)) {
-      fail(errors, `${recipePath}: unsupported recipe action "${rawType}".`);
-    }
-    return;
-  }
-
-  if (!action || typeof action !== "object") {
-    fail(errors, `${recipePath}: recipe actions must be strings or objects.`);
-    return;
-  }
-
-  const rawType = String(action.type || "");
-  if (!supportedRecipeActionTypes.has(rawType)) {
-    fail(errors, `${recipePath}: unsupported recipe action "${rawType}".`);
-  }
-}
-
 function validateSeedRouteGroups(errors, recipePath, seedRouteGroups) {
   for (const [groupName, group] of Object.entries(seedRouteGroups ?? {})) {
     const routeTemplates = Array.isArray(group?.routeTemplates) ? group.routeTemplates : [];
@@ -153,7 +118,7 @@ function validateSeedRouteGroups(errors, recipePath, seedRouteGroups) {
   }
 }
 
-async function validateRecipeFile(errors, recipePath) {
+async function validateRecipeFile(errors, classifications, recipePath) {
   const absolutePath = path.join(repoRoot, recipePath);
   let recipe;
 
@@ -177,11 +142,16 @@ async function validateRecipeFile(errors, recipePath) {
     fail(errors, `${recipePath}: missing url.`);
   }
 
-  if (!Array.isArray(recipe.actions) || recipe.actions.length === 0) {
+  if (recipe.actions === undefined || recipe.actions === null) {
     fail(errors, `${recipePath}: recipes must include at least one action.`);
   } else {
-    for (const action of recipe.actions) {
-      validateRecipeAction(errors, recipePath, action);
+    try {
+      const actions = normalizeRecipeActions(recipe.actions);
+      if (actions.length === 0) {
+        fail(errors, `${recipePath}: recipes must include at least one action.`);
+      }
+    } catch (error) {
+      fail(errors, `${recipePath}: ${error.message}`);
     }
   }
 
@@ -197,17 +167,31 @@ async function validateRecipeFile(errors, recipePath) {
     fail(errors, `${recipePath}: maxActions must be a non-negative integer when present.`);
   }
 
-  if (recipe.pageTarget !== undefined) {
-    if (!recipe.pageTarget || typeof recipe.pageTarget !== "object" || Array.isArray(recipe.pageTarget)) {
-      fail(errors, `${recipePath}: pageTarget must be an object when present.`);
-    } else {
-      try {
-        resolvePageTargetCriteria(recipe);
-        validateRecipeTargetMetadata(recipe);
-      } catch (error) {
-        fail(errors, `${recipePath}: ${error.message}`);
-      }
-    }
+  try {
+    resolvePageTargetCriteria(recipe);
+    const metadata = canonicalizeRecipeForDispatch(recipe);
+    classifications.push({
+      recipePath,
+      status: "dispatchable",
+      mode: "live-capture",
+      rootUrl: metadata.rootUrl,
+      entryUrl: metadata.entryUrl,
+    });
+  } catch (error) {
+    const mode = error.message.includes("pageTarget")
+      ? "legacy-target-unmodeled"
+      : error.message.includes("navigate action")
+        ? "legacy-safety-blocked"
+        : "legacy-validation-blocked";
+    classifications.push({
+      recipePath,
+      status: "non-dispatchable",
+      mode,
+      reason: error.message,
+    });
+  }
+  if (recipe.pageTarget !== undefined && (!recipe.pageTarget || typeof recipe.pageTarget !== "object" || Array.isArray(recipe.pageTarget))) {
+    fail(errors, `${recipePath}: pageTarget must be an object when present.`);
   }
 
   validateSeedRouteGroups(errors, recipePath, recipe.seedRouteGroups);
@@ -217,6 +201,7 @@ async function main() {
   const specInventory = await buildSpecInventory();
   const specTitles = specInventory.map((record) => record.title);
   const errors = [];
+  const classifications = [];
 
   await validatePortfolioCoverageGapClasses(errors, specInventory);
 
@@ -243,7 +228,7 @@ async function main() {
         continue;
       }
       seenRecipePaths.add(recipePath);
-      await validateRecipeFile(errors, recipePath);
+      await validateRecipeFile(errors, classifications, recipePath);
     }
   }
 
@@ -255,7 +240,20 @@ async function main() {
     .flat()
     .filter((value, index, values) => values.indexOf(value) === index)
     .length;
-  console.log(`Validated portal discovery metadata for ${specTitles.length} specs and ${recipeCount} capture recipes.`);
+  const uniqueClassifications = [...new Map(classifications.map((entry) => [entry.recipePath, entry])).values()]
+    .sort((left, right) => left.recipePath.localeCompare(right.recipePath));
+  const dispatchable = uniqueClassifications.filter((entry) => entry.status === "dispatchable").length;
+  const nonDispatchable = uniqueClassifications.filter((entry) => entry.status === "non-dispatchable").length;
+  const unclassified = recipeCount - uniqueClassifications.length;
+  if (unclassified !== 0) {
+    throw new Error(`Recipe dispatch classification is incomplete: ${unclassified} recipe(s) are unclassified.`);
+  }
+  console.log(JSON.stringify({
+    specs: specTitles.length,
+    recipes: recipeCount,
+    dispatchability: { dispatchable, nonDispatchable, unclassified },
+    classifications: uniqueClassifications,
+  }, null, 2));
 }
 
 main().catch((error) => {

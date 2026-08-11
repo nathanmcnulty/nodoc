@@ -27,8 +27,13 @@ import {
 } from "./cdp-attribution.mjs";
 import {
   canonicalizeRecipeForDispatch,
-  normalizeRecipeAction,
 } from "./portal-discovery-recipe.mjs";
+import {
+  buildEffectiveRecipeActions,
+  normalizeRecipeAction,
+  normalizeRecipeActions,
+  validateEffectiveRecipeActions,
+} from "./portal-discovery-actions.mjs";
 
 let apiBase = "http://127.0.0.1:9222";
 const defaultNavigationTimeoutMs = 15000;
@@ -500,21 +505,22 @@ function applyRecipeConfig(args, recipeConfig, recipePath) {
     }
   }
 
-  if (recipeConfig.actions) {
-    args.actions = ensureArray(recipeConfig.actions).map(normalizeRecipeAction);
-  }
+  args.recipeActions = normalizeRecipeActions(recipeConfig.actions);
+  args.actions = [...args.recipeActions];
 
   if (recipeConfig.captureScripts !== undefined) {
     args.captureScripts = Boolean(recipeConfig.captureScripts);
   }
 
   args.seedRouteGroups = normalizeSeedRouteGroups(recipeConfig.seedRouteGroups);
-  args.actionBudget = planActionBudget(recipeConfig, { maxActions: recipeConfig.maxActions });
+  args.actionBudget = planActionBudget({ ...recipeConfig, actions: args.actions }, { maxActions: recipeConfig.maxActions });
 }
 
 async function parseArgs(argv) {
   const args = {
     actions: [],
+    recipeActions: [],
+    cliActions: [],
     captureScripts: true,
     cdpEndpoint: "http://127.0.0.1:9222",
     bundleCacheDir: null,
@@ -822,13 +828,13 @@ async function parseArgs(argv) {
     }
 
     if (arg === "--action" && next) {
-      args.actions.push(normalizeRecipeAction(next));
+      args.cliActions.push(normalizeRecipeAction(next));
       index += 1;
       continue;
     }
 
     if (arg.startsWith("--action=")) {
-      args.actions.push(normalizeRecipeAction(arg.slice("--action=".length)));
+      args.cliActions.push(normalizeRecipeAction(arg.slice("--action=".length)));
       continue;
     }
   }
@@ -838,12 +844,18 @@ async function parseArgs(argv) {
   }
 
   if (args.recipe) {
-    const metadata = canonicalizeRecipeForDispatch(args.recipe);
+    const metadata = canonicalizeRecipeForDispatch(args.recipe, { actionOverrides: args.cliActions });
+    args.actions = metadata.actions;
+    args.actionBudget = planActionBudget({ ...args.recipe, actions: args.actions }, { maxActions: args.recipe.maxActions });
     if (args.url !== args.recipe.url && args.url !== metadata.rootUrl) {
       throw new Error("Worker navigation URL does not match the checked-in or canonical recipe root URL.");
     }
     args.recipeMetadata = metadata;
     args.url = metadata.rootUrl;
+  } else {
+    args.actions = buildEffectiveRecipeActions([], args.cliActions);
+    args.actions = validateEffectiveRecipeActions(args.actions, args.url);
+    args.actionBudget = planActionBudget({ actions: args.actions });
   }
 
   if (args.actionBudget?.maxActions !== null && args.actionBudget?.maxActions !== undefined

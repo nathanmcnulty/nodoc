@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { execFile } from "node:child_process";
-import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -18,6 +18,7 @@ import {
 } from "../portal-discovery-recipe.mjs";
 import { buildCaptureWorkerArgs, buildBootstrapPreflightCriteria, buildPreflightCriteria } from "../run-portal-discovery.mjs";
 import { buildRecipeAssignmentId, recipeDigest } from "../portal-discovery-dispatch.mjs";
+import { captureRecipesByTitle } from "../portal-discovery-metadata.mjs";
 
 const execFileAsync = promisify(execFile);
 const repoRoot = path.resolve(import.meta.dirname, "..", "..");
@@ -100,6 +101,32 @@ test("relative Viva Engage navigation resolves against the declared root", async
   const metadata = canonicalizeRecipeForDispatch(recipe);
   assert.equal(metadata.entryUrl, "https://engage.cloud.microsoft/main/admin/external-networks-settings");
   assert.equal(metadata.rootUrl, "https://engage.cloud.microsoft/main/admin");
+  const scalarMetadata = canonicalizeRecipeForDispatch({
+    ...recipe,
+    actions: "navigate=/main/admin/segmentation",
+  });
+  assert.equal(scalarMetadata.entryUrl, "https://engage.cloud.microsoft/main/admin/segmentation");
+});
+
+test("checked-in recipe classification is complete and deterministic", async () => {
+  const recipePaths = [...new Set(Object.values(captureRecipesByTitle).flat())];
+  let dispatchable = 0;
+  let nonDispatchable = 0;
+  for (const recipePath of recipePaths) {
+    const recipe = JSON.parse(
+      (await readFile(path.join(repoRoot, recipePath), "utf8")).replace(/^\uFEFF/u, ""),
+    );
+    try {
+      canonicalizeRecipeForDispatch(recipe);
+      dispatchable += 1;
+    } catch {
+      nonDispatchable += 1;
+    }
+  }
+  assert.deepEqual(
+    { total: recipePaths.length, dispatchable, nonDispatchable },
+    { total: 43, dispatchable: 25, nonDispatchable: 18 },
+  );
 });
 
 test("active root fragments are rejected before browser-entry normalization", () => {
@@ -136,7 +163,7 @@ test("explicit passive-fragment navigate routes remain strict", () => {
       },
       actions: ["navigate=https://example.com/#home"],
     }),
-    /recipe navigate action 0 must be an HTTPS URL without fragment/,
+    /navigate action 0 must be an HTTPS URL without fragment/,
   );
 });
 
@@ -208,6 +235,7 @@ test("worker rejects every later fragment navigate before Page.navigate", async 
         const recipePath = path.join(tempDir, `${hasBootstrap ? "bootstrap" : "legacy"}-${formIndex}.json`);
         const outputPath = path.join(tempDir, `${hasBootstrap ? "bootstrap" : "legacy"}-${formIndex}.out`);
         await writeFile(recipePath, `${JSON.stringify(recipe)}\n`, "utf8");
+        await mkdir(outputPath);
         await assert.rejects(
           execFileAsync(process.execPath, [
             path.join(repoRoot, "tools", "cdp-deep-capture.mjs"),
@@ -221,9 +249,49 @@ test("worker rejects every later fragment navigate before Page.navigate", async 
             outputPath,
           ]),
           (error) => error.code === 1
-            && /recipe navigate action 1/u.test(error.stderr),
+            && /navigate action 1/u.test(error.stderr),
         );
       }
+    }
+  } finally {
+    await rm(tempDir, { force: true, recursive: true });
+  }
+});
+
+test("worker rejects unsafe CLI actions before connecting to CDP", async () => {
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-worker-cli-actions-"));
+  try {
+    const recipePath = path.join(tempDir, "recipe.json");
+    await writeFile(recipePath, `${JSON.stringify({
+      url: "https://example.com/",
+      actions: "capture=surface",
+    })}\n`, "utf8");
+    for (const [index, action] of [
+      "navigate=https://other.example/#home",
+      "navigate=https://example.com/path?query=1",
+      "navigate=https://user:password@example.com/path",
+      " CLICK-LABEL = Save ",
+      "click-contains=",
+    ].entries()) {
+      const outputPath = path.join(tempDir, `cli-${index}.out`);
+      await mkdir(outputPath);
+      await assert.rejects(
+        execFileAsync(process.execPath, [
+          path.join(repoRoot, "tools", "cdp-deep-capture.mjs"),
+          "--recipe",
+          recipePath,
+          "--url",
+          "https://example.com/",
+          "--portal",
+          "test",
+          "--out",
+          outputPath,
+          "--action",
+          action,
+        ]),
+        (error) => error.code === 1
+          && /(?:recipe entry URL|navigate action|click action|action .*value)/u.test(error.stderr),
+      );
     }
   } finally {
     await rm(tempDir, { force: true, recursive: true });
@@ -361,7 +429,7 @@ test("explicit page-target criteria fail closed when malformed or empty", () => 
       },
       actions: ["navigate=https://config.office.com/officeSettings/inventory#fragment"],
     }),
-    /recipe navigate action 0 must be an HTTPS URL without fragment/,
+    /navigate action 0 must be an HTTPS URL without fragment/,
   );
   assert.throws(
     () => validateRecipeTargetMetadata({
