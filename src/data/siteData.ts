@@ -426,7 +426,7 @@ const apiCatalogSeed: ApiCatalogSeed[] = [
     title: "Entra B2C",
     slug: "/entra-b-2-c",
     family: "Entra portal",
-    operations: 5,
+    operations: 6,
     authModel: "Azure AD bearer token + `tenantId` query context",
     baseUrl: "https://main.b2cadmin.ext.azure.com",
     summary:
