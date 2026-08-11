@@ -391,18 +391,14 @@
                                         "cometd",
                                         "handshake"
                                     ],
-                                    "query": [],
-                                    "variable": [
-                                        {
-                                            "type": "any",
-                                            "value": "relay-instance.rt.yammer.com",
-                                            "key": "relayHost"
-                                        }
-                                    ],
                                     "host": [
-                                        "{{relayHost}}"
+                                        "{{relayHost}}",
+                                        "rt",
+                                        "yammer",
+                                        "com"
                                     ],
-                                    "raw": "https://{{relayHost}}/cometd/handshake"
+                                    "query": [],
+                                    "variable": []
                                 },
                                 "header": [
                                     {
@@ -438,18 +434,14 @@
                                                 "cometd",
                                                 "handshake"
                                             ],
-                                            "query": [],
-                                            "variable": [
-                                                {
-                                                    "type": "any",
-                                                    "value": "relay-instance.rt.yammer.com",
-                                                    "key": "relayHost"
-                                                }
-                                            ],
                                             "host": [
-                                                "{{relayHost}}"
+                                                "{{relayHost}}",
+                                                "rt",
+                                                "yammer",
+                                                "com"
                                             ],
-                                            "raw": "https://{{relayHost}}/cometd/handshake"
+                                            "query": [],
+                                            "variable": []
                                         },
                                         "header": [
                                             {
@@ -508,18 +500,14 @@
                                 "cometd",
                                 ""
                             ],
-                            "query": [],
-                            "variable": [
-                                {
-                                    "type": "any",
-                                    "value": "relay-instance.rt.yammer.com",
-                                    "key": "relayHost"
-                                }
-                            ],
                             "host": [
-                                "{{relayHost}}"
+                                "{{relayHost}}",
+                                "rt",
+                                "yammer",
+                                "com"
                             ],
-                            "raw": "https://{{relayHost}}/cometd/"
+                            "query": [],
+                            "variable": []
                         },
                         "header": [
                             {
@@ -555,18 +543,14 @@
                                         "cometd",
                                         ""
                                     ],
-                                    "query": [],
-                                    "variable": [
-                                        {
-                                            "type": "any",
-                                            "value": "relay-instance.rt.yammer.com",
-                                            "key": "relayHost"
-                                        }
-                                    ],
                                     "host": [
-                                        "{{relayHost}}"
+                                        "{{relayHost}}",
+                                        "rt",
+                                        "yammer",
+                                        "com"
                                     ],
-                                    "raw": "https://{{relayHost}}/cometd/"
+                                    "query": [],
+                                    "variable": []
                                 },
                                 "header": [
                                     {
@@ -627,18 +611,14 @@
                                         "cometd",
                                         "connect"
                                     ],
-                                    "query": [],
-                                    "variable": [
-                                        {
-                                            "type": "any",
-                                            "value": "relay-instance.rt.yammer.com",
-                                            "key": "relayHost"
-                                        }
-                                    ],
                                     "host": [
-                                        "{{relayHost}}"
+                                        "{{relayHost}}",
+                                        "rt",
+                                        "yammer",
+                                        "com"
                                     ],
-                                    "raw": "https://{{relayHost}}/cometd/connect"
+                                    "query": [],
+                                    "variable": []
                                 },
                                 "header": [
                                     {
@@ -674,18 +654,14 @@
                                                 "cometd",
                                                 "connect"
                                             ],
-                                            "query": [],
-                                            "variable": [
-                                                {
-                                                    "type": "any",
-                                                    "value": "relay-instance.rt.yammer.com",
-                                                    "key": "relayHost"
-                                                }
-                                            ],
                                             "host": [
-                                                "{{relayHost}}"
+                                                "{{relayHost}}",
+                                                "rt",
+                                                "yammer",
+                                                "com"
                                             ],
-                                            "raw": "https://{{relayHost}}/cometd/connect"
+                                            "query": [],
+                                            "variable": []
                                         },
                                         "header": [
                                             {
@@ -747,6 +723,10 @@
         {
             "key": "baseUrl",
             "value": "https://engage.cloud.microsoft"
+        },
+        {
+            "key": "relayHost",
+            "value": "relay-instance"
         }
     ],
     "info": {
@@ -754,7 +734,7 @@
         "name": "Viva Engage",
         "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
         "description": {
-            "content": "The Viva Engage specification documents the authenticated backend surface observed while the\nViva Engage admin experience (`https://engage.cloud.microsoft/main/admin`) hydrated in the\ndefault Edge profile.\n\nThe retained evidence confirmed:\n\n  - MSAL PKCE sign-in against `https://login.microsoftonline.com/organizations/oauth2/v2.0/authorize`\n  - redirect URI `https://engage.cloud.microsoft/main/authredirect`\n  - requested scope `https://www.yammer.com/user_impersonation openid profile offline_access`\n  - same-origin persisted GraphQL traffic on `https://engage.cloud.microsoft/graphql`\n  - 27 unique `operationName` or `operationAlias` values during the authenticated admin landing flow\n  - direct-route captures on `/main/admin/segmentation`, `/main/admin/external-networks-settings`, and `/main/admin/setup-external-network`\n  - route-specific persisted GraphQL operations such as `NetworkSegmentationQueryClients` and `ExternalNetworksAdminSettingsClients`\n  - repeated admin captures also observed `UniversalCreateButtonQueryClients`, which returned create-capability flags and dismissable prompt state for the shell `Create new` affordance\n  - a cross-host bearer-backed token helper on `https://api.engage.cloud.microsoft/api/v1/oauth2/aad_access_token`\n  - a same-origin `RealtimeConnectionSettingsClients` persisted query that returned transient `*.rt.yammer.com/cometd/` relay hosts\n  - relay POSTs on `/cometd/handshake`, `/cometd/`, and `/cometd/connect` that carried redacted `token` and `hub_tenant_token` values in the Bayeux payload instead of `Authorization` or cookie headers\n  - no cookie header on any of the captured authenticated admin API requests for this pass\n  - telemetry-only sinks such as `/api/v1/yamalytics/webui`, `/api/v2/events`, and `/api/v3/events`, which are intentionally excluded from the published surface for now\n\nThe authenticated realtime relay chain was derived from the same-origin\n`RealtimeConnectionSettingsClients` response, which supplied a tenant- and user-scoped\n`cometdBaseUrl` on transient `*.rt.yammer.com` hosts. The captured relay calls used Bayeux\nhandshake, subscribe, and connect envelopes with redacted auth material in the request body.\n\nA review of the checked-in April 2026 raw-request artifacts still found no direct admin\nrequest to `msgraph.yammer.com` or `broadcast.yammer.com`, so those hosts remain unpromoted\nconfig references rather than published admin routes.\n\nDocumentation and specifications have been provided on a best-efforts basis and may not be\n100% accurate.\n\n\nContact Support:\n Name: nodoc",
+            "content": "The Viva Engage specification documents the authenticated backend surface observed while the\nViva Engage admin experience (`https://engage.cloud.microsoft/main/admin`) hydrated in the\ndefault Edge profile.\n\nThe retained evidence confirmed:\n\n  - MSAL PKCE sign-in against `https://login.microsoftonline.com/organizations/oauth2/v2.0/authorize`\n  - redirect URI `https://engage.cloud.microsoft/main/authredirect`\n  - requested scope `https://www.yammer.com/user_impersonation openid profile offline_access`\n  - same-origin persisted GraphQL traffic on `https://engage.cloud.microsoft/graphql`\n  - 27 unique `operationName` or `operationAlias` values during the authenticated admin landing flow\n  - direct-route captures on `/main/admin/segmentation`, `/main/admin/external-networks-settings`, and `/main/admin/setup-external-network`\n  - route-specific persisted GraphQL operations such as `NetworkSegmentationQueryClients` and `ExternalNetworksAdminSettingsClients`\n  - repeated admin captures also observed `UniversalCreateButtonQueryClients`, which returned create-capability flags and dismissable prompt state for the shell `Create new` affordance\n  - later authenticated captures also observed persisted request shapes for `NetworkTopicSettingsClients`, `UpdateAppActivityStateClients`, `InformationBarrierSettingsClients`, `FeatureAccessInsightsClients`, and `DismissablePromptsClients`\n  - a cross-host bearer-backed token helper on `https://api.engage.cloud.microsoft/api/v1/oauth2/aad_access_token`\n  - a same-origin `RealtimeConnectionSettingsClients` persisted query that returned transient `*.rt.yammer.com/cometd/` relay hosts\n  - relay POSTs on `/cometd/handshake`, `/cometd/`, and `/cometd/connect` that carried redacted `token` and `hub_tenant_token` values in the Bayeux payload instead of `Authorization` or cookie headers\n  - no cookie header on any of the captured authenticated admin API requests for this pass\n  - telemetry-only sinks such as `/api/v1/yamalytics/webui`, `/api/v2/events`, and `/api/v3/events`, which are intentionally excluded from the published surface for now\n\nThe authenticated realtime relay chain was derived from the same-origin\n`RealtimeConnectionSettingsClients` response, which supplied a tenant- and user-scoped\n`cometdBaseUrl` on transient `*.rt.yammer.com` hosts. The captured relay calls used Bayeux\nhandshake, subscribe, and connect envelopes with redacted auth material in the request body.\n\nA review of the checked-in April 2026 raw-request artifacts still found no direct admin\nrequest to `msgraph.yammer.com` or `broadcast.yammer.com`, so those hosts remain unpromoted\nconfig references rather than published admin routes.\n\nDocumentation and specifications have been provided on a best-efforts basis and may not be\n100% accurate.\n\n\nContact Support:\n Name: nodoc",
             "type": "text/plain"
         }
     }
