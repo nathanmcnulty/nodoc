@@ -288,6 +288,7 @@ test("pre-action inventories distinguish eligible controls from absent controls"
         candidateCount: 1,
         controlCount: 1,
         controlIdentities: ['["Role settings","","","","","",""]'],
+        controlTokens: [],
         sessionId: "root",
         targetType: "page",
         targetUrl: "https://entra.microsoft.com/",

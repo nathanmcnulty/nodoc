@@ -179,6 +179,7 @@ export function deriveActionEligibility(action, snapshots) {
       candidateCount: matchingControls.length,
       controlCount: controls.length,
       controlIdentities: matchingControls.map((control) => controlIdentity(control)),
+      controlTokens: matchingControls.map((control) => control.controlToken).filter(Boolean),
       sessionId: snapshot.sessionId ?? null,
       targetType: snapshot.targetType ?? "page",
       targetUrl: snapshot.targetUrl ?? snapshot.url ?? null,

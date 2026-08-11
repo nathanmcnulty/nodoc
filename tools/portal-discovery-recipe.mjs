@@ -100,7 +100,7 @@ export function resolvePageTargetBootstrapCriteria(recipe) {
   };
 }
 
-export function validateRecipeTargetMetadata(recipe) {
+export function validateRecipeTargetMetadata(recipe, { enforcePageTargetForAll = true } = {}) {
   const featureCriteria = resolvePageTargetCriteria(recipe);
   const bootstrapCriteria = resolvePageTargetBootstrapCriteria(recipe);
   const recipeUrl = resolveStrictNavigationUrl(recipe?.url, recipe?.url, {
@@ -115,6 +115,7 @@ export function validateRecipeTargetMetadata(recipe) {
     rootUrl: recipeUrl,
     pageTarget: recipe?.pageTarget === undefined ? null : featureCriteria,
     bootstrapTarget: recipe?.pageTarget === undefined ? null : bootstrapCriteria,
+    enforcePageTargetForAll,
   });
   validateSelectedReplayRouteTemplates(recipe?.seedRouteGroups, validatedActions, {
     rootUrl: recipeUrl,

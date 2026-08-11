@@ -203,7 +203,7 @@ async function validateRecipeFile(errors, recipePath) {
     } else {
       try {
         resolvePageTargetCriteria(recipe);
-        validateRecipeTargetMetadata(recipe);
+        validateRecipeTargetMetadata(recipe, { enforcePageTargetForAll: false });
       } catch (error) {
         fail(errors, `${recipePath}: ${error.message}`);
       }

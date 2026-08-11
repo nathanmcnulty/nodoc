@@ -7,6 +7,7 @@ import { mineJavascriptBundles } from "./mine-javascript-bundles.mjs";
 import {
   activeGetPathPattern,
   activeGetQueryPattern,
+  classifyGetProbeUrl,
   sanitizeObservedTransportUrl,
 } from "./discovery-safety.mjs";
 import { planActionBudget, validateActionBudgetResult } from "./portal-discovery-action-budget.mjs";
@@ -1516,6 +1517,14 @@ async function evaluateJson(client, expression, sessionId = null, timeoutMs = ru
 function buildDomSnapshotExpression() {
   return `(() => {
     const normalizeText = (value) => String(value || "").replace(/\\s+/g, " ").trim();
+    const controlToken = (element) => {
+      const tokens = globalThis.__nodocControlTokens ??= new WeakMap();
+      if (!tokens.has(element)) {
+        globalThis.__nodocControlTokenCounter = (globalThis.__nodocControlTokenCounter || 0) + 1;
+        tokens.set(element, String(globalThis.__nodocControlTokenCounter));
+      }
+      return tokens.get(element);
+    };
     const visible = (element) => {
       if (!(element instanceof Element)) return false;
       const style = window.getComputedStyle(element);
@@ -1541,6 +1550,7 @@ function buildDomSnapshotExpression() {
       .map((element) => ({
         ariaLabel: normalizeText(element.getAttribute("aria-label")),
         automationId: normalizeText(element.getAttribute("data-automation-id")),
+        controlToken: controlToken(element),
         href: element.getAttribute("href"),
         id: normalizeText(element.id),
         role: element.getAttribute("role"),
@@ -1580,12 +1590,13 @@ function buildDomSnapshotExpression() {
   })()`;
 }
 
-function buildClickExpression(action, dispatch = true, expectedHref = null, expectedControlIdentity = null, bindingToken = null) {
+function buildClickExpression(action, dispatch = true, expectedHref = null, expectedControlIdentity = null, bindingToken = null, expectedControlToken = null) {
   const encodedMode = JSON.stringify(action.type);
   const encodedValue = JSON.stringify(String(action.value || ""));
   const encodedExpectedHref = JSON.stringify(expectedHref);
   const encodedExpectedControlIdentity = JSON.stringify(expectedControlIdentity);
   const encodedBindingToken = JSON.stringify(bindingToken);
+  const encodedExpectedControlToken = JSON.stringify(expectedControlToken);
   const dispatchCode = dispatch
     ? `match.element.scrollIntoView({ block: "center", inline: "center" });
     match.element.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, composed: true }));
@@ -1599,6 +1610,7 @@ function buildClickExpression(action, dispatch = true, expectedHref = null, expe
     const expectedHref = ${encodedExpectedHref};
     const expectedControlIdentity = ${encodedExpectedControlIdentity};
     const bindingToken = ${encodedBindingToken};
+    const expectedControlToken = ${encodedExpectedControlToken};
     const controlIdentity = (candidate) => JSON.stringify([
       normalizeText(candidate.text),
       normalizeText(candidate.ariaLabel),
@@ -1608,6 +1620,10 @@ function buildClickExpression(action, dispatch = true, expectedHref = null, expe
       normalizeText(candidate.role),
       normalizeText(candidate.tag),
     ]);
+    const controlToken = (element) => {
+      const tokens = globalThis.__nodocControlTokens ??= new WeakMap();
+      return tokens.get(element) ?? null;
+    };
     const normalizeText = (value) => String(value || "").replace(/\\s+/g, " ").trim();
     const normalizedNeedle = normalizeText(rawValue);
     const lowerNeedle = normalizedNeedle.toLowerCase();
@@ -1637,6 +1653,7 @@ function buildClickExpression(action, dispatch = true, expectedHref = null, expe
         absoluteHref: toAbsoluteUrl(element.getAttribute("href")),
         ariaLabel: normalizeText(element.getAttribute("aria-label")),
         automationId: normalizeText(element.getAttribute("data-automation-id")),
+        controlToken: controlToken(element),
         element,
         href: element.getAttribute("href"),
         id: normalizeText(element.id),
@@ -1672,6 +1689,7 @@ function buildClickExpression(action, dispatch = true, expectedHref = null, expe
     }).filter((candidate) => (
       (!expectedHref || candidate.absoluteHref === expectedHref)
       && (!expectedControlIdentity || controlIdentity(candidate) === expectedControlIdentity)
+      && (!expectedControlToken || candidate.controlToken === expectedControlToken)
     ));
 
     if (matches.length === 0) {
@@ -1721,77 +1739,8 @@ function buildClickExpression(action, dispatch = true, expectedHref = null, expe
 
 function buildProbeExpression(value) {
   const encodedValue = JSON.stringify(String(value || ""));
-  const encodedPathPattern = JSON.stringify(activeGetPathPattern.source);
-  const encodedQueryPattern = JSON.stringify(activeGetQueryPattern.source);
   return `(async () => {
     const url = new URL(${encodedValue}, location.href).toString();
-    const target = new URL(url);
-    const riskyRoute = new RegExp(${encodedPathPattern}, "iu");
-    const riskyQuery = new RegExp(${encodedQueryPattern}, "iu");
-    let canonicalPath = target.pathname;
-    let canonicalFragment = target.hash;
-    try {
-      for (let pass = 0; pass < 3 && canonicalPath.includes("%"); pass += 1) {
-        canonicalPath = decodeURIComponent(canonicalPath);
-      }
-      for (let pass = 0; pass < 3 && canonicalFragment.includes("%"); pass += 1) {
-        canonicalFragment = decodeURIComponent(canonicalFragment);
-      }
-    } catch {
-      return {
-        error: "The route contains unsafe URL encoding.",
-        ok: false,
-        rejected: true,
-        status: null,
-        url,
-      };
-    }
-    if (
-      !["http:", "https:"].includes(target.protocol)
-      || target.origin !== location.origin
-      || target.username
-      || target.password
-    ) {
-      return {
-        error: "Only same-origin HTTP(S) probes are permitted.",
-        ok: false,
-        rejected: true,
-        status: null,
-        url,
-      };
-    }
-    let riskyQueryValue = false;
-    try {
-      riskyQueryValue = Array.from(target.searchParams).some(([key, rawValue]) => {
-        let queryKey = key;
-        let queryValue = rawValue;
-        for (let pass = 0; pass < 3 && queryKey.includes("%"); pass += 1) {
-          queryKey = decodeURIComponent(queryKey);
-        }
-        for (let pass = 0; pass < 3 && queryValue.includes("%"); pass += 1) {
-          queryValue = decodeURIComponent(queryValue);
-        }
-        return ["action", "command", "operation"].includes(queryKey.toLowerCase())
-          && riskyRoute.test("/" + queryValue);
-      });
-    } catch {
-      riskyQueryValue = true;
-    }
-    if (
-      riskyRoute.test(canonicalPath)
-      || riskyRoute.test(canonicalFragment.replace(/^#/, "/"))
-      || riskyQuery.test(target.search)
-      || riskyQuery.test(canonicalFragment)
-      || riskyQueryValue
-    ) {
-      return {
-        error: "The route matches the active-GET deny rules.",
-        ok: false,
-        rejected: true,
-        status: null,
-        url,
-      };
-    }
     try {
       const response = await fetch(url, {
         credentials: "include",
@@ -2148,6 +2097,14 @@ async function main() {
         // Best effort only.
       }
     }
+    await client.send("Fetch.enable", {
+      patterns: [
+        "Document",
+        "Script",
+        "XHR",
+        "Fetch",
+      ].map((resourceType) => ({ requestStage: "Request", resourceType })),
+    }, sessionId);
 
     configuredSessions.add(key);
   }
@@ -2158,6 +2115,55 @@ async function main() {
     }
 
     currentLoadResolver?.();
+  });
+
+  client.on("Fetch.requestPaused", async (params, metadata) => {
+    const sessionId = metadata.sessionId ?? null;
+    const requestUrl = params.request?.url;
+    const resourceType = params.resourceType ?? "Document";
+    try {
+      if (runtimeSafetyError) throw runtimeSafetyError;
+      if (String(params.request?.method ?? "GET").toUpperCase() !== "GET") {
+        throw new Error("Only GET requests are permitted by capture safety.");
+      }
+      if (["Document", "Script"].includes(resourceType)) {
+        resolveStrictNavigationUrl(requestUrl, args.url, {
+          criteria: lifecyclePhase === "bootstrap"
+            ? (args.bootstrapTargetCriteria ?? args.pageTargetCriteria)
+            : args.pageTargetCriteria,
+          label: `paused ${resourceType.toLowerCase()} request`,
+        });
+      } else {
+        const classification = classifyGetProbeUrl(requestUrl, args.url);
+        if (!classification.allowed) {
+          const error = new Error(
+            `Paused ${resourceType.toLowerCase()} request rejected by active-GET safety (${classification.code}).`,
+          );
+          error.code = classification.code;
+          throw error;
+        }
+        const parsed = new URL(requestUrl);
+        parsed.search = "";
+        parsed.hash = "";
+        resolveStrictNavigationUrl(parsed.href, args.url, {
+          criteria: lifecyclePhase === "bootstrap"
+            ? (args.bootstrapTargetCriteria ?? args.pageTargetCriteria)
+            : args.pageTargetCriteria,
+          label: `paused ${resourceType.toLowerCase()} request`,
+        });
+      }
+      await client.send("Fetch.continueRequest", { requestId: params.requestId }, sessionId);
+    } catch (error) {
+      runtimeSafetyError ??= error;
+      try {
+        await client.send("Fetch.failRequest", {
+          errorReason: "BlockedByClient",
+          requestId: params.requestId,
+        }, sessionId);
+      } catch {
+        // The request may already be terminal.
+      }
+    }
   });
 
   client.on("Target.attachedToTarget", async (params, metadata) => {
@@ -3138,7 +3144,11 @@ async function main() {
       };
     }
     const boundFrames = eligibility.targetFrameInventory
-      .filter((frame) => frame.candidateCount === 1 && frame.controlIdentities?.length === 1);
+      .filter((frame) => (
+        frame.candidateCount === 1
+        && frame.controlIdentities?.length === 1
+        && frame.controlTokens?.length === 1
+      ));
     if (boundFrames.length !== 1) {
       return {
         afterUrl: beforeUrl,
@@ -3158,7 +3168,14 @@ async function main() {
         const bindingToken = randomUUID();
         const preview = await evaluateJson(
           client,
-          buildClickExpression(action, false, null, null, bindingToken),
+          buildClickExpression(
+            action,
+            false,
+            null,
+            boundFrame.controlIdentities[0],
+            bindingToken,
+            boundFrame.controlTokens[0],
+          ),
           sessionId,
         );
         if (!preview?.clicked) {
