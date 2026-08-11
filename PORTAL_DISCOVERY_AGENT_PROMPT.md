@@ -29,16 +29,20 @@ authorize safety, scope, threshold, and model-disagreement conclusions.
 Raw OpenAPI or Postman gaps are candidate deficits, not confirmed true deficits,
 when the converter or generator is unavailable. Before interpreting counts,
 normalize method, path template, and canonical alias, then use mutually
-exclusive sets and require both equations:
+exclusive sets and require the exact accounting equation:
 
 ```text
-raw observations = emitted + duplicate-shadowed + orphaned + intentional-filtered + alias-observations
-emitted = matched + unresolved
+observations = promoted_or_matched + alias + intentionally_filtered + duplicate_shadowed + orphaned + unresolved
 ```
 
-Aliases are counted once as alias observations, and emitted/matched/unresolved
-sets contain canonical keys only. An unbalanced or unavailable reconciliation
-is unknown and cannot justify a coverage claim.
+`promoted_or_matched`, `alias`, `intentionally_filtered`, `duplicate_shadowed`,
+`orphaned`, and `unresolved` are mutually exclusive and exhaustive for the
+inspected inventory. An unbalanced or unavailable reconciliation is unknown and
+cannot justify a coverage claim. Keep separate inspected-surface and evidence
+partition lists: surface partitions are nav/routes, entity/detail states,
+interaction states, child targets, and host families; evidence partitions are
+confirmed traffic, safe probes, bundle-only leads, suppressed candidates, and
+adjacent/scope-review candidates.
 
 Copy this prompt into a new agent session after the operator has started and
 authenticated the dedicated CDP browser described in
@@ -47,14 +51,46 @@ authenticated the dedicated CDP browser described in
 ```text
 Perform bounded API discovery for `<portal-title>` (`<portal-spec-id>`).
 
-First read `AGENT_DISCOVERY_RUNBOOK.md` in this repository and follow it
-exactly. It is the execution contract. Do not use the deeper
-`AGENT_DISCOVERY_PLAYBOOK.md` unless the runbook says a blocker needs it.
-
 This assignment is one execution shard. Do not coordinate other agents, install
 dependencies, repair the environment, review unrelated portals, promote
 findings, create a branch or pull request, or merge changes. The orchestrator
 owns those stages.
+
+The first action, before reading any repository documentation, is to switch to
+the named target worktree, or use absolute `git -C <target-worktree>` paths.
+Then read `AGENT_DISCOVERY_RUNBOOK.md` and follow it exactly. Report and verify
+the expected kickoff SHA, actual kickoff SHA, and clean/dirty status against the
+orchestrator baseline; report the expected final SHA, actual final SHA, and
+clean/dirty status too.
+Idle, completed, or success is not acceptance: require materialized non-null
+output, an explicit cross-session report, an immutable artifact with a hash, or
+a commit. Apply recovery in this order: a complete immutable capture artifact
+is accepted evidence; analyze it once and reconstruct the report instead of
+retrying the worker. An incomplete capture is not accepted evidence; preserve
+it, record its hash, and use the seeded retry in a new artifact directory. Only
+when no materialized usable capture or report exists after null output, a
+low-capability capture assignment uses exactly `gpt-5.3-codex-spark`, retries
+exactly once with a compact read-only report-first request, then escalates
+exactly to `gpt-5.6-luna` if that retry remains null. Assignments already routed
+to Luna or manual review keep that route. Preserve every materialized
+failed-worker artifact and record its hash. Do not launch a broad wave until a
+representative probe materializes accepted output.
+
+Before interpreting counts, normalize each observation and checked-in
+specification operation to an uppercase method, path template, and canonical
+alias key. Use these mutually exclusive, exhaustive dispositions:
+
+```text
+observations = promoted_or_matched + alias + intentionally_filtered + duplicate_shadowed + orphaned + unresolved
+```
+
+`promoted_or_matched` means the normalized canonical key is already promoted or
+exactly matches a checked-in specification operation; `unresolved` matches
+neither. Alias observations map to one canonical key and count only in `alias`.
+Keep separate inspected-surface and evidence-partition lists. Missing evidence
+is unavailable, not zero; offline and runtime completeness are separate;
+`live-evidence-blocked` is valid; declaration parity is not specification
+completeness; and no-change is not a completeness claim.
 
 Before capture, run the required recipe-gated target gate. Owner startup only
 reports `lifecycleStatus: owner-ready` and `authenticationStatus: unverified`;
@@ -89,11 +125,15 @@ Read the primary output files named by the runbook, including
 `candidate-handoff.json`. The `all` phase already performs the normalized
 family diff; do not recommend that diff as a separate post-run command. This is
 an execution-only validation: do not edit, commit, or push repository files.
-Do not submit forms, invoke writes, follow redirects, export secrets, or copy
+Browser/CDP/live capture and write execution require explicit operator
+authorization. Do not submit forms, invoke writes, follow redirects, export secrets, or copy
 cookies, bearer tokens, or tenant data into chat. Landing supported findings is
 a separate human-reviewed specification PR.
 
-Return the exact compact completion structure from the runbook. Distinguish
+Return the exact compact completion structure from the runbook, including the
+target worktree, expected and actual kickoff SHA, kickoff clean/dirty status,
+expected and actual final SHA, final clean/dirty status, and every artifact path
+with immutable status and SHA-256 hash. Distinguish
 confirmed reads, confirmed candidates needing safety classification, successful
 probes, bundle-only candidates, suppressions, and adjacent scope-review
 evidence. Report adjacent confirmed reads, confirmed non-GETs, successful
@@ -113,6 +153,8 @@ serialized by the coordinator, with one merge owner at a time.
 
 If command execution finishes but you cannot return a normal response, leave
 the artifact directory unchanged. The orchestrator may inspect
-`discovery-run.json` and run only the documented `analyze` recovery against a
-completed capture. Never rerun capture into the same directory.
+`discovery-run.json`; a complete capture is accepted evidence and permits only
+the documented `analyze` recovery, while an incomplete capture requires a
+seeded retry in a new artifact directory. Never rerun capture into the same
+directory.
 ```
