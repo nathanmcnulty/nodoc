@@ -28,21 +28,32 @@ authorize safety, scope, threshold, and model-disagreement conclusions.
 
 Raw OpenAPI or Postman gaps are candidate deficits, not confirmed true deficits,
 when the converter or generator is unavailable. Before interpreting counts,
-normalize method, path template, and canonical alias, then use mutually
-exclusive sets and require the exact accounting equation:
+normalize method, path template, and canonical alias, then reconcile raw/source
+observations with the two-stage ledger below:
 
 ```text
-observations = promoted_or_matched + alias + intentionally_filtered + duplicate_shadowed + orphaned + unresolved
+raw observations = emitted + duplicate-shadowed + orphaned + intentional-filtered + alias-observations
+emitted = matched + unresolved
 ```
 
-`promoted_or_matched`, `alias`, `intentionally_filtered`, `duplicate_shadowed`,
-`orphaned`, and `unresolved` are mutually exclusive and exhaustive for the
-inspected inventory. An unbalanced or unavailable reconciliation is unknown and
-cannot justify a coverage claim. Keep separate inspected-surface and evidence
-partition lists: surface partitions are nav/routes, entity/detail states,
-interaction states, child targets, and host families; evidence partitions are
-confirmed traffic, safe probes, bundle-only leads, suppressed candidates, and
-adjacent/scope-review candidates.
+The first equation reconciles raw/source observations to emitted observations;
+the second partitions emitted observations. These ledgers are not additive and
+must not double-count. Separately, candidate-review dispositions for the
+inspected inventory are mutually exclusive and exhaustive:
+
+```text
+candidate observations = promoted_or_matched + alias + intentionally_filtered + duplicate_shadowed + orphaned + unresolved
+```
+
+`promoted_or_matched` means the normalized canonical key is already promoted or
+exactly matches a checked-in specification operation; `unresolved` matches
+neither. Alias observations map to one canonical key and count only in `alias`.
+An unbalanced or unavailable reconciliation is unknown and cannot justify a
+coverage claim. Keep separate inspected-surface and evidence-partition lists:
+surface partitions are nav/routes, entity/detail states, interaction states,
+child targets, and host families; evidence partitions are confirmed traffic,
+safe probes, bundle-only leads, suppressed candidates, and adjacent/scope-review
+candidates.
 
 Copy this prompt into a new agent session after the operator has started and
 authenticated the dedicated CDP browser described in
