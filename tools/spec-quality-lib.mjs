@@ -233,6 +233,16 @@ export function getEffectiveServerUrls(specification, pathItem, operation) {
   return getServerUrls(specification.servers);
 }
 
+export function getPreferredServerUrls(specification, pathItem, operation) {
+  if (Array.isArray(operation?.servers)) {
+    return getServerUrls(operation.servers);
+  }
+  if (Array.isArray(pathItem?.servers)) {
+    return getServerUrls(pathItem.servers);
+  }
+  return getServerUrls(specification.servers).slice(0, 1);
+}
+
 export function getScopeServerUrls(specification) {
   return uniqueOrdered([
     ...getServerUrls(specification.servers),
@@ -274,21 +284,62 @@ export function canonicalOperationKey({ method, path: pathname }) {
   return `${String(method).toUpperCase()} ${normalizeCanonicalPath(pathname)}`;
 }
 
-function getPostmanItems(items, output = []) {
+function normalizeServerHost(url) {
+  const templatedUrl = String(url).replace(/\{[^{}]+\}/gu, "server-variable");
+  const parsedUrl = new URL(templatedUrl);
+  return parsedUrl.host.toLowerCase();
+}
+
+function getPostmanVariableValue(collection, name) {
+  const entry = (collection?.variable ?? []).find((candidate) => candidate?.key === name);
+  return typeof entry?.value === "string" ? entry.value : undefined;
+}
+
+function getPostmanHost(url, collection) {
+  const hostSegments = Array.isArray(url?.host) ? url.host : [];
+  if (hostSegments.length === 0) {
+    return typeof url?.raw === "string" && /^https?:\/\//iu.test(url.raw)
+      ? normalizeServerHost(url.raw)
+      : null;
+  }
+
+  if (hostSegments.length === 1) {
+    const variableMatch = /^\{\{([^{}]+)\}\}$/u.exec(hostSegments[0]);
+    if (variableMatch) {
+      const variableValue = getPostmanVariableValue(collection, variableMatch[1]);
+      return variableValue ? normalizeServerHost(variableValue) : null;
+    }
+  }
+
+  const expandedHost = hostSegments.map((segment) => {
+    const variableMatch = /^\{\{([^{}]+)\}\}$/u.exec(String(segment));
+    return variableMatch
+      ? (getPostmanVariableValue(collection, variableMatch[1]) ?? segment)
+      : segment;
+  }).join(".");
+
+  return normalizeServerHost(`https://${expandedHost}`);
+}
+
+function getPostmanItems(items, output = [], collection) {
   for (const item of items ?? []) {
     if (item?.request) {
       const pathname = Array.isArray(item.request.url?.path)
         ? `/${item.request.url.path.join("/")}`
         : null;
       if (pathname && item.request.method) {
-        output.push({
+        const entry = {
           key: canonicalOperationKey({ method: item.request.method, path: pathname }),
           method: String(item.request.method).toUpperCase(),
           path: normalizeCanonicalPath(pathname),
-        });
+        };
+        if (collection) {
+          entry.host = getPostmanHost(item.request.url, collection);
+        }
+        output.push(entry);
       }
     }
-    getPostmanItems(item?.item, output);
+    getPostmanItems(item?.item, output, collection);
   }
   return output;
 }
@@ -357,6 +408,58 @@ export function reconcileOperationSets(openapiOperations, postmanCollection, opt
       aliases: aliases.length,
       unresolved: unresolved.length,
     },
+  };
+}
+
+export function validatePostmanServerRouting(
+  operations,
+  collection,
+  context = "OpenAPI/Postman collection",
+) {
+  const openapi = operations.map((entry) => ({
+    key: canonicalOperationKey(entry),
+    method: entry.method,
+    path: normalizeCanonicalPath(entry.path),
+    operationId: entry.operationId ?? null,
+    serverUrls: entry.serverUrls ?? entry.effectiveServerUrls ?? [],
+  }));
+  const postman = getPostmanItems(collection?.item, [], collection);
+  const postmanByKey = new Map(postman.map((entry) => [entry.key, entry]));
+  const mismatches = [];
+
+  for (const operation of openapi) {
+    if (!Array.isArray(operation.serverUrls) || operation.serverUrls.length === 0) {
+      continue;
+    }
+
+    const request = postmanByKey.get(operation.key);
+    const expectedHosts = operation.serverUrls.map(normalizeServerHost);
+    const actualHost = request?.host ?? null;
+
+    if (!request || !expectedHosts.includes(actualHost)) {
+      mismatches.push({
+        key: operation.key,
+        operationId: operation.operationId,
+        expectedHosts,
+        actualHost,
+      });
+    }
+  }
+
+  if (mismatches.length > 0) {
+    const details = mismatches
+      .map((entry) => (
+        `${entry.key} expected ${entry.expectedHosts.join("|")} but generated ${entry.actualHost ?? "missing"}`
+      ))
+      .join("; ");
+    throw new Error(`${context} has invalid server routing (${details}).`);
+  }
+
+  return {
+    operationCount: openapi.length,
+    requestCount: postman.length,
+    validatedOperationCount: openapi.filter((entry) => entry.serverUrls.length > 0).length,
+    mismatches: [],
   };
 }
 

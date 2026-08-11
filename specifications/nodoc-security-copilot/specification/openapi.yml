@@ -570,6 +570,9 @@ paths:
                   $ref: '#/components/schemas/GenericObject'
 
   /trial:
+    servers:
+      - url: https://prod.cds.securitycopilot.microsoft.com
+        description: Security Copilot trial-status service used during portal startup
     get:
       tags: [Auth]
       summary: List Security Copilot trial records
@@ -606,6 +609,9 @@ paths:
                 $ref: '#/components/schemas/GraphDetailsResponse'
 
   /pods/{podId}/workspaces/{workspaceName}/securitycopilot/graphData/details:
+    servers:
+      - url: https://us.api.securityplatform.microsoft.com
+        description: Regional Security Platform workspace content and policy plane observed in the current tenant
     post:
       tags: [Workspace]
       summary: Resolve Security Copilot workspace graph data details
@@ -629,6 +635,9 @@ paths:
                 $ref: '#/components/schemas/GraphDetailsResponse'
 
   /provisioning/create:
+    servers:
+      - url: https://api.securityplatform.microsoft.com
+        description: Global Security Platform provisioning and account control plane used by Security Copilot
     post:
       tags: [Provisioning]
       summary: Run Security Copilot create-capacity what-if
@@ -657,6 +666,9 @@ paths:
                 example: OperationWhatIfSuccess
 
   /provisioning/account:
+    servers:
+      - url: https://api.securityplatform.microsoft.com
+        description: Global Security Platform provisioning and account control plane used by Security Copilot
     get:
       tags: [Provisioning]
       summary: Get Security Platform account and pod inventory
@@ -673,6 +685,9 @@ paths:
                 $ref: '#/components/schemas/ProvisioningAccountResponse'
 
   /account/workspaces:
+    servers:
+      - url: https://api.securityplatform.microsoft.com
+        description: Global Security Platform provisioning and account control plane used by Security Copilot
     get:
       tags: [Provisioning]
       summary: List Security Copilot workspaces
@@ -689,6 +704,9 @@ paths:
                 $ref: '#/components/schemas/WorkspaceListResponse'
 
   /api/gateway/actions/containers/me:
+    servers:
+      - url: https://api.securityplatform.microsoft.com
+        description: Global Security Platform provisioning and account control plane used by Security Copilot
     post:
       tags: [Provisioning]
       summary: Evaluate current-container permissions
@@ -711,6 +729,9 @@ paths:
                 $ref: '#/components/schemas/ContainerPermissionCheckResponse'
 
   /api/gateway/actions/collections/me:
+    servers:
+      - url: https://api.securityplatform.microsoft.com
+        description: Global Security Platform provisioning and account control plane used by Security Copilot
     post:
       tags: [Provisioning]
       summary: Evaluate collection permissions
@@ -733,6 +754,9 @@ paths:
                 $ref: '#/components/schemas/ContainerPermissionCheckResponse'
 
   /provisioning/checkTenant:
+    servers:
+      - url: https://api.securityplatform.microsoft.com
+        description: Global Security Platform provisioning and account control plane used by Security Copilot
     get:
       tags: [Provisioning]
       summary: Check Security Platform tenant eligibility
@@ -749,6 +773,9 @@ paths:
                 $ref: '#/components/schemas/GenericObject'
 
   /pods/{podId}/workspaces/{workspaceName}:
+    servers:
+      - url: https://us.api.securityplatform.microsoft.com
+        description: Regional Security Platform workspace content and policy plane observed in the current tenant
     get:
       tags: [Workspace]
       summary: Get workspace metadata
@@ -767,6 +794,9 @@ paths:
                 $ref: '#/components/schemas/GenericObject'
 
   /pods/{podId}/policystore/workspaces/{workspaceName}/workspacePolicy:
+    servers:
+      - url: https://us.api.securityplatform.microsoft.com
+        description: Regional Security Platform workspace content and policy plane observed in the current tenant
     get:
       tags: [Workspace]
       summary: Get workspace policy document
@@ -785,6 +815,9 @@ paths:
                 $ref: '#/components/schemas/GenericObject'
 
   /pods/{podId}/workspaces/{workspaceName}/securitycopilot/personas/values:
+    servers:
+      - url: https://us.api.securityplatform.microsoft.com
+        description: Regional Security Platform workspace content and policy plane observed in the current tenant
     get:
       tags: [Workspace]
       summary: List persona labels
@@ -802,6 +835,9 @@ paths:
                 $ref: '#/components/schemas/PersonaValuesResponse'
 
   /pods/{podId}/workspaces/{workspaceName}/securitycopilot/personas/skillsets:
+    servers:
+      - url: https://us.api.securityplatform.microsoft.com
+        description: Regional Security Platform workspace content and policy plane observed in the current tenant
     get:
       tags: [Workspace]
       summary: List persona skillset mappings
@@ -821,6 +857,9 @@ paths:
                   type: string
 
   /pods/{podId}/workspaces/{workspaceName}/securitycopilot/users/{userId}/activities:
+    servers:
+      - url: https://us.api.securityplatform.microsoft.com
+        description: Regional Security Platform workspace content and policy plane observed in the current tenant
     get:
       tags: [Workspace]
       summary: Get recent Security Copilot user activity
@@ -839,6 +878,9 @@ paths:
                 $ref: '#/components/schemas/UserActivityResponse'
 
   /pods/{podId}/workspaces/{workspaceName}/securitycopilot/availabletrials:
+    servers:
+      - url: https://us.api.securityplatform.microsoft.com
+        description: Regional Security Platform workspace content and policy plane observed in the current tenant
     get:
       tags: [Workspace]
       summary: List workspace-available trials
@@ -856,6 +898,9 @@ paths:
                 $ref: '#/components/schemas/GenericListEnvelope'
 
   /pods/{podId}/workspaces/{workspaceName}/securitycopilot/sessions:
+    servers:
+      - url: https://us.api.securityplatform.microsoft.com
+        description: Regional Security Platform workspace content and policy plane observed in the current tenant
     get:
       tags: [Sessions]
       summary: List recent Security Copilot sessions
@@ -877,6 +922,9 @@ paths:
                 $ref: '#/components/schemas/SessionsResponse'
 
   /pods/{podId}/workspaces/{workspaceName}/securitycopilot/sessions/prompts:
+    servers:
+      - url: https://us.api.securityplatform.microsoft.com
+        description: Regional Security Platform workspace content and policy plane observed in the current tenant
     get:
       tags: [Sessions]
       summary: List session prompts
@@ -894,6 +942,9 @@ paths:
                 $ref: '#/components/schemas/GenericObject'
 
   /pods/{podId}/workspaces/{workspaceName}/securitycopilot/promptbooks:
+    servers:
+      - url: https://us.api.securityplatform.microsoft.com
+        description: Regional Security Platform workspace content and policy plane observed in the current tenant
     get:
       tags: [Promptbooks]
       summary: List promptbooks
@@ -911,6 +962,9 @@ paths:
                 $ref: '#/components/schemas/GenericListEnvelope'
 
   /pods/{podId}/workspaces/{workspaceName}/securitycopilot/agents:
+    servers:
+      - url: https://us.api.securityplatform.microsoft.com
+        description: Regional Security Platform workspace content and policy plane observed in the current tenant
     get:
       tags: [Agents]
       summary: List agents
@@ -930,6 +984,9 @@ paths:
                 $ref: '#/components/schemas/AgentsResponse'
 
   /pods/{podId}/workspaces/{workspaceName}/securitycopilot/agentdefinitions:
+    servers:
+      - url: https://us.api.securityplatform.microsoft.com
+        description: Regional Security Platform workspace content and policy plane observed in the current tenant
     get:
       tags: [Agents]
       summary: List agent definitions
@@ -950,6 +1007,9 @@ paths:
                   $ref: '#/components/schemas/GenericObject'
 
   /pods/{podId}/workspaces/{workspaceName}/securitycopilot/prompt-suggestions/personas:
+    servers:
+      - url: https://us.api.securityplatform.microsoft.com
+        description: Regional Security Platform workspace content and policy plane observed in the current tenant
     get:
       tags: [Sessions]
       summary: Get persona-scoped suggested prompts
@@ -969,6 +1029,9 @@ paths:
                 $ref: '#/components/schemas/GenericObject'
 
   /pods/{podId}/workspaces/{workspaceName}/securitycopilot/skillsets:
+    servers:
+      - url: https://us.api.securityplatform.microsoft.com
+        description: Regional Security Platform workspace content and policy plane observed in the current tenant
     get:
       tags: [Builder]
       summary: List skillsets and plugins
@@ -986,6 +1049,9 @@ paths:
                 $ref: '#/components/schemas/GenericListEnvelope'
 
   /pods/{podId}/workspaces/{workspaceName}/securitycopilot/skillsets/authSettings:
+    servers:
+      - url: https://us.api.securityplatform.microsoft.com
+        description: Regional Security Platform workspace content and policy plane observed in the current tenant
     get:
       tags: [Builder]
       summary: Get skillset authentication settings
@@ -1003,6 +1069,9 @@ paths:
                 $ref: '#/components/schemas/GenericObject'
 
   /pods/{podId}/workspaces/{workspaceName}/securitycopilot/skillsets/Fusion/icon:
+    servers:
+      - url: https://us.api.securityplatform.microsoft.com
+        description: Regional Security Platform workspace content and policy plane observed in the current tenant
     get:
       tags: [Builder]
       summary: Get Fusion skillset icon
@@ -1021,6 +1090,9 @@ paths:
                 format: binary
 
   /pods/{podId}/workspaces/{workspaceName}/securitycopilot/skillsets/KnowledgeBase/icon:
+    servers:
+      - url: https://us.api.securityplatform.microsoft.com
+        description: Regional Security Platform workspace content and policy plane observed in the current tenant
     get:
       tags: [Builder]
       summary: Get KnowledgeBase skillset icon
@@ -1039,6 +1111,9 @@ paths:
                 format: binary
 
   /pods/{podId}/workspaces/{workspaceName}/securitycopilot/skillsets/configurations:
+    servers:
+      - url: https://us.api.securityplatform.microsoft.com
+        description: Regional Security Platform workspace content and policy plane observed in the current tenant
     get:
       tags: [Builder]
       summary: List skillset configurations
@@ -1057,6 +1132,9 @@ paths:
                 $ref: '#/components/schemas/GenericListEnvelope'
 
   /pods/{podId}/workspaces/{workspaceName}/securitycopilot/skillsets/checkRequirements:
+    servers:
+      - url: https://us.api.securityplatform.microsoft.com
+        description: Regional Security Platform workspace content and policy plane observed in the current tenant
     get:
       tags: [Builder]
       summary: Check builder requirements for skillsets
@@ -1074,6 +1152,9 @@ paths:
                 $ref: '#/components/schemas/GenericListEnvelope'
 
   /pods/{podId}/workspaces/{workspaceName}/securitycopilot/WorkspaceSettings:
+    servers:
+      - url: https://us.api.securityplatform.microsoft.com
+        description: Regional Security Platform workspace content and policy plane observed in the current tenant
     get:
       tags: [Workspace]
       summary: Get workspace settings
@@ -1091,6 +1172,9 @@ paths:
                 $ref: '#/components/schemas/GenericObject'
 
   /pods/{podId}/workspaces/{workspaceName}/securitycopilot/skillsets/{skillsetName}/skills:
+    servers:
+      - url: https://us.api.securityplatform.microsoft.com
+        description: Regional Security Platform workspace content and policy plane observed in the current tenant
     get:
       tags: [Builder]
       summary: List skills for a skillset
@@ -1113,6 +1197,9 @@ paths:
                 $ref: '#/components/schemas/GenericListEnvelope'
 
   /config/v1/SecurityMarketplaceClient/1.0.0:
+    servers:
+      - url: https://ecs.office.com
+        description: Security Store client-configuration service
     get:
       tags: [Store]
       summary: Get Security Store client configuration
@@ -1130,6 +1217,9 @@ paths:
                 $ref: '#/components/schemas/MarketplaceClientConfigResponse'
 
   /config/v1/SecurityCopilotClient/1.0.0:
+    servers:
+      - url: https://ecs.office.com
+        description: Security Store client-configuration service
     get:
       tags: [Store]
       summary: Get Security Copilot client configuration
@@ -1147,6 +1237,9 @@ paths:
                 $ref: '#/components/schemas/MarketplaceClientConfigResponse'
 
   /config/v1/LokiService/1.0.0.0:
+    servers:
+      - url: https://ecs.office.com
+        description: Security Store client-configuration service
     get:
       tags: [Store]
       summary: Get Loki Service client configuration
@@ -1164,6 +1257,9 @@ paths:
                 $ref: '#/components/schemas/MarketplaceClientConfigResponse'
 
   /config/v1/YammerClients/0.0.1:
+    servers:
+      - url: https://ecs.office.com
+        description: Security Store client-configuration service
     get:
       tags: [Store]
       summary: Get Yammer client configuration
@@ -1184,6 +1280,9 @@ paths:
                 $ref: '#/components/schemas/MarketplaceClientConfigResponse'
 
   /catalog/search:
+    servers:
+      - url: https://securitymarketplaceapi-prod.microsoft.com
+        description: Security Store catalog backend
     get:
       tags: [Store]
       summary: Search Security Store catalog

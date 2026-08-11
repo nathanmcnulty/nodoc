@@ -5,6 +5,11 @@ import process from "node:process";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
+import {
+  getPreferredServerUrls,
+  validatePostmanServerRouting,
+} from "./spec-quality-lib.mjs";
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, "..");
 const outputDir = path.join(repoRoot, "postman", "collections");
@@ -85,6 +90,7 @@ const collectionDefinitions = [
     name: "Security Copilot",
     spec: "specifications/nodoc-security-copilot/specification/openapi.yml",
     output: "postman/collections/security-copilot.collection.json",
+    hostRouting: true,
   },
   {
     name: "Entra IAM",
@@ -194,7 +200,11 @@ function buildOperationIndex(openapi) {
       .map(([method, operation]) => ({
         method: method.toUpperCase(),
         pathRegex: pathTemplateToRegex(pathname),
+        path: pathname,
+        operationId: operation.operationId ?? null,
         responses: operation.responses ?? {},
+        serverUrls: getPreferredServerUrls(openapi, pathItem, operation),
+        serverOverride: Array.isArray(pathItem?.servers) || Array.isArray(operation?.servers),
       }))
   ));
 }
@@ -450,6 +460,67 @@ function normalizePostmanUrl(url) {
   return normalizedUrl;
 }
 
+function getOperationForRequest(operations, request) {
+  const method = request?.method?.toUpperCase();
+  const pathname = getCollectionPath(request);
+
+  if (!method || !pathname) {
+    return undefined;
+  }
+
+  return operations.find(
+    (operation) => operation.method === method && operation.pathRegex.test(pathname),
+  );
+}
+
+function applyServerOverride(url, serverUrl) {
+  if (!url || typeof serverUrl !== "string") {
+    return url;
+  }
+
+  const match = /^(https?):\/\/([^/]+)(\/.*)?$/u.exec(serverUrl);
+  if (!match) {
+    throw new Error(`Unsupported Postman server URL: ${serverUrl}`);
+  }
+
+  const authority = match[2];
+  const portMatch = /:(\d+)$/u.exec(authority);
+  const hostname = portMatch ? authority.slice(0, -portMatch[0].length) : authority;
+  const host = hostname.split(".").map((segment) => segment.replace(
+    /\{([^{}]+)\}/gu,
+    "{{$1}}",
+  ));
+  const normalizedUrl = {
+    ...url,
+    protocol: match[1],
+    host,
+  };
+
+  if (portMatch) {
+    normalizedUrl.port = portMatch[1];
+  } else {
+    delete normalizedUrl.port;
+  }
+
+  if (typeof url.raw === "string") {
+    const pathAndQuery = /^https?:\/\/[^/]+(.*)$/u.exec(url.raw)?.[1] ?? "";
+    normalizedUrl.raw = `${match[1]}://${authority}${pathAndQuery}`;
+  }
+
+  return normalizedUrl;
+}
+
+function applyOperationServer(request, operation) {
+  if (!operation?.serverOverride || !operation.serverUrls?.[0] || !request?.url) {
+    return request;
+  }
+
+  return {
+    ...request,
+    url: applyServerOverride(request.url, operation.serverUrls[0]),
+  };
+}
+
 function getSpecExampleBody(operations, itemRequest, response) {
   const request = response.originalRequest ?? itemRequest;
   const method = request?.method?.toUpperCase();
@@ -483,7 +554,12 @@ function getSpecExampleBody(operations, itemRequest, response) {
 }
 
 // Preserve stable Postman metadata from the checked-in collection and normalize line endings.
-function stabilizeCollection(openapiPath, collectionPath, previousCollection) {
+function stabilizeCollection(
+  openapiPath,
+  collectionPath,
+  previousCollection,
+  { hostRouting = false } = {},
+) {
   const openapi = JSON.parse(readFileSync(openapiPath, "utf8"));
   const collection = JSON.parse(readFileSync(collectionPath, "utf8"));
   const operations = buildOperationIndex(openapi);
@@ -513,6 +589,13 @@ function stabilizeCollection(openapiPath, collectionPath, previousCollection) {
       item.request = mergeRequestExamples(item.request, previousItem.request);
     }
 
+    if (hostRouting) {
+      item.request = applyOperationServer(
+        item.request,
+        getOperationForRequest(operations, item.request),
+      );
+    }
+
     for (const response of item.response ?? []) {
       const previousResponse = previousIndex?.responses.get(
         getResponseKey(itemKey, item.request, response),
@@ -533,6 +616,13 @@ function stabilizeCollection(openapiPath, collectionPath, previousCollection) {
         );
       }
 
+      if (hostRouting) {
+        response.originalRequest = applyOperationServer(
+          response.originalRequest,
+          getOperationForRequest(operations, response.originalRequest),
+        );
+      }
+
       const body = getSpecExampleBody(operations, item.request, response);
 
       if (body !== undefined) {
@@ -545,6 +635,10 @@ function stabilizeCollection(openapiPath, collectionPath, previousCollection) {
       }
     }
   });
+
+  if (hostRouting) {
+    validatePostmanServerRouting(operations, collection, openapi.info?.title ?? "OpenAPI/Postman collection");
+  }
 
   writeFileSync(collectionPath, `${JSON.stringify(collection, null, 4)}\n`);
 }
@@ -596,7 +690,12 @@ try {
       "postman_to_openapi.json",
     ]);
 
-    stabilizeCollection(bundledJsonPath, collectionPath, previousCollection);
+    stabilizeCollection(
+      bundledJsonPath,
+      collectionPath,
+      previousCollection,
+      { hostRouting: definition.hostRouting },
+    );
   }
 } finally {
   rmSync(tempDir, { recursive: true, force: true });
