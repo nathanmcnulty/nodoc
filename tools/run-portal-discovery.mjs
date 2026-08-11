@@ -197,6 +197,8 @@ function parseArgs(argv) {
       args.applySaturationStop = true;
     } else if (argument === "--no-ledger") {
       args.noLedger = true;
+    } else if (argument === "--action" || argument.startsWith("--action=")) {
+      throw new Error("CLI action overrides are not supported by ledger-backed discovery; update the checked-in recipe instead.");
     } else if (argument === "--json") {
       args.json = true;
     } else if (argument === "--portal" && next) {
