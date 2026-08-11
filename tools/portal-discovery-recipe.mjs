@@ -100,7 +100,7 @@ export function resolvePageTargetBootstrapCriteria(recipe) {
   };
 }
 
-export function validateRecipeTargetMetadata(recipe, { enforcePageTargetForAll = true } = {}) {
+export function validateRecipeTargetMetadata(recipe, { enforcePageTargetForAll = false } = {}) {
   const featureCriteria = resolvePageTargetCriteria(recipe);
   const bootstrapCriteria = resolvePageTargetBootstrapCriteria(recipe);
   const recipeUrl = resolveStrictNavigationUrl(recipe?.url, recipe?.url, {

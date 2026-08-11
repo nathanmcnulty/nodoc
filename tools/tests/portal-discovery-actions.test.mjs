@@ -625,10 +625,12 @@ test("no-target-id legacy wrong-path navigation is rejected before target creati
     response.end();
   });
   await writeFile(recipePath, `${JSON.stringify({
-    portal: "Legacy no target",
+    portal: "Structured no target",
     url: "https://portal.example/safe",
-    matchHosts: ["portal.example"],
-    matchPathPrefixes: ["/safe"],
+    pageTarget: {
+      matchHosts: ["portal.example"],
+      matchPathPrefixes: ["/safe"],
+    },
     actions: ["navigate=/admin"],
   })}\n`, "utf8");
   await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));

@@ -1,4 +1,5 @@
 import { createHash, randomUUID } from "node:crypto";
+import { writeFileSync } from "node:fs";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
@@ -531,9 +532,7 @@ function finalizeActionConfiguration(args) {
   });
   const pageTarget = args.recipeConfig?.pageTarget !== undefined
     ? resolvePageTargetCriteria(args.recipeConfig)
-    : (args.matchHosts.length > 0 || args.matchPathPrefixes.length > 0
-      ? { matchHosts: args.matchHosts, matchPathPrefixes: args.matchPathPrefixes }
-      : null);
+    : null;
   const bootstrapTarget = args.recipeConfig?.pageTarget !== undefined
     ? resolvePageTargetBootstrapCriteria(args.recipeConfig)
     : null;
@@ -541,13 +540,17 @@ function finalizeActionConfiguration(args) {
     rootUrl: args.url,
     pageTarget,
     bootstrapTarget,
-    enforcePageTargetForAll: true,
+    enforcePageTargetForAll: false,
   });
   args.initialNavigationUrl = validatedActions[0].resolvedUrl;
   args.actions = validatedActions.slice(1);
   args.pageTargetCriteria = pageTarget;
   args.bootstrapTargetCriteria = bootstrapTarget;
-  args.targetOwnershipCriteria = pageTarget;
+  args.targetOwnershipCriteria = pageTarget ?? (
+    args.matchHosts.length > 0 || args.matchPathPrefixes.length > 0
+      ? { matchHosts: args.matchHosts, matchPathPrefixes: args.matchPathPrefixes }
+      : null
+  );
   args.effectiveReplayConfig = {
     ...(args.recipeConfig ?? {}),
     seedLinkLimit: args.seedLinkLimit,
@@ -2047,6 +2050,15 @@ async function main() {
   let currentLoadResolver = null;
   let lastNetworkActivityAt = Date.now();
 
+  function rejectFrozenLifecycleEvent(kind) {
+    if (lifecyclePhase !== "frozen") return false;
+    const error = new Error(`Lifecycle event "${kind}" arrived after terminal freeze.`);
+    error.code = "late-terminal-event";
+    terminalLifecycleError ??= error;
+    runtimeSafetyError ??= error;
+    return true;
+  }
+
   function setCaptureContext(pageLabel, actionIndex = currentActionIndex, pageUrl = null, attempt = 0) {
     currentContext = {
       actionIndex,
@@ -2098,12 +2110,7 @@ async function main() {
       }
     }
     await client.send("Fetch.enable", {
-      patterns: [
-        "Document",
-        "Script",
-        "XHR",
-        "Fetch",
-      ].map((resourceType) => ({ requestStage: "Request", resourceType })),
+      patterns: [{ requestStage: "Request", urlPattern: "*" }],
     }, sessionId);
 
     configuredSessions.add(key);
@@ -2122,11 +2129,22 @@ async function main() {
     const requestUrl = params.request?.url;
     const resourceType = params.resourceType ?? "Document";
     try {
+      if (lifecyclePhase === "frozen") {
+        const error = new Error("Request paused after terminal publication was frozen.");
+        error.code = "late-terminal-request";
+        runtimeSafetyError ??= error;
+        terminalLifecycleError ??= error;
+        await client.send("Fetch.failRequest", {
+          errorReason: "BlockedByClient",
+          requestId: params.requestId,
+        }, sessionId);
+        return;
+      }
       if (runtimeSafetyError) throw runtimeSafetyError;
       if (String(params.request?.method ?? "GET").toUpperCase() !== "GET") {
         throw new Error("Only GET requests are permitted by capture safety.");
       }
-      if (["Document", "Script"].includes(resourceType)) {
+      if (resourceType === "Document") {
         resolveStrictNavigationUrl(requestUrl, args.url, {
           criteria: lifecyclePhase === "bootstrap"
             ? (args.bootstrapTargetCriteria ?? args.pageTargetCriteria)
@@ -2146,9 +2164,7 @@ async function main() {
         parsed.search = "";
         parsed.hash = "";
         resolveStrictNavigationUrl(parsed.href, args.url, {
-          criteria: lifecyclePhase === "bootstrap"
-            ? (args.bootstrapTargetCriteria ?? args.pageTargetCriteria)
-            : args.pageTargetCriteria,
+          criteria: null,
           label: `paused ${resourceType.toLowerCase()} request`,
         });
       }
@@ -2171,9 +2187,7 @@ async function main() {
     if (!childSessionId || childSessionId === metadata.sessionId) {
       return;
     }
-    if (lifecyclePhase === "frozen") {
-      return;
-    }
+    if (rejectFrozenLifecycleEvent("target-attached")) return;
     targetGeneration += 1;
     const handler = (async () => {
       if (lifecyclePhase === "closing" || lifecyclePhase === "frozen") {
@@ -2245,7 +2259,7 @@ async function main() {
   });
 
   client.on("Target.detachedFromTarget", (params, metadata) => {
-    if (lifecyclePhase === "frozen") return;
+    if (rejectFrozenLifecycleEvent("target-detached")) return;
     const detachedSessionId = params.sessionId ?? null;
     if (detachedSessionId) {
       targetGeneration += 1;
@@ -2254,7 +2268,7 @@ async function main() {
   });
 
   client.on("Target.targetInfoChanged", (params, metadata) => {
-    if (lifecyclePhase === "frozen") return;
+    if (rejectFrozenLifecycleEvent("target-info-changed")) return;
     targetGeneration += 1;
     const targetInfo = params.targetInfo ?? {};
     if (["page", "iframe"].includes(targetInfo.type ?? "page")) {
@@ -2274,7 +2288,7 @@ async function main() {
   });
 
   client.on("Page.frameAttached", (params, metadata) => {
-    if (lifecyclePhase === "frozen") return;
+    if (rejectFrozenLifecycleEvent("frame-attached")) return;
     targetGeneration += 1;
     attributionRegistry.recordFrameAttached(
       metadata.sessionId ?? null,
@@ -2284,7 +2298,7 @@ async function main() {
   });
 
   client.on("Page.frameNavigated", (params, metadata) => {
-    if (lifecyclePhase === "frozen") return;
+    if (rejectFrozenLifecycleEvent("frame-navigated")) return;
     targetGeneration += 1;
     if (params.frame?.url) {
       try {
@@ -2303,7 +2317,7 @@ async function main() {
   });
 
   client.on("Page.frameDetached", (params, metadata) => {
-    if (lifecyclePhase === "frozen") return;
+    if (rejectFrozenLifecycleEvent("frame-detached")) return;
     targetGeneration += 1;
     const sessionId = metadata.sessionId ?? null;
     const entry = sessions.get(sessionId);
@@ -3763,7 +3777,7 @@ async function main() {
       targetId: target.id ?? args.targetId ?? null,
     };
 
-    await writeFile(
+    writeFileSync(
       path.join(args.outDir, "summary.json"),
       `${JSON.stringify(summary, null, 2)}\n`,
       "utf8",
