@@ -119,6 +119,44 @@ required for safety, scope, thresholds, and model disagreement. Retries,
 timeouts, recovery, escalation, invalid results, and CI/PR outcomes must be
 reported as structured counts and reason codes.
 
+## Reconciliation, publication, and merge gates
+
+Treat converter and generator availability as part of reconciliation health. If
+either is unavailable, raw OpenAPI or Postman gaps remain candidate deficits;
+they are not confirmed true deficits and must not change a coverage claim.
+
+Before interpreting any raw count, normalize every observation and spec
+operation to an uppercase method, path template, and canonical alias key. Use
+mutually exclusive categories and record exact integer counts for each:
+
+```text
+raw observations = emitted + duplicate-shadowed + orphaned + intentional-filtered + alias-observations
+emitted = matched + unresolved
+```
+
+`matched` means an emitted canonical key matches the checked-in operation;
+`unresolved` means it does not. Alias observations map to one canonical key and
+are not counted again in emitted, matched, or unresolved. A reconciliation is
+unknown, not zero, when a category or input is unavailable, and an unbalanced
+equation blocks interpretation or publication.
+
+Canonical operation-count or placeholder-count changes require
+`npm run generate:site-data` before publication. Include only proven generated
+`specQuality` or coverage deltas in the change; spec/Postman parity alone is
+insufficient. A focused generator stabilization change additionally requires a
+focused regression test and two consecutive target runs whose outputs are byte-
+and semantically idempotent.
+
+Current-base synchronization and protected merges are serialized separately from
+offline reconciliation. One merge owner refreshes the current base, performs
+the protected merge, and reruns exact-head and relevant validation checks before
+another merge owner may proceed. Concurrent merge attempts are not a recovery
+strategy for stale exact-head checks.
+
+Generated request examples are documentation fixtures only. They do not
+reclassify unsafe `POST`, `PATCH`, or `PUT` operations and do not constitute live
+execution or evidence.
+
 ## Required input
 
 The task must name one portal by title or spec ID, for example `M365 Admin` or

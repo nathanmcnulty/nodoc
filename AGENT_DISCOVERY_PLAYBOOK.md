@@ -42,6 +42,8 @@ When promoting discoveries into the repository, aim for more than just path cove
 - Preserve evidence provenance in descriptions. If something is bundle-only or only safe-probed, say so explicitly instead of overstating confidence.
 - Leave placeholders visible only when evidence is genuinely missing; otherwise replace `pending` text with observed request, response, auth, or routing details.
 - Regenerate derived artifacts after spec changes so the website, quality data, and Postman collections stay aligned.
+- Treat converter or generator outages as an evidence-health limitation: raw
+  OpenAPI/Postman gaps remain candidates until the conversion path is available.
 
 ## Core principles
 
@@ -417,6 +419,10 @@ be analyzed offline and retain the normal evidence-based recommendation.
 - Never merge directly from a discovery worker.
 - After CI and review, merge only the reviewed commit set. Create a new follow-up
   assignment for recipe repair, adjacent host/spec work, or deferred candidates.
+- Serialize current-base synchronization and protected merges. One merge owner at
+  a time refreshes the current base, performs the protected merge, and reruns
+  exact-head and relevant validation checks; concurrent merge attempts must not
+  repeatedly invalidate those checks.
 - Rebase or resolve conflicts in the promotion branch, rerun the relevant
   validation, and require another review when the effective diff changes.
 
@@ -728,6 +734,23 @@ This helps answer the real question:
 
 If the answer is “one unresolved family and one thin recipe”, update the recipe before running another broad crawl.
 
+#### Normalized reconciliation before counting
+
+Raw observations and generated counts are not comparable until every operation is
+normalized by uppercase method, path template, and canonical alias. Keep the
+following categories mutually exclusive and record their exact counts:
+
+```text
+raw observations = emitted + duplicate-shadowed + orphaned + intentional-filtered + alias-observations
+emitted = matched + unresolved
+```
+
+Aliases map observations to one canonical key and are counted only in
+`alias-observations`; they are not emitted or matched a second time. `matched`
+means the canonical key is in the checked-in spec, while `unresolved` means it
+is not. Missing converter/generator inputs make the reconciliation unknown, not
+zero, so raw gaps cannot be promoted to true deficits.
+
 ### 6. Promote discoveries carefully
 
 Confidence ladder:
@@ -755,6 +778,8 @@ Interpret probe results carefully:
 Default policy:
 
 - Treat every `POST`, `PUT`, `PATCH`, and `DELETE` as a real write unless proven otherwise.
+- Generated request examples do not change that classification and are not live
+  execution or evidence.
 
 Preferred write-shape workflow:
 
@@ -799,6 +824,13 @@ After spec changes:
 1. `npm run generate:postman`
 2. `npm run typecheck`
 3. `npm run build`
+
+Canonical operation-count or placeholder-count changes also require
+`npm run generate:site-data` before publication. Include only proven generated
+`specQuality` or coverage deltas; Postman parity alone is not evidence of a
+quality or coverage change. A focused generator stabilization change is not
+complete until it has a focused regression test and two consecutive target runs
+with byte- and semantic-idempotent output.
 
 Before finishing:
 
