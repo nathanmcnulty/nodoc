@@ -559,7 +559,7 @@ try {
     run(npmCommand, [
       "exec",
       "--yes",
-      "--package=@redocly/cli@latest",
+      "--package=@redocly/cli@2.46.0",
       "--",
       "redocly",
       "bundle",

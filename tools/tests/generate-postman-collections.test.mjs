@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 
 import { mergeCollectionVariables } from "../generate-postman-collections.mjs";
@@ -25,4 +26,18 @@ test("leaves generated variables unchanged when no prior collection exists", () 
   ];
 
   assert.deepEqual(mergeCollectionVariables(current, undefined), current);
+});
+
+test("pins the external Postman generation tools to exact versions", () => {
+  const generatorSource = readFileSync(
+    new URL("../generate-postman-collections.mjs", import.meta.url),
+    "utf8",
+  );
+  const packageSpecs = [...generatorSource.matchAll(/"--package=([^"]+)"/gu)]
+    .map((match) => match[1]);
+
+  assert.deepEqual(packageSpecs, [
+    "@redocly/cli@2.46.0",
+    "openapi-to-postmanv2@6.0.0",
+  ]);
 });
