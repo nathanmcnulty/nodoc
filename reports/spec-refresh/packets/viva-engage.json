@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "id": "viva-engage",
+  "phases": {
+    "sourceInventory": {
+      "status": "complete",
+      "reason": "Canonical source modules parsed and inventoried."
+    },
+    "derivativeParity": {
+      "status": "complete",
+      "reason": "A checked-in derivative exists with no unresolved or orphaned routes."
+    },
+    "discoveryEvidence": {
+      "status": "incomplete",
+      "reason": "Static recipes or metadata exist, but no machine-readable live-capture record was observed."
+    },
+    "refreshReadiness": {
+      "status": "incomplete",
+      "reason": "Discovery evidence is absent or static-only; metadata validation alone is insufficient."
+    }
+  },
+  "counts": {
+    "operationCount": 5,
+    "operationDigest": "20fce3e9ad0af12bc7a4aa1b38933c11df75e8170eca46c230e4c0709dabbe53",
+    "schemaCount": 9,
+    "schemaDigest": "a909f1f1b3f79163d222a92f467ca8a06bd3dfd9b6c6c05a1d52d381bc6d9d28",
+    "moduleCount": 1,
+    "evidenceObserved": 0,
+    "evidenceReferences": 7,
+    "parityExceptions": 0,
+    "openMetadataGaps": 1
+  },
+  "digests": {
+    "operations": "20fce3e9ad0af12bc7a4aa1b38933c11df75e8170eca46c230e4c0709dabbe53",
+    "schemas": "a909f1f1b3f79163d222a92f467ca8a06bd3dfd9b6c6c05a1d52d381bc6d9d28",
+    "evidence": "72901b997d144c8766b5a382557d39922ecd4dd586bac7f54168f3c02eb42007",
+    "parity": "06f1e77b77a5db2a10ad638ac19bd21d5a7bbbd88b4f6dafa0943ef2645370c3",
+    "sources": "55505dee2bd4477bb33008a0810f7712a957286de16a0ff24582378520977cd4"
+  },
+  "evidence": {
+    "state": "notObserved",
+    "reason": "Static recipes or metadata exist, but no machine-readable live-capture record was observed.",
+    "references": [
+      "tools/capture-recipes/viva-engage-admin-deep.json",
+      "tools/capture-recipes/viva-engage-admin-roles-deep.json",
+      "tools/capture-recipes/viva-engage-external-networks-deep.json",
+      "tools/capture-recipes/viva-engage-segmentation-deep.json",
+      "tools/capture-recipes/viva-engage-setup-external-network-deep.json"
+    ],
+    "remainingCount": 2
+  },
+  "exceptions": {
+    "totalCount": 1,
+    "digest": "131fcfde0881bde003c56a00f77954d88e49bb6cd223b142ed95890ef31d0971",
+    "top": [
+      {
+        "kind": "openGap",
+        "reason": "Intercept the next step after code generation or code entry if `setup-external-network` ever advances beyond the shared `ExternalNetworksAdminSettingsClients` bootstrap query and shell-state reads, because the no-submit access-code control probe did not emit a distinct write or redemption family."
+      }
+    ],
+    "remainingCount": 0,
+    "detailsSelector": "npm run spec-refresh -- --spec viva-engage --details operations|schemas|evidence"
+  }
+}

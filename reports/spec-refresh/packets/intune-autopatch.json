@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "id": "intune-autopatch",
+  "phases": {
+    "sourceInventory": {
+      "status": "complete",
+      "reason": "Canonical source modules parsed and inventoried."
+    },
+    "derivativeParity": {
+      "status": "complete",
+      "reason": "A checked-in derivative exists with no unresolved or orphaned routes."
+    },
+    "discoveryEvidence": {
+      "status": "complete",
+      "reason": "Machine-readable live-capture records are present."
+    },
+    "refreshReadiness": {
+      "status": "complete",
+      "reason": "Source, derivative parity, and observed evidence are all explicit."
+    }
+  },
+  "counts": {
+    "operationCount": 53,
+    "operationDigest": "0dee14b2fa8c9cfd19afb0280adbbb6ae1bed37d46e3bb0ac2274e9a3818f7c1",
+    "schemaCount": 85,
+    "schemaDigest": "e9b2901437cb7e8d3a30090e7d86e643f065c79019a98a0f4b3de5ec17b03a82",
+    "moduleCount": 1,
+    "evidenceObserved": 4,
+    "evidenceReferences": 5,
+    "parityExceptions": 0,
+    "openMetadataGaps": 0
+  },
+  "digests": {
+    "operations": "0dee14b2fa8c9cfd19afb0280adbbb6ae1bed37d46e3bb0ac2274e9a3818f7c1",
+    "schemas": "e9b2901437cb7e8d3a30090e7d86e643f065c79019a98a0f4b3de5ec17b03a82",
+    "evidence": "62cf7b6fdf463b57ab533d13b3368e2c7182990d3c8672678181fc17a5c6c325",
+    "parity": "c6a7b7ba903bea33c9fa7e2bfcbb6c7f21a1cbbfadad8804180480ce67f289eb",
+    "sources": "179dca5663461e1f8be484a6a195faab7d424c9728f02cf7fccb238088b7045f"
+  },
+  "evidence": {
+    "state": "observed",
+    "reason": "Machine-readable live-capture records are present.",
+    "references": [
+      "src/generated/operationLiveCaptureLedger.json",
+      "tools/capture-recipes/intune-autopatch-deep.json",
+      "tools/capture-recipes/intune-deep.json",
+      "tools/capture-recipes/intune-seeded-replay.json",
+      "tools/portal-discovery-metadata.mjs"
+    ],
+    "remainingCount": 0
+  },
+  "exceptions": {
+    "totalCount": 0,
+    "digest": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+    "top": [],
+    "remainingCount": 0,
+    "detailsSelector": "npm run spec-refresh -- --spec intune-autopatch --details operations|schemas|evidence"
+  }
+}

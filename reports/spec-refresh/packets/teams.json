@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "id": "teams",
+  "phases": {
+    "sourceInventory": {
+      "status": "complete",
+      "reason": "Canonical source modules parsed and inventoried."
+    },
+    "derivativeParity": {
+      "status": "complete",
+      "reason": "A checked-in derivative exists with no unresolved or orphaned routes."
+    },
+    "discoveryEvidence": {
+      "status": "incomplete",
+      "reason": "Static recipes or metadata exist, but no machine-readable live-capture record was observed."
+    },
+    "refreshReadiness": {
+      "status": "incomplete",
+      "reason": "Discovery evidence is absent or static-only; metadata validation alone is insufficient."
+    }
+  },
+  "counts": {
+    "operationCount": 100,
+    "operationDigest": "f446e6623f0d4ce655e17b3e47db77c565017a4193415213c3e492f2a3d9df14",
+    "schemaCount": 21,
+    "schemaDigest": "ae6d7f97be39228a5b07f06ffee9be9cc703e87b988d70ab150cea4c19ab41bd",
+    "moduleCount": 1,
+    "evidenceObserved": 0,
+    "evidenceReferences": 2,
+    "parityExceptions": 0,
+    "openMetadataGaps": 0
+  },
+  "digests": {
+    "operations": "f446e6623f0d4ce655e17b3e47db77c565017a4193415213c3e492f2a3d9df14",
+    "schemas": "ae6d7f97be39228a5b07f06ffee9be9cc703e87b988d70ab150cea4c19ab41bd",
+    "evidence": "343219072441d00cdb904e93d96e203831c76eec736291d48ae65b6eca142023",
+    "parity": "ec4a34011a46f8cc7f6a2e42321a656570e1a1cd94420b17dcbac9c5fd6e5b7c",
+    "sources": "ff6852b7d2e07f053419dce01343a49afb9c15c39b30e9c79a3e8ae8e4f638cb"
+  },
+  "evidence": {
+    "state": "notObserved",
+    "reason": "Static recipes or metadata exist, but no machine-readable live-capture record was observed.",
+    "references": [
+      "tools/capture-recipes/teams-deep.json",
+      "tools/capture-recipes/teams-seeded-replay.json"
+    ],
+    "remainingCount": 0
+  },
+  "exceptions": {
+    "totalCount": 0,
+    "digest": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+    "top": [],
+    "remainingCount": 0,
+    "detailsSelector": "npm run spec-refresh -- --spec teams --details operations|schemas|evidence"
+  }
+}

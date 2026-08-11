@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "id": "purview",
+  "phases": {
+    "sourceInventory": {
+      "status": "complete",
+      "reason": "Canonical source modules parsed and inventoried."
+    },
+    "derivativeParity": {
+      "status": "complete",
+      "reason": "A checked-in derivative exists with no unresolved or orphaned routes."
+    },
+    "discoveryEvidence": {
+      "status": "incomplete",
+      "reason": "Static recipes or metadata exist, but no machine-readable live-capture record was observed."
+    },
+    "refreshReadiness": {
+      "status": "incomplete",
+      "reason": "Discovery evidence is absent or static-only; metadata validation alone is insufficient."
+    }
+  },
+  "counts": {
+    "operationCount": 134,
+    "operationDigest": "614eb6ff6b8940d5ef2327e35517abadc7cc88cd3a46dc4f06726db0df7c4312",
+    "schemaCount": 68,
+    "schemaDigest": "d6e541035f45e852e7427868c0d2ff1073700a8b3997e2668543cd02a2165aee",
+    "moduleCount": 20,
+    "evidenceObserved": 0,
+    "evidenceReferences": 3,
+    "parityExceptions": 0,
+    "openMetadataGaps": 2
+  },
+  "digests": {
+    "operations": "614eb6ff6b8940d5ef2327e35517abadc7cc88cd3a46dc4f06726db0df7c4312",
+    "schemas": "d6e541035f45e852e7427868c0d2ff1073700a8b3997e2668543cd02a2165aee",
+    "evidence": "4140663ac0328c995f8872189ee6c94f2cc9fae1a89984c858f4ffff96ab12e4",
+    "parity": "a551aefbc21c57def05ab8e7b1b496a3da61e383ffef30f426d0178db1a322ac",
+    "sources": "b86d7cfa0804f4e572f405df19ae63b42d55cf57499fac4db881056ea5d274c9"
+  },
+  "evidence": {
+    "state": "notObserved",
+    "reason": "Static recipes or metadata exist, but no machine-readable live-capture record was observed.",
+    "references": [
+      "tools/capture-recipes/purview-deep.json",
+      "tools/capture-recipes/purview-seeded-replay.json",
+      "tools/portal-discovery-metadata.mjs"
+    ],
+    "remainingCount": 0
+  },
+  "exceptions": {
+    "totalCount": 2,
+    "digest": "8eedf0063e313b1a843b39b649c37774822b1b95282211f522ada0075106fde8",
+    "top": [
+      {
+        "kind": "openGap",
+        "reason": "The generic Microsoft Graph batch wrapper remains unpromoted; document stable inner operations individually when they can be generalized safely."
+      },
+      {
+        "kind": "openGap",
+        "reason": "The IRMEasyPolicy POST remains unpromoted unless a future intercepted capture proves it is a bounded read-only lookup."
+      }
+    ],
+    "remainingCount": 0,
+    "detailsSelector": "npm run spec-refresh -- --spec purview --details operations|schemas|evidence"
+  }
+}

@@ -30,6 +30,7 @@ on:
       - tools/generate-portal-coverage-ledger.mjs
       - tools/generate-spec-quality.mjs
       - tools/portal-discovery-metadata.mjs
+      - tools/portal-discovery-portfolio.json
       - tools/portal-discovery-ledger.mjs
       - tools/run-portal-discovery.mjs
       - tools/browser-cdp-owner.mjs
@@ -38,6 +39,9 @@ on:
       - tools/tests/browser-cdp-preflight.test.mjs
       - tools/tests/portal-discovery-ledger.test.mjs
       - tools/spec-quality-lib.mjs
+      - tools/spec-refresh-ledger.mjs
+      - tools/tests/spec-refresh-ledger.test.mjs
+      - reports/spec-refresh/**
       - tools/validate-portal-discovery-metadata.mjs
       - tools/validate-spec-quality.mjs
   push:
@@ -71,6 +75,7 @@ on:
       - tools/generate-portal-coverage-ledger.mjs
       - tools/generate-spec-quality.mjs
       - tools/portal-discovery-metadata.mjs
+      - tools/portal-discovery-portfolio.json
       - tools/portal-discovery-ledger.mjs
       - tools/run-portal-discovery.mjs
       - tools/browser-cdp-owner.mjs
@@ -79,6 +84,9 @@ on:
       - tools/tests/browser-cdp-preflight.test.mjs
       - tools/tests/portal-discovery-ledger.test.mjs
       - tools/spec-quality-lib.mjs
+      - tools/spec-refresh-ledger.mjs
+      - tools/tests/spec-refresh-ledger.test.mjs
+      - reports/spec-refresh/**
       - tools/validate-portal-discovery-metadata.mjs
       - tools/validate-spec-quality.mjs
   workflow_dispatch:
@@ -108,6 +116,12 @@ jobs:
 
       - name: Validate portal discovery metadata
         run: npm run validate:portal-discovery
+
+      - name: Test compact specification refresh ledger
+        run: node --test tools/tests/spec-refresh-ledger.test.mjs
+
+      - name: Validate compact specification refresh ledger
+        run: npm run validate:spec-refresh
 
       - name: Validate generated site data
         run: npm run validate:site-data

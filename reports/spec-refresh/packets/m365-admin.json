@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "id": "m365-admin",
+  "phases": {
+    "sourceInventory": {
+      "status": "complete",
+      "reason": "Canonical source modules parsed and inventoried."
+    },
+    "derivativeParity": {
+      "status": "incomplete",
+      "reason": "A checked-in derivative exists with parity gaps."
+    },
+    "discoveryEvidence": {
+      "status": "incomplete",
+      "reason": "Static recipes or metadata exist, but no machine-readable live-capture record was observed."
+    },
+    "refreshReadiness": {
+      "status": "incomplete",
+      "reason": "Discovery evidence is absent or static-only; metadata validation alone is insufficient."
+    }
+  },
+  "counts": {
+    "operationCount": 309,
+    "operationDigest": "6ad42f4a4927768a93d6ea880973723f7c23ed6094a929721e4b3c55ef3c3733",
+    "schemaCount": 52,
+    "schemaDigest": "24f26e148cba46e9269d969e736603128c8d52bc78095bb79589d517ea1fdb32",
+    "moduleCount": 26,
+    "evidenceObserved": 0,
+    "evidenceReferences": 3,
+    "parityExceptions": 101,
+    "openMetadataGaps": 2
+  },
+  "digests": {
+    "operations": "6ad42f4a4927768a93d6ea880973723f7c23ed6094a929721e4b3c55ef3c3733",
+    "schemas": "24f26e148cba46e9269d969e736603128c8d52bc78095bb79589d517ea1fdb32",
+    "evidence": "5b6e7316af3c69dda5de4866095852e296169460f63170f971461fade91a752d",
+    "parity": "53bb84b2f9c89bd1e33b375775291984d89b09f39691f662c2d4f5f0d4a20e62",
+    "sources": "d4d3d32d6ed77cae77dc77a4c8ce6db23c809365a8f654cce4eb8e023b809bc1"
+  },
+  "evidence": {
+    "state": "notObserved",
+    "reason": "Static recipes or metadata exist, but no machine-readable live-capture record was observed.",
+    "references": [
+      "tools/capture-recipes/m365-admin-deep.json",
+      "tools/capture-recipes/m365-admin-seeded-replay.json",
+      "tools/portal-discovery-metadata.mjs"
+    ],
+    "remainingCount": 0
+  },
+  "exceptions": {
+    "totalCount": 103,
+    "digest": "b13d8469189b77a415cb1c23f9ce8d5496f7a07e6f62f350f074120e7f95bad6",
+    "top": [
+      {
+        "kind": "openGap",
+        "reason": "Provider-registration POSTs observed during marketplace and subscription loading remain intentionally unpromoted because replay could change tenant resource-provider state."
+      },
+      {
+        "kind": "openGap",
+        "reason": "The captured substrate suggestions POST remains intentionally unpromoted because it is an active search operation rather than a safe discovery probe."
+      },
+      {
+        "kind": "orphaned",
+        "key": "GET /admin/api/dirsyncmanagement/hasobjectswithdirsyncerrors"
+      },
+      {
+        "kind": "orphaned",
+        "key": "GET /admin/api/dirsyncmanagement/manage"
+      },
+      {
+        "kind": "orphaned",
+        "key": "GET /admin/api/domainlist/Customization"
+      }
+    ],
+    "remainingCount": 98,
+    "detailsSelector": "npm run spec-refresh -- --spec m365-admin --details operations|schemas|evidence"
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "id": "m365-apps-config",
+  "phases": {
+    "sourceInventory": {
+      "status": "complete",
+      "reason": "Canonical source modules parsed and inventoried."
+    },
+    "derivativeParity": {
+      "status": "complete",
+      "reason": "A checked-in derivative exists with no unresolved or orphaned routes."
+    },
+    "discoveryEvidence": {
+      "status": "incomplete",
+      "reason": "Static recipes or metadata exist, but no machine-readable live-capture record was observed."
+    },
+    "refreshReadiness": {
+      "status": "incomplete",
+      "reason": "Discovery evidence is absent or static-only; metadata validation alone is insufficient."
+    }
+  },
+  "counts": {
+    "operationCount": 24,
+    "operationDigest": "613dc3bedb68df2056bda3b15fad6698e355f3a3b8eca5561be31fb8f58b948d",
+    "schemaCount": 20,
+    "schemaDigest": "6eebdcfc7536b5e364ed01c87faaf399ad313cbf29d7f177ef894ed2da3e8ffd",
+    "moduleCount": 1,
+    "evidenceObserved": 0,
+    "evidenceReferences": 3,
+    "parityExceptions": 0,
+    "openMetadataGaps": 0
+  },
+  "digests": {
+    "operations": "613dc3bedb68df2056bda3b15fad6698e355f3a3b8eca5561be31fb8f58b948d",
+    "schemas": "6eebdcfc7536b5e364ed01c87faaf399ad313cbf29d7f177ef894ed2da3e8ffd",
+    "evidence": "16cdadba539347e147fb3f7ebabe870a30988388de2f59a65ac25eebd25053eb",
+    "parity": "27a431f0b8ee68eea930bd6f230b5744a5b899a0eed511921030bd3b80598477",
+    "sources": "46b30a05311be16a9a762b5dff1129d2e282066242597fe2de41e3c8e3cae472"
+  },
+  "evidence": {
+    "state": "notObserved",
+    "reason": "Static recipes or metadata exist, but no machine-readable live-capture record was observed.",
+    "references": [
+      "tools/capture-recipes/m365-apps-config-deep.json",
+      "tools/capture-recipes/m365-apps-deep.json",
+      "tools/capture-recipes/m365-apps-seeded-replay.json"
+    ],
+    "remainingCount": 0
+  },
+  "exceptions": {
+    "totalCount": 0,
+    "digest": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+    "top": [],
+    "remainingCount": 0,
+    "detailsSelector": "npm run spec-refresh -- --spec m365-apps-config --details operations|schemas|evidence"
+  }
+}

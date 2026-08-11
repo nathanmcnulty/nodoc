@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "id": "power-platform",
+  "phases": {
+    "sourceInventory": {
+      "status": "complete",
+      "reason": "Canonical source modules parsed and inventoried."
+    },
+    "derivativeParity": {
+      "status": "complete",
+      "reason": "A checked-in derivative exists with no unresolved or orphaned routes."
+    },
+    "discoveryEvidence": {
+      "status": "complete",
+      "reason": "Machine-readable live-capture records are present."
+    },
+    "refreshReadiness": {
+      "status": "complete",
+      "reason": "Source, derivative parity, and observed evidence are all explicit."
+    }
+  },
+  "counts": {
+    "operationCount": 248,
+    "operationDigest": "e9d219ebe26b281f509da734008b937f68a9730e0231db165270621aec55f75d",
+    "schemaCount": 0,
+    "schemaDigest": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+    "moduleCount": 10,
+    "evidenceObserved": 248,
+    "evidenceReferences": 4,
+    "parityExceptions": 0,
+    "openMetadataGaps": 3
+  },
+  "digests": {
+    "operations": "e9d219ebe26b281f509da734008b937f68a9730e0231db165270621aec55f75d",
+    "schemas": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+    "evidence": "90d0bf40deb70b28cabeaa594808ac88e25e9fceda779f0cc3882de401dd15f6",
+    "parity": "4ae2591e9a4e82a9488f3a3a5f0dffb696fc0beeed8f9b94d9181756dbd74e9d",
+    "sources": "357e080448576f88fe563cb3b79dba1eaff48ea0e577c20e379d4a39b1a2e8ec"
+  },
+  "evidence": {
+    "state": "observed",
+    "reason": "Machine-readable live-capture records are present.",
+    "references": [
+      "src/generated/operationLiveCaptureLedger.json",
+      "tools/capture-recipes/power-platform-deep.json",
+      "tools/capture-recipes/power-platform-seeded-replay.json",
+      "tools/portal-discovery-metadata.mjs"
+    ],
+    "remainingCount": 0
+  },
+  "exceptions": {
+    "totalCount": 3,
+    "digest": "aaf27e845595ead06b1c40b3eac1ee31fdd7e8d6d9bbce763811be8a88642644",
+    "top": [
+      {
+        "kind": "openGap",
+        "reason": "Nine confirmed tenant-island API reads remain adjacent scope-review evidence until their effective host templates are assigned explicitly."
+      },
+      {
+        "kind": "openGap",
+        "reason": "Twenty-seven other shared Microsoft 365, Graph, Azure management, authentication, and Defender-family operations remain for a later cross-spec assignment pass."
+      },
+      {
+        "kind": "openGap",
+        "reason": "Two ECS routes match the Security Copilot server family and remain for explicit cross-spec assignment."
+      }
+    ],
+    "remainingCount": 0,
+    "detailsSelector": "npm run spec-refresh -- --spec power-platform --details operations|schemas|evidence"
+  }
+}

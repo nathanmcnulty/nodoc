@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "id": "exchange-beta",
+  "phases": {
+    "sourceInventory": {
+      "status": "complete",
+      "reason": "Canonical source modules parsed and inventoried."
+    },
+    "derivativeParity": {
+      "status": "complete",
+      "reason": "A checked-in derivative exists with no unresolved or orphaned routes."
+    },
+    "discoveryEvidence": {
+      "status": "incomplete",
+      "reason": "Static recipes or metadata exist, but no machine-readable live-capture record was observed."
+    },
+    "refreshReadiness": {
+      "status": "incomplete",
+      "reason": "Discovery evidence is absent or static-only; metadata validation alone is insufficient."
+    }
+  },
+  "counts": {
+    "operationCount": 61,
+    "operationDigest": "6974029a6ab6ac66ddc2a0097dd752cc413b4ff7787f09a4c0a8c47a8aff752a",
+    "schemaCount": 10,
+    "schemaDigest": "159b377f20a555759bcbd409ff9bf59489752aade804fbf0fbd86a8313a776e6",
+    "moduleCount": 1,
+    "evidenceObserved": 0,
+    "evidenceReferences": 2,
+    "parityExceptions": 0,
+    "openMetadataGaps": 0
+  },
+  "digests": {
+    "operations": "6974029a6ab6ac66ddc2a0097dd752cc413b4ff7787f09a4c0a8c47a8aff752a",
+    "schemas": "159b377f20a555759bcbd409ff9bf59489752aade804fbf0fbd86a8313a776e6",
+    "evidence": "6dddf11624a29b0dfabc2968f0cbac65196a308054cbdd768fa61813c9086a87",
+    "parity": "46e9ff66fd0d3464cc64ccce805e36ee4d8c2301d0161c129711a8c4ba1f980a",
+    "sources": "1f71946cc971d4e66709ccce9ce3a843d9d6bb47be4e1461310d482390592fef"
+  },
+  "evidence": {
+    "state": "notObserved",
+    "reason": "Static recipes or metadata exist, but no machine-readable live-capture record was observed.",
+    "references": [
+      "tools/capture-recipes/exchange-deep.json",
+      "tools/capture-recipes/exchange-seeded-replay.json"
+    ],
+    "remainingCount": 0
+  },
+  "exceptions": {
+    "totalCount": 0,
+    "digest": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+    "top": [],
+    "remainingCount": 0,
+    "detailsSelector": "npm run spec-refresh -- --spec exchange-beta --details operations|schemas|evidence"
+  }
+}

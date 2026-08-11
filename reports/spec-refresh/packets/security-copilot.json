@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "id": "security-copilot",
+  "phases": {
+    "sourceInventory": {
+      "status": "complete",
+      "reason": "Canonical source modules parsed and inventoried."
+    },
+    "derivativeParity": {
+      "status": "complete",
+      "reason": "A checked-in derivative exists with no unresolved or orphaned routes."
+    },
+    "discoveryEvidence": {
+      "status": "incomplete",
+      "reason": "Static recipes or metadata exist, but no machine-readable live-capture record was observed."
+    },
+    "refreshReadiness": {
+      "status": "incomplete",
+      "reason": "Discovery evidence is absent or static-only; metadata validation alone is insufficient."
+    }
+  },
+  "counts": {
+    "operationCount": 42,
+    "operationDigest": "dd999fd733f04755fff03d5cba88a44b93d2b45bd2ce05b783cba6855e64cafa",
+    "schemaCount": 19,
+    "schemaDigest": "21fb0f9b1bb88606e4bdbd2092dfbe7e6ea6e58ec3975eb296e8be268d0cb18c",
+    "moduleCount": 1,
+    "evidenceObserved": 0,
+    "evidenceReferences": 4,
+    "parityExceptions": 0,
+    "openMetadataGaps": 2
+  },
+  "digests": {
+    "operations": "dd999fd733f04755fff03d5cba88a44b93d2b45bd2ce05b783cba6855e64cafa",
+    "schemas": "21fb0f9b1bb88606e4bdbd2092dfbe7e6ea6e58ec3975eb296e8be268d0cb18c",
+    "evidence": "fb573e684d47ba381d361f1a326b5fe8478c75c4621ca423a22655c6a189ff7a",
+    "parity": "2a10477ed9fd7ad060e7ddc926b23199e830de0b38aa28b432771e2b868c0dd4",
+    "sources": "df5749480a6e92e6c383d8eac1b5902b8e4d3daa5db667d6b6c472daecd5c7e4"
+  },
+  "evidence": {
+    "state": "notObserved",
+    "reason": "Static recipes or metadata exist, but no machine-readable live-capture record was observed.",
+    "references": [
+      "tools/capture-recipes/security-copilot-builder-followup.json",
+      "tools/capture-recipes/security-copilot-deep.json",
+      "tools/capture-recipes/security-copilot-seeded-replay.json",
+      "tools/portal-discovery-metadata.mjs"
+    ],
+    "remainingCount": 0
+  },
+  "exceptions": {
+    "totalCount": 2,
+    "digest": "d97cac7e6aac4cda81f71ebbc825b0c1fdf4051dcdae6a4ff778bd5def36cfd7",
+    "top": [
+      {
+        "kind": "openGap",
+        "reason": "Builder save flows, agent setup submits, promptbook creation submits, and plugin configuration writes still need intercepted capture before promotion."
+      },
+      {
+        "kind": "openGap",
+        "reason": "The builder pass also emitted malformed empty-ID requests such as skillsets//authSettings and sessions//prompts/, which should be revisited only after capturing the same family with a concrete selected object."
+      }
+    ],
+    "remainingCount": 0,
+    "detailsSelector": "npm run spec-refresh -- --spec security-copilot --details operations|schemas|evidence"
+  }
+}

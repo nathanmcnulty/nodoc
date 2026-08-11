@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "id": "m365-apps-inventory",
+  "phases": {
+    "sourceInventory": {
+      "status": "complete",
+      "reason": "Canonical source modules parsed and inventoried."
+    },
+    "derivativeParity": {
+      "status": "complete",
+      "reason": "A checked-in derivative exists with no unresolved or orphaned routes."
+    },
+    "discoveryEvidence": {
+      "status": "incomplete",
+      "reason": "Static recipes or metadata exist, but no machine-readable live-capture record was observed."
+    },
+    "refreshReadiness": {
+      "status": "incomplete",
+      "reason": "Discovery evidence is absent or static-only; metadata validation alone is insufficient."
+    }
+  },
+  "counts": {
+    "operationCount": 27,
+    "operationDigest": "1cd675df35abd474b21df5d8e0f5b001e684579f013352f4fd4e145e632c871d",
+    "schemaCount": 17,
+    "schemaDigest": "aa32afd5773dfd3e825245529ce1ec20430dd08790c94c40575a9c21730a0775",
+    "moduleCount": 1,
+    "evidenceObserved": 0,
+    "evidenceReferences": 3,
+    "parityExceptions": 0,
+    "openMetadataGaps": 0
+  },
+  "digests": {
+    "operations": "1cd675df35abd474b21df5d8e0f5b001e684579f013352f4fd4e145e632c871d",
+    "schemas": "aa32afd5773dfd3e825245529ce1ec20430dd08790c94c40575a9c21730a0775",
+    "evidence": "dec65d98ae7ca9ede96268eee68a55ee1b0f8a6404f1aa196f7887c4eb06b41f",
+    "parity": "cae5ade83758939b2e358de19268326cfd0771a5aed0f9837b8e5fcaf1b9ba29",
+    "sources": "e84f5182dc0bf917244c020744ffec8cc5133edc5ff25606029e58f781676c89"
+  },
+  "evidence": {
+    "state": "notObserved",
+    "reason": "Static recipes or metadata exist, but no machine-readable live-capture record was observed.",
+    "references": [
+      "tools/capture-recipes/m365-apps-deep.json",
+      "tools/capture-recipes/m365-apps-inventory-deep.json",
+      "tools/capture-recipes/m365-apps-seeded-replay.json"
+    ],
+    "remainingCount": 0
+  },
+  "exceptions": {
+    "totalCount": 0,
+    "digest": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+    "top": [],
+    "remainingCount": 0,
+    "detailsSelector": "npm run spec-refresh -- --spec m365-apps-inventory --details operations|schemas|evidence"
+  }
+}

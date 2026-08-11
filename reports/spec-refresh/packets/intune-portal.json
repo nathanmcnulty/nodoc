@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "id": "intune-portal",
+  "phases": {
+    "sourceInventory": {
+      "status": "complete",
+      "reason": "Canonical source modules parsed and inventoried."
+    },
+    "derivativeParity": {
+      "status": "complete",
+      "reason": "A checked-in derivative exists with no unresolved or orphaned routes."
+    },
+    "discoveryEvidence": {
+      "status": "complete",
+      "reason": "Machine-readable live-capture records are present."
+    },
+    "refreshReadiness": {
+      "status": "complete",
+      "reason": "Source, derivative parity, and observed evidence are all explicit."
+    }
+  },
+  "counts": {
+    "operationCount": 5,
+    "operationDigest": "9dd4effaf98bba65b9a35f48af118722c351caf64857eaa0ec22ac80654ffaea",
+    "schemaCount": 8,
+    "schemaDigest": "24ce2572310bc417339966449ddf70dfa11051800465828ab53fbb4733d055c7",
+    "moduleCount": 1,
+    "evidenceObserved": 3,
+    "evidenceReferences": 5,
+    "parityExceptions": 0,
+    "openMetadataGaps": 0
+  },
+  "digests": {
+    "operations": "9dd4effaf98bba65b9a35f48af118722c351caf64857eaa0ec22ac80654ffaea",
+    "schemas": "24ce2572310bc417339966449ddf70dfa11051800465828ab53fbb4733d055c7",
+    "evidence": "929f8780dd98e346b0ac9f3341ce646851e1fcf54873c5f0b13b0a8a022b6d00",
+    "parity": "33ac3aeba4e9531622c6001cd601ca9fb3cda8a60e38527ddf5f5481070f0361",
+    "sources": "c8f6a7167860c7d53b42b52af791d872191e7c4c4d4dcb8613d2c0e45536562b"
+  },
+  "evidence": {
+    "state": "observed",
+    "reason": "Machine-readable live-capture records are present.",
+    "references": [
+      "src/generated/operationLiveCaptureLedger.json",
+      "tools/capture-recipes/intune-deep.json",
+      "tools/capture-recipes/intune-portal-deep.json",
+      "tools/capture-recipes/intune-seeded-replay.json",
+      "tools/portal-discovery-metadata.mjs"
+    ],
+    "remainingCount": 0
+  },
+  "exceptions": {
+    "totalCount": 0,
+    "digest": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+    "top": [],
+    "remainingCount": 0,
+    "detailsSelector": "npm run spec-refresh -- --spec intune-portal --details operations|schemas|evidence"
+  }
+}

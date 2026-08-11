@@ -195,6 +195,30 @@ export async function loadBundledSpecification(specPath) {
   return bundleSpecification(fileSystem);
 }
 
+export async function loadSpecificationInventory(specPath) {
+  const fileSystem = await load(specPath, {
+    plugins: [readFiles()],
+  });
+  const bundledSpecification = bundleSpecification(fileSystem);
+  const schemaKeys = new Set();
+  const moduleFiles = [];
+
+  for (const entry of fileSystem.filesystem) {
+    const filename = entry.filename || ".";
+    const schemas = entry.specification?.components?.schemas ?? {};
+    moduleFiles.push(filename);
+    for (const schemaName of Object.keys(schemas)) {
+      schemaKeys.add(`${filename}#${schemaName}`);
+    }
+  }
+
+  return {
+    bundledSpecification,
+    moduleFiles: [...new Set(moduleFiles)].sort(),
+    schemaKeys: [...schemaKeys].sort(),
+  };
+}
+
 function countMatches(text, pattern) {
   return text.match(pattern)?.length ?? 0;
 }

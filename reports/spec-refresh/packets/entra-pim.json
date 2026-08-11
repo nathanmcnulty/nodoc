@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "id": "entra-pim",
+  "phases": {
+    "sourceInventory": {
+      "status": "complete",
+      "reason": "Canonical source modules parsed and inventoried."
+    },
+    "derivativeParity": {
+      "status": "complete",
+      "reason": "A checked-in derivative exists with no unresolved or orphaned routes."
+    },
+    "discoveryEvidence": {
+      "status": "incomplete",
+      "reason": "Static recipes or metadata exist, but no machine-readable live-capture record was observed."
+    },
+    "refreshReadiness": {
+      "status": "incomplete",
+      "reason": "Discovery evidence is absent or static-only; metadata validation alone is insufficient."
+    }
+  },
+  "counts": {
+    "operationCount": 16,
+    "operationDigest": "ba890d1570bf9d8d0293e632fccd7c1f61af8861fcce0c4e7094a76f9ff698b9",
+    "schemaCount": 6,
+    "schemaDigest": "b112547bfb6ad292daf2c88ac5c505959159a63b0897e56adb1a1a9b1b7c371f",
+    "moduleCount": 1,
+    "evidenceObserved": 0,
+    "evidenceReferences": 2,
+    "parityExceptions": 0,
+    "openMetadataGaps": 0
+  },
+  "digests": {
+    "operations": "ba890d1570bf9d8d0293e632fccd7c1f61af8861fcce0c4e7094a76f9ff698b9",
+    "schemas": "b112547bfb6ad292daf2c88ac5c505959159a63b0897e56adb1a1a9b1b7c371f",
+    "evidence": "6c5ee14e19cf841962a8fbbc413f5d24af2f6123a8914110bd8ace02739fad6b",
+    "parity": "97cadc47b499de9ccfdae4fc7a111fb2afa4c96845cffa4c7f42f258177fb070",
+    "sources": "3d3d3015134bee6a4a1f0581b235f6dbe3b09896560f08219bc58966dcd4021d"
+  },
+  "evidence": {
+    "state": "notObserved",
+    "reason": "Static recipes or metadata exist, but no machine-readable live-capture record was observed.",
+    "references": [
+      "tools/capture-recipes/entra-pim-deep.json",
+      "tools/capture-recipes/entra-pim-seeded-replay.json"
+    ],
+    "remainingCount": 0
+  },
+  "exceptions": {
+    "totalCount": 0,
+    "digest": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+    "top": [],
+    "remainingCount": 0,
+    "detailsSelector": "npm run spec-refresh -- --spec entra-pim --details operations|schemas|evidence"
+  }
+}

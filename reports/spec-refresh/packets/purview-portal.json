@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "id": "purview-portal",
+  "phases": {
+    "sourceInventory": {
+      "status": "complete",
+      "reason": "Canonical source modules parsed and inventoried."
+    },
+    "derivativeParity": {
+      "status": "complete",
+      "reason": "A checked-in derivative exists with no unresolved or orphaned routes."
+    },
+    "discoveryEvidence": {
+      "status": "incomplete",
+      "reason": "Static recipes or metadata exist, but no machine-readable live-capture record was observed."
+    },
+    "refreshReadiness": {
+      "status": "incomplete",
+      "reason": "Discovery evidence is absent or static-only; metadata validation alone is insufficient."
+    }
+  },
+  "counts": {
+    "operationCount": 8,
+    "operationDigest": "337dd6c7ff0eee8ab70139d31c9ee1c42c1c41503a82f1ab17ccbb0ab9ed404e",
+    "schemaCount": 11,
+    "schemaDigest": "f3293315f651bb28981e32b76de7e9fcb7a8cec16cde08a5c5b5f83a808dc355",
+    "moduleCount": 1,
+    "evidenceObserved": 0,
+    "evidenceReferences": 3,
+    "parityExceptions": 0,
+    "openMetadataGaps": 1
+  },
+  "digests": {
+    "operations": "337dd6c7ff0eee8ab70139d31c9ee1c42c1c41503a82f1ab17ccbb0ab9ed404e",
+    "schemas": "f3293315f651bb28981e32b76de7e9fcb7a8cec16cde08a5c5b5f83a808dc355",
+    "evidence": "de05ab1e2889b8fffd07407d5b52f8a83e77f736fb84017a6b27057e746a11c0",
+    "parity": "063199206547b0b14685d62491143bf0d1d44af032c371920f232d4de2357532",
+    "sources": "d354adbb23f40390eededa4100eebf0a8e560af9f43b40f3c8535f1563effab7"
+  },
+  "evidence": {
+    "state": "notObserved",
+    "reason": "Static recipes or metadata exist, but no machine-readable live-capture record was observed.",
+    "references": [
+      "tools/capture-recipes/purview-portal-deep.json",
+      "tools/capture-recipes/purview-portal-seeded-replay.json",
+      "tools/portal-discovery-metadata.mjs"
+    ],
+    "remainingCount": 0
+  },
+  "exceptions": {
+    "totalCount": 1,
+    "digest": "38a1ba4db4f45b53b0ec86115e3ec704e9dfb084ce1a774a191b0eda7befb8e5",
+    "top": [
+      {
+        "kind": "openGap",
+        "reason": "A fresh runtime capture is still outstanding; checked-in historical evidence exists, but no distinct Purview Portal operation live-capture record or fresh runtime artifact is available."
+      }
+    ],
+    "remainingCount": 0,
+    "detailsSelector": "npm run spec-refresh -- --spec purview-portal --details operations|schemas|evidence"
+  }
+}

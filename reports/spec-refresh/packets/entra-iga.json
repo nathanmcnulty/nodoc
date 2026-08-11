@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "id": "entra-iga",
+  "phases": {
+    "sourceInventory": {
+      "status": "complete",
+      "reason": "Canonical source modules parsed and inventoried."
+    },
+    "derivativeParity": {
+      "status": "complete",
+      "reason": "A checked-in derivative exists with no unresolved or orphaned routes."
+    },
+    "discoveryEvidence": {
+      "status": "incomplete",
+      "reason": "Static recipes or metadata exist, but no machine-readable live-capture record was observed."
+    },
+    "refreshReadiness": {
+      "status": "incomplete",
+      "reason": "Discovery evidence is absent or static-only; metadata validation alone is insufficient."
+    }
+  },
+  "counts": {
+    "operationCount": 11,
+    "operationDigest": "4cdf8c079b91af3db408bbe019ee7be969360577ef9ad8d7f9ef88098d6045ed",
+    "schemaCount": 0,
+    "schemaDigest": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+    "moduleCount": 1,
+    "evidenceObserved": 0,
+    "evidenceReferences": 1,
+    "parityExceptions": 0,
+    "openMetadataGaps": 1
+  },
+  "digests": {
+    "operations": "4cdf8c079b91af3db408bbe019ee7be969360577ef9ad8d7f9ef88098d6045ed",
+    "schemas": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+    "evidence": "2750b62f0e8dfea6c0ac6bc1a304dda27f648caa4e426bb4e3ee5b0760d6bdad",
+    "parity": "3d705f2ba2be6b95462cb5cd0a0dd932007134a5a9b98930ed84910976f3366d",
+    "sources": "34ca5a66224a356b45df27d4c5a291e1452e43767080d3160a35854eccba1edb"
+  },
+  "evidence": {
+    "state": "notObserved",
+    "reason": "Static recipes or metadata exist, but no machine-readable live-capture record was observed.",
+    "references": [
+      "tools/portal-discovery-metadata.mjs"
+    ],
+    "remainingCount": 0
+  },
+  "exceptions": {
+    "totalCount": 1,
+    "digest": "5c9a8000cd6972d831d42ba2bae68ca1dc425bad49171ccb1db1056af0cefd7b",
+    "top": [
+      {
+        "kind": "openGap",
+        "reason": "A fresh non-Graph capture pass is still needed for the legacy Entra IGA entitlement-management surfaces."
+      }
+    ],
+    "remainingCount": 0,
+    "detailsSelector": "npm run spec-refresh -- --spec entra-iga --details operations|schemas|evidence"
+  }
+}

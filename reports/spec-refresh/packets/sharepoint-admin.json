@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "id": "sharepoint-admin",
+  "phases": {
+    "sourceInventory": {
+      "status": "complete",
+      "reason": "Canonical source modules parsed and inventoried."
+    },
+    "derivativeParity": {
+      "status": "complete",
+      "reason": "A checked-in derivative exists with no unresolved or orphaned routes."
+    },
+    "discoveryEvidence": {
+      "status": "incomplete",
+      "reason": "Static recipes or metadata exist, but no machine-readable live-capture record was observed."
+    },
+    "refreshReadiness": {
+      "status": "incomplete",
+      "reason": "Discovery evidence is absent or static-only; metadata validation alone is insufficient."
+    }
+  },
+  "counts": {
+    "operationCount": 42,
+    "operationDigest": "e08ded6f97b86bfd8c72c99d248027c8d8e9847f4ae3eb43fe0d1fc79f77804d",
+    "schemaCount": 18,
+    "schemaDigest": "cd2049ada973dc8a7e16a0c0e98833b1a61797739617d35a853a98e3073703c4",
+    "moduleCount": 1,
+    "evidenceObserved": 0,
+    "evidenceReferences": 3,
+    "parityExceptions": 0,
+    "openMetadataGaps": 1
+  },
+  "digests": {
+    "operations": "e08ded6f97b86bfd8c72c99d248027c8d8e9847f4ae3eb43fe0d1fc79f77804d",
+    "schemas": "cd2049ada973dc8a7e16a0c0e98833b1a61797739617d35a853a98e3073703c4",
+    "evidence": "175122178bc879e7ca79f65a60af0654f38329612b7d3675c71cc43b35469cad",
+    "parity": "505ea219cdf2a8e0d33b1b84a5fdcd2c5e7c3c4e38b73433caca320ba83d69b4",
+    "sources": "39bcdba129ed186a8d6aa83b76e6565c5e6aa8eb57a49388fc4b08ab31c178d5"
+  },
+  "evidence": {
+    "state": "notObserved",
+    "reason": "Static recipes or metadata exist, but no machine-readable live-capture record was observed.",
+    "references": [
+      "tools/capture-recipes/sharepoint-admin-deep.json",
+      "tools/capture-recipes/sharepoint-admin-seeded-replay.json",
+      "tools/portal-discovery-metadata.mjs"
+    ],
+    "remainingCount": 0
+  },
+  "exceptions": {
+    "totalCount": 1,
+    "digest": "8a97d3fce02a2153556738cfeff460d181b06adac7ff7b89afa83833aaae92ab",
+    "top": [
+      {
+        "kind": "openGap",
+        "reason": "The current tenant nav also exposes SharePoint Embedded, Reports subpages such as Data access governance and OneDrive accounts, and Advanced > Script sources; those surfaces still need route-specific capture before promoting any additional same-origin /_api routes."
+      }
+    ],
+    "remainingCount": 0,
+    "detailsSelector": "npm run spec-refresh -- --spec sharepoint-admin --details operations|schemas|evidence"
+  }
+}

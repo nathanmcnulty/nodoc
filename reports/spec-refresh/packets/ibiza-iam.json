@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "id": "ibiza-iam",
+  "phases": {
+    "sourceInventory": {
+      "status": "complete",
+      "reason": "Canonical source modules parsed and inventoried."
+    },
+    "derivativeParity": {
+      "status": "complete",
+      "reason": "A checked-in derivative exists with no unresolved or orphaned routes."
+    },
+    "discoveryEvidence": {
+      "status": "incomplete",
+      "reason": "Static recipes or metadata exist, but no machine-readable live-capture record was observed."
+    },
+    "refreshReadiness": {
+      "status": "incomplete",
+      "reason": "Discovery evidence is absent or static-only; metadata validation alone is insufficient."
+    }
+  },
+  "counts": {
+    "operationCount": 286,
+    "operationDigest": "4a6964545f9fd2c6e31a9c59d55dd489cd69b6473fae4207540e49f98def02f6",
+    "schemaCount": 73,
+    "schemaDigest": "5b2a8d97e14b5302703dcbd47f5f100f99b82f72fbfc5ee7d1bb997cd2ddcdcb",
+    "moduleCount": 34,
+    "evidenceObserved": 0,
+    "evidenceReferences": 2,
+    "parityExceptions": 0,
+    "openMetadataGaps": 0
+  },
+  "digests": {
+    "operations": "4a6964545f9fd2c6e31a9c59d55dd489cd69b6473fae4207540e49f98def02f6",
+    "schemas": "5b2a8d97e14b5302703dcbd47f5f100f99b82f72fbfc5ee7d1bb997cd2ddcdcb",
+    "evidence": "6230a58be8e4c789297840dc0b2a47dab4b229a4981fd46ed6eaed7abd5c12bb",
+    "parity": "44c64167c1915907f763fb96c0b7f3941bc890404e3afc8390282a97730f394a",
+    "sources": "fcf77e7cb938f332fb1b72d09c8478a015b3ad498f3f9b997982280cb315255f"
+  },
+  "evidence": {
+    "state": "notObserved",
+    "reason": "Static recipes or metadata exist, but no machine-readable live-capture record was observed.",
+    "references": [
+      "tools/capture-recipes/entra-iam-deep.json",
+      "tools/capture-recipes/entra-iam-seeded-replay.json"
+    ],
+    "remainingCount": 0
+  },
+  "exceptions": {
+    "totalCount": 0,
+    "digest": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+    "top": [],
+    "remainingCount": 0,
+    "detailsSelector": "npm run spec-refresh -- --spec ibiza-iam --details operations|schemas|evidence"
+  }
+}

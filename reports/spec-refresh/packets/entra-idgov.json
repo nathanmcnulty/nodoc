@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "id": "entra-idgov",
+  "phases": {
+    "sourceInventory": {
+      "status": "complete",
+      "reason": "Canonical source modules parsed and inventoried."
+    },
+    "derivativeParity": {
+      "status": "complete",
+      "reason": "A checked-in derivative exists with no unresolved or orphaned routes."
+    },
+    "discoveryEvidence": {
+      "status": "incomplete",
+      "reason": "Static recipes or metadata exist, but no machine-readable live-capture record was observed."
+    },
+    "refreshReadiness": {
+      "status": "incomplete",
+      "reason": "Discovery evidence is absent or static-only; metadata validation alone is insufficient."
+    }
+  },
+  "counts": {
+    "operationCount": 17,
+    "operationDigest": "14d9de42ee9be8c5731011288da6a71c436b09265f74b86b0b7fcd5c796b9063",
+    "schemaCount": 6,
+    "schemaDigest": "e0d02e57d15c1eec656ace2eebce009701dec79a50c773f4ca34348dcdab8eb9",
+    "moduleCount": 1,
+    "evidenceObserved": 0,
+    "evidenceReferences": 3,
+    "parityExceptions": 0,
+    "openMetadataGaps": 0
+  },
+  "digests": {
+    "operations": "14d9de42ee9be8c5731011288da6a71c436b09265f74b86b0b7fcd5c796b9063",
+    "schemas": "e0d02e57d15c1eec656ace2eebce009701dec79a50c773f4ca34348dcdab8eb9",
+    "evidence": "9d272a4139a7e5cf1714a29e13edf6cb96b494638051fe8f0f7a126aadb3d368",
+    "parity": "8b62bbac3a016c33097979fe9b45a562dbc132b4bc88d34a9e3289876446ccbd",
+    "sources": "61e82ddd82499c6129b9b81f6eff82df21a939b71c9d2d40ce8b48df31ebcf03"
+  },
+  "evidence": {
+    "state": "notObserved",
+    "reason": "Static recipes or metadata exist, but no machine-readable live-capture record was observed.",
+    "references": [
+      "tools/capture-recipes/entra-idgov-deep.json",
+      "tools/capture-recipes/entra-idgov-seeded-replay.json",
+      "tools/portal-discovery-metadata.mjs"
+    ],
+    "remainingCount": 0
+  },
+  "exceptions": {
+    "totalCount": 0,
+    "digest": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+    "top": [],
+    "remainingCount": 0,
+    "detailsSelector": "npm run spec-refresh -- --spec entra-idgov --details operations|schemas|evidence"
+  }
+}

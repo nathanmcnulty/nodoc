@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "id": "defender-xdr",
+  "phases": {
+    "sourceInventory": {
+      "status": "complete",
+      "reason": "Canonical source modules parsed and inventoried."
+    },
+    "derivativeParity": {
+      "status": "complete",
+      "reason": "A checked-in derivative exists with no unresolved or orphaned routes."
+    },
+    "discoveryEvidence": {
+      "status": "incomplete",
+      "reason": "Static recipes or metadata exist, but no machine-readable live-capture record was observed."
+    },
+    "refreshReadiness": {
+      "status": "incomplete",
+      "reason": "Discovery evidence is absent or static-only; metadata validation alone is insufficient."
+    }
+  },
+  "counts": {
+    "operationCount": 601,
+    "operationDigest": "89fbb73b12880e783fab10c19e90892cc886ee261764bd800b9ea716c3933ba2",
+    "schemaCount": 148,
+    "schemaDigest": "58a1dcdcb93ae11cc6329f89ed59b55a06c68ef4f452dd90a131f8c8a9bb6d8f",
+    "moduleCount": 23,
+    "evidenceObserved": 0,
+    "evidenceReferences": 4,
+    "parityExceptions": 0,
+    "openMetadataGaps": 1
+  },
+  "digests": {
+    "operations": "89fbb73b12880e783fab10c19e90892cc886ee261764bd800b9ea716c3933ba2",
+    "schemas": "58a1dcdcb93ae11cc6329f89ed59b55a06c68ef4f452dd90a131f8c8a9bb6d8f",
+    "evidence": "6df4090873744e846679ab46636dd0450ebc4f93665d65eaf18789b316c4d515",
+    "parity": "5d07290cc47f1e3bbbb1787d994db312520ac366e394af4baa09afc01f291979",
+    "sources": "2d9402322cf9c485c71e4d8667337e5b0924065bc28e6eab3de5e9434d1aa224"
+  },
+  "evidence": {
+    "state": "notObserved",
+    "reason": "Static recipes or metadata exist, but no machine-readable live-capture record was observed.",
+    "references": [
+      "tools/capture-recipes/defender-deep.json",
+      "tools/capture-recipes/defender-entity-replay.json",
+      "tools/capture-recipes/defender-telemetry-verification.json",
+      "tools/portal-discovery-metadata.mjs"
+    ],
+    "remainingCount": 0
+  },
+  "exceptions": {
+    "totalCount": 1,
+    "digest": "9ae968f093057e9e40a009054d8b5f7d7869066031cd4abc7f283a7fb2a80440",
+    "top": [
+      {
+        "kind": "openGap",
+        "reason": "No Defender operationLiveCaptureLedger record exists; static evidence must not be promoted as live capture."
+      }
+    ],
+    "remainingCount": 0,
+    "detailsSelector": "npm run spec-refresh -- --spec defender-xdr --details operations|schemas|evidence"
+  }
+}

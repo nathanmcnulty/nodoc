@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "id": "entra-b2c",
+  "phases": {
+    "sourceInventory": {
+      "status": "complete",
+      "reason": "Canonical source modules parsed and inventoried."
+    },
+    "derivativeParity": {
+      "status": "complete",
+      "reason": "A checked-in derivative exists with no unresolved or orphaned routes."
+    },
+    "discoveryEvidence": {
+      "status": "incomplete",
+      "reason": "Static recipes or metadata exist, but no machine-readable live-capture record was observed."
+    },
+    "refreshReadiness": {
+      "status": "incomplete",
+      "reason": "Discovery evidence is absent or static-only; metadata validation alone is insufficient."
+    }
+  },
+  "counts": {
+    "operationCount": 6,
+    "operationDigest": "728134b22b4e3c4c32ce8a388928b4e0e4693a7d082860919be5f7b9169e719e",
+    "schemaCount": 4,
+    "schemaDigest": "4d610e8e966ed6d0c4cdc1c7db8cf786832326fa7552f94248e3d12f5bf877d0",
+    "moduleCount": 1,
+    "evidenceObserved": 0,
+    "evidenceReferences": 3,
+    "parityExceptions": 0,
+    "openMetadataGaps": 0
+  },
+  "digests": {
+    "operations": "728134b22b4e3c4c32ce8a388928b4e0e4693a7d082860919be5f7b9169e719e",
+    "schemas": "4d610e8e966ed6d0c4cdc1c7db8cf786832326fa7552f94248e3d12f5bf877d0",
+    "evidence": "4af05eac7948b7befddeb3be1df6128e09098790ed8ba001227e4c91702d06c4",
+    "parity": "de766b8fbc4c6fb4d9624a51845184a8aa86d4263ed3b2b4acfdd1d7114cee13",
+    "sources": "d9d40b685ce171d2e8855befad55a36987c99bb285b667702f086943fdafebbf"
+  },
+  "evidence": {
+    "state": "notObserved",
+    "reason": "Static recipes or metadata exist, but no machine-readable live-capture record was observed.",
+    "references": [
+      "tools/capture-recipes/entra-b2c-deep.json",
+      "tools/capture-recipes/entra-b2c-seeded-replay.json",
+      "tools/portal-discovery-metadata.mjs"
+    ],
+    "remainingCount": 0
+  },
+  "exceptions": {
+    "totalCount": 0,
+    "digest": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+    "top": [],
+    "remainingCount": 0,
+    "detailsSelector": "npm run spec-refresh -- --spec entra-b2c --details operations|schemas|evidence"
+  }
+}
