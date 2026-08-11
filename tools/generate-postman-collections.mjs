@@ -7,7 +7,6 @@ import { fileURLToPath } from "node:url";
 
 import {
   getPreferredServerUrls,
-  getScopeServerUrls,
   validatePostmanServerRouting,
 } from "./spec-quality-lib.mjs";
 
@@ -91,6 +90,7 @@ const collectionDefinitions = [
     name: "Security Copilot",
     spec: "specifications/nodoc-security-copilot/specification/openapi.yml",
     output: "postman/collections/security-copilot.collection.json",
+    hostRouting: true,
   },
   {
     name: "Entra IAM",
@@ -554,7 +554,12 @@ function getSpecExampleBody(operations, itemRequest, response) {
 }
 
 // Preserve stable Postman metadata from the checked-in collection and normalize line endings.
-function stabilizeCollection(openapiPath, collectionPath, previousCollection) {
+function stabilizeCollection(
+  openapiPath,
+  collectionPath,
+  previousCollection,
+  { hostRouting = false } = {},
+) {
   const openapi = JSON.parse(readFileSync(openapiPath, "utf8"));
   const collection = JSON.parse(readFileSync(collectionPath, "utf8"));
   const operations = buildOperationIndex(openapi);
@@ -584,10 +589,12 @@ function stabilizeCollection(openapiPath, collectionPath, previousCollection) {
       item.request = mergeRequestExamples(item.request, previousItem.request);
     }
 
-    item.request = applyOperationServer(
-      item.request,
-      getOperationForRequest(operations, item.request),
-    );
+    if (hostRouting) {
+      item.request = applyOperationServer(
+        item.request,
+        getOperationForRequest(operations, item.request),
+      );
+    }
 
     for (const response of item.response ?? []) {
       const previousResponse = previousIndex?.responses.get(
@@ -609,10 +616,12 @@ function stabilizeCollection(openapiPath, collectionPath, previousCollection) {
         );
       }
 
-      response.originalRequest = applyOperationServer(
-        response.originalRequest,
-        getOperationForRequest(operations, response.originalRequest),
-      );
+      if (hostRouting) {
+        response.originalRequest = applyOperationServer(
+          response.originalRequest,
+          getOperationForRequest(operations, response.originalRequest),
+        );
+      }
 
       const body = getSpecExampleBody(operations, item.request, response);
 
@@ -627,8 +636,7 @@ function stabilizeCollection(openapiPath, collectionPath, previousCollection) {
     }
   });
 
-  const scopeServerUrls = getScopeServerUrls(openapi);
-  if (scopeServerUrls.length > 1 && scopeServerUrls.every((url) => !/[{}]/u.test(url))) {
+  if (hostRouting) {
     validatePostmanServerRouting(operations, collection, openapi.info?.title ?? "OpenAPI/Postman collection");
   }
 
@@ -682,7 +690,12 @@ try {
       "postman_to_openapi.json",
     ]);
 
-    stabilizeCollection(bundledJsonPath, collectionPath, previousCollection);
+    stabilizeCollection(
+      bundledJsonPath,
+      collectionPath,
+      previousCollection,
+      { hostRouting: definition.hostRouting },
+    );
   }
 } finally {
   rmSync(tempDir, { recursive: true, force: true });
