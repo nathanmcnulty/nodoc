@@ -2120,6 +2120,133 @@
                                     }
                                 }
                             ]
+                        },
+                        {
+                            "name": "ServiceProfileAggregator",
+                            "description": "",
+                            "item": [
+                                {
+                                    "name": "{profileId}",
+                                    "description": "",
+                                    "item": [
+                                        {
+                                            "name": "16.0.20131.20152",
+                                            "description": "",
+                                            "item": [
+                                                {
+                                                    "name": "Issues",
+                                                    "description": "",
+                                                    "item": [
+                                                        {
+                                                            "id": "4ac5be23-77c7-4236-a815-a1e0e88a05a8",
+                                                            "name": "Get servicing profile issues",
+                                                            "request": {
+                                                                "name": "Get servicing profile issues",
+                                                                "description": {
+                                                                    "content": "Returns issues reported for a servicing profile for the observed Office version.",
+                                                                    "type": "text/plain"
+                                                                },
+                                                                "url": {
+                                                                    "path": [
+                                                                        "ServiceProfile",
+                                                                        "v1.0",
+                                                                        "ServiceProfileAggregator",
+                                                                        ":profileId",
+                                                                        "16.0.20131.20152",
+                                                                        "Issues"
+                                                                    ],
+                                                                    "host": [
+                                                                        "{{baseUrl}}"
+                                                                    ],
+                                                                    "query": [],
+                                                                    "variable": [
+                                                                        {
+                                                                            "type": "any",
+                                                                            "value": "f57fa03b-07bd-826f-3f3b-05aa613ba590",
+                                                                            "key": "profileId",
+                                                                            "disabled": false,
+                                                                            "description": {
+                                                                                "content": "(Required) Servicing profile identifier.",
+                                                                                "type": "text/plain"
+                                                                            }
+                                                                        }
+                                                                    ]
+                                                                },
+                                                                "header": [
+                                                                    {
+                                                                        "key": "Accept",
+                                                                        "value": "application/json"
+                                                                    }
+                                                                ],
+                                                                "method": "GET",
+                                                                "body": {},
+                                                                "auth": null
+                                                            },
+                                                            "response": [
+                                                                {
+                                                                    "id": "ae28097f-e354-4699-94ae-ed6f1fc52bca",
+                                                                    "name": "Servicing profile issues",
+                                                                    "originalRequest": {
+                                                                        "url": {
+                                                                            "path": [
+                                                                                "ServiceProfile",
+                                                                                "v1.0",
+                                                                                "ServiceProfileAggregator",
+                                                                                ":profileId",
+                                                                                "16.0.20131.20152",
+                                                                                "Issues"
+                                                                            ],
+                                                                            "host": [
+                                                                                "{{baseUrl}}"
+                                                                            ],
+                                                                            "query": [],
+                                                                            "variable": [
+                                                                                {
+                                                                                    "disabled": false,
+                                                                                    "description": {
+                                                                                        "content": "(Required) Servicing profile identifier.",
+                                                                                        "type": "text/plain"
+                                                                                    },
+                                                                                    "type": "any",
+                                                                                    "value": "f57fa03b-07bd-826f-3f3b-05aa613ba590",
+                                                                                    "key": "profileId"
+                                                                                }
+                                                                            ]
+                                                                        },
+                                                                        "header": [
+                                                                            {
+                                                                                "key": "Accept",
+                                                                                "value": "application/json"
+                                                                            }
+                                                                        ],
+                                                                        "method": "GET",
+                                                                        "body": {}
+                                                                    },
+                                                                    "status": "OK",
+                                                                    "code": 200,
+                                                                    "header": [
+                                                                        {
+                                                                            "key": "Content-Type",
+                                                                            "value": "application/json"
+                                                                        }
+                                                                    ],
+                                                                    "body": "{\n  \"serviceProfileId\": \"00000000-0000-0000-0000-000000000000\",\n  \"issues\": [],\n  \"skipToken\": \"\",\n  \"count\": 0\n}",
+                                                                    "cookie": [],
+                                                                    "_postman_previewlanguage": "json"
+                                                                }
+                                                            ],
+                                                            "event": [],
+                                                            "protocolProfileBehavior": {
+                                                                "disableBodyPruning": true
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
                         }
                     ]
                 }
