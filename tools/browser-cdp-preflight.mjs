@@ -320,6 +320,11 @@ export async function alignBrowserCdpTarget({
       },
     };
   } catch (error) {
+    if (["AbortError", "TimeoutError"].includes(error?.name)) {
+      failWith("navigation-readiness-timeout", "portal target readiness could not be established before timeout (state: preflight-timeout).", {
+        readinessState: "preflight-timeout",
+      });
+    }
     if (!(error instanceof BrowserCdpPreflightError) || error.code !== "target-count" || error.targetCount !== 0) {
       throw error;
     }

@@ -151,12 +151,18 @@ test("launches a new owner with an unverified preflight contract", async () => {
         if (!launched) throw new BrowserCdpOwnerError("cdp-unavailable", "not launched");
         return { browser: "Microsoft Edge/140.0", webSocketDebuggerUrl: "ws://127.0.0.1/devtools/browser/root" };
       },
+      findOwnerProcesses: async () => [{
+        pid: 6161,
+        executablePath: binaryPath,
+        commandLine: `"${binaryPath}" --remote-debugging-port=9222 --user-data-dir=${join(ownerRoot, "profiles", "m365-admin")} --nodoc-cdp-owner=${ownerToken}`,
+      }],
       randomUUID: () => ownerToken,
     });
     assert.equal(result.reused, false);
-    assert.equal(result.pid, 5151);
+    assert.equal(result.pid, 6161);
     assertOwnerReadyNextStep(result.nextStep);
     assert.equal(writtenManifest.ownerToken, ownerToken);
+    assert.equal(writtenManifest.pid, 6161);
   } finally {
     await rm(ownerRoot, { force: true, recursive: true });
   }
@@ -166,11 +172,44 @@ test("reports and refuses a stale manifest until explicit stop cleanup", async (
   const deps = {
     readManifest: async () => manifest(),
     inspectProcess: async () => null,
+    findOwnerProcesses: async () => [],
     probeVersion: unavailable,
+    isPortAvailable: async () => true,
   };
   const status = await getBrowserOwnerStatus(options(), deps);
   assert.equal(status.state, "stale-manifest");
   await assert.rejects(startBrowserOwner(options(), deps), (error) => error.code === "stale-manifest");
+});
+
+test("launch fails closed when the long-lived exact owner is not unique", async () => {
+  const ownerRoot = await mkdtemp(join(tmpdir(), "nodoc-cdp-owner-ambiguous-"));
+  const ownerProfile = join(ownerRoot, "profiles", "m365-admin");
+  const candidate = (pid) => ({
+    pid,
+    executablePath: binaryPath,
+    commandLine: `"${binaryPath}" --remote-debugging-port=9222 --user-data-dir=${ownerProfile} --nodoc-cdp-owner=${ownerToken}`,
+  });
+  try {
+    for (const processes of [[], [candidate(5152), candidate(5153)]]) {
+      let launched = false;
+      await assert.rejects(startBrowserOwner(options({ ownerRoot }), {
+        readManifest: async () => null,
+        isPortAvailable: async () => true,
+        resolveBinary: async () => ({ product: "Edge", path: binaryPath }),
+        spawnBrowser: async () => { launched = true; return { pid: 5151 }; },
+        writeManifest: async () => {},
+        probeVersion: async () => {
+          if (!launched) throw new BrowserCdpOwnerError("cdp-unavailable", "not launched");
+          return { browser: "Microsoft Edge/140.0", webSocketDebuggerUrl: "ws://127.0.0.1/devtools/browser/root" };
+        },
+        findOwnerProcesses: async () => processes,
+        randomUUID: () => ownerToken,
+        delay: async () => {},
+      }), (error) => error.code === "owner-resolution-failed");
+    }
+  } finally {
+    await rm(ownerRoot, { force: true, recursive: true });
+  }
 });
 
 test("fails closed without launch or cleanup when process inspection times out", async () => {
@@ -266,10 +305,43 @@ test("stop removes a stale manifest without terminating any PID", async () => {
   const result = await stopBrowserOwner(options(), {
     readManifest: async () => manifest(),
     inspectProcess: async () => null,
+    findOwnerProcesses: async () => [],
+    probeVersion: unavailable,
+    isPortAvailable: async () => true,
     terminateProcess: async () => { terminated = true; },
     removeManifest: async () => { removed = true; },
   });
   assert.equal(result.staleManifestRemoved, true);
   assert.equal(terminated, false);
   assert.equal(removed, true);
+});
+
+test("stop retains the manifest when the recorded PID handed off to an exact owner", async () => {
+  let terminated = false;
+  let removed = false;
+  await assert.rejects(stopBrowserOwner(options(), {
+    readManifest: async () => manifest(),
+    inspectProcess: async () => null,
+    findOwnerProcesses: async () => [exactProcess({ pid: 6161 })],
+    terminateProcess: async () => { terminated = true; },
+    removeManifest: async () => { removed = true; },
+  }), (error) => error.code === "owner-identity-changed");
+  assert.equal(terminated, false);
+  assert.equal(removed, false);
+});
+
+test("stop retains the manifest when a live listener has no exact owner", async () => {
+  let terminated = false;
+  let removed = false;
+  await assert.rejects(stopBrowserOwner(options(), {
+    readManifest: async () => manifest(),
+    inspectProcess: async () => null,
+    findOwnerProcesses: async () => [],
+    probeVersion: async () => ({ browser: "Microsoft Edge/140.0", webSocketDebuggerUrl: "ws://127.0.0.1/devtools/browser/root" }),
+    isPortAvailable: async () => false,
+    terminateProcess: async () => { terminated = true; },
+    removeManifest: async () => { removed = true; },
+  }), (error) => error.code === "orphaned-owner");
+  assert.equal(terminated, false);
+  assert.equal(removed, false);
 });
