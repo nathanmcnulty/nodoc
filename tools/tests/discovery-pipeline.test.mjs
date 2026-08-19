@@ -1105,6 +1105,48 @@ test("portal driver prefers the bounded Defender deep recipe", async () => {
   assert.equal(result.brief.recipe, "tools/capture-recipes/defender-deep.json");
 });
 
+test("portal driver blocks a missing recipe without allocating browser or ledger work", async () => {
+  await assert.rejects(
+    execFileAsync(process.execPath, [
+      path.join(repoRoot, "tools", "run-portal-discovery.mjs"),
+      "--portal",
+      "entra-iga",
+      "--phase",
+      "plan",
+      "--json",
+    ], { cwd: repoRoot }),
+    (error) => {
+      const result = JSON.parse(error.stderr);
+      return result.status === "blocked"
+        && result.phase === "plan"
+        && result.brief.recipe === null
+        && result.blocker.code === "recipe-missing"
+        && !error.stderr.includes("ERR_INVALID_ARG_TYPE");
+    },
+  );
+});
+
+test("M365 Apps Inventory plan accounts for its mandatory orchestration action", async () => {
+  const { stdout } = await execFileAsync(process.execPath, [
+    path.join(repoRoot, "tools", "run-portal-discovery.mjs"),
+    "--portal",
+    "m365-apps-inventory",
+    "--phase",
+    "plan",
+    "--json",
+  ], { cwd: repoRoot });
+  const result = JSON.parse(stdout);
+
+  assert.equal(result.status, "planned");
+  assert.deepEqual(result.actionBudget.categories, {
+    recipeActions: 32,
+    mandatoryOrchestrationActions: 1,
+    expandedReplayActions: 0,
+  });
+  assert.equal(result.actionBudget.countedActions, 33);
+  assert.equal(result.actionBudget.maxActions, 33);
+});
+
 test("portal driver rejects unsupported profiles", async () => {
   await assert.rejects(
     execFileAsync(process.execPath, [

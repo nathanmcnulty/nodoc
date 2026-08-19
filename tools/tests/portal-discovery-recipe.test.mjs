@@ -124,12 +124,12 @@ test("explicit page-target criteria fail closed when malformed or empty", () => 
 });
 
 test("action budget counts the mandatory orchestration seed", () => {
-  const recipe = { actions: Array.from({ length: 31 }, () => "capture=test"), maxActions: 32 };
-  assert.equal(planRecipeActionBudget(recipe).countedActions, 32);
+  const recipe = { actions: Array.from({ length: 32 }, () => "capture=test"), maxActions: 33 };
+  assert.equal(planRecipeActionBudget(recipe).countedActions, 33);
   assert.throws(
     () => planRecipeActionBudget({ ...recipe, actions: [...recipe.actions, "capture=overflow"] }),
     (error) => error.code === "action-budget-exceeded"
-      && error.blocker.categories.recipeActions === 32
+      && error.blocker.categories.recipeActions === 33
       && error.blocker.categories.mandatoryOrchestrationActions === 1,
   );
 });

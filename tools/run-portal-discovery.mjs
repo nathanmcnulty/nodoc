@@ -792,9 +792,49 @@ async function main() {
   const specInventory = await buildSpecInventory();
   const specRecord = resolvePortal(specInventory, args.portal);
   const recipePath = await selectRecipe(specRecord, args.recipe);
-  const selectedRecipe = JSON.parse(await readFile(recipePath, "utf8"));
-  const actionBudget = buildActionBudget(selectedRecipe);
   const brief = buildBrief(specRecord, recipePath);
+  if (!recipePath) {
+    const runState = {
+      artifacts: args.artifacts,
+      brief,
+      phase: args.phase,
+      startedAt: new Date().toISOString(),
+      status: "blocked",
+      blocker: {
+        code: "recipe-missing",
+        detail: `No checked-in deterministic recipe exists for ${specRecord.title}.`,
+        remediation: "Add and validate a bounded checked-in recipe before allocating a browser or ledger attempt.",
+      },
+    };
+    await writeRunState(args.artifacts, runState);
+    process.exitCode = 2;
+    console.error(JSON.stringify(runState, null, 2));
+    return;
+  }
+
+  let selectedRecipe;
+  let actionBudget;
+  try {
+    selectedRecipe = JSON.parse(await readFile(recipePath, "utf8"));
+    actionBudget = buildActionBudget(selectedRecipe);
+  } catch (error) {
+    const runState = {
+      artifacts: args.artifacts,
+      brief,
+      phase: args.phase,
+      startedAt: new Date().toISOString(),
+      status: "blocked",
+      blocker: {
+        code: error?.code === "action-budget-exceeded" ? error.code : "recipe-invalid",
+        detail: error instanceof Error ? error.message : String(error),
+        ...(error?.blocker ?? {}),
+      },
+    };
+    await writeRunState(args.artifacts, runState);
+    process.exitCode = 2;
+    console.error(JSON.stringify(runState, null, 2));
+    return;
+  }
 
   if (args.phase === "plan") {
     console.log(JSON.stringify({ actionBudget, brief, status: "planned" }, null, 2));
