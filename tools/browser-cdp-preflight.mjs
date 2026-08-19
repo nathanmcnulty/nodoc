@@ -272,12 +272,17 @@ async function waitForAlignedTarget({ endpoint, expectedProduct, featureCriteria
   while (Date.now() < deadline) {
     const remainingMs = Math.max(1, deadline - Date.now());
     const base = loopbackEndpoint(endpoint);
-    const targets = await getJson(new URL("/json/list", base), remainingMs);
-    const exactTarget = targets.find((target) => target?.type === "page" && target.id === targetId);
-    if (exactTarget && targetMatches(exactTarget, { ...featureCriteria, targetId })) {
-      return await runBrowserCdpPreflight({ endpoint, expectedProduct, ...featureCriteria, targetId, stabilityMs, pollMs, timeoutMs: remainingMs });
+    try {
+      const targets = await getJson(new URL("/json/list", base), remainingMs);
+      const exactTarget = targets.find((target) => target?.type === "page" && target.id === targetId);
+      if (exactTarget && targetMatches(exactTarget, { ...featureCriteria, targetId })) {
+        return await runBrowserCdpPreflight({ endpoint, expectedProduct, ...featureCriteria, targetId, stabilityMs, pollMs, timeoutMs: remainingMs });
+      }
+      readinessState = exactTarget ? "target-transitioning" : "target-missing";
+    } catch (error) {
+      if (["AbortError", "TimeoutError"].includes(error?.name)) break;
+      throw error;
     }
-    readinessState = exactTarget ? "target-transitioning" : "target-missing";
     await delay(Math.min(pollMs, Math.max(1, deadline - Date.now())));
   }
   failWith("navigation-readiness-timeout", `target ${targetId} did not reach feature URL readiness before timeout (state: ${readinessState}).`, {

@@ -173,6 +173,32 @@ test("reports and refuses a stale manifest until explicit stop cleanup", async (
   await assert.rejects(startBrowserOwner(options(), deps), (error) => error.code === "stale-manifest");
 });
 
+test("fails closed without launch or cleanup when process inspection times out", async () => {
+  const timeout = Object.assign(new Error("spawnSync powershell.exe ETIMEDOUT"), { code: "ETIMEDOUT" });
+  let launched = false;
+  let terminated = false;
+  let removed = false;
+  const deps = {
+    readManifest: async () => manifest(),
+    inspectProcess: async (_pid, timeoutMs) => {
+      assert.equal(timeoutMs, 15000);
+      throw timeout;
+    },
+    spawnBrowser: async () => { launched = true; return { pid: 9999 }; },
+    terminateProcess: async () => { terminated = true; },
+    removeManifest: async () => { removed = true; },
+  };
+
+  const status = await getBrowserOwnerStatus(options(), deps);
+  assert.equal(status.state, "owner-status-unknown");
+  assert.match(status.reason, /ETIMEDOUT/);
+  await assert.rejects(startBrowserOwner(options(), deps), (error) => error.code === "owner-status-unknown");
+  await assert.rejects(stopBrowserOwner(options(), deps), (error) => error.code === "owner-status-unknown");
+  assert.equal(launched, false);
+  assert.equal(terminated, false);
+  assert.equal(removed, false);
+});
+
 test("fails closed on manifest owner product mismatch", async () => {
   await assert.rejects(startBrowserOwner(options(), {
     readManifest: async () => manifest(),
