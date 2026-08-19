@@ -185,7 +185,7 @@ function bodyShapeFingerprint(value) {
     const parsed = typeof value === "string" ? JSON.parse(value) : value;
     return sha256(JSON.stringify(shapeOf(parsed)));
   } catch {
-    return sha256(`non-json:${typeof value}:${String(value)}`);
+    return sha256(`non-json:${typeof value}`);
   }
 }
 
@@ -1760,12 +1760,14 @@ function toApiRecord(request, portalName) {
       attribution: request.attribution,
       confidence: "confirmed-traffic",
       method: request.method,
+      mimeType: request.mimeType ?? null,
       path: parsed.pathname,
       portalName,
       querySamples: querySample ? [querySample] : [],
       requestBodySamples: request.requestBody ? [request.requestBody] : [],
       responseBodySample: request.responseBody ?? null,
       seenOnPages: [request.pageLabel],
+      status: request.status ?? null,
       url: request.url,
     };
   } catch {
@@ -1775,12 +1777,14 @@ function toApiRecord(request, portalName) {
       attribution: request.attribution,
       confidence: "confirmed-traffic",
       method: request.method,
+      mimeType: request.mimeType ?? null,
       path: request.url,
       portalName,
       querySamples: [],
       requestBodySamples: request.requestBody ? [request.requestBody] : [],
       responseBodySample: request.responseBody ?? null,
       seenOnPages: [request.pageLabel],
+      status: request.status ?? null,
       url: request.url,
     };
   }

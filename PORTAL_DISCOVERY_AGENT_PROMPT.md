@@ -142,13 +142,33 @@ orchestrator must publish the categorized plan and reject an over-budget plan
 before preflight or ledger-attempt consumption; report the structured blocker
 and remediation instead of truncating or silently omitting actions.
 
+An expensive capture also requires a checked-in `noveltyFrontier`. Each target
+must name the unvisited UI state, expected host/route family, expected request
+or response-shape/metadata signal, evidence level, safe deterministic recipe
+actions, and an acceptance key. Run plans with `--require-novelty`; matched
+known traffic is baseline context, not discovery yield. Every planned frontier
+target must be attempted or receive a structured blocker. The terminal
+`novelty-assessment.json` must classify the run as `productive`,
+`frontier-incomplete`, or `no-novelty`. A completed `no-novelty` run is not a
+successful discovery and must not be repeated unchanged. It can support a
+saturation conclusion only after canonical health passes and no critical
+frontier item remains.
+
+The driver derives the primary baseline from the checked-in OpenAPI operation,
+host, parameter, response-status, media-type, and schema metadata. The recipe's
+`baselineSignals` is an explicit overlay for previously accepted runtime shape
+and metadata keys that the OpenAPI cannot encode. Only action-attributed deltas
+from both sources or candidates classified as undocumented count. After review,
+add every accepted runtime key to the overlay before another run; otherwise a
+repeat observation could be misreported as new.
+
 Run the deterministic interface:
 
-  npm run discover:portal -- --portal <portal-spec-id> --profile bounded --phase plan --json
+  npm run discover:portal -- --portal <portal-spec-id> --profile bounded --phase plan --require-novelty --json
 
 Then create a unique artifact directory outside the repository and run:
 
-  npm run discover:portal -- --portal <portal-spec-id> --profile bounded --phase all --artifacts <fresh-artifact-directory>
+  npm run discover:portal -- --portal <portal-spec-id> --profile bounded --phase all --require-novelty --artifacts <fresh-artifact-directory>
 
 Read the primary output files named by the runbook, including
 `candidate-handoff.json`. The `all` phase already performs the normalized

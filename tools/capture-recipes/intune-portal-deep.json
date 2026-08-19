@@ -5,6 +5,36 @@
     "matchHosts": ["intune.microsoft.com"],
     "matchPathPrefixes": ["/"]
   },
+  "noveltyFrontier": {
+    "baseline": "checked-in-spec-and-live-capture-ledgers",
+    "baselineSignals": { "queryMetadata": [], "requestShapes": [], "responseShapes": [], "routes": [] },
+    "targets": [
+      {
+        "id": "tenant-route-context-bootstrap",
+        "state": "Tenant administration and governance states",
+        "evidenceLevel": "confirmed",
+        "expectedHostFamilies": ["intune.microsoft.com"],
+        "expectedRoutePrefixes": ["/api/Experimentation", "/api/Portal", "/api/Settings"],
+        "expectedInformationClasses": ["request-shape", "response-shape", "response-metadata"],
+        "actionIndexes": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+        "safeAction": "Visit read-only tenant governance states without invoking settings updates or approvals.",
+        "acceptanceKey": "tenant-context-bootstrap-variant",
+        "rationale": "The five-operation spec and three-entry live ledger do not cover route-context bootstrap variations."
+      },
+      {
+        "id": "workload-route-context-bootstrap",
+        "state": "Devices, Apps, and Endpoint security states",
+        "evidenceLevel": "hypothesis",
+        "expectedHostFamilies": ["intune.microsoft.com"],
+        "expectedRoutePrefixes": ["/api/Experimentation", "/api/Portal", "/api/Settings"],
+        "expectedInformationClasses": ["request-shape", "response-shape"],
+        "actionIndexes": [12, 13, 14, 15, 16, 17, 18, 19, 20],
+        "safeAction": "Visit each major read-only workload state from the portal shell and capture route-bound lazy data.",
+        "acceptanceKey": "workload-context-shape-variant",
+        "rationale": "Navigation context may expose unmodeled lazy-data, experiment, or settings-selection variants."
+      }
+    ]
+  },
   "matchHosts": [
     "intune.microsoft.com"
   ],

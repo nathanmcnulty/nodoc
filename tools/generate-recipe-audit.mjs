@@ -8,6 +8,7 @@ import {
   hasRecorderSupport,
   readRecorderPortalIds,
 } from "./portal-discovery-metadata.mjs";
+import { buildNoveltyPlan } from "./portal-discovery-novelty.mjs";
 
 function stripBom(value) {
   return typeof value === "string" ? value.replace(/^\uFEFF/u, "") : value;
@@ -41,12 +42,15 @@ async function readRecipeMetrics(recipePath) {
   const recipe = JSON.parse(source);
   const actions = Array.isArray(recipe.actions) ? recipe.actions : [];
   const descriptors = actions.map(toActionDescriptor);
+  const noveltyPlan = buildNoveltyPlan(recipe);
 
   return {
     actionCount: descriptors.length,
     captureActions: descriptors.filter((entry) => entry.type === "capture").length,
     iframeClicks: descriptors.filter((entry) => entry.scope === "iframe" && entry.type.startsWith("click")).length,
     navigateActions: descriptors.filter((entry) => entry.type === "navigate").length,
+    noveltyTargetCount: noveltyPlan?.measurements.frontierTargetCount ?? 0,
+    noveltyTargetedActionCount: noveltyPlan?.measurements.frontierTargetedActionCount ?? 0,
     rootClicks: descriptors.filter((entry) => entry.scope === "root" && entry.type.startsWith("click")).length,
     seededLinkActions: descriptors.filter((entry) => entry.type === "replay-seeded-links").length,
     seededRouteActions: descriptors.filter((entry) => entry.type === "replay-seeded-routes").length,
@@ -63,6 +67,8 @@ function sumRecipeMetrics(recipePaths, metricsByPath) {
       "captureActions",
       "iframeClicks",
       "navigateActions",
+      "noveltyTargetCount",
+      "noveltyTargetedActionCount",
       "rootClicks",
       "seededLinkActions",
       "seededRouteActions",
@@ -81,6 +87,8 @@ function sumRecipeMetrics(recipePaths, metricsByPath) {
     captureActions: 0,
     iframeClicks: 0,
     navigateActions: 0,
+    noveltyTargetCount: 0,
+    noveltyTargetedActionCount: 0,
     rootClicks: 0,
     seededLinkActions: 0,
     seededRouteActions: 0,
@@ -112,12 +120,20 @@ function buildMissingAxes(summary) {
     missing.push("interaction-checkpoints");
   }
 
+  if (summary.recipeCount > 0 && summary.noveltyTargetCount === 0) {
+    missing.push("novelty-frontier");
+  }
+
   return missing;
 }
 
 function buildRecommendedNext(summary, specTitle, operationCount) {
   if (summary.recipeCount === 0) {
     return "add-base-recipe";
+  }
+
+  if (summary.noveltyTargetCount === 0) {
+    return "add-novelty-frontier";
   }
 
   if (specTitle.startsWith("Entra") && summary.iframeClicks === 0) {
@@ -180,6 +196,7 @@ async function main() {
           recipeSummary.iframeClicks > 0,
           recipeSummary.seededLinkActions + recipeSummary.seededRouteActions > 0,
           recipeSummary.captureActions + recipeSummary.waitActions > 0,
+          recipeSummary.noveltyTargetCount > 0,
         ].filter(Boolean).length,
         title: specRecord.title,
       };
@@ -198,11 +215,12 @@ async function main() {
     ops: row.operationCount,
     recorder: row.recorderSupported ? "yes" : "no",
     recipes: row.recipeCount,
-    score: `${row.score}/5`,
+    score: `${row.score}/6`,
     root: row.rootClicks,
     iframe: row.iframeClicks,
     seeded: row.seededLinkActions + row.seededRouteActions,
     checkpoints: row.captureActions + row.waitActions,
+    novelty: row.noveltyTargetCount,
     next: row.recommendedNext,
     missing: row.missingAxes.join(", ") || "none",
   })));

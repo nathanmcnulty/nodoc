@@ -1,0 +1,85 @@
+{
+  "portal": "Entra PIM",
+  "url": "https://entra.microsoft.com/#blade/Microsoft_Azure_PIMCommon/CommonMenuBlade",
+  "pageTarget": {
+    "matchHosts": ["entra.microsoft.com"],
+    "matchPathPrefixes": ["/"],
+    "bootstrap": {
+      "matchHosts": ["entra.microsoft.com"],
+      "matchPathnames": ["/"]
+    }
+  },
+  "matchHosts": ["entra.microsoft.com", "api.azrbac.mspim.azure.com"],
+  "matchPathPrefixes": ["/api"],
+  "captureScripts": false,
+  "postActionSettleMs": 5000,
+  "settleMs": 6000,
+  "noveltyFrontier": {
+    "baseline": "checked-in-spec-and-live-capture-ledgers",
+    "baselineSignals": { "queryMetadata": [], "requestShapes": [], "responseShapes": [], "routes": [] },
+    "targets": [
+      {
+        "id": "role-definition-setting-detail-shapes",
+        "state": "Entra role settings list and linked detail states",
+        "evidenceLevel": "confirmed",
+        "expectedHostFamilies": ["api.azrbac.mspim.azure.com"],
+        "expectedRoutePrefixes": ["/api/v2/privilegedAccess"],
+        "expectedInformationClasses": ["response-shape", "query-metadata"],
+        "actionIndexes": [0, 1, 2, 3, 4, 5, 6, 7],
+        "safeAction": "Open the read-only Entra role settings state and crawl only same-origin links containing RoleSettings.",
+        "acceptanceKey": "role-definition-or-setting-detail-shape-delta",
+        "rationale": "The prior broad pass found no unresolved routes; the remaining value is in concrete role-definition and role-setting detail shapes."
+      },
+      {
+        "id": "alert-incident-detail-shapes",
+        "state": "PIM alerts list and linked alert detail states",
+        "evidenceLevel": "confirmed",
+        "expectedHostFamilies": ["api.azrbac.mspim.azure.com"],
+        "expectedRoutePrefixes": ["/api/v2/privilegedAccess"],
+        "expectedInformationClasses": ["response-shape", "query-metadata"],
+        "actionIndexes": [8, 9, 10, 11, 12, 13, 14, 15],
+        "safeAction": "Open the read-only PIM alerts state and crawl only same-origin links containing Alerts.",
+        "acceptanceKey": "alert-or-incident-detail-shape-delta",
+        "rationale": "Alert detail and incident response bodies remain opaque despite the list route being documented."
+      },
+      {
+        "id": "expired-assignment-audit-shapes",
+        "state": "PIM audit history and linked expired-assignment states",
+        "evidenceLevel": "confirmed",
+        "expectedHostFamilies": ["api.azrbac.mspim.azure.com"],
+        "expectedRoutePrefixes": ["/api/v2/privilegedAccess"],
+        "expectedInformationClasses": ["response-shape", "query-metadata"],
+        "actionIndexes": [16, 17, 18, 19, 20, 21, 22, 23],
+        "safeAction": "Open the read-only PIM audit state and crawl only same-origin links containing Audit.",
+        "acceptanceKey": "expired-assignment-audit-shape-delta",
+        "rationale": "Expired-assignment audit metadata is a remaining schema gap and should be targeted without replaying all PIM blades."
+      }
+    ]
+  },
+  "actions": [
+    "navigate=https://entra.microsoft.com/#blade/Microsoft_Azure_PIMCommon/CommonMenuBlade",
+    "wait-ms=2000",
+    "click-href-root=#view/Microsoft_Azure_PIMCommon/CommonMenuBlade/~/aadmigratedroles",
+    "wait-ms=2000",
+    "click-href-root=#view/Microsoft_Azure_PIMCommon/ResourceMenuBlade/~/RoleSettings/resourceId//resourceType/tenant/provider/aadroles",
+    "wait-ms=2000",
+    "crawl-links=RoleSettings",
+    "capture=role-settings-detail",
+    "navigate=https://entra.microsoft.com/#blade/Microsoft_Azure_PIMCommon/CommonMenuBlade",
+    "wait-ms=2000",
+    "click-href-root=#view/Microsoft_Azure_PIMCommon/CommonMenuBlade/~/aadmigratedroles",
+    "wait-ms=2000",
+    "click-href-root=#view/Microsoft_Azure_PIMCommon/ResourceMenuBlade/~/Alerts/resourceId//resourceType/tenant/provider/aadroles",
+    "wait-ms=2000",
+    "crawl-links=Alerts",
+    "capture=alert-incidents",
+    "navigate=https://entra.microsoft.com/#blade/Microsoft_Azure_PIMCommon/CommonMenuBlade",
+    "wait-ms=2000",
+    "click-href-root=#view/Microsoft_Azure_PIMCommon/CommonMenuBlade/~/aadmigratedroles",
+    "wait-ms=2000",
+    "click-href-root=#view/Microsoft_Azure_PIMCommon/ResourceMenuBlade/~/Audit/resourceId//resourceType/tenant/provider/aadroles",
+    "wait-ms=2000",
+    "crawl-links=Audit",
+    "capture=expired-assignment-audit"
+  ]
+}

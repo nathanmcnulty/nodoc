@@ -9,6 +9,36 @@
       "matchPathnames": ["/officeSettings"]
     }
   },
+  "noveltyFrontier": {
+    "baseline": "checked-in-spec-and-live-capture-ledgers",
+    "baselineSignals": { "queryMetadata": [], "requestShapes": [], "responseShapes": [], "routes": [] },
+    "targets": [
+      {
+        "id": "deployment-policy-catalog-shapes",
+        "state": "Customization and policy list states",
+        "evidenceLevel": "confirmed",
+        "expectedHostFamilies": ["config.office.com"],
+        "expectedRoutePrefixes": ["/intents/v1.0/DeploymentConfiguration", "/policyadmin/v1.0", "/settings/v1.0/SettingsCatalog"],
+        "expectedInformationClasses": ["new-route-family", "response-shape", "query-metadata"],
+        "actionIndexes": [0, 1, 2, 3, 4, 5],
+        "safeAction": "Open deployment and policy lists without invoking configuration updates.",
+        "acceptanceKey": "deployment-policy-list-or-catalog-shape",
+        "rationale": "List/detail and settings-catalog envelopes remain incomplete, including an opaque license response."
+      },
+      {
+        "id": "setup-shell-feature-metadata",
+        "state": "M365 Apps setup state",
+        "evidenceLevel": "hypothesis",
+        "expectedHostFamilies": ["config.office.com"],
+        "expectedRoutePrefixes": ["/appConfig/v1.0", "/endpointprovisionhealth/v1.0"],
+        "expectedInformationClasses": ["new-route-family", "response-shape", "response-metadata"],
+        "actionIndexes": [6, 7, 8],
+        "safeAction": "Open setup and shell metadata only; do not provision or associate services.",
+        "acceptanceKey": "setup-shell-metadata-gap",
+        "rationale": "Service health, shell, flights, and tenant-association metadata may expose undocumented fields."
+      }
+    ]
+  },
   "matchHosts": [
     "config.office.com"
   ],
@@ -32,15 +62,6 @@
     "navigate=https://config.office.com/officeSettings/policy",
     "wait-ms=6000",
     "capture=policies",
-    "navigate=https://config.office.com/officeSettings/cloudUpdate",
-    "wait-ms=6000",
-    "capture=cloud-update",
-    "navigate=https://config.office.com/officeSettings/serviceProfile",
-    "wait-ms=6000",
-    "capture=servicing-profiles",
-    "navigate=https://config.office.com/officeSettings/deviceConfiguration",
-    "wait-ms=6000",
-    "capture=device-configuration",
     "navigate=https://config.office.com/officeSettings/setup",
     "wait-ms=6000",
     "capture=setup"

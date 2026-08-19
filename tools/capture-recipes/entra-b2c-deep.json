@@ -9,6 +9,48 @@
       "matchPathnames": ["/"]
     }
   },
+  "noveltyFrontier": {
+    "baseline": "checked-in-spec-and-coverage-ledgers",
+    "baselineSignals": { "queryMetadata": [], "requestShapes": [], "responseShapes": [], "routes": [] },
+    "targets": [
+      {
+        "id": "tenant-policy-and-settings-shape",
+        "state": "External Identities settings state",
+        "evidenceLevel": "confirmed",
+        "expectedHostFamilies": ["main.b2cadmin.ext.azure.com"],
+        "expectedRoutePrefixes": ["/api/tenants", "/api/tenantResource"],
+        "expectedInformationClasses": ["response-shape", "response-metadata"],
+        "actionIndexes": [15, 16, 17],
+        "safeAction": "Open the read-only settings state and capture tenant policy and feature-gating envelopes.",
+        "acceptanceKey": "tenant-policy-shape-or-feature-gate",
+        "rationale": "GetAndInitializeTenantPolicy has an opaque successful response and prior tenants exposed feature gating."
+      },
+      {
+        "id": "external-identity-collection-variants",
+        "state": "Identity providers, API connectors, user flows, policies, and attributes lists",
+        "evidenceLevel": "confirmed",
+        "expectedHostFamilies": ["main.b2cadmin.ext.azure.com"],
+        "expectedRoutePrefixes": ["/api/adminflows", "/api/adminuserjourneys", "/api/userAttribute"],
+        "expectedInformationClasses": ["new-route-family", "response-shape", "query-metadata"],
+        "actionIndexes": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
+        "safeAction": "Open each read-only collection state without invoking create, edit, or delete controls.",
+        "acceptanceKey": "external-identity-list-shapes",
+        "rationale": "The six-operation spec remains thin relative to the checked-in navigation surface."
+      },
+      {
+        "id": "external-identity-iframe-attribution",
+        "state": "User flows and custom attributes child iframe states",
+        "evidenceLevel": "hypothesis",
+        "expectedHostFamilies": ["main.b2cadmin.ext.azure.com"],
+        "expectedRoutePrefixes": ["/api/adminflows", "/api/userAttribute"],
+        "expectedInformationClasses": ["response-shape"],
+        "actionIndexes": [18, 19, 20, 21, 22, 23],
+        "safeAction": "Open the exact read-only child iframe states and preserve target attribution.",
+        "acceptanceKey": "iframe-attributed-b2c-shapes",
+        "rationale": "Iframe variants may expose distinct envelopes or route families not visible from shell-only navigation."
+      }
+    ]
+  },
   "matchHosts": [
     "entra.microsoft.com",
     "main.b2cadmin.ext.azure.com"

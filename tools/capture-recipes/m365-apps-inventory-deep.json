@@ -1,6 +1,6 @@
 {
   "portal": "M365 Apps Inventory",
-  "maxActions": 33,
+  "maxActions": 22,
   "url": "https://config.office.com/officeSettings",
   "matchHosts": [
     "config.office.com",
@@ -25,6 +25,36 @@
       ]
     }
   },
+  "noveltyFrontier": {
+    "baseline": "checked-in-spec-and-live-capture-ledgers",
+    "baselineSignals": { "queryMetadata": [], "requestShapes": [], "responseShapes": [], "routes": [] },
+    "targets": [
+      {
+        "id": "inventory-list-query-matrix",
+        "state": "Inventory builds, channels, devices, and add-ins list states",
+        "evidenceLevel": "confirmed",
+        "expectedHostFamilies": ["config.office.com", "query.inventory.insights.office.net"],
+        "expectedRoutePrefixes": ["/inventory"],
+        "expectedInformationClasses": ["new-route-family", "response-shape", "query-metadata"],
+        "actionIndexes": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
+        "safeAction": "Open the read-only inventory list variants and their built-in show-all views.",
+        "acceptanceKey": "inventory-list-route-shape-or-query-delta",
+        "rationale": "Device, build, channel, and add-in query variants have incomplete examples and schema coverage."
+      },
+      {
+        "id": "inventory-detail-route-matrix",
+        "state": "Add-in-to-device and device-to-add-in detail routes",
+        "evidenceLevel": "hypothesis",
+        "expectedHostFamilies": ["config.office.com", "query.inventory.insights.office.net"],
+        "expectedRoutePrefixes": ["/inventory"],
+        "expectedInformationClasses": ["new-route-family", "response-shape", "query-metadata"],
+        "actionIndexes": [15, 16, 17, 18, 19, 20],
+        "safeAction": "Navigate directly among read-only inventory detail route variants and capture their normal GET traffic.",
+        "acceptanceKey": "inventory-detail-route-or-shape-delta",
+        "rationale": "The cross-resource detail matrix is a likely source of undocumented route and response variants."
+      }
+    ]
+  },
   "postActionSettleMs": 10000,
   "settleMs": 12000,
   "actions": [
@@ -43,22 +73,11 @@
     "click-label-root=Show all add-ins",
     "wait-ms=6000",
     "capture=inventory-addins",
-    "navigate=https://config.office.com/officeSettings/cloudUpdate",
-    "wait-ms=6000",
-    "capture=cloud-update",
-    "navigate=https://config.office.com/officeSettings/securityUpdate",
-    "wait-ms=6000",
-    "capture=security-update-status",
-    "navigate=https://config.office.com/officeSettings/health",
-    "wait-ms=6000",
-    "capture=health",
-    "navigate=https://config.office.com/officeSettings/setup",
-    "wait-ms=6000",
-    "capture=setup",
     "navigate=https://config.office.com/officeSettings/inventory/addins",
     "navigate=https://config.office.com/officeSettings/inventory/addins/devices",
     "navigate=https://config.office.com/officeSettings/inventory/devices",
     "navigate=https://config.office.com/officeSettings/inventory/devices/addins",
-    "wait-ms=6000"
+    "wait-ms=6000",
+    "capture=inventory-detail-matrix"
   ]
 }

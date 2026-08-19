@@ -12,6 +12,7 @@ import {
   resolvePageTargetCriteria,
   validateRecipeTargetMetadata,
 } from "./portal-discovery-recipe.mjs";
+import { buildNoveltyPlan } from "./portal-discovery-novelty.mjs";
 
 const portfolioManifestPath = path.join(repoRoot, "tools", "portal-discovery-portfolio.json");
 
@@ -200,6 +201,7 @@ async function validateRecipeFile(errors, recipePath) {
   try {
     resolvePageTargetCriteria(recipe);
     validateRecipeTargetMetadata(recipe);
+    buildNoveltyPlan(recipe);
   } catch (error) {
     fail(errors, `${recipePath}: ${error.message}`);
   }

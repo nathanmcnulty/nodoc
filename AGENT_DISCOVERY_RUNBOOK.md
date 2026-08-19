@@ -231,6 +231,17 @@ not discovery work:
    when the entry is HTTPS, same-origin, query-free, and constrained by an
    explicit clean host/path `pageTarget`; fragments are never matching or
    capture criteria.
+   For an expensive discovery assignment, also pass `--require-novelty` and
+   require a non-empty `noveltyPlan`. Each frontier target must be tied to exact
+   checked-in action indexes and declare its UI state, expected host/route,
+   expected request/response-shape or metadata class, evidence level, safe
+   action, and acceptance key. A plan containing only known replay is blocked
+   before owner allocation.
+   The plan must derive its primary baseline from the checked-in OpenAPI and
+   merge the recipe's `baselineSignals` overlay for accepted runtime-only route,
+   query, request-shape, and response-shape keys. Empty overlay arrays mean no
+   additional runtime signals have been accepted; they never disable the
+   derived OpenAPI comparison.
 4. Require `npm run browser:cdp:status -- --profile-key <key>` to report the
    manifest-owned browser as healthy, then run the portal driver against that
    exact loopback endpoint. Its recipe-gated preflight verifies browser metadata,
@@ -244,6 +255,19 @@ not discovery work:
 Do not spend a worker allocation on a missing dependency, invalid portal ID,
 missing recipe, unavailable CDP listener, or unauthenticated target. Report and
 repair those prerequisites at the orchestrator layer first.
+
+Do not spend a worker allocation merely to reconfirm checked-in operation keys.
+Known routes may establish baseline context, but every costly assignment must
+target at least one unvisited state, unmodeled host/route family, or known
+schema/metadata gap. Large recipes require materialized signals across at least
+two frontier targets. The driver writes `novelty-assessment.json`; treat
+`no-novelty` as a recipe/frontier revision outcome, not discovery success, and
+never rerun the same plan unchanged.
+During coordinator review, update `baselineSignals` with accepted signal keys
+before scheduling any follow-up so the same evidence cannot count twice.
+Evidence must be attributed to the exact frontier action page that emitted it;
+bootstrap traffic, failed actions, raw prefix collisions, and records from a
+different target state do not count.
 
 ### Protected PR transport troubleshooting
 
@@ -382,7 +406,7 @@ healthy completed capture may be analyzed again without reopening the browser.
 1. Read the machine-generated portal brief:
 
    ```powershell
-   npm run discover:portal -- --portal m365-admin --profile bounded --phase plan --json
+   npm run discover:portal -- --portal m365-admin --profile bounded --phase plan --require-novelty --json
    ```
 
 2. Choose a unique, fresh artifact directory outside the repository for every
@@ -395,7 +419,7 @@ healthy completed capture may be analyzed again without reopening the browser.
 3. Run the deterministic pipeline:
 
    ```powershell
-   npm run discover:portal -- --portal m365-admin --profile bounded --phase all --endpoint https://admin.cloud.microsoft --artifacts $artifacts --ledger-path $ledgerPath
+   npm run discover:portal -- --portal m365-admin --profile bounded --phase all --require-novelty --endpoint https://admin.cloud.microsoft --artifacts $artifacts --ledger-path $ledgerPath
    ```
 
    Capture and analysis automatically enqueue and claim a deterministic ledger

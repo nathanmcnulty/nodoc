@@ -1105,25 +1105,21 @@ test("portal driver prefers the bounded Defender deep recipe", async () => {
   assert.equal(result.brief.recipe, "tools/capture-recipes/defender-deep.json");
 });
 
-test("portal driver blocks a missing recipe without allocating browser or ledger work", async () => {
-  await assert.rejects(
-    execFileAsync(process.execPath, [
-      path.join(repoRoot, "tools", "run-portal-discovery.mjs"),
-      "--portal",
-      "entra-iga",
-      "--phase",
-      "plan",
-      "--json",
-    ], { cwd: repoRoot }),
-    (error) => {
-      const result = JSON.parse(error.stderr);
-      return result.status === "blocked"
-        && result.phase === "plan"
-        && result.brief.recipe === null
-        && result.blocker.code === "recipe-missing"
-        && !error.stderr.includes("ERR_INVALID_ARG_TYPE");
-    },
-  );
+test("portal driver plans the bounded non-Graph Entra IGA novelty recipe without browser allocation", async () => {
+  const { stdout } = await execFileAsync(process.execPath, [
+    path.join(repoRoot, "tools", "run-portal-discovery.mjs"),
+    "--portal",
+    "entra-iga",
+    "--phase",
+    "plan",
+    "--require-novelty",
+    "--json",
+  ], { cwd: repoRoot });
+  const result = JSON.parse(stdout);
+  assert.equal(result.status, "planned");
+  assert.equal(result.brief.recipe, "tools/capture-recipes/entra-iga-novelty.json");
+  assert.equal(result.noveltyPlan.baselineSignals.derivedOperationCount, 11);
+  assert.equal(result.noveltyPlan.measurements.frontierTargetCount, 3);
 });
 
 test("M365 Apps Inventory plan accounts for its mandatory orchestration action", async () => {
@@ -1139,12 +1135,28 @@ test("M365 Apps Inventory plan accounts for its mandatory orchestration action",
 
   assert.equal(result.status, "planned");
   assert.deepEqual(result.actionBudget.categories, {
-    recipeActions: 32,
+    recipeActions: 21,
     mandatoryOrchestrationActions: 1,
     expandedReplayActions: 0,
   });
-  assert.equal(result.actionBudget.countedActions, 33);
-  assert.equal(result.actionBudget.maxActions, 33);
+  assert.equal(result.actionBudget.countedActions, 22);
+  assert.equal(result.actionBudget.maxActions, 22);
+});
+
+test("novelty-gated analyze never reports an incomplete frontier as completed", async () => {
+  const artifactDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-novelty-incomplete-"));
+  try {
+    await Promise.all([
+      writeJson(path.join(artifactDir, "api-records.json"), []),
+      writeJson(path.join(artifactDir, "action-results.json"), []),
+    ]);
+    const { runState } = await runAnalyze("purview-portal", artifactDir, { noLedger: true });
+    assert.equal(runState.status, "blocked");
+    assert.equal(runState.blocker.code, "frontier-incomplete");
+    assert.equal(runState.novelty.status, "frontier-incomplete");
+  } finally {
+    await rm(artifactDir, { force: true, recursive: true });
+  }
 });
 
 test("portal driver rejects unsupported profiles", async () => {

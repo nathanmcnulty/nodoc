@@ -5,18 +5,39 @@
     "intune.microsoft.com",
     "services.autopatch.microsoft.com"
   ],
+  "noveltyFrontier": {
+    "baseline": "checked-in-spec-and-live-capture-ledgers",
+    "baselineSignals": { "queryMetadata": [], "requestShapes": [], "responseShapes": [], "routes": [] },
+    "targets": [
+      {
+        "id": "autopatch-group-role-metadata",
+        "state": "Autopatch groups and access-control role states",
+        "evidenceLevel": "confirmed",
+        "expectedHostFamilies": ["services.autopatch.microsoft.com"],
+        "expectedRoutePrefixes": ["/access-control", "/device/v2/autopatchGroups", "/unified-reporting/odata/1.0/Autopatch"],
+        "expectedInformationClasses": ["new-route-family", "response-shape", "response-metadata"],
+        "actionIndexes": [0, 1, 2, 3, 4, 5],
+        "safeAction": "Open group and role inventories without assigning roles or changing group membership.",
+        "acceptanceKey": "group-role-envelope-gap",
+        "rationale": "Group membership, management status, effective permissions, and role metadata lack fresh live evidence."
+      },
+      {
+        "id": "support-read-hierarchy",
+        "state": "Support request list and read-only status state",
+        "evidenceLevel": "hypothesis",
+        "expectedHostFamilies": ["services.autopatch.microsoft.com"],
+        "expectedRoutePrefixes": ["/support/odata/v1/supportRequests", "/support/v1"],
+        "expectedInformationClasses": ["new-route-family", "response-shape", "query-metadata"],
+        "actionIndexes": [6, 7, 8],
+        "safeAction": "Open support inventory only; do not add notes, upload, reactivate, or update contacts.",
+        "acceptanceKey": "support-list-entitlement-shape",
+        "rationale": "Support entitlement and request hierarchy are documented but not represented in the current live ledger."
+      }
+    ]
+  },
   "postActionSettleMs": 12000,
   "settleMs": 14000,
   "actions": [
-    "click-label-root=Update Windows from the cloud",
-    "wait-ms=8000",
-    "capture=autopatch-home",
-    "click-contains-root=Windows quality updates",
-    "wait-ms=8000",
-    "capture=windows-quality-updates",
-    "click-contains-root=Windows feature updates",
-    "wait-ms=8000",
-    "capture=windows-feature-updates",
     "click-contains-root=Autopatch groups",
     "wait-ms=8000",
     "capture=autopatch-groups",

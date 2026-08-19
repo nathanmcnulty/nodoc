@@ -62,6 +62,30 @@ When promoting discoveries into the repository, aim for more than just path cove
 
 ## Coverage expansion model
 
+### Novelty is the allocation and acceptance boundary
+
+Recipe completion and known-route parity are necessary health signals, not the
+goal of a costly discovery run. Before live allocation, the selected recipe
+must declare a machine-validated `noveltyFrontier` that ties exact safe actions
+to unvisited states, unmodeled host/route families, or checked-in response
+schema and metadata gaps. Normalize method, canonical path, host, query-key
+sets, request/response-shape fingerprints, and interaction state before judging
+novelty. Tenant IDs, timestamps, cursors, and ordering changes do not count.
+The driver derives checked-in operation/schema baselines and merges each
+recipe's explicit `baselineSignals` overlay. Only action-attributed undocumented
+candidates, weak-schema fills, or normalized metadata keys absent from both
+sources count as new. Reviewers must append accepted runtime keys to the overlay
+before another allocation.
+
+The post-run `novelty-assessment.json` reports planned and attempted targets,
+new candidate signals, targeted shape/metadata fingerprints, and one of
+`productive`, `frontier-incomplete`, or `no-novelty`. Zero new signals is a
+known-route replay and must not be described as success or completeness. A
+healthy no-change result supports saturation only after every frontier item is
+exhausted or structurally blocked. Prefer a small targeted detail/interaction
+matrix over replaying a broad recipe whose prior pass already produced no
+unresolved candidates.
+
 Do **not** rely on any single technique to discover the full surface area.
 
 The most effective pattern is a layered pipeline:

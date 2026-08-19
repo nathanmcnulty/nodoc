@@ -1,0 +1,73 @@
+{
+  "portal": "Entra IGA",
+  "url": "https://entra.microsoft.com/#view/Microsoft_AAD_ERM/DashboardBlade/~/elmEntitlementManagement/menuId/AccessPackages",
+  "pageTarget": {
+    "matchHosts": ["entra.microsoft.com"],
+    "matchPathPrefixes": ["/"],
+    "bootstrap": {
+      "matchHosts": ["entra.microsoft.com"],
+      "matchPathnames": ["/"]
+    }
+  },
+  "matchHosts": ["entra.microsoft.com", "elm.iga.azure.com"],
+  "matchPathPrefixes": ["/api/v1"],
+  "captureScripts": false,
+  "postActionSettleMs": 8000,
+  "settleMs": 10000,
+  "noveltyFrontier": {
+    "baseline": "checked-in-spec-and-coverage-ledgers",
+    "baselineSignals": { "queryMetadata": [], "requestShapes": [], "responseShapes": [], "routes": [] },
+    "targets": [
+      {
+        "id": "access-package-catalog-detail-shapes",
+        "state": "Entitlement Management access packages and catalogs states",
+        "evidenceLevel": "hypothesis",
+        "expectedHostFamilies": ["elm.iga.azure.com"],
+        "expectedRoutePrefixes": ["/api/v1/accessPackages", "/api/v1/catalogs"],
+        "expectedInformationClasses": ["new-route-family", "response-shape", "query-metadata"],
+        "actionIndexes": [0, 1, 2, 3, 4, 5],
+        "safeAction": "Navigate directly to the read-only Access Packages and Catalogs list routes and capture their normal traffic.",
+        "acceptanceKey": "access-package-catalog-detail-or-resource-shape-delta",
+        "rationale": "Access-package detail, catalog detail, and catalog resource payloads remain opaque in the checked-in spec."
+      },
+      {
+        "id": "connected-organization-detail-shapes",
+        "state": "Entitlement Management connected organizations state",
+        "evidenceLevel": "hypothesis",
+        "expectedHostFamilies": ["elm.iga.azure.com"],
+        "expectedRoutePrefixes": ["/api/v1/connectedOrganizations"],
+        "expectedInformationClasses": ["response-shape", "query-metadata"],
+        "actionIndexes": [6, 7, 8],
+        "safeAction": "Navigate directly to the read-only Connected Organizations list route without opening create flows.",
+        "acceptanceKey": "connected-organization-detail-shape-delta",
+        "rationale": "Connected-organization detail response properties are not modeled."
+      },
+      {
+        "id": "governance-settings-metadata",
+        "state": "Entitlement Management settings state",
+        "evidenceLevel": "hypothesis",
+        "expectedHostFamilies": ["elm.iga.azure.com"],
+        "expectedRoutePrefixes": ["/api/v1/settings", "/api/v1/billingConfigurations"],
+        "expectedInformationClasses": ["response-shape", "response-metadata"],
+        "actionIndexes": [9, 10, 11],
+        "safeAction": "Navigate directly to the read-only Entitlement Management settings route without selecting Edit or saving changes.",
+        "acceptanceKey": "settings-or-billing-metadata-delta",
+        "rationale": "Global governance settings and billing configuration payloads are schema gaps, while Graph-backed Lifecycle Workflows remain out of scope."
+      }
+    ]
+  },
+  "actions": [
+    "navigate=https://entra.microsoft.com/#view/Microsoft_AAD_ERM/DashboardBlade/~/elmEntitlementManagement/menuId/AccessPackages",
+    "wait-ms=6000",
+    "capture=access-packages",
+    "navigate=https://entra.microsoft.com/#view/Microsoft_AAD_ERM/DashboardBlade/~/elmCatalog",
+    "wait-ms=6000",
+    "capture=catalogs",
+    "navigate=https://entra.microsoft.com/#view/Microsoft_AAD_ERM/DashboardBlade/~/elmOrganizations",
+    "wait-ms=6000",
+    "capture=connected-organizations",
+    "navigate=https://entra.microsoft.com/#view/Microsoft_AAD_ERM/DashboardBlade/~/elmSetting",
+    "wait-ms=6000",
+    "capture=entitlement-management-settings"
+  ]
+}

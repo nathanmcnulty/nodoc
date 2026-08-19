@@ -5,6 +5,48 @@
     "matchHosts": ["purview.microsoft.com"],
     "matchPathPrefixes": ["/"]
   },
+  "noveltyFrontier": {
+    "baseline": "checked-in-spec-and-live-capture-ledgers",
+    "baselineSignals": { "queryMetadata": [], "requestShapes": [], "responseShapes": [], "routes": [] },
+    "targets": [
+      {
+        "id": "compliance-catalog-dlp-solution-shapes",
+        "state": "Compliance Manager, Data Catalog, and DLP solution states",
+        "evidenceLevel": "confirmed",
+        "expectedHostFamilies": ["purview.microsoft.com"],
+        "expectedRoutePrefixes": ["/api"],
+        "expectedInformationClasses": ["new-route-family", "request-shape", "response-shape", "response-metadata"],
+        "actionIndexes": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+        "safeAction": "Open solution list and detail surfaces without creating assessments or policies.",
+        "acceptanceKey": "solution-route-or-detail-shape-delta",
+        "rationale": "The eight-operation spec does not model the solution catalog and detail bootstrap families."
+      },
+      {
+        "id": "ediscovery-records-protection-shapes",
+        "state": "eDiscovery, Records Management, and Information Protection states",
+        "evidenceLevel": "confirmed",
+        "expectedHostFamilies": ["purview.microsoft.com"],
+        "expectedRoutePrefixes": ["/api"],
+        "expectedInformationClasses": ["new-route-family", "request-shape", "response-shape", "query-metadata"],
+        "actionIndexes": [12, 13, 14, 15, 16, 17, 18, 19, 20],
+        "safeAction": "Open read-only solution landing states without starting searches, cases, exports, or policy changes.",
+        "acceptanceKey": "governance-solution-route-or-shape-delta",
+        "rationale": "These major solution states are absent from the currently narrow portal specification."
+      },
+      {
+        "id": "audit-settings-ocr-usage-metadata",
+        "state": "Audit, Settings, OCR, and Usage center states",
+        "evidenceLevel": "confirmed",
+        "expectedHostFamilies": ["purview.microsoft.com"],
+        "expectedRoutePrefixes": ["/api"],
+        "expectedInformationClasses": ["new-route-family", "response-shape", "response-metadata", "query-metadata"],
+        "actionIndexes": [21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32],
+        "safeAction": "Visit read-only audit, settings, OCR, and usage states without running searches or changing configuration.",
+        "acceptanceKey": "settings-feature-check-or-usage-shape-delta",
+        "rationale": "Roles, feature checks, settings, and usage metadata are promising undocumented portal families."
+      }
+    ]
+  },
   "matchHosts": [
     "purview.microsoft.com"
   ],

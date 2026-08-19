@@ -14,7 +14,7 @@ import {
   captureRecipesByTitle,
   crawlMetadataByTitle,
 } from "./portal-discovery-metadata.mjs";
-import { buildSpecInventory, repoRoot } from "./spec-quality-lib.mjs";
+import { buildSpecInventory, loadBundledSpecification, repoRoot } from "./spec-quality-lib.mjs";
 import {
   claimAssignment,
   defaultLedgerPath,
@@ -42,6 +42,11 @@ import {
   validateRecipeTargetMetadata,
 } from "./portal-discovery-recipe.mjs";
 import { planActionBudget } from "./portal-discovery-action-budget.mjs";
+import {
+  buildNoveltyPlan,
+  deriveNoveltyBaseline,
+  evaluateNoveltyEvidence,
+} from "./portal-discovery-novelty.mjs";
 
 const validPhases = new Set(["all", "analyze", "capture", "plan"]);
 
@@ -130,6 +135,7 @@ function parseArgs(argv) {
     includeAdjacent: false,
     saturation: false,
     applySaturationStop: false,
+    requireNovelty: false,
     noLedger: false,
     json: false,
     phase: "all",
@@ -175,6 +181,8 @@ function parseArgs(argv) {
     } else if (argument === "--apply-saturation-stop") {
       args.saturation = true;
       args.applySaturationStop = true;
+    } else if (argument === "--require-novelty") {
+      args.requireNovelty = true;
     } else if (argument === "--no-ledger") {
       args.noLedger = true;
     } else if (argument === "--json") {
@@ -357,7 +365,7 @@ function resolvePortal(specInventory, portalInput) {
   return matches[0];
 }
 
-async function selectRecipe(specRecord, explicitRecipe) {
+async function selectRecipe(specRecord, explicitRecipe, { requireNovelty = false } = {}) {
   const allowedRecipes = (captureRecipesByTitle[specRecord.title] ?? [])
     .map((recipePath) => path.resolve(repoRoot, recipePath));
   if (explicitRecipe) {
@@ -370,16 +378,19 @@ async function selectRecipe(specRecord, explicitRecipe) {
     return resolvedRecipe;
   }
   const matchingRecipes = [];
+  const noveltyRecipes = [];
   for (const recipePath of allowedRecipes) {
     try {
       const recipe = JSON.parse(await readFile(recipePath, "utf8"));
       if (recipe.portal === specRecord.title) {
         matchingRecipes.push(recipePath);
+        if (recipe.noveltyFrontier) noveltyRecipes.push(recipePath);
       }
     } catch {
       // Recipe parsing is validated separately before capture.
     }
   }
+  if (requireNovelty && noveltyRecipes.length > 0) return noveltyRecipes[0];
   const matchingPreferred = matchingRecipes.find((recipePath) =>
     recipePath.includes("-deep") && !recipePath.includes("seeded-replay"));
   if (matchingPreferred) {
@@ -804,7 +815,7 @@ async function main() {
   }
   const specInventory = await buildSpecInventory();
   const specRecord = resolvePortal(specInventory, args.portal);
-  const recipePath = await selectRecipe(specRecord, args.recipe);
+  const recipePath = await selectRecipe(specRecord, args.recipe, { requireNovelty: args.requireNovelty });
   const brief = buildBrief(specRecord, recipePath);
   if (!recipePath) {
     const runState = {
@@ -827,9 +838,12 @@ async function main() {
 
   let selectedRecipe;
   let actionBudget;
+  let noveltyPlan;
   try {
     selectedRecipe = JSON.parse(await readFile(recipePath, "utf8"));
     validateSelectedRecipeTarget(selectedRecipe);
+    const derivedBaseline = deriveNoveltyBaseline(await loadBundledSpecification(path.resolve(repoRoot, specRecord.specPath)));
+    noveltyPlan = buildNoveltyPlan(selectedRecipe, { required: args.requireNovelty, derivedBaseline });
     actionBudget = buildActionBudget(selectedRecipe);
   } catch (error) {
     const runState = {
@@ -839,7 +853,7 @@ async function main() {
       startedAt: new Date().toISOString(),
       status: "blocked",
       blocker: {
-        code: ["action-budget-exceeded", "recipe-target-invalid"].includes(error?.code) ? error.code : "recipe-invalid",
+        code: ["action-budget-exceeded", "novelty-frontier-invalid", "recipe-target-invalid"].includes(error?.code) ? error.code : "recipe-invalid",
         detail: error instanceof Error ? error.message : String(error),
         ...(error?.blocker ?? {}),
       },
@@ -851,7 +865,7 @@ async function main() {
   }
 
   if (args.phase === "plan") {
-    console.log(JSON.stringify({ actionBudget, brief, status: "planned" }, null, 2));
+    console.log(JSON.stringify({ actionBudget, brief, noveltyPlan, status: "planned" }, null, 2));
     return;
   }
 
@@ -919,6 +933,7 @@ async function main() {
     artifacts: args.artifacts,
     brief,
     phase: args.phase,
+    noveltyPlan,
     startedAt: new Date().toISOString(),
     status: "running",
     preflight: args.preflightAlignment
@@ -947,6 +962,7 @@ async function main() {
   let interactionHealth = null;
   let interactionHealthStatus = null;
   let captureSummary = null;
+  let noveltyAssessment = null;
   let actionResults = [];
   let recipe = null;
   try {
@@ -1232,6 +1248,26 @@ async function main() {
         specTitle: specRecord.title,
         saturation,
       });
+      if (noveltyPlan) {
+        let apiRecords = [];
+        try {
+          apiRecords = JSON.parse(await readFile(path.join(args.artifacts, "api-records.json"), "utf8"));
+        } catch (error) {
+          if (error?.code !== "ENOENT" && !(error instanceof SyntaxError)) throw error;
+        }
+        noveltyAssessment = evaluateNoveltyEvidence({
+          actionResults,
+          apiRecords,
+          candidateHandoff,
+          noveltyPlan,
+          recipe,
+        });
+        await writeFile(
+          path.join(args.artifacts, "novelty-assessment.json"),
+          `${JSON.stringify(noveltyAssessment, null, 2)}\n`,
+          "utf8",
+        );
+      }
       await writeFile(
         candidateHandoffPath,
         `${JSON.stringify(candidateHandoff, null, 2)}\n`,
@@ -1242,10 +1278,33 @@ async function main() {
       }
       runState.candidateCounts = candidateHandoff.counts;
       runState.recommendedNextAction = candidateHandoff.recommendedNextAction;
+      runState.novelty = noveltyAssessment;
+      if (noveltyAssessment?.status === "no-novelty") {
+        runState.recommendedNextAction = {
+          code: "revise-frontier-after-no-novelty",
+          summary: "The capture completed but materialized no qualifying frontier novelty; do not report discovery success or repeat the same recipe unchanged.",
+        };
+      } else if (noveltyAssessment?.status === "frontier-incomplete") {
+        runState.recommendedNextAction = {
+          code: "repair-incomplete-frontier",
+          summary: "At least one planned frontier target was not attempted; preserve partial evidence and repair the deterministic recipe before any retry.",
+        };
+      }
       runState.saturation = saturation;
     }
 
-    runState.status = "completed";
+    if (noveltyAssessment && noveltyAssessment.status !== "productive") {
+      runState.status = "blocked";
+      runState.blocker = {
+        code: noveltyAssessment.status,
+        detail: noveltyAssessment.status === "no-novelty"
+          ? "The capture completed but produced no qualifying delta from the checked-in novelty baseline."
+          : "The capture did not attempt every checked-in frontier target successfully.",
+        remediation: runState.recommendedNextAction?.summary ?? "Revise the frontier before another live allocation.",
+      };
+    } else {
+      runState.status = "completed";
+    }
     runState.interactionHealth = interactionHealth;
     runState.interactionHealthStatus = interactionHealthStatus ?? (
       interactionHealth
@@ -1274,6 +1333,9 @@ async function main() {
         : null,
       groupedCandidateHandoff: args.groupedHandoffDir
         ? path.join(args.groupedHandoffDir, "manifest.json")
+        : null,
+      noveltyAssessment: noveltyPlan && ["all", "analyze"].includes(args.phase)
+        ? path.join(args.artifacts, "novelty-assessment.json")
         : null,
       runState: path.join(args.artifacts, "discovery-run.json"),
     };

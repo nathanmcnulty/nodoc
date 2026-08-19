@@ -5,6 +5,48 @@
     "entra.microsoft.com",
     "main.iam.ad.ext.azure.com"
   ],
+  "noveltyFrontier": {
+    "baseline": "checked-in-spec-and-coverage-ledgers",
+    "baselineSignals": { "queryMetadata": [], "requestShapes": [], "responseShapes": [], "routes": [] },
+    "targets": [
+      {
+        "id": "application-and-sso-shapes",
+        "state": "Applications and Enterprise applications list states",
+        "evidenceLevel": "confirmed",
+        "expectedHostFamilies": ["main.iam.ad.ext.azure.com"],
+        "expectedRoutePrefixes": ["/ApplicationInsights", "/ApplicationProxy", "/Applications", "/ApplicationSso"],
+        "expectedInformationClasses": ["request-shape", "response-shape", "query-metadata"],
+        "actionIndexes": [6, 7, 8, 9, 10, 11],
+        "safeAction": "Open the read-only application list surfaces and capture their normal portal traffic.",
+        "acceptanceKey": "application-list-shape-or-unmodeled-family",
+        "rationale": "Many checked-in application-family successful responses remain opaque or lack examples."
+      },
+      {
+        "id": "authentication-and-device-shapes",
+        "state": "Authentication methods and Devices list states",
+        "evidenceLevel": "confirmed",
+        "expectedHostFamilies": ["main.iam.ad.ext.azure.com"],
+        "expectedRoutePrefixes": ["/AuthenticationMethods", "/Devices"],
+        "expectedInformationClasses": ["response-shape", "response-metadata"],
+        "actionIndexes": [12, 13, 14, 15, 16, 17],
+        "safeAction": "Open the read-only authentication-method and device list surfaces without changing policy or device state.",
+        "acceptanceKey": "authentication-or-device-shape-gap",
+        "rationale": "The current recipe reaches these lists, but schema and metadata gaps remain in the checked-in operations."
+      },
+      {
+        "id": "reactblade-user-group-attribution",
+        "state": "User and group child ReactBlade iframe states",
+        "evidenceLevel": "confirmed",
+        "expectedHostFamilies": ["main.iam.ad.ext.azure.com"],
+        "expectedRoutePrefixes": ["/Groups", "/Users"],
+        "expectedInformationClasses": ["response-shape", "query-metadata"],
+        "actionIndexes": [24, 25, 26, 27, 28, 29],
+        "safeAction": "Open the exact read-only child iframe list states and preserve target/session attribution.",
+        "acceptanceKey": "reactblade-attributed-list-shapes",
+        "rationale": "Coverage metadata explicitly requires child ReactBlade attribution rather than shell-only replay."
+      }
+    ]
+  },
   "postActionSettleMs": 12000,
   "settleMs": 14000,
   "actions": [
