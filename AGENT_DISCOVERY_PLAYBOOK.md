@@ -481,6 +481,13 @@ Preferred flow:
    `/json/list` must remain exactly-one, same-host, and past authentication at
    every gate.
 
+Before this lifecycle, require the portal plan to validate the selected
+recipe's target metadata. `pageTarget` is the browser UI contract; top-level
+host/path prefixes are network-capture filters. Do not infer one from the
+other. Legacy SPA fragments are permitted only as HTTPS, same-origin,
+query-free navigation under an explicit clean host/path `pageTarget`, and the
+fragment is never a target or capture criterion.
+
 Chrome 136+ ignores remote-debugging switches against its default data
 directory unless a nonstandard `--user-data-dir` is supplied, as documented in
 the first-party
@@ -500,6 +507,11 @@ Practical notes:
   owner `status`; only owner `stop` may terminate the exact manifest-owned PID.
   The operator then starts the same stable profile key, verifies both CDP
   endpoints, and gives the worker a new empty artifact directory.
+- Treat browser-launch PID handoff as normal but identity-sensitive: the owner
+  must persist exactly one long-lived process matching binary, port, dedicated
+  profile, and random owner token. If the recorded PID disappears while an
+  exact candidate or listener remains, retain the manifest and stop nothing;
+  never adopt or kill a process by name, port, or profile alone.
 - Let the checked-in runner use auth and portal headers in memory for same-session
   safe probes. Persisted bodies are token-redacted and persisted headers contain
   metadata rather than raw authorization or cookie values. Other tenant content

@@ -1,6 +1,8 @@
 import { setTimeout as delay } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
 
+import { classifyGetProbeUrl } from "./discovery-safety.mjs";
+
 const defaultTimeoutMs = 3000;
 const defaultStabilityMs = 750;
 const defaultPollMs = 150;
@@ -221,8 +223,12 @@ function trustedEntryUrl(entryUrl, featureCriteria, bootstrapCriteria) {
   } catch {
     failWith("entry-url-invalid", "recipe entry URL must be a valid URL.");
   }
-  if (parsed.protocol !== "https:" || parsed.username || parsed.password || parsed.search || parsed.hash) {
-    failWith("entry-url-untrusted", "recipe entry URL must be an HTTPS URL without credentials, query, or fragment.");
+  if (parsed.protocol !== "https:" || parsed.username || parsed.password || parsed.search) {
+    failWith("entry-url-untrusted", "recipe entry URL must be HTTPS without credentials or query.");
+  }
+  const classification = classifyGetProbeUrl(parsed.href, parsed.origin);
+  if (!classification.allowed) {
+    failWith("entry-url-untrusted", `recipe entry URL is not a passive same-origin GET (${classification.code}).`);
   }
   const hostname = parsed.hostname.toLowerCase();
   const featureHosts = featureCriteria?.matchHosts ?? [];

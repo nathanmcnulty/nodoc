@@ -9,7 +9,11 @@ import {
   validateRecipeTargetMetadata,
   planRecipeActionBudget,
 } from "../portal-discovery-recipe.mjs";
-import { buildBootstrapPreflightCriteria, buildPreflightCriteria } from "../run-portal-discovery.mjs";
+import {
+  buildBootstrapPreflightCriteria,
+  buildPreflightCriteria,
+  validateSelectedRecipeTarget,
+} from "../run-portal-discovery.mjs";
 
 const inventoryRecipe = {
   url: "https://config.office.com/officeSettings",
@@ -119,7 +123,61 @@ test("explicit page-target criteria fail closed when malformed or empty", () => 
       ...inventoryRecipe,
       actions: ["navigate=https://config.office.com/officeSettings/inventory?operation=delete"],
     }),
-    /HTTPS URL without credentials, query, or fragment/,
+    /HTTPS without credentials or query/,
+  );
+});
+
+test("same-origin SPA fragments require explicit page-target metadata", () => {
+  const legacyHashRecipe = {
+    url: "https://entra.microsoft.com/#blade/Microsoft_AAD_ERM/DashboardBlade",
+    matchHosts: ["entra.microsoft.com"],
+    matchPathPrefixes: ["/api"],
+    actions: [],
+  };
+  assert.throws(
+    () => validateRecipeTargetMetadata(legacyHashRecipe),
+    /fragments require an explicit pageTarget/,
+  );
+  assert.equal(
+    validateRecipeTargetMetadata({
+      ...legacyHashRecipe,
+      pageTarget: {
+        matchHosts: ["entra.microsoft.com"],
+        matchPathPrefixes: ["/"],
+        bootstrap: { matchHosts: ["entra.microsoft.com"], matchPathnames: ["/"] },
+      },
+    }).entryUrl,
+    legacyHashRecipe.url,
+  );
+});
+
+test("relative same-origin entry routes are normalized before target validation", () => {
+  const recipe = {
+    url: "https://engage.cloud.microsoft/main/admin",
+    pageTarget: {
+      matchHosts: ["engage.cloud.microsoft"],
+      matchPathPrefixes: ["/main/admin/segmentation"],
+      bootstrap: { matchHosts: ["engage.cloud.microsoft"], matchPathnames: ["/main/admin"] },
+    },
+    actions: ["navigate=/main/admin/segmentation"],
+  };
+  assert.equal(
+    validateRecipeTargetMetadata(recipe).entryUrl,
+    "https://engage.cloud.microsoft/main/admin/segmentation",
+  );
+});
+
+test("selected invalid recipe metadata becomes a structured pre-browser blocker", () => {
+  assert.throws(
+    () => validateSelectedRecipeTarget({
+      url: "https://config.office.com/officeSettings",
+      matchHosts: ["config.office.com"],
+      matchPathPrefixes: ["/api"],
+      actions: ["navigate=https://config.office.com/officeSettings/policy"],
+    }),
+    (error) => error.code === "recipe-target-invalid"
+      && /pageTarget/.test(error.message)
+      && /before allocating browser or ledger work/.test(error.blocker.remediation),
   );
 });
 

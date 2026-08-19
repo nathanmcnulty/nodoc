@@ -110,6 +110,19 @@ export async function preflightRecipeTarget({
   });
 }
 
+export function validateSelectedRecipeTarget(recipe) {
+  try {
+    return validateRecipeTargetMetadata(recipe);
+  } catch (error) {
+    error.code = "recipe-target-invalid";
+    error.blocker = {
+      ...(error.blocker ?? {}),
+      remediation: "Repair and validate the checked-in pageTarget metadata before allocating browser or ledger work.",
+    };
+    throw error;
+  }
+}
+
 function parseArgs(argv) {
   const args = {
     artifacts: null,
@@ -816,6 +829,7 @@ async function main() {
   let actionBudget;
   try {
     selectedRecipe = JSON.parse(await readFile(recipePath, "utf8"));
+    validateSelectedRecipeTarget(selectedRecipe);
     actionBudget = buildActionBudget(selectedRecipe);
   } catch (error) {
     const runState = {
@@ -825,7 +839,7 @@ async function main() {
       startedAt: new Date().toISOString(),
       status: "blocked",
       blocker: {
-        code: error?.code === "action-budget-exceeded" ? error.code : "recipe-invalid",
+        code: ["action-budget-exceeded", "recipe-target-invalid"].includes(error?.code) ? error.code : "recipe-invalid",
         detail: error instanceof Error ? error.message : String(error),
         ...(error?.blocker ?? {}),
       },

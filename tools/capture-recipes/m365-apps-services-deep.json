@@ -1,6 +1,14 @@
 {
   "portal": "M365 Apps Services",
   "url": "https://config.office.com/officeSettings",
+  "pageTarget": {
+    "matchHosts": ["config.office.com"],
+    "matchPathPrefixes": ["/officeSettings"],
+    "bootstrap": {
+      "matchHosts": ["config.office.com"],
+      "matchPathnames": ["/officeSettings"]
+    }
+  },
   "matchHosts": [
     "config.office.com",
     "clients.config.office.net"

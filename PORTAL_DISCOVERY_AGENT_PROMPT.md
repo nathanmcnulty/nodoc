@@ -121,6 +121,14 @@ same-portal bootstrap-target GET alignment, bounded same-ID navigation
 readiness, and then strict preflight on the same target ID. Readiness must
 reach the checked-in entry URL or fail closed; it is not an arbitrary wait:
 
+The plan must first validate the selected recipe's target metadata. An explicit
+`pageTarget` describes the browser UI only; top-level `matchHosts` and
+`matchPathPrefixes` remain network-capture filters and must not be reused as UI
+criteria. A legacy SPA fragment is allowed only for an HTTPS, same-origin,
+query-free entry URL with an explicit clean host/path `pageTarget`; the fragment
+never becomes a target criterion or capture filter. A metadata blocker is
+terminal before browser allocation or ledger mutation.
+
   npm run discover:portal -- --portal <portal-spec-id> --profile bounded --phase all --artifacts <fresh-artifact-directory>
 
 The orchestrator runs this gate before ledger dispatch. If it fails, stop and

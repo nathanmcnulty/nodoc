@@ -104,13 +104,20 @@ export function validateRecipeTargetMetadata(recipe) {
   let entryUrl;
   let recipeUrl;
   try {
-    entryUrl = new URL(entryUrlValue);
     recipeUrl = new URL(recipe?.url);
+    entryUrl = new URL(entryUrlValue, recipeUrl);
   } catch {
     throw new Error("recipe entry and declared root URLs must be valid URLs.");
   }
-  if (entryUrl.protocol !== "https:" || entryUrl.username || entryUrl.password || entryUrl.search || entryUrl.hash) {
-    throw new Error("recipe entry URL must be an HTTPS URL without credentials, query, or fragment.");
+  const hasExplicitPageTarget = recipe?.pageTarget !== undefined;
+  if (
+    entryUrl.protocol !== "https:"
+    || entryUrl.username
+    || entryUrl.password
+    || entryUrl.search
+    || (entryUrl.hash && !hasExplicitPageTarget)
+  ) {
+    throw new Error("recipe entry URL must be HTTPS without credentials or query; fragments require an explicit pageTarget.");
   }
   const classification = classifyGetProbeUrl(entryUrl.href, recipeUrl.href);
   if (!classification.allowed) {
@@ -137,7 +144,7 @@ export function validateRecipeTargetMetadata(recipe) {
 export function recipeEntryMatchesPageTarget(recipe) {
   let entryUrl;
   try {
-    entryUrl = new URL(getRecipeEntryUrl(recipe));
+    entryUrl = new URL(getRecipeEntryUrl(recipe), recipe?.url);
   } catch {
     return false;
   }

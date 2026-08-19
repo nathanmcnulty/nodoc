@@ -197,17 +197,11 @@ async function validateRecipeFile(errors, recipePath) {
     fail(errors, `${recipePath}: maxActions must be a non-negative integer when present.`);
   }
 
-  if (recipe.pageTarget !== undefined) {
-    if (!recipe.pageTarget || typeof recipe.pageTarget !== "object" || Array.isArray(recipe.pageTarget)) {
-      fail(errors, `${recipePath}: pageTarget must be an object when present.`);
-    } else {
-      try {
-        resolvePageTargetCriteria(recipe);
-        validateRecipeTargetMetadata(recipe);
-      } catch (error) {
-        fail(errors, `${recipePath}: ${error.message}`);
-      }
-    }
+  try {
+    resolvePageTargetCriteria(recipe);
+    validateRecipeTargetMetadata(recipe);
+  } catch (error) {
+    fail(errors, `${recipePath}: ${error.message}`);
   }
 
   validateSeedRouteGroups(errors, recipePath, recipe.seedRouteGroups);

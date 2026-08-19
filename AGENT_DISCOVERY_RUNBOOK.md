@@ -223,7 +223,14 @@ not discovery work:
    project.
 2. Restore the repository's locked dependencies when `node_modules` is absent;
    workers must not install or update packages.
-3. Run the portal plan command and require `status: planned`.
+3. Run the portal plan command and require `status: planned`. The plan must
+   validate the selected recipe target metadata before any browser or ledger
+   work. Treat explicit `pageTarget` host/path values as UI criteria and
+   top-level `matchHosts`/`matchPathPrefixes` as network-capture filters; never
+   substitute the latter for the former. A legacy SPA fragment is valid only
+   when the entry is HTTPS, same-origin, query-free, and constrained by an
+   explicit clean host/path `pageTarget`; fragments are never matching or
+   capture criteria.
 4. Require `npm run browser:cdp:status -- --profile-key <key>` to report the
    manifest-owned browser as healthy, then run the portal driver against that
    exact loopback endpoint. Its recipe-gated preflight verifies browser metadata,
@@ -321,11 +328,19 @@ complete sign-in only if the browser UI requires it, then **always** run the
 read-only authenticated preflight. Only preflight and later capture barrier
 detection may report `authentication-required`. The sanitized manifest is
 stored beneath `%LOCALAPPDATA%\nodoc-cdp\manifests`, outside Git, and contains
-only lifecycle identity needed to prove ownership. `status` and `start` fail
+only lifecycle identity needed to prove ownership. After launch, the owner
+resolves exactly one long-lived process matching the browser binary, fixed
+port, dedicated profile, and random owner token, then persists that PID instead
+of assuming the short-lived launcher PID remains authoritative. Zero or
+multiple exact candidates fail closed. `status` and `start` fail
 closed for malformed or stale manifests, a product mismatch, an unknown
 listener, or an occupied port. `stop` terminates only the exact manifest PID
 whose executable, fixed port, dedicated profile, and random owner token all
-match; it never kills by process name.
+match; it never kills by process name. If the recorded PID disappears while an
+exact token/profile candidate or live listener remains, retain the manifest,
+stop nothing, and report an identity/orphan blocker. Remove a stale manifest
+only after the recorded PID and exact candidates are absent and the endpoint is
+confirmed free.
 
 The required order is: owner ready -> strict feature preflight; only when the
 validated recipe declares it and the feature target is absent, one
