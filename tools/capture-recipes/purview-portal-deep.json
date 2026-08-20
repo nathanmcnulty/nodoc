@@ -6,44 +6,54 @@
     "matchPathPrefixes": ["/"]
   },
   "noveltyFrontier": {
-    "baseline": "checked-in-spec-and-live-capture-ledgers",
-    "baselineSignals": { "queryMetadata": [], "requestShapes": [], "responseShapes": [], "routes": [] },
+    "baseline": "eight checked-in same-origin operations plus prior Purview adjacent review and known telemetry",
+    "baselineSignals": {
+      "queryMetadata": [
+        "purview.microsoft.com GET /api/Auth/getToken resource",
+        "purview.microsoft.com GET /api/Auth/getToken serviceType",
+        "purview.microsoft.com GET /api/v2/auth/GetCachedRoles refreshCache",
+        "purview.microsoft.com GET /api/user/ query",
+        "purview.microsoft.com POST /api/Report/GetReportSummaryData dataSourceId",
+        "purview.microsoft.com POST /api/Report/GetReportSummaryData reportId"
+      ],
+      "requestShapes": [],
+      "responseShapes": [],
+      "routes": [
+        "purview.microsoft.com GET /api/Auth/getToken",
+        "purview.microsoft.com GET /api/Auth/getSpaAuthCode",
+        "purview.microsoft.com GET /api/v2/auth/GetCachedRoles",
+        "purview.microsoft.com POST /api/auth/IsInRoles",
+        "purview.microsoft.com GET /api/adminauditlogconfig/",
+        "purview.microsoft.com GET /api/user/",
+        "purview.microsoft.com POST /api/LabelUserActivityLog/GetChartData",
+        "purview.microsoft.com POST /api/Report/GetReportSummaryData",
+        "purview.microsoft.com POST /api/log/Put"
+      ]
+    },
     "targets": [
       {
-        "id": "compliance-catalog-dlp-solution-shapes",
-        "state": "Compliance Manager, Data Catalog, and DLP solution states",
+        "id": "compliance-manager-detail-unknown-api-family",
+        "state": "Compliance Manager landing and read-only detail states",
         "evidenceLevel": "confirmed",
         "expectedHostFamilies": ["purview.microsoft.com"],
         "expectedRoutePrefixes": ["/api"],
-        "expectedInformationClasses": ["new-route-family", "request-shape", "response-shape", "response-metadata"],
-        "actionIndexes": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
-        "safeAction": "Open solution list and detail surfaces without creating assessments or policies.",
-        "acceptanceKey": "solution-route-or-detail-shape-delta",
-        "rationale": "The eight-operation spec does not model the solution catalog and detail bootstrap families."
+        "expectedInformationClasses": ["new-route-family", "request-shape", "response-shape", "query-metadata", "response-metadata"],
+        "actionIndexes": [0, 1, 2, 3],
+        "safeAction": "Open Compliance Manager and its read-only details surface without creating assessments, exports, or policies.",
+        "acceptanceKey": "compliance-manager-detail-normalized-route-and-shape-delta",
+        "rationale": "Only an action-attributed normalized method/path outside the checked-in and telemetry baseline, or an evaluator-qualified missing shape or metadata signal, qualifies."
       },
       {
-        "id": "ediscovery-records-protection-shapes",
-        "state": "eDiscovery, Records Management, and Information Protection states",
-        "evidenceLevel": "confirmed",
-        "expectedHostFamilies": ["purview.microsoft.com"],
-        "expectedRoutePrefixes": ["/api"],
-        "expectedInformationClasses": ["new-route-family", "request-shape", "response-shape", "query-metadata"],
-        "actionIndexes": [12, 13, 14, 15, 16, 17, 18, 19, 20],
-        "safeAction": "Open read-only solution landing states without starting searches, cases, exports, or policy changes.",
-        "acceptanceKey": "governance-solution-route-or-shape-delta",
-        "rationale": "These major solution states are absent from the currently narrow portal specification."
-      },
-      {
-        "id": "audit-settings-ocr-usage-metadata",
-        "state": "Audit, Settings, OCR, and Usage center states",
+        "id": "dlp-representative-unknown-api-family",
+        "state": "Data Loss Prevention read-only landing state",
         "evidenceLevel": "confirmed",
         "expectedHostFamilies": ["purview.microsoft.com"],
         "expectedRoutePrefixes": ["/api"],
         "expectedInformationClasses": ["new-route-family", "response-shape", "response-metadata", "query-metadata"],
-        "actionIndexes": [21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32],
-        "safeAction": "Visit read-only audit, settings, OCR, and usage states without running searches or changing configuration.",
-        "acceptanceKey": "settings-feature-check-or-usage-shape-delta",
-        "rationale": "Roles, feature checks, settings, and usage metadata are promising undocumented portal families."
+        "actionIndexes": [4, 5],
+        "safeAction": "Open only the Data Loss Prevention landing state without policy creation, simulation, editing, export, or configuration controls.",
+        "acceptanceKey": "dlp-normalized-route-and-shape-delta",
+        "rationale": "DLP is the single representative governance state; deferred solutions require a concrete delta from this pass before receiving browser time."
       }
     ]
   },
@@ -53,41 +63,14 @@
   "matchPathPrefixes": [
     "/api"
   ],
-  "postActionSettleMs": 10000,
-  "settleMs": 12000,
+  "postActionSettleMs": 8000,
+  "settleMs": 10000,
   "actions": [
     "click-label-root=Compliance Manager",
-    "wait-ms=6000",
     "capture=compliance-manager",
     "click-label-root=View details in Compliance Manager",
-    "wait-ms=6000",
     "capture=compliance-manager-detail",
-    "click-label-root=Data Catalog",
-    "wait-ms=6000",
-    "capture=data-catalog",
     "click-label-root=Data Loss Prevention",
-    "wait-ms=6000",
-    "capture=data-loss-prevention",
-    "click-contains-root=eDiscovery",
-    "wait-ms=6000",
-    "capture=ediscovery",
-    "click-contains-root=Records Management",
-    "wait-ms=6000",
-    "capture=records-management",
-    "click-label-root=Information Protection",
-    "wait-ms=6000",
-    "capture=information-protection",
-    "click-contains-root=Audit",
-    "wait-ms=6000",
-    "capture=audit",
-    "click-contains-root=Settings",
-    "wait-ms=6000",
-    "capture=settings",
-    "click-contains-root=OCR",
-    "wait-ms=6000",
-    "capture=ocr-settings",
-    "click-label-root=Usage center (preview)",
-    "wait-ms=6000",
-    "capture=usage-center"
+    "capture=data-loss-prevention"
   ]
 }
