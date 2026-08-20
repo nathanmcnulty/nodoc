@@ -213,6 +213,304 @@
                             ]
                         },
                         {
+                            "name": "accessPackageCatalogs",
+                            "description": "",
+                            "item": [
+                                {
+                                    "id": "3e64ab63-7bb0-4d97-889b-0e7f3b253e39",
+                                    "name": "List access package catalog summaries",
+                                    "request": {
+                                        "name": "List access package catalog summaries",
+                                        "description": {
+                                            "content": "Retrieves catalog summary records used by the Access Packages portal\nview. Each record links a catalog identifier to aggregate access-package\nand resource counts. The portal was observed using both list-ordering\nand projection/expansion query variants.\n",
+                                            "type": "text/plain"
+                                        },
+                                        "url": {
+                                            "path": [
+                                                "api",
+                                                "v1",
+                                                "accessPackageCatalogs"
+                                            ],
+                                            "host": [
+                                                "{{baseUrl}}"
+                                            ],
+                                            "query": [
+                                                {
+                                                    "disabled": false,
+                                                    "description": {
+                                                        "content": "Include the total result count in the OData response",
+                                                        "type": "text/plain"
+                                                    },
+                                                    "key": "$count",
+                                                    "value": "true"
+                                                },
+                                                {
+                                                    "disabled": false,
+                                                    "description": {
+                                                        "content": "OData order-by expression",
+                                                        "type": "text/plain"
+                                                    },
+                                                    "key": "$orderby",
+                                                    "value": "string"
+                                                },
+                                                {
+                                                    "disabled": false,
+                                                    "description": {
+                                                        "content": "Maximum number of results to return",
+                                                        "type": "text/plain"
+                                                    },
+                                                    "key": "$top",
+                                                    "value": "6913"
+                                                },
+                                                {
+                                                    "disabled": false,
+                                                    "description": {
+                                                        "content": "OData related-resource expansion expression",
+                                                        "type": "text/plain"
+                                                    },
+                                                    "key": "$expand",
+                                                    "value": "string"
+                                                },
+                                                {
+                                                    "disabled": false,
+                                                    "description": {
+                                                        "content": "OData filter expression",
+                                                        "type": "text/plain"
+                                                    },
+                                                    "key": "$filter",
+                                                    "value": "string"
+                                                },
+                                                {
+                                                    "disabled": false,
+                                                    "description": {
+                                                        "content": "OData response-property selection expression",
+                                                        "type": "text/plain"
+                                                    },
+                                                    "key": "$select",
+                                                    "value": "string"
+                                                }
+                                            ],
+                                            "variable": []
+                                        },
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            }
+                                        ],
+                                        "method": "GET",
+                                        "body": {},
+                                        "auth": null
+                                    },
+                                    "response": [
+                                        {
+                                            "id": "a9adccb1-608b-45c9-8fd5-55ce2463c640",
+                                            "name": "Access package catalog summaries",
+                                            "originalRequest": {
+                                                "url": {
+                                                    "path": [
+                                                        "api",
+                                                        "v1",
+                                                        "accessPackageCatalogs"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [
+                                                        {
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "Include the total result count in the OData response",
+                                                                "type": "text/plain"
+                                                            },
+                                                            "key": "$count",
+                                                            "value": "true"
+                                                        },
+                                                        {
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "OData order-by expression",
+                                                                "type": "text/plain"
+                                                            },
+                                                            "key": "$orderby",
+                                                            "value": "string"
+                                                        },
+                                                        {
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "Maximum number of results to return",
+                                                                "type": "text/plain"
+                                                            },
+                                                            "key": "$top",
+                                                            "value": "6913"
+                                                        },
+                                                        {
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "OData related-resource expansion expression",
+                                                                "type": "text/plain"
+                                                            },
+                                                            "key": "$expand",
+                                                            "value": "string"
+                                                        },
+                                                        {
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "OData filter expression",
+                                                                "type": "text/plain"
+                                                            },
+                                                            "key": "$filter",
+                                                            "value": "string"
+                                                        },
+                                                        {
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "OData response-property selection expression",
+                                                                "type": "text/plain"
+                                                            },
+                                                            "key": "$select",
+                                                            "value": "string"
+                                                        }
+                                                    ],
+                                                    "variable": []
+                                                },
+                                                "header": [
+                                                    {
+                                                        "key": "Accept",
+                                                        "value": "application/json"
+                                                    }
+                                                ],
+                                                "method": "GET",
+                                                "body": {}
+                                            },
+                                            "status": "OK",
+                                            "code": 200,
+                                            "header": [
+                                                {
+                                                    "key": "Content-Type",
+                                                    "value": "application/json"
+                                                }
+                                            ],
+                                            "body": "{\n  \"@odata.context\": \"string\",\n  \"value\": [\n    {\n      \"id\": \"string\",\n      \"additionalInfo\": {\n        \"catalogId\": \"string\",\n        \"accessPackageCount\": 7291.7852621235925,\n        \"resourceCount\": 5318.880973611335\n      }\n    },\n    {\n      \"id\": \"string\",\n      \"additionalInfo\": {\n        \"catalogId\": \"string\",\n        \"accessPackageCount\": 3639.935011857306,\n        \"resourceCount\": 2951.5689443851834\n      }\n    }\n  ]\n}",
+                                            "cookie": [],
+                                            "_postman_previewlanguage": "json"
+                                        }
+                                    ],
+                                    "event": [],
+                                    "protocolProfileBehavior": {
+                                        "disableBodyPruning": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "checkAccess",
+                            "description": "",
+                            "item": [
+                                {
+                                    "id": "bcba4bf5-5d38-4b59-9f16-cd2c0b7c1fa6",
+                                    "name": "Check authorization for an entitlement-management action",
+                                    "request": {
+                                        "name": "Check authorization for an entitlement-management action",
+                                        "description": {
+                                            "content": "Evaluates whether the caller is authorized for the supplied action and\nresource scope. This is a read-like authorization check; it does not\nperform the action named in the request.\n\n**Safety:** This operation was observed passively during a normal portal\npage load. Do not probe or replay it, alter the action or resource scope,\nor treat it as a write-safe test route.\n",
+                                            "type": "text/plain"
+                                        },
+                                        "url": {
+                                            "path": [
+                                                "api",
+                                                "v1",
+                                                "checkAccess"
+                                            ],
+                                            "host": [
+                                                "{{baseUrl}}"
+                                            ],
+                                            "query": [],
+                                            "variable": []
+                                        },
+                                        "header": [
+                                            {
+                                                "key": "Content-Type",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            }
+                                        ],
+                                        "method": "POST",
+                                        "body": {
+                                            "mode": "raw",
+                                            "raw": "{\n  \"action\": \"string\",\n  \"resourceScope\": \"string\"\n}",
+                                            "options": {
+                                                "raw": {
+                                                    "headerFamily": "json",
+                                                    "language": "json"
+                                                }
+                                            }
+                                        },
+                                        "auth": null
+                                    },
+                                    "response": [
+                                        {
+                                            "id": "60e1b91a-42db-4cb9-8941-c621be77847f",
+                                            "name": "Authorization-check result",
+                                            "originalRequest": {
+                                                "url": {
+                                                    "path": [
+                                                        "api",
+                                                        "v1",
+                                                        "checkAccess"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [],
+                                                    "variable": []
+                                                },
+                                                "header": [
+                                                    {
+                                                        "key": "Content-Type",
+                                                        "value": "application/json"
+                                                    },
+                                                    {
+                                                        "key": "Accept",
+                                                        "value": "application/json"
+                                                    }
+                                                ],
+                                                "method": "POST",
+                                                "body": {
+                                                    "mode": "raw",
+                                                    "raw": "{\n  \"action\": \"string\",\n  \"resourceScope\": \"string\"\n}",
+                                                    "options": {
+                                                        "raw": {
+                                                            "headerFamily": "json",
+                                                            "language": "json"
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            "status": "OK",
+                                            "code": 200,
+                                            "header": [
+                                                {
+                                                    "key": "Content-Type",
+                                                    "value": "application/json"
+                                                }
+                                            ],
+                                            "body": "{\n  \"@odata.context\": \"string\",\n  \"value\": true\n}",
+                                            "cookie": [],
+                                            "_postman_previewlanguage": "json"
+                                        }
+                                    ],
+                                    "event": [],
+                                    "protocolProfileBehavior": {
+                                        "disableBodyPruning": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
                             "name": "accessPackages",
                             "description": "",
                             "item": [

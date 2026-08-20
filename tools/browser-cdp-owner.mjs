@@ -16,6 +16,7 @@ const manifestSchemaVersion = 1;
 const manifestOwner = "nodoc-browser-cdp";
 const maxVersionBytes = 64 * 1024;
 const defaultTimeoutMs = 2500;
+const defaultProcessInspectionTimeoutMs = 15000;
 const supportedBrowsers = new Set(["auto", "edge", "chrome"]);
 
 export class BrowserCdpOwnerError extends Error {
@@ -273,13 +274,41 @@ function normalizePathForComparison(value) {
   return resolve(value).replace(/[\\/]+$/u, "").toLowerCase();
 }
 
+export function parseWindowsCommandLineArguments(commandLine) {
+  const argumentsList = [];
+  let current = "";
+  let quoted = false;
+  for (const character of String(commandLine ?? "")) {
+    if (character === '"') {
+      quoted = !quoted;
+      continue;
+    }
+    if (/\s/u.test(character) && !quoted) {
+      if (current) argumentsList.push(current);
+      current = "";
+      continue;
+    }
+    current += character;
+  }
+  if (quoted) return [];
+  if (current) argumentsList.push(current);
+  return argumentsList;
+}
+
 export function isExactManifestOwner(manifest, processInfo, profilePath = manifest.profilePath) {
   if (!processInfo || Number(processInfo.pid) !== manifest.pid) return false;
   if (normalizePathForComparison(processInfo.executablePath ?? "") !== normalizePathForComparison(manifest.binaryPath)) return false;
-  const commandLine = String(processInfo.commandLine ?? "");
-  return commandLine.includes(`--nodoc-cdp-owner=${manifest.ownerToken}`)
-    && commandLine.includes(`--remote-debugging-port=${manifest.port}`)
-    && commandLine.includes(`--user-data-dir=${profilePath}`);
+  const argumentsList = parseWindowsCommandLineArguments(processInfo.commandLine);
+  const switchValues = (name) => argumentsList
+    .filter((argument) => argument.toLowerCase().startsWith(`--${name.toLowerCase()}=`))
+    .map((argument) => argument.slice(argument.indexOf("=") + 1));
+  const ownerTokens = switchValues("nodoc-cdp-owner");
+  const ports = switchValues("remote-debugging-port");
+  const profiles = switchValues("user-data-dir");
+  return ownerTokens.length === 1 && ownerTokens[0] === manifest.ownerToken
+    && ports.length === 1 && ports[0] === String(manifest.port)
+    && profiles.length === 1
+    && normalizePathForComparison(profiles[0]) === normalizePathForComparison(profilePath);
 }
 
 async function readOwnerManifest(path) {
@@ -311,7 +340,7 @@ async function defaultPortAvailable(host, port) {
   });
 }
 
-function inspectWindowsProcess(pid) {
+function inspectWindowsProcess(pid, timeoutMs = defaultProcessInspectionTimeoutMs) {
   const script = [
     `$p = Get-CimInstance Win32_Process -Filter "ProcessId = ${pid}" -ErrorAction SilentlyContinue`,
     "if ($null -ne $p) { $p | Select-Object ProcessId,ExecutablePath,CommandLine | ConvertTo-Json -Compress }",
@@ -319,7 +348,7 @@ function inspectWindowsProcess(pid) {
   const result = spawnSync("powershell.exe", ["-NoProfile", "-NonInteractive", "-Command", script], {
     encoding: "utf8",
     windowsHide: true,
-    timeout: defaultTimeoutMs,
+    timeout: timeoutMs,
   });
   if (result.error) throw result.error;
   if (result.status !== 0) fail("process-inspection-failed", "could not inspect the manifest PID.");
@@ -330,6 +359,28 @@ function inspectWindowsProcess(pid) {
     executablePath: value.ExecutablePath,
     commandLine: value.CommandLine,
   };
+}
+
+function findWindowsOwnerProcesses(ownerToken, timeoutMs = defaultProcessInspectionTimeoutMs) {
+  const script = [
+    `$p = Get-CimInstance Win32_Process -Filter "CommandLine LIKE '%--nodoc-cdp-owner=${ownerToken}%'" -ErrorAction SilentlyContinue`,
+    "$items = @($p | Select-Object ProcessId,ExecutablePath,CommandLine)",
+    "if ($items.Count -gt 0) { ConvertTo-Json -InputObject $items -Compress }",
+  ].join("; ");
+  const result = spawnSync("powershell.exe", ["-NoProfile", "-NonInteractive", "-Command", script], {
+    encoding: "utf8",
+    windowsHide: true,
+    timeout: timeoutMs,
+  });
+  if (result.error) throw result.error;
+  if (result.status !== 0) fail("process-inspection-failed", "could not enumerate owner-token processes.");
+  if (!result.stdout.trim()) return [];
+  const values = JSON.parse(result.stdout);
+  return (Array.isArray(values) ? values : [values]).map((value) => ({
+    pid: Number(value.ProcessId),
+    executablePath: value.ExecutablePath,
+    commandLine: value.CommandLine,
+  }));
 }
 
 function defaultSpawnBrowser(command, args) {
@@ -344,6 +395,7 @@ function defaultTerminateProcess(pid) {
 }
 
 const defaultDependencies = {
+  findOwnerProcesses: findWindowsOwnerProcesses,
   inspectProcess: inspectWindowsProcess,
   isPortAvailable: defaultPortAvailable,
   probeVersion: probeCdpVersion,
@@ -375,6 +427,30 @@ async function probeSafely(deps, options) {
   }
 }
 
+async function inspectProcessSafely(deps, pid, timeoutMs) {
+  try {
+    return { ok: true, processInfo: await deps.inspectProcess(pid, timeoutMs) };
+  } catch (error) {
+    return { ok: false, error };
+  }
+}
+
+async function findExactOwnerCandidatesSafely(deps, manifest, profilePath, timeoutMs) {
+  try {
+    const candidates = await deps.findOwnerProcesses(manifest.ownerToken, timeoutMs);
+    return {
+      ok: true,
+      candidates: candidates.filter((candidate) => isExactManifestOwner(
+        { ...manifest, pid: candidate.pid },
+        candidate,
+        profilePath,
+      )),
+    };
+  } catch (error) {
+    return { ok: false, error };
+  }
+}
+
 export async function getBrowserOwnerStatus(options = {}, dependencies = {}) {
   const deps = { ...defaultDependencies, ...dependencies };
   const config = ownerConfiguration(options);
@@ -389,8 +465,63 @@ export async function getBrowserOwnerStatus(options = {}, dependencies = {}) {
     return { state: available ? "stopped" : "occupied-unknown", endpoint: config.endpoint, profileKey: config.profileKey };
   }
   const manifest = validateManifest(rawManifest, config);
-  const processInfo = await deps.inspectProcess(manifest.pid);
-  if (!processInfo) return { state: "stale-manifest", endpoint: config.endpoint, profileKey: config.profileKey, pid: manifest.pid };
+  const inspection = await inspectProcessSafely(
+    deps,
+    manifest.pid,
+    options.processInspectionTimeoutMs ?? defaultProcessInspectionTimeoutMs,
+  );
+  if (!inspection.ok) {
+    return {
+      state: "owner-status-unknown",
+      endpoint: config.endpoint,
+      profileKey: config.profileKey,
+      pid: manifest.pid,
+      reason: inspection.error?.message ?? String(inspection.error),
+    };
+  }
+  const processInfo = inspection.processInfo;
+  if (!processInfo) {
+    const candidates = await findExactOwnerCandidatesSafely(
+      deps,
+      manifest,
+      config.profilePath,
+      options.processInspectionTimeoutMs ?? defaultProcessInspectionTimeoutMs,
+    );
+    if (!candidates.ok) {
+      return {
+        state: "owner-status-unknown",
+        endpoint: config.endpoint,
+        profileKey: config.profileKey,
+        pid: manifest.pid,
+        reason: candidates.error?.message ?? String(candidates.error),
+      };
+    }
+    if (candidates.candidates.length > 0) {
+      return {
+        state: "owner-identity-changed",
+        endpoint: config.endpoint,
+        profileKey: config.profileKey,
+        pid: manifest.pid,
+        exactCandidateCount: candidates.candidates.length,
+      };
+    }
+    const probe = await probeSafely(deps, {
+      endpoint: config.endpoint,
+      expectedProduct: manifest.product,
+      timeoutMs: options.timeoutMs,
+    });
+    const available = await deps.isPortAvailable(DEFAULT_CDP_HOST, config.port);
+    if (probe.ok || !available) {
+      return {
+        state: "orphaned-owner",
+        endpoint: config.endpoint,
+        profileKey: config.profileKey,
+        pid: manifest.pid,
+        reason: probe.ok ? "CDP listener remained live after the recorded owner PID disappeared." : probe.error?.message,
+      };
+    }
+    return { state: "stale-manifest", endpoint: config.endpoint, profileKey: config.profileKey, pid: manifest.pid };
+  }
   if (!isExactManifestOwner(manifest, processInfo, config.profilePath)) {
     return { state: "ownership-mismatch", endpoint: config.endpoint, profileKey: config.profileKey, pid: manifest.pid };
   }
@@ -504,6 +635,31 @@ export async function startBrowserOwner(options = {}, dependencies = {}) {
         expectedProduct: binary.product,
         timeoutMs: Math.min(options.timeoutMs ?? defaultTimeoutMs, Math.max(1, deadline - Date.now())),
       });
+      const candidates = await findExactOwnerCandidatesSafely(
+        deps,
+        manifest,
+        config.profilePath,
+        options.processInspectionTimeoutMs ?? defaultProcessInspectionTimeoutMs,
+      );
+      if (!candidates.ok) {
+        fail("owner-status-unknown", `could not resolve the long-lived browser owner (${candidates.error?.message ?? String(candidates.error)}).`);
+      }
+      if (candidates.candidates.length > 1) {
+        fail("owner-resolution-failed", `expected exactly one long-lived exact owner process, found ${candidates.candidates.length}; manifest retained for explicit recovery.`);
+      }
+      if (candidates.candidates.length === 0) {
+        lastError = new BrowserCdpOwnerError(
+          "owner-resolution-failed",
+          "expected exactly one long-lived exact owner process, found 0; manifest retained for explicit recovery.",
+        );
+        await deps.delay(Math.min(150, Math.max(1, deadline - Date.now())));
+        continue;
+      }
+      const resolvedPid = candidates.candidates[0].pid;
+      if (manifest.pid !== resolvedPid) {
+        manifest.pid = resolvedPid;
+        await deps.writeManifest(config.manifestPath, manifest);
+      }
       return {
         state: "running",
         reused: false,
@@ -511,16 +667,76 @@ export async function startBrowserOwner(options = {}, dependencies = {}) {
         profileKey: config.profileKey,
         product: binary.product,
         browser: version.browser,
-        pid: child.pid,
+        pid: resolvedPid,
         nextStep: ownerReadyNextStep({ endpoint: config.endpoint, product: binary.product, portalUrl }),
       };
     } catch (error) {
       lastError = error;
-      if (error?.code === "product-mismatch") throw error;
+      if (["product-mismatch", "owner-status-unknown", "owner-resolution-failed"].includes(error?.code)) {
+        throw error;
+      }
       await deps.delay(Math.min(150, Math.max(1, deadline - Date.now())));
     }
   } while (Date.now() < deadline);
+  if (lastError?.code === "owner-resolution-failed") throw lastError;
   fail("launch-validation-failed", `browser launched but bounded CDP validation failed; manifest retained for exact-owner stop (${lastError?.message ?? "unknown error"}).`);
+}
+
+export async function rebindBrowserOwner(options = {}, dependencies = {}) {
+  const deps = { ...defaultDependencies, ...dependencies };
+  const config = ownerConfiguration(options);
+  const rawManifest = await deps.readManifest(config.manifestPath);
+  if (!rawManifest) fail("manifest-missing", "cannot rebind without an existing owner manifest.");
+  const manifest = validateManifest(rawManifest, config);
+  const inspection = await inspectProcessSafely(
+    deps,
+    manifest.pid,
+    options.processInspectionTimeoutMs ?? defaultProcessInspectionTimeoutMs,
+  );
+  if (!inspection.ok) {
+    fail("owner-status-unknown", `could not inspect the recorded owner PID (${inspection.error?.message ?? String(inspection.error)}).`);
+  }
+  if (inspection.processInfo) {
+    fail(
+      isExactManifestOwner(manifest, inspection.processInfo, config.profilePath) ? "owner-already-bound" : "ownership-mismatch",
+      "refusing to rebind while the recorded manifest PID still exists.",
+    );
+  }
+  const candidates = await findExactOwnerCandidatesSafely(
+    deps,
+    manifest,
+    config.profilePath,
+    options.processInspectionTimeoutMs ?? defaultProcessInspectionTimeoutMs,
+  );
+  if (!candidates.ok) {
+    fail("owner-status-unknown", `could not resolve the replacement browser owner (${candidates.error?.message ?? String(candidates.error)}).`);
+  }
+  if (candidates.candidates.length !== 1) {
+    fail("owner-resolution-failed", `rebind requires exactly one fully matching owner process, found ${candidates.candidates.length}; manifest unchanged.`);
+  }
+  const version = await deps.probeVersion({
+    endpoint: config.endpoint,
+    expectedProduct: manifest.product,
+    timeoutMs: options.timeoutMs,
+  });
+  const reboundManifest = { ...manifest, pid: candidates.candidates[0].pid };
+  await deps.writeManifest(config.manifestPath, reboundManifest);
+  return {
+    state: "healthy",
+    rebound: true,
+    lifecycleStatus: "owner-ready",
+    authenticationStatus: "unverified",
+    endpoint: config.endpoint,
+    profileKey: config.profileKey,
+    product: manifest.product,
+    browser: version.browser,
+    previousPid: manifest.pid,
+    pid: reboundManifest.pid,
+    nextStep: {
+      code: OWNER_PREFLIGHT_REQUIRED_CODE,
+      message: "Rebind restored lifecycle identity only. Run the recipe-gated authenticated preflight before ledger allocation or capture.",
+    },
+  };
 }
 
 export async function stopBrowserOwner(options = {}, dependencies = {}) {
@@ -535,19 +751,48 @@ export async function stopBrowserOwner(options = {}, dependencies = {}) {
     return { state: "stopped", alreadyStopped: true, endpoint: config.endpoint, profileKey: config.profileKey };
   }
   const manifest = validateManifest(rawManifest, config);
-  const processInfo = await deps.inspectProcess(manifest.pid);
+  const inspectionTimeoutMs = options.processInspectionTimeoutMs ?? defaultProcessInspectionTimeoutMs;
+  const inspection = await inspectProcessSafely(deps, manifest.pid, inspectionTimeoutMs);
+  if (!inspection.ok) {
+    fail("owner-status-unknown", `could not verify the manifest PID; nothing was stopped (${inspection.error?.message ?? String(inspection.error)}).`);
+  }
+  const processInfo = inspection.processInfo;
   if (!processInfo) {
+    const candidates = await findExactOwnerCandidatesSafely(deps, manifest, config.profilePath, inspectionTimeoutMs);
+    if (!candidates.ok) {
+      fail("owner-status-unknown", `could not verify replacement owner processes; nothing was stopped (${candidates.error?.message ?? String(candidates.error)}).`);
+    }
+    if (candidates.candidates.length > 0) {
+      fail("owner-identity-changed", `recorded PID disappeared but ${candidates.candidates.length} exact owner candidate(s) remain; manifest retained and nothing was stopped.`);
+    }
+    const probe = await probeSafely(deps, {
+      endpoint: config.endpoint,
+      expectedProduct: manifest.product,
+      timeoutMs: options.timeoutMs,
+    });
+    const available = await deps.isPortAvailable(DEFAULT_CDP_HOST, config.port);
+    if (probe.ok || !available) {
+      fail("orphaned-owner", "recorded PID disappeared while the endpoint remained occupied; manifest retained and nothing was stopped.");
+    }
     await deps.removeManifest(config.manifestPath);
     return { state: "stopped", staleManifestRemoved: true, endpoint: config.endpoint, profileKey: config.profileKey };
   }
   if (!isExactManifestOwner(manifest, processInfo, config.profilePath)) {
     fail("exact-owner-required", "manifest PID does not exactly match its binary, profile, port, and owner token; nothing was stopped.");
   }
-  await deps.terminateProcess(manifest.pid);
+  try {
+    await deps.terminateProcess(manifest.pid);
+  } catch (error) {
+    if (error?.code !== "ESRCH") throw error;
+  }
   const deadline = Date.now() + (options.stopTimeoutMs ?? 5000);
   while (Date.now() < deadline) {
     await deps.delay(50);
-    if (!await deps.inspectProcess(manifest.pid)) {
+    const pollInspection = await inspectProcessSafely(deps, manifest.pid, inspectionTimeoutMs);
+    if (!pollInspection.ok) {
+      fail("owner-status-unknown", `could not verify whether the exact owner exited; manifest retained (${pollInspection.error?.message ?? String(pollInspection.error)}).`);
+    }
+    if (!pollInspection.processInfo) {
       await deps.removeManifest(config.manifestPath);
       return { state: "stopped", pid: manifest.pid, endpoint: config.endpoint, profileKey: config.profileKey };
     }
@@ -557,8 +802,8 @@ export async function stopBrowserOwner(options = {}, dependencies = {}) {
 
 function parseCli(argv) {
   const command = argv[0];
-  if (!["status", "start", "stop"].includes(command)) {
-    fail("command-invalid", "usage: browser-cdp-owner.mjs <status|start|stop> --profile-key <key> [options]");
+  if (!["status", "start", "rebind", "stop"].includes(command)) {
+    fail("command-invalid", "usage: browser-cdp-owner.mjs <status|start|rebind|stop> --profile-key <key> [options]");
   }
   const options = {};
   const flags = new Map([
@@ -568,6 +813,7 @@ function parseCli(argv) {
     ["--browser", "browser"],
     ["--binary", "binaryPath"],
     ["--timeout-ms", "timeoutMs"],
+    ["--process-inspection-timeout-ms", "processInspectionTimeoutMs"],
     ["--launch-timeout-ms", "launchTimeoutMs"],
     ["--stop-timeout-ms", "stopTimeoutMs"],
   ]);
@@ -575,7 +821,7 @@ function parseCli(argv) {
     const property = flags.get(argv[index]);
     const value = argv[index + 1];
     if (!property || value === undefined) fail("argument-invalid", `unknown or incomplete argument: ${argv[index]}`);
-    options[property] = ["port", "timeoutMs", "launchTimeoutMs", "stopTimeoutMs"].includes(property) ? Number(value) : value;
+    options[property] = ["port", "timeoutMs", "processInspectionTimeoutMs", "launchTimeoutMs", "stopTimeoutMs"].includes(property) ? Number(value) : value;
   }
   return { command, options };
 }
@@ -584,6 +830,7 @@ export async function runBrowserCdpOwnerCli(argv = process.argv.slice(2)) {
   const { command, options } = parseCli(argv);
   if (command === "status") return getBrowserOwnerStatus(options);
   if (command === "start") return startBrowserOwner(options);
+  if (command === "rebind") return rebindBrowserOwner(options);
   return stopBrowserOwner(options);
 }
 

@@ -116,10 +116,21 @@ completeness; and no-change is not a completeness claim.
 Before capture, run the required recipe-gated target gate. Owner startup only
 reports `lifecycleStatus: owner-ready` and `authenticationStatus: unverified`;
 only preflight determines whether authentication is confirmed or blocked. If
+Edge performs a launcher PID handoff, operator `rebind` is allowed only for one
+fully exact manifest-token/binary/port/dedicated-profile candidate with the
+expected CDP product; it must never adopt an unknown listener. If
 the feature target is absent, the checked-in recipe may authorize one exact
 same-portal bootstrap-target GET alignment, bounded same-ID navigation
 readiness, and then strict preflight on the same target ID. Readiness must
 reach the checked-in entry URL or fail closed; it is not an arbitrary wait:
+
+The plan must first validate the selected recipe's target metadata. An explicit
+`pageTarget` describes the browser UI only; top-level `matchHosts` and
+`matchPathPrefixes` remain network-capture filters and must not be reused as UI
+criteria. A legacy SPA fragment is allowed only for an HTTPS, same-origin,
+query-free entry URL with an explicit clean host/path `pageTarget`; the fragment
+never becomes a target criterion or capture filter. A metadata blocker is
+terminal before browser allocation or ledger mutation.
 
   npm run discover:portal -- --portal <portal-spec-id> --profile bounded --phase all --artifacts <fresh-artifact-directory>
 
@@ -134,13 +145,96 @@ orchestrator must publish the categorized plan and reject an over-budget plan
 before preflight or ledger-attempt consumption; report the structured blocker
 and remediation instead of truncating or silently omitting actions.
 
+An expensive capture also requires a checked-in `noveltyFrontier`. Each target
+must name the unvisited UI state, expected host/route family, expected request
+or response-shape/metadata signal, evidence level, safe deterministic recipe
+actions, and an acceptance key. Run plans with `--require-novelty`; matched
+known traffic is baseline context, not discovery yield. Every planned frontier
+target must be attempted or receive a structured blocker. The terminal
+`novelty-assessment.json` must classify the run as `productive`,
+`frontier-incomplete`, `no-target-signal`, or `no-novelty`. A complete artifact
+set with zero expected-route records is `no-target-signal`, not `no-novelty`;
+it keeps the frontier open and requires a deterministic action repair. For a
+passive bootstrap already at its canonical URL, use an explicit checked-in
+`reload=<checkpoint>` action and require its load event instead of assuming a
+same-URL navigation emitted traffic. A completed `no-novelty` run is not a
+successful discovery and must not be repeated unchanged. It can support a
+saturation conclusion only after canonical health passes and no critical
+frontier item remains.
+
+Compile the offline frontier before allocating a browser:
+
+  npm run generate:portal-frontier -- --spec <portal-spec-id> --recipe <recipe-path> [--prior-artifact <candidate-json>] [--candidate-handoff <handoff-json>]
+
+The compiler compares checked-in OpenAPI metadata, coverage gaps, and prior
+sanitized artifacts. Its candidates are review work, not generated UI actions.
+Capture is authorized only when an approved candidate maps to an exact checked-
+in target state and action set. A satisfied recipe blocks before browser work;
+reopening requires a concrete `reopenCondition` and a new immutable
+`approvalDigest`.
+
+The driver derives the primary baseline from the checked-in OpenAPI operation,
+host, parameter, response-status, media-type, and schema metadata. The recipe's
+`baselineSignals` is an explicit overlay for previously accepted runtime shape
+and metadata keys that the OpenAPI cannot encode. Only action-attributed deltas
+from both sources or reviewable candidates classified as undocumented count.
+Suppressed telemetry, static assets, and other non-candidates cannot contribute
+shape or metadata novelty. After review, add every accepted runtime key,
+including response status/media-type keys, to the overlay before another run;
+otherwise a repeat observation could be misreported as new. For normalized
+records observed on multiple pages, prefer the explicit action index over the
+unioned `seenOnPages` list so one target cannot inherit another target's query
+or shape signal. Empty JSON arrays or objects are not response-shape evidence.
+
+Accepted runtime keys enter the overlay only through a schema-validated
+`baseline-approval.json` from exact model `gpt-5.6-luna`. The approval binds the
+spec, canonical signal, evidence IDs, terminal canonical health, and source
+artifact digest. `npm run sync:portal-baseline -- compile <input.json>` emits an
+append-only, idempotent sync result. The input names `sourceArtifactPath`; the
+compiler hashes that file and verifies every approved evidence ID against its
+immutable `evidenceIndex`. Free-form prose, wrong-model output, stale artifact
+hashes, missing evidence, and scope changes never mutate the baseline.
+
+When a frontier depends on a specific visible control, declare
+`frontierControlReadiness` with the exact targeted click action indexes and a
+bounded timeout. Before ledger-attempt creation or capture, the driver must
+inventory the intended root/child targets and classify every control as
+`present`, `absent-not-applicable`, or `ambiguous`. Only one visible match in
+the declared scope is `present`; missing or multiple matches emit
+`frontier-control-unavailable` and spend no capture attempt. Prefer an exact
+stable href or accessibility/automation identifier over label containment.
+Generic child or ReactBlade frames never satisfy a named frontier unless the
+control and resulting traffic are attributed to that frontier action and
+checkpoint. Readiness inventory is sanitized and persisted before ledger
+mutation. Static suppression requires supporting suffix/prefix, content-type,
+and live/bundle transport evidence. A confirmed live API transport is never
+hidden only because its path has a static-looking suffix; `.ReactView` is not a
+broad suppression rule.
+
+Each checkpoint records elapsed time, counted actions, new request/candidate
+families, bundle-cache hits/bytes, and a non-financial cardinality cost proxy.
+The novelty assessment joins qualifying signals per frontier target and emits
+yield rates only when inputs are available. Adjacent confirmed or safety
+evidence must receive an explicit spec/host disposition before more capture on
+the affected host family; a unique matching spec remains only a suggestion.
+
 Run the deterministic interface:
 
-  npm run discover:portal -- --portal <portal-spec-id> --profile bounded --phase plan --json
+  npm run discover:portal -- --portal <portal-spec-id> --profile bounded --phase plan --require-novelty --json
 
-Then create a unique artifact directory outside the repository and run:
+Then create a unique artifact directory and a stable derivative bundle-cache
+directory outside the repository and run:
 
-  npm run discover:portal -- --portal <portal-spec-id> --profile bounded --phase all --artifacts <fresh-artifact-directory>
+  npm run discover:portal -- --portal <portal-spec-id> --profile bounded --phase all --require-novelty --artifacts <fresh-artifact-directory> --bundle-cache-dir <stable-derivative-cache-directory>
+
+Expensive novelty runs must enable the content-addressed bundle cache. The cache
+contains sanitized derivative analysis only and is never evidence; immutable
+run artifacts remain authoritative. Re-analyzing identical bundles at every
+checkpoint wastes the capture supervision budget without increasing discovery
+yield. Preserve a failed run's artifacts, but reuse the compatible derivative
+cache for its one fresh seeded retry. A seeded retry must identify the exact
+terminal incomplete ledger attempt in its `discovery-run.json`; the driver
+atomically creates and claims a new attempt instead of reusing the terminal one.
 
 Read the primary output files named by the runbook, including
 `candidate-handoff.json`. The `all` phase already performs the normalized

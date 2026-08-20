@@ -5,6 +5,7 @@ import {
   buildStableEvidenceId,
   CdpAttributionRegistry,
   captureArtifactSchemaVersion,
+  shouldPreferActiveSessionAttribution,
 } from "../cdp-attribution.mjs";
 
 function context(pageLabel, pageUrl, actionIndex) {
@@ -82,6 +83,46 @@ test("target and frame attribution survives concurrent late events", () => {
   assert.equal(registry.resolve({ sessionId: "worker-session" }).targetType, "worker");
   assert.equal(registry.resolve({ sessionId: "service-session" }).targetType, "service_worker");
   assert.equal(registry.resolve({ sessionId: null }).pageLabel, "02-settings");
+});
+
+test("network request attribution can prefer the current action for long-lived workers", () => {
+  const seed = context("seed-00", "https://portal.example.test/home", -1);
+  const action = context("02-connectors", "https://portal.example.test/connectors", 1);
+  const registry = new CdpAttributionRegistry(
+    { id: "root-target", title: "Portal", type: "page", url: seed.pageUrl },
+    seed,
+  );
+  registry.registerSession("worker-session", {
+    targetId: "worker-target",
+    type: "worker",
+    url: "blob:https://portal.example.test/worker",
+  });
+  registry.recordFrameNavigated("worker-session", {
+    id: "worker-frame",
+    loaderId: "seed-loader",
+    url: "blob:https://portal.example.test/worker",
+  });
+  registry.setRootContext(action);
+  registry.setActiveSessionContexts(action);
+
+  assert.equal(registry.resolve({
+    documentURL: "blob:https://portal.example.test/worker",
+    loaderId: "seed-loader",
+    sessionId: "worker-session",
+  }).pageLabel, "seed-00");
+  assert.equal(registry.resolve({
+    documentURL: "blob:https://portal.example.test/worker",
+    loaderId: "seed-loader",
+    preferSessionContext: true,
+    sessionId: "worker-session",
+  }).pageLabel, "02-connectors");
+});
+
+test("only request-start events prefer the active child-session context", () => {
+  assert.equal(shouldPreferActiveSessionAttribution("Network.requestWillBeSent"), true);
+  assert.equal(shouldPreferActiveSessionAttribution("Network.webSocketCreated"), false);
+  assert.equal(shouldPreferActiveSessionAttribution("Network.webTransportCreated"), false);
+  assert.equal(shouldPreferActiveSessionAttribution("Network.responseReceived"), false);
 });
 
 test("stable evidence IDs are deterministic and attempt-scoped", () => {

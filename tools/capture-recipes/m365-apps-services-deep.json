@@ -1,6 +1,19 @@
 {
   "portal": "M365 Apps Services",
   "url": "https://config.office.com/officeSettings",
+  "pageTarget": {
+    "matchHosts": ["config.office.com"],
+    "matchPathPrefixes": ["/officeSettings"],
+    "bootstrap": {
+      "matchHosts": ["config.office.com"],
+      "matchPathnames": ["/officeSettings"]
+    }
+  },
+  "noveltyStatus": {
+    "status": "satisfied",
+    "reason": "All nine service operations and the health, OneDrive, cloud update, customization, and setup states already have deep or seeded coverage with no open gap; the prior broad frontier only replayed known route families.",
+    "nextRequirement": "Identify an exact unmodeled clients.config.office.net route, selector, response key, status, or media type before another novelty run; do not replay the shared M365 Apps states unchanged."
+  },
   "matchHosts": [
     "config.office.com",
     "clients.config.office.net"

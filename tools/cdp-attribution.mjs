@@ -6,6 +6,10 @@ function sessionKey(sessionId) {
   return sessionId ?? "root";
 }
 
+export function shouldPreferActiveSessionAttribution(eventName) {
+  return eventName === "Network.requestWillBeSent";
+}
+
 function normalizeUrl(value) {
   try {
     const url = new URL(String(value || ""));
@@ -110,6 +114,12 @@ export class CdpAttributionRegistry {
     }
   }
 
+  setActiveSessionContexts(context) {
+    for (const entry of this.sessions.values()) {
+      if (entry.attached) entry.context = { ...context };
+    }
+  }
+
   recordFrameAttached(sessionId, frameId, parentFrameId) {
     const entry = this.sessions.get(sessionId);
     if (!entry || !frameId) {
@@ -137,13 +147,22 @@ export class CdpAttributionRegistry {
     }
   }
 
-  resolve({ sessionId = null, frameId = null, loaderId = null, documentURL = null, targetUrl = null } = {}) {
+  resolve({
+    sessionId = null,
+    frameId = null,
+    loaderId = null,
+    documentURL = null,
+    targetUrl = null,
+    preferSessionContext = false,
+  } = {}) {
     const entry = this.sessions.get(sessionId) ?? this.sessions.get(null);
     const loaderContext = loaderId ? this.loaderContexts.get(loaderId) : null;
     const documentContext = documentURL
       ? this.pageContexts.get(normalizeUrl(documentURL))
       : null;
-    const context = loaderContext ?? documentContext ?? entry?.context ?? this.rootContext;
+    const context = preferSessionContext
+      ? entry?.context ?? loaderContext ?? documentContext ?? this.rootContext
+      : loaderContext ?? documentContext ?? entry?.context ?? this.rootContext;
     return {
       actionIndex: context.actionIndex ?? null,
       attempt: context.attempt ?? 0,

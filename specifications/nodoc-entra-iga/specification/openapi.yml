@@ -63,6 +63,30 @@ components:
       schema:
         type: integer
       description: Number of results to skip
+    $count:
+      name: $count
+      in: query
+      schema:
+        type: boolean
+      description: Include the total result count in the OData response
+    $orderby:
+      name: $orderby
+      in: query
+      schema:
+        type: string
+      description: OData order-by expression
+    $expand:
+      name: $expand
+      in: query
+      schema:
+        type: string
+      description: OData related-resource expansion expression
+    $select:
+      name: $select
+      in: query
+      schema:
+        type: string
+      description: OData response-property selection expression
 tags:
   - name: Billing
     description: Guest user billing configuration
@@ -117,6 +141,82 @@ paths:
       responses:
         '200':
           description: Guest billing configuration updated
+  /api/v1/accessPackageCatalogs:
+    get:
+      tags: [Entitlement Management]
+      summary: List access package catalog summaries
+      description: |
+        Retrieves catalog summary records used by the Access Packages portal
+        view. Each record links a catalog identifier to aggregate access-package
+        and resource counts. The portal was observed using both list-ordering
+        and projection/expansion query variants.
+      parameters:
+        - $ref: '#/components/parameters/$count'
+        - $ref: '#/components/parameters/$orderby'
+        - $ref: '#/components/parameters/$top'
+        - $ref: '#/components/parameters/$expand'
+        - $ref: '#/components/parameters/$filter'
+        - $ref: '#/components/parameters/$select'
+      responses:
+        '200':
+          description: Access package catalog summaries
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  '@odata.context':
+                    type: string
+                  value:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        additionalInfo:
+                          type: object
+                          properties:
+                            catalogId:
+                              type: string
+                            accessPackageCount:
+                              type: number
+                            resourceCount:
+                              type: number
+  /api/v1/checkAccess:
+    post:
+      tags: [Entitlement Management]
+      summary: Check authorization for an entitlement-management action
+      description: |
+        Evaluates whether the caller is authorized for the supplied action and
+        resource scope. This is a read-like authorization check; it does not
+        perform the action named in the request.
+
+        **Safety:** This operation was observed passively during a normal portal
+        page load. Do not probe or replay it, alter the action or resource scope,
+        or treat it as a write-safe test route.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                action:
+                  type: string
+                resourceScope:
+                  type: string
+      responses:
+        '200':
+          description: Authorization-check result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  '@odata.context':
+                    type: string
+                  value:
+                    type: boolean
   /api/v1/accessPackages:
     get:
       tags: [Entitlement Management]

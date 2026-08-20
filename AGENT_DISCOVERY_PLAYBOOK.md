@@ -62,6 +62,35 @@ When promoting discoveries into the repository, aim for more than just path cove
 
 ## Coverage expansion model
 
+### Novelty is the allocation and acceptance boundary
+
+Recipe completion and known-route parity are necessary health signals, not the
+goal of a costly discovery run. Before live allocation, the selected recipe
+must declare a machine-validated `noveltyFrontier` that ties exact safe actions
+to unvisited states, unmodeled host/route families, or checked-in response
+schema and metadata gaps. Normalize method, canonical path, host, query-key
+sets, request/response-shape fingerprints, and interaction state before judging
+novelty. Tenant IDs, timestamps, cursors, and ordering changes do not count.
+The driver derives checked-in operation/schema baselines and merges each
+recipe's explicit `baselineSignals` overlay. Only action-attributed undocumented
+candidates, weak-schema fills, or normalized metadata keys absent from both
+sources count as new. Reviewers must append accepted runtime keys to the overlay
+before another allocation.
+
+The post-run `novelty-assessment.json` reports planned and attempted targets,
+new candidate signals, targeted shape/metadata fingerprints, and one of
+`productive`, `frontier-incomplete`, `no-target-signal`, or `no-novelty`.
+`no-target-signal` means no expected route materialized even though the artifact
+set completed; keep the frontier open and repair the deterministic action. Use
+an explicit same-origin `reload=<checkpoint>` for a passive bootstrap already
+at its canonical URL, and require its load event. Zero new signals after at
+least one expected target route materializes is `no-novelty`; it is a
+known-route replay and must not be described as success or completeness. A
+healthy no-change result supports saturation only after every frontier item is
+exhausted or structurally blocked. Prefer a small targeted detail/interaction
+matrix over replaying a broad recipe whose prior pass already produced no
+unresolved candidates.
+
 Do **not** rely on any single technique to discover the full surface area.
 
 The most effective pattern is a layered pipeline:
@@ -110,6 +139,19 @@ healthy stop. Partial offline analysis reports unavailable rather than
 reconstructing live completeness. Use the recorded window gains and remaining
 eligible work for scheduling and reviewer triage; do not infer token or CPU
 savings from candidate cardinality alone.
+
+Record cost/yield at each checkpoint and per frontier target: counted actions,
+elapsed milliseconds, eligible/absent/ambiguous controls, new request and
+candidate families, qualifying novelty signals, bundle analyzed bytes, and
+memory/persistent cache hits. Yield rates are cardinality metrics; cost is
+non-financial unless an explicit versioned pricing input is supplied.
+
+Run adjacent ownership reconciliation before another capture on the affected
+host family. Single-spec matches are suggestions only; an explicit spec and
+host-family disposition is required to lift the gate. Keep unrelated portals
+schedulable. Static suppression likewise requires evidence: never suppress a
+confirmed live API transport from suffix alone, and do not introduce broad
+`.ReactView` filtering without a representative reviewed corpus.
 
 ### Recommended spidering rules
 
@@ -481,6 +523,13 @@ Preferred flow:
    `/json/list` must remain exactly-one, same-host, and past authentication at
    every gate.
 
+Before this lifecycle, require the portal plan to validate the selected
+recipe's target metadata. `pageTarget` is the browser UI contract; top-level
+host/path prefixes are network-capture filters. Do not infer one from the
+other. Legacy SPA fragments are permitted only as HTTPS, same-origin,
+query-free navigation under an explicit clean host/path `pageTarget`, and the
+fragment is never a target or capture criterion.
+
 Chrome 136+ ignores remote-debugging switches against its default data
 directory unless a nonstandard `--user-data-dir` is supplied, as documented in
 the first-party
@@ -500,6 +549,14 @@ Practical notes:
   owner `status`; only owner `stop` may terminate the exact manifest-owned PID.
   The operator then starts the same stable profile key, verifies both CDP
   endpoints, and gives the worker a new empty artifact directory.
+- Treat browser-launch PID handoff as normal but identity-sensitive: the owner
+  must persist exactly one long-lived process matching binary, port, dedicated
+  profile, and random owner token. If the recorded PID disappears while an
+  exact candidate or listener remains, retain the manifest and stop nothing.
+  The operator may use explicit owner `rebind` only for exactly one candidate
+  that still matches the manifest binary, token, fixed port, dedicated profile,
+  and expected CDP product. Never adopt or kill a process by name, port, or
+  profile alone.
 - Let the checked-in runner use auth and portal headers in memory for same-session
   safe probes. Persisted bodies are token-redacted and persisted headers contain
   metadata rather than raw authorization or cookie values. Other tenant content

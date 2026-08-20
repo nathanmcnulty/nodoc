@@ -176,7 +176,7 @@ test("waits for the same target ID to publish its navigated URL before strict pr
       bootstrapCriteria: { matchHosts: ["config.office.com"], matchPathnames: ["/officeSettings"] },
       stabilityMs: 4,
       pollMs: 1,
-      timeoutMs: 100,
+      timeoutMs: 500,
     });
     assert.equal(result.alignment.status, "aligned");
     assert.equal(result.target.id, "page-1");
@@ -256,4 +256,29 @@ test("fails closed when bootstrap selection is ambiguous, wrong-host, or authent
     [target({ url: "https://config.office.com/officeSettings" })],
     { title: "Sign in", url: "https://config.office.com/officeSettings", bodyText: "Sign in to your account" },
   );
+});
+
+test("rejects active-looking SPA fragments before exact-target navigation", async () => {
+  const current = target({ title: "Microsoft Entra admin center", url: "https://entra.microsoft.com/" });
+  const restore = installWebSocket({
+    evaluate: () => ({ title: current.title, url: current.url, bodyText: "Microsoft Entra admin center" }),
+  });
+  const cdp = await mockCdp(() => [current]);
+  try {
+    await assert.rejects(
+      alignBrowserCdpTarget({
+        endpoint: cdp.endpoint,
+        entryUrl: "https://entra.microsoft.com/#blade/delete",
+        featureCriteria: { matchHosts: ["entra.microsoft.com"], matchPathPrefixes: ["/feature"] },
+        bootstrapCriteria: { matchHosts: ["entra.microsoft.com"], matchPathnames: ["/"] },
+        stabilityMs: 1,
+        pollMs: 1,
+        timeoutMs: 250,
+      }),
+      (error) => error.code === "entry-url-untrusted" && /active-get-denied/.test(error.message),
+    );
+  } finally {
+    restore();
+    await cdp.close();
+  }
 });

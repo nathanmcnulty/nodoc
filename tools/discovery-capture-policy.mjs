@@ -1,5 +1,20 @@
 export const responseBodyCaptureLimit = 512 * 1024;
 
+export function buildInteractionHealthStatus(capture, interactionHealth) {
+  if (interactionHealth) {
+    return { available: true, reason: null, source: "summary-and-action-results" };
+  }
+  return {
+    available: false,
+    reason: capture?.reason === "summary-missing"
+      ? "summary-missing"
+      : capture?.reason === "summary-invalid-json" || capture?.reason === "summary-invalid"
+        ? "summary-corrupt"
+        : "canonical-health-unavailable",
+    source: capture?.source ?? "artifact-directory",
+  };
+}
+
 export function decodeBoundedCdpBody(payload, limit = responseBodyCaptureLimit) {
   const value = payload?.body ?? payload?.content;
   if (typeof value !== "string") {
@@ -29,7 +44,19 @@ export function actionResultSucceeded(actionResult) {
       const actual = new URL(result.url);
       const expected = new URL(result.resolvedUrl ?? actionResult.value);
       return actual.origin === expected.origin
-        && (actionResult.allowCanonicalRedirect || actual.pathname === expected.pathname);
+        && (actionResult.allowCanonicalRedirect || (
+          actual.pathname === expected.pathname
+          && actual.search === expected.search
+          && actual.hash === expected.hash
+        ));
+    } catch {
+      return false;
+    }
+  }
+  if (type === "reload") {
+    try {
+      return result.didLoad === true
+        && new URL(result.url).href === new URL(result.resolvedUrl).href;
     } catch {
       return false;
     }

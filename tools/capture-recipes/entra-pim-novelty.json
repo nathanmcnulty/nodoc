@@ -1,0 +1,48 @@
+{
+  "portal": "Entra PIM",
+  "url": "https://entra.microsoft.com/#blade/Microsoft_Azure_PIMCommon/CommonMenuBlade",
+  "pageTarget": {
+    "matchHosts": ["entra.microsoft.com"],
+    "matchPathPrefixes": ["/"],
+    "bootstrap": {
+      "matchHosts": ["entra.microsoft.com"],
+      "matchPathnames": ["/"]
+    }
+  },
+  "matchHosts": ["entra.microsoft.com", "api.azrbac.mspim.azure.com"],
+  "matchPathPrefixes": ["/api"],
+  "captureScripts": false,
+  "postActionSettleMs": 5000,
+  "settleMs": 6000,
+  "noveltyStatus": {
+    "status": "satisfied",
+    "reason": "The prior schema-v2 PIM capture completed all eligible feature clicks and left no unresolved role-setting, alert, incident, activity, or expired-assignment candidate.",
+    "nextRequirement": "Identify an exact missing api.azrbac.mspim.azure.com route, query key, or non-empty response shape before another novelty run; do not repeat the role settings, alerts, or audit crawls unchanged."
+  },
+  "actions": [
+    "navigate=https://entra.microsoft.com/#blade/Microsoft_Azure_PIMCommon/CommonMenuBlade",
+    "wait-ms=2000",
+    "click-href-root=#view/Microsoft_Azure_PIMCommon/CommonMenuBlade/~/aadmigratedroles",
+    "wait-ms=2000",
+    "click-href-root=#view/Microsoft_Azure_PIMCommon/ResourceMenuBlade/~/RoleSettings/resourceId//resourceType/tenant/provider/aadroles",
+    "wait-ms=2000",
+    "crawl-links=RoleSettings",
+    "capture=role-settings-detail",
+    "navigate=https://entra.microsoft.com/#blade/Microsoft_Azure_PIMCommon/CommonMenuBlade",
+    "wait-ms=2000",
+    "click-href-root=#view/Microsoft_Azure_PIMCommon/CommonMenuBlade/~/aadmigratedroles",
+    "wait-ms=2000",
+    "click-href-root=#view/Microsoft_Azure_PIMCommon/ResourceMenuBlade/~/Alerts/resourceId//resourceType/tenant/provider/aadroles",
+    "wait-ms=2000",
+    "crawl-links=Alerts",
+    "capture=alert-incidents",
+    "navigate=https://entra.microsoft.com/#blade/Microsoft_Azure_PIMCommon/CommonMenuBlade",
+    "wait-ms=2000",
+    "click-href-root=#view/Microsoft_Azure_PIMCommon/CommonMenuBlade/~/aadmigratedroles",
+    "wait-ms=2000",
+    "click-href-root=#view/Microsoft_Azure_PIMCommon/ResourceMenuBlade/~/Audit/resourceId//resourceType/tenant/provider/aadroles",
+    "wait-ms=2000",
+    "crawl-links=Audit",
+    "capture=expired-assignment-audit"
+  ]
+}

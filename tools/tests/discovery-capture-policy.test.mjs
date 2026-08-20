@@ -4,6 +4,7 @@ import test from "node:test";
 import {
   aggregateInteractionHealth,
   actionResultSucceeded,
+  buildInteractionHealthStatus,
   deriveActionEligibility,
   decodeBoundedCdpBody,
   shouldRequestResponseBody,
@@ -31,6 +32,24 @@ function unchangedClick() {
     result: { clicked: false },
   };
 }
+
+test("canonical health availability recognizes a complete capture summary", () => {
+  const health = { accounting: { consistent: true } };
+  assert.deepEqual(
+    buildInteractionHealthStatus(
+      { captureComplete: true, reason: "summary-present", source: "summary.json" },
+      health,
+    ),
+    { available: true, reason: null, source: "summary-and-action-results" },
+  );
+  assert.deepEqual(
+    buildInteractionHealthStatus(
+      { captureComplete: false, reason: "summary-missing", source: "artifact-directory" },
+      null,
+    ),
+    { available: false, reason: "summary-missing", source: "artifact-directory" },
+  );
+});
 
 test("productive novelty prevents saturation", () => {
   const signal = evaluateDiscoverySaturation({
@@ -203,12 +222,44 @@ test("confirmed required probes count as successful actions", () => {
   }), true);
 });
 
+test("explicit reload requires a completed load event", () => {
+  assert.equal(actionResultSucceeded({
+    result: { didLoad: true, resolvedUrl: "https://admin.cloud.microsoft/exchange#/", url: "https://admin.cloud.microsoft/exchange#/" },
+    type: "reload",
+  }), true);
+  assert.equal(actionResultSucceeded({
+    result: { didLoad: false, resolvedUrl: "https://admin.cloud.microsoft/exchange#/", url: "https://admin.cloud.microsoft/exchange#/" },
+    type: "reload",
+  }), false);
+  assert.equal(actionResultSucceeded({
+    result: { didLoad: true, resolvedUrl: "https://admin.cloud.microsoft/exchange#/", url: "https://login.microsoftonline.com/" },
+    type: "reload",
+  }), false);
+});
+
 test("initial navigation accepts a same-origin canonical landing route", () => {
   assert.equal(actionResultSucceeded({
     allowCanonicalRedirect: true,
     result: {
       resolvedUrl: "https://security.microsoft.com",
       url: "https://security.microsoft.com/homepage",
+    },
+    type: "navigate",
+  }), true);
+});
+
+test("frontier navigation requires the exact SPA route when redirects are not allowed", () => {
+  assert.equal(actionResultSucceeded({
+    result: {
+      resolvedUrl: "https://entra.microsoft.com/#view/Expected",
+      url: "https://entra.microsoft.com/#view/Fallback",
+    },
+    type: "navigate",
+  }), false);
+  assert.equal(actionResultSucceeded({
+    result: {
+      resolvedUrl: "https://entra.microsoft.com/#view/Expected",
+      url: "https://entra.microsoft.com/#view/Expected",
     },
     type: "navigate",
   }), true);

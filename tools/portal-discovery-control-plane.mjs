@@ -8,7 +8,7 @@ import {
   getCaptureRecipes,
   getCoverageOverlay,
 } from "./portal-discovery-metadata.mjs";
-import { getLedgerViewFromFile, enqueueAssignment } from "./portal-discovery-ledger.mjs";
+import { getLedgerViewFromFile, enqueueAssignment, normalizeEndpoint } from "./portal-discovery-ledger.mjs";
 import { buildSpecInventory, repoRoot } from "./spec-quality-lib.mjs";
 
 export const portfolioManifestSchemaVersion = 1;
@@ -128,7 +128,31 @@ export function materializePortfolioManifest(raw, inventory) {
 }
 
 export async function buildPortfolioManifest(manifestPath = defaultPortfolioManifestPath) {
-  return materializePortfolioManifest(await loadPortfolioManifest(manifestPath), await buildSpecInventory());
+  const manifest = materializePortfolioManifest(await loadPortfolioManifest(manifestPath), await buildSpecInventory());
+  const portals = await Promise.all(manifest.portals.map(async (portal) => {
+    if (!portal.recipe) return { ...portal, novelty: { status: "missing" } };
+    const recipe = await readJson(path.join(repoRoot, portal.recipe));
+    if (recipe.noveltyStatus?.status === "satisfied") {
+      return {
+        ...portal,
+        novelty: {
+          nextRequirement: sanitize(recipe.noveltyStatus.nextRequirement),
+          status: "satisfied",
+        },
+      };
+    }
+    if (!recipe.noveltyFrontier) return { ...portal, novelty: { status: "missing" } };
+    return {
+      ...portal,
+      novelty: {
+        approvalDigest: sanitize(recipe.noveltyFrontier.approvalDigest),
+        hasControlReadiness: Boolean(recipe.frontierControlReadiness),
+        reopenCondition: sanitize(recipe.noveltyFrontier.reopenCondition),
+        status: "active",
+      },
+    };
+  }));
+  return { ...manifest, portals };
 }
 
 function ledgerSummary(input) {
@@ -136,10 +160,22 @@ function ledgerSummary(input) {
   return assignments.map((entry) => ({ assignmentId: entry.assignmentId, specId: entry.specId, endpoint: entry.endpoint, profile: entry.profile, state: entry.state, priority: entry.priority })).sort((a, b) => a.assignmentId.localeCompare(b.assignmentId));
 }
 
-function routeForPortal(portal, summary) {
+function routeForPortal(portal, summary, options = {}) {
   if (!portal.enabled) return { route: "orchestrator", reasonCodes: ["disabled"] };
   if (portal.auth.requiresProfile && !portal.auth.profile) return { route: "orchestrator", reasonCodes: ["missing-auth-profile"] };
   if (!portal.recipe) return { route: "orchestrator", reasonCodes: ["missing-recipe"] };
+  if (portal.novelty?.status === "satisfied") return { route: "orchestrator", reasonCodes: ["novelty-satisfied"] };
+  if (portal.novelty?.status !== "active") return { route: "orchestrator", reasonCodes: ["novelty-frontier-missing"] };
+  if (!/^[a-f0-9]{64}$/u.test(String(portal.novelty.approvalDigest || "")) || !portal.novelty.reopenCondition) {
+    return { route: "orchestrator", reasonCodes: ["novelty-frontier-unapproved"] };
+  }
+  const unresolvedAdjacent = options.adjacentOwnership ?? [];
+  if (unresolvedAdjacent.some((entry) => entry?.status !== "resolved" && (
+    entry?.specId === portal.specId || (() => {
+      try { return normalizeEndpoint(entry?.hostFamily) === normalizeEndpoint(portal.endpoint.hostFamily); }
+      catch { return false; }
+    })()
+  ))) return { route: "manual", reasonCodes: ["adjacent-ownership-unresolved"] };
   if (summary.some((entry) => entry.specId === portal.specId && entry.state === "blocked")) return { route: "manual", reasonCodes: ["ledger-blocked"] };
   if (portal.riskTier === "critical" || portal.outstandingGapClasses.some((gap) => /safety|scope|state-changing/iu.test(gap))) return { route: "luna", reasonCodes: ["risk-or-scope-review"] };
   return { route: "cheap", reasonCodes: ["routine-read-only"] };
@@ -154,7 +190,7 @@ export function compileOrchestrationPlan(manifest, { ledger = {}, budgets = {}, 
   const assignments = [];
   const captureByLease = new Map();
   for (const portal of manifest.portals) {
-    const route = routeForPortal(portal, summary);
+    const route = routeForPortal(portal, summary, options);
     const captureKey = `${portal.endpoint.leaseFamily}|${portal.auth.profile}`;
     const capture = { type: "capture", specId: portal.specId, portal: portal.title, endpointLease: captureKey, profile: portal.auth.profile, recipe: portal.recipe, route: "orchestrator", model: "deterministic", reasoning: "none", budgets: portal.captureBudget, preconditions: portal.enabled ? ["validated-manifest", "authenticated-profile", "fresh-artifact-directory"] : ["portal-enabled"], completionGates: ["sanitized-summary", "candidate-handoff", "no-authoritative-mutation"], blockers: route.reasonCodes, terminal: portal.enabled ? "capture-result-required" : "disabled", nextAction: portal.enabled ? "allocate-fresh-artifacts" : "none", serializedGroup: captureKey };
     capture.assignmentId = `capture-${digest(capture).slice(0, 24)}`;
@@ -163,11 +199,23 @@ export function compileOrchestrationPlan(manifest, { ledger = {}, budgets = {}, 
   }
   const captures = [...captureByLease.values()].flat().sort((a, b) => a.assignmentId.localeCompare(b.assignmentId));
   const serializedCaptures = captures;
-  const captureAllowed = captures.filter((entry) => entry.blockers.every((code) => code !== "disabled" && code !== "missing-auth-profile")).slice(0, maxCaptures);
+  const captureBlockingCodes = new Set([
+    "adjacent-ownership-unresolved",
+    "disabled",
+    "ledger-blocked",
+    "missing-auth-profile",
+    "missing-recipe",
+    "novelty-frontier-missing",
+    "novelty-frontier-unapproved",
+    "novelty-satisfied",
+  ]);
+  const captureAllowed = captures
+    .filter((entry) => entry.blockers.every((code) => !captureBlockingCodes.has(code)))
+    .slice(0, maxCaptures);
   const captureIds = new Set(captureAllowed.map((entry) => entry.assignmentId));
   for (const capture of serializedCaptures) if (captureIds.has(capture.assignmentId)) assignments.push(capture);
   for (const portal of manifest.portals) {
-    const route = routeForPortal(portal, summary);
+    const route = routeForPortal(portal, summary, options);
     const review = { type: "review", specId: portal.specId, portal: portal.title, route: route.route, model: requiredReviewModel, reasoning: "high", budgets: { timeoutMs: budgets.reviewTimeoutMs ?? 120000, retryCount: budgets.retryCount ?? 1, maxPayloadBytes: budgets.maxPayloadBytes ?? 262144 }, preconditions: ["capture-summary-sanitized", "assignment-scope-known"], completionGates: ["exact-candidate-accounting", "exact-evidence-accounting", "legal-decision", "terminal-live-lifecycle-accounted", "process-improvement-dispositioned"], blockers: route.reasonCodes, terminal: route.route === "orchestrator" ? "blocked" : "worker-result-required", nextAction: route.route === "orchestrator" ? "repair-preconditions" : "validate-worker-result", scope: { candidateIds: [], evidenceIds: [] } };
     review.assignmentId = `review-${digest(review).slice(0, 24)}`;
     review.assignmentDigest = assignmentDigest(review);

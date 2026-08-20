@@ -1,0 +1,33 @@
+{
+  "portal": "Entra IGA",
+  "url": "https://entra.microsoft.com/#view/Microsoft_AAD_ERM/DashboardBlade/~/Dashboard/menuId/AccessPackages",
+  "pageTarget": {
+    "matchHosts": ["entra.microsoft.com"],
+    "matchPathPrefixes": ["/"],
+    "bootstrap": {
+      "matchHosts": ["entra.microsoft.com"],
+      "matchPathnames": ["/"]
+    }
+  },
+  "matchHosts": ["entra.microsoft.com", "elm.iga.azure.com"],
+  "matchPathPrefixes": ["/api/v1"],
+  "captureScripts": false,
+  "postActionSettleMs": 8000,
+  "settleMs": 10000,
+  "noveltyStatus": {
+    "status": "satisfied",
+    "reason": "The reviewed capture promoted every confirmed in-scope candidate from these list states.",
+    "nextRequirement": "Define a concrete unmodeled detail or resource state before another --require-novelty allocation."
+  },
+  "actions": [
+    "navigate=https://entra.microsoft.com/#view/Microsoft_AAD_ERM/DashboardBlade/~/Dashboard/menuId/AccessPackages",
+    "wait-ms=6000",
+    "capture=access-packages",
+    "navigate=https://entra.microsoft.com/#view/Microsoft_AAD_ERM/DashboardBlade/~/elmCatalog",
+    "wait-ms=6000",
+    "capture=catalogs",
+    "navigate=https://entra.microsoft.com/#view/Microsoft_AAD_ERM/DashboardBlade/~/elmOrganizations",
+    "wait-ms=6000",
+    "capture=connected-organizations"
+  ]
+}

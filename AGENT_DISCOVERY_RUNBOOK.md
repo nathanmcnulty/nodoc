@@ -223,7 +223,35 @@ not discovery work:
    project.
 2. Restore the repository's locked dependencies when `node_modules` is absent;
    workers must not install or update packages.
-3. Run the portal plan command and require `status: planned`.
+3. Run the portal plan command and require `status: planned`. The plan must
+   validate the selected recipe target metadata before any browser or ledger
+   work. Treat explicit `pageTarget` host/path values as UI criteria and
+   top-level `matchHosts`/`matchPathPrefixes` as network-capture filters; never
+   substitute the latter for the former. A legacy SPA fragment is valid only
+   when the entry is HTTPS, same-origin, query-free, and constrained by an
+   explicit clean host/path `pageTarget`; fragments are never matching or
+   capture criteria.
+   For an expensive discovery assignment, also pass `--require-novelty` and
+   require a non-empty `noveltyPlan`. Each frontier target must be tied to exact
+   checked-in action indexes and declare its UI state, expected host/route,
+   expected request/response-shape or metadata class, evidence level, safe
+   action, and acceptance key. A plan containing only known replay is blocked
+   before owner allocation.
+   The plan must derive its primary baseline from the checked-in OpenAPI and
+   merge the recipe's `baselineSignals` overlay for accepted runtime-only route,
+   query, request-shape, response-shape, and response-metadata keys. Empty
+   overlay arrays mean no additional runtime signals have been accepted; they
+   never disable the derived OpenAPI comparison. Shape or metadata from an
+   undocumented route counts only when the normalized method/path survives
+   suppression into a reviewable candidate bucket; telemetry sinks, static
+   assets, and other suppressed traffic cannot manufacture novelty.
+   Before planning, run the offline frontier compiler against the checked-in
+   OpenAPI, generated coverage ledger, and available sanitized prior artifacts.
+   Do not allocate a browser for `satisfied-prebrowser-block`,
+   `blocked-no-exact-frontier`, or `blocked-adjacent-ownership`. An active
+   frontier requires a concrete `reopenCondition`, immutable approval digest,
+   and exact state/action mapping. Click-driven targets additionally require
+   readiness metadata covering every targeted click.
 4. Require `npm run browser:cdp:status -- --profile-key <key>` to report the
    manifest-owned browser as healthy, then run the portal driver against that
    exact loopback endpoint. Its recipe-gated preflight verifies browser metadata,
@@ -232,11 +260,45 @@ not discovery work:
    checked-in `pageTarget.bootstrap` may authorize one exact-target GET to the
    recipe's first navigation URL, followed by strict preflight bound to the same
    target ID.
+   If the selected novelty recipe declares `frontierControlReadiness`, the
+   driver then inventories the declared root/child target scopes before
+   creating a ledger attempt or starting capture. Every referenced control
+   must have exactly one visible match. Zero matches are
+   `absent-not-applicable`; multiple matches or unavailable frame inventory are
+   `ambiguous`. Either state emits `frontier-control-unavailable`; do not
+   bypass it, guess a direct route, or treat generic ReactBlade frames as named
+   frontier progress. Use exact stable href or accessibility/automation
+   identifiers when label containment would match an ancestor and a control.
 5. Confirm the selected recipe exists and choose a fresh artifact directory.
 
 Do not spend a worker allocation on a missing dependency, invalid portal ID,
 missing recipe, unavailable CDP listener, or unauthenticated target. Report and
 repair those prerequisites at the orchestrator layer first.
+
+Do not spend a worker allocation merely to reconfirm checked-in operation keys.
+Known routes may establish baseline context, but every costly assignment must
+target at least one unvisited state, unmodeled host/route family, or known
+schema/metadata gap. Large recipes require materialized signals across at least
+two frontier targets. The driver writes `novelty-assessment.json`; treat
+`no-novelty` as a recipe/frontier revision outcome, not discovery success, and
+never rerun the same plan unchanged. A run with zero records matching every
+expected frontier route is `no-target-signal`; artifact completeness does not
+make that a completed novelty attempt, and the frontier remains open. When a
+passive bootstrap target is already at its canonical URL, require the explicit
+same-origin `reload=<checkpoint>` recipe action and a completed load event so a
+same-URL navigation cannot become an expensive no-op.
+During coordinator review, update `baselineSignals` with accepted signal keys
+before scheduling any follow-up so the same evidence cannot count twice.
+Evidence must be attributed to the exact frontier action page that emitted it;
+bootstrap traffic, failed actions, raw prefix collisions, and records from a
+different target state do not count. When a normalized record aggregates
+observations from multiple pages, its explicit `attribution.actionIndex` owns
+the signal; `seenOnPages` is only a legacy fallback and must not spread unioned
+query or shape metadata across targets. Empty JSON arrays or objects do not
+establish a promotable response shape.
+Known localization `.resjson` resources are static portal assets and remain in
+the suppressed evidence bucket even when their path falls under an in-scope API
+prefix.
 
 ### Protected PR transport troubleshooting
 
@@ -301,6 +363,13 @@ npm run browser:cdp:status -- --profile-key m365-admin
 npm run browser:cdp:start -- --profile-key m365-admin `
   --portal-url $portalUrl --browser edge --port 9222
 
+# Only when status reports owner-identity-changed after a verified launcher handoff:
+npm run browser:cdp:rebind -- --profile-key m365-admin --port 9222
+
+# Rebind restores lifecycle identity only. Run authenticated preflight again:
+npm run preflight:browser-cdp -- --endpoint http://127.0.0.1:9222 `
+  --expected-product Edge --match-host admin.cloud.microsoft
+
 # Complete sign-in in that dedicated window and leave exactly one portal page open.
 npm run preflight:browser-cdp -- --endpoint http://127.0.0.1:9222 `
   --expected-product Edge --match-host admin.cloud.microsoft
@@ -321,11 +390,26 @@ complete sign-in only if the browser UI requires it, then **always** run the
 read-only authenticated preflight. Only preflight and later capture barrier
 detection may report `authentication-required`. The sanitized manifest is
 stored beneath `%LOCALAPPDATA%\nodoc-cdp\manifests`, outside Git, and contains
-only lifecycle identity needed to prove ownership. `status` and `start` fail
+only lifecycle identity needed to prove ownership. After launch, the owner
+resolves exactly one long-lived process matching the browser binary, fixed
+port, dedicated profile, and random owner token, then persists that PID instead
+of assuming the short-lived launcher PID remains authoritative. Zero or
+multiple exact candidates fail closed. `status` and `start` fail
 closed for malformed or stale manifests, a product mismatch, an unknown
 listener, or an occupied port. `stop` terminates only the exact manifest PID
 whose executable, fixed port, dedicated profile, and random owner token all
-match; it never kills by process name.
+match; it never kills by process name. If the recorded PID disappears while one
+exact token/profile candidate remains, retain the manifest and stop nothing.
+The operator may run explicit `rebind` only when exactly one process still
+matches the manifest's binary, token, fixed port, and dedicated profile and the
+CDP product still matches; zero or multiple candidates and product mismatch
+leave the manifest unchanged. A live listener without that one exact candidate
+remains an identity/orphan blocker. Remove a stale manifest only after the
+recorded PID and exact candidates are absent and the endpoint is confirmed free.
+Never rebind an occupied listener without a manifest, after unknown process
+inspection, with zero or multiple candidates, or after a CDP product mismatch.
+Successful rebind restores lifecycle identity only; authenticated preflight is
+required again before ledger allocation or capture.
 
 The required order is: owner ready -> strict feature preflight; only when the
 validated recipe declares it and the feature target is absent, one
@@ -367,7 +451,7 @@ healthy completed capture may be analyzed again without reopening the browser.
 1. Read the machine-generated portal brief:
 
    ```powershell
-   npm run discover:portal -- --portal m365-admin --profile bounded --phase plan --json
+   npm run discover:portal -- --portal m365-admin --profile bounded --phase plan --require-novelty --json
    ```
 
 2. Choose a unique, fresh artifact directory outside the repository for every
@@ -375,12 +459,13 @@ healthy completed capture may be analyzed again without reopening the browser.
 
    ```powershell
    $artifacts = Join-Path $env:TEMP ("nodoc-m365-admin-discovery-" + [guid]::NewGuid())
+   $bundleCache = Join-Path $env:LOCALAPPDATA "nodoc-cdp\bundle-cache"
    ```
 
 3. Run the deterministic pipeline:
 
    ```powershell
-   npm run discover:portal -- --portal m365-admin --profile bounded --phase all --endpoint https://admin.cloud.microsoft --artifacts $artifacts --ledger-path $ledgerPath
+   npm run discover:portal -- --portal m365-admin --profile bounded --phase all --require-novelty --endpoint https://admin.cloud.microsoft --artifacts $artifacts --ledger-path $ledgerPath --bundle-cache-dir $bundleCache
    ```
 
    Capture and analysis automatically enqueue and claim a deterministic ledger
@@ -402,7 +487,7 @@ healthy completed capture may be analyzed again without reopening the browser.
 
        ```powershell
        $retryArtifacts = Join-Path $env:TEMP ("nodoc-m365-admin-retry-" + [guid]::NewGuid())
-       npm run discover:portal -- --portal m365-admin --profile bounded --phase all --artifacts $retryArtifacts --seed-artifacts $artifacts
+       npm run discover:portal -- --portal m365-admin --profile bounded --phase all --require-novelty --endpoint https://admin.cloud.microsoft --artifacts $retryArtifacts --seed-artifacts $artifacts --bundle-cache-dir $bundleCache
        ```
 
     This recovery path is distinct from the delegated null-output contract: it
@@ -410,6 +495,10 @@ healthy completed capture may be analyzed again without reopening the browser.
     seeded retry uses a new attempt and fresh artifact directory. Never resume
     `capture` or `all` into a non-empty directory, merge artifact
     directories, or use `analyze` as a substitute for an incomplete capture.
+    The seeded run validates that `discovery-run.json` names the exact latest
+    terminal incomplete ledger attempt, then atomically creates and claims the
+    next attempt. A mismatched seed, completed capture, changed recipe/endpoint,
+    or competing state fails before CDP execution.
     Body draining, script/bundle processing, and artifact finalization are bounded
     by `--supervision-timeout-ms`. Productive capture has a separate total
     `--capture-supervision-timeout-ms` failsafe. The production ledger lease is
@@ -524,10 +613,11 @@ diagnostics rather than treated as successful extraction.
 
 ### Bundle analysis cache
 
-Bundle analysis caching is disabled by default, preserving legacy execution. To
-opt in for repeated runs, pass `--bundle-cache-dir <directory>` to
-`run-portal-discovery.mjs`; the directory is a local derivative cache and must
-not be used as evidence storage. Entries are keyed by SHA-256 bundle content,
+Bundle analysis caching remains disabled by default for legacy execution, but
+it is required for expensive `--require-novelty` capture assignments. Pass
+`--bundle-cache-dir <directory>` to `run-portal-discovery.mjs`; use a stable
+directory outside the repository and artifact directories. It is a local
+derivative cache and must not be used as evidence storage. Entries are keyed by SHA-256 bundle content,
 analyzer version, cache schema version, result schema version, and normalized
 path-prefix options. URL, local path, and modification time are never keys.
 

@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "specId": "exchange-beta",
+  "decision": "accept-bounded-frontier",
+  "workerModel": "gpt-5.6-luna",
+  "approvedAt": "2026-08-20T08:20:07.359Z",
+  "source": {
+    "head": "7e579d1cce59c15326aad3ba6c43ed3018219635",
+    "artifactSha256": "d060431d32ecc600cb1ea2963b63aa0c44a52873de54978d8c1a36ff7d475519",
+    "frontierSetId": "offline-frontier-set-beedf2cee9ff0ed87afe09e1",
+    "frontierSetDigest": "beedf2cee9ff0ed87afe09e12e4b8e0aaeef44b227b207a788132e0968d251b0"
+  },
+  "state": "Exchange admin center landing bootstrap",
+  "canonicalShellUrl": "https://admin.cloud.microsoft/exchange#/",
+  "apiEvidenceScope": {
+    "hosts": ["admin.exchange.microsoft.com"],
+    "pathPrefixes": ["/beta"]
+  },
+  "safeActions": [
+    "reload=exchange-bootstrap",
+    "wait-ms=5000",
+    "capture=exchange-bootstrap"
+  ],
+  "acceptedItems": [
+    {
+      "frontierId": "offline-frontier-889f1c20e658027079dc4411",
+      "frontierDigest": "889f1c20e658027079dc441139bbede1dda7cb0205d2b6b34b29e0cf51d89ebf",
+      "canonicalKey": "admin.exchange.microsoft.com GET /beta/CmdletInfo"
+    },
+    {
+      "frontierId": "offline-frontier-31f52fcb61b076914c720ee4",
+      "frontierDigest": "31f52fcb61b076914c720ee4ae089a794de033bbaed7a84b2765d67b86c54e46",
+      "canonicalKey": "admin.exchange.microsoft.com GET /beta/Shell"
+    },
+    {
+      "frontierId": "offline-frontier-1c25e95902b67c7a77e88549",
+      "frontierDigest": "1c25e95902b67c7a77e8854983558a2376524150190ee12c88b89a5a5843e18c",
+      "canonicalKey": "admin.exchange.microsoft.com GET /beta/TimeZone/ExchangeAdminCenter.MyTimeZone"
+    },
+    {
+      "frontierId": "offline-frontier-310c5689cb21dd96fe72873b",
+      "frontierDigest": "310c5689cb21dd96fe72873b1d98259357c1bfc9f6b13683b74a5cc5a505fac2",
+      "canonicalKey": "admin.exchange.microsoft.com GET /beta/UserProfile"
+    },
+    {
+      "frontierId": "offline-frontier-035cd7e8016573ffe1989af7",
+      "frontierDigest": "035cd7e8016573ffe1989af7553716e4d58f911162576d9632cebf1662dbe52d",
+      "canonicalKey": "admin.exchange.microsoft.com GET /beta/UserProfile/ExchangeAdminCenter.GetFeedbackAttribute()"
+    }
+  ],
+  "deferredItemCount": 5,
+  "blockedItemCount": 4,
+  "constraints": [
+    "GET-only passive capture",
+    "Portal shell navigation may use admin.cloud.microsoft but API evidence remains limited to admin.exchange.microsoft.com /beta",
+    "No forms, writes, forwarding, trace jobs, or exports",
+    "Token response routes do not qualify as novelty",
+    "Acceptance requires a non-empty response shape absent from the checked-in OpenAPI"
+  ]
+}

@@ -24,7 +24,9 @@ import {
   captureArtifactSchemaVersion,
   CdpAttributionRegistry,
   normalizeAttributionUrl,
+  shouldPreferActiveSessionAttribution,
 } from "./cdp-attribution.mjs";
+import { collectCdpDomSnapshots } from "./cdp-snapshot-collector.mjs";
 
 let apiBase = "http://127.0.0.1:9222";
 const defaultNavigationTimeoutMs = 15000;
@@ -105,6 +107,7 @@ function parseActionSpec(value) {
     "crawl-links",
     "navigate",
     "probe-get",
+    "reload",
     "replay-seeded-links",
     "replay-seeded-routes",
     "wait-ms",
@@ -185,7 +188,7 @@ function bodyShapeFingerprint(value) {
     const parsed = typeof value === "string" ? JSON.parse(value) : value;
     return sha256(JSON.stringify(shapeOf(parsed)));
   } catch {
-    return sha256(`non-json:${typeof value}:${String(value)}`);
+    return sha256(`non-json:${typeof value}`);
   }
 }
 
@@ -569,6 +572,10 @@ function applyRecipeConfig(args, recipeConfig, recipePath) {
     args.captureScripts = Boolean(recipeConfig.captureScripts);
   }
 
+  if (recipeConfig.frontierControlReadiness !== undefined) {
+    args.frontierControlReadiness = recipeConfig.frontierControlReadiness;
+  }
+
   args.seedRouteGroups = normalizeSeedRouteGroups(recipeConfig.seedRouteGroups);
   args.actionBudget = planActionBudget(recipeConfig, { maxActions: recipeConfig.maxActions });
 }
@@ -581,6 +588,8 @@ async function parseArgs(argv) {
     bundleCacheDir: null,
     evaluateTimeoutMs: defaultEvaluateTimeoutMs,
     finalizationTimeoutMs: defaultFinalizationTimeoutMs,
+    frontierControlReadiness: null,
+    frontierReadinessOnly: false,
     bodyCaptureTimeoutMs: defaultBodyCaptureTimeoutMs,
     scriptCaptureTimeoutMs: defaultScriptCaptureTimeoutMs,
     label: null,
@@ -888,6 +897,11 @@ async function parseArgs(argv) {
       args.actions.push(parseActionSpec(arg.slice("--action=".length)));
       continue;
     }
+
+    if (arg === "--frontier-readiness-only") {
+      args.frontierReadinessOnly = true;
+      continue;
+    }
   }
 
   if (!args.url) {
@@ -903,8 +917,12 @@ async function parseArgs(argv) {
     throw new Error("Missing required --portal argument.");
   }
 
-  if (!args.outDir) {
+  if (!args.outDir && !args.frontierReadinessOnly) {
     throw new Error("Missing required --out argument.");
+  }
+
+  if (args.frontierReadinessOnly && !args.frontierControlReadiness) {
+    throw new Error("--frontier-readiness-only requires recipe frontierControlReadiness metadata.");
   }
 
   for (const key of ["evaluateTimeoutMs", "navigationTimeoutMs", "networkIdleMs", "postActionSettleMs", "settleMs"]) {
@@ -1760,12 +1778,14 @@ function toApiRecord(request, portalName) {
       attribution: request.attribution,
       confidence: "confirmed-traffic",
       method: request.method,
+      mimeType: request.mimeType ?? null,
       path: parsed.pathname,
       portalName,
       querySamples: querySample ? [querySample] : [],
       requestBodySamples: request.requestBody ? [request.requestBody] : [],
       responseBodySample: request.responseBody ?? null,
       seenOnPages: [request.pageLabel],
+      status: request.status ?? null,
       url: request.url,
     };
   } catch {
@@ -1775,12 +1795,14 @@ function toApiRecord(request, portalName) {
       attribution: request.attribution,
       confidence: "confirmed-traffic",
       method: request.method,
+      mimeType: request.mimeType ?? null,
       path: request.url,
       portalName,
       querySamples: [],
       requestBodySamples: request.requestBody ? [request.requestBody] : [],
       responseBodySample: request.responseBody ?? null,
       seenOnPages: [request.pageLabel],
+      status: request.status ?? null,
       url: request.url,
     };
   }
@@ -1992,7 +2014,9 @@ async function main() {
         rawRequests: [],
         sessionSnapshots: [],
       };
-  await mkdir(args.outDir, { recursive: true });
+  if (!args.frontierReadinessOnly) {
+    await mkdir(args.outDir, { recursive: true });
+  }
 
   const target = await resolveTarget(args);
   const client = new CdpClient(target.webSocketDebuggerUrl);
@@ -2012,6 +2036,7 @@ async function main() {
   const probeAssociations = new Map();
   const passiveTransports = [];
   const actionResults = [];
+  const actionStartedAt = new Map([[-1, Date.now()]]);
   const boundedNetworkSessions = new Set();
   const configuredSessions = new Set();
   let currentActionIndex = -1;
@@ -2036,13 +2061,15 @@ async function main() {
       pageUrl: pageUrl ?? currentContext.pageUrl ?? null,
     };
     attributionRegistry.setRootContext(currentContext);
+    attributionRegistry.setActiveSessionContexts(currentContext);
   }
 
-  function resolveEventAttribution(sessionId, params = {}) {
+  function resolveEventAttribution(eventName, sessionId, params = {}) {
     return attributionRegistry.resolve({
       documentURL: params.documentURL,
       frameId: params.frameId,
       loaderId: params.loaderId,
+      preferSessionContext: shouldPreferActiveSessionAttribution(eventName),
       sessionId,
       targetUrl: sessions.get(sessionId)?.targetUrl ?? null,
     });
@@ -2146,7 +2173,7 @@ async function main() {
     const requestUrl = params.request?.url;
     const sessionId = metadata.sessionId ?? null;
     const key = requestKey(params.requestId, sessionId);
-    const attribution = resolveEventAttribution(sessionId, params);
+    const attribution = resolveEventAttribution("Network.requestWillBeSent", sessionId, params);
     const probeId = requestUrl
       ? probeAssociations.get(`${sessionId ?? "root"}:${normalizeAttributionUrl(requestUrl)}`) ?? null
       : null;
@@ -2236,7 +2263,7 @@ async function main() {
   });
 
   client.on("Network.webSocketCreated", (params, metadata) => {
-    const attribution = resolveEventAttribution(metadata.sessionId ?? null, params);
+    const attribution = resolveEventAttribution("Network.webSocketCreated", metadata.sessionId ?? null, params);
     const sanitizedUrl = sanitizeObservedTransportUrl(params.url);
     if (!sanitizedUrl) {
       return;
@@ -2252,7 +2279,7 @@ async function main() {
   });
 
   client.on("Network.webTransportCreated", (params, metadata) => {
-    const attribution = resolveEventAttribution(metadata.sessionId ?? null, params);
+    const attribution = resolveEventAttribution("Network.webTransportCreated", metadata.sessionId ?? null, params);
     const sanitizedUrl = sanitizeObservedTransportUrl(params.url);
     if (!sanitizedUrl) {
       return;
@@ -2362,45 +2389,97 @@ async function main() {
   }
 
   async function collectSnapshots() {
-    const snapshots = [];
-    for (const [sessionId, targetInfo] of sessions.entries()) {
-      if (!isDomCapableTarget(sessionId, targetInfo)) {
-        continue;
-      }
+    return collectCdpDomSnapshots({
+      sessionEntries: sessions.entries(),
+      isDomCapableTarget,
+      evaluateSnapshot: (sessionId) => evaluateJson(
+        client,
+        buildDomSnapshotExpression(),
+        sessionId,
+      ),
+      schemaVersion: captureArtifactSchemaVersion,
+    });
+  }
 
-      try {
-        const snapshot = await evaluateJson(client, buildDomSnapshotExpression(), sessionId);
-        if (!snapshot) {
-          continue;
-        }
-
-        snapshots.push({
-          schemaVersion: captureArtifactSchemaVersion,
-          targetId: targetInfo?.targetId ?? null,
-          parentFrameId: targetInfo?.parentFrameId ?? null,
-          parentSessionId: targetInfo?.parentSessionId ?? null,
-          sessionId: sessionId ?? "root",
-          targetTitle: targetInfo?.targetTitle ?? null,
-          targetType: targetInfo?.targetType ?? "page",
-          targetUrl: targetInfo?.targetUrl ?? null,
-          ...snapshot,
-        });
-      } catch (error) {
-        snapshots.push({
-          schemaVersion: captureArtifactSchemaVersion,
-          targetId: targetInfo?.targetId ?? null,
-          parentFrameId: targetInfo?.parentFrameId ?? null,
-          parentSessionId: targetInfo?.parentSessionId ?? null,
-          error: error instanceof Error ? error.message : String(error),
-          sessionId: sessionId ?? "root",
-          targetTitle: targetInfo?.targetTitle ?? null,
-          targetType: targetInfo?.targetType ?? "page",
-          targetUrl: targetInfo?.targetUrl ?? null,
-        });
-      }
+  function safeInventoryUrl(value) {
+    try {
+      const parsed = new URL(value);
+      return `${parsed.origin}${parsed.pathname}`;
+    } catch {
+      return null;
     }
+  }
 
-    return snapshots;
+  function assessFrontierControlReadiness(snapshots) {
+    const configuredIndexes = args.frontierControlReadiness?.actionIndexes;
+    const actionIndexes = Array.isArray(configuredIndexes)
+      ? configuredIndexes.map(Number)
+      : [];
+    const controls = actionIndexes.map((actionIndex) => {
+      const action = args.actions[actionIndex];
+      if (!Number.isInteger(actionIndex) || !action || !String(action.type).startsWith("click")) {
+        return {
+          actionIndex,
+          candidateCount: null,
+          reason: "readiness-action-invalid",
+          status: "ambiguous",
+          targetFrameInventory: [],
+        };
+      }
+      const eligibility = deriveActionEligibility(action, snapshots);
+      const candidateCount = eligibility?.candidateCount;
+      return {
+        actionIndex,
+        candidateCount,
+        reason: candidateCount === 1
+          ? "unique-visible-control-present"
+          : candidateCount === 0
+            ? "control-absent-not-applicable"
+            : Number.isInteger(candidateCount)
+              ? "multiple-visible-controls"
+              : "control-inventory-unavailable",
+        scope: action.scope,
+        status: candidateCount === 1
+          ? "present"
+          : candidateCount === 0
+            ? "absent-not-applicable"
+            : "ambiguous",
+        type: action.type,
+        targetFrameInventory: (eligibility?.targetFrameInventory ?? []).map((entry) => ({
+          candidateCount: entry.candidateCount,
+          controlCount: entry.controlCount,
+          sessionKind: entry.sessionId === "root" ? "root" : "child",
+          targetType: entry.targetType,
+          targetUrl: safeInventoryUrl(entry.targetUrl),
+        })),
+        value: action.value,
+      };
+    });
+    return {
+      schemaVersion: captureArtifactSchemaVersion,
+      status: controls.length > 0 && controls.every((entry) => entry.status === "present")
+        ? "ready"
+        : "frontier-control-unavailable",
+      controls,
+    };
+  }
+
+  async function waitForFrontierControlReadiness() {
+    const configuredTimeoutMs = Number(args.frontierControlReadiness?.timeoutMs);
+    const timeoutMs = Number.isFinite(configuredTimeoutMs) && configuredTimeoutMs > 0
+      ? configuredTimeoutMs
+      : args.evaluateTimeoutMs;
+    const startedAt = Date.now();
+    let assessment = null;
+    do {
+      const snapshots = await collectSnapshots();
+      assessment = assessFrontierControlReadiness(snapshots);
+      if (assessment.status === "ready") {
+        return { ...assessment, waitedMs: Date.now() - startedAt };
+      }
+      await delay(Math.min(250, Math.max(1, timeoutMs - (Date.now() - startedAt))));
+    } while (Date.now() - startedAt < timeoutMs);
+    return { ...assessment, waitedMs: Date.now() - startedAt };
   }
 
   let latestBundleSummary = {
@@ -2408,7 +2487,11 @@ async function main() {
     candidateCount: 0,
     graphqlOperationCount: 0,
     parseFailureCount: 0,
+    analyzedBytes: 0,
+    candidateFamilies: [],
   };
+  const checkpointRequestFamilies = new Set();
+  const checkpointCandidateFamilies = new Set();
 
   async function writeBundleArtifacts() {
     if (!args.captureScripts) {
@@ -2432,6 +2515,8 @@ async function main() {
         candidateCount: 0,
         graphqlOperationCount: 0,
         parseFailureCount: 0,
+        analyzedBytes: 0,
+        candidateFamilies: [],
       };
       return;
     }
@@ -2486,8 +2571,10 @@ async function main() {
       "utf8",
     );
     latestBundleSummary = {
+      analyzedBytes: downloads.reduce((total, entry) => total + (entry.byteLength ?? 0), 0),
       bundleCount: bundleCandidates.bundleCount,
       candidateCount: bundleCandidates.candidates.length,
+      candidateFamilies: uniqueSorted(bundleCandidates.candidates.map((candidate) => `${candidate.hostname ?? "NO_HOST"} ${candidate.method ?? "ANY"} ${candidate.candidatePath}`)),
       graphqlOperationCount: bundleCandidates.graphqlOperations.length,
       parseFailureCount: bundleCandidates.parseFailures.length,
       cache: bundleCandidates.cache,
@@ -2644,6 +2731,7 @@ async function main() {
   }
 
   async function captureCheckpoint(pageLabel) {
+    const checkpointStartedAt = actionStartedAt.get(currentActionIndex) ?? Date.now();
     await delay(1000);
     const snapshots = await collectSnapshots();
     const rootSnapshot = snapshots.find((snapshot) => snapshot.sessionId === "root" && !snapshot.error) ?? snapshots[0] ?? {};
@@ -2715,7 +2803,43 @@ async function main() {
       await capturePageScriptBodies(pageLabel);
     }
     await flushArtifacts();
+    const requestFamilies = capturedRequests
+      .filter((request) => request.pageLabel === pageLabel && !request.probeId)
+      .map(requestFamily);
+    const newRequestFamilies = uniqueSorted(requestFamilies.filter((family) => !checkpointRequestFamilies.has(family)));
+    requestFamilies.forEach((family) => checkpointRequestFamilies.add(family));
+    const newCandidateFamilies = latestBundleSummary.candidateFamilies
+      .filter((family) => !checkpointCandidateFamilies.has(family));
+    latestBundleSummary.candidateFamilies.forEach((family) => checkpointCandidateFamilies.add(family));
+    const cacheHits = latestBundleSummary.cache?.cacheHits ?? {};
+    const checkpointMetrics = {
+      schemaVersion: captureArtifactSchemaVersion,
+      bundleAnalysis: {
+        analyzedBytes: latestBundleSummary.analyzedBytes ?? null,
+        cacheHits: {
+          memory: cacheHits.memory ?? null,
+          persistent: cacheHits.persistent ?? null,
+        },
+      },
+      countedActions: currentActionIndex >= 0 ? 1 : 0,
+      elapsedMs: Date.now() - checkpointStartedAt,
+      estimatedCostProxy: {
+        kind: "non-financial-cardinality",
+        scope: "checkpoint-bundle-analysis-invocation",
+        value: (currentActionIndex >= 0 ? 1 : 0) + (latestBundleSummary.cache?.analyzerExecutions ?? 0),
+      },
+      newCandidateFamilies,
+      newCandidateFamilyCount: newCandidateFamilies.length,
+      newRequestFamilies,
+      newRequestFamilyCount: newRequestFamilies.length,
+      qualifyingNoveltySignals: null,
+      yieldPerAction: null,
+      yieldPerMinute: null,
+    };
+    const actionResult = actionResults.findLast((entry) => entry.page === pageLabel);
+    if (actionResult) actionResult.checkpointMetrics = checkpointMetrics;
     return {
+      checkpointMetrics,
       pageState: pageStates.at(-1),
       snapshots,
     };
@@ -2766,6 +2890,39 @@ async function main() {
       resolvedUrl,
       settleResult,
       url: currentUrl,
+    };
+  }
+
+  async function reloadRoot() {
+    const resolvedUrl = await getRootUrl();
+    const navigationPromise = new Promise((resolve) => {
+      const timeout = setTimeout(() => {
+        currentLoadResolver = null;
+        resolve(false);
+      }, args.navigationTimeoutMs);
+
+      currentLoadResolver = () => {
+        clearTimeout(timeout);
+        currentLoadResolver = null;
+        resolve(true);
+      };
+    });
+
+    const reloadIssued = await Promise.race([
+      client.send("Page.reload", { ignoreCache: false }).then(() => true).catch(() => false),
+      delay(Math.min(args.navigationTimeoutMs, 5000)).then(() => false),
+    ]);
+    if (!reloadIssued) {
+      await evaluateJson(client, "location.reload()");
+    }
+
+    const didLoad = await navigationPromise;
+    const settleResult = await waitForNetworkIdle(args.settleMs);
+    return {
+      didLoad,
+      resolvedUrl,
+      settleResult,
+      url: await getRootUrl(),
     };
   }
 
@@ -2865,6 +3022,7 @@ async function main() {
       setCaptureContext(linkPageLabel);
       const navigationResult = await navigateRoot(seededLink.url);
       actionResults.push({
+        actionIndex: currentActionIndex,
         page: linkPageLabel,
         result: {
           ...navigationResult,
@@ -2903,6 +3061,7 @@ async function main() {
       setCaptureContext(routePageLabel);
       const navigationResult = await navigateRoot(seededRoute.url);
       actionResults.push({
+        actionIndex: currentActionIndex,
         page: routePageLabel,
         result: {
           ...navigationResult,
@@ -2994,6 +3153,7 @@ async function main() {
         url: candidate.url,
       });
       actionResults.push({
+        actionIndex: currentActionIndex,
         page: pageLabel,
         result: {
           ...navigationResult,
@@ -3111,10 +3271,21 @@ async function main() {
     waitForDebuggerOnStart: true,
   });
 
+  if (args.frontierReadinessOnly) {
+    try {
+      const readiness = await waitForFrontierControlReadiness();
+      console.log(JSON.stringify(readiness));
+    } finally {
+      await client.close();
+    }
+    return;
+  }
+
   try {
     setCaptureContext(args.label ?? "seed-00", -1, args.url);
     const initialNavigation = await navigateRoot(args.url);
     actionResults.push({
+      actionIndex: -1,
       allowCanonicalRedirect: true,
       page: currentContext.pageLabel,
       required: true,
@@ -3127,11 +3298,13 @@ async function main() {
     for (const [index, action] of args.actions.entries()) {
       const pageLabel = buildActionLabel(action, index);
       currentActionIndex = index;
+      actionStartedAt.set(index, Date.now());
       setCaptureContext(pageLabel);
 
       if (action.type === "wait-ms") {
         await delay(Number(action.value));
         actionResults.push({
+          actionIndex: index,
           page: pageLabel,
           required: action.required,
           result: { waitedMs: Number(action.value) },
@@ -3145,6 +3318,7 @@ async function main() {
 
       if (action.type === "capture") {
         actionResults.push({
+          actionIndex: index,
           page: pageLabel,
           required: action.required,
           result: { capturedOnly: true },
@@ -3159,6 +3333,7 @@ async function main() {
       if (action.type === "navigate") {
         const navigationResult = await navigateRoot(action.value);
         actionResults.push({
+          actionIndex: index,
           page: pageLabel,
           required: action.required,
           result: navigationResult,
@@ -3170,9 +3345,25 @@ async function main() {
         continue;
       }
 
+      if (action.type === "reload") {
+        const reloadResult = await reloadRoot();
+        actionResults.push({
+          actionIndex: index,
+          page: pageLabel,
+          required: action.required,
+          result: reloadResult,
+          scope: action.scope,
+          type: action.type,
+          value: action.value,
+        });
+        await captureCheckpoint(pageLabel);
+        continue;
+      }
+
       if (action.type === "probe-get") {
         const probeResult = await runProbeGetAction(action, pageLabel, index);
         actionResults.push({
+          actionIndex: index,
           page: pageLabel,
           required: action.required,
           result: probeResult,
@@ -3188,6 +3379,7 @@ async function main() {
       if (action.type === "crawl-links") {
         const crawlResult = await runCurrentLinkCrawlAction(action, pageLabel);
         actionResults.push({
+          actionIndex: index,
           page: pageLabel,
           required: action.required,
           result: crawlResult,
@@ -3202,6 +3394,7 @@ async function main() {
       if (action.type === "replay-seeded-links") {
         const replayResult = await runSeededReplayAction(action, pageLabel);
         actionResults.push({
+          actionIndex: index,
           page: pageLabel,
           required: action.required,
           result: replayResult,
@@ -3216,6 +3409,7 @@ async function main() {
       if (action.type === "replay-seeded-routes") {
         const replayResult = await runSeededRouteReplayAction(action, pageLabel);
         actionResults.push({
+          actionIndex: index,
           page: pageLabel,
           required: action.required,
           result: replayResult,
@@ -3233,6 +3427,7 @@ async function main() {
       const beforeRequestFamilies = new Set(capturedRequests.map(requestFamily));
       const clickResult = await runClickAction(action, beforeSnapshots);
       const actionResult = {
+        actionIndex: index,
         highValue: action.highValue === true,
         page: pageLabel,
         required: action.required,

@@ -1,11 +1,15 @@
 import { createHash } from "node:crypto";
 
+import { buildNoveltyPlan, deriveNoveltyBaseline } from "./portal-discovery-novelty.mjs";
+
 export const frontierSchemaVersion = 1;
 export const frontierClasses = [
   "unvisited-state", "eligible-control", "failed-transition", "bundle-only-family",
   "missing-schema-shape", "unassigned-adjacent", "spec-evidence-gap",
   "safety-ownership-schema-conflict", "incomplete-health", "benchmark-regression",
 ];
+export const offlineFrontierSchemaVersion = 1;
+const gapClasses = new Set(["route", "query", "request-shape", "response-shape", "response-metadata", "ownership"]);
 
 const stableJson = (value) => `${JSON.stringify(value)}\n`;
 export const frontierDigest = (value) => createHash("sha256").update(stableJson(value), "utf8").digest("hex");
@@ -88,5 +92,103 @@ export function validateFrontier(value) {
   const core = Object.fromEntries(Object.entries(value).filter(([key]) => !["frontierId", "frontierDigest", "measurements"].includes(key)));
   if (value.frontierDigest !== frontierDigest(core)) throw new Error("Frontier digest mismatch.");
   for (const item of value.items) if (!frontierClasses.includes(item.class) || item.itemDigest !== frontierDigest(Object.fromEntries(Object.entries(item).filter(([key]) => !["itemId", "itemDigest"].includes(key))))) throw new Error("Invalid frontier item.");
+  return value;
+}
+
+function inferredGapClass(value) {
+  const text = safeText(value).toLowerCase();
+  if (/query|parameter/u.test(text)) return "query";
+  if (/request.*shape|payload/u.test(text)) return "request-shape";
+  if (/response.*shape|schema/u.test(text)) return "response-shape";
+  if (/mime|status|header|response.*metadata/u.test(text)) return "response-metadata";
+  return "route";
+}
+
+function exactCandidate({ specId, hostFamily = "unknown", gapClass, canonicalKey, evidence = [], sourceRefs = [], status = "candidate", requiredActionState = null, blockers = [] }) {
+  const core = {
+    schemaVersion: offlineFrontierSchemaVersion,
+    specId: safeText(specId),
+    hostFamily: safeText(hostFamily).toLowerCase(),
+    gapClass,
+    canonicalKey: safeText(canonicalKey),
+    evidence: sorted(evidence.map(safeText)),
+    sourceRefs: sorted(sourceRefs.map(safeText)),
+    requiredActionState: safe(requiredActionState),
+    status,
+    blockers: sorted(blockers.map(safeText)),
+  };
+  return {
+    ...core,
+    frontierId: `offline-frontier-${frontierDigest(core).slice(0, 24)}`,
+    frontierDigest: frontierDigest(core),
+  };
+}
+
+function targetMapping(recipe, hostFamily, pathname) {
+  const target = recipe?.noveltyFrontier?.targets?.find((entry) => (
+    (entry.expectedHostFamilies ?? []).map((host) => String(host).toLowerCase()).includes(hostFamily)
+    && ((entry.expectedRoutes ?? []).includes(pathname)
+      || (entry.expectedRoutePrefixes ?? []).some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)))
+  ));
+  return target ? { targetId: target.id, state: target.state, actionIndexes: target.actionIndexes } : null;
+}
+
+export function compileOfflineFrontier({ specId, specification = {}, coverage = {}, recipe = {}, priorArtifacts = {}, candidateHandoff = {} } = {}) {
+  if (typeof specId !== "string" || !specId.trim()) throw new Error("specId is required for offline frontier compilation.");
+  const baseline = deriveNoveltyBaseline(specification);
+  let executablePlan = null;
+  if (recipe?.noveltyFrontier) {
+    try { executablePlan = buildNoveltyPlan(recipe, { required: true, derivedBaseline: baseline }); }
+    catch { executablePlan = null; }
+  }
+  const candidates = [];
+  const add = (entry) => candidates.push(exactCandidate({ specId, ...entry }));
+  for (const operation of baseline.operations) {
+    const host = operation.hosts[0] ?? "unknown";
+    const key = `${host} ${operation.method} ${operation.path}`;
+    const mapping = targetMapping(recipe, host, operation.path);
+    if (!operation.requestSchemaDocumented) add({ hostFamily: host, gapClass: "request-shape", canonicalKey: key, evidence: ["openapi"], sourceRefs: ["checked-in-openapi"], requiredActionState: mapping, status: mapping && executablePlan ? "approved" : "candidate", blockers: mapping && executablePlan ? [] : ["exact-ui-state-approval-required"] });
+    if (!operation.responseSchemaDocumented) add({ hostFamily: host, gapClass: "response-shape", canonicalKey: key, evidence: ["openapi"], sourceRefs: ["checked-in-openapi"], requiredActionState: mapping, status: mapping && executablePlan ? "approved" : "candidate", blockers: mapping && executablePlan ? [] : ["exact-ui-state-approval-required"] });
+    if (operation.responseStatuses.length === 0 || operation.responseContentTypes.length === 0) add({ hostFamily: host, gapClass: "response-metadata", canonicalKey: key, evidence: ["openapi"], sourceRefs: ["checked-in-openapi"], requiredActionState: mapping, status: mapping && executablePlan ? "approved" : "candidate", blockers: mapping && executablePlan ? [] : ["exact-ui-state-approval-required"] });
+  }
+  for (const gap of [...(coverage.openGaps ?? []), ...(coverage.openGapClasses ?? [])]) {
+    add({ gapClass: inferredGapClass(gap), canonicalKey: `coverage ${safeText(gap)}`, evidence: ["coverage-ledger"], sourceRefs: ["coverage-ledger"], blockers: ["exact-route-and-ui-state-required"] });
+  }
+  for (const record of priorArtifacts.candidates ?? priorArtifacts.confirmedReadCandidates ?? []) {
+    if (!record?.normalizedPath) continue;
+    const host = safeText(record.hostFamily ?? "unknown").toLowerCase();
+    const method = safeText(record.method ?? "GET").toUpperCase();
+    const mapping = targetMapping(recipe, host, record.normalizedPath);
+    add({ hostFamily: host, gapClass: "route", canonicalKey: `${host} ${method} ${record.normalizedPath}`, evidence: ["prior-artifact"], sourceRefs: record.evidenceIds ?? [record.candidateId ?? "prior-candidate"], requiredActionState: mapping, status: mapping && executablePlan ? "approved" : "candidate", blockers: mapping && executablePlan ? [] : ["exact-ui-state-approval-required"] });
+  }
+  const adjacent = [
+    ...(candidateHandoff.adjacentConfirmedReadCandidates ?? []),
+    ...(candidateHandoff.adjacentConfirmedSafetyReviewCandidates ?? []),
+  ];
+  for (const record of adjacent) add({ hostFamily: record.hostFamily ?? "unknown", gapClass: "ownership", canonicalKey: `${record.hostFamily ?? "unknown"} ${record.method ?? "ANY"} ${record.normalizedPath ?? "unknown"}`, evidence: ["candidate-handoff"], sourceRefs: record.evidenceIds ?? [record.candidateId ?? "adjacent-candidate"], status: "blocked", blockers: ["explicit-spec-and-host-assignment-required"] });
+  const items = [...new Map(candidates.map((entry) => [`${entry.gapClass}|${entry.canonicalKey}`, entry])).values()]
+    .sort((left, right) => `${left.gapClass}|${left.canonicalKey}`.localeCompare(`${right.gapClass}|${right.canonicalKey}`));
+  const approved = items.filter((entry) => entry.status === "approved" && entry.requiredActionState);
+  const unresolvedOwnership = items.filter((entry) => entry.gapClass === "ownership" && entry.status !== "satisfied");
+  const terminal = recipe?.noveltyStatus?.status === "satisfied"
+    ? "satisfied-prebrowser-block"
+    : unresolvedOwnership.length > 0
+      ? "blocked-adjacent-ownership"
+      : approved.length > 0
+        ? "capture-authorized"
+        : "blocked-no-exact-frontier";
+  const core = { schemaVersion: offlineFrontierSchemaVersion, specId: safeText(specId), items, terminal };
+  return { ...core, frontierSetId: `offline-frontier-set-${frontierDigest(core).slice(0, 24)}`, frontierSetDigest: frontierDigest(core), measurements: { approvedCount: approved.length, candidateCount: items.filter((entry) => entry.status === "candidate").length, itemCount: items.length, unresolvedOwnershipCount: unresolvedOwnership.length } };
+}
+
+export function validateOfflineFrontier(value) {
+  if (!value || value.schemaVersion !== offlineFrontierSchemaVersion || !Array.isArray(value.items)) throw new Error("Unsupported offline frontier schema.");
+  const core = Object.fromEntries(Object.entries(value).filter(([key]) => !["frontierSetId", "frontierSetDigest", "measurements"].includes(key)));
+  if (value.frontierSetDigest !== frontierDigest(core)) throw new Error("Offline frontier digest mismatch.");
+  for (const item of value.items) {
+    if (!gapClasses.has(item.gapClass)) throw new Error(`Unsupported offline frontier gap class ${item.gapClass}.`);
+    const itemCore = Object.fromEntries(Object.entries(item).filter(([key]) => !["frontierId", "frontierDigest"].includes(key)));
+    if (item.frontierDigest !== frontierDigest(itemCore)) throw new Error("Offline frontier item digest mismatch.");
+  }
   return value;
 }

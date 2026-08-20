@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 
@@ -12,6 +13,7 @@ import {
   resolvePageTargetCriteria,
   validateRecipeTargetMetadata,
 } from "./portal-discovery-recipe.mjs";
+import { buildNoveltyPlan } from "./portal-discovery-novelty.mjs";
 
 const portfolioManifestPath = path.join(repoRoot, "tools", "portal-discovery-portfolio.json");
 
@@ -24,6 +26,7 @@ const supportedRecipeActionTypes = new Set([
   "crawl-links",
   "navigate",
   "probe-get",
+  "reload",
   "replay-seeded-links",
   "replay-seeded-routes",
   "wait-ms",
@@ -197,17 +200,43 @@ async function validateRecipeFile(errors, recipePath) {
     fail(errors, `${recipePath}: maxActions must be a non-negative integer when present.`);
   }
 
-  if (recipe.pageTarget !== undefined) {
-    if (!recipe.pageTarget || typeof recipe.pageTarget !== "object" || Array.isArray(recipe.pageTarget)) {
-      fail(errors, `${recipePath}: pageTarget must be an object when present.`);
-    } else {
-      try {
-        resolvePageTargetCriteria(recipe);
-        validateRecipeTargetMetadata(recipe);
-      } catch (error) {
-        fail(errors, `${recipePath}: ${error.message}`);
+  try {
+    resolvePageTargetCriteria(recipe);
+    validateRecipeTargetMetadata(recipe);
+    buildNoveltyPlan(recipe);
+    if (recipe.noveltyFrontier) {
+      const approvalPath = String(recipe.noveltyFrontier.approvalArtifact || "").trim();
+      if (!approvalPath) {
+        fail(errors, `${recipePath}: active noveltyFrontier requires approvalArtifact.`);
+      } else {
+        const approvalAbsolute = path.resolve(repoRoot, approvalPath);
+        const relativeApproval = path.relative(repoRoot, approvalAbsolute);
+        if (relativeApproval.startsWith("..") || path.isAbsolute(relativeApproval)) {
+          fail(errors, `${recipePath}: approvalArtifact must remain inside the repository.`);
+        } else {
+          const approvalSource = await readFile(approvalAbsolute, "utf8");
+          const approval = JSON.parse(stripBom(approvalSource));
+          const approvalDigest = createHash("sha256").update(approvalSource, "utf8").digest("hex");
+          if (approvalDigest !== recipe.noveltyFrontier.approvalDigest) fail(errors, `${recipePath}: approvalArtifact digest does not match approvalDigest.`);
+          if (approval.workerModel !== "gpt-5.6-luna" || approval.decision !== "accept-bounded-frontier" || !Array.isArray(approval.acceptedItems) || approval.acceptedItems.length === 0) fail(errors, `${recipePath}: approvalArtifact is not an exact Luna bounded-frontier approval.`);
+        }
       }
     }
+    if (recipe.noveltyStatus?.status === "satisfied") {
+      let blockedBeforeBrowser = false;
+      try {
+        buildNoveltyPlan(recipe, {
+          required: true,
+          derivedBaseline: { source: "checked-in-openapi", operations: [] },
+        });
+      } catch (error) {
+        blockedBeforeBrowser = error?.code === "novelty-frontier-invalid"
+          && /prior novelty frontier is satisfied/u.test(error.message);
+      }
+      if (!blockedBeforeBrowser) fail(errors, `${recipePath}: satisfied novelty state does not block pre-browser planning.`);
+    }
+  } catch (error) {
+    fail(errors, `${recipePath}: ${error.message}`);
   }
 
   validateSeedRouteGroups(errors, recipePath, recipe.seedRouteGroups);

@@ -741,6 +741,18 @@ export async function resumeAttempt(input) {
     if (!assignment) {
       throw new Error(`Unknown assignment ${assignmentId}.`);
     }
+    if (
+      input.expectedAttemptNumber !== undefined
+      && assignment.latestAttempt?.attemptNumber !== Number(input.expectedAttemptNumber)
+    ) {
+      throw new Error(`Cannot resume ${assignmentId}; the latest attempt changed.`);
+    }
+    if (
+      input.expectedStatus !== undefined
+      && assignment.latestAttempt?.status !== input.expectedStatus
+    ) {
+      throw new Error(`Cannot resume ${assignmentId}; the latest attempt status changed.`);
+    }
     if (assignment.latestAttempt?.status === "running") {
       throw new Error(`Cannot resume a running attempt for ${assignmentId}.`);
     }

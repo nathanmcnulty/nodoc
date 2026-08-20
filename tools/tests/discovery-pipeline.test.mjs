@@ -10,7 +10,7 @@ import {
   getEffectiveServerUrls,
   getScopeServerUrls,
 } from "../spec-quality-lib.mjs";
-import { claimAssignment, enqueueAssignment } from "../portal-discovery-ledger.mjs";
+import { claimAssignment, enqueueAssignment, updateAttempt } from "../portal-discovery-ledger.mjs";
 import { prepareLedgerAttempt } from "../portal-discovery-dispatch.mjs";
 import {
   buildPartitionedCandidateHandoff,
@@ -45,6 +45,8 @@ test("partitioned handoff preserves identities, isolates adjacent evidence, and 
   assert.equal(first.manifest.totals.candidateCount, 4);
   assert.equal(first.manifest.totals.evidenceFamilyCount, 4);
   assert.ok(first.partitions.some(({ reviewClass, destination }) => reviewClass === "adjacent-confirmed-read" && destination.specId === "unassigned"));
+  assert.equal(first.manifest.ownershipReview.suggestedCount, 1);
+  assert.equal(first.partitions.find(({ reviewClass }) => reviewClass === "adjacent-confirmed-read").candidates[0].ownershipDisposition.suggestedSpecId, "beta");
   assert.throws(() => validatePartitionedCandidateHandoff(handoff, { partitions: first.partitions.slice(1) }), /duplicated or dropped/);
   assert.match(JSON.stringify(first), /Items/);
 });
@@ -242,6 +244,50 @@ test("M365 Apps Services reuses an owned canonical lease before browser prefligh
       assert.equal(result.assignment.latestAttempt.attemptNumber, 1, leaseCase.name);
     }
   }
+});
+
+test("seeded retry resumes the exact terminal incomplete ledger attempt", async (t) => {
+  const rootDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-ledger-seeded-retry-"));
+  const ledgerPath = path.join(rootDir, "ledger.jsonl");
+  const seedDir = path.join(rootDir, "seed");
+  const retryDir = path.join(rootDir, "retry");
+  await Promise.all([mkdir(seedDir), mkdir(retryDir)]);
+  const recipePath = path.join(repoRoot, "tools", "capture-recipes", "entra-b2c-deep.json");
+  const baseArgs = {
+    noLedger: false,
+    phase: "all",
+    endpoint: "http://127.0.0.1:9222",
+    ledgerPath,
+    profile: "bounded",
+    workerId: "worker",
+    model: "gpt-5.3-codex-spark",
+    reasoning: "low",
+    priority: "normal",
+    artifacts: seedDir,
+    captureSupervisionTimeoutMs: 1000,
+    supervisionTimeoutMs: 1000,
+  };
+  const spec = { specId: "entra-b2c", title: "Entra B2C" };
+  const first = await prepareLedgerAttempt(baseArgs, spec, recipePath);
+  await updateAttempt({
+    ledgerPath,
+    assignmentId: first.assignmentId,
+    attemptNumber: 1,
+    status: "blocked",
+    captureComplete: false,
+    captureStatus: "interrupted",
+    blocker: { code: "capture-process-timeout" },
+  });
+  await writeJson(path.join(seedDir, "discovery-run.json"), {
+    ledger: { assignmentId: first.assignmentId, attemptNumber: 1 },
+  });
+
+  const retryArgs = { ...baseArgs, artifacts: retryDir, seedArtifacts: seedDir };
+  const resumed = await prepareLedgerAttempt(retryArgs, spec, recipePath);
+  assert.equal(resumed.latestAttempt.attemptNumber, 2);
+  assert.equal(resumed.latestAttempt.status, "running");
+  assert.equal(resumed.latestAttempt.artifactDir, "[external]/retry");
+  assert.equal(retryArgs.attemptNumber, 2);
 });
 
 test("legacy analysis remains explicitly opt-out from ledger dispatch", async (t) => {
@@ -522,6 +568,47 @@ test("adjacent known static assets are suppressed without hiding nearby Entra ro
       candidate.normalizedPath === "/entracopilot/api/meaningful"
     )));
     assert.equal(result.candidateQueue.summary.adjacentStaticAssetObservationCount, 1);
+  } finally {
+    await rm(artifactDir, { force: true, recursive: true });
+  }
+});
+
+test("in-scope localization resjson assets are suppressed as static evidence", async () => {
+  const artifactDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-resjson-static-noise-"));
+
+  try {
+    await writeJson(path.join(artifactDir, "bundle-candidates.json"), {
+      candidates: [{
+        candidatePath: "/AuthenticationMethods/AuthenticationDevices/AuthenticationDevicesStrings.resjson",
+        method: null,
+        sourceFile: "feature.js",
+      }],
+    });
+    const result = await runAnalyze("ibiza-iam", artifactDir);
+    assert.ok(result.candidateQueue.suppressedCandidates.some((candidate) => (
+      candidate.normalizedPath === "/AuthenticationMethods/AuthenticationDevices/AuthenticationDevicesStrings.resjson"
+      && candidate.suppressionNote.includes("Known static portal asset")
+    )));
+    assert.equal(result.candidateQueue.candidates.some((candidate) => (
+      candidate.normalizedPath === "/AuthenticationMethods/AuthenticationDevices/AuthenticationDevicesStrings.resjson"
+    )), false);
+  } finally {
+    await rm(artifactDir, { force: true, recursive: true });
+  }
+});
+
+test("static-looking suffix never suppresses confirmed live API transport", async () => {
+  const artifactDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-live-static-looking-api-"));
+  try {
+    await writeJson(path.join(artifactDir, "api-records.json"), [{
+      method: "GET",
+      mimeType: "application/json",
+      path: "/AuthenticationMethods/api/items.resjson",
+      seenOnPages: ["items"],
+    }]);
+    const result = await runAnalyze("ibiza-iam", artifactDir);
+    assert.equal(result.candidateQueue.suppressedCandidates.some((candidate) => candidate.normalizedPath.includes("items.resjson")), false);
+    assert.ok(result.candidateQueue.candidates.some((candidate) => candidate.normalizedPath.includes("items.resjson")));
   } finally {
     await rm(artifactDir, { force: true, recursive: true });
   }
@@ -820,8 +907,7 @@ test("no-candidate analysis uses an appropriate portal metadata fallback", async
     assert.deepEqual(candidateHandoff.recommendedNextAction, {
       code: "follow-portal-metadata",
       metadataNextPass: "full-layered-crawl",
-      summary:
-        "No actionable candidates were generated; follow the portal metadata next pass: full-layered-crawl.",
+      summary: "No actionable candidates were generated; follow the portal metadata next pass: full-layered-crawl.",
     });
   } finally {
     await rm(artifactDir, { force: true, recursive: true });
@@ -1103,6 +1189,194 @@ test("portal driver prefers the bounded Defender deep recipe", async () => {
 
   assert.equal(result.status, "planned");
   assert.equal(result.brief.recipe, "tools/capture-recipes/defender-deep.json");
+});
+
+test("portal driver blocks a satisfied Entra IGA novelty frontier before browser allocation", async () => {
+  await assert.rejects(
+    execFileAsync(process.execPath, [
+      path.join(repoRoot, "tools", "run-portal-discovery.mjs"),
+      "--portal",
+      "entra-iga",
+      "--phase",
+      "plan",
+      "--require-novelty",
+      "--json",
+    ], { cwd: repoRoot }),
+    (error) => {
+      const result = JSON.parse(error.stderr);
+      return result.status === "blocked"
+        && result.blocker.code === "novelty-frontier-invalid"
+        && /prior novelty frontier is satisfied/.test(result.blocker.detail);
+    },
+  );
+});
+
+test("Entra B2C blocks its exhausted frontier before browser allocation", async () => {
+  await assert.rejects(
+    execFileAsync(process.execPath, [
+      path.join(repoRoot, "tools", "run-portal-discovery.mjs"),
+      "--portal",
+      "entra-b2c",
+      "--phase",
+      "plan",
+      "--require-novelty",
+      "--json",
+    ], { cwd: repoRoot }),
+    (error) => {
+      const result = JSON.parse(error.stderr);
+      return result.status === "blocked"
+        && result.blocker.code === "novelty-frontier-invalid"
+        && /prior novelty frontier is satisfied/.test(result.blocker.detail);
+    },
+  );
+});
+
+test("Intune Portal blocks its exhausted frontier before browser allocation", async () => {
+  await assert.rejects(
+    execFileAsync(process.execPath, [
+      path.join(repoRoot, "tools", "run-portal-discovery.mjs"),
+      "--portal",
+      "intune-portal",
+      "--phase",
+      "plan",
+      "--require-novelty",
+      "--json",
+    ], { cwd: repoRoot }),
+    (error) => {
+      const result = JSON.parse(error.stderr);
+      return result.status === "blocked"
+        && result.blocker.code === "novelty-frontier-invalid"
+        && /prior novelty frontier is satisfied/.test(result.blocker.detail);
+    },
+  );
+});
+
+test("completed Entra and Autopatch frontiers block before browser allocation", async () => {
+  for (const portal of ["entra-idgov", "entra-pim", "intune-autopatch"]) {
+    await assert.rejects(
+      execFileAsync(process.execPath, [
+        path.join(repoRoot, "tools", "run-portal-discovery.mjs"),
+        "--portal",
+        portal,
+        "--phase",
+        "plan",
+        "--require-novelty",
+        "--json",
+      ], { cwd: repoRoot }),
+      (error) => {
+        const result = JSON.parse(error.stderr);
+        return result.status === "blocked"
+          && result.blocker.code === "novelty-frontier-invalid"
+          && /prior novelty frontier is satisfied/.test(result.blocker.detail);
+      },
+    );
+  }
+});
+
+test("Exchange selects the approved exact-route bootstrap shape frontier", async () => {
+  const { stdout } = await execFileAsync(process.execPath, [
+    path.join(repoRoot, "tools", "run-portal-discovery.mjs"),
+    "--portal",
+    "exchange-beta",
+    "--phase",
+    "plan",
+    "--require-novelty",
+    "--json",
+  ], { cwd: repoRoot });
+  const result = JSON.parse(stdout);
+  assert.equal(result.status, "planned");
+  assert.equal(result.brief.recipe, "tools/capture-recipes/exchange-bootstrap-shape-novelty.json");
+  assert.equal(result.noveltyPlan.targets.length, 5);
+  assert.deepEqual(result.actionBudget.categories, {
+    expandedReplayActions: 0,
+    mandatoryOrchestrationActions: 1,
+    recipeActions: 3,
+  });
+  assert.deepEqual(result.noveltyPlan.actions
+    .filter((action) => action.classification === "frontier-targeted")
+    .map((action) => action.type), ["reload", "wait-ms", "capture"]);
+  assert.ok(result.noveltyPlan.targets.every((target) => target.expectedRoutes.length === 1 && target.expectedRoutePrefixes.length === 0));
+});
+
+test("M365 Apps Inventory plan accounts for its mandatory orchestration action", async () => {
+  const { stdout } = await execFileAsync(process.execPath, [
+    path.join(repoRoot, "tools", "run-portal-discovery.mjs"),
+    "--portal",
+    "m365-apps-inventory",
+    "--phase",
+    "plan",
+    "--json",
+  ], { cwd: repoRoot });
+  const result = JSON.parse(stdout);
+
+  assert.equal(result.status, "planned");
+  assert.deepEqual(result.actionBudget.categories, {
+    recipeActions: 21,
+    mandatoryOrchestrationActions: 1,
+    expandedReplayActions: 0,
+  });
+  assert.equal(result.actionBudget.countedActions, 22);
+  assert.equal(result.actionBudget.maxActions, 22);
+});
+
+test("M365 Apps recipes block exhausted frontiers before browser allocation", async () => {
+  for (const portal of ["m365-apps-services", "m365-apps-config", "m365-apps-inventory"]) {
+    await assert.rejects(
+      execFileAsync(process.execPath, [
+        path.join(repoRoot, "tools", "run-portal-discovery.mjs"),
+        "--portal",
+        portal,
+        "--phase",
+        "plan",
+        "--require-novelty",
+        "--json",
+      ], { cwd: repoRoot }),
+      (error) => {
+        const result = JSON.parse(error.stderr);
+        return result.status === "blocked"
+          && result.blocker.code === "novelty-frontier-invalid"
+          && /prior novelty frontier is satisfied/.test(result.blocker.detail);
+      },
+    );
+  }
+});
+
+test("Purview Portal blocks its exhausted frontier before browser allocation", async () => {
+  await assert.rejects(
+    execFileAsync(process.execPath, [
+      path.join(repoRoot, "tools", "run-portal-discovery.mjs"),
+      "--portal",
+      "purview-portal",
+      "--phase",
+      "plan",
+      "--require-novelty",
+      "--json",
+    ], { cwd: repoRoot }),
+    (error) => {
+      const result = JSON.parse(error.stderr);
+      return result.status === "blocked"
+        && result.blocker.code === "novelty-frontier-invalid"
+        && /prior novelty frontier is satisfied/.test(result.blocker.detail);
+    },
+  );
+});
+
+test("analysis does not fabricate an incomplete frontier after the recipe is satisfied", async () => {
+  const artifactDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-novelty-incomplete-"));
+  try {
+    await Promise.all([
+      writeJson(path.join(artifactDir, "api-records.json"), []),
+      writeJson(path.join(artifactDir, "action-results.json"), []),
+    ]);
+    const { runState } = await runAnalyze("exchange-beta", artifactDir, { noLedger: true });
+    assert.equal(runState.status, "completed");
+    assert.equal(runState.blocker, undefined);
+    assert.equal(runState.novelty, null);
+    const handoff = JSON.parse(await readFile(path.join(artifactDir, "candidate-handoff.json"), "utf8"));
+    assert.notEqual(handoff.recommendedNextAction.code, "repair-incomplete-frontier");
+  } finally {
+    await rm(artifactDir, { force: true, recursive: true });
+  }
 });
 
 test("portal driver rejects unsupported profiles", async () => {

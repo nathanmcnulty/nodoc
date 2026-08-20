@@ -7,14 +7,18 @@ import {
   buildCandidateHandoff,
   writePartitionedCandidateHandoff,
 } from "./discovery-candidate-handoff.mjs";
-import { aggregateInteractionHealth, sanitizeInteractionHealth } from "./discovery-capture-policy.mjs";
+import {
+  aggregateInteractionHealth,
+  buildInteractionHealthStatus,
+  sanitizeInteractionHealth,
+} from "./discovery-capture-policy.mjs";
 import { evaluateDiscoverySaturation } from "./discovery-saturation.mjs";
 import { classifyGetProbeUrl } from "./discovery-safety.mjs";
 import {
   captureRecipesByTitle,
   crawlMetadataByTitle,
 } from "./portal-discovery-metadata.mjs";
-import { buildSpecInventory, repoRoot } from "./spec-quality-lib.mjs";
+import { buildSpecInventory, loadBundledSpecification, repoRoot } from "./spec-quality-lib.mjs";
 import {
   claimAssignment,
   defaultLedgerPath,
@@ -30,6 +34,7 @@ import { prepareLedgerAttempt } from "./portal-discovery-dispatch.mjs";
 import {
   ProcessSupervisionTimeoutError,
   runNode,
+  runNodeJson,
   writeParentSupervisionFailure,
 } from "./portal-discovery-process.mjs";
 import {
@@ -42,6 +47,11 @@ import {
   validateRecipeTargetMetadata,
 } from "./portal-discovery-recipe.mjs";
 import { planActionBudget } from "./portal-discovery-action-budget.mjs";
+import {
+  buildNoveltyPlan,
+  deriveNoveltyBaseline,
+  evaluateNoveltyEvidence,
+} from "./portal-discovery-novelty.mjs";
 
 const validPhases = new Set(["all", "analyze", "capture", "plan"]);
 
@@ -110,6 +120,19 @@ export async function preflightRecipeTarget({
   });
 }
 
+export function validateSelectedRecipeTarget(recipe) {
+  try {
+    return validateRecipeTargetMetadata(recipe);
+  } catch (error) {
+    error.code = "recipe-target-invalid";
+    error.blocker = {
+      ...(error.blocker ?? {}),
+      remediation: "Repair and validate the checked-in pageTarget metadata before allocating browser or ledger work.",
+    };
+    throw error;
+  }
+}
+
 function parseArgs(argv) {
   const args = {
     artifacts: null,
@@ -117,6 +140,7 @@ function parseArgs(argv) {
     includeAdjacent: false,
     saturation: false,
     applySaturationStop: false,
+    requireNovelty: false,
     noLedger: false,
     json: false,
     phase: "all",
@@ -162,6 +186,8 @@ function parseArgs(argv) {
     } else if (argument === "--apply-saturation-stop") {
       args.saturation = true;
       args.applySaturationStop = true;
+    } else if (argument === "--require-novelty") {
+      args.requireNovelty = true;
     } else if (argument === "--no-ledger") {
       args.noLedger = true;
     } else if (argument === "--json") {
@@ -344,7 +370,7 @@ function resolvePortal(specInventory, portalInput) {
   return matches[0];
 }
 
-async function selectRecipe(specRecord, explicitRecipe) {
+async function selectRecipe(specRecord, explicitRecipe, { requireNovelty = false } = {}) {
   const allowedRecipes = (captureRecipesByTitle[specRecord.title] ?? [])
     .map((recipePath) => path.resolve(repoRoot, recipePath));
   if (explicitRecipe) {
@@ -357,16 +383,19 @@ async function selectRecipe(specRecord, explicitRecipe) {
     return resolvedRecipe;
   }
   const matchingRecipes = [];
+  const noveltyRecipes = [];
   for (const recipePath of allowedRecipes) {
     try {
       const recipe = JSON.parse(await readFile(recipePath, "utf8"));
       if (recipe.portal === specRecord.title) {
         matchingRecipes.push(recipePath);
+        if (recipe.noveltyFrontier || recipe.noveltyStatus) noveltyRecipes.push(recipePath);
       }
     } catch {
       // Recipe parsing is validated separately before capture.
     }
   }
+  if (requireNovelty && noveltyRecipes.length > 0) return noveltyRecipes[0];
   const matchingPreferred = matchingRecipes.find((recipePath) =>
     recipePath.includes("-deep") && !recipePath.includes("seeded-replay"));
   if (matchingPreferred) {
@@ -791,13 +820,57 @@ async function main() {
   }
   const specInventory = await buildSpecInventory();
   const specRecord = resolvePortal(specInventory, args.portal);
-  const recipePath = await selectRecipe(specRecord, args.recipe);
-  const selectedRecipe = JSON.parse(await readFile(recipePath, "utf8"));
-  const actionBudget = buildActionBudget(selectedRecipe);
+  const recipePath = await selectRecipe(specRecord, args.recipe, { requireNovelty: args.requireNovelty });
   const brief = buildBrief(specRecord, recipePath);
+  if (!recipePath) {
+    const runState = {
+      artifacts: args.artifacts,
+      brief,
+      phase: args.phase,
+      startedAt: new Date().toISOString(),
+      status: "blocked",
+      blocker: {
+        code: "recipe-missing",
+        detail: `No checked-in deterministic recipe exists for ${specRecord.title}.`,
+        remediation: "Add and validate a bounded checked-in recipe before allocating a browser or ledger attempt.",
+      },
+    };
+    await writeRunState(args.artifacts, runState);
+    process.exitCode = 2;
+    console.error(JSON.stringify(runState, null, 2));
+    return;
+  }
+
+  let selectedRecipe;
+  let actionBudget;
+  let noveltyPlan;
+  try {
+    selectedRecipe = JSON.parse(await readFile(recipePath, "utf8"));
+    validateSelectedRecipeTarget(selectedRecipe);
+    const derivedBaseline = deriveNoveltyBaseline(await loadBundledSpecification(path.resolve(repoRoot, specRecord.specPath)));
+    noveltyPlan = buildNoveltyPlan(selectedRecipe, { required: args.requireNovelty, derivedBaseline });
+    actionBudget = buildActionBudget(selectedRecipe);
+  } catch (error) {
+    const runState = {
+      artifacts: args.artifacts,
+      brief,
+      phase: args.phase,
+      startedAt: new Date().toISOString(),
+      status: "blocked",
+      blocker: {
+        code: ["action-budget-exceeded", "novelty-frontier-invalid", "recipe-target-invalid"].includes(error?.code) ? error.code : "recipe-invalid",
+        detail: error instanceof Error ? error.message : String(error),
+        ...(error?.blocker ?? {}),
+      },
+    };
+    await writeRunState(args.artifacts, runState);
+    process.exitCode = 2;
+    console.error(JSON.stringify(runState, null, 2));
+    return;
+  }
 
   if (args.phase === "plan") {
-    console.log(JSON.stringify({ actionBudget, brief, status: "planned" }, null, 2));
+    console.log(JSON.stringify({ actionBudget, brief, noveltyPlan, status: "planned" }, null, 2));
     return;
   }
 
@@ -834,6 +907,36 @@ async function main() {
       });
       args.targetId = cdp.target.id;
       args.preflightAlignment = cdp.alignment;
+      if (args.requireNovelty && selectedRecipe.frontierControlReadiness) {
+        const readinessArgs = [
+          "--recipe",
+          recipePath,
+          "--target-id",
+          args.targetId,
+          "--cdp-endpoint",
+          args.cdpEndpoint,
+          "--frontier-readiness-only",
+        ];
+        for (const variable of args.variables) {
+          readinessArgs.push("--var", variable);
+        }
+        const readinessTimeoutMs = Number(selectedRecipe.frontierControlReadiness.timeoutMs) || 15000;
+        args.frontierReadiness = await runNodeJson(
+          path.join(repoRoot, "tools", "cdp-deep-capture.mjs"),
+          readinessArgs,
+          Math.max(30000, readinessTimeoutMs + 30000),
+          { cwd: repoRoot },
+        );
+        if (args.frontierReadiness.status !== "ready") {
+          const readinessError = new Error("Required frontier controls are not uniquely available on the authenticated target.");
+          readinessError.code = "frontier-control-unavailable";
+          readinessError.blocker = {
+            frontierReadiness: args.frontierReadiness,
+            remediation: "Wait for an authenticated target inventory with each exact required control uniquely present; do not spend a capture attempt on generic child-frame traffic.",
+          };
+          throw readinessError;
+        }
+      }
     }
     ledgerAssignment = await prepareLedgerAttempt(args, specRecord, recipePath);
   } catch (error) {
@@ -845,7 +948,7 @@ async function main() {
       startedAt: new Date().toISOString(),
       status: "blocked",
       blocker: {
-        code: error?.code === "action-budget-exceeded"
+        code: ["action-budget-exceeded", "frontier-control-unavailable"].includes(error?.code)
           ? error.code
           : error?.message?.startsWith("browser-cdp-preflight:") ? "browser-cdp-preflight-failed" : "ledger-dispatch-conflict",
         detail: error instanceof Error ? error.message : String(error),
@@ -865,6 +968,7 @@ async function main() {
     artifacts: args.artifacts,
     brief,
     phase: args.phase,
+    noveltyPlan,
     startedAt: new Date().toISOString(),
     status: "running",
     preflight: args.preflightAlignment
@@ -875,6 +979,7 @@ async function main() {
           status: args.preflightAlignment.status,
           targetId: args.preflightAlignment.targetId,
           entryUrl: args.preflightAlignment.entryUrl ?? null,
+          ...(args.frontierReadiness ? { frontierReadiness: args.frontierReadiness } : {}),
         }
       : null,
     ledger: ledgerAssignment
@@ -893,6 +998,7 @@ async function main() {
   let interactionHealth = null;
   let interactionHealthStatus = null;
   let captureSummary = null;
+  let noveltyAssessment = null;
   let actionResults = [];
   let recipe = null;
   try {
@@ -1000,6 +1106,8 @@ async function main() {
       runState.capture = captureCompleteness;
       interactionHealth = await readInteractionHealth(args.artifacts);
       runState.interactionHealth = interactionHealth;
+      interactionHealthStatus = buildInteractionHealthStatus(captureCompleteness, interactionHealth);
+      runState.interactionHealthStatus = interactionHealthStatus;
       const authenticationBarrier = await detectAuthenticationBarrier(
         args.artifacts,
         captureSummary,
@@ -1067,17 +1175,7 @@ async function main() {
       runState.interactionHealth = interactionHealth;
     }
     if (args.phase === "analyze") {
-      interactionHealthStatus = interactionHealth
-        ? { available: true, reason: null, source: "summary-and-action-results" }
-        : {
-            available: false,
-            reason: captureCompleteness.reason === "summary-missing"
-              ? "summary-missing"
-              : captureCompleteness.reason === "summary-invalid-json" || captureCompleteness.reason === "summary-invalid"
-                ? "summary-corrupt"
-                : "canonical-health-unavailable",
-            source: captureCompleteness.source,
-          };
+      interactionHealthStatus = buildInteractionHealthStatus(captureCompleteness, interactionHealth);
       runState.interactionHealthStatus = interactionHealthStatus;
     }
     if (args.phase === "analyze" && interactionHealth?.accounting?.consistent === false) {
@@ -1178,6 +1276,42 @@ async function main() {
         specTitle: specRecord.title,
         saturation,
       });
+      if (noveltyPlan) {
+        let apiRecords = [];
+        try {
+          apiRecords = JSON.parse(await readFile(path.join(args.artifacts, "api-records.json"), "utf8"));
+        } catch (error) {
+          if (error?.code !== "ENOENT" && !(error instanceof SyntaxError)) throw error;
+        }
+        noveltyAssessment = evaluateNoveltyEvidence({
+          actionResults,
+          apiRecords,
+          candidateHandoff,
+          noveltyPlan,
+          recipe,
+        });
+        await writeFile(
+          path.join(args.artifacts, "novelty-assessment.json"),
+          `${JSON.stringify(noveltyAssessment, null, 2)}\n`,
+          "utf8",
+        );
+        if (noveltyAssessment.status === "no-novelty") {
+          candidateHandoff.recommendedNextAction = {
+            code: "revise-frontier-after-no-novelty",
+            summary: "The capture completed but materialized no qualifying frontier novelty; do not report discovery success or repeat the same recipe unchanged.",
+          };
+        } else if (noveltyAssessment.status === "no-target-signal") {
+          candidateHandoff.recommendedNextAction = {
+            code: "repair-frontier-after-no-target-signal",
+            summary: "The capture artifacts are complete but no expected target route materialized; treat the run as a no-op, keep the frontier open, and repair its deterministic action before any retry.",
+          };
+        } else if (noveltyAssessment.status === "frontier-incomplete") {
+          candidateHandoff.recommendedNextAction = {
+            code: "repair-incomplete-frontier",
+            summary: "At least one planned frontier target was not attempted; preserve partial evidence and repair the deterministic recipe before any retry.",
+          };
+        }
+      }
       await writeFile(
         candidateHandoffPath,
         `${JSON.stringify(candidateHandoff, null, 2)}\n`,
@@ -1188,10 +1322,24 @@ async function main() {
       }
       runState.candidateCounts = candidateHandoff.counts;
       runState.recommendedNextAction = candidateHandoff.recommendedNextAction;
+      runState.novelty = noveltyAssessment;
       runState.saturation = saturation;
     }
 
-    runState.status = "completed";
+    if (noveltyAssessment && noveltyAssessment.status !== "productive") {
+      runState.status = "blocked";
+      runState.blocker = {
+        code: noveltyAssessment.status,
+        detail: noveltyAssessment.status === "no-novelty"
+          ? "The capture completed but produced no qualifying delta from the checked-in novelty baseline."
+          : noveltyAssessment.status === "no-target-signal"
+            ? "The capture artifacts completed, but no expected frontier route materialized; this run cannot satisfy or retire the frontier."
+            : "The capture did not attempt every checked-in frontier target successfully.",
+        remediation: runState.recommendedNextAction?.summary ?? "Revise the frontier before another live allocation.",
+      };
+    } else {
+      runState.status = "completed";
+    }
     runState.interactionHealth = interactionHealth;
     runState.interactionHealthStatus = interactionHealthStatus ?? (
       interactionHealth
@@ -1220,6 +1368,9 @@ async function main() {
         : null,
       groupedCandidateHandoff: args.groupedHandoffDir
         ? path.join(args.groupedHandoffDir, "manifest.json")
+        : null,
+      noveltyAssessment: noveltyPlan && ["all", "analyze"].includes(args.phase)
+        ? path.join(args.artifacts, "novelty-assessment.json")
         : null,
       runState: path.join(args.artifacts, "discovery-run.json"),
     };

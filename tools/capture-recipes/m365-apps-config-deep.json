@@ -1,6 +1,19 @@
 {
   "portal": "M365 Apps Config",
   "url": "https://config.office.com/officeSettings",
+  "pageTarget": {
+    "matchHosts": ["config.office.com"],
+    "matchPathPrefixes": ["/officeSettings"],
+    "bootstrap": {
+      "matchHosts": ["config.office.com"],
+      "matchPathnames": ["/officeSettings"]
+    }
+  },
+  "noveltyStatus": {
+    "status": "satisfied",
+    "reason": "The 24 configuration operations and customization, policy, and setup states already have deep coverage with no open gap; the prior frontier named only checked-in route families and opaque hypotheses.",
+    "nextRequirement": "Identify a precise missing config.office.com operation, selector, response key, status, or media type before another novelty run; do not overlap customization or setup with the services recipe."
+  },
   "matchHosts": [
     "config.office.com"
   ],
@@ -24,15 +37,6 @@
     "navigate=https://config.office.com/officeSettings/policy",
     "wait-ms=6000",
     "capture=policies",
-    "navigate=https://config.office.com/officeSettings/cloudUpdate",
-    "wait-ms=6000",
-    "capture=cloud-update",
-    "navigate=https://config.office.com/officeSettings/serviceProfile",
-    "wait-ms=6000",
-    "capture=servicing-profiles",
-    "navigate=https://config.office.com/officeSettings/deviceConfiguration",
-    "wait-ms=6000",
-    "capture=device-configuration",
     "navigate=https://config.office.com/officeSettings/setup",
     "wait-ms=6000",
     "capture=setup"

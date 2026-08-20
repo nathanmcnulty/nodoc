@@ -105,6 +105,8 @@ function recommendedPolicy(reviewClass) {
 }
 
 function compactCandidate(candidate, reviewClass) {
+  const matchingSpecIds = candidate.matchingSpecIds ?? [];
+  const adjacent = reviewClass.includes("adjacent");
   return {
     candidateId: candidateId(candidate, reviewClass),
     evidenceFamilyId: evidenceFamilyId(candidate),
@@ -125,6 +127,19 @@ function compactCandidate(candidate, reviewClass) {
     ...(candidate.suppressionNote !== undefined ? { suppressionNote: candidate.suppressionNote } : {}),
     ...(candidate.hostFamily ? { hostFamily: candidate.hostFamily } : {}),
     ...(candidate.matchingSpecIds ? { matchingSpecIds: candidate.matchingSpecIds } : {}),
+    ...(adjacent ? {
+      ownershipDisposition: matchingSpecIds.length === 1
+        ? {
+            status: "suggested-single-match",
+            suggestedHostFamily: normalizedHostFamily(candidate, "unassigned"),
+            suggestedSpecId: matchingSpecIds[0],
+          }
+        : {
+            status: "explicit-assignment-required",
+            suggestedHostFamily: normalizedHostFamily(candidate, "unassigned"),
+            suggestedSpecId: null,
+          },
+    } : {}),
     ...(candidate.scopeReasons ? { scopeReasons: candidate.scopeReasons } : {}),
     ...(candidate.requiresSpecAssignment ? { requiresSpecAssignment: true } : {}),
   };
@@ -206,6 +221,15 @@ export function buildPartitionedCandidateHandoff(handoff, { outputDir = null } =
     sharedMetadata: shared,
     monolithicSchemaVersion: handoff.schemaVersion,
     partitions: partitions.map(({ manifest: entry }) => entry),
+    ownershipReview: {
+      ambiguousCount: partitions.flatMap(({ payload }) => payload.candidates)
+        .filter((candidate) => candidate.ownershipDisposition?.status === "explicit-assignment-required").length,
+      suggestedCount: partitions.flatMap(({ payload }) => payload.candidates)
+        .filter((candidate) => candidate.ownershipDisposition?.status === "suggested-single-match").length,
+      status: partitions.some(({ payload }) => payload.candidates.some((candidate) => candidate.ownershipDisposition))
+        ? "explicit-disposition-required-before-related-capture"
+        : "clear",
+    },
     totals: {
       candidateCount: partitions.reduce((sum, entry) => sum + entry.manifest.candidateCount, 0),
       evidenceFamilyCount: new Set(partitions.flatMap((entry) => entry.payload.candidates.map(({ evidenceFamilyId }) => evidenceFamilyId))).size,

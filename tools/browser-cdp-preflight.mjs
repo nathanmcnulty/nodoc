@@ -1,6 +1,8 @@
 import { setTimeout as delay } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
 
+import { classifyGetProbeUrl } from "./discovery-safety.mjs";
+
 const defaultTimeoutMs = 3000;
 const defaultStabilityMs = 750;
 const defaultPollMs = 150;
@@ -221,8 +223,12 @@ function trustedEntryUrl(entryUrl, featureCriteria, bootstrapCriteria) {
   } catch {
     failWith("entry-url-invalid", "recipe entry URL must be a valid URL.");
   }
-  if (parsed.protocol !== "https:" || parsed.username || parsed.password || parsed.search || parsed.hash) {
-    failWith("entry-url-untrusted", "recipe entry URL must be an HTTPS URL without credentials, query, or fragment.");
+  if (parsed.protocol !== "https:" || parsed.username || parsed.password || parsed.search) {
+    failWith("entry-url-untrusted", "recipe entry URL must be HTTPS without credentials or query.");
+  }
+  const classification = classifyGetProbeUrl(parsed.href, parsed.origin);
+  if (!classification.allowed) {
+    failWith("entry-url-untrusted", `recipe entry URL is not a passive same-origin GET (${classification.code}).`);
   }
   const hostname = parsed.hostname.toLowerCase();
   const featureHosts = featureCriteria?.matchHosts ?? [];
@@ -272,12 +278,17 @@ async function waitForAlignedTarget({ endpoint, expectedProduct, featureCriteria
   while (Date.now() < deadline) {
     const remainingMs = Math.max(1, deadline - Date.now());
     const base = loopbackEndpoint(endpoint);
-    const targets = await getJson(new URL("/json/list", base), remainingMs);
-    const exactTarget = targets.find((target) => target?.type === "page" && target.id === targetId);
-    if (exactTarget && targetMatches(exactTarget, { ...featureCriteria, targetId })) {
-      return await runBrowserCdpPreflight({ endpoint, expectedProduct, ...featureCriteria, targetId, stabilityMs, pollMs, timeoutMs: remainingMs });
+    try {
+      const targets = await getJson(new URL("/json/list", base), remainingMs);
+      const exactTarget = targets.find((target) => target?.type === "page" && target.id === targetId);
+      if (exactTarget && targetMatches(exactTarget, { ...featureCriteria, targetId })) {
+        return await runBrowserCdpPreflight({ endpoint, expectedProduct, ...featureCriteria, targetId, stabilityMs, pollMs, timeoutMs: remainingMs });
+      }
+      readinessState = exactTarget ? "target-transitioning" : "target-missing";
+    } catch (error) {
+      if (["AbortError", "TimeoutError"].includes(error?.name)) break;
+      throw error;
     }
-    readinessState = exactTarget ? "target-transitioning" : "target-missing";
     await delay(Math.min(pollMs, Math.max(1, deadline - Date.now())));
   }
   failWith("navigation-readiness-timeout", `target ${targetId} did not reach feature URL readiness before timeout (state: ${readinessState}).`, {
@@ -315,6 +326,11 @@ export async function alignBrowserCdpTarget({
       },
     };
   } catch (error) {
+    if (["AbortError", "TimeoutError"].includes(error?.name)) {
+      failWith("navigation-readiness-timeout", "portal target readiness could not be established before timeout (state: preflight-timeout).", {
+        readinessState: "preflight-timeout",
+      });
+    }
     if (!(error instanceof BrowserCdpPreflightError) || error.code !== "target-count" || error.targetCount !== 0) {
       throw error;
     }

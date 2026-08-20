@@ -1,6 +1,19 @@
 {
   "portal": "Entra IDGov",
   "url": "https://entra.microsoft.com/#blade/Microsoft_AAD_ERM/DashboardBlade",
+  "pageTarget": {
+    "matchHosts": ["entra.microsoft.com"],
+    "matchPathPrefixes": ["/"],
+    "bootstrap": {
+      "matchHosts": ["entra.microsoft.com"],
+      "matchPathnames": ["/"]
+    }
+  },
+  "noveltyStatus": {
+    "status": "satisfied",
+    "reason": "The provider, partner settings, business-flow, request, instance, decision, and report families already have deep-clickflow coverage and the prior businessFlows/reports deltas were promoted.",
+    "nextRequirement": "Identify a precise unmodeled api.accessreviews.identitygovernance.azure.com route, response key, status, or media type before another novelty run; do not replay Programs, Review History, Settings, or Access reviews unchanged."
+  },
   "matchHosts": [
     "entra.microsoft.com",
     "api.accessreviews.identitygovernance.azure.com"
