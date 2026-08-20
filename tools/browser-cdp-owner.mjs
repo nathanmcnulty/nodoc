@@ -780,7 +780,11 @@ export async function stopBrowserOwner(options = {}, dependencies = {}) {
   if (!isExactManifestOwner(manifest, processInfo, config.profilePath)) {
     fail("exact-owner-required", "manifest PID does not exactly match its binary, profile, port, and owner token; nothing was stopped.");
   }
-  await deps.terminateProcess(manifest.pid);
+  try {
+    await deps.terminateProcess(manifest.pid);
+  } catch (error) {
+    if (error?.code !== "ESRCH") throw error;
+  }
   const deadline = Date.now() + (options.stopTimeoutMs ?? 5000);
   while (Date.now() < deadline) {
     await deps.delay(50);

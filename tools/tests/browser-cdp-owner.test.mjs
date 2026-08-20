@@ -419,6 +419,23 @@ test("stop terminates and removes only the exact manifest owner", async () => {
   assert.equal(removed, true);
 });
 
+test("stop tolerates an exact owner exiting between inspection and termination", async () => {
+  let running = true;
+  let removed = false;
+  const result = await stopBrowserOwner(options({ stopTimeoutMs: 100 }), {
+    readManifest: async () => manifest(),
+    inspectProcess: async () => running ? exactProcess() : null,
+    terminateProcess: async () => {
+      running = false;
+      throw Object.assign(new Error("kill ESRCH"), { code: "ESRCH" });
+    },
+    removeManifest: async () => { removed = true; },
+    delay: async () => {},
+  });
+  assert.equal(result.state, "stopped");
+  assert.equal(removed, true);
+});
+
 test("stop removes a stale manifest without terminating any PID", async () => {
   let terminated = false;
   let removed = false;
