@@ -1187,6 +1187,26 @@ test("Entra B2C blocks its exhausted frontier before browser allocation", async 
   );
 });
 
+test("Intune Portal blocks its exhausted frontier before browser allocation", async () => {
+  await assert.rejects(
+    execFileAsync(process.execPath, [
+      path.join(repoRoot, "tools", "run-portal-discovery.mjs"),
+      "--portal",
+      "intune-portal",
+      "--phase",
+      "plan",
+      "--require-novelty",
+      "--json",
+    ], { cwd: repoRoot }),
+    (error) => {
+      const result = JSON.parse(error.stderr);
+      return result.status === "blocked"
+        && result.blocker.code === "novelty-frontier-invalid"
+        && /prior novelty frontier is satisfied/.test(result.blocker.detail);
+    },
+  );
+});
+
 test("M365 Apps Inventory plan accounts for its mandatory orchestration action", async () => {
   const { stdout } = await execFileAsync(process.execPath, [
     path.join(repoRoot, "tools", "run-portal-discovery.mjs"),

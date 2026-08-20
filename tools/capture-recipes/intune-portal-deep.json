@@ -5,44 +5,10 @@
     "matchHosts": ["intune.microsoft.com"],
     "matchPathPrefixes": ["/"]
   },
-  "noveltyFrontier": {
-    "baseline": "five checked-in operations plus three live-ledger operations and prior deep/seeded navigation states",
-    "baselineSignals": {
-      "queryMetadata": [
-        "intune.microsoft.com GET /api/Experimentation/GetExtensionVariants extension",
-        "intune.microsoft.com GET /api/Experimentation/GetExtensionVariants extensionVersion"
-      ],
-      "requestShapes": [],
-      "responseMetadata": [
-        "intune.microsoft.com POST /api/Settings/Update mime:text/plain"
-      ],
-      "responseShapes": [],
-      "routes": [
-        "intune.microsoft.com GET /api/Experimentation/GetExtensionVariants",
-        "intune.microsoft.com POST /api/Portal/GetEarlyUserData",
-        "intune.microsoft.com POST /api/Portal/GetLazyUserData",
-        "intune.microsoft.com POST /api/Settings/Select",
-        "intune.microsoft.com POST /api/Settings/Update",
-        "intune.microsoft.com POST /api/Telemetry",
-        "intune.microsoft.com POST /api/extensionclienttrace",
-        "intune.microsoft.com POST /api/extensiontelemetry",
-        "intune.microsoft.com POST /api/metric"
-      ]
-    },
-    "targets": [
-      {
-        "id": "intune-addons-undocumented-api",
-        "state": "Intune add-ons read-only landing state",
-        "evidenceLevel": "confirmed",
-        "expectedHostFamilies": ["intune.microsoft.com"],
-        "expectedRoutePrefixes": ["/api/"],
-        "expectedInformationClasses": ["new-route-family", "request-shape", "response-shape", "query-metadata", "response-metadata"],
-        "actionIndexes": [0, 1],
-        "safeAction": "Navigate directly to the observed Intune add-ons landing route and capture passive traffic without selecting trials, purchases, enrollment, configuration, remediation, or save controls.",
-        "acceptanceKey": "undocumented-intune-addons-method-path-or-shape",
-        "rationale": "The prior run proved the exact advancedHub route while its guessed Intune Suite label was absent; Endpoint analytics is retired after yielding only known telemetry and adjacent APIs."
-      }
-    ]
+  "noveltyStatus": {
+    "status": "satisfied",
+    "reason": "Complete healthy captures of Endpoint analytics and the exact Intune add-ons advancedHub state produced no qualifying same-origin API, shape, query, or response-metadata delta.",
+    "nextRequirement": "Do not repeat the add-ons, Endpoint analytics, tenant, or workload recipes unchanged. Define a precise newly identified UI state or route family with deterministic action-attributed evidence."
   },
   "matchHosts": [
     "intune.microsoft.com"
