@@ -107,6 +107,7 @@ function parseActionSpec(value) {
     "crawl-links",
     "navigate",
     "probe-get",
+    "reload",
     "replay-seeded-links",
     "replay-seeded-routes",
     "wait-ms",
@@ -2892,6 +2893,39 @@ async function main() {
     };
   }
 
+  async function reloadRoot() {
+    const resolvedUrl = await getRootUrl();
+    const navigationPromise = new Promise((resolve) => {
+      const timeout = setTimeout(() => {
+        currentLoadResolver = null;
+        resolve(false);
+      }, args.navigationTimeoutMs);
+
+      currentLoadResolver = () => {
+        clearTimeout(timeout);
+        currentLoadResolver = null;
+        resolve(true);
+      };
+    });
+
+    const reloadIssued = await Promise.race([
+      client.send("Page.reload", { ignoreCache: false }).then(() => true).catch(() => false),
+      delay(Math.min(args.navigationTimeoutMs, 5000)).then(() => false),
+    ]);
+    if (!reloadIssued) {
+      await evaluateJson(client, "location.reload()");
+    }
+
+    const didLoad = await navigationPromise;
+    const settleResult = await waitForNetworkIdle(args.settleMs);
+    return {
+      didLoad,
+      resolvedUrl,
+      settleResult,
+      url: await getRootUrl(),
+    };
+  }
+
   function getOrderedSessions(scope) {
     const entries = Array.from(sessions.entries());
     return entries
@@ -3303,6 +3337,21 @@ async function main() {
           page: pageLabel,
           required: action.required,
           result: navigationResult,
+          scope: action.scope,
+          type: action.type,
+          value: action.value,
+        });
+        await captureCheckpoint(pageLabel);
+        continue;
+      }
+
+      if (action.type === "reload") {
+        const reloadResult = await reloadRoot();
+        actionResults.push({
+          actionIndex: index,
+          page: pageLabel,
+          required: action.required,
+          result: reloadResult,
           scope: action.scope,
           type: action.type,
           value: action.value,

@@ -127,7 +127,8 @@ function exactCandidate({ specId, hostFamily = "unknown", gapClass, canonicalKey
 function targetMapping(recipe, hostFamily, pathname) {
   const target = recipe?.noveltyFrontier?.targets?.find((entry) => (
     (entry.expectedHostFamilies ?? []).map((host) => String(host).toLowerCase()).includes(hostFamily)
-    && (entry.expectedRoutePrefixes ?? []).some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`))
+    && ((entry.expectedRoutes ?? []).includes(pathname)
+      || (entry.expectedRoutePrefixes ?? []).some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)))
   ));
   return target ? { targetId: target.id, state: target.state, actionIndexes: target.actionIndexes } : null;
 }

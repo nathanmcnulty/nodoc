@@ -1300,6 +1300,11 @@ async function main() {
             code: "revise-frontier-after-no-novelty",
             summary: "The capture completed but materialized no qualifying frontier novelty; do not report discovery success or repeat the same recipe unchanged.",
           };
+        } else if (noveltyAssessment.status === "no-target-signal") {
+          candidateHandoff.recommendedNextAction = {
+            code: "repair-frontier-after-no-target-signal",
+            summary: "The capture artifacts are complete but no expected target route materialized; treat the run as a no-op, keep the frontier open, and repair its deterministic action before any retry.",
+          };
         } else if (noveltyAssessment.status === "frontier-incomplete") {
           candidateHandoff.recommendedNextAction = {
             code: "repair-incomplete-frontier",
@@ -1327,7 +1332,9 @@ async function main() {
         code: noveltyAssessment.status,
         detail: noveltyAssessment.status === "no-novelty"
           ? "The capture completed but produced no qualifying delta from the checked-in novelty baseline."
-          : "The capture did not attempt every checked-in frontier target successfully.",
+          : noveltyAssessment.status === "no-target-signal"
+            ? "The capture artifacts completed, but no expected frontier route materialized; this run cannot satisfy or retire the frontier."
+            : "The capture did not attempt every checked-in frontier target successfully.",
         remediation: runState.recommendedNextAction?.summary ?? "Revise the frontier before another live allocation.",
       };
     } else {

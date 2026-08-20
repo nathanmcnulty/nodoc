@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 
@@ -25,6 +26,7 @@ const supportedRecipeActionTypes = new Set([
   "crawl-links",
   "navigate",
   "probe-get",
+  "reload",
   "replay-seeded-links",
   "replay-seeded-routes",
   "wait-ms",
@@ -202,6 +204,24 @@ async function validateRecipeFile(errors, recipePath) {
     resolvePageTargetCriteria(recipe);
     validateRecipeTargetMetadata(recipe);
     buildNoveltyPlan(recipe);
+    if (recipe.noveltyFrontier) {
+      const approvalPath = String(recipe.noveltyFrontier.approvalArtifact || "").trim();
+      if (!approvalPath) {
+        fail(errors, `${recipePath}: active noveltyFrontier requires approvalArtifact.`);
+      } else {
+        const approvalAbsolute = path.resolve(repoRoot, approvalPath);
+        const relativeApproval = path.relative(repoRoot, approvalAbsolute);
+        if (relativeApproval.startsWith("..") || path.isAbsolute(relativeApproval)) {
+          fail(errors, `${recipePath}: approvalArtifact must remain inside the repository.`);
+        } else {
+          const approvalSource = await readFile(approvalAbsolute, "utf8");
+          const approval = JSON.parse(stripBom(approvalSource));
+          const approvalDigest = createHash("sha256").update(approvalSource, "utf8").digest("hex");
+          if (approvalDigest !== recipe.noveltyFrontier.approvalDigest) fail(errors, `${recipePath}: approvalArtifact digest does not match approvalDigest.`);
+          if (approval.workerModel !== "gpt-5.6-luna" || approval.decision !== "accept-bounded-frontier" || !Array.isArray(approval.acceptedItems) || approval.acceptedItems.length === 0) fail(errors, `${recipePath}: approvalArtifact is not an exact Luna bounded-frontier approval.`);
+        }
+      }
+    }
     if (recipe.noveltyStatus?.status === "satisfied") {
       let blockedBeforeBrowser = false;
       try {

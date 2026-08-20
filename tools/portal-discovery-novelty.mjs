@@ -18,6 +18,7 @@ const interactiveActionTypes = new Set([
   "click-label",
   "crawl-links",
   "navigate",
+  "reload",
   "replay-seeded-links",
   "replay-seeded-routes",
 ]);
@@ -213,9 +214,16 @@ export function buildNoveltyPlan(recipe, { required = false, derivedBaseline = n
     if (expectedHostFamilies.some((host) => host.includes("://") || host.includes("/") || host.includes("@"))) {
       fail(`${context}.expectedHostFamilies must contain hostnames only.`);
     }
-    const expectedRoutePrefixes = uniqueStrings(target.expectedRoutePrefixes, `${context}.expectedRoutePrefixes`);
+    const expectedRoutePrefixes = uniqueStrings(target.expectedRoutePrefixes ?? [], `${context}.expectedRoutePrefixes`, { allowEmpty: true });
     if (expectedRoutePrefixes.some((prefix) => !prefix.startsWith("/") || prefix.includes("?") || prefix.includes("#"))) {
       fail(`${context}.expectedRoutePrefixes must contain clean absolute path prefixes.`);
+    }
+    const expectedRoutes = uniqueStrings(target.expectedRoutes ?? [], `${context}.expectedRoutes`, { allowEmpty: true });
+    if (expectedRoutes.some((route) => !route.startsWith("/") || route.includes("?") || route.includes("#"))) {
+      fail(`${context}.expectedRoutes must contain clean absolute paths.`);
+    }
+    if (expectedRoutePrefixes.length === 0 && expectedRoutes.length === 0) {
+      fail(`${context} must declare expectedRoutes or expectedRoutePrefixes.`);
     }
     const expectedInformationClasses = uniqueStrings(
       target.expectedInformationClasses,
@@ -248,6 +256,7 @@ export function buildNoveltyPlan(recipe, { required = false, derivedBaseline = n
       expectedHostFamilies,
       expectedInformationClasses,
       expectedRoutePrefixes,
+      expectedRoutes,
       id,
       rationale,
       safeAction,
@@ -346,7 +355,8 @@ function recordMatchesTarget(record, target) {
   }
   const pathname = String(record?.path || "");
   return target.expectedHostFamilies.includes(hostname)
-    && target.expectedRoutePrefixes.some((prefix) => routePrefixMatches(pathname, prefix));
+    && (target.expectedRoutes.includes(pathname)
+      || target.expectedRoutePrefixes.some((prefix) => routePrefixMatches(pathname, prefix)));
 }
 
 function candidateHostnames(candidate) {
@@ -364,7 +374,8 @@ function candidateHostnames(candidate) {
 function candidateMatchesTarget(candidate, target) {
   if (!["undocumented", "path-documented-missing-method"].includes(candidate?.documentationStatus)) return false;
   return candidateHostnames(candidate).some((hostname) => target.expectedHostFamilies.includes(hostname))
-    && target.expectedRoutePrefixes.some((prefix) => routePrefixMatches(candidate?.normalizedPath, prefix));
+    && (target.expectedRoutes.includes(candidate?.normalizedPath)
+      || target.expectedRoutePrefixes.some((prefix) => routePrefixMatches(candidate?.normalizedPath, prefix)));
 }
 
 function candidateLists(candidateHandoff) {
@@ -572,6 +583,7 @@ export function evaluateNoveltyEvidence({ recipe, noveltyPlan = null, actionResu
   });
   const targetedSignals = targets.reduce((total, target) => total + target.materializedSignalCount, 0);
   const attemptedTargetCount = targets.filter((target) => target.attempted).length;
+  const observedTargetCount = targets.filter((target) => target.matchedRecordCount > 0).length;
   const productiveTargetCount = targets.filter((target) => target.materializedSignalCount > 0).length;
   const requiredSignalCount = recipe.actions.length > 20 ? 3 : 1;
   const requiredProductiveTargets = recipe.actions.length > 20 ? 2 : 1;
@@ -581,10 +593,17 @@ export function evaluateNoveltyEvidence({ recipe, noveltyPlan = null, actionResu
     && productiveTargetCount >= requiredProductiveTargets;
   return {
     schemaVersion: 1,
-    status: !complete ? "frontier-incomplete" : productive ? "productive" : "no-novelty",
+    status: !complete
+      ? "frontier-incomplete"
+      : observedTargetCount === 0
+        ? "no-target-signal"
+        : productive
+          ? "productive"
+          : "no-novelty",
     targets,
     measurements: {
       attemptedTargetCount,
+      observedTargetCount,
       plannedTargetCount: targets.length,
       productiveTargetCount,
       requiredProductiveTargets,

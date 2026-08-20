@@ -1251,8 +1251,8 @@ test("Intune Portal blocks its exhausted frontier before browser allocation", as
   );
 });
 
-test("completed Entra, Exchange, and Autopatch frontiers block before browser allocation", async () => {
-  for (const portal of ["entra-idgov", "entra-pim", "exchange-beta", "intune-autopatch"]) {
+test("completed Entra and Autopatch frontiers block before browser allocation", async () => {
+  for (const portal of ["entra-idgov", "entra-pim", "intune-autopatch"]) {
     await assert.rejects(
       execFileAsync(process.execPath, [
         path.join(repoRoot, "tools", "run-portal-discovery.mjs"),
@@ -1271,6 +1271,31 @@ test("completed Entra, Exchange, and Autopatch frontiers block before browser al
       },
     );
   }
+});
+
+test("Exchange selects the approved exact-route bootstrap shape frontier", async () => {
+  const { stdout } = await execFileAsync(process.execPath, [
+    path.join(repoRoot, "tools", "run-portal-discovery.mjs"),
+    "--portal",
+    "exchange-beta",
+    "--phase",
+    "plan",
+    "--require-novelty",
+    "--json",
+  ], { cwd: repoRoot });
+  const result = JSON.parse(stdout);
+  assert.equal(result.status, "planned");
+  assert.equal(result.brief.recipe, "tools/capture-recipes/exchange-bootstrap-shape-novelty.json");
+  assert.equal(result.noveltyPlan.targets.length, 5);
+  assert.deepEqual(result.actionBudget.categories, {
+    expandedReplayActions: 0,
+    mandatoryOrchestrationActions: 1,
+    recipeActions: 3,
+  });
+  assert.deepEqual(result.noveltyPlan.actions
+    .filter((action) => action.classification === "frontier-targeted")
+    .map((action) => action.type), ["reload", "wait-ms", "capture"]);
+  assert.ok(result.noveltyPlan.targets.every((target) => target.expectedRoutes.length === 1 && target.expectedRoutePrefixes.length === 0));
 });
 
 test("M365 Apps Inventory plan accounts for its mandatory orchestration action", async () => {

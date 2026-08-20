@@ -152,7 +152,12 @@ actions, and an acceptance key. Run plans with `--require-novelty`; matched
 known traffic is baseline context, not discovery yield. Every planned frontier
 target must be attempted or receive a structured blocker. The terminal
 `novelty-assessment.json` must classify the run as `productive`,
-`frontier-incomplete`, or `no-novelty`. A completed `no-novelty` run is not a
+`frontier-incomplete`, `no-target-signal`, or `no-novelty`. A complete artifact
+set with zero expected-route records is `no-target-signal`, not `no-novelty`;
+it keeps the frontier open and requires a deterministic action repair. For a
+passive bootstrap already at its canonical URL, use an explicit checked-in
+`reload=<checkpoint>` action and require its load event instead of assuming a
+same-URL navigation emitted traffic. A completed `no-novelty` run is not a
 successful discovery and must not be repeated unchanged. It can support a
 saturation conclusion only after canonical health passes and no critical
 frontier item remains.

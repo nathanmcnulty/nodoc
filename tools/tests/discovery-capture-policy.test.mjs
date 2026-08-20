@@ -222,6 +222,21 @@ test("confirmed required probes count as successful actions", () => {
   }), true);
 });
 
+test("explicit reload requires a completed load event", () => {
+  assert.equal(actionResultSucceeded({
+    result: { didLoad: true, resolvedUrl: "https://admin.cloud.microsoft/exchange#/", url: "https://admin.cloud.microsoft/exchange#/" },
+    type: "reload",
+  }), true);
+  assert.equal(actionResultSucceeded({
+    result: { didLoad: false, resolvedUrl: "https://admin.cloud.microsoft/exchange#/", url: "https://admin.cloud.microsoft/exchange#/" },
+    type: "reload",
+  }), false);
+  assert.equal(actionResultSucceeded({
+    result: { didLoad: true, resolvedUrl: "https://admin.cloud.microsoft/exchange#/", url: "https://login.microsoftonline.com/" },
+    type: "reload",
+  }), false);
+});
+
 test("initial navigation accepts a same-origin canonical landing route", () => {
   assert.equal(actionResultSucceeded({
     allowCanonicalRedirect: true,

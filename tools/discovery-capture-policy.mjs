@@ -53,6 +53,14 @@ export function actionResultSucceeded(actionResult) {
       return false;
     }
   }
+  if (type === "reload") {
+    try {
+      return result.didLoad === true
+        && new URL(result.url).href === new URL(result.resolvedUrl).href;
+    } catch {
+      return false;
+    }
+  }
   if (type.startsWith("click")) {
     const transitionEvidence = result.transitionEvidence ?? {};
     return result.clicked === true && (

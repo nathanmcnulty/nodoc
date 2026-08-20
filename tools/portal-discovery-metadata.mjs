@@ -601,6 +601,7 @@ export const captureRecipesByTitle = {
     "tools/capture-recipes/entra-pim-seeded-replay.json",
   ],
   Exchange: [
+    "tools/capture-recipes/exchange-bootstrap-shape-novelty.json",
     "tools/capture-recipes/exchange-deep.json",
     "tools/capture-recipes/exchange-seeded-replay.json",
   ],

@@ -231,7 +231,7 @@ test("post-run assessment distinguishes productive targeted shapes from no novel
       }],
     },
   });
-  assert.equal(documentedOnly.status, "no-novelty");
+  assert.equal(documentedOnly.status, "no-target-signal");
 
   const alreadyKnownShape = assess({
     recipe: {
@@ -258,8 +258,9 @@ test("post-run assessment distinguishes productive targeted shapes from no novel
   assert.equal(alreadyKnownShape.status, "no-novelty");
 
   const empty = assess({ recipe, actionResults, candidateHandoff, apiRecords: [] });
-  assert.equal(empty.status, "no-novelty");
+  assert.equal(empty.status, "no-target-signal");
   assert.equal(empty.measurements.attemptedTargetCount, 1);
+  assert.equal(empty.measurements.observedTargetCount, 0);
 });
 
 test("dynamic crawl result rows do not break exact recipe action accounting", () => {
@@ -421,7 +422,7 @@ test("persisted seed sorting and explicit action indexes cannot shift recipe acc
     { actionIndex: -1, page: "seed-00", required: true, type: "navigate", value: "https://entra.microsoft.com" },
   ];
   const assessment = assess({ recipe, actionResults, candidateHandoff: {}, apiRecords: [] });
-  assert.equal(assessment.status, "no-novelty");
+  assert.equal(assessment.status, "no-target-signal");
   assert.equal(assessment.measurements.attemptedTargetCount, 1);
 
   const legacyAssessment = assess({
@@ -430,7 +431,7 @@ test("persisted seed sorting and explicit action indexes cannot shift recipe acc
     candidateHandoff: {},
     apiRecords: [],
   });
-  assert.equal(legacyAssessment.status, "no-novelty");
+  assert.equal(legacyAssessment.status, "no-target-signal");
   assert.equal(legacyAssessment.measurements.attemptedTargetCount, 1);
 });
 
@@ -521,5 +522,40 @@ test("route prefixes are segment bounded and evidence is action-page attributed"
       url: "https://main.iam.ad.ext.azure.com/ApplicationInsights/CrossTarget",
     }],
   });
-  assert.equal(assessment.status, "no-novelty");
+  assert.equal(assessment.status, "no-target-signal");
+});
+
+test("exact route selectors exclude unsafe sibling and descendant operations", () => {
+  const exactRecipe = {
+    url: "https://portal.example.test",
+    actions: ["navigate=https://portal.example.test", "capture=profile"],
+    noveltyFrontier: {
+      approvalDigest: "f".repeat(64),
+      baselineSignals: { queryMetadata: [], requestShapes: [], responseMetadata: [], responseShapes: [], routes: [] },
+      reopenCondition: "The exact profile response shape is undocumented.",
+      targets: [{
+        acceptanceKey: "profile-shape",
+        actionIndexes: [0, 1],
+        evidenceLevel: "confirmed",
+        expectedHostFamilies: ["api.example.test"],
+        expectedInformationClasses: ["response-shape"],
+        expectedRoutes: ["/beta/UserProfile"],
+        id: "profile-shape",
+        rationale: "Exclude token-shaped child routes.",
+        safeAction: "Reload the read-only landing page.",
+        state: "Portal bootstrap",
+      }],
+    },
+  };
+  const assessment = assess({
+    recipe: exactRecipe,
+    actionResults: [
+      { actionIndex: 0, page: "landing", result: { resolvedUrl: "https://portal.example.test", url: "https://portal.example.test" }, type: "navigate", value: "https://portal.example.test" },
+      { actionIndex: 1, page: "profile", type: "capture", value: "profile" },
+    ],
+    candidateHandoff: {},
+    apiRecords: [{ method: "GET", path: "/beta/UserProfile/ExchangeAdminCenter.GetToken()", responseShapeFingerprint: "token-shape", seenOnPages: ["profile"], url: "https://api.example.test/beta/UserProfile/ExchangeAdminCenter.GetToken()" }],
+  }, [{ hosts: ["api.example.test"], method: "GET", path: "/beta/UserProfile/ExchangeAdminCenter.GetToken()", queryParameterNames: [], requestSchemaDocumented: true, responseContentTypes: ["application/json"], responseSchemaDocumented: false, responseStatuses: ["200"] }]);
+  assert.equal(assessment.status, "no-target-signal");
+  assert.equal(assessment.targets[0].matchedRecordCount, 0);
 });

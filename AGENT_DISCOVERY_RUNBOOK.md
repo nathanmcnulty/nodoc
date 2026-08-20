@@ -281,7 +281,12 @@ target at least one unvisited state, unmodeled host/route family, or known
 schema/metadata gap. Large recipes require materialized signals across at least
 two frontier targets. The driver writes `novelty-assessment.json`; treat
 `no-novelty` as a recipe/frontier revision outcome, not discovery success, and
-never rerun the same plan unchanged.
+never rerun the same plan unchanged. A run with zero records matching every
+expected frontier route is `no-target-signal`; artifact completeness does not
+make that a completed novelty attempt, and the frontier remains open. When a
+passive bootstrap target is already at its canonical URL, require the explicit
+same-origin `reload=<checkpoint>` recipe action and a completed load event so a
+same-URL navigation cannot become an expensive no-op.
 During coordinator review, update `baselineSignals` with accepted signal keys
 before scheduling any follow-up so the same evidence cannot count twice.
 Evidence must be attributed to the exact frontier action page that emitted it;

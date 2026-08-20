@@ -79,7 +79,12 @@ before another allocation.
 
 The post-run `novelty-assessment.json` reports planned and attempted targets,
 new candidate signals, targeted shape/metadata fingerprints, and one of
-`productive`, `frontier-incomplete`, or `no-novelty`. Zero new signals is a
+`productive`, `frontier-incomplete`, `no-target-signal`, or `no-novelty`.
+`no-target-signal` means no expected route materialized even though the artifact
+set completed; keep the frontier open and repair the deterministic action. Use
+an explicit same-origin `reload=<checkpoint>` for a passive bootstrap already
+at its canonical URL, and require its load event. Zero new signals after at
+least one expected target route materializes is `no-novelty`; it is a
 known-route replay and must not be described as success or completeness. A
 healthy no-change result supports saturation only after every frontier item is
 exhausted or structurally blocked. Prefer a small targeted detail/interaction
