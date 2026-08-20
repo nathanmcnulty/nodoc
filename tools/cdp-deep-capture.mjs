@@ -25,6 +25,7 @@ import {
   CdpAttributionRegistry,
   normalizeAttributionUrl,
 } from "./cdp-attribution.mjs";
+import { collectCdpDomSnapshots } from "./cdp-snapshot-collector.mjs";
 
 let apiBase = "http://127.0.0.1:9222";
 const defaultNavigationTimeoutMs = 15000;
@@ -2366,45 +2367,16 @@ async function main() {
   }
 
   async function collectSnapshots() {
-    const snapshots = [];
-    for (const [sessionId, targetInfo] of sessions.entries()) {
-      if (!isDomCapableTarget(sessionId, targetInfo)) {
-        continue;
-      }
-
-      try {
-        const snapshot = await evaluateJson(client, buildDomSnapshotExpression(), sessionId);
-        if (!snapshot) {
-          continue;
-        }
-
-        snapshots.push({
-          schemaVersion: captureArtifactSchemaVersion,
-          targetId: targetInfo?.targetId ?? null,
-          parentFrameId: targetInfo?.parentFrameId ?? null,
-          parentSessionId: targetInfo?.parentSessionId ?? null,
-          sessionId: sessionId ?? "root",
-          targetTitle: targetInfo?.targetTitle ?? null,
-          targetType: targetInfo?.targetType ?? "page",
-          targetUrl: targetInfo?.targetUrl ?? null,
-          ...snapshot,
-        });
-      } catch (error) {
-        snapshots.push({
-          schemaVersion: captureArtifactSchemaVersion,
-          targetId: targetInfo?.targetId ?? null,
-          parentFrameId: targetInfo?.parentFrameId ?? null,
-          parentSessionId: targetInfo?.parentSessionId ?? null,
-          error: error instanceof Error ? error.message : String(error),
-          sessionId: sessionId ?? "root",
-          targetTitle: targetInfo?.targetTitle ?? null,
-          targetType: targetInfo?.targetType ?? "page",
-          targetUrl: targetInfo?.targetUrl ?? null,
-        });
-      }
-    }
-
-    return snapshots;
+    return collectCdpDomSnapshots({
+      sessionEntries: sessions.entries(),
+      isDomCapableTarget,
+      evaluateSnapshot: (sessionId) => evaluateJson(
+        client,
+        buildDomSnapshotExpression(),
+        sessionId,
+      ),
+      schemaVersion: captureArtifactSchemaVersion,
+    });
   }
 
   let latestBundleSummary = {
