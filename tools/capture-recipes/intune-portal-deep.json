@@ -13,39 +13,34 @@
         "intune.microsoft.com GET /api/Experimentation/GetExtensionVariants extensionVersion"
       ],
       "requestShapes": [],
+      "responseMetadata": [
+        "intune.microsoft.com POST /api/Settings/Update mime:text/plain"
+      ],
       "responseShapes": [],
       "routes": [
         "intune.microsoft.com GET /api/Experimentation/GetExtensionVariants",
         "intune.microsoft.com POST /api/Portal/GetEarlyUserData",
         "intune.microsoft.com POST /api/Portal/GetLazyUserData",
         "intune.microsoft.com POST /api/Settings/Select",
-        "intune.microsoft.com POST /api/Settings/Update"
+        "intune.microsoft.com POST /api/Settings/Update",
+        "intune.microsoft.com POST /api/Telemetry",
+        "intune.microsoft.com POST /api/extensionclienttrace",
+        "intune.microsoft.com POST /api/extensiontelemetry",
+        "intune.microsoft.com POST /api/metric"
       ]
     },
     "targets": [
       {
-        "id": "intune-suite-undocumented-api",
-        "state": "Intune Suite read-only landing state",
+        "id": "intune-addons-undocumented-api",
+        "state": "Intune add-ons read-only landing state",
         "evidenceLevel": "confirmed",
         "expectedHostFamilies": ["intune.microsoft.com"],
         "expectedRoutePrefixes": ["/api/"],
         "expectedInformationClasses": ["new-route-family", "request-shape", "response-shape", "query-metadata", "response-metadata"],
-        "actionIndexes": [0, 1, 2],
-        "safeAction": "Open Tenant administration and the Intune Suite landing state, then capture passive traffic without selecting trials, purchases, settings, or save controls.",
-        "acceptanceKey": "undocumented-intune-suite-method-path-or-shape",
-        "rationale": "Intune Suite is absent from the prior deep and seeded recipes; only an action-attributed method/path outside the five-operation baseline or its undocumented shape/metadata qualifies."
-      },
-      {
-        "id": "endpoint-analytics-undocumented-api",
-        "state": "Endpoint analytics read-only landing state",
-        "evidenceLevel": "confirmed",
-        "expectedHostFamilies": ["intune.microsoft.com"],
-        "expectedRoutePrefixes": ["/api/"],
-        "expectedInformationClasses": ["new-route-family", "request-shape", "response-shape", "query-metadata", "response-metadata"],
-        "actionIndexes": [3, 4, 5],
-        "safeAction": "Open Reports and the Endpoint analytics landing state, then capture passive traffic without opening configuration, remediation, or save controls.",
-        "acceptanceKey": "undocumented-endpoint-analytics-method-path-or-shape",
-        "rationale": "Endpoint analytics is absent from the prior deep and seeded recipes; repeated bootstrap operations do not qualify unless a separately reviewable undocumented method/path or shape is observed."
+        "actionIndexes": [0, 1],
+        "safeAction": "Navigate directly to the observed Intune add-ons landing route and capture passive traffic without selecting trials, purchases, enrollment, configuration, remediation, or save controls.",
+        "acceptanceKey": "undocumented-intune-addons-method-path-or-shape",
+        "rationale": "The prior run proved the exact advancedHub route while its guessed Intune Suite label was absent; Endpoint analytics is retired after yielding only known telemetry and adjacent APIs."
       }
     ]
   },
@@ -58,11 +53,7 @@
   "postActionSettleMs": 8000,
   "settleMs": 10000,
   "actions": [
-    "click-label-root=Tenant administration",
-    "click-contains-root=Intune Suite",
-    "capture=intune-suite",
-    "click-label-root=Reports",
-    "click-contains-root=Endpoint analytics",
-    "capture=endpoint-analytics"
+    "navigate=https://intune.microsoft.com/#view/Microsoft_Intune_DeviceSettings/TenantAdminMenu/~/advancedHub",
+    "capture=intune-addons"
   ]
 }
