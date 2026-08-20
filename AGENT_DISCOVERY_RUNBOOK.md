@@ -332,6 +332,13 @@ npm run browser:cdp:status -- --profile-key m365-admin
 npm run browser:cdp:start -- --profile-key m365-admin `
   --portal-url $portalUrl --browser edge --port 9222
 
+# Only when status reports owner-identity-changed after a verified launcher handoff:
+npm run browser:cdp:rebind -- --profile-key m365-admin --port 9222
+
+# Rebind restores lifecycle identity only. Run authenticated preflight again:
+npm run preflight:browser-cdp -- --endpoint http://127.0.0.1:9222 `
+  --expected-product Edge --match-host admin.cloud.microsoft
+
 # Complete sign-in in that dedicated window and leave exactly one portal page open.
 npm run preflight:browser-cdp -- --endpoint http://127.0.0.1:9222 `
   --expected-product Edge --match-host admin.cloud.microsoft
@@ -360,11 +367,18 @@ multiple exact candidates fail closed. `status` and `start` fail
 closed for malformed or stale manifests, a product mismatch, an unknown
 listener, or an occupied port. `stop` terminates only the exact manifest PID
 whose executable, fixed port, dedicated profile, and random owner token all
-match; it never kills by process name. If the recorded PID disappears while an
-exact token/profile candidate or live listener remains, retain the manifest,
-stop nothing, and report an identity/orphan blocker. Remove a stale manifest
-only after the recorded PID and exact candidates are absent and the endpoint is
-confirmed free.
+match; it never kills by process name. If the recorded PID disappears while one
+exact token/profile candidate remains, retain the manifest and stop nothing.
+The operator may run explicit `rebind` only when exactly one process still
+matches the manifest's binary, token, fixed port, and dedicated profile and the
+CDP product still matches; zero or multiple candidates and product mismatch
+leave the manifest unchanged. A live listener without that one exact candidate
+remains an identity/orphan blocker. Remove a stale manifest only after the
+recorded PID and exact candidates are absent and the endpoint is confirmed free.
+Never rebind an occupied listener without a manifest, after unknown process
+inspection, with zero or multiple candidates, or after a CDP product mismatch.
+Successful rebind restores lifecycle identity only; authenticated preflight is
+required again before ledger allocation or capture.
 
 The required order is: owner ready -> strict feature preflight; only when the
 validated recipe declares it and the feature target is absent, one

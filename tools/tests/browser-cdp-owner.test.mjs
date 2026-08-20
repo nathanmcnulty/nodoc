@@ -10,6 +10,8 @@ import {
   assertDedicatedProfilePath,
   buildLaunchCommand,
   getBrowserOwnerStatus,
+  isExactManifestOwner,
+  rebindBrowserOwner,
   resolveBrowserBinary,
   startBrowserOwner,
   stopBrowserOwner,
@@ -46,7 +48,7 @@ function exactProcess(overrides = {}) {
   return {
     pid: 4242,
     executablePath: binaryPath,
-    commandLine: `"${binaryPath}" --remote-debugging-port=9222 --user-data-dir=${profilePath} --nodoc-cdp-owner=${ownerToken}`,
+    commandLine: `"${binaryPath}" --remote-debugging-port=9222 --user-data-dir="${profilePath}" --nodoc-cdp-owner=${ownerToken}`,
     ...overrides,
   };
 }
@@ -168,6 +170,62 @@ test("launches a new owner with an unverified preflight contract", async () => {
   }
 });
 
+test("accepts Edge-quoted dedicated profile arguments without weakening exact identity", () => {
+  assert.equal(isExactManifestOwner(manifest(), exactProcess({
+    commandLine: `"${binaryPath}" --remote-debugging-port=9222 --user-data-dir="${profilePath}" --nodoc-cdp-owner=${ownerToken}`,
+  }), profilePath), true);
+  const noSpaceProfile = "C:\\nodoc-cdp\\profiles\\m365-admin";
+  assert.equal(isExactManifestOwner(manifest(), exactProcess({
+    commandLine: `"${binaryPath}" --remote-debugging-port=9222 --user-data-dir=${noSpaceProfile} --nodoc-cdp-owner=${ownerToken}`,
+  }), noSpaceProfile), true);
+  assert.equal(isExactManifestOwner(manifest(), exactProcess({
+    commandLine: `"${binaryPath}" --remote-debugging-port=9222 --user-data-dir="${profilePath}-other" --nodoc-cdp-owner=${ownerToken}`,
+  }), profilePath), false);
+  assert.equal(isExactManifestOwner(manifest(), exactProcess({
+    commandLine: `"${binaryPath}" --remote-debugging-port=9222 --user-data-dir=${profilePath}-other --nodoc-cdp-owner=${ownerToken}`,
+  }), profilePath), false);
+  assert.equal(isExactManifestOwner(manifest(), exactProcess({
+    commandLine: `"${binaryPath}" --remote-debugging-port=92220 --user-data-dir="${profilePath}" --nodoc-cdp-owner=${ownerToken}`,
+  }), profilePath), false);
+  assert.equal(isExactManifestOwner(manifest(), exactProcess({
+    commandLine: `"${binaryPath}" --remote-debugging-port=9222 --user-data-dir="${profilePath}" --nodoc-cdp-owner=${ownerToken}-other`,
+  }), profilePath), false);
+});
+
+test("launch retries a transient zero-candidate handoff before binding the exact owner", async () => {
+  const ownerRoot = await mkdtemp(join(tmpdir(), "nodoc-cdp-owner-handoff-"));
+  const ownerProfile = join(ownerRoot, "profiles", "m365-admin");
+  let searches = 0;
+  let launched = false;
+  try {
+    const result = await startBrowserOwner(options({ ownerRoot, launchTimeoutMs: 1000 }), {
+      readManifest: async () => null,
+      isPortAvailable: async () => true,
+      resolveBinary: async () => ({ product: "Edge", path: binaryPath }),
+      spawnBrowser: async () => { launched = true; return { pid: 5151 }; },
+      writeManifest: async () => {},
+      probeVersion: async () => {
+        if (!launched) throw new BrowserCdpOwnerError("cdp-unavailable", "not launched");
+        return { browser: "Microsoft Edge/140.0", webSocketDebuggerUrl: "ws://127.0.0.1/devtools/browser/root" };
+      },
+      findOwnerProcesses: async () => {
+        searches += 1;
+        return searches === 1 ? [] : [{
+          pid: 6161,
+          executablePath: binaryPath,
+          commandLine: `"${binaryPath}" --remote-debugging-port=9222 --user-data-dir="${ownerProfile}" --nodoc-cdp-owner=${ownerToken}`,
+        }];
+      },
+      randomUUID: () => ownerToken,
+      delay: async () => {},
+    });
+    assert.equal(searches, 2);
+    assert.equal(result.pid, 6161);
+  } finally {
+    await rm(ownerRoot, { force: true, recursive: true });
+  }
+});
+
 test("reports and refuses a stale manifest until explicit stop cleanup", async () => {
   const deps = {
     readManifest: async () => manifest(),
@@ -181,7 +239,7 @@ test("reports and refuses a stale manifest until explicit stop cleanup", async (
   await assert.rejects(startBrowserOwner(options(), deps), (error) => error.code === "stale-manifest");
 });
 
-test("launch fails closed when the long-lived exact owner is not unique", async () => {
+test("launch fails closed when the long-lived exact owner is ambiguous", async () => {
   const ownerRoot = await mkdtemp(join(tmpdir(), "nodoc-cdp-owner-ambiguous-"));
   const ownerProfile = join(ownerRoot, "profiles", "m365-admin");
   const candidate = (pid) => ({
@@ -190,25 +248,87 @@ test("launch fails closed when the long-lived exact owner is not unique", async 
     commandLine: `"${binaryPath}" --remote-debugging-port=9222 --user-data-dir=${ownerProfile} --nodoc-cdp-owner=${ownerToken}`,
   });
   try {
-    for (const processes of [[], [candidate(5152), candidate(5153)]]) {
-      let launched = false;
-      await assert.rejects(startBrowserOwner(options({ ownerRoot }), {
-        readManifest: async () => null,
-        isPortAvailable: async () => true,
-        resolveBinary: async () => ({ product: "Edge", path: binaryPath }),
-        spawnBrowser: async () => { launched = true; return { pid: 5151 }; },
-        writeManifest: async () => {},
-        probeVersion: async () => {
-          if (!launched) throw new BrowserCdpOwnerError("cdp-unavailable", "not launched");
-          return { browser: "Microsoft Edge/140.0", webSocketDebuggerUrl: "ws://127.0.0.1/devtools/browser/root" };
-        },
-        findOwnerProcesses: async () => processes,
-        randomUUID: () => ownerToken,
-        delay: async () => {},
-      }), (error) => error.code === "owner-resolution-failed");
-    }
+    let launched = false;
+    let delays = 0;
+    await assert.rejects(startBrowserOwner(options({ ownerRoot }), {
+      readManifest: async () => null,
+      isPortAvailable: async () => true,
+      resolveBinary: async () => ({ product: "Edge", path: binaryPath }),
+      spawnBrowser: async () => { launched = true; return { pid: 5151 }; },
+      writeManifest: async () => {},
+      probeVersion: async () => {
+        if (!launched) throw new BrowserCdpOwnerError("cdp-unavailable", "not launched");
+        return { browser: "Microsoft Edge/140.0", webSocketDebuggerUrl: "ws://127.0.0.1/devtools/browser/root" };
+      },
+      findOwnerProcesses: async () => [candidate(5152), candidate(5153)],
+      randomUUID: () => ownerToken,
+      delay: async () => { delays += 1; },
+    }), (error) => error.code === "owner-resolution-failed");
+    assert.equal(delays, 0);
   } finally {
     await rm(ownerRoot, { force: true, recursive: true });
+  }
+});
+
+test("launch bounds a persistent zero-candidate handoff and retains its manifest", async () => {
+  const ownerRoot = await mkdtemp(join(tmpdir(), "nodoc-cdp-owner-zero-"));
+  let writes = 0;
+  let launched = false;
+  try {
+    await assert.rejects(startBrowserOwner(options({ ownerRoot, launchTimeoutMs: 5 }), {
+      readManifest: async () => null,
+      isPortAvailable: async () => true,
+      resolveBinary: async () => ({ product: "Edge", path: binaryPath }),
+      spawnBrowser: async () => { launched = true; return { pid: 5151 }; },
+      writeManifest: async () => { writes += 1; },
+      probeVersion: async () => {
+        if (!launched) throw new BrowserCdpOwnerError("cdp-unavailable", "not launched");
+        return { browser: "Microsoft Edge/140.0", webSocketDebuggerUrl: "ws://127.0.0.1/devtools/browser/root" };
+      },
+      findOwnerProcesses: async () => [],
+      randomUUID: () => ownerToken,
+      delay: async () => new Promise((resolvePromise) => setTimeout(resolvePromise, 1)),
+    }), (error) => error.code === "owner-resolution-failed");
+    assert.equal(writes, 1);
+  } finally {
+    await rm(ownerRoot, { force: true, recursive: true });
+  }
+});
+
+test("explicit rebind repairs only one exact replacement owner after launcher handoff", async () => {
+  let writtenManifest;
+  const result = await rebindBrowserOwner(options(), {
+    readManifest: async () => manifest(),
+    inspectProcess: async () => null,
+    findOwnerProcesses: async () => [exactProcess({
+      pid: 6161,
+      commandLine: `"${binaryPath}" --remote-debugging-port=9222 --user-data-dir="${profilePath}" --nodoc-cdp-owner=${ownerToken}`,
+    })],
+    probeVersion: async () => ({ browser: "Microsoft Edge/140.0", webSocketDebuggerUrl: "ws://127.0.0.1/devtools/browser/root" }),
+    writeManifest: async (path, value) => {
+      assert.equal(path, manifestPath);
+      writtenManifest = value;
+    },
+  });
+  assert.equal(result.rebound, true);
+  assert.equal(result.authenticationStatus, "unverified");
+  assert.equal(result.nextStep.code, OWNER_PREFLIGHT_REQUIRED_CODE);
+  assert.equal(result.previousPid, 4242);
+  assert.equal(result.pid, 6161);
+  assert.equal(writtenManifest.pid, 6161);
+});
+
+test("rebind leaves the manifest unchanged without exactly one fully matching owner", async () => {
+  for (const candidates of [[], [exactProcess({ pid: 6161 }), exactProcess({ pid: 7171 })]]) {
+    let wrote = false;
+    await assert.rejects(rebindBrowserOwner(options(), {
+      readManifest: async () => manifest(),
+      inspectProcess: async () => null,
+      findOwnerProcesses: async () => candidates,
+      probeVersion: async () => ({ browser: "Microsoft Edge/140.0", webSocketDebuggerUrl: "ws://127.0.0.1/devtools/browser/root" }),
+      writeManifest: async () => { wrote = true; },
+    }), (error) => error.code === "owner-resolution-failed");
+    assert.equal(wrote, false);
   }
 });
 

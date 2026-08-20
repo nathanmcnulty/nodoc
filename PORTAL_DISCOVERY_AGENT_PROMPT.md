@@ -116,6 +116,9 @@ completeness; and no-change is not a completeness claim.
 Before capture, run the required recipe-gated target gate. Owner startup only
 reports `lifecycleStatus: owner-ready` and `authenticationStatus: unverified`;
 only preflight determines whether authentication is confirmed or blocked. If
+Edge performs a launcher PID handoff, operator `rebind` is allowed only for one
+fully exact manifest-token/binary/port/dedicated-profile candidate with the
+expected CDP product; it must never adopt an unknown listener. If
 the feature target is absent, the checked-in recipe may authorize one exact
 same-portal bootstrap-target GET alignment, bounded same-ID navigation
 readiness, and then strict preflight on the same target ID. Readiness must

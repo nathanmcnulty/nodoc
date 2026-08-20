@@ -534,8 +534,11 @@ Practical notes:
 - Treat browser-launch PID handoff as normal but identity-sensitive: the owner
   must persist exactly one long-lived process matching binary, port, dedicated
   profile, and random owner token. If the recorded PID disappears while an
-  exact candidate or listener remains, retain the manifest and stop nothing;
-  never adopt or kill a process by name, port, or profile alone.
+  exact candidate or listener remains, retain the manifest and stop nothing.
+  The operator may use explicit owner `rebind` only for exactly one candidate
+  that still matches the manifest binary, token, fixed port, dedicated profile,
+  and expected CDP product. Never adopt or kill a process by name, port, or
+  profile alone.
 - Let the checked-in runner use auth and portal headers in memory for same-session
   safe probes. Persisted bodies are token-redacted and persisted headers contain
   metadata rather than raw authorization or cookie values. Other tenant content
