@@ -411,6 +411,34 @@ inspection, with zero or multiple candidates, or after a CDP product mismatch.
 Successful rebind restores lifecycle identity only; authenticated preflight is
 required again before ledger allocation or capture.
 
+### Closing a portal discovery run
+
+Closing a portal is an explicit operator step after the run has reached a
+terminal state and the evidence/review decision is recorded. Use the checked-in
+cleanup command instead of deleting profile directories by hand:
+
+```powershell
+npm run close:portal-discovery -- --artifacts $artifacts `
+  --profile-key m365-admin --port 9222 --purge-profile
+```
+
+The command fails closed unless `discovery-run.json` is terminal (`completed`,
+`blocked`, or `failed`). A `completed` run must also report
+`capture.captureComplete: true` and contain both `summary.json` and
+`candidate-handoff.json`. It stops only the exact manifest-owned browser,
+verifies that no Edge/Chrome process still references the dedicated profile,
+and removes only the single validated child beneath
+`%LOCALAPPDATA%\nodoc-cdp\profiles`. The command writes a sanitized receipt to
+`%LOCALAPPDATA%\nodoc-cdp\cleanup-receipts` and leaves immutable capture
+artifacts and the shared derivative `bundle-cache` untouched.
+
+`--purge-profile` is intentionally explicit because it removes the persistent
+portal sign-in state; omit it when the operator needs to retain the profile for
+an authorized repair or retry. A blocked or failed run may be closed only when
+the operator has decided that no live repair is pending. Profile cleanup does
+not manage Git branches or worktrees; those remain the promotion/merge owner's
+responsibility.
+
 The required order is: owner ready -> strict feature preflight; only when the
 validated recipe declares it and the feature target is absent, one
 authenticated same-portal bootstrap preflight and exact-target GET alignment ->
