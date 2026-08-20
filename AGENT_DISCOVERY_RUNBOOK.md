@@ -464,6 +464,10 @@ healthy completed capture may be analyzed again without reopening the browser.
     seeded retry uses a new attempt and fresh artifact directory. Never resume
     `capture` or `all` into a non-empty directory, merge artifact
     directories, or use `analyze` as a substitute for an incomplete capture.
+    The seeded run validates that `discovery-run.json` names the exact latest
+    terminal incomplete ledger attempt, then atomically creates and claims the
+    next attempt. A mismatched seed, completed capture, changed recipe/endpoint,
+    or competing state fails before CDP execution.
     Body draining, script/bundle processing, and artifact finalization are bounded
     by `--supervision-timeout-ms`. Productive capture has a separate total
     `--capture-supervision-timeout-ms` failsafe. The production ledger lease is

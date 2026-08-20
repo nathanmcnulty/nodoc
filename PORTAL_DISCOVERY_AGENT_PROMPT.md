@@ -179,7 +179,9 @@ contains sanitized derivative analysis only and is never evidence; immutable
 run artifacts remain authoritative. Re-analyzing identical bundles at every
 checkpoint wastes the capture supervision budget without increasing discovery
 yield. Preserve a failed run's artifacts, but reuse the compatible derivative
-cache for its one fresh seeded retry.
+cache for its one fresh seeded retry. A seeded retry must identify the exact
+terminal incomplete ledger attempt in its `discovery-run.json`; the driver
+atomically creates and claims a new attempt instead of reusing the terminal one.
 
 Read the primary output files named by the runbook, including
 `candidate-handoff.json`. The `all` phase already performs the normalized

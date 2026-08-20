@@ -10,7 +10,7 @@ import {
   getEffectiveServerUrls,
   getScopeServerUrls,
 } from "../spec-quality-lib.mjs";
-import { claimAssignment, enqueueAssignment } from "../portal-discovery-ledger.mjs";
+import { claimAssignment, enqueueAssignment, updateAttempt } from "../portal-discovery-ledger.mjs";
 import { prepareLedgerAttempt } from "../portal-discovery-dispatch.mjs";
 import {
   buildPartitionedCandidateHandoff,
@@ -242,6 +242,50 @@ test("M365 Apps Services reuses an owned canonical lease before browser prefligh
       assert.equal(result.assignment.latestAttempt.attemptNumber, 1, leaseCase.name);
     }
   }
+});
+
+test("seeded retry resumes the exact terminal incomplete ledger attempt", async (t) => {
+  const rootDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-ledger-seeded-retry-"));
+  const ledgerPath = path.join(rootDir, "ledger.jsonl");
+  const seedDir = path.join(rootDir, "seed");
+  const retryDir = path.join(rootDir, "retry");
+  await Promise.all([mkdir(seedDir), mkdir(retryDir)]);
+  const recipePath = path.join(repoRoot, "tools", "capture-recipes", "entra-b2c-deep.json");
+  const baseArgs = {
+    noLedger: false,
+    phase: "all",
+    endpoint: "http://127.0.0.1:9222",
+    ledgerPath,
+    profile: "bounded",
+    workerId: "worker",
+    model: "gpt-5.3-codex-spark",
+    reasoning: "low",
+    priority: "normal",
+    artifacts: seedDir,
+    captureSupervisionTimeoutMs: 1000,
+    supervisionTimeoutMs: 1000,
+  };
+  const spec = { specId: "entra-b2c", title: "Entra B2C" };
+  const first = await prepareLedgerAttempt(baseArgs, spec, recipePath);
+  await updateAttempt({
+    ledgerPath,
+    assignmentId: first.assignmentId,
+    attemptNumber: 1,
+    status: "blocked",
+    captureComplete: false,
+    captureStatus: "interrupted",
+    blocker: { code: "capture-process-timeout" },
+  });
+  await writeJson(path.join(seedDir, "discovery-run.json"), {
+    ledger: { assignmentId: first.assignmentId, attemptNumber: 1 },
+  });
+
+  const retryArgs = { ...baseArgs, artifacts: retryDir, seedArtifacts: seedDir };
+  const resumed = await prepareLedgerAttempt(retryArgs, spec, recipePath);
+  assert.equal(resumed.latestAttempt.attemptNumber, 2);
+  assert.equal(resumed.latestAttempt.status, "running");
+  assert.equal(resumed.latestAttempt.artifactDir, "[external]/retry");
+  assert.equal(retryArgs.attemptNumber, 2);
 });
 
 test("legacy analysis remains explicitly opt-out from ledger dispatch", async (t) => {
