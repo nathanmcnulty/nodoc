@@ -25,35 +25,10 @@
       ]
     }
   },
-  "noveltyFrontier": {
-    "baseline": "checked-in-spec-and-live-capture-ledgers",
-    "baselineSignals": { "queryMetadata": [], "requestShapes": [], "responseShapes": [], "routes": [] },
-    "targets": [
-      {
-        "id": "inventory-list-query-matrix",
-        "state": "Inventory builds, channels, devices, and add-ins list states",
-        "evidenceLevel": "confirmed",
-        "expectedHostFamilies": ["config.office.com", "query.inventory.insights.office.net"],
-        "expectedRoutePrefixes": ["/inventory"],
-        "expectedInformationClasses": ["new-route-family", "response-shape", "query-metadata"],
-        "actionIndexes": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
-        "safeAction": "Open the read-only inventory list variants and their built-in show-all views.",
-        "acceptanceKey": "inventory-list-route-shape-or-query-delta",
-        "rationale": "Device, build, channel, and add-in query variants have incomplete examples and schema coverage."
-      },
-      {
-        "id": "inventory-detail-route-matrix",
-        "state": "Add-in-to-device and device-to-add-in detail routes",
-        "evidenceLevel": "hypothesis",
-        "expectedHostFamilies": ["config.office.com", "query.inventory.insights.office.net"],
-        "expectedRoutePrefixes": ["/inventory"],
-        "expectedInformationClasses": ["new-route-family", "response-shape", "query-metadata"],
-        "actionIndexes": [15, 16, 17, 18, 19, 20],
-        "safeAction": "Navigate directly among read-only inventory detail route variants and capture their normal GET traffic.",
-        "acceptanceKey": "inventory-detail-route-or-shape-delta",
-        "rationale": "The cross-resource detail matrix is a likely source of undocumented route and response variants."
-      }
-    ]
+  "noveltyStatus": {
+    "status": "satisfied",
+    "reason": "All 27 inventory operations and their list/detail states already have deep coverage with no open gap; the prior matrix did not name a concrete missing route, selector, or response field.",
+    "nextRequirement": "Identify an exact unmodeled query.inventory.insights.office.net route, selector, or response key before another novelty run; do not replay show-all branches or the detail matrix unchanged."
   },
   "postActionSettleMs": 10000,
   "settleMs": 12000,

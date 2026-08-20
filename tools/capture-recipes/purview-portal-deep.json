@@ -5,57 +5,10 @@
     "matchHosts": ["purview.microsoft.com"],
     "matchPathPrefixes": ["/"]
   },
-  "noveltyFrontier": {
-    "baseline": "eight checked-in same-origin operations plus prior Purview adjacent review and known telemetry",
-    "baselineSignals": {
-      "queryMetadata": [
-        "purview.microsoft.com GET /api/Auth/getToken resource",
-        "purview.microsoft.com GET /api/Auth/getToken serviceType",
-        "purview.microsoft.com GET /api/v2/auth/GetCachedRoles refreshCache",
-        "purview.microsoft.com GET /api/user/ query",
-        "purview.microsoft.com POST /api/Report/GetReportSummaryData dataSourceId",
-        "purview.microsoft.com POST /api/Report/GetReportSummaryData reportId"
-      ],
-      "requestShapes": [],
-      "responseShapes": [],
-      "routes": [
-        "purview.microsoft.com GET /api/Auth/getToken",
-        "purview.microsoft.com GET /api/Auth/getSpaAuthCode",
-        "purview.microsoft.com GET /api/v2/auth/GetCachedRoles",
-        "purview.microsoft.com POST /api/auth/IsInRoles",
-        "purview.microsoft.com GET /api/adminauditlogconfig/",
-        "purview.microsoft.com GET /api/user/",
-        "purview.microsoft.com POST /api/LabelUserActivityLog/GetChartData",
-        "purview.microsoft.com POST /api/Report/GetReportSummaryData",
-        "purview.microsoft.com POST /api/log/Put"
-      ]
-    },
-    "targets": [
-      {
-        "id": "compliance-manager-detail-unknown-api-family",
-        "state": "Compliance Manager landing and read-only detail states",
-        "evidenceLevel": "confirmed",
-        "expectedHostFamilies": ["purview.microsoft.com"],
-        "expectedRoutePrefixes": ["/api"],
-        "expectedInformationClasses": ["new-route-family", "request-shape", "response-shape", "query-metadata", "response-metadata"],
-        "actionIndexes": [0, 1, 2, 3],
-        "safeAction": "Open Compliance Manager and its read-only details surface without creating assessments, exports, or policies.",
-        "acceptanceKey": "compliance-manager-detail-normalized-route-and-shape-delta",
-        "rationale": "Only an action-attributed normalized method/path outside the checked-in and telemetry baseline, or an evaluator-qualified missing shape or metadata signal, qualifies."
-      },
-      {
-        "id": "dlp-representative-unknown-api-family",
-        "state": "Data Loss Prevention read-only landing state",
-        "evidenceLevel": "confirmed",
-        "expectedHostFamilies": ["purview.microsoft.com"],
-        "expectedRoutePrefixes": ["/api"],
-        "expectedInformationClasses": ["new-route-family", "response-shape", "response-metadata", "query-metadata"],
-        "actionIndexes": [4, 5],
-        "safeAction": "Open only the Data Loss Prevention landing state without policy creation, simulation, editing, export, or configuration controls.",
-        "acceptanceKey": "dlp-normalized-route-and-shape-delta",
-        "rationale": "DLP is the single representative governance state; deferred solutions require a concrete delta from this pass before receiving browser time."
-      }
-    ]
+  "noveltyStatus": {
+    "status": "satisfied",
+    "reason": "A complete healthy representative capture reached Compliance Manager and DLP but produced no promotable same-origin route or response-shape delta; the guessed detail control was absent.",
+    "nextRequirement": "Define an exact reachable Compliance detail route/control or another precise unmodeled same-origin API state before future novelty spend; do not repeat the representative frontier unchanged."
   },
   "matchHosts": [
     "purview.microsoft.com"

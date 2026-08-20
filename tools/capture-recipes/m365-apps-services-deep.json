@@ -9,35 +9,10 @@
       "matchPathnames": ["/officeSettings"]
     }
   },
-  "noveltyFrontier": {
-    "baseline": "checked-in-spec-and-live-capture-ledgers",
-    "baselineSignals": { "queryMetadata": [], "requestShapes": [], "responseShapes": [], "routes": [] },
-    "targets": [
-      {
-        "id": "onedrive-health-count-shapes",
-        "state": "Health and OneDrive sync report states",
-        "evidenceLevel": "confirmed",
-        "expectedHostFamilies": ["config.office.com", "clients.config.office.net"],
-        "expectedRoutePrefixes": ["/odbhealth"],
-        "expectedInformationClasses": ["new-route-family", "response-shape", "query-metadata"],
-        "actionIndexes": [0, 1, 2, 3, 4, 5],
-        "safeAction": "Open read-only health and OneDrive sync report states without exporting data.",
-        "acceptanceKey": "onedrive-health-route-shape-or-count-metadata",
-        "rationale": "OneDrive health count and report variants remain underrepresented in the nine-operation spec."
-      },
-      {
-        "id": "onboarding-release-feature-state",
-        "state": "Cloud update, customization, and setup states",
-        "evidenceLevel": "confirmed",
-        "expectedHostFamilies": ["config.office.com", "clients.config.office.net"],
-        "expectedRoutePrefixes": ["/intents", "/onboarding", "/releases"],
-        "expectedInformationClasses": ["new-route-family", "response-shape", "response-metadata"],
-        "actionIndexes": [6, 7, 8, 9, 10, 11, 12, 13, 14],
-        "safeAction": "Visit read-only service onboarding, release, and setup states without submitting changes.",
-        "acceptanceKey": "service-feature-state-or-release-shape",
-        "rationale": "Eligibility, agreement, onboarding, and release feature-state metadata are not comprehensively documented."
-      }
-    ]
+  "noveltyStatus": {
+    "status": "satisfied",
+    "reason": "All nine service operations and the health, OneDrive, cloud update, customization, and setup states already have deep or seeded coverage with no open gap; the prior broad frontier only replayed known route families.",
+    "nextRequirement": "Identify an exact unmodeled clients.config.office.net route, selector, response key, status, or media type before another novelty run; do not replay the shared M365 Apps states unchanged."
   },
   "matchHosts": [
     "config.office.com",

@@ -1228,6 +1228,48 @@ test("M365 Apps Inventory plan accounts for its mandatory orchestration action",
   assert.equal(result.actionBudget.maxActions, 22);
 });
 
+test("M365 Apps recipes block exhausted frontiers before browser allocation", async () => {
+  for (const portal of ["m365-apps-services", "m365-apps-config", "m365-apps-inventory"]) {
+    await assert.rejects(
+      execFileAsync(process.execPath, [
+        path.join(repoRoot, "tools", "run-portal-discovery.mjs"),
+        "--portal",
+        portal,
+        "--phase",
+        "plan",
+        "--require-novelty",
+        "--json",
+      ], { cwd: repoRoot }),
+      (error) => {
+        const result = JSON.parse(error.stderr);
+        return result.status === "blocked"
+          && result.blocker.code === "novelty-frontier-invalid"
+          && /prior novelty frontier is satisfied/.test(result.blocker.detail);
+      },
+    );
+  }
+});
+
+test("Purview Portal blocks its exhausted frontier before browser allocation", async () => {
+  await assert.rejects(
+    execFileAsync(process.execPath, [
+      path.join(repoRoot, "tools", "run-portal-discovery.mjs"),
+      "--portal",
+      "purview-portal",
+      "--phase",
+      "plan",
+      "--require-novelty",
+      "--json",
+    ], { cwd: repoRoot }),
+    (error) => {
+      const result = JSON.parse(error.stderr);
+      return result.status === "blocked"
+        && result.blocker.code === "novelty-frontier-invalid"
+        && /prior novelty frontier is satisfied/.test(result.blocker.detail);
+    },
+  );
+});
+
 test("novelty-gated analyze never reports an incomplete frontier as completed", async () => {
   const artifactDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-novelty-incomplete-"));
   try {
@@ -1235,7 +1277,7 @@ test("novelty-gated analyze never reports an incomplete frontier as completed", 
       writeJson(path.join(artifactDir, "api-records.json"), []),
       writeJson(path.join(artifactDir, "action-results.json"), []),
     ]);
-    const { runState } = await runAnalyze("purview-portal", artifactDir, { noLedger: true });
+    const { runState } = await runAnalyze("exchange-beta", artifactDir, { noLedger: true });
     assert.equal(runState.status, "blocked");
     assert.equal(runState.blocker.code, "frontier-incomplete");
     assert.equal(runState.novelty.status, "frontier-incomplete");
