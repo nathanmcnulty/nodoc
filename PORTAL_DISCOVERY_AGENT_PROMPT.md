@@ -266,6 +266,20 @@ regression test and two consecutive target runs with byte- and semantic-
 idempotent output. Current-base synchronization and protected merges are
 serialized by the coordinator, with one merge owner at a time.
 
+After the coordinator records the terminal evidence/review disposition, the
+operator may close the portal lifecycle with:
+
+  npm run close:portal-discovery -- --artifacts <artifact-directory> --profile-key <portal-profile-key> --purge-profile
+
+This command is fail-closed: it requires terminal `discovery-run.json`, requires
+complete capture evidence for `completed` runs, stops only the exact owner,
+checks for any remaining browser process using the dedicated profile, and then
+removes only that profile child. It writes a sanitized cleanup receipt while
+leaving immutable artifacts and the derivative bundle cache untouched. The
+`--purge-profile` flag is explicit because it removes persistent sign-in state;
+omit it when retaining the profile for a repair or authorized retry. Branch and
+worktree cleanup is outside this command and remains promotion-owner work.
+
 If command execution finishes but you cannot return a normal response, leave
 the artifact directory unchanged. The orchestrator may inspect
 `discovery-run.json`; a complete capture is accepted evidence and permits only

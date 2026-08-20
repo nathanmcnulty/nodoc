@@ -10,6 +10,7 @@ import {
   assertDedicatedProfilePath,
   buildLaunchCommand,
   getBrowserOwnerStatus,
+  isBrowserProcessUsingProfile,
   isExactManifestOwner,
   rebindBrowserOwner,
   resolveBrowserBinary,
@@ -190,6 +191,21 @@ test("accepts Edge-quoted dedicated profile arguments without weakening exact id
   assert.equal(isExactManifestOwner(manifest(), exactProcess({
     commandLine: `"${binaryPath}" --remote-debugging-port=9222 --user-data-dir="${profilePath}" --nodoc-cdp-owner=${ownerToken}-other`,
   }), profilePath), false);
+});
+
+test("treats an exact or suspicious profile reference as in-use", () => {
+  assert.equal(isBrowserProcessUsingProfile({
+    commandLine: `"${binaryPath}" --user-data-dir="${profilePath}"`,
+  }, profilePath), true);
+  assert.equal(isBrowserProcessUsingProfile({
+    commandLine: `"${binaryPath}" --user-data-dir="${profilePath}-other"`,
+  }, profilePath), true);
+  assert.equal(isBrowserProcessUsingProfile({
+    commandLine: `"${binaryPath}" --user-data-dir="C:\\other-profile"`,
+  }, profilePath), false);
+  assert.equal(isBrowserProcessUsingProfile({
+    commandLine: `"${binaryPath}" --user-data-dir="${profilePath}`,
+  }, profilePath), true);
 });
 
 test("launch retries a transient zero-candidate handoff before binding the exact owner", async () => {

@@ -383,6 +383,54 @@ function findWindowsOwnerProcesses(ownerToken, timeoutMs = defaultProcessInspect
   }));
 }
 
+function findWindowsBrowserProcesses(timeoutMs = defaultProcessInspectionTimeoutMs) {
+  const script = [
+    "$p = Get-CimInstance Win32_Process -ErrorAction SilentlyContinue | Where-Object { $_.Name -match '^(msedge|chrome)(\\.exe)?$' -and $_.CommandLine }",
+    "$items = @($p | Select-Object ProcessId,ExecutablePath,CommandLine)",
+    "if ($items.Count -gt 0) { ConvertTo-Json -InputObject $items -Compress }",
+  ].join("; ");
+  const result = spawnSync("powershell.exe", ["-NoProfile", "-NonInteractive", "-Command", script], {
+    encoding: "utf8",
+    windowsHide: true,
+    timeout: timeoutMs,
+  });
+  if (result.error) throw result.error;
+  if (result.status !== 0) fail("process-inspection-failed", "could not enumerate browser processes.");
+  if (!result.stdout.trim()) return [];
+  const values = JSON.parse(result.stdout);
+  return (Array.isArray(values) ? values : [values]).map((value) => ({
+    pid: Number(value.ProcessId),
+    executablePath: value.ExecutablePath,
+    commandLine: value.CommandLine,
+  }));
+}
+
+export function isBrowserProcessUsingProfile(processInfo, profilePath) {
+  const targetProfile = normalizePathForComparison(profilePath);
+  const argumentsList = parseWindowsCommandLineArguments(processInfo?.commandLine);
+  const exactProfileArgument = argumentsList
+    .filter((argument) => argument.toLowerCase().startsWith("--user-data-dir="))
+    .some((argument) => normalizePathForComparison(argument.slice(argument.indexOf("=") + 1)) === targetProfile);
+  if (exactProfileArgument) return true;
+  // An unbalanced or otherwise unparsable command line is unsafe to ignore
+  // when it still contains the validated profile path. Block rather than
+  // risk deleting a profile that a browser may have open.
+  const rawCommandLine = String(processInfo?.commandLine ?? "")
+    .replaceAll("/", "\\")
+    .toLowerCase();
+  return rawCommandLine.includes(targetProfile);
+}
+
+export function findBrowserProcessesUsingProfile(profilePath, {
+  platform = process.platform,
+  timeoutMs = defaultProcessInspectionTimeoutMs,
+} = {}) {
+  if (platform !== "win32") fail("platform-unsupported", "browser process inspection is supported only on Windows.");
+  return findWindowsBrowserProcesses(timeoutMs)
+    .filter((processInfo) => isBrowserProcessUsingProfile(processInfo, profilePath))
+    .map(({ pid, executablePath }) => ({ pid, executablePath }));
+}
+
 function defaultSpawnBrowser(command, args) {
   const child = spawn(command, args, { detached: true, stdio: "ignore", windowsHide: false });
   child.unref();

@@ -566,6 +566,22 @@ Practical notes:
   own investigation target; browser-session recovery remains operator-owned.
 - If you still need a scratch `.mjs` experiment, keep it in the artifacts directory and promote only the pieces that generalize back into the checked-in runner.
 
+After the portal's terminal evidence and review disposition are recorded, close
+the dedicated lifecycle with the explicit cleanup command:
+
+```powershell
+npm run close:portal-discovery -- --artifacts $artifacts `
+  --profile-key m365-admin --port 9222 --purge-profile
+```
+
+The command accepts only terminal discovery runs, stops the exact owner, checks
+for remaining browser processes using the dedicated profile, and deletes only
+that validated profile child. It records a sanitized receipt under
+`%LOCALAPPDATA%\nodoc-cdp\cleanup-receipts`; immutable artifacts and the shared
+derivative bundle cache are preserved. Omit `--purge-profile` to retain the
+sign-in state for an authorized repair/retry. Git branch/worktree cleanup stays
+with the promotion owner rather than the portal runner.
+
 Deterministic recovery depends on where execution stopped:
 
 - Completed capture, interrupted analysis: run `--phase analyze` against the
