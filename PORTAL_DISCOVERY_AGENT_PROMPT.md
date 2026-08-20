@@ -165,7 +165,10 @@ from both sources or reviewable candidates classified as undocumented count.
 Suppressed telemetry, static assets, and other non-candidates cannot contribute
 shape or metadata novelty. After review, add every accepted runtime key,
 including response status/media-type keys, to the overlay before another run;
-otherwise a repeat observation could be misreported as new.
+otherwise a repeat observation could be misreported as new. For normalized
+records observed on multiple pages, prefer the explicit action index over the
+unioned `seenOnPages` list so one target cannot inherit another target's query
+or shape signal. Empty JSON arrays or objects are not response-shape evidence.
 
 Run the deterministic interface:
 

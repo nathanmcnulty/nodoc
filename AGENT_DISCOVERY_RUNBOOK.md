@@ -270,7 +270,11 @@ During coordinator review, update `baselineSignals` with accepted signal keys
 before scheduling any follow-up so the same evidence cannot count twice.
 Evidence must be attributed to the exact frontier action page that emitted it;
 bootstrap traffic, failed actions, raw prefix collisions, and records from a
-different target state do not count.
+different target state do not count. When a normalized record aggregates
+observations from multiple pages, its explicit `attribution.actionIndex` owns
+the signal; `seenOnPages` is only a legacy fallback and must not spread unioned
+query or shape metadata across targets. Empty JSON arrays or objects do not
+establish a promotable response shape.
 
 ### Protected PR transport troubleshooting
 

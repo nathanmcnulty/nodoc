@@ -151,6 +151,7 @@ test("post-run assessment distinguishes productive targeted shapes from no novel
     apiRecords: [{
       path: "/ApplicationInsights/EnterpriseAppSignIns",
       queryParameterNames: ["top"],
+      responseBodySample: "{\"value\":[{\"id\":\"redacted\"}]}",
       responseShapeFingerprint: "shape-a",
       seenOnPages: ["capture"],
       url: "https://main.iam.ad.ext.azure.com/ApplicationInsights/EnterpriseAppSignIns?top=20",
@@ -243,6 +244,7 @@ test("dynamic crawl result rows do not break exact recipe action accounting", ()
     apiRecords: [{
       method: "GET",
       path: "/detail/1",
+      responseBodySample: "{\"id\":\"redacted\"}",
       responseShapeFingerprint: "shape-detail",
       seenOnPages: ["detail-1"],
       url: "https://api.example.test/detail/1",
@@ -434,7 +436,14 @@ test("route prefixes are segment bounded and evidence is action-page attributed"
       { page: "wait", type: "wait-ms", value: "6000" },
       { page: "capture", type: "capture", value: "enterprise-applications" },
     ],
-    candidateHandoff: {},
+    candidateHandoff: {
+      confirmedReadCandidates: [{
+        baseUrls: ["https://main.iam.ad.ext.azure.com"],
+        documentationStatus: "undocumented",
+        method: "GET",
+        normalizedPath: "/ApplicationInsights/CrossTarget",
+      }],
+    },
     apiRecords: [{
       method: "GET",
       path: "/ApplicationInsightsExtra",
@@ -447,6 +456,14 @@ test("route prefixes are segment bounded and evidence is action-page attributed"
       responseShapeFingerprint: "wrong-page",
       seenOnPages: ["unrelated-page"],
       url: "https://main.iam.ad.ext.azure.com/ApplicationInsights/OtherState",
+    }, {
+      attribution: { actionIndex: 99 },
+      method: "GET",
+      path: "/ApplicationInsights/CrossTarget",
+      responseBodySample: "{\"value\":[1]}",
+      responseShapeFingerprint: "wrong-action",
+      seenOnPages: ["capture"],
+      url: "https://main.iam.ad.ext.azure.com/ApplicationInsights/CrossTarget",
     }],
   });
   assert.equal(assessment.status, "no-novelty");

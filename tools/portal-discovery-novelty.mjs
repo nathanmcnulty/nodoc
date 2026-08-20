@@ -332,6 +332,26 @@ function recordHostname(record) {
   }
 }
 
+function recordBelongsToTarget(record, target, targetPages) {
+  const actionIndex = record?.attribution?.actionIndex;
+  if (Number.isInteger(actionIndex)) return target.actionIndexes.includes(actionIndex);
+  return (record?.seenOnPages ?? []).some((page) => targetPages.has(page));
+}
+
+function hasInformativeResponseShape(record) {
+  if (!record?.responseShapeFingerprint || typeof record?.responseBodySample !== "string") return false;
+  const sample = record.responseBodySample.trim();
+  if (!sample) return false;
+  try {
+    const parsed = JSON.parse(sample);
+    if (Array.isArray(parsed)) return parsed.length > 0;
+    if (parsed && typeof parsed === "object") return Object.keys(parsed).length > 0;
+    return parsed !== null && parsed !== "";
+  } catch {
+    return true;
+  }
+}
+
 function signalKey(record, property, normalizedPath = record?.path) {
   const hostname = recordHostname(record);
   const method = String(record?.method || "GET").toUpperCase();
@@ -381,7 +401,7 @@ export function evaluateNoveltyEvidence({ recipe, noveltyPlan = null, actionResu
     const attempted = target.actionIndexes.every((index) => completedRecipeActionIndexes.has(index));
     const targetPages = new Set(target.actionIndexes.flatMap((index) => actionPages.get(index) ?? []));
     const records = apiRecords.filter((record) => recordMatchesTarget(record, target)
-      && (record.seenOnPages ?? []).some((page) => targetPages.has(page)));
+      && recordBelongsToTarget(record, target, targetPages));
     const candidates = candidateLists(candidateHandoff).filter((candidate) => candidateMatchesTarget(candidate, target));
     const undocumentedRecords = records.filter((record) => candidates.some((candidate) => (
       candidateHostnames(candidate).includes(recordHostname(record))
@@ -405,6 +425,7 @@ export function evaluateNoveltyEvidence({ recipe, noveltyPlan = null, actionResu
       : [];
     const responseShapeSignals = acceptedClasses.has("response-shape")
       ? Array.from(new Set(signalRecords.map((record) => {
+        if (!hasInformativeResponseShape(record)) return null;
         const operation = matchingBaselineOperation(record, plan.baselineOperations);
         if (operation?.responseSchemaDocumented) return null;
         return signalKey(record, "responseShapeFingerprint", operation?.path ?? record.path);
