@@ -134,7 +134,25 @@ function uniqueStrings(values, label, { allowEmpty = false } = {}) {
 export function buildNoveltyPlan(recipe, { required = false, derivedBaseline = null } = {}) {
   const frontier = recipe?.noveltyFrontier;
   if (!frontier) {
-    if (required) fail("selected recipe does not declare noveltyFrontier metadata.");
+    const noveltyStatus = recipe?.noveltyStatus;
+    if (noveltyStatus !== undefined) {
+      if (!noveltyStatus || typeof noveltyStatus !== "object" || Array.isArray(noveltyStatus)) {
+        fail("noveltyStatus must be an object.");
+      }
+      if (noveltyStatus.status !== "satisfied") {
+        fail("noveltyStatus.status must be satisfied when no noveltyFrontier is declared.");
+      }
+      for (const key of ["reason", "nextRequirement"]) {
+        if (typeof noveltyStatus[key] !== "string" || !noveltyStatus[key].trim()) {
+          fail(`noveltyStatus.${key} must be a non-empty string.`);
+        }
+      }
+    }
+    if (required) {
+      fail(noveltyStatus?.status === "satisfied"
+        ? `selected recipe's prior novelty frontier is satisfied; ${noveltyStatus.nextRequirement}`
+        : "selected recipe does not declare noveltyFrontier metadata.");
+    }
     return null;
   }
   if (!frontier || typeof frontier !== "object" || Array.isArray(frontier)) {
@@ -335,13 +353,21 @@ export function evaluateNoveltyEvidence({ recipe, noveltyPlan = null, actionResu
     .map((key) => [key, new Set(plan.baselineSignals[key] ?? [])]));
   const completedRecipeActionIndexes = new Set();
   const actionPages = new Map();
-  let resultCursor = 1;
+  const recipeActionResults = actionResults.filter((result) => (
+    Number.isInteger(result?.actionIndex)
+      ? result.actionIndex >= 0
+      : !/^seed(?:-|$)/u.test(String(result?.page ?? ""))
+  ));
+  const indexedResultsAvailable = recipeActionResults.some((result) => Number.isInteger(result?.actionIndex));
+  let resultCursor = 0;
   for (const [index, action] of recipe.actions.entries()) {
     const expected = actionDescriptor(action);
     const traversedPages = [];
-    while (resultCursor < actionResults.length) {
-      const actual = actionResults[resultCursor];
-      resultCursor += 1;
+    const results = indexedResultsAvailable
+      ? recipeActionResults.filter((result) => result.actionIndex === index)
+      : recipeActionResults.slice(resultCursor);
+    for (const actual of results) {
+      if (!indexedResultsAvailable) resultCursor += 1;
       if (actual?.page) traversedPages.push(actual.page);
       if (actual?.type === expected.type && String(actual?.value ?? "") === expected.value) {
         if (actionResultSucceeded(actual)) completedRecipeActionIndexes.add(index);

@@ -29,7 +29,11 @@ export function actionResultSucceeded(actionResult) {
       const actual = new URL(result.url);
       const expected = new URL(result.resolvedUrl ?? actionResult.value);
       return actual.origin === expected.origin
-        && (actionResult.allowCanonicalRedirect || actual.pathname === expected.pathname);
+        && (actionResult.allowCanonicalRedirect || (
+          actual.pathname === expected.pathname
+          && actual.search === expected.search
+          && actual.hash === expected.hash
+        ));
     } catch {
       return false;
     }

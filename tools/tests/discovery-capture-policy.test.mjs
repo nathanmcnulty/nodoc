@@ -214,6 +214,23 @@ test("initial navigation accepts a same-origin canonical landing route", () => {
   }), true);
 });
 
+test("frontier navigation requires the exact SPA route when redirects are not allowed", () => {
+  assert.equal(actionResultSucceeded({
+    result: {
+      resolvedUrl: "https://entra.microsoft.com/#view/Expected",
+      url: "https://entra.microsoft.com/#view/Fallback",
+    },
+    type: "navigate",
+  }), false);
+  assert.equal(actionResultSucceeded({
+    result: {
+      resolvedUrl: "https://entra.microsoft.com/#view/Expected",
+      url: "https://entra.microsoft.com/#view/Expected",
+    },
+    type: "navigate",
+  }), true);
+});
+
 test("required clicks need a URL, target, or state transition", () => {
   assert.equal(actionResultSucceeded({
     result: {

@@ -1267,6 +1267,17 @@ async function main() {
           `${JSON.stringify(noveltyAssessment, null, 2)}\n`,
           "utf8",
         );
+        if (noveltyAssessment.status === "no-novelty") {
+          candidateHandoff.recommendedNextAction = {
+            code: "revise-frontier-after-no-novelty",
+            summary: "The capture completed but materialized no qualifying frontier novelty; do not report discovery success or repeat the same recipe unchanged.",
+          };
+        } else if (noveltyAssessment.status === "frontier-incomplete") {
+          candidateHandoff.recommendedNextAction = {
+            code: "repair-incomplete-frontier",
+            summary: "At least one planned frontier target was not attempted; preserve partial evidence and repair the deterministic recipe before any retry.",
+          };
+        }
       }
       await writeFile(
         candidateHandoffPath,
@@ -1279,17 +1290,6 @@ async function main() {
       runState.candidateCounts = candidateHandoff.counts;
       runState.recommendedNextAction = candidateHandoff.recommendedNextAction;
       runState.novelty = noveltyAssessment;
-      if (noveltyAssessment?.status === "no-novelty") {
-        runState.recommendedNextAction = {
-          code: "revise-frontier-after-no-novelty",
-          summary: "The capture completed but materialized no qualifying frontier novelty; do not report discovery success or repeat the same recipe unchanged.",
-        };
-      } else if (noveltyAssessment?.status === "frontier-incomplete") {
-        runState.recommendedNextAction = {
-          code: "repair-incomplete-frontier",
-          summary: "At least one planned frontier target was not attempted; preserve partial evidence and repair the deterministic recipe before any retry.",
-        };
-      }
       runState.saturation = saturation;
     }
 

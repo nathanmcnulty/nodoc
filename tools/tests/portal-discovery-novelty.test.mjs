@@ -111,6 +111,23 @@ test("required novelty fails closed without targets or safe action linkage", () 
   );
 });
 
+test("required novelty blocks a satisfied frontier until a new unmodeled state is defined", () => {
+  const satisfied = {
+    actions: [],
+    noveltyStatus: {
+      status: "satisfied",
+      reason: "Every confirmed candidate was promoted.",
+      nextRequirement: "Define a concrete unmodeled detail state.",
+    },
+  };
+  assert.equal(buildNoveltyPlan(satisfied), null);
+  assert.throws(
+    () => buildNoveltyPlan(satisfied, { required: true, derivedBaseline: emptyDerivedBaseline }),
+    (error) => error.code === "novelty-frontier-invalid"
+      && /prior novelty frontier is satisfied/.test(error.message),
+  );
+});
+
 test("post-run assessment distinguishes productive targeted shapes from no novelty", () => {
   const actionResults = [
     { page: "seed", type: "navigate", value: "https://entra.microsoft.com" },
@@ -226,6 +243,27 @@ test("dynamic crawl result rows do not break exact recipe action accounting", ()
   });
   assert.equal(assessment.status, "productive");
   assert.equal(assessment.measurements.attemptedTargetCount, 1);
+});
+
+test("persisted seed sorting and explicit action indexes cannot shift recipe accounting", () => {
+  const actionResults = [
+    { actionIndex: 0, page: "01-click", result: { clicked: true, transitionEvidence: { stateChanged: true } }, type: "click-label", value: "Enterprise applications" },
+    { actionIndex: 1, page: "02-wait", type: "wait-ms", value: "6000" },
+    { actionIndex: 2, page: "03-capture", type: "capture", value: "enterprise-applications" },
+    { actionIndex: -1, page: "seed-00", required: true, type: "navigate", value: "https://entra.microsoft.com" },
+  ];
+  const assessment = assess({ recipe, actionResults, candidateHandoff: {}, apiRecords: [] });
+  assert.equal(assessment.status, "no-novelty");
+  assert.equal(assessment.measurements.attemptedTargetCount, 1);
+
+  const legacyAssessment = assess({
+    recipe,
+    actionResults: actionResults.map(({ actionIndex, ...result }) => result),
+    candidateHandoff: {},
+    apiRecords: [],
+  });
+  assert.equal(legacyAssessment.status, "no-novelty");
+  assert.equal(legacyAssessment.measurements.attemptedTargetCount, 1);
 });
 
 test("checked-in documented schemas and failed actions cannot become novelty", () => {

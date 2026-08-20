@@ -818,10 +818,8 @@ test("no-candidate analysis uses an appropriate portal metadata fallback", async
 
     assert.equal(candidateHandoff.counts.confirmedRead, 0);
     assert.deepEqual(candidateHandoff.recommendedNextAction, {
-      code: "follow-portal-metadata",
-      metadataNextPass: "full-layered-crawl",
-      summary:
-        "No actionable candidates were generated; follow the portal metadata next pass: full-layered-crawl.",
+      code: "repair-incomplete-frontier",
+      summary: "At least one planned frontier target was not attempted; preserve partial evidence and repair the deterministic recipe before any retry.",
     });
   } finally {
     await rm(artifactDir, { force: true, recursive: true });
@@ -1105,21 +1103,24 @@ test("portal driver prefers the bounded Defender deep recipe", async () => {
   assert.equal(result.brief.recipe, "tools/capture-recipes/defender-deep.json");
 });
 
-test("portal driver plans the bounded non-Graph Entra IGA novelty recipe without browser allocation", async () => {
-  const { stdout } = await execFileAsync(process.execPath, [
-    path.join(repoRoot, "tools", "run-portal-discovery.mjs"),
-    "--portal",
-    "entra-iga",
-    "--phase",
-    "plan",
-    "--require-novelty",
-    "--json",
-  ], { cwd: repoRoot });
-  const result = JSON.parse(stdout);
-  assert.equal(result.status, "planned");
-  assert.equal(result.brief.recipe, "tools/capture-recipes/entra-iga-novelty.json");
-  assert.equal(result.noveltyPlan.baselineSignals.derivedOperationCount, 11);
-  assert.equal(result.noveltyPlan.measurements.frontierTargetCount, 3);
+test("portal driver blocks a satisfied Entra IGA novelty frontier before browser allocation", async () => {
+  await assert.rejects(
+    execFileAsync(process.execPath, [
+      path.join(repoRoot, "tools", "run-portal-discovery.mjs"),
+      "--portal",
+      "entra-iga",
+      "--phase",
+      "plan",
+      "--require-novelty",
+      "--json",
+    ], { cwd: repoRoot }),
+    (error) => {
+      const result = JSON.parse(error.stderr);
+      return result.status === "blocked"
+        && result.blocker.code === "novelty-frontier-invalid"
+        && /prior novelty frontier is satisfied/.test(result.blocker.detail);
+    },
+  );
 });
 
 test("M365 Apps Inventory plan accounts for its mandatory orchestration action", async () => {
@@ -1154,6 +1155,8 @@ test("novelty-gated analyze never reports an incomplete frontier as completed", 
     assert.equal(runState.status, "blocked");
     assert.equal(runState.blocker.code, "frontier-incomplete");
     assert.equal(runState.novelty.status, "frontier-incomplete");
+    const handoff = JSON.parse(await readFile(path.join(artifactDir, "candidate-handoff.json"), "utf8"));
+    assert.equal(handoff.recommendedNextAction.code, "repair-incomplete-frontier");
   } finally {
     await rm(artifactDir, { force: true, recursive: true });
   }

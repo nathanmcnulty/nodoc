@@ -2869,6 +2869,7 @@ async function main() {
       setCaptureContext(linkPageLabel);
       const navigationResult = await navigateRoot(seededLink.url);
       actionResults.push({
+        actionIndex: currentActionIndex,
         page: linkPageLabel,
         result: {
           ...navigationResult,
@@ -2907,6 +2908,7 @@ async function main() {
       setCaptureContext(routePageLabel);
       const navigationResult = await navigateRoot(seededRoute.url);
       actionResults.push({
+        actionIndex: currentActionIndex,
         page: routePageLabel,
         result: {
           ...navigationResult,
@@ -2998,6 +3000,7 @@ async function main() {
         url: candidate.url,
       });
       actionResults.push({
+        actionIndex: currentActionIndex,
         page: pageLabel,
         result: {
           ...navigationResult,
@@ -3119,6 +3122,7 @@ async function main() {
     setCaptureContext(args.label ?? "seed-00", -1, args.url);
     const initialNavigation = await navigateRoot(args.url);
     actionResults.push({
+      actionIndex: -1,
       allowCanonicalRedirect: true,
       page: currentContext.pageLabel,
       required: true,
@@ -3136,6 +3140,7 @@ async function main() {
       if (action.type === "wait-ms") {
         await delay(Number(action.value));
         actionResults.push({
+          actionIndex: index,
           page: pageLabel,
           required: action.required,
           result: { waitedMs: Number(action.value) },
@@ -3149,6 +3154,7 @@ async function main() {
 
       if (action.type === "capture") {
         actionResults.push({
+          actionIndex: index,
           page: pageLabel,
           required: action.required,
           result: { capturedOnly: true },
@@ -3163,6 +3169,7 @@ async function main() {
       if (action.type === "navigate") {
         const navigationResult = await navigateRoot(action.value);
         actionResults.push({
+          actionIndex: index,
           page: pageLabel,
           required: action.required,
           result: navigationResult,
@@ -3177,6 +3184,7 @@ async function main() {
       if (action.type === "probe-get") {
         const probeResult = await runProbeGetAction(action, pageLabel, index);
         actionResults.push({
+          actionIndex: index,
           page: pageLabel,
           required: action.required,
           result: probeResult,
@@ -3192,6 +3200,7 @@ async function main() {
       if (action.type === "crawl-links") {
         const crawlResult = await runCurrentLinkCrawlAction(action, pageLabel);
         actionResults.push({
+          actionIndex: index,
           page: pageLabel,
           required: action.required,
           result: crawlResult,
@@ -3206,6 +3215,7 @@ async function main() {
       if (action.type === "replay-seeded-links") {
         const replayResult = await runSeededReplayAction(action, pageLabel);
         actionResults.push({
+          actionIndex: index,
           page: pageLabel,
           required: action.required,
           result: replayResult,
@@ -3220,6 +3230,7 @@ async function main() {
       if (action.type === "replay-seeded-routes") {
         const replayResult = await runSeededRouteReplayAction(action, pageLabel);
         actionResults.push({
+          actionIndex: index,
           page: pageLabel,
           required: action.required,
           result: replayResult,
@@ -3237,6 +3248,7 @@ async function main() {
       const beforeRequestFamilies = new Set(capturedRequests.map(requestFamily));
       const clickResult = await runClickAction(action, beforeSnapshots);
       const actionResult = {
+        actionIndex: index,
         highValue: action.highValue === true,
         page: pageLabel,
         required: action.required,
