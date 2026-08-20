@@ -45,6 +45,8 @@ test("partitioned handoff preserves identities, isolates adjacent evidence, and 
   assert.equal(first.manifest.totals.candidateCount, 4);
   assert.equal(first.manifest.totals.evidenceFamilyCount, 4);
   assert.ok(first.partitions.some(({ reviewClass, destination }) => reviewClass === "adjacent-confirmed-read" && destination.specId === "unassigned"));
+  assert.equal(first.manifest.ownershipReview.suggestedCount, 1);
+  assert.equal(first.partitions.find(({ reviewClass }) => reviewClass === "adjacent-confirmed-read").candidates[0].ownershipDisposition.suggestedSpecId, "beta");
   assert.throws(() => validatePartitionedCandidateHandoff(handoff, { partitions: first.partitions.slice(1) }), /duplicated or dropped/);
   assert.match(JSON.stringify(first), /Items/);
 });
@@ -590,6 +592,23 @@ test("in-scope localization resjson assets are suppressed as static evidence", a
     assert.equal(result.candidateQueue.candidates.some((candidate) => (
       candidate.normalizedPath === "/AuthenticationMethods/AuthenticationDevices/AuthenticationDevicesStrings.resjson"
     )), false);
+  } finally {
+    await rm(artifactDir, { force: true, recursive: true });
+  }
+});
+
+test("static-looking suffix never suppresses confirmed live API transport", async () => {
+  const artifactDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-live-static-looking-api-"));
+  try {
+    await writeJson(path.join(artifactDir, "api-records.json"), [{
+      method: "GET",
+      mimeType: "application/json",
+      path: "/AuthenticationMethods/api/items.resjson",
+      seenOnPages: ["items"],
+    }]);
+    const result = await runAnalyze("ibiza-iam", artifactDir);
+    assert.equal(result.candidateQueue.suppressedCandidates.some((candidate) => candidate.normalizedPath.includes("items.resjson")), false);
+    assert.ok(result.candidateQueue.candidates.some((candidate) => candidate.normalizedPath.includes("items.resjson")));
   } finally {
     await rm(artifactDir, { force: true, recursive: true });
   }

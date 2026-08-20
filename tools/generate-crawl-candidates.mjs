@@ -478,6 +478,10 @@ function buildObservation(record, sourceFile, evidence, context = {}) {
       seenOnPages.size,
       queryParameters.length,
     ),
+    mimeType: typeof record.mimeType === "string" ? record.mimeType.toLowerCase() : null,
+    responseContentType: typeof record.responseContentType === "string"
+      ? record.responseContentType.toLowerCase()
+      : null,
   };
 }
 
@@ -972,16 +976,41 @@ const knownStaticAssetPrefixes = [
   "/erm/Content/",
 ];
 
-function isKnownStaticAssetPath(normalizedPath) {
+function classifyStaticAssetObservation(observation) {
+  const normalizedPath = String(observation.normalizedPath || "");
   const lowerPath = normalizedPath.toLowerCase();
-  return knownStaticAssetPrefixes.some((prefix) => lowerPath.startsWith(prefix.toLowerCase()))
-    || /\.resjson$/iu.test(normalizedPath)
-    || /(?:^|\/)[^/]*(?:[.-])[a-f0-9]{8,}(?:\.[^/]+)?$/iu.test(normalizedPath);
+  const contentType = String(observation.responseContentType || observation.mimeType || "").toLowerCase();
+  const prefixSignal = knownStaticAssetPrefixes.some((prefix) => lowerPath.startsWith(prefix.toLowerCase()));
+  const strongSuffixSignal = /\.(?:resjson|css|map|woff2?|ttf|eot|png|jpe?g|gif|svg|ico)$/iu.test(normalizedPath);
+  const scriptSuffixSignal = /\.(?:js|mjs)$/iu.test(normalizedPath);
+  const hashedAssetSignal = /(?:^|\/)[^/]*(?:[.-])[a-f0-9]{8,}(?:\.[^/]+)?$/iu.test(normalizedPath);
+  const mimeSignal = /^(?:text\/css|application\/(?:javascript|x-javascript|font-woff)|text\/javascript|font\/|image\/)/u.test(contentType);
+  const bundleOnlySignal = observation.evidence === "bundle-discovered" && !observation.method;
+  const liveApiSignal = ["confirmed", "probed"].includes(observation.evidence)
+    && (/\/(?:api|apiproxy|beta|v\d+(?:\.\d+)?)\//iu.test(normalizedPath)
+      || !["GET", "HEAD"].includes(String(observation.method || "").toUpperCase()));
+  const evidence = [
+    ...(prefixSignal ? ["known-static-prefix"] : []),
+    ...(strongSuffixSignal ? ["static-suffix"] : []),
+    ...(scriptSuffixSignal ? ["script-suffix"] : []),
+    ...(hashedAssetSignal ? ["hashed-asset-name"] : []),
+    ...(mimeSignal ? ["static-content-type"] : []),
+    ...(bundleOnlySignal ? ["bundle-only-no-api-method"] : []),
+    ...(liveApiSignal ? ["confirmed-live-api-transport"] : []),
+  ];
+  const isStatic = !liveApiSignal && (
+    strongSuffixSignal
+    || (prefixSignal && (scriptSuffixSignal || hashedAssetSignal || mimeSignal))
+    || (mimeSignal && (scriptSuffixSignal || hashedAssetSignal))
+    || (bundleOnlySignal && (strongSuffixSignal || scriptSuffixSignal || hashedAssetSignal))
+  );
+  return { evidence, isStatic };
 }
 
 function partitionAdjacentStaticAssets(observations) {
   return observations.reduce((result, observation) => {
-    result[isKnownStaticAssetPath(observation.normalizedPath) ? "staticAssets" : "actionable"]
+    const classification = classifyStaticAssetObservation(observation);
+    result[classification.isStatic ? "staticAssets" : "actionable"]
       .push(observation);
     return result;
   }, {

@@ -51,6 +51,7 @@ async function readRecipeMetrics(recipePath) {
     navigateActions: descriptors.filter((entry) => entry.type === "navigate").length,
     noveltyTargetCount: noveltyPlan?.measurements.frontierTargetCount ?? 0,
     noveltyTargetedActionCount: noveltyPlan?.measurements.frontierTargetedActionCount ?? 0,
+    satisfiedNoveltyCount: recipe.noveltyStatus?.status === "satisfied" ? 1 : 0,
     rootClicks: descriptors.filter((entry) => entry.scope === "root" && entry.type.startsWith("click")).length,
     seededLinkActions: descriptors.filter((entry) => entry.type === "replay-seeded-links").length,
     seededRouteActions: descriptors.filter((entry) => entry.type === "replay-seeded-routes").length,
@@ -69,6 +70,7 @@ function sumRecipeMetrics(recipePaths, metricsByPath) {
       "navigateActions",
       "noveltyTargetCount",
       "noveltyTargetedActionCount",
+      "satisfiedNoveltyCount",
       "rootClicks",
       "seededLinkActions",
       "seededRouteActions",
@@ -89,6 +91,7 @@ function sumRecipeMetrics(recipePaths, metricsByPath) {
     navigateActions: 0,
     noveltyTargetCount: 0,
     noveltyTargetedActionCount: 0,
+    satisfiedNoveltyCount: 0,
     rootClicks: 0,
     seededLinkActions: 0,
     seededRouteActions: 0,
@@ -120,7 +123,7 @@ function buildMissingAxes(summary) {
     missing.push("interaction-checkpoints");
   }
 
-  if (summary.recipeCount > 0 && summary.noveltyTargetCount === 0) {
+  if (summary.recipeCount > 0 && summary.noveltyTargetCount === 0 && summary.satisfiedNoveltyCount === 0) {
     missing.push("novelty-frontier");
   }
 
@@ -130,6 +133,10 @@ function buildMissingAxes(summary) {
 function buildRecommendedNext(summary, specTitle, operationCount) {
   if (summary.recipeCount === 0) {
     return "add-base-recipe";
+  }
+
+  if (summary.noveltyTargetCount === 0 && summary.satisfiedNoveltyCount > 0) {
+    return "blocked-satisfied-await-new-approved-frontier";
   }
 
   if (summary.noveltyTargetCount === 0) {

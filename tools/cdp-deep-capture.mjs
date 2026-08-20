@@ -2035,6 +2035,7 @@ async function main() {
   const probeAssociations = new Map();
   const passiveTransports = [];
   const actionResults = [];
+  const actionStartedAt = new Map([[-1, Date.now()]]);
   const boundedNetworkSessions = new Set();
   const configuredSessions = new Set();
   let currentActionIndex = -1;
@@ -2485,7 +2486,11 @@ async function main() {
     candidateCount: 0,
     graphqlOperationCount: 0,
     parseFailureCount: 0,
+    analyzedBytes: 0,
+    candidateFamilies: [],
   };
+  const checkpointRequestFamilies = new Set();
+  const checkpointCandidateFamilies = new Set();
 
   async function writeBundleArtifacts() {
     if (!args.captureScripts) {
@@ -2509,6 +2514,8 @@ async function main() {
         candidateCount: 0,
         graphqlOperationCount: 0,
         parseFailureCount: 0,
+        analyzedBytes: 0,
+        candidateFamilies: [],
       };
       return;
     }
@@ -2563,8 +2570,10 @@ async function main() {
       "utf8",
     );
     latestBundleSummary = {
+      analyzedBytes: downloads.reduce((total, entry) => total + (entry.byteLength ?? 0), 0),
       bundleCount: bundleCandidates.bundleCount,
       candidateCount: bundleCandidates.candidates.length,
+      candidateFamilies: uniqueSorted(bundleCandidates.candidates.map((candidate) => `${candidate.hostname ?? "NO_HOST"} ${candidate.method ?? "ANY"} ${candidate.candidatePath}`)),
       graphqlOperationCount: bundleCandidates.graphqlOperations.length,
       parseFailureCount: bundleCandidates.parseFailures.length,
       cache: bundleCandidates.cache,
@@ -2721,6 +2730,7 @@ async function main() {
   }
 
   async function captureCheckpoint(pageLabel) {
+    const checkpointStartedAt = actionStartedAt.get(currentActionIndex) ?? Date.now();
     await delay(1000);
     const snapshots = await collectSnapshots();
     const rootSnapshot = snapshots.find((snapshot) => snapshot.sessionId === "root" && !snapshot.error) ?? snapshots[0] ?? {};
@@ -2792,7 +2802,43 @@ async function main() {
       await capturePageScriptBodies(pageLabel);
     }
     await flushArtifacts();
+    const requestFamilies = capturedRequests
+      .filter((request) => request.pageLabel === pageLabel && !request.probeId)
+      .map(requestFamily);
+    const newRequestFamilies = uniqueSorted(requestFamilies.filter((family) => !checkpointRequestFamilies.has(family)));
+    requestFamilies.forEach((family) => checkpointRequestFamilies.add(family));
+    const newCandidateFamilies = latestBundleSummary.candidateFamilies
+      .filter((family) => !checkpointCandidateFamilies.has(family));
+    latestBundleSummary.candidateFamilies.forEach((family) => checkpointCandidateFamilies.add(family));
+    const cacheHits = latestBundleSummary.cache?.cacheHits ?? {};
+    const checkpointMetrics = {
+      schemaVersion: captureArtifactSchemaVersion,
+      bundleAnalysis: {
+        analyzedBytes: latestBundleSummary.analyzedBytes ?? null,
+        cacheHits: {
+          memory: cacheHits.memory ?? null,
+          persistent: cacheHits.persistent ?? null,
+        },
+      },
+      countedActions: currentActionIndex >= 0 ? 1 : 0,
+      elapsedMs: Date.now() - checkpointStartedAt,
+      estimatedCostProxy: {
+        kind: "non-financial-cardinality",
+        scope: "checkpoint-bundle-analysis-invocation",
+        value: (currentActionIndex >= 0 ? 1 : 0) + (latestBundleSummary.cache?.analyzerExecutions ?? 0),
+      },
+      newCandidateFamilies,
+      newCandidateFamilyCount: newCandidateFamilies.length,
+      newRequestFamilies,
+      newRequestFamilyCount: newRequestFamilies.length,
+      qualifyingNoveltySignals: null,
+      yieldPerAction: null,
+      yieldPerMinute: null,
+    };
+    const actionResult = actionResults.findLast((entry) => entry.page === pageLabel);
+    if (actionResult) actionResult.checkpointMetrics = checkpointMetrics;
     return {
+      checkpointMetrics,
       pageState: pageStates.at(-1),
       snapshots,
     };
@@ -3218,6 +3264,7 @@ async function main() {
     for (const [index, action] of args.actions.entries()) {
       const pageLabel = buildActionLabel(action, index);
       currentActionIndex = index;
+      actionStartedAt.set(index, Date.now());
       setCaptureContext(pageLabel);
 
       if (action.type === "wait-ms") {

@@ -245,6 +245,13 @@ not discovery work:
    undocumented route counts only when the normalized method/path survives
    suppression into a reviewable candidate bucket; telemetry sinks, static
    assets, and other suppressed traffic cannot manufacture novelty.
+   Before planning, run the offline frontier compiler against the checked-in
+   OpenAPI, generated coverage ledger, and available sanitized prior artifacts.
+   Do not allocate a browser for `satisfied-prebrowser-block`,
+   `blocked-no-exact-frontier`, or `blocked-adjacent-ownership`. An active
+   frontier requires a concrete `reopenCondition`, immutable approval digest,
+   and exact state/action mapping. Click-driven targets additionally require
+   readiness metadata covering every targeted click.
 4. Require `npm run browser:cdp:status -- --profile-key <key>` to report the
    manifest-owned browser as healthy, then run the portal driver against that
    exact loopback endpoint. Its recipe-gated preflight verifies browser metadata,

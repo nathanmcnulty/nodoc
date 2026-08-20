@@ -135,6 +135,19 @@ reconstructing live completeness. Use the recorded window gains and remaining
 eligible work for scheduling and reviewer triage; do not infer token or CPU
 savings from candidate cardinality alone.
 
+Record cost/yield at each checkpoint and per frontier target: counted actions,
+elapsed milliseconds, eligible/absent/ambiguous controls, new request and
+candidate families, qualifying novelty signals, bundle analyzed bytes, and
+memory/persistent cache hits. Yield rates are cardinality metrics; cost is
+non-financial unless an explicit versioned pricing input is supplied.
+
+Run adjacent ownership reconciliation before another capture on the affected
+host family. Single-spec matches are suggestions only; an explicit spec and
+host-family disposition is required to lift the gate. Keep unrelated portals
+schedulable. Static suppression likewise requires evidence: never suppress a
+confirmed live API transport from suffix alone, and do not introduce broad
+`.ReactView` filtering without a representative reviewed corpus.
+
 ### Recommended spidering rules
 
 - same-origin first

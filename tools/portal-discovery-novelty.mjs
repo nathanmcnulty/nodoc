@@ -1,3 +1,5 @@
+import { createHash } from "node:crypto";
+
 import { actionResultSucceeded } from "./discovery-capture-policy.mjs";
 
 const evidenceLevels = new Set(["confirmed", "probed", "bundle-discovered", "hypothesis"]);
@@ -19,6 +21,8 @@ const interactiveActionTypes = new Set([
   "replay-seeded-links",
   "replay-seeded-routes",
 ]);
+const stableJson = (value) => `${JSON.stringify(value)}\n`;
+const noveltyDigest = (value) => createHash("sha256").update(stableJson(value), "utf8").digest("hex");
 
 function routePattern(pathname) {
   const escaped = String(pathname).replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
@@ -164,6 +168,12 @@ export function buildNoveltyPlan(recipe, { required = false, derivedBaseline = n
   if (!frontier.baselineSignals || typeof frontier.baselineSignals !== "object" || Array.isArray(frontier.baselineSignals)) {
     fail("noveltyFrontier.baselineSignals must explicitly snapshot the checked-in evidence baseline.");
   }
+  if (typeof frontier.reopenCondition !== "string" || !frontier.reopenCondition.trim()) {
+    fail("noveltyFrontier.reopenCondition must describe the exact new state or evidence gap that reopened capture.");
+  }
+  if (!/^[a-f0-9]{64}$/u.test(String(frontier.approvalDigest || ""))) {
+    fail("noveltyFrontier.approvalDigest must be an immutable SHA-256 approval digest.");
+  }
   const baselineSignals = Object.fromEntries([
     "queryMetadata",
     "requestShapes",
@@ -280,8 +290,19 @@ export function buildNoveltyPlan(recipe, { required = false, derivedBaseline = n
       timeoutMs,
     };
   }
-  const plan = {
+  const targetedClickIndexes = [...targetedIndexes]
+    .filter((index) => String(actions[index]?.type || "").startsWith("click"))
+    .sort((left, right) => left - right);
+  if (targetedClickIndexes.length > 0 && !frontierControlReadiness) {
+    fail("frontierControlReadiness is required for click-driven novelty targets.");
+  }
+  if (frontierControlReadiness
+    && targetedClickIndexes.some((index) => !frontierControlReadiness.actionIndexes.includes(index))) {
+    fail("frontierControlReadiness.actionIndexes must cover every frontier-targeted click action.");
+  }
+  const planCore = {
     schemaVersion: 1,
+    approvalDigest: frontier.approvalDigest,
     baseline: String(frontier.baseline || "checked-in-spec-and-coverage-ledgers"),
     baselineSignals: {
       ...baselineSignals,
@@ -289,6 +310,7 @@ export function buildNoveltyPlan(recipe, { required = false, derivedBaseline = n
       source: derivedBaseline?.source ?? "recipe-overlay-only",
     },
     targets,
+    reopenCondition: frontier.reopenCondition.trim(),
     ...(frontierControlReadiness ? { frontierControlReadiness } : {}),
     actions: [{
       index: -1,
@@ -303,6 +325,10 @@ export function buildNoveltyPlan(recipe, { required = false, derivedBaseline = n
       frontierTargetedActionShare: actions.length === 0 ? 0 : targetedIndexes.size / actions.length,
       mandatoryOrchestrationActionCount: 1,
     },
+  };
+  const plan = {
+    ...planCore,
+    frontierDigest: noveltyDigest(planCore),
   };
   Object.defineProperty(plan, "baselineOperations", {
     enumerable: false,
@@ -499,6 +525,35 @@ export function evaluateNoveltyEvidence({ recipe, noveltyPlan = null, actionResu
       + requestShapeSignals.length
       + queryMetadataSignals.length
       + responseMetadataSignals.length;
+    const checkpointMetrics = target.actionIndexes
+      .flatMap((index) => recipeActionResults.filter((result) => result.actionIndex === index))
+      .map((result) => result.checkpointMetrics)
+      .filter(Boolean);
+    const countedActions = checkpointMetrics.reduce((total, entry) => total + (entry.countedActions ?? 0), 0);
+    const elapsedMs = checkpointMetrics.reduce((total, entry) => total + (entry.elapsedMs ?? 0), 0);
+    const readinessControls = checkpointMetrics.flatMap((entry) => entry.controlReadiness?.controls ?? []);
+    const costYield = {
+      bundleCacheHits: {
+        memory: checkpointMetrics.reduce((total, entry) => total + (entry.bundleAnalysis?.cacheHits?.memory ?? 0), 0),
+        persistent: checkpointMetrics.reduce((total, entry) => total + (entry.bundleAnalysis?.cacheHits?.persistent ?? 0), 0),
+      },
+      controlReadiness: {
+        absent: readinessControls.filter((entry) => entry.status === "absent-not-applicable").length,
+        ambiguous: readinessControls.filter((entry) => entry.status === "ambiguous").length,
+        eligible: readinessControls.filter((entry) => entry.status === "present").length,
+      },
+      countedActions,
+      elapsedMs,
+      estimatedCostProxy: {
+        kind: "non-financial-cardinality",
+        value: checkpointMetrics.reduce((total, entry) => total + (entry.estimatedCostProxy?.value ?? 0), 0),
+      },
+      newCandidateFamilyCount: checkpointMetrics.reduce((total, entry) => total + (entry.newCandidateFamilyCount ?? 0), 0),
+      newRequestFamilyCount: checkpointMetrics.reduce((total, entry) => total + (entry.newRequestFamilyCount ?? 0), 0),
+      qualifyingNoveltySignals: materializedSignalCount,
+      yieldPerAction: countedActions > 0 ? materializedSignalCount / countedActions : null,
+      yieldPerMinute: elapsedMs > 0 ? materializedSignalCount / (elapsedMs / 60000) : null,
+    };
     return {
       acceptanceKey: target.acceptanceKey,
       attempted,
@@ -506,6 +561,7 @@ export function evaluateNoveltyEvidence({ recipe, noveltyPlan = null, actionResu
       hostSignals,
       matchedRecordCount: records.length,
       materializedSignalCount,
+      costYield,
       queryMetadataSignals,
       requestShapeSignals,
       responseMetadataSignals,

@@ -157,6 +157,17 @@ successful discovery and must not be repeated unchanged. It can support a
 saturation conclusion only after canonical health passes and no critical
 frontier item remains.
 
+Compile the offline frontier before allocating a browser:
+
+  npm run generate:portal-frontier -- --spec <portal-spec-id> --recipe <recipe-path> [--prior-artifact <candidate-json>] [--candidate-handoff <handoff-json>]
+
+The compiler compares checked-in OpenAPI metadata, coverage gaps, and prior
+sanitized artifacts. Its candidates are review work, not generated UI actions.
+Capture is authorized only when an approved candidate maps to an exact checked-
+in target state and action set. A satisfied recipe blocks before browser work;
+reopening requires a concrete `reopenCondition` and a new immutable
+`approvalDigest`.
+
 The driver derives the primary baseline from the checked-in OpenAPI operation,
 host, parameter, response-status, media-type, and schema metadata. The recipe's
 `baselineSignals` is an explicit overlay for previously accepted runtime shape
@@ -170,6 +181,15 @@ records observed on multiple pages, prefer the explicit action index over the
 unioned `seenOnPages` list so one target cannot inherit another target's query
 or shape signal. Empty JSON arrays or objects are not response-shape evidence.
 
+Accepted runtime keys enter the overlay only through a schema-validated
+`baseline-approval.json` from exact model `gpt-5.6-luna`. The approval binds the
+spec, canonical signal, evidence IDs, terminal canonical health, and source
+artifact digest. `npm run sync:portal-baseline -- compile <input.json>` emits an
+append-only, idempotent sync result. The input names `sourceArtifactPath`; the
+compiler hashes that file and verifies every approved evidence ID against its
+immutable `evidenceIndex`. Free-form prose, wrong-model output, stale artifact
+hashes, missing evidence, and scope changes never mutate the baseline.
+
 When a frontier depends on a specific visible control, declare
 `frontierControlReadiness` with the exact targeted click action indexes and a
 bounded timeout. Before ledger-attempt creation or capture, the driver must
@@ -180,7 +200,18 @@ the declared scope is `present`; missing or multiple matches emit
 stable href or accessibility/automation identifier over label containment.
 Generic child or ReactBlade frames never satisfy a named frontier unless the
 control and resulting traffic are attributed to that frontier action and
-checkpoint. Localization `.resjson` files are static assets, not API novelty.
+checkpoint. Readiness inventory is sanitized and persisted before ledger
+mutation. Static suppression requires supporting suffix/prefix, content-type,
+and live/bundle transport evidence. A confirmed live API transport is never
+hidden only because its path has a static-looking suffix; `.ReactView` is not a
+broad suppression rule.
+
+Each checkpoint records elapsed time, counted actions, new request/candidate
+families, bundle-cache hits/bytes, and a non-financial cardinality cost proxy.
+The novelty assessment joins qualifying signals per frontier target and emits
+yield rates only when inputs are available. Adjacent confirmed or safety
+evidence must receive an explicit spec/host disposition before more capture on
+the affected host family; a unique matching spec remains only a suggestion.
 
 Run the deterministic interface:
 

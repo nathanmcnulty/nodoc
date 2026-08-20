@@ -9,12 +9,14 @@ import {
 
 const recipe = {
   url: "https://entra.microsoft.com",
+  frontierControlReadiness: { actionIndexes: [0], timeoutMs: 15000 },
   actions: [
     "click-label-root=Enterprise applications",
     "wait-ms=6000",
     "capture=enterprise-applications",
   ],
   noveltyFrontier: {
+    approvalDigest: "a".repeat(64),
     baseline: "checked-in-spec-and-coverage-ledgers",
     baselineSignals: {
       queryMetadata: [],
@@ -22,6 +24,7 @@ const recipe = {
       responseShapes: [],
       routes: [],
     },
+    reopenCondition: "The enterprise applications state has a specific undocumented response shape.",
     targets: [{
       acceptanceKey: "response-shape:/ApplicationInsights/EnterpriseAppSignIns",
       actionIndexes: [0, 1, 2],
@@ -127,6 +130,22 @@ test("frontier control readiness references only targeted click actions", () => 
     }),
     /frontier-targeted click actions/,
   );
+  assert.throws(
+    () => planFor({ ...recipe, frontierControlReadiness: undefined }),
+    /required for click-driven novelty targets/,
+  );
+  assert.throws(
+    () => planFor({
+      ...recipe,
+      actions: ["click-label-root=Enterprise applications", "click-label-root=Details", "capture=enterprise-applications"],
+      frontierControlReadiness: { actionIndexes: [0], timeoutMs: 15000 },
+      noveltyFrontier: {
+        ...recipe.noveltyFrontier,
+        targets: [{ ...recipe.noveltyFrontier.targets[0], actionIndexes: [0, 1, 2] }],
+      },
+    }),
+    /cover every frontier-targeted click action/,
+  );
 });
 
 test("required novelty blocks a satisfied frontier until a new unmodeled state is defined", () => {
@@ -144,6 +163,19 @@ test("required novelty blocks a satisfied frontier until a new unmodeled state i
     (error) => error.code === "novelty-frontier-invalid"
       && /prior novelty frontier is satisfied/.test(error.message),
   );
+});
+
+test("active frontier requires exact reopen provenance and produces an immutable digest", () => {
+  const plan = planFor(recipe);
+  assert.match(plan.frontierDigest, /^[a-f0-9]{64}$/u);
+  assert.throws(() => planFor({
+    ...recipe,
+    noveltyFrontier: { ...recipe.noveltyFrontier, approvalDigest: undefined },
+  }), /approvalDigest/);
+  assert.throws(() => planFor({
+    ...recipe,
+    noveltyFrontier: { ...recipe.noveltyFrontier, reopenCondition: "" },
+  }), /reopenCondition/);
 });
 
 test("post-run assessment distinguishes productive targeted shapes from no novelty", () => {
@@ -234,8 +266,10 @@ test("dynamic crawl result rows do not break exact recipe action accounting", ()
   const crawlRecipe = {
     actions: ["navigate=https://example.test/start", "crawl-links=detail", "capture=detail"],
     noveltyFrontier: {
+      approvalDigest: "b".repeat(64),
       baseline: "checked-in-spec-and-coverage-ledgers",
       baselineSignals: { queryMetadata: [], requestShapes: [], responseShapes: [], routes: [] },
+      reopenCondition: "A read-only detail state has an undocumented response shape.",
       targets: [{
         acceptanceKey: "detail-shape",
         actionIndexes: [0, 1, 2],
@@ -284,9 +318,12 @@ test("suppressed undocumented telemetry cannot produce shape or metadata novelty
   const telemetryRecipe = {
     url: "https://portal.example.test",
     actions: ["click-label-root=Reports", "capture=reports"],
+    frontierControlReadiness: { actionIndexes: [0], timeoutMs: 15000 },
     noveltyFrontier: {
+      approvalDigest: "c".repeat(64),
       baseline: "checked-in-spec-and-candidate-policy",
       baselineSignals: { queryMetadata: [], requestShapes: [], responseShapes: [], routes: [] },
+      reopenCondition: "A read-only reports state has a reviewable API delta.",
       targets: [{
         acceptanceKey: "reviewable-api-delta",
         actionIndexes: [0, 1],

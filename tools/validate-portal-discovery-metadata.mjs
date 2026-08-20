@@ -202,6 +202,19 @@ async function validateRecipeFile(errors, recipePath) {
     resolvePageTargetCriteria(recipe);
     validateRecipeTargetMetadata(recipe);
     buildNoveltyPlan(recipe);
+    if (recipe.noveltyStatus?.status === "satisfied") {
+      let blockedBeforeBrowser = false;
+      try {
+        buildNoveltyPlan(recipe, {
+          required: true,
+          derivedBaseline: { source: "checked-in-openapi", operations: [] },
+        });
+      } catch (error) {
+        blockedBeforeBrowser = error?.code === "novelty-frontier-invalid"
+          && /prior novelty frontier is satisfied/u.test(error.message);
+      }
+      if (!blockedBeforeBrowser) fail(errors, `${recipePath}: satisfied novelty state does not block pre-browser planning.`);
+    }
   } catch (error) {
     fail(errors, `${recipePath}: ${error.message}`);
   }
