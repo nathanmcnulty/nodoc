@@ -1167,27 +1167,23 @@ test("portal driver blocks a satisfied Entra IGA novelty frontier before browser
   );
 });
 
-test("Entra B2C retargets only the action-attributed API connector graph lead", async () => {
-  const { stdout } = await execFileAsync(process.execPath, [
-    path.join(repoRoot, "tools", "run-portal-discovery.mjs"),
-    "--portal",
-    "entra-b2c",
-    "--phase",
-    "plan",
-    "--require-novelty",
-    "--json",
-  ], { cwd: repoRoot });
-  const result = JSON.parse(stdout);
-  assert.equal(result.status, "planned");
-  assert.equal(result.actionBudget.countedActions, 4);
-  assert.equal(result.noveltyPlan.measurements.frontierTargetCount, 1);
-  assert.deepEqual(
-    result.noveltyPlan.targets[0].expectedRoutePrefixes,
-    ["/graph/cpimApiConnectors"],
-  );
-  assert.deepEqual(
-    result.noveltyPlan.actions.filter(({ index }) => index >= 0).map(({ type }) => type),
-    ["navigate", "wait-ms", "capture"],
+test("Entra B2C blocks its exhausted frontier before browser allocation", async () => {
+  await assert.rejects(
+    execFileAsync(process.execPath, [
+      path.join(repoRoot, "tools", "run-portal-discovery.mjs"),
+      "--portal",
+      "entra-b2c",
+      "--phase",
+      "plan",
+      "--require-novelty",
+      "--json",
+    ], { cwd: repoRoot }),
+    (error) => {
+      const result = JSON.parse(error.stderr);
+      return result.status === "blocked"
+        && result.blocker.code === "novelty-frontier-invalid"
+        && /prior novelty frontier is satisfied/.test(result.blocker.detail);
+    },
   );
 });
 

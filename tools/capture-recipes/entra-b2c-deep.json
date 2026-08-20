@@ -9,23 +9,10 @@
       "matchPathnames": ["/"]
     }
   },
-  "noveltyFrontier": {
-    "baseline": "checked-in-spec-and-coverage-ledgers",
-    "baselineSignals": { "queryMetadata": [], "requestShapes": [], "responseShapes": [], "routes": [] },
-    "targets": [
-      {
-        "id": "api-connector-graph-shape",
-        "state": "External Identities API connectors list state",
-        "evidenceLevel": "confirmed",
-        "expectedHostFamilies": ["main.b2cadmin.ext.azure.com"],
-        "expectedRoutePrefixes": ["/graph/cpimApiConnectors"],
-        "expectedInformationClasses": ["new-route-family", "response-shape", "query-metadata", "response-metadata"],
-        "actionIndexes": [0, 1, 2],
-        "safeAction": "Navigate directly to the observed read-only API Connectors SPA state and capture its normal list request without opening create or edit controls.",
-        "acceptanceKey": "api-connector-graph-route-and-shape",
-        "rationale": "An incomplete run observed /graph/cpimApiConnectors only during seed traffic. It is absent from the six-operation spec and must be reacquired with exact API-connectors action attribution before review."
-      }
-    ]
+  "noveltyStatus": {
+    "status": "satisfied",
+    "reason": "A complete healthy targeted run produced no qualifying action-attributed delta; the B2C-looking connector route remained seed-only and is not promotion evidence.",
+    "nextRequirement": "Do not rerun this recipe unchanged. Define a precise newly identified UI state or route family with a deterministic action that can produce action-attributed evidence."
   },
   "matchHosts": [
     "entra.microsoft.com",
