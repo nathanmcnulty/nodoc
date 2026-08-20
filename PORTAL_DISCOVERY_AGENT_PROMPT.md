@@ -169,9 +169,17 @@ Run the deterministic interface:
 
   npm run discover:portal -- --portal <portal-spec-id> --profile bounded --phase plan --require-novelty --json
 
-Then create a unique artifact directory outside the repository and run:
+Then create a unique artifact directory and a stable derivative bundle-cache
+directory outside the repository and run:
 
-  npm run discover:portal -- --portal <portal-spec-id> --profile bounded --phase all --require-novelty --artifacts <fresh-artifact-directory>
+  npm run discover:portal -- --portal <portal-spec-id> --profile bounded --phase all --require-novelty --artifacts <fresh-artifact-directory> --bundle-cache-dir <stable-derivative-cache-directory>
+
+Expensive novelty runs must enable the content-addressed bundle cache. The cache
+contains sanitized derivative analysis only and is never evidence; immutable
+run artifacts remain authoritative. Re-analyzing identical bundles at every
+checkpoint wastes the capture supervision budget without increasing discovery
+yield. Preserve a failed run's artifacts, but reuse the compatible derivative
+cache for its one fresh seeded retry.
 
 Read the primary output files named by the runbook, including
 `candidate-handoff.json`. The `all` phase already performs the normalized

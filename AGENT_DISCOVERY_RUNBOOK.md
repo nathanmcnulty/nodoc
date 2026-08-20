@@ -428,12 +428,13 @@ healthy completed capture may be analyzed again without reopening the browser.
 
    ```powershell
    $artifacts = Join-Path $env:TEMP ("nodoc-m365-admin-discovery-" + [guid]::NewGuid())
+   $bundleCache = Join-Path $env:LOCALAPPDATA "nodoc-cdp\bundle-cache"
    ```
 
 3. Run the deterministic pipeline:
 
    ```powershell
-   npm run discover:portal -- --portal m365-admin --profile bounded --phase all --require-novelty --endpoint https://admin.cloud.microsoft --artifacts $artifacts --ledger-path $ledgerPath
+   npm run discover:portal -- --portal m365-admin --profile bounded --phase all --require-novelty --endpoint https://admin.cloud.microsoft --artifacts $artifacts --ledger-path $ledgerPath --bundle-cache-dir $bundleCache
    ```
 
    Capture and analysis automatically enqueue and claim a deterministic ledger
@@ -455,7 +456,7 @@ healthy completed capture may be analyzed again without reopening the browser.
 
        ```powershell
        $retryArtifacts = Join-Path $env:TEMP ("nodoc-m365-admin-retry-" + [guid]::NewGuid())
-       npm run discover:portal -- --portal m365-admin --profile bounded --phase all --artifacts $retryArtifacts --seed-artifacts $artifacts
+       npm run discover:portal -- --portal m365-admin --profile bounded --phase all --require-novelty --endpoint https://admin.cloud.microsoft --artifacts $retryArtifacts --seed-artifacts $artifacts --bundle-cache-dir $bundleCache
        ```
 
     This recovery path is distinct from the delegated null-output contract: it
@@ -577,10 +578,11 @@ diagnostics rather than treated as successful extraction.
 
 ### Bundle analysis cache
 
-Bundle analysis caching is disabled by default, preserving legacy execution. To
-opt in for repeated runs, pass `--bundle-cache-dir <directory>` to
-`run-portal-discovery.mjs`; the directory is a local derivative cache and must
-not be used as evidence storage. Entries are keyed by SHA-256 bundle content,
+Bundle analysis caching remains disabled by default for legacy execution, but
+it is required for expensive `--require-novelty` capture assignments. Pass
+`--bundle-cache-dir <directory>` to `run-portal-discovery.mjs`; use a stable
+directory outside the repository and artifact directories. It is a local
+derivative cache and must not be used as evidence storage. Entries are keyed by SHA-256 bundle content,
 analyzer version, cache schema version, result schema version, and normalized
 path-prefix options. URL, local path, and modification time are never keys.
 
