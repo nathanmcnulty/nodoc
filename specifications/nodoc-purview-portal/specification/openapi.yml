@@ -442,8 +442,19 @@ paths:
       summary: Evaluate role and feature membership
       description: |
         Evaluates a batch of role, permission, and feature identifiers and returns a positional boolean
-        array indicating which entries are available to the current portal session.
+        array indicating which entries are available to the current portal session. The optional
+        `cache` flag was observed with both boolean values during normal solution navigation.
+
+        This POST is documented from passive portal traffic only. Never probe or replay it, alter
+        its role inputs or scope, or treat it as write-safe.
       operationId: PurviewPortal.Auth.IsInRoles
+      parameters:
+        - name: cache
+          in: query
+          required: false
+          description: Whether the portal requests cached role-evaluation results.
+          schema:
+            type: boolean
       requestBody:
         required: true
         content:
@@ -469,6 +480,7 @@ paths:
             confidence: high
             notes:
               - Verified during startup and solution transitions in a signed-in Purview portal session.
+              - The optional cache query flag was observed as true and false in passive traffic; no request was replayed.
       responses:
         '200':
           description: Role evaluation completed successfully.

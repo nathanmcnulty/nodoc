@@ -629,7 +629,7 @@
                                     "request": {
                                         "name": "Evaluate role and feature membership",
                                         "description": {
-                                            "content": "Evaluates a batch of role, permission, and feature identifiers and returns a positional boolean\narray indicating which entries are available to the current portal session.\n",
+                                            "content": "Evaluates a batch of role, permission, and feature identifiers and returns a positional boolean\narray indicating which entries are available to the current portal session. The optional\n`cache` flag was observed with both boolean values during normal solution navigation.\n\nThis POST is documented from passive portal traffic only. Never probe or replay it, alter\nits role inputs or scope, or treat it as write-safe.\n",
                                             "type": "text/plain"
                                         },
                                         "url": {
@@ -641,7 +641,17 @@
                                             "host": [
                                                 "{{baseUrl}}"
                                             ],
-                                            "query": [],
+                                            "query": [
+                                                {
+                                                    "disabled": false,
+                                                    "description": {
+                                                        "content": "Whether the portal requests cached role-evaluation results.",
+                                                        "type": "text/plain"
+                                                    },
+                                                    "key": "cache",
+                                                    "value": "true"
+                                                }
+                                            ],
                                             "variable": []
                                         },
                                         "header": [
@@ -681,7 +691,17 @@
                                                     "host": [
                                                         "{{baseUrl}}"
                                                     ],
-                                                    "query": [],
+                                                    "query": [
+                                                        {
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "Whether the portal requests cached role-evaluation results.",
+                                                                "type": "text/plain"
+                                                            },
+                                                            "key": "cache",
+                                                            "value": "true"
+                                                        }
+                                                    ],
                                                     "variable": []
                                                 },
                                                 "header": [
@@ -731,7 +751,17 @@
                                                     "host": [
                                                         "{{baseUrl}}"
                                                     ],
-                                                    "query": [],
+                                                    "query": [
+                                                        {
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "Whether the portal requests cached role-evaluation results.",
+                                                                "type": "text/plain"
+                                                            },
+                                                            "key": "cache",
+                                                            "value": "true"
+                                                        }
+                                                    ],
                                                     "variable": []
                                                 },
                                                 "header": [
@@ -771,7 +801,17 @@
                                                     "host": [
                                                         "{{baseUrl}}"
                                                     ],
-                                                    "query": [],
+                                                    "query": [
+                                                        {
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "Whether the portal requests cached role-evaluation results.",
+                                                                "type": "text/plain"
+                                                            },
+                                                            "key": "cache",
+                                                            "value": "true"
+                                                        }
+                                                    ],
                                                     "variable": []
                                                 },
                                                 "header": [
@@ -811,7 +851,17 @@
                                                     "host": [
                                                         "{{baseUrl}}"
                                                     ],
-                                                    "query": [],
+                                                    "query": [
+                                                        {
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "Whether the portal requests cached role-evaluation results.",
+                                                                "type": "text/plain"
+                                                            },
+                                                            "key": "cache",
+                                                            "value": "true"
+                                                        }
+                                                    ],
                                                     "variable": []
                                                 },
                                                 "header": [

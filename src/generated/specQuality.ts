@@ -523,7 +523,7 @@ export const generatedSpecDataByTitle = {
     "operationContextCount": 4,
     "requestExampleCount": 1,
     "successResponseExampleCount": 2,
-    "evidenceMentionCount": 10,
+    "evidenceMentionCount": 13,
     "maturity": {
       "label": "Growing",
       "tone": "warning",
