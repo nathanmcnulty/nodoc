@@ -135,7 +135,15 @@ test("post-run assessment distinguishes productive targeted shapes from no novel
     { page: "wait", type: "wait-ms", value: "6000" },
     { page: "capture", type: "capture", value: "enterprise-applications" },
   ];
-  const candidateHandoff = { counts: {}, confirmedReadCandidates: [] };
+  const candidateHandoff = {
+    counts: {},
+    confirmedReadCandidates: [{
+      baseUrls: ["https://main.iam.ad.ext.azure.com"],
+      documentationStatus: "undocumented",
+      method: "GET",
+      normalizedPath: "/ApplicationInsights/EnterpriseAppSignIns",
+    }],
+  };
   const productive = assess({
     recipe,
     actionResults,
@@ -239,10 +247,113 @@ test("dynamic crawl result rows do not break exact recipe action accounting", ()
       seenOnPages: ["detail-1"],
       url: "https://api.example.test/detail/1",
     }],
-    candidateHandoff: {},
+    candidateHandoff: {
+      confirmedReadCandidates: [{
+        baseUrls: ["https://api.example.test"],
+        documentationStatus: "undocumented",
+        method: "GET",
+        normalizedPath: "/detail/{id}",
+      }],
+    },
   });
   assert.equal(assessment.status, "productive");
   assert.equal(assessment.measurements.attemptedTargetCount, 1);
+});
+
+test("suppressed undocumented telemetry cannot produce shape or metadata novelty", () => {
+  const telemetryRecipe = {
+    url: "https://portal.example.test",
+    actions: ["click-label-root=Reports", "capture=reports"],
+    noveltyFrontier: {
+      baseline: "checked-in-spec-and-candidate-policy",
+      baselineSignals: { queryMetadata: [], requestShapes: [], responseShapes: [], routes: [] },
+      targets: [{
+        acceptanceKey: "reviewable-api-delta",
+        actionIndexes: [0, 1],
+        evidenceLevel: "confirmed",
+        expectedHostFamilies: ["portal.example.test"],
+        expectedInformationClasses: ["new-route-family", "request-shape", "response-metadata"],
+        expectedRoutePrefixes: ["/api"],
+        id: "reviewable-api-delta",
+        rationale: "Only reviewable candidates qualify.",
+        safeAction: "Open a read-only reports state.",
+        state: "Reports",
+      }],
+    },
+  };
+  const assessment = assess({
+    recipe: telemetryRecipe,
+    actionResults: [
+      { actionIndex: 0, page: "reports-click", result: { clicked: true, transitionEvidence: { stateChanged: true } }, type: "click-label", value: "Reports" },
+      { actionIndex: 1, page: "reports", type: "capture", value: "reports" },
+    ],
+    apiRecords: [{
+      method: "POST",
+      mimeType: "text/plain",
+      path: "/api/Telemetry",
+      requestShapeFingerprint: "telemetry-shape",
+      seenOnPages: ["reports"],
+      status: 204,
+      url: "https://portal.example.test/api/Telemetry",
+    }],
+    candidateHandoff: {
+      suppressedCandidates: [{
+        baseUrls: ["https://portal.example.test"],
+        documentationStatus: "undocumented",
+        method: "POST",
+        normalizedPath: "/api/Telemetry",
+        suppressionNote: "Known telemetry sink.",
+      }],
+    },
+  });
+  assert.equal(assessment.status, "no-novelty");
+  assert.equal(assessment.measurements.targetedShapeAndMetadataSignalCount, 0);
+});
+
+test("accepted runtime response metadata does not recur as novelty", () => {
+  const metadataRecipe = {
+    ...recipe,
+    noveltyFrontier: {
+      ...recipe.noveltyFrontier,
+      baselineSignals: {
+        ...recipe.noveltyFrontier.baselineSignals,
+        responseMetadata: [
+          "main.iam.ad.ext.azure.com GET /ApplicationInsights/EnterpriseAppSignIns mime:text/plain",
+          "main.iam.ad.ext.azure.com GET /ApplicationInsights/EnterpriseAppSignIns status:200",
+        ],
+      },
+      targets: [{
+        ...recipe.noveltyFrontier.targets[0],
+        expectedInformationClasses: ["response-metadata"],
+      }],
+    },
+  };
+  const assessment = assess({
+    recipe: metadataRecipe,
+    actionResults: [
+      { actionIndex: 0, page: "click", result: { clicked: true, transitionEvidence: { stateChanged: true } }, type: "click-label", value: "Enterprise applications" },
+      { actionIndex: 1, page: "wait", type: "wait-ms", value: "6000" },
+      { actionIndex: 2, page: "capture", type: "capture", value: "enterprise-applications" },
+    ],
+    apiRecords: [{
+      method: "GET",
+      mimeType: "text/plain",
+      path: "/ApplicationInsights/EnterpriseAppSignIns",
+      seenOnPages: ["capture"],
+      status: 200,
+      url: "https://main.iam.ad.ext.azure.com/ApplicationInsights/EnterpriseAppSignIns",
+    }],
+    candidateHandoff: {
+      confirmedReadCandidates: [{
+        baseUrls: ["https://main.iam.ad.ext.azure.com"],
+        documentationStatus: "undocumented",
+        method: "GET",
+        normalizedPath: "/ApplicationInsights/EnterpriseAppSignIns",
+      }],
+    },
+  });
+  assert.equal(assessment.status, "no-novelty");
+  assert.equal(assessment.measurements.targetedShapeAndMetadataSignalCount, 0);
 });
 
 test("persisted seed sorting and explicit action indexes cannot shift recipe accounting", () => {

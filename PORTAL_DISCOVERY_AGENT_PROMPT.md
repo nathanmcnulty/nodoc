@@ -161,9 +161,11 @@ The driver derives the primary baseline from the checked-in OpenAPI operation,
 host, parameter, response-status, media-type, and schema metadata. The recipe's
 `baselineSignals` is an explicit overlay for previously accepted runtime shape
 and metadata keys that the OpenAPI cannot encode. Only action-attributed deltas
-from both sources or candidates classified as undocumented count. After review,
-add every accepted runtime key to the overlay before another run; otherwise a
-repeat observation could be misreported as new.
+from both sources or reviewable candidates classified as undocumented count.
+Suppressed telemetry, static assets, and other non-candidates cannot contribute
+shape or metadata novelty. After review, add every accepted runtime key,
+including response status/media-type keys, to the overlay before another run;
+otherwise a repeat observation could be misreported as new.
 
 Run the deterministic interface:
 

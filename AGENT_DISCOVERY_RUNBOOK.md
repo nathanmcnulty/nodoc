@@ -239,9 +239,12 @@ not discovery work:
    before owner allocation.
    The plan must derive its primary baseline from the checked-in OpenAPI and
    merge the recipe's `baselineSignals` overlay for accepted runtime-only route,
-   query, request-shape, and response-shape keys. Empty overlay arrays mean no
-   additional runtime signals have been accepted; they never disable the
-   derived OpenAPI comparison.
+   query, request-shape, response-shape, and response-metadata keys. Empty
+   overlay arrays mean no additional runtime signals have been accepted; they
+   never disable the derived OpenAPI comparison. Shape or metadata from an
+   undocumented route counts only when the normalized method/path survives
+   suppression into a reviewable candidate bucket; telemetry sinks, static
+   assets, and other suppressed traffic cannot manufacture novelty.
 4. Require `npm run browser:cdp:status -- --profile-key <key>` to report the
    manifest-owned browser as healthy, then run the portal driver against that
    exact loopback endpoint. Its recipe-gated preflight verifies browser metadata,

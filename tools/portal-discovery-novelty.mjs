@@ -167,6 +167,7 @@ export function buildNoveltyPlan(recipe, { required = false, derivedBaseline = n
   const baselineSignals = Object.fromEntries([
     "queryMetadata",
     "requestShapes",
+    "responseMetadata",
     "responseShapes",
     "routes",
   ].map((key) => [key, uniqueStrings(
@@ -349,7 +350,7 @@ function matchingBaselineOperation(record, operations) {
 
 export function evaluateNoveltyEvidence({ recipe, noveltyPlan = null, actionResults = [], apiRecords = [], candidateHandoff } = {}) {
   const plan = noveltyPlan ?? buildNoveltyPlan(recipe, { required: true });
-  const known = Object.fromEntries(["queryMetadata", "requestShapes", "responseShapes", "routes"]
+  const known = Object.fromEntries(["queryMetadata", "requestShapes", "responseMetadata", "responseShapes", "routes"]
     .map((key) => [key, new Set(plan.baselineSignals[key] ?? [])]));
   const completedRecipeActionIndexes = new Set();
   const actionPages = new Map();
@@ -387,6 +388,11 @@ export function evaluateNoveltyEvidence({ recipe, noveltyPlan = null, actionResu
       && String(candidate.method || "GET").toUpperCase() === String(record.method || "GET").toUpperCase()
       && routePattern(candidate.normalizedPath).test(String(record.path))
     )));
+    const reviewableUndocumentedRecords = new Set(undocumentedRecords);
+    const signalRecords = records.filter((record) => (
+      matchingBaselineOperation(record, plan.baselineOperations)
+      || reviewableUndocumentedRecords.has(record)
+    ));
     const acceptedClasses = new Set(target.expectedInformationClasses);
     const baselineHosts = new Set(plan.baselineOperations.flatMap((operation) => operation.hosts));
     const routeSignals = acceptedClasses.has("new-route-family")
@@ -398,21 +404,21 @@ export function evaluateNoveltyEvidence({ recipe, noveltyPlan = null, actionResu
       ? Array.from(new Set(undocumentedRecords.map(recordHostname).filter((hostname) => !baselineHosts.has(hostname)))).sort()
       : [];
     const responseShapeSignals = acceptedClasses.has("response-shape")
-      ? Array.from(new Set(records.map((record) => {
+      ? Array.from(new Set(signalRecords.map((record) => {
         const operation = matchingBaselineOperation(record, plan.baselineOperations);
         if (operation?.responseSchemaDocumented) return null;
         return signalKey(record, "responseShapeFingerprint", operation?.path ?? record.path);
       }).filter((value) => value && !known.responseShapes.has(value)))).sort()
       : [];
     const requestShapeSignals = acceptedClasses.has("request-shape")
-      ? Array.from(new Set(records.map((record) => {
+      ? Array.from(new Set(signalRecords.map((record) => {
         const operation = matchingBaselineOperation(record, plan.baselineOperations);
         if (operation?.requestSchemaDocumented) return null;
         return signalKey(record, "requestShapeFingerprint", operation?.path ?? record.path);
       }).filter((value) => value && !known.requestShapes.has(value)))).sort()
       : [];
     const queryMetadataSignals = acceptedClasses.has("query-metadata")
-      ? Array.from(new Set(records.flatMap((record) => {
+      ? Array.from(new Set(signalRecords.flatMap((record) => {
         const operation = matchingBaselineOperation(record, plan.baselineOperations);
         const knownNames = new Set(operation?.queryParameterNames ?? []);
         return (record.queryParameterNames ?? [])
@@ -421,15 +427,17 @@ export function evaluateNoveltyEvidence({ recipe, noveltyPlan = null, actionResu
       }).filter((value) => value && !known.queryMetadata.has(value)))).sort()
       : [];
     const responseMetadataSignals = acceptedClasses.has("response-metadata")
-      ? Array.from(new Set(records.flatMap((record) => {
+      ? Array.from(new Set(signalRecords.flatMap((record) => {
         const operation = matchingBaselineOperation(record, plan.baselineOperations);
         const signals = [];
         if (record.mimeType && !operation?.responseContentTypes?.includes(record.mimeType)) {
-          signals.push(`${recordHostname(record)} ${String(record.method || "GET").toUpperCase()} ${operation?.path ?? record.path} mime:${record.mimeType}`);
+          const signal = `${recordHostname(record)} ${String(record.method || "GET").toUpperCase()} ${operation?.path ?? record.path} mime:${record.mimeType}`;
+          if (!known.responseMetadata.has(signal)) signals.push(signal);
         }
         const status = String(record.status ?? "");
         if (status && !operation?.responseStatuses?.includes("default") && !operation?.responseStatuses?.includes(status)) {
-          signals.push(`${recordHostname(record)} ${String(record.method || "GET").toUpperCase()} ${operation?.path ?? record.path} status:${status}`);
+          const signal = `${recordHostname(record)} ${String(record.method || "GET").toUpperCase()} ${operation?.path ?? record.path} status:${status}`;
+          if (!known.responseMetadata.has(signal)) signals.push(signal);
         }
         return signals;
       }))).sort()
