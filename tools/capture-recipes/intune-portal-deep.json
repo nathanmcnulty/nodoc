@@ -6,32 +6,46 @@
     "matchPathPrefixes": ["/"]
   },
   "noveltyFrontier": {
-    "baseline": "checked-in-spec-and-live-capture-ledgers",
-    "baselineSignals": { "queryMetadata": [], "requestShapes": [], "responseShapes": [], "routes": [] },
+    "baseline": "five checked-in operations plus three live-ledger operations and prior deep/seeded navigation states",
+    "baselineSignals": {
+      "queryMetadata": [
+        "intune.microsoft.com GET /api/Experimentation/GetExtensionVariants extension",
+        "intune.microsoft.com GET /api/Experimentation/GetExtensionVariants extensionVersion"
+      ],
+      "requestShapes": [],
+      "responseShapes": [],
+      "routes": [
+        "intune.microsoft.com GET /api/Experimentation/GetExtensionVariants",
+        "intune.microsoft.com POST /api/Portal/GetEarlyUserData",
+        "intune.microsoft.com POST /api/Portal/GetLazyUserData",
+        "intune.microsoft.com POST /api/Settings/Select",
+        "intune.microsoft.com POST /api/Settings/Update"
+      ]
+    },
     "targets": [
       {
-        "id": "tenant-route-context-bootstrap",
-        "state": "Tenant administration and governance states",
+        "id": "intune-suite-undocumented-api",
+        "state": "Intune Suite read-only landing state",
         "evidenceLevel": "confirmed",
         "expectedHostFamilies": ["intune.microsoft.com"],
-        "expectedRoutePrefixes": ["/api/Experimentation", "/api/Portal", "/api/Settings"],
-        "expectedInformationClasses": ["request-shape", "response-shape", "response-metadata"],
-        "actionIndexes": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
-        "safeAction": "Visit read-only tenant governance states without invoking settings updates or approvals.",
-        "acceptanceKey": "tenant-context-bootstrap-variant",
-        "rationale": "The five-operation spec and three-entry live ledger do not cover route-context bootstrap variations."
+        "expectedRoutePrefixes": ["/api/"],
+        "expectedInformationClasses": ["new-route-family", "request-shape", "response-shape", "query-metadata", "response-metadata"],
+        "actionIndexes": [0, 1, 2],
+        "safeAction": "Open Tenant administration and the Intune Suite landing state, then capture passive traffic without selecting trials, purchases, settings, or save controls.",
+        "acceptanceKey": "undocumented-intune-suite-method-path-or-shape",
+        "rationale": "Intune Suite is absent from the prior deep and seeded recipes; only an action-attributed method/path outside the five-operation baseline or its undocumented shape/metadata qualifies."
       },
       {
-        "id": "workload-route-context-bootstrap",
-        "state": "Devices, Apps, and Endpoint security states",
-        "evidenceLevel": "hypothesis",
+        "id": "endpoint-analytics-undocumented-api",
+        "state": "Endpoint analytics read-only landing state",
+        "evidenceLevel": "confirmed",
         "expectedHostFamilies": ["intune.microsoft.com"],
-        "expectedRoutePrefixes": ["/api/Experimentation", "/api/Portal", "/api/Settings"],
-        "expectedInformationClasses": ["request-shape", "response-shape"],
-        "actionIndexes": [12, 13, 14, 15, 16, 17, 18, 19, 20],
-        "safeAction": "Visit each major read-only workload state from the portal shell and capture route-bound lazy data.",
-        "acceptanceKey": "workload-context-shape-variant",
-        "rationale": "Navigation context may expose unmodeled lazy-data, experiment, or settings-selection variants."
+        "expectedRoutePrefixes": ["/api/"],
+        "expectedInformationClasses": ["new-route-family", "request-shape", "response-shape", "query-metadata", "response-metadata"],
+        "actionIndexes": [3, 4, 5],
+        "safeAction": "Open Reports and the Endpoint analytics landing state, then capture passive traffic without opening configuration, remediation, or save controls.",
+        "acceptanceKey": "undocumented-endpoint-analytics-method-path-or-shape",
+        "rationale": "Endpoint analytics is absent from the prior deep and seeded recipes; repeated bootstrap operations do not qualify unless a separately reviewable undocumented method/path or shape is observed."
       }
     ]
   },
@@ -41,29 +55,14 @@
   "matchPathPrefixes": [
     "/api"
   ],
-  "postActionSettleMs": 12000,
-  "settleMs": 14000,
+  "postActionSettleMs": 8000,
+  "settleMs": 10000,
   "actions": [
     "click-label-root=Tenant administration",
-    "wait-ms=8000",
-    "capture=tenant-administration",
-    "click-contains-root=Multi Admin Approval",
-    "wait-ms=8000",
-    "capture=multi-admin-approval",
-    "click-contains-root=Diagnostics settings",
-    "wait-ms=8000",
-    "capture=diagnostics-settings",
-    "click-contains-root=Terms and conditions",
-    "wait-ms=8000",
-    "capture=terms-and-conditions",
-    "click-label-root=Devices",
-    "wait-ms=8000",
-    "capture=devices",
-    "click-label-root=Apps",
-    "wait-ms=8000",
-    "capture=apps",
-    "click-label-root=Endpoint security",
-    "wait-ms=8000",
-    "capture=endpoint-security"
+    "click-contains-root=Intune Suite",
+    "capture=intune-suite",
+    "click-label-root=Reports",
+    "click-contains-root=Endpoint analytics",
+    "capture=endpoint-analytics"
   ]
 }
