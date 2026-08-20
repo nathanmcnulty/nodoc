@@ -251,6 +251,35 @@ export function buildNoveltyPlan(recipe, { required = false, derivedBaseline = n
     value: action.value,
     classification: targetedIndexes.has(index) ? "frontier-targeted" : "known-replay",
   }));
+  let frontierControlReadiness = null;
+  if (recipe.frontierControlReadiness !== undefined) {
+    const readiness = recipe.frontierControlReadiness;
+    if (!readiness || typeof readiness !== "object" || Array.isArray(readiness)) {
+      fail("frontierControlReadiness must be an object.");
+    }
+    if (!Array.isArray(readiness.actionIndexes) || readiness.actionIndexes.length === 0) {
+      fail("frontierControlReadiness.actionIndexes must be a non-empty array.");
+    }
+    const actionIndexes = readiness.actionIndexes.map(Number);
+    if (new Set(actionIndexes).size !== actionIndexes.length) {
+      fail("frontierControlReadiness.actionIndexes must not contain duplicates.");
+    }
+    if (actionIndexes.some((index) => (
+      !Number.isInteger(index)
+      || !targetedIndexes.has(index)
+      || !String(actions[index]?.type || "").startsWith("click")
+    ))) {
+      fail("frontierControlReadiness.actionIndexes must reference frontier-targeted click actions.");
+    }
+    const timeoutMs = Number(readiness.timeoutMs);
+    if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) {
+      fail("frontierControlReadiness.timeoutMs must be a positive number.");
+    }
+    frontierControlReadiness = {
+      actionIndexes: [...actionIndexes].sort((left, right) => left - right),
+      timeoutMs,
+    };
+  }
   const plan = {
     schemaVersion: 1,
     baseline: String(frontier.baseline || "checked-in-spec-and-coverage-ledgers"),
@@ -260,6 +289,7 @@ export function buildNoveltyPlan(recipe, { required = false, derivedBaseline = n
       source: derivedBaseline?.source ?? "recipe-overlay-only",
     },
     targets,
+    ...(frontierControlReadiness ? { frontierControlReadiness } : {}),
     actions: [{
       index: -1,
       type: "navigate",

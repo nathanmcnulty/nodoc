@@ -34,6 +34,7 @@ import { prepareLedgerAttempt } from "./portal-discovery-dispatch.mjs";
 import {
   ProcessSupervisionTimeoutError,
   runNode,
+  runNodeJson,
   writeParentSupervisionFailure,
 } from "./portal-discovery-process.mjs";
 import {
@@ -906,6 +907,36 @@ async function main() {
       });
       args.targetId = cdp.target.id;
       args.preflightAlignment = cdp.alignment;
+      if (args.requireNovelty && selectedRecipe.frontierControlReadiness) {
+        const readinessArgs = [
+          "--recipe",
+          recipePath,
+          "--target-id",
+          args.targetId,
+          "--cdp-endpoint",
+          args.cdpEndpoint,
+          "--frontier-readiness-only",
+        ];
+        for (const variable of args.variables) {
+          readinessArgs.push("--var", variable);
+        }
+        const readinessTimeoutMs = Number(selectedRecipe.frontierControlReadiness.timeoutMs) || 15000;
+        args.frontierReadiness = await runNodeJson(
+          path.join(repoRoot, "tools", "cdp-deep-capture.mjs"),
+          readinessArgs,
+          Math.max(30000, readinessTimeoutMs + 30000),
+          { cwd: repoRoot },
+        );
+        if (args.frontierReadiness.status !== "ready") {
+          const readinessError = new Error("Required frontier controls are not uniquely available on the authenticated target.");
+          readinessError.code = "frontier-control-unavailable";
+          readinessError.blocker = {
+            frontierReadiness: args.frontierReadiness,
+            remediation: "Wait for an authenticated target inventory with each exact required control uniquely present; do not spend a capture attempt on generic child-frame traffic.",
+          };
+          throw readinessError;
+        }
+      }
     }
     ledgerAssignment = await prepareLedgerAttempt(args, specRecord, recipePath);
   } catch (error) {
@@ -917,7 +948,7 @@ async function main() {
       startedAt: new Date().toISOString(),
       status: "blocked",
       blocker: {
-        code: error?.code === "action-budget-exceeded"
+        code: ["action-budget-exceeded", "frontier-control-unavailable"].includes(error?.code)
           ? error.code
           : error?.message?.startsWith("browser-cdp-preflight:") ? "browser-cdp-preflight-failed" : "ledger-dispatch-conflict",
         detail: error instanceof Error ? error.message : String(error),
@@ -948,6 +979,7 @@ async function main() {
           status: args.preflightAlignment.status,
           targetId: args.preflightAlignment.targetId,
           entryUrl: args.preflightAlignment.entryUrl ?? null,
+          ...(args.frontierReadiness ? { frontierReadiness: args.frontierReadiness } : {}),
         }
       : null,
     ledger: ledgerAssignment

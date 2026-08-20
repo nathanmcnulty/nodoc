@@ -253,6 +253,15 @@ not discovery work:
    checked-in `pageTarget.bootstrap` may authorize one exact-target GET to the
    recipe's first navigation URL, followed by strict preflight bound to the same
    target ID.
+   If the selected novelty recipe declares `frontierControlReadiness`, the
+   driver then inventories the declared root/child target scopes before
+   creating a ledger attempt or starting capture. Every referenced control
+   must have exactly one visible match. Zero matches are
+   `absent-not-applicable`; multiple matches or unavailable frame inventory are
+   `ambiguous`. Either state emits `frontier-control-unavailable`; do not
+   bypass it, guess a direct route, or treat generic ReactBlade frames as named
+   frontier progress. Use exact stable href or accessibility/automation
+   identifiers when label containment would match an ancestor and a control.
 5. Confirm the selected recipe exists and choose a fresh artifact directory.
 
 Do not spend a worker allocation on a missing dependency, invalid portal ID,
@@ -275,6 +284,9 @@ observations from multiple pages, its explicit `attribution.actionIndex` owns
 the signal; `seenOnPages` is only a legacy fallback and must not spread unioned
 query or shape metadata across targets. Empty JSON arrays or objects do not
 establish a promotable response shape.
+Known localization `.resjson` resources are static portal assets and remain in
+the suppressed evidence bucket even when their path falls under an in-scope API
+prefix.
 
 ### Protected PR transport troubleshooting
 

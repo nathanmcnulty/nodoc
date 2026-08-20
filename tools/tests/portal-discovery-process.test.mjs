@@ -7,6 +7,7 @@ import test from "node:test";
 import {
   ProcessSupervisionTimeoutError,
   runNode,
+  runNodeJson,
   writeParentSupervisionFailure,
 } from "../portal-discovery-process.mjs";
 
@@ -19,6 +20,20 @@ test("productive child work may exceed the finalization-equivalent timeout", asy
     await writeFile(childPath, "await new Promise((resolve) => setTimeout(resolve, 250));\n", "utf8");
     await runNode(childPath, [], 1000, { cwd: repoRoot, stdio: "ignore" });
     assert.equal(250 > 25, true);
+  } finally {
+    await rm(artifactDir, { force: true, recursive: true });
+  }
+});
+
+test("bounded child JSON capture returns one structured result", async () => {
+  const artifactDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-process-json-"));
+  const childPath = path.join(artifactDir, "child.mjs");
+  try {
+    await writeFile(childPath, "console.log(JSON.stringify({ status: 'ready', controls: 2 }));\n", "utf8");
+    assert.deepEqual(
+      await runNodeJson(childPath, [], 1000, { cwd: repoRoot }),
+      { status: "ready", controls: 2 },
+    );
   } finally {
     await rm(artifactDir, { force: true, recursive: true });
   }

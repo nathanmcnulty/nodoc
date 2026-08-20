@@ -111,6 +111,24 @@ test("required novelty fails closed without targets or safe action linkage", () 
   );
 });
 
+test("frontier control readiness references only targeted click actions", () => {
+  const withReadiness = {
+    ...recipe,
+    frontierControlReadiness: { actionIndexes: [0], timeoutMs: 15000 },
+  };
+  assert.deepEqual(planFor(withReadiness).frontierControlReadiness, {
+    actionIndexes: [0],
+    timeoutMs: 15000,
+  });
+  assert.throws(
+    () => planFor({
+      ...withReadiness,
+      frontierControlReadiness: { actionIndexes: [1], timeoutMs: 15000 },
+    }),
+    /frontier-targeted click actions/,
+  );
+});
+
 test("required novelty blocks a satisfied frontier until a new unmodeled state is defined", () => {
   const satisfied = {
     actions: [],

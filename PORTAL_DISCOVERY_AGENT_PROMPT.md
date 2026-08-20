@@ -170,6 +170,18 @@ records observed on multiple pages, prefer the explicit action index over the
 unioned `seenOnPages` list so one target cannot inherit another target's query
 or shape signal. Empty JSON arrays or objects are not response-shape evidence.
 
+When a frontier depends on a specific visible control, declare
+`frontierControlReadiness` with the exact targeted click action indexes and a
+bounded timeout. Before ledger-attempt creation or capture, the driver must
+inventory the intended root/child targets and classify every control as
+`present`, `absent-not-applicable`, or `ambiguous`. Only one visible match in
+the declared scope is `present`; missing or multiple matches emit
+`frontier-control-unavailable` and spend no capture attempt. Prefer an exact
+stable href or accessibility/automation identifier over label containment.
+Generic child or ReactBlade frames never satisfy a named frontier unless the
+control and resulting traffic are attributed to that frontier action and
+checkpoint. Localization `.resjson` files are static assets, not API novelty.
+
 Run the deterministic interface:
 
   npm run discover:portal -- --portal <portal-spec-id> --profile bounded --phase plan --require-novelty --json

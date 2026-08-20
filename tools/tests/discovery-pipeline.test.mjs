@@ -571,6 +571,30 @@ test("adjacent known static assets are suppressed without hiding nearby Entra ro
   }
 });
 
+test("in-scope localization resjson assets are suppressed as static evidence", async () => {
+  const artifactDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-resjson-static-noise-"));
+
+  try {
+    await writeJson(path.join(artifactDir, "bundle-candidates.json"), {
+      candidates: [{
+        candidatePath: "/AuthenticationMethods/AuthenticationDevices/AuthenticationDevicesStrings.resjson",
+        method: null,
+        sourceFile: "feature.js",
+      }],
+    });
+    const result = await runAnalyze("ibiza-iam", artifactDir);
+    assert.ok(result.candidateQueue.suppressedCandidates.some((candidate) => (
+      candidate.normalizedPath === "/AuthenticationMethods/AuthenticationDevices/AuthenticationDevicesStrings.resjson"
+      && candidate.suppressionNote.includes("Known static portal asset")
+    )));
+    assert.equal(result.candidateQueue.candidates.some((candidate) => (
+      candidate.normalizedPath === "/AuthenticationMethods/AuthenticationDevices/AuthenticationDevicesStrings.resjson"
+    )), false);
+  } finally {
+    await rm(artifactDir, { force: true, recursive: true });
+  }
+});
+
 test("adjacent Power Platform-like evidence is tenant-safe and never promotion-active", async () => {
   const artifactDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-power-platform-scope-"));
   const tenantId = "5e2f94d1-730e-46f3-b567-e79c3946ab11";
@@ -862,8 +886,9 @@ test("no-candidate analysis uses an appropriate portal metadata fallback", async
 
     assert.equal(candidateHandoff.counts.confirmedRead, 0);
     assert.deepEqual(candidateHandoff.recommendedNextAction, {
-      code: "repair-incomplete-frontier",
-      summary: "At least one planned frontier target was not attempted; preserve partial evidence and repair the deterministic recipe before any retry.",
+      code: "follow-portal-metadata",
+      metadataNextPass: "full-layered-crawl",
+      summary: "No actionable candidates were generated; follow the portal metadata next pass: full-layered-crawl.",
     });
   } finally {
     await rm(artifactDir, { force: true, recursive: true });
@@ -1292,7 +1317,7 @@ test("Purview Portal blocks its exhausted frontier before browser allocation", a
   );
 });
 
-test("novelty-gated analyze never reports an incomplete frontier as completed", async () => {
+test("analysis does not fabricate an incomplete frontier after the recipe is satisfied", async () => {
   const artifactDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-novelty-incomplete-"));
   try {
     await Promise.all([
@@ -1300,11 +1325,11 @@ test("novelty-gated analyze never reports an incomplete frontier as completed", 
       writeJson(path.join(artifactDir, "action-results.json"), []),
     ]);
     const { runState } = await runAnalyze("exchange-beta", artifactDir, { noLedger: true });
-    assert.equal(runState.status, "blocked");
-    assert.equal(runState.blocker.code, "frontier-incomplete");
-    assert.equal(runState.novelty.status, "frontier-incomplete");
+    assert.equal(runState.status, "completed");
+    assert.equal(runState.blocker, undefined);
+    assert.equal(runState.novelty, null);
     const handoff = JSON.parse(await readFile(path.join(artifactDir, "candidate-handoff.json"), "utf8"));
-    assert.equal(handoff.recommendedNextAction.code, "repair-incomplete-frontier");
+    assert.notEqual(handoff.recommendedNextAction.code, "repair-incomplete-frontier");
   } finally {
     await rm(artifactDir, { force: true, recursive: true });
   }

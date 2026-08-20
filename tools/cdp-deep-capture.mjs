@@ -571,6 +571,10 @@ function applyRecipeConfig(args, recipeConfig, recipePath) {
     args.captureScripts = Boolean(recipeConfig.captureScripts);
   }
 
+  if (recipeConfig.frontierControlReadiness !== undefined) {
+    args.frontierControlReadiness = recipeConfig.frontierControlReadiness;
+  }
+
   args.seedRouteGroups = normalizeSeedRouteGroups(recipeConfig.seedRouteGroups);
   args.actionBudget = planActionBudget(recipeConfig, { maxActions: recipeConfig.maxActions });
 }
@@ -583,6 +587,8 @@ async function parseArgs(argv) {
     bundleCacheDir: null,
     evaluateTimeoutMs: defaultEvaluateTimeoutMs,
     finalizationTimeoutMs: defaultFinalizationTimeoutMs,
+    frontierControlReadiness: null,
+    frontierReadinessOnly: false,
     bodyCaptureTimeoutMs: defaultBodyCaptureTimeoutMs,
     scriptCaptureTimeoutMs: defaultScriptCaptureTimeoutMs,
     label: null,
@@ -890,6 +896,11 @@ async function parseArgs(argv) {
       args.actions.push(parseActionSpec(arg.slice("--action=".length)));
       continue;
     }
+
+    if (arg === "--frontier-readiness-only") {
+      args.frontierReadinessOnly = true;
+      continue;
+    }
   }
 
   if (!args.url) {
@@ -905,8 +916,12 @@ async function parseArgs(argv) {
     throw new Error("Missing required --portal argument.");
   }
 
-  if (!args.outDir) {
+  if (!args.outDir && !args.frontierReadinessOnly) {
     throw new Error("Missing required --out argument.");
+  }
+
+  if (args.frontierReadinessOnly && !args.frontierControlReadiness) {
+    throw new Error("--frontier-readiness-only requires recipe frontierControlReadiness metadata.");
   }
 
   for (const key of ["evaluateTimeoutMs", "navigationTimeoutMs", "networkIdleMs", "postActionSettleMs", "settleMs"]) {
@@ -1998,7 +2013,9 @@ async function main() {
         rawRequests: [],
         sessionSnapshots: [],
       };
-  await mkdir(args.outDir, { recursive: true });
+  if (!args.frontierReadinessOnly) {
+    await mkdir(args.outDir, { recursive: true });
+  }
 
   const target = await resolveTarget(args);
   const client = new CdpClient(target.webSocketDebuggerUrl);
@@ -2380,6 +2397,87 @@ async function main() {
       ),
       schemaVersion: captureArtifactSchemaVersion,
     });
+  }
+
+  function safeInventoryUrl(value) {
+    try {
+      const parsed = new URL(value);
+      return `${parsed.origin}${parsed.pathname}`;
+    } catch {
+      return null;
+    }
+  }
+
+  function assessFrontierControlReadiness(snapshots) {
+    const configuredIndexes = args.frontierControlReadiness?.actionIndexes;
+    const actionIndexes = Array.isArray(configuredIndexes)
+      ? configuredIndexes.map(Number)
+      : [];
+    const controls = actionIndexes.map((actionIndex) => {
+      const action = args.actions[actionIndex];
+      if (!Number.isInteger(actionIndex) || !action || !String(action.type).startsWith("click")) {
+        return {
+          actionIndex,
+          candidateCount: null,
+          reason: "readiness-action-invalid",
+          status: "ambiguous",
+          targetFrameInventory: [],
+        };
+      }
+      const eligibility = deriveActionEligibility(action, snapshots);
+      const candidateCount = eligibility?.candidateCount;
+      return {
+        actionIndex,
+        candidateCount,
+        reason: candidateCount === 1
+          ? "unique-visible-control-present"
+          : candidateCount === 0
+            ? "control-absent-not-applicable"
+            : Number.isInteger(candidateCount)
+              ? "multiple-visible-controls"
+              : "control-inventory-unavailable",
+        scope: action.scope,
+        status: candidateCount === 1
+          ? "present"
+          : candidateCount === 0
+            ? "absent-not-applicable"
+            : "ambiguous",
+        type: action.type,
+        targetFrameInventory: (eligibility?.targetFrameInventory ?? []).map((entry) => ({
+          candidateCount: entry.candidateCount,
+          controlCount: entry.controlCount,
+          sessionKind: entry.sessionId === "root" ? "root" : "child",
+          targetType: entry.targetType,
+          targetUrl: safeInventoryUrl(entry.targetUrl),
+        })),
+        value: action.value,
+      };
+    });
+    return {
+      schemaVersion: captureArtifactSchemaVersion,
+      status: controls.length > 0 && controls.every((entry) => entry.status === "present")
+        ? "ready"
+        : "frontier-control-unavailable",
+      controls,
+    };
+  }
+
+  async function waitForFrontierControlReadiness() {
+    const configuredTimeoutMs = Number(args.frontierControlReadiness?.timeoutMs);
+    const timeoutMs = Number.isFinite(configuredTimeoutMs) && configuredTimeoutMs > 0
+      ? configuredTimeoutMs
+      : args.evaluateTimeoutMs;
+    const startedAt = Date.now();
+    let assessment = null;
+    do {
+      const snapshots = await collectSnapshots();
+      assessment = assessFrontierControlReadiness(snapshots);
+      if (assessment.status === "ready") {
+        return { ...assessment, waitedMs: Date.now() - startedAt };
+      }
+      await delay(Math.min(250, Math.max(1, timeoutMs - (Date.now() - startedAt))));
+    } while (Date.now() - startedAt < timeoutMs);
+    return { ...assessment, waitedMs: Date.now() - startedAt };
   }
 
   let latestBundleSummary = {
@@ -3092,6 +3190,16 @@ async function main() {
     flatten: true,
     waitForDebuggerOnStart: true,
   });
+
+  if (args.frontierReadinessOnly) {
+    try {
+      const readiness = await waitForFrontierControlReadiness();
+      console.log(JSON.stringify(readiness));
+    } finally {
+      await client.close();
+    }
+    return;
+  }
 
   try {
     setCaptureContext(args.label ?? "seed-00", -1, args.url);

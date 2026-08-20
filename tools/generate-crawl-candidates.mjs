@@ -975,6 +975,7 @@ const knownStaticAssetPrefixes = [
 function isKnownStaticAssetPath(normalizedPath) {
   const lowerPath = normalizedPath.toLowerCase();
   return knownStaticAssetPrefixes.some((prefix) => lowerPath.startsWith(prefix.toLowerCase()))
+    || /\.resjson$/iu.test(normalizedPath)
     || /(?:^|\/)[^/]*(?:[.-])[a-f0-9]{8,}(?:\.[^/]+)?$/iu.test(normalizedPath);
 }
 
@@ -1389,9 +1390,10 @@ async function main() {
   ];
   const { adjacent, inScope } = partitionObservationsByScope(observations, specContext);
   const adjacentPartitions = partitionAdjacentStaticAssets(adjacent);
+  const inScopePartitions = partitionAdjacentStaticAssets(inScope);
   const candidateSuppressions = getCandidateSuppressions(specRecord.title);
   const candidatePartitions = partitionSuppressedCandidates(aggregateCandidates(
-    inScope,
+    inScopePartitions.actionable,
     specContext,
     args.includeDocumented,
   ), candidateSuppressions);
@@ -1403,7 +1405,7 @@ async function main() {
     { scopeReview: true, specContexts },
   ).map((candidate) => sanitizeScopeReviewCandidate(candidate));
   const staticAssetCandidates = aggregateCandidates(
-    adjacentPartitions.staticAssets,
+    [...inScopePartitions.staticAssets, ...adjacentPartitions.staticAssets],
     specContext,
     true,
   ).map((candidate) => ({

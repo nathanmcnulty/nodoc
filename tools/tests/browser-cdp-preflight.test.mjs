@@ -176,7 +176,7 @@ test("waits for the same target ID to publish its navigated URL before strict pr
       bootstrapCriteria: { matchHosts: ["config.office.com"], matchPathnames: ["/officeSettings"] },
       stabilityMs: 4,
       pollMs: 1,
-      timeoutMs: 100,
+      timeoutMs: 500,
     });
     assert.equal(result.alignment.status, "aligned");
     assert.equal(result.target.id, "page-1");

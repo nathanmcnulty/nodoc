@@ -5,42 +5,18 @@
     "entra.microsoft.com",
     "main.iam.ad.ext.azure.com"
   ],
-  "noveltyFrontier": {
-    "baseline": "238 checked-in path keys plus prior diff-first coverage without child ReactBlade attribution",
-    "baselineSignals": { "queryMetadata": [], "requestShapes": [], "responseMetadata": [], "responseShapes": [], "routes": [] },
-    "targets": [
-      {
-        "id": "reactblade-users-attribution",
-        "state": "Users list with child ReactBlade target/session/frame attribution",
-        "evidenceLevel": "confirmed",
-        "expectedHostFamilies": ["main.iam.ad.ext.azure.com"],
-        "expectedRoutePrefixes": ["/Users"],
-        "expectedInformationClasses": ["new-route-family", "response-shape", "query-metadata", "response-metadata"],
-        "actionIndexes": [0, 1],
-        "safeAction": "Open only the read-only Users list and capture its child ReactBlade traffic without user, role, group, or policy changes.",
-        "acceptanceKey": "users-child-frame-route-shape-or-metadata-delta",
-        "rationale": "The operation/context ledgers contain no child iframe, frame, target, or ReactBlade attribution for Users."
-      },
-      {
-        "id": "reactblade-groups-attribution",
-        "state": "Groups list with child ReactBlade target/session/frame attribution",
-        "evidenceLevel": "confirmed",
-        "expectedHostFamilies": ["main.iam.ad.ext.azure.com"],
-        "expectedRoutePrefixes": ["/Groups"],
-        "expectedInformationClasses": ["new-route-family", "response-shape", "query-metadata", "response-metadata"],
-        "actionIndexes": [2, 3],
-        "safeAction": "Open only the read-only Groups list and capture its child ReactBlade traffic without membership, role, group, or policy changes.",
-        "acceptanceKey": "groups-child-frame-route-shape-or-metadata-delta",
-        "rationale": "The operation/context ledgers contain no child iframe, frame, target, or ReactBlade attribution for Groups."
-      }
-    ]
+  "noveltyStatus": {
+    "status": "satisfied",
+    "reason": "The exact Users and Groups child-frame controls were each uniquely eligible, clicked successfully, and captured with healthy action attribution, but the terminal run produced no qualifying route, query, response-metadata, or non-empty response-shape delta.",
+    "nextRequirement": "Identify a new action-attributed Users or Groups child-frame route, query key, response status or media type, or non-empty response-shape field absent from the checked-in Ibiza IAM baseline; generic ReactBlade and UI assets do not qualify."
   },
   "postActionSettleMs": 8000,
+  "evaluateTimeoutMs": 30000,
   "settleMs": 10000,
   "actions": [
-    "click-contains-root=Users",
+    "click-href-iframe=https://entra.microsoft.com/#blade/Microsoft_AAD_UsersAndTenants/UserManagementMenuBlade/menuId/",
     "capture=users-iframe",
-    "click-contains-root=Groups",
+    "click-href-iframe=https://entra.microsoft.com/#blade/Microsoft_AAD_IAM/GroupsManagementMenuBlade/menuId/Overview",
     "capture=groups-iframe"
   ]
 }
