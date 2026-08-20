@@ -24,6 +24,7 @@ import {
   captureArtifactSchemaVersion,
   CdpAttributionRegistry,
   normalizeAttributionUrl,
+  shouldPreferActiveSessionAttribution,
 } from "./cdp-attribution.mjs";
 import { collectCdpDomSnapshots } from "./cdp-snapshot-collector.mjs";
 
@@ -2041,13 +2042,15 @@ async function main() {
       pageUrl: pageUrl ?? currentContext.pageUrl ?? null,
     };
     attributionRegistry.setRootContext(currentContext);
+    attributionRegistry.setActiveSessionContexts(currentContext);
   }
 
-  function resolveEventAttribution(sessionId, params = {}) {
+  function resolveEventAttribution(eventName, sessionId, params = {}) {
     return attributionRegistry.resolve({
       documentURL: params.documentURL,
       frameId: params.frameId,
       loaderId: params.loaderId,
+      preferSessionContext: shouldPreferActiveSessionAttribution(eventName),
       sessionId,
       targetUrl: sessions.get(sessionId)?.targetUrl ?? null,
     });
@@ -2151,7 +2154,7 @@ async function main() {
     const requestUrl = params.request?.url;
     const sessionId = metadata.sessionId ?? null;
     const key = requestKey(params.requestId, sessionId);
-    const attribution = resolveEventAttribution(sessionId, params);
+    const attribution = resolveEventAttribution("Network.requestWillBeSent", sessionId, params);
     const probeId = requestUrl
       ? probeAssociations.get(`${sessionId ?? "root"}:${normalizeAttributionUrl(requestUrl)}`) ?? null
       : null;
@@ -2241,7 +2244,7 @@ async function main() {
   });
 
   client.on("Network.webSocketCreated", (params, metadata) => {
-    const attribution = resolveEventAttribution(metadata.sessionId ?? null, params);
+    const attribution = resolveEventAttribution("Network.webSocketCreated", metadata.sessionId ?? null, params);
     const sanitizedUrl = sanitizeObservedTransportUrl(params.url);
     if (!sanitizedUrl) {
       return;
@@ -2257,7 +2260,7 @@ async function main() {
   });
 
   client.on("Network.webTransportCreated", (params, metadata) => {
-    const attribution = resolveEventAttribution(metadata.sessionId ?? null, params);
+    const attribution = resolveEventAttribution("Network.webTransportCreated", metadata.sessionId ?? null, params);
     const sanitizedUrl = sanitizeObservedTransportUrl(params.url);
     if (!sanitizedUrl) {
       return;

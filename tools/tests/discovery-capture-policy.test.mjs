@@ -4,6 +4,7 @@ import test from "node:test";
 import {
   aggregateInteractionHealth,
   actionResultSucceeded,
+  buildInteractionHealthStatus,
   deriveActionEligibility,
   decodeBoundedCdpBody,
   shouldRequestResponseBody,
@@ -31,6 +32,24 @@ function unchangedClick() {
     result: { clicked: false },
   };
 }
+
+test("canonical health availability recognizes a complete capture summary", () => {
+  const health = { accounting: { consistent: true } };
+  assert.deepEqual(
+    buildInteractionHealthStatus(
+      { captureComplete: true, reason: "summary-present", source: "summary.json" },
+      health,
+    ),
+    { available: true, reason: null, source: "summary-and-action-results" },
+  );
+  assert.deepEqual(
+    buildInteractionHealthStatus(
+      { captureComplete: false, reason: "summary-missing", source: "artifact-directory" },
+      null,
+    ),
+    { available: false, reason: "summary-missing", source: "artifact-directory" },
+  );
+});
 
 test("productive novelty prevents saturation", () => {
   const signal = evaluateDiscoverySaturation({

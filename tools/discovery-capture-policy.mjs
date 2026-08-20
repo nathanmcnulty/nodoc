@@ -1,5 +1,20 @@
 export const responseBodyCaptureLimit = 512 * 1024;
 
+export function buildInteractionHealthStatus(capture, interactionHealth) {
+  if (interactionHealth) {
+    return { available: true, reason: null, source: "summary-and-action-results" };
+  }
+  return {
+    available: false,
+    reason: capture?.reason === "summary-missing"
+      ? "summary-missing"
+      : capture?.reason === "summary-invalid-json" || capture?.reason === "summary-invalid"
+        ? "summary-corrupt"
+        : "canonical-health-unavailable",
+    source: capture?.source ?? "artifact-directory",
+  };
+}
+
 export function decodeBoundedCdpBody(payload, limit = responseBodyCaptureLimit) {
   const value = payload?.body ?? payload?.content;
   if (typeof value !== "string") {

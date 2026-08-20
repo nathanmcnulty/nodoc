@@ -7,7 +7,11 @@ import {
   buildCandidateHandoff,
   writePartitionedCandidateHandoff,
 } from "./discovery-candidate-handoff.mjs";
-import { aggregateInteractionHealth, sanitizeInteractionHealth } from "./discovery-capture-policy.mjs";
+import {
+  aggregateInteractionHealth,
+  buildInteractionHealthStatus,
+  sanitizeInteractionHealth,
+} from "./discovery-capture-policy.mjs";
 import { evaluateDiscoverySaturation } from "./discovery-saturation.mjs";
 import { classifyGetProbeUrl } from "./discovery-safety.mjs";
 import {
@@ -1070,6 +1074,8 @@ async function main() {
       runState.capture = captureCompleteness;
       interactionHealth = await readInteractionHealth(args.artifacts);
       runState.interactionHealth = interactionHealth;
+      interactionHealthStatus = buildInteractionHealthStatus(captureCompleteness, interactionHealth);
+      runState.interactionHealthStatus = interactionHealthStatus;
       const authenticationBarrier = await detectAuthenticationBarrier(
         args.artifacts,
         captureSummary,
@@ -1137,17 +1143,7 @@ async function main() {
       runState.interactionHealth = interactionHealth;
     }
     if (args.phase === "analyze") {
-      interactionHealthStatus = interactionHealth
-        ? { available: true, reason: null, source: "summary-and-action-results" }
-        : {
-            available: false,
-            reason: captureCompleteness.reason === "summary-missing"
-              ? "summary-missing"
-              : captureCompleteness.reason === "summary-invalid-json" || captureCompleteness.reason === "summary-invalid"
-                ? "summary-corrupt"
-                : "canonical-health-unavailable",
-            source: captureCompleteness.source,
-          };
+      interactionHealthStatus = buildInteractionHealthStatus(captureCompleteness, interactionHealth);
       runState.interactionHealthStatus = interactionHealthStatus;
     }
     if (args.phase === "analyze" && interactionHealth?.accounting?.consistent === false) {
