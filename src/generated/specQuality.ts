@@ -106,7 +106,7 @@ export const generatedSpecDataByTitle = {
     "specPath": "specifications/nodoc-entra-iga/specification/openapi.yml",
     "specSourceUrl": "https://github.com/nathanmcnulty/nodoc/tree/main/specifications/nodoc-entra-iga/specification",
     "specDownloadUrl": "https://raw.githubusercontent.com/nathanmcnulty/nodoc/main/specifications/nodoc-entra-iga/specification/openapi.yml",
-    "operationCount": 11,
+    "operationCount": 13,
     "tagCount": 4,
     "tagGroupCount": 2,
     "ungroupedTagCount": 0,
@@ -127,7 +127,7 @@ export const generatedSpecDataByTitle = {
     "operationContextCount": 0,
     "requestExampleCount": 0,
     "successResponseExampleCount": 3,
-    "evidenceMentionCount": 2,
+    "evidenceMentionCount": 3,
     "maturity": {
       "label": "Advanced",
       "tone": "success",
