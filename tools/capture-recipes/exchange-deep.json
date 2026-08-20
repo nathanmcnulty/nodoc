@@ -5,47 +5,10 @@
     "matchHosts": ["admin.exchange.microsoft.com"],
     "matchPathPrefixes": ["/"]
   },
-  "noveltyFrontier": {
-    "baseline": "checked-in-spec-and-coverage-ledgers",
-    "baselineSignals": { "queryMetadata": [], "requestShapes": [], "responseShapes": [], "routes": [] },
-    "targets": [
-      {
-        "id": "mail-flow-report-parameters",
-        "state": "Mail flow, report, and forwarding states",
-        "evidenceLevel": "confirmed",
-        "expectedHostFamilies": ["admin.exchange.microsoft.com"],
-        "expectedRoutePrefixes": ["/beta/AcceptedDomain", "/beta/HistoricalSearch", "/beta/InboundConnector", "/beta/MailflowReport", "/beta/OutboundConnector", "/beta/TransportRule"],
-        "expectedInformationClasses": ["new-route-family", "query-metadata", "response-shape"],
-        "actionIndexes": [0, 1, 2, 3, 4, 5, 6, 7, 8],
-        "safeAction": "Open read-only mail-flow and report states without creating rules, connectors, exports, or trace jobs.",
-        "acceptanceKey": "mail-flow-family-or-report-shape",
-        "rationale": "Report parameters and several mail-flow list families are not exercised by operation-key replay alone."
-      },
-      {
-        "id": "recipient-and-resource-details",
-        "state": "Mailbox, group, contact, and resource list states",
-        "evidenceLevel": "confirmed",
-        "expectedHostFamilies": ["admin.exchange.microsoft.com"],
-        "expectedRoutePrefixes": ["/beta/DynamicDistributionGroup", "/beta/MailContact", "/beta/Recipient", "/beta/ResourceMailbox"],
-        "expectedInformationClasses": ["new-route-family", "response-shape", "response-metadata"],
-        "actionIndexes": [9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
-        "safeAction": "Open recipient and resource lists without modifying recipients, permissions, or forwarding.",
-        "acceptanceKey": "recipient-resource-envelope-gap",
-        "rationale": "Mailbox/resource detail and permission-related response envelopes remain underdocumented."
-      },
-      {
-        "id": "role-settings-mobile-families",
-        "state": "Roles, settings, and mobile access states",
-        "evidenceLevel": "hypothesis",
-        "expectedHostFamilies": ["admin.exchange.microsoft.com"],
-        "expectedRoutePrefixes": ["/beta/ActiveSync", "/beta/ManagementRole", "/beta/MobileDevice", "/beta/Role", "/beta/UserPreference"],
-        "expectedInformationClasses": ["new-route-family", "response-shape"],
-        "actionIndexes": [21, 22, 23, 24, 25, 26, 27, 28, 29],
-        "safeAction": "Open read-only role, settings, and mobile inventory states without changing policy.",
-        "acceptanceKey": "role-mobile-family-gap",
-        "rationale": "Role assignments, mobile policies, and related list/detail states remain a high-value frontier."
-      }
-    ]
+  "noveltyStatus": {
+    "status": "satisfied",
+    "reason": "All 61 Exchange beta operations and every route family named by the broad mail-flow, recipient, role, settings, and mobile recipe already have deep-interaction coverage with no open gap.",
+    "nextRequirement": "Complete an offline normalized family/metadata diff and identify an exact missing admin.exchange.microsoft.com route, query key, status, media type, or non-empty response shape before another novelty run."
   },
   "matchHosts": [
     "admin.exchange.microsoft.com"

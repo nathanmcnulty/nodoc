@@ -9,35 +9,10 @@
       "matchPathnames": ["/"]
     }
   },
-  "noveltyFrontier": {
-    "baseline": "checked-in-spec-and-coverage-ledgers",
-    "baselineSignals": { "queryMetadata": [], "requestShapes": [], "responseShapes": [], "routes": [] },
-    "targets": [
-      {
-        "id": "provider-and-partner-settings-shapes",
-        "state": "Programs and governance settings states",
-        "evidenceLevel": "confirmed",
-        "expectedHostFamilies": ["api.accessreviews.identitygovernance.azure.com"],
-        "expectedRoutePrefixes": ["/accessReviews/v2.0/approvalWorkflowProviders"],
-        "expectedInformationClasses": ["response-shape", "response-metadata", "query-metadata"],
-        "actionIndexes": [3, 4, 5, 9, 10, 11],
-        "safeAction": "Open provider/program and settings pages without changing governance configuration.",
-        "acceptanceKey": "provider-settings-shape-gap",
-        "rationale": "Provider partner settings and feature metadata remain opaque or example-free."
-      },
-      {
-        "id": "review-request-hierarchy",
-        "state": "Access reviews and review-history request states",
-        "evidenceLevel": "confirmed",
-        "expectedHostFamilies": ["api.accessreviews.identitygovernance.azure.com"],
-        "expectedRoutePrefixes": ["/accessReviews/v2.0/approvalWorkflowProviders", "/accessReviews/v2.0/reports"],
-        "expectedInformationClasses": ["new-route-family", "response-shape"],
-        "actionIndexes": [0, 1, 2, 6, 7, 8],
-        "safeAction": "Open read-only review lists and history without stopping, applying, resetting, or creating reviews.",
-        "acceptanceKey": "request-instance-decision-hierarchy",
-        "rationale": "Request, instance, and decision detail shapes are the explicit deeper workflow-state frontier."
-      }
-    ]
+  "noveltyStatus": {
+    "status": "satisfied",
+    "reason": "The provider, partner settings, business-flow, request, instance, decision, and report families already have deep-clickflow coverage and the prior businessFlows/reports deltas were promoted.",
+    "nextRequirement": "Identify a precise unmodeled api.accessreviews.identitygovernance.azure.com route, response key, status, or media type before another novelty run; do not replay Programs, Review History, Settings, or Access reviews unchanged."
   },
   "matchHosts": [
     "entra.microsoft.com",

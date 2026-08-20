@@ -5,35 +5,10 @@
     "intune.microsoft.com",
     "services.autopatch.microsoft.com"
   ],
-  "noveltyFrontier": {
-    "baseline": "checked-in-spec-and-live-capture-ledgers",
-    "baselineSignals": { "queryMetadata": [], "requestShapes": [], "responseShapes": [], "routes": [] },
-    "targets": [
-      {
-        "id": "autopatch-group-role-metadata",
-        "state": "Autopatch groups and access-control role states",
-        "evidenceLevel": "confirmed",
-        "expectedHostFamilies": ["services.autopatch.microsoft.com"],
-        "expectedRoutePrefixes": ["/access-control", "/device/v2/autopatchGroups", "/unified-reporting/odata/1.0/Autopatch"],
-        "expectedInformationClasses": ["new-route-family", "response-shape", "response-metadata"],
-        "actionIndexes": [0, 1, 2, 3, 4, 5],
-        "safeAction": "Open group and role inventories without assigning roles or changing group membership.",
-        "acceptanceKey": "group-role-envelope-gap",
-        "rationale": "Group membership, management status, effective permissions, and role metadata lack fresh live evidence."
-      },
-      {
-        "id": "support-read-hierarchy",
-        "state": "Support request list and read-only status state",
-        "evidenceLevel": "hypothesis",
-        "expectedHostFamilies": ["services.autopatch.microsoft.com"],
-        "expectedRoutePrefixes": ["/support/odata/v1/supportRequests", "/support/v1"],
-        "expectedInformationClasses": ["new-route-family", "response-shape", "query-metadata"],
-        "actionIndexes": [6, 7, 8],
-        "safeAction": "Open support inventory only; do not add notes, upload, reactivate, or update contacts.",
-        "acceptanceKey": "support-list-entitlement-shape",
-        "rationale": "Support entitlement and request hierarchy are documented but not represented in the current live ledger."
-      }
-    ]
+  "noveltyStatus": {
+    "status": "satisfied",
+    "reason": "All 53 Autopatch operations and the group, access-control, and support route families already have deep coverage; missing live-ledger repetition alone is not new API, shape, or metadata evidence.",
+    "nextRequirement": "Identify an exact unmodeled services.autopatch.microsoft.com route, query key, status, media type, or non-empty response shape before another novelty run; do not replay groups, roles, or support solely to refresh evidence."
   },
   "postActionSettleMs": 12000,
   "settleMs": 14000,

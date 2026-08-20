@@ -388,7 +388,7 @@ async function selectRecipe(specRecord, explicitRecipe, { requireNovelty = false
       const recipe = JSON.parse(await readFile(recipePath, "utf8"));
       if (recipe.portal === specRecord.title) {
         matchingRecipes.push(recipePath);
-        if (recipe.noveltyFrontier) noveltyRecipes.push(recipePath);
+        if (recipe.noveltyFrontier || recipe.noveltyStatus) noveltyRecipes.push(recipePath);
       }
     } catch {
       // Recipe parsing is validated separately before capture.

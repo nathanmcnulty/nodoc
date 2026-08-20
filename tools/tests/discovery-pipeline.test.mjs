@@ -1207,6 +1207,28 @@ test("Intune Portal blocks its exhausted frontier before browser allocation", as
   );
 });
 
+test("completed Entra, Exchange, and Autopatch frontiers block before browser allocation", async () => {
+  for (const portal of ["entra-idgov", "entra-pim", "exchange-beta", "intune-autopatch"]) {
+    await assert.rejects(
+      execFileAsync(process.execPath, [
+        path.join(repoRoot, "tools", "run-portal-discovery.mjs"),
+        "--portal",
+        portal,
+        "--phase",
+        "plan",
+        "--require-novelty",
+        "--json",
+      ], { cwd: repoRoot }),
+      (error) => {
+        const result = JSON.parse(error.stderr);
+        return result.status === "blocked"
+          && result.blocker.code === "novelty-frontier-invalid"
+          && /prior novelty frontier is satisfied/.test(result.blocker.detail);
+      },
+    );
+  }
+});
+
 test("M365 Apps Inventory plan accounts for its mandatory orchestration action", async () => {
   const { stdout } = await execFileAsync(process.execPath, [
     path.join(repoRoot, "tools", "run-portal-discovery.mjs"),
