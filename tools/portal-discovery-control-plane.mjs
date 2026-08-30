@@ -144,13 +144,34 @@ export function materializePortfolioManifest(raw, inventory) {
 }
 
 export async function buildPortfolioManifest(manifestPath = defaultPortfolioManifestPath) {
-  const manifest = materializePortfolioManifest(await loadPortfolioManifest(manifestPath), await buildSpecInventory());
+  const raw = await loadPortfolioManifest(manifestPath);
+  const manifest = materializePortfolioManifest(raw, await buildSpecInventory());
+  const pinnedRecipes = new Map(raw.portals
+    .filter((portal) => portal.recipe)
+    .map((portal) => [portal.specId, portal.recipe]));
   const portals = await Promise.all(manifest.portals.map(async (portal) => {
-    if (!portal.recipe) return { ...portal, novelty: { status: "missing" } };
-    const recipe = await readJson(path.join(repoRoot, portal.recipe));
+    const allowedRecipePaths = getCaptureRecipes(portal.title);
+    const pinnedRecipe = pinnedRecipes.get(portal.specId);
+    const canonicalPinnedRecipe = pinnedRecipe
+      ? allowedRecipePaths.find((recipePath) => path.resolve(repoRoot, recipePath) === path.resolve(repoRoot, pinnedRecipe))
+      : null;
+    if (pinnedRecipe && !canonicalPinnedRecipe) {
+      throw new Error(`Recipe ${JSON.stringify(pinnedRecipe)} is not checked in for ${portal.title}.`);
+    }
+    const recipePaths = canonicalPinnedRecipe ? [canonicalPinnedRecipe] : allowedRecipePaths;
+    if (recipePaths.length === 0) return { ...portal, recipe: null, novelty: { status: "missing" } };
+    const recipes = await Promise.all(recipePaths.map(async (recipePath) => ({
+      path: recipePath,
+      value: await readJson(path.join(repoRoot, recipePath)),
+    })));
+    const selected = recipes.find((entry) => entry.value.noveltyFrontier && entry.value.noveltyStatus?.status !== "satisfied")
+      ?? recipes.find((entry) => entry.value.noveltyStatus?.status === "satisfied")
+      ?? recipes[0];
+    const recipe = selected.value;
     if (recipe.noveltyStatus?.status === "satisfied") {
       return {
         ...portal,
+        recipe: selected.path,
         novelty: {
           evidenceDisposition: sanitize(recipe.noveltyStatus.evidenceDisposition),
           nextRequirement: sanitize(recipe.noveltyStatus.nextRequirement),
@@ -158,9 +179,10 @@ export async function buildPortfolioManifest(manifestPath = defaultPortfolioMani
         },
       };
     }
-    if (!recipe.noveltyFrontier) return { ...portal, novelty: { status: "missing" } };
+    if (!recipe.noveltyFrontier) return { ...portal, recipe: selected.path, novelty: { status: "missing" } };
     return {
       ...portal,
+      recipe: selected.path,
       novelty: {
         approvalDigest: sanitize(recipe.noveltyFrontier.approvalDigest),
         hasControlReadiness: Boolean(recipe.frontierControlReadiness),

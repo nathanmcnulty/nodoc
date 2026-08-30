@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { execFile } from "node:child_process";
 import { createHash } from "node:crypto";
-import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -101,6 +101,47 @@ test("filtered Intune Autopatch controller blocks its satisfied deep recipe befo
   assert.equal(plan.assignments.some((entry) => entry.type === "capture"), false);
   assert.ok(plan.assignments.find((entry) => entry.type === "review")?.blockers.includes("novelty-satisfied"));
   assert.ok(plan.assignments.find((entry) => entry.type === "review")?.blockers.includes("capture-freshness-gap"));
+});
+
+test("controller selects a satisfied recipe when an earlier companion recipe has no frontier", async () => {
+  const manifest = await buildPortfolioManifest();
+  const intune = manifest.portals.find((portal) => portal.specId === "intune-portal");
+  assert.equal(intune?.recipe, "tools/capture-recipes/intune-portal-deep.json");
+  assert.equal(intune?.novelty.status, "satisfied");
+
+  const plan = compileOrchestrationPlan({ ...manifest, portals: [intune] }, { budgets: { maxCaptures: 1 } });
+  assert.equal(plan.assignments.some((entry) => entry.type === "capture"), false);
+  assert.ok(plan.assignments.find((entry) => entry.type === "review")?.blockers.includes("novelty-satisfied"));
+});
+
+test("controller honors only canonical portal-owned recipe pins", async () => {
+  const source = JSON.parse(await readFile(path.join(repoRoot, "tools", "portal-discovery-portfolio.json"), "utf8"));
+  const temporary = await mkdtemp(path.join(os.tmpdir(), "nodoc-control-pins-"));
+  const manifestPath = path.join(temporary, "portfolio.json");
+  const intune = source.portals.find((portal) => portal.specId === "intune-portal");
+  try {
+    intune.recipe = "tools/capture-recipes/intune-deep.json";
+    await writeFile(manifestPath, JSON.stringify(source));
+    const pinned = await buildPortfolioManifest(manifestPath);
+    assert.equal(pinned.portals.find((portal) => portal.specId === "intune-portal")?.recipe, "tools/capture-recipes/intune-deep.json");
+
+    intune.recipe = "tools/capture-recipes/defender-deep.json";
+    await writeFile(manifestPath, JSON.stringify(source));
+    await assert.rejects(buildPortfolioManifest(manifestPath), /not checked in for Intune Portal/u);
+
+    intune.recipe = "../outside.json";
+    await writeFile(manifestPath, JSON.stringify(source));
+    await assert.rejects(buildPortfolioManifest(manifestPath), /not checked in for Intune Portal/u);
+  } finally {
+    await rm(temporary, { force: true, recursive: true });
+  }
+});
+
+test("controller prefers an active frontier over a satisfied companion recipe", async () => {
+  const manifest = await buildPortfolioManifest();
+  const exchange = manifest.portals.find((portal) => portal.specId === "exchange-beta");
+  assert.equal(exchange?.recipe, "tools/capture-recipes/exchange-bootstrap-shape-novelty.json");
+  assert.equal(exchange?.novelty.status, "active");
 });
 
 test("Entra PIM exposes missing immutable state provenance as its prebrowser blocker", async () => {

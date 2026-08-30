@@ -316,6 +316,7 @@ test("launch fails closed when the long-lived exact owner is ambiguous", async (
         if (!launched) throw new BrowserCdpOwnerError("cdp-unavailable", "not launched");
         return { browser: "Microsoft Edge/140.0", webSocketDebuggerUrl: "ws://127.0.0.1/devtools/browser/root" };
       },
+      probeTargets: async () => ({ pageTargetCount: 1 }),
       findOwnerProcesses: async () => [candidate(5152), candidate(5153)],
       randomUUID: () => ownerToken,
       delay: async () => { delays += 1; },
