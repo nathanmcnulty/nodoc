@@ -1545,6 +1545,15 @@ Current takeaway:
 
 Add new ideas here before trying them, then move the result into the experiment log.
 
+### 2026-08-29 — Latest-assignment portfolio status
+
+- The prior status projection selected the first ledger assignment for each spec,
+  which could leave an older blocker visible after a newer retry.
+- Status now selects the newest assignment deterministically and exposes capture
+  completeness, capture status, and blocker code independently.
+- Treat assignment completion as lifecycle accounting only; evidence readiness
+  still requires a complete immutable capture and the normal artifact gates.
+
 - Extract request factory defaults from bundles so probes can include the same query params the UI would send.
 - Evaluate a separately authorized and tested synthetic client-response mode;
   current abort support fails the backend request and does not call

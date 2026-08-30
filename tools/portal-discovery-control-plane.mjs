@@ -326,7 +326,34 @@ export async function enqueueOrchestrationPlan(plan, { ledgerPath, apply = false
 }
 
 export function projectPortfolioStatus(manifest, ledger = { assignments: [] }) {
-  return { schemaVersion: portfolioManifestSchemaVersion, manifestId: manifest.manifestId, portals: manifest.portals.map((portal) => ({ specId: portal.specId, enabled: portal.enabled, state: ledger.assignments.find((entry) => entry.specId === portal.specId)?.state ?? (portal.enabled ? "unallocated" : "disabled") })).sort((a, b) => a.specId.localeCompare(b.specId)) };
+  const latestBySpec = new Map();
+  for (const assignment of ledger.assignments ?? []) {
+    const current = latestBySpec.get(assignment.specId);
+    const assignmentTime = Date.parse(assignment.updatedAt ?? assignment.createdAt ?? "") || 0;
+    const currentTime = Date.parse(current?.updatedAt ?? current?.createdAt ?? "") || 0;
+    if (!current || assignmentTime > currentTime || (
+      assignmentTime === currentTime
+      && String(assignment.assignmentId).localeCompare(String(current.assignmentId)) > 0
+    )) latestBySpec.set(assignment.specId, assignment);
+  }
+  return {
+    schemaVersion: portfolioManifestSchemaVersion,
+    manifestId: manifest.manifestId,
+    portals: manifest.portals.map((portal) => {
+      const assignment = latestBySpec.get(portal.specId);
+      const attempt = assignment?.latestAttempt;
+      return {
+        specId: portal.specId,
+        enabled: portal.enabled,
+        state: assignment?.state ?? (portal.enabled ? "unallocated" : "disabled"),
+        latestAssignmentId: assignment?.assignmentId ?? null,
+        latestAssignmentUpdatedAt: assignment?.updatedAt ?? null,
+        captureComplete: attempt?.captureComplete ?? null,
+        captureStatus: attempt?.captureStatus ?? null,
+        blockerCode: attempt?.blocker?.code ?? assignment?.blocked?.code ?? null,
+      };
+    }).sort((a, b) => a.specId.localeCompare(b.specId)),
+  };
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {

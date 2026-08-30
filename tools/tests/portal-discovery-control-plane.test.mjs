@@ -139,3 +139,36 @@ test("worker result preserves exact accounting and rejects cheap capability viol
   assert.throws(() => validateWorkerResult({ ...result, qualityGate: { ...result.qualityGate, workerResultDigest: "0".repeat(64) } }, plan), /digest mismatch/);
   assert.deepEqual(projectPortfolioStatus(manifest).portals.length, manifest.portals.length);
 });
+
+test("portfolio status reports the newest assignment and its capture quality", async () => {
+  const manifest = await buildPortfolioManifest();
+  const specId = manifest.portals[0].specId;
+  const status = projectPortfolioStatus(manifest, {
+    assignments: [
+      {
+        assignmentId: "older-blocked",
+        specId,
+        state: "blocked",
+        updatedAt: "2026-08-29T10:00:00.000Z",
+        latestAttempt: { captureComplete: true, captureStatus: "complete", blocker: { code: "objective-incomplete" } },
+      },
+      {
+        assignmentId: "newer-completed",
+        specId,
+        state: "completed",
+        updatedAt: "2026-08-29T11:00:00.000Z",
+        latestAttempt: { captureComplete: false, captureStatus: "interrupted", blocker: null },
+      },
+    ],
+  }).portals.find((entry) => entry.specId === specId);
+  assert.deepEqual(status, {
+    specId,
+    enabled: true,
+    state: "completed",
+    latestAssignmentId: "newer-completed",
+    latestAssignmentUpdatedAt: "2026-08-29T11:00:00.000Z",
+    captureComplete: false,
+    captureStatus: "interrupted",
+    blockerCode: null,
+  });
+});

@@ -40,8 +40,14 @@ unless `--apply` is explicitly supplied:
 ```powershell
 npm run control:portal-discovery -- validate-portfolio --json
 npm run control:portal-discovery -- compile-plan --json
-npm run control:portal-discovery -- status --json
+npm run control:portal-discovery -- status --ledger .portal-discovery-ledger.jsonl --json
 ```
+
+Portfolio status selects the newest assignment for each specification and reports
+its `captureComplete`, `captureStatus`, and `blockerCode` separately from the
+assignment state. A terminal `completed` assignment with an interrupted or
+incomplete capture is not complete evidence and must not outrank an older usable
+artifact during review.
 
 The plan has stable IDs and SHA-256 digests. Offline per-spec reconciliation and
 review assignments may run concurrently when their artifacts and destination
