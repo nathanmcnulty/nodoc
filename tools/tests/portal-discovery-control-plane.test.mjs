@@ -1,14 +1,21 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
+import { mkdtemp, readFile, rm } from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
 import test from "node:test";
 
 import {
   buildPortfolioManifest,
   compileOrchestrationPlan,
+  enqueueOrchestrationPlan,
+  projectOrchestrationPlanSummary,
   validateOrchestrationPlan,
   validateWorkerResult,
   workerResultSubjectDigest,
   projectPortfolioStatus,
 } from "../portal-discovery-control-plane.mjs";
+import { repoRoot } from "../spec-quality-lib.mjs";
 
 test("materialized portfolio and plan are stable and serialize shared capture leases", async () => {
   const manifest = await buildPortfolioManifest();
@@ -25,6 +32,30 @@ test("materialized portfolio and plan are stable and serialize shared capture le
   assert.equal(maxReviewPlan.assignments.find((entry) => entry.type === "review")?.reasoning, "max");
   assert.throws(() => compileOrchestrationPlan(manifest, { options: { offlineReviewReasoning: "high" } }), /xhigh or max/);
   validateOrchestrationPlan(plan);
+  const summary = projectOrchestrationPlanSummary(plan);
+  assert.equal(summary.planDigest, plan.planDigest);
+  assert.deepEqual(summary.captures, plan.assignments.filter((assignment) => assignment.type === "capture"));
+  assert.equal(summary.reviews.totalCount, plan.assignments.filter((assignment) => assignment.type === "review").length);
+  assert.ok(Buffer.byteLength(JSON.stringify(summary)) < Buffer.byteLength(JSON.stringify(plan)) / 2);
+});
+
+test("applied capture plans bind the ledger to the checked-in recipe bytes", async () => {
+  const manifest = await buildPortfolioManifest();
+  const exchange = manifest.portals.find((portal) => portal.specId === "exchange-beta");
+  const plan = compileOrchestrationPlan({ ...manifest, portals: [exchange] });
+  const capture = plan.assignments.find((assignment) => assignment.type === "capture");
+  const temporary = await mkdtemp(path.join(os.tmpdir(), "nodoc-control-enqueue-"));
+  try {
+    const [result] = await enqueueOrchestrationPlan(plan, {
+      apply: true,
+      ledgerPath: path.join(temporary, "ledger.jsonl"),
+    });
+    const recipeBytes = await readFile(path.join(repoRoot, capture.recipe));
+    const expected = createHash("sha256").update(recipeBytes).digest("hex");
+    assert.equal(result.assignment.recipeDigest, expected);
+  } finally {
+    await rm(temporary, { force: true, recursive: true });
+  }
 });
 
 test("Purview Portal derives its outstanding freshness gap from coverage metadata", async () => {
