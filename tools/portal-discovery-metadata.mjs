@@ -363,6 +363,7 @@ export const coverageOverlayByTitle = {
     ],
     observedHosts: [
       "graph.microsoft.com",
+      "intune.microsoft.com",
       "admin.cloud.microsoft",
       "purview.microsoft.com",
       "security.microsoft.com",
@@ -373,7 +374,7 @@ export const coverageOverlayByTitle = {
       "Proxy routes and the Graph batch wrapper remain in their owning portal specifications and evidence artifacts.",
     ],
     openGaps: [
-      "Corroborate current Intune candidates with fresh complete captures and structured response shapes before promotion.",
+      "Corroborate the remaining Intune candidates with fresh complete captures and structured response shapes before promotion.",
       "Exercise the Defender, Purview, and M365 Admin Graph proxy inventories with authenticated dedicated profiles.",
     ],
   },
