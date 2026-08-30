@@ -454,10 +454,10 @@ export const generatedSpecDataByTitle = {
     "blankDescriptionCount": 0,
     "publicLiveCaptureDescriptionCount": 0,
     "headerProfileCount": 0,
-    "operationContextCount": 0,
+    "operationContextCount": 9,
     "requestExampleCount": 0,
     "successResponseExampleCount": 1,
-    "evidenceMentionCount": 1,
+    "evidenceMentionCount": 13,
     "maturity": {
       "label": "Growing",
       "tone": "warning",

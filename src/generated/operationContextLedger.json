@@ -2634,6 +2634,331 @@
     ]
   },
   {
+    "title": "M365 Apps Services",
+    "specId": "m365-apps-services",
+    "specPath": "specifications/nodoc-m365-apps-services/specification/openapi.yml",
+    "nodocRoute": null,
+    "nodocCategory": "M365 Apps",
+    "headerProfiles": {},
+    "operations": [
+      {
+        "operationId": "M365AppsServices.ResolveComponentGroupIntentShard",
+        "summary": "Resolve component group shard",
+        "method": "POST",
+        "path": "/intents/v1.0/ComponentGroupIntentShard",
+        "operationContext": {
+          "surface": "Microsoft 365 Apps admin center shell bootstrap",
+          "workflows": [
+            "Resolve the service shard used by the portal before loading feature-specific experiences."
+          ],
+          "permissions": [
+            "Requires the browser-obtained Microsoft 365 Apps services bearer token used by config.office.com."
+          ],
+          "troubleshooting": [
+            "Preserve x-api-name, correlation, client-session, and requested-with headers when reproducing portal behavior.",
+            "Although the response is a boolean, the body-less POST may initialize service-side routing and should not be treated as a generic safe probe."
+          ],
+          "availability": {
+            "level": "tenant-conditional",
+            "notes": [
+              "The returned boolean reflects whether shard resolution is available for the current tenant context."
+            ]
+          },
+          "provenance": [
+            {
+              "source": "authenticated-portal-capture",
+              "confidence": "high"
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "M365AppsServices.GetOneDriveSyncBucketCounts",
+        "summary": "Get OneDrive Sync bucket counts",
+        "method": "POST",
+        "path": "/odbhealth/v1.0/synchealth/reports/count",
+        "operationContext": {
+          "surface": "Microsoft 365 Apps admin center OneDrive Sync health",
+          "workflows": [
+            "Populate OneDrive Sync health summary counters for multiple filters in one read-like POST."
+          ],
+          "permissions": [
+            "Requires the portal bearer token and tenant access to OneDrive Sync health reporting."
+          ],
+          "troubleshooting": [
+            "An empty result can reflect an unpopulated reporting surface rather than route removal.",
+            "Keep the filter array order stable when correlating response keys to requested counters."
+          ],
+          "requestShapes": [
+            {
+              "name": "ordered-filter-array",
+              "contentType": "application/json",
+              "bodyKind": "array",
+              "notes": "Response keys correspond to the zero-based position of each filter expression."
+            }
+          ],
+          "availability": {
+            "level": "feature-gated",
+            "notes": [
+              "Data is available only when OneDrive Sync health reporting is enabled and populated for the tenant."
+            ]
+          },
+          "provenance": [
+            {
+              "source": "authenticated-portal-capture",
+              "confidence": "high"
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "M365AppsServices.GetOneDriveSyncVersionDistribution",
+        "summary": "Get OneDrive Sync version distribution",
+        "method": "GET",
+        "path": "/odbhealth/v1.0/synchealth/reports/versioncount",
+        "operationContext": {
+          "surface": "Microsoft 365 Apps admin center OneDrive Sync health",
+          "workflows": [
+            "Build the OneDrive client-version and update-ring distribution shown on the Sync health page."
+          ],
+          "permissions": [
+            "Requires the portal bearer token and tenant access to OneDrive Sync health reporting."
+          ],
+          "troubleshooting": [
+            "Treat an empty 200 response separately from authentication failures and service errors."
+          ],
+          "pagination": {
+            "style": "none"
+          },
+          "availability": {
+            "level": "feature-gated",
+            "notes": [
+              "The array may be empty when no eligible devices have reported sync-health telemetry."
+            ]
+          },
+          "provenance": [
+            {
+              "source": "authenticated-portal-capture",
+              "confidence": "high"
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "M365AppsServices.GetEligibilityRecord",
+        "summary": "Get onboarding eligibility record",
+        "method": "GET",
+        "path": "/onboarding/odata/v1.0/EligibilityRecord",
+        "operationContext": {
+          "surface": "Microsoft 365 Apps admin center onboarding",
+          "workflows": [
+            "Determine which shared-service experiences the current tenant is eligible to use."
+          ],
+          "permissions": [
+            "Requires the browser-obtained Microsoft 365 Apps services bearer token."
+          ],
+          "troubleshooting": [
+            "Use the eligibilities array as a capability signal; do not infer route removal when a feature is absent."
+          ],
+          "pagination": {
+            "style": "none"
+          },
+          "availability": {
+            "level": "tenant-conditional"
+          },
+          "provenance": [
+            {
+              "source": "authenticated-portal-capture",
+              "confidence": "high"
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "M365AppsServices.ListAgreementData",
+        "summary": "List feature-ring agreement records",
+        "method": "GET",
+        "path": "/onboarding/odata/v1.0/Agreementdata",
+        "operationContext": {
+          "surface": "Microsoft 365 Apps admin center onboarding and preview agreements",
+          "workflows": [
+            "Check whether the tenant has agreement records for a requested feature ring."
+          ],
+          "permissions": [
+            "Requires the browser-obtained Microsoft 365 Apps services bearer token."
+          ],
+          "troubleshooting": [
+            "A 200 response with an empty value array is valid tenant state, not evidence that the endpoint was removed."
+          ],
+          "pagination": {
+            "style": "odata",
+            "requestParameters": [
+              "$filter"
+            ],
+            "responseFields": [
+              "value"
+            ],
+            "notes": [
+              "No continuation field was observed; preserve any future OData next-link evidence if the collection grows."
+            ]
+          },
+          "variants": [
+            {
+              "selector": "$filter",
+              "location": "query",
+              "knownValues": [
+                "FeatureRing eq 'Preview'"
+              ],
+              "notes": "The observed preview query returned a successful empty collection in the captured tenant."
+            }
+          ],
+          "availability": {
+            "level": "tenant-conditional"
+          },
+          "provenance": [
+            {
+              "source": "authenticated-portal-capture",
+              "confidence": "high"
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "M365AppsServices.ListFeatureDefinitions",
+        "summary": "List feature definitions",
+        "method": "GET",
+        "path": "/onboarding/odata/v1.0/FeatureData",
+        "operationContext": {
+          "surface": "Microsoft 365 Apps admin center onboarding",
+          "workflows": [
+            "Discover service feature definitions, rings, agreements, and eligibility requirements before rendering setup choices."
+          ],
+          "permissions": [
+            "Requires the browser-obtained Microsoft 365 Apps services bearer token."
+          ],
+          "troubleshooting": [
+            "Feature and ring names are service-controlled and may change independently of the response envelope."
+          ],
+          "pagination": {
+            "style": "odata",
+            "responseFields": [
+              "value"
+            ],
+            "notes": [
+              "No continuation field was observed in the captured response."
+            ]
+          },
+          "availability": {
+            "level": "tenant-conditional"
+          },
+          "provenance": [
+            {
+              "source": "authenticated-portal-capture",
+              "confidence": "high"
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "M365AppsServices.GetFeatureProvisioningState",
+        "summary": "Query feature provisioning state",
+        "method": "GET",
+        "path": "/onboarding/odata/v1.0/FeatureProvisiondata",
+        "operationContext": {
+          "surface": "Microsoft 365 Apps admin center setup and provisioning",
+          "workflows": [
+            "Read the current provisioning and migration state for one or more shared-service features."
+          ],
+          "permissions": [
+            "Requires the browser-obtained Microsoft 365 Apps services bearer token."
+          ],
+          "troubleshooting": [
+            "Distinguish an empty value array from a provisioning failure or authorization error."
+          ],
+          "pagination": {
+            "style": "odata",
+            "requestParameters": [
+              "$filter"
+            ],
+            "responseFields": [
+              "value"
+            ]
+          },
+          "availability": {
+            "level": "feature-gated"
+          },
+          "provenance": [
+            {
+              "source": "authenticated-portal-capture",
+              "confidence": "high"
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "M365AppsServices.ProvisionFeature",
+        "summary": "Provision or confirm a feature state",
+        "method": "POST",
+        "path": "/onboarding/odata/v1.0/FeatureProvisiondata",
+        "operationContext": {
+          "surface": "Microsoft 365 Apps admin center setup and provisioning",
+          "workflows": [
+            "Provision or confirm a tenant feature selected through the portal setup experience."
+          ],
+          "permissions": [
+            "Requires a portal bearer token and sufficient tenant administration permission to provision the selected feature."
+          ],
+          "troubleshooting": [
+            "Do not invoke this operation for discovery unless an exact approved reversible-operation plan exists; a body-less request is still potentially state-changing.",
+            "Read the GET provisioning state before and after any authorized invocation and preserve the exact feature filter and response evidence."
+          ],
+          "availability": {
+            "level": "feature-gated"
+          },
+          "provenance": [
+            {
+              "source": "authenticated-portal-capture",
+              "confidence": "high"
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "M365AppsServices.GetOfficeReleaseCatalog",
+        "summary": "Get Office release catalog",
+        "method": "GET",
+        "path": "/releases/v1.0/OfficeReleases",
+        "operationContext": {
+          "surface": "Microsoft 365 Apps admin center Device Configuration",
+          "workflows": [
+            "Populate Office release-channel and build selectors with availability and end-of-support dates."
+          ],
+          "permissions": [
+            "Requires the browser-obtained Microsoft 365 Apps services bearer token."
+          ],
+          "troubleshooting": [
+            "Channel aliases, versions, and CDN URLs change over time; consume them as catalog data rather than hard-coded constants."
+          ],
+          "pagination": {
+            "style": "none"
+          },
+          "availability": {
+            "level": "global",
+            "notes": [
+              "The catalog is service-controlled even though access still requires the portal authentication context."
+            ]
+          },
+          "provenance": [
+            {
+              "source": "authenticated-portal-capture",
+              "confidence": "high"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
     "title": "Microsoft Graph Research",
     "specId": "graph-research",
     "specPath": "specifications/nodoc-graph-research/specification/openapi.yml",
