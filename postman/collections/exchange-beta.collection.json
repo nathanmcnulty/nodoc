@@ -1757,6 +1757,31 @@
                                             "_postman_previewlanguage": "json"
                                         },
                                         {
+                                            "id": "74f2da04-64f1-4e3e-ad0c-51721df41a84",
+                                            "name": "The requested preference item is not set for the current user.",
+                                            "originalRequest": {
+                                                "url": {
+                                                    "path": [
+                                                        "beta",
+                                                        "UserPreference(PrimaryKey='{{primaryKey}}')",
+                                                        "ExchangeAdminCenter.GetItemInCollection(SubKey='{{subKey}}')"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [],
+                                                    "variable": []
+                                                },
+                                                "method": "GET",
+                                                "body": {}
+                                            },
+                                            "status": "No Content",
+                                            "code": 204,
+                                            "header": [],
+                                            "cookie": [],
+                                            "_postman_previewlanguage": "text"
+                                        },
+                                        {
                                             "id": "9a90f797-c99f-4453-a27a-b67843f4ec7c",
                                             "name": "The supplied route parameters or request body were invalid.",
                                             "originalRequest": {
@@ -8917,7 +8942,7 @@
         "name": "Exchange",
         "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
         "description": {
-            "content": "The Exchange API is used by the Exchange admin center (`admin.exchange.microsoft.com`)\nfor same-origin shell bootstrap, user preference storage, mailbox and recipient detail\nblades, role administration, mobile device management, organization sharing, mail flow\nadministration, migration state, public folder inventory, and report widgets.\n\nThe operations below were confirmed while browsing the Exchange admin center with a real\nauthenticated Edge session. They were observed on routes including:\n\n  - Home/dashboard\n  - Accepted domains\n  - Admin roles\n  - Alert policies\n  - Connectors\n  - Contacts\n  - Groups\n  - High Volume Email\n  - Mobile device access\n  - Mobile device mailbox policy\n  - Mail flow reports\n  - Migration\n  - Organization sharing\n  - Public folders\n  - Resources\n  - Remote domains\n  - Settings\n  - Troubleshoot\n  - User roles\n\nRequests relied on the authenticated Exchange admin center browser session, same-origin\n`fetch`/XHR traffic, and `x-requested-with: XMLHttpRequest`. The observed cookie set\nincluded `.AspNetCore.Cookies` plus companion chunk cookies on `admin.exchange.microsoft.com`.\n\nShared `admin.microsoft.com` support, SharePoint, and feedback calls were also present in the\nlive session, but those were not modeled here because they are either generic Microsoft 365\nadmin shell dependencies or already documented elsewhere in the repository.\n\nDocumentation and specifications have been provided on a best-efforts basis and may not be\n100% accurate.\n\n\nContact Support:\n Name: nodoc",
+            "content": "The Exchange API is used by the Exchange admin center. It has been observed directly on\n`admin.exchange.microsoft.com` and through the fixed\n`exchange.admin.cloud.microsoft` Exchange proxy\nfor same-origin shell bootstrap, user preference storage, mailbox and recipient detail\nblades, role administration, mobile device management, organization sharing, mail flow\nadministration, migration state, public folder inventory, and report widgets.\n\nThe operations below were confirmed while browsing the Exchange admin center with a real\nauthenticated Edge session. They were observed on routes including:\n\n  - Home/dashboard\n  - Accepted domains\n  - Admin roles\n  - Alert policies\n  - Connectors\n  - Contacts\n  - Groups\n  - High Volume Email\n  - Mobile device access\n  - Mobile device mailbox policy\n  - Mail flow reports\n  - Migration\n  - Organization sharing\n  - Public folders\n  - Resources\n  - Remote domains\n  - Settings\n  - Troubleshoot\n  - User roles\n\nRequests to the legacy direct host relied on the authenticated Exchange admin center browser\nsession, same-origin `fetch`/XHR traffic, and `x-requested-with: XMLHttpRequest`. The observed\ncookie set included `.AspNetCore.Cookies` plus companion chunk cookies. A 2026-08-30 capture\nconfirmed that the current portal can instead route `/beta` operations through the fixed\n`exchange.admin.cloud.microsoft` service host with bearer authorization.\n\nShared `admin.microsoft.com` support, SharePoint, and feedback calls were also present in the\nlive session, but those were not modeled here because they are either generic Microsoft 365\nadmin shell dependencies or already documented elsewhere in the repository.\n\nDocumentation and specifications have been provided on a best-efforts basis and may not be\n100% accurate.\n\n\nContact Support:\n Name: nodoc",
             "type": "text/plain"
         }
     }

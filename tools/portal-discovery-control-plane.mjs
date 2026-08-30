@@ -356,6 +356,7 @@ export async function compileFromFiles({ manifestPath = defaultPortfolioManifest
 export async function enqueueOrchestrationPlan(plan, { ledgerPath, apply = false } = {}) {
   validateOrchestrationPlan(plan);
   if (!apply) throw new Error("Applying an orchestration plan requires explicit apply opt-in.");
+  if (!ledgerPath) throw new Error("Applying an orchestration plan requires --ledger.");
   const results = [];
   for (const assignment of plan.assignments.filter((entry) => entry.type === "capture" && entry.route === "orchestrator")) {
     results.push(await enqueueAssignment({ ledgerPath, assignmentId: assignment.assignmentId, specId: assignment.specId, portal: assignment.portal, recipePath: assignment.recipe, recipeDigest: await checkedInRecipeDigest(assignment.recipe), endpoint: assignment.endpointLease.split("|")[0], profile: assignment.profile, phase: "all", model: portalDiscoveryModelPolicy.capture.model, reasoning: portalDiscoveryModelPolicy.capture.reasoning, priority: 20 }));
@@ -400,8 +401,26 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const json = async () => {
     if (command === "validate-portfolio") return buildPortfolioManifest(value("--manifest", defaultPortfolioManifestPath));
     if (command === "compile-plan") {
-      const plan = await compileFromFiles({ manifestPath: value("--manifest", defaultPortfolioManifestPath), ledgerPath: value("--ledger"), budgets: {}, options: { apply: args.includes("--apply") } });
-      return args.includes("--summary") ? projectOrchestrationPlanSummary(plan) : plan;
+      const ledgerPath = value("--ledger");
+      const apply = args.includes("--apply");
+      const plan = await compileFromFiles({ manifestPath: value("--manifest", defaultPortfolioManifestPath), ledgerPath, budgets: {}, options: { apply } });
+      const projection = args.includes("--summary") ? projectOrchestrationPlanSummary(plan) : plan;
+      if (!apply) return projection;
+      const enqueued = await enqueueOrchestrationPlan(plan, { ledgerPath, apply: true });
+      return {
+        schemaVersion: 1,
+        mode: "applied",
+        plan: projection,
+        enqueue: {
+          count: enqueued.length,
+          assignments: enqueued.map((result) => ({
+            assignmentId: result.assignment.assignmentId,
+            attempt: result.assignment.latestAttempt?.attempt ?? null,
+            specId: result.assignment.specId,
+            state: result.assignment.state,
+          })),
+        },
+      };
     }
     if (command === "status") { const manifest = await buildPortfolioManifest(value("--manifest", defaultPortfolioManifestPath)); const ledger = value("--ledger") ? await getLedgerViewFromFile({ ledgerPath: value("--ledger"), view: "all" }) : { assignments: [] }; return projectPortfolioStatus(manifest, ledger); }
     throw new Error("Use validate-portfolio, compile-plan, or status.");

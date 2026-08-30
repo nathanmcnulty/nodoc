@@ -1,9 +1,11 @@
 import assert from "node:assert/strict";
+import { execFile } from "node:child_process";
 import { createHash } from "node:crypto";
 import { mkdtemp, readFile, rm } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
+import { promisify } from "node:util";
 
 import {
   buildPortfolioManifest,
@@ -16,6 +18,8 @@ import {
   projectPortfolioStatus,
 } from "../portal-discovery-control-plane.mjs";
 import { repoRoot } from "../spec-quality-lib.mjs";
+
+const execFileAsync = promisify(execFile);
 
 test("materialized portfolio and plan are stable and serialize shared capture leases", async () => {
   const manifest = await buildPortfolioManifest();
@@ -53,6 +57,28 @@ test("applied capture plans bind the ledger to the checked-in recipe bytes", asy
     const recipeBytes = await readFile(path.join(repoRoot, capture.recipe));
     const expected = createHash("sha256").update(recipeBytes).digest("hex");
     assert.equal(result.assignment.recipeDigest, expected);
+  } finally {
+    await rm(temporary, { force: true, recursive: true });
+  }
+});
+
+test("compile-plan --apply enqueues assignments and returns an applied receipt", async () => {
+  const temporary = await mkdtemp(path.join(os.tmpdir(), "nodoc-control-cli-"));
+  const ledgerPath = path.join(temporary, "ledger.jsonl");
+  try {
+    const { stdout } = await execFileAsync(process.execPath, [
+      path.join(repoRoot, "tools", "portal-discovery-control-plane.mjs"),
+      "compile-plan",
+      "--summary",
+      "--ledger",
+      ledgerPath,
+      "--apply",
+    ], { cwd: repoRoot });
+    const receipt = JSON.parse(stdout);
+    assert.equal(receipt.mode, "applied");
+    assert.equal(receipt.enqueue.count > 0, true);
+    assert.equal(receipt.enqueue.assignments.length, receipt.enqueue.count);
+    assert.match(await readFile(ledgerPath, "utf8"), /"eventType":"assignment-created"/u);
   } finally {
     await rm(temporary, { force: true, recursive: true });
   }

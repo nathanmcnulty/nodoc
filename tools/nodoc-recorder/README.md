@@ -8,7 +8,7 @@ A Chrome/Edge DevTools extension that captures API traffic from Microsoft portal
 |--------|--------|----------|
 | Defender | `security.microsoft.com` | `/apiproxy/*` |
 | M365 Admin | `admin.cloud.microsoft` | `/admin/api/*` |
-| Exchange | `admin.exchange.microsoft.com` | `/beta/*` |
+| Exchange | `admin.exchange.microsoft.com`, `exchange.admin.cloud.microsoft` | `/beta/*` |
 | SharePoint | `{tenant}-admin.sharepoint.com` | `/_api/*` |
 | Teams | `admin.teams.microsoft.com` + related Teams/Office hosts | `/api/*`, `/admin/api/*`, `/amer/api/*`, `/data/*`, `/Teams.*`, `/Skype.*`, `/config/*`, `/repository/*`, and related report/app-catalog paths |
 | M365 Apps Config | `config.office.com` | `/appConfig/*`, `/endpointprovisionhealth/*`, `/intents/*`, `/policyadmin/*`, `/releases/*`, `/rollout/*`, `/serviceProfile/*`, `/ServiceProfile/*`, `/settings/*` |

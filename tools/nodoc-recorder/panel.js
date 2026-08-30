@@ -19,9 +19,12 @@ const portalConfig = [
   {
     id: 'exchange-beta',
     name: 'Exchange',
-    hostname: 'admin.exchange.microsoft.com',
+    hostnames: ['admin.exchange.microsoft.com', 'exchange.admin.cloud.microsoft'],
     pathPrefixes: ['/beta/'],
-    urlPatterns: ['https://admin.exchange.microsoft.com/beta/*']
+    urlPatterns: [
+      'https://admin.exchange.microsoft.com/beta/*',
+      'https://exchange.admin.cloud.microsoft/beta/*'
+    ]
   },
   {
     id: 'sharepoint-admin',

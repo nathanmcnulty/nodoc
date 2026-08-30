@@ -43,6 +43,15 @@ npm run control:portal-discovery -- compile-plan --summary --json
 npm run control:portal-discovery -- status --ledger .portal-discovery-ledger.jsonl --json
 ```
 
+To enqueue the capture assignments from the compiled plan, supply both the
+ledger and the explicit apply opt-in. The command returns an `applied` receipt
+with each enqueued assignment and attempt; without `--apply` it remains
+report-only.
+
+```powershell
+npm run control:portal-discovery -- compile-plan --summary --ledger .portal-discovery-ledger.jsonl --apply --json
+```
+
 Portfolio status selects the newest assignment for each specification and reports
 its `captureComplete`, `captureStatus`, and `blockerCode` separately from the
 assignment state. A terminal `completed` assignment with an interrupted or
@@ -209,6 +218,13 @@ Each portal engagement must produce evidence for three separate questions:
 Retain all observed methods. Reads, POST-backed reads, mutations, GraphQL/RPC,
 streaming, and job-style transports receive separate safety and execution-state
 labels; no non-GET is discarded merely because it is not promotion-ready.
+
+Also inventory automatic portal side effects separately from agent-invoked
+operations. For each passive non-GET, retain its action/checkpoint attribution,
+status, request shape, response shape, and any naturally emitted before/after
+reads. When only a before read and successful write are visible, report a
+likely real but unverified side effect; do not relabel it as an active-operation
+`unresolved-change` because no approved operation was invoked.
 
 For a multi-spec session, use one spec as a process-calibration unit at a time.
 Prefer the oldest material specification update that has a valid frontier and

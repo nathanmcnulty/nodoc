@@ -1360,7 +1360,12 @@ test("Exchange selects the approved exact-route bootstrap shape frontier", async
   const result = JSON.parse(stdout);
   assert.equal(result.status, "planned");
   assert.equal(result.brief.recipe, "tools/capture-recipes/exchange-bootstrap-shape-novelty.json");
-  assert.equal(result.noveltyPlan.targets.length, 5);
+  assert.equal(result.noveltyPlan.targets.length, 1);
+  assert.equal(result.noveltyPlan.targets[0].id, "my-time-zone-response-shape");
+  assert.deepEqual(result.noveltyPlan.targets[0].expectedHostFamilies, [
+    "admin.exchange.microsoft.com",
+    "exchange.admin.cloud.microsoft",
+  ]);
   assert.equal(result.workerPacket.assignmentType, "capture");
   assert.deepEqual(result.workerPacket.role, {
     model: "gpt-5.6-luna",

@@ -128,6 +128,7 @@ const tenantSafeServiceLabels = new Set([
   "crm",
   "ecs",
   "ext",
+  "exchange",
   "graph",
   "identitygovernance",
   "insights",

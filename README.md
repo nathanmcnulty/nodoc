@@ -15,7 +15,7 @@ The project currently publishes the following API definitions:
 | --- | ---: | --- | --- | --- |
 | Defender | 558 | Portal session cookie (`sccauth`) | [Browse](https://nodoc.nathanmcnulty.com/defender) | `postman/collections/defender.collection.json` |
 | M365 Admin | 213 | Portal session + custom admin headers | [Browse](https://nodoc.nathanmcnulty.com/m365-admin) | `postman/collections/m365-admin.collection.json` |
-| Exchange | 61 | Portal session cookie + same-origin `x-requested-with` | [Browse](https://nodoc.nathanmcnulty.com/exchange) | `postman/collections/exchange-beta.collection.json` |
+| Exchange | 61 | Legacy portal cookie or current admin-shell bearer token | [Browse](https://nodoc.nathanmcnulty.com/exchange) | `postman/collections/exchange-beta.collection.json` |
 | SharePoint | 41 | Portal session cookie (`FedAuth`) + SharePoint form digest | [Browse](https://nodoc.nathanmcnulty.com/sharepoint-admin) | `postman/collections/sharepoint-admin.collection.json` |
 | Teams | 99 | Portal bearer token + same-origin portal context | [Browse](https://nodoc.nathanmcnulty.com/teams) | `postman/collections/teams.collection.json` |
 | Viva Engage | 5 | MSAL PKCE bearer token + same-origin GraphQL | [Browse](https://nodoc.nathanmcnulty.com/viva-engage) | `postman/collections/viva-engage.collection.json` |
