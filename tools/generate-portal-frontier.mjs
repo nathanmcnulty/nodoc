@@ -13,12 +13,13 @@ function parseArgs(argv) {
       args.approved_only = true;
       continue;
     }
-    if (["--spec", "--recipe", "--coverage", "--prior-artifact", "--candidate-handoff", "--output"].includes(value)) {
+    if (["--spec", "--recipe", "--coverage", "--prior-artifact", "--candidate-handoff", "--frontier-id", "--output"].includes(value)) {
       args[value.slice(2).replaceAll("-", "_")] = argv[index + 1];
       index += 1;
     }
   }
-  if (!args.spec) throw new Error("Use --spec <spec-id> [--recipe <path>] [--prior-artifact <json>] [--candidate-handoff <json>] [--output <json>].");
+  if (!args.spec) throw new Error("Use --spec <spec-id> [--recipe <path>] [--prior-artifact <json>] [--candidate-handoff <json>] [--approved-only | --frontier-id <id>] [--output <json>].");
+  if (args.approved_only && args.frontier_id) throw new Error("Use only one frontier projection mode.");
   return args;
 }
 
@@ -43,6 +44,12 @@ const result = compileOfflineFrontier({
   candidateHandoff: await readJsonIf(args.candidate_handoff, {}),
 });
 validateOfflineFrontier(result);
+const selectedItems = args.frontier_id
+  ? result.items.filter((item) => item.frontierId === args.frontier_id)
+  : null;
+if (args.frontier_id && selectedItems.length !== 1) {
+  throw new Error(`Frontier item ${JSON.stringify(args.frontier_id)} was not found exactly once.`);
+}
 const output = args.approved_only
   ? {
       schemaVersion: 1,
@@ -53,6 +60,16 @@ const output = args.approved_only
       measurements: result.measurements,
       items: result.items.filter((item) => item.status === "approved"),
     }
+  : args.frontier_id
+    ? {
+        schemaVersion: 1,
+        specId: result.specId,
+        projection: "selected-item",
+        frontierSetId: result.frontierSetId,
+        frontierSetDigest: result.frontierSetDigest,
+        measurements: result.measurements,
+        items: selectedItems,
+      }
   : result;
 const text = `${JSON.stringify(output, null, 2)}\n`;
 if (args.output) {

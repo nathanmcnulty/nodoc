@@ -134,7 +134,12 @@ function targetMapping(recipe, hostFamily, pathname) {
     && ((entry.expectedRoutes ?? []).includes(pathname)
       || (entry.expectedRoutePrefixes ?? []).some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)))
   ));
-  return target ? { targetId: target.id, state: target.state, actionIndexes: target.actionIndexes } : null;
+  return target ? {
+    targetId: target.id,
+    state: target.state,
+    actionIndexes: target.actionIndexes,
+    documentationObjectives: target.expectedDocumentationObjectives ?? [],
+  } : null;
 }
 
 export function compileOfflineFrontier({ specId, specification = {}, coverage = {}, recipe = {}, priorArtifacts = {}, candidateHandoff = {} } = {}) {
@@ -156,6 +161,7 @@ export function compileOfflineFrontier({ specId, specification = {}, coverage = 
     if (operation.responseStatuses.length === 0 || operation.responseContentTypes.length === 0) add({ hostFamily: host, gapClass: "response-metadata", canonicalKey: key, evidence: ["openapi"], sourceRefs: ["checked-in-openapi"], requiredActionState: mapping, status: mapping && executablePlan ? "approved" : "candidate", blockers: mapping && executablePlan ? [] : ["exact-ui-state-approval-required"] });
     const enrichment = (gapClass, applies) => {
       if (!applies) return;
+      const approved = Boolean(mapping && executablePlan && mapping.documentationObjectives.includes(gapClass));
       add({
         hostFamily: host,
         gapClass,
@@ -163,8 +169,8 @@ export function compileOfflineFrontier({ specId, specification = {}, coverage = 
         evidence: ["openapi-documentation-inventory"],
         sourceRefs: ["checked-in-openapi"],
         requiredActionState: mapping,
-        status: "candidate",
-        blockers: ["sanitized-documentation-evidence-required"],
+        status: approved ? "approved" : "candidate",
+        blockers: approved ? [] : ["sanitized-documentation-evidence-required"],
       });
     };
     enrichment("operation-context", operation.operationContextFields.length === 0);

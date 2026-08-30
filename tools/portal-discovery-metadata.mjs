@@ -672,6 +672,7 @@ export const captureRecipesByTitle = {
     "tools/capture-recipes/m365-apps-seeded-replay.json",
   ],
   "Power Platform": [
+    "tools/capture-recipes/power-platform-environments-novelty.json",
     "tools/capture-recipes/power-platform-deep.json",
     "tools/capture-recipes/power-platform-seeded-replay.json",
   ],
