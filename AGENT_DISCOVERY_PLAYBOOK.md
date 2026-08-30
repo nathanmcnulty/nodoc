@@ -310,7 +310,8 @@ Use four bounded roles instead of asking every worker to understand the entire
 research process:
 
 1. **Coordinator**
-   - Runs `--phase plan --worker-packet --json`, assigns one portal and
+   - Runs `compile-plan --summary`, then binds its exact assignment ID and
+     digest into `--phase plan --worker-packet --json`, assigns one portal and
      checked-in recipe, and
      records a unique artifact directory. This is `gpt-5.6-sol` at high
      reasoning and owns the final quality gate.

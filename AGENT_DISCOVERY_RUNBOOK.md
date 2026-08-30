@@ -39,7 +39,7 @@ unless `--apply` is explicitly supplied:
 
 ```powershell
 npm run control:portal-discovery -- validate-portfolio --json
-npm run control:portal-discovery -- compile-plan --json
+npm run control:portal-discovery -- compile-plan --summary --json
 npm run control:portal-discovery -- status --ledger .portal-discovery-ledger.jsonl --json
 ```
 
@@ -552,6 +552,13 @@ healthy completed capture may be analyzed again without reopening the browser.
    ```powershell
    npm run discover:portal -- --portal m365-admin --profile bounded --phase plan --require-novelty --worker-packet --json
    ```
+
+   When the capture came from the control plane, pass its exact
+   `--assignment-id` and `--assignment-digest` while generating the packet.
+   Both values are then bound into the packet hash, executable driver arguments,
+   and terminal `discovery-run.json` receipt. Use `compile-plan --summary` for
+   routine selection; request the full plan only for application or detailed
+   review.
 
    The coordinator hands the capture worker only the returned packet, not the
    entire prompt, runbook, playbook, or `noveltyPlan`. In the target checkout,

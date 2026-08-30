@@ -1370,6 +1370,15 @@ test("Exchange selects the approved exact-route bootstrap shape frontier", async
   assert.equal(result.workerPacket.bindings.recipeSha256.length, 64);
   assert.equal(result.workerPacket.packetSha256.length, 64);
   assert.ok(result.workerPacket.execution.driverArgs.includes("--require-novelty"));
+  assert.deepEqual(
+    result.workerPacket.execution.driverArgs.slice(
+      result.workerPacket.execution.driverArgs.indexOf("--model"),
+      result.workerPacket.execution.driverArgs.indexOf("--model") + 4,
+    ),
+    ["--model", "gpt-5.6-luna", "--reasoning", "low"],
+  );
+  assert.ok(result.workerPacket.execution.driverArgs.includes("--endpoint"));
+  assert.ok(result.workerPacket.execution.driverArgs.includes("--cdp-endpoint"));
   assert.ok(result.workerPacket.execution.verificationArgs.includes("--worker-packet"));
   assert.ok(result.workerPacket.execution.verificationArgs.includes("plan"));
   assert.deepEqual(result.actionBudget.categories, {
@@ -1377,6 +1386,7 @@ test("Exchange selects the approved exact-route bootstrap shape frontier", async
     mandatoryOrchestrationActions: 1,
     recipeActions: 3,
   });
+  assert.equal(result.actionBudget.maxActions, 4);
   assert.deepEqual(result.noveltyPlan.actions
     .filter((action) => action.classification === "frontier-targeted")
     .map((action) => action.type), ["reload", "wait-ms", "capture"]);
@@ -1419,6 +1429,10 @@ test("portal driver can emit only the compact capture worker packet", async () =
     "plan",
     "--worker-packet",
     "--json",
+    "--assignment-id",
+    "capture-packet-test",
+    "--assignment-digest",
+    "f".repeat(64),
   ];
   const { stdout } = await execFileAsync(process.execPath, command, { cwd: repoRoot });
   const repeated = await execFileAsync(process.execPath, command, { cwd: repoRoot });
@@ -1426,6 +1440,9 @@ test("portal driver can emit only the compact capture worker packet", async () =
 
   assert.equal(result.schemaVersion, "1.0");
   assert.equal(result.assignmentType, "capture");
+  assert.equal(result.bindings.assignmentId, "capture-packet-test");
+  assert.equal(result.bindings.assignmentDigest, "f".repeat(64));
+  assert.ok(result.execution.driverArgs.includes("--assignment-digest"));
   assert.equal(result.brief, undefined);
   assert.equal(result.noveltyPlan, undefined);
   assert.ok(Buffer.byteLength(stdout, "utf8") < result.measurements.sourcePolicyBytes / 5);

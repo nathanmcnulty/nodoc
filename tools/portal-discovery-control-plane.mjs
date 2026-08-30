@@ -39,6 +39,14 @@ const transitions = {
 
 function stableJson(value) { return `${JSON.stringify(value)}\n`; }
 export function digest(value) { return createHash("sha256").update(stableJson(value), "utf8").digest("hex"); }
+async function checkedInRecipeDigest(recipePath) {
+  const absolute = path.resolve(repoRoot, requiredString(recipePath, "recipe path"));
+  const relative = path.relative(repoRoot, absolute);
+  if (!relative || relative.startsWith("..") || path.isAbsolute(relative)) {
+    throw new Error("Capture recipe must resolve to a checked-in repository file.");
+  }
+  return createHash("sha256").update(await readFile(absolute)).digest("hex");
+}
 function clone(value) { return JSON.parse(JSON.stringify(value)); }
 function sorted(values) { return [...values].sort((left, right) => String(left).localeCompare(String(right))); }
 function requiredString(value, label) {
@@ -254,6 +262,36 @@ export function validateOrchestrationPlan(plan) {
   return plan;
 }
 
+export function projectOrchestrationPlanSummary(plan) {
+  validateOrchestrationPlan(plan);
+  const captures = plan.assignments.filter((assignment) => assignment.type === "capture");
+  const reviews = plan.assignments.filter((assignment) => assignment.type === "review");
+  const byRoute = {};
+  const blockerCounts = {};
+  for (const review of reviews) {
+    byRoute[review.route] = (byRoute[review.route] ?? 0) + 1;
+    for (const blocker of review.blockers ?? []) {
+      blockerCounts[blocker] = (blockerCounts[blocker] ?? 0) + 1;
+    }
+  }
+  return {
+    schemaVersion: plan.schemaVersion,
+    planId: plan.planId,
+    planDigest: plan.planDigest,
+    mode: plan.mode,
+    modelPolicy: plan.modelPolicy,
+    captures,
+    reviews: {
+      blockerCounts: Object.fromEntries(Object.entries(blockerCounts).sort(([left], [right]) => left.localeCompare(right))),
+      byRoute: Object.fromEntries(Object.entries(byRoute).sort(([left], [right]) => left.localeCompare(right))),
+      runnableCount: reviews.filter((review) => review.terminal === "worker-result-required").length,
+      totalCount: reviews.length,
+    },
+    completion: plan.completion,
+    totals: plan.totals,
+  };
+}
+
 function capabilityViolation(result, assignment) {
   const restricted = new Set(["safety", "scope", "adjacent", "state-changing", "unknown", "incomplete"]);
   const reasons = result.reasonCodes ?? [];
@@ -320,7 +358,7 @@ export async function enqueueOrchestrationPlan(plan, { ledgerPath, apply = false
   if (!apply) throw new Error("Applying an orchestration plan requires explicit apply opt-in.");
   const results = [];
   for (const assignment of plan.assignments.filter((entry) => entry.type === "capture" && entry.route === "orchestrator")) {
-    results.push(await enqueueAssignment({ ledgerPath, assignmentId: assignment.assignmentId, specId: assignment.specId, portal: assignment.portal, recipePath: assignment.recipe, recipeDigest: digest(assignment.recipe), endpoint: assignment.endpointLease.split("|")[0], profile: assignment.profile, phase: "all", model: portalDiscoveryModelPolicy.capture.model, reasoning: portalDiscoveryModelPolicy.capture.reasoning, priority: 20 }));
+    results.push(await enqueueAssignment({ ledgerPath, assignmentId: assignment.assignmentId, specId: assignment.specId, portal: assignment.portal, recipePath: assignment.recipe, recipeDigest: await checkedInRecipeDigest(assignment.recipe), endpoint: assignment.endpointLease.split("|")[0], profile: assignment.profile, phase: "all", model: portalDiscoveryModelPolicy.capture.model, reasoning: portalDiscoveryModelPolicy.capture.reasoning, priority: 20 }));
   }
   return results;
 }
@@ -361,7 +399,10 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const value = (flag, fallback = null) => { const index = args.indexOf(flag); return index >= 0 ? args[index + 1] : fallback; };
   const json = async () => {
     if (command === "validate-portfolio") return buildPortfolioManifest(value("--manifest", defaultPortfolioManifestPath));
-    if (command === "compile-plan") return compileFromFiles({ manifestPath: value("--manifest", defaultPortfolioManifestPath), ledgerPath: value("--ledger"), budgets: {}, options: { apply: args.includes("--apply") } });
+    if (command === "compile-plan") {
+      const plan = await compileFromFiles({ manifestPath: value("--manifest", defaultPortfolioManifestPath), ledgerPath: value("--ledger"), budgets: {}, options: { apply: args.includes("--apply") } });
+      return args.includes("--summary") ? projectOrchestrationPlanSummary(plan) : plan;
+    }
     if (command === "status") { const manifest = await buildPortfolioManifest(value("--manifest", defaultPortfolioManifestPath)); const ledger = value("--ledger") ? await getLedgerViewFromFile({ ledgerPath: value("--ledger"), view: "all" }) : { assignments: [] }; return projectPortfolioStatus(manifest, ledger); }
     throw new Error("Use validate-portfolio, compile-plan, or status.");
   };

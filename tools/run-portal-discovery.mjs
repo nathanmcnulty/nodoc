@@ -187,6 +187,7 @@ function parseArgs(argv) {
     ledgerMode: null,
     ledgerPath: defaultLedgerPath,
     assignmentId: null,
+    assignmentDigest: null,
     attemptNumber: null,
     endpoint: null,
     cdpEndpoint: "http://127.0.0.1:9222",
@@ -265,6 +266,9 @@ function parseArgs(argv) {
       index += 1;
     } else if (argument === "--assignment-id" && next) {
       args.assignmentId = next;
+      index += 1;
+    } else if (argument === "--assignment-digest" && next) {
+      args.assignmentDigest = next.trim().toLowerCase();
       index += 1;
     } else if ((argument === "--attempt" || argument === "--attempt-number") && next) {
       args.attemptNumber = Number(next);
@@ -373,6 +377,12 @@ function parseArgs(argv) {
     }
     if (args.workerPacketOnly && args.phase !== "plan") {
       throw new Error("--worker-packet is only valid with --phase plan.");
+    }
+    if (args.assignmentDigest && !args.assignmentId) {
+      throw new Error("--assignment-digest requires --assignment-id.");
+    }
+    if (args.assignmentDigest && !/^[a-f0-9]{64}$/u.test(args.assignmentDigest)) {
+      throw new Error("--assignment-digest must be a lowercase SHA-256 digest.");
     }
     if (args.phase !== "plan" && !args.artifacts) {
       throw new Error(`--artifacts <directory> is required for phase "${args.phase}".`);
@@ -660,7 +670,14 @@ export async function buildCaptureWorkerPacket({
     "--profile", "bounded",
     "--phase", "all",
     ...(args.requireNovelty ? ["--require-novelty"] : []),
+    "--model", "gpt-5.6-luna",
+    "--reasoning", "low",
     "--operation-ceiling", args.operationCeiling,
+    ...(args.assignmentId ? ["--assignment-id", args.assignmentId] : []),
+    ...(args.assignmentDigest ? ["--assignment-digest", args.assignmentDigest] : []),
+    ...(args.endpoint || brief.portalUrl ? ["--endpoint", args.endpoint || brief.portalUrl] : []),
+    "--cdp-endpoint", args.cdpEndpoint,
+    ...(args.workerId ? ["--worker-id", args.workerId] : []),
     ...(args.operationApprovalDigest
       ? ["--operation-approval-digest", args.operationApprovalDigest]
       : []),
@@ -677,6 +694,8 @@ export async function buildCaptureWorkerPacket({
       specificationEdits: false,
     },
     bindings: {
+      assignmentDigest: args.assignmentDigest,
+      assignmentId: args.assignmentId,
       noveltyPlanSha256: noveltyPlan ? sha256(stableJson(noveltyPlan)) : null,
       policyFiles: policyBindings,
       recipe: brief.recipe,
@@ -697,6 +716,10 @@ export async function buildCaptureWorkerPacket({
       driverArgs,
       freshArtifactDirectoryRequired: true,
       liveLifecycleConcurrency: 1,
+      requiredRuntimeInputs: [
+        "fresh-artifact-directory",
+        ...(args.requireNovelty ? ["stable-derivative-cache-directory"] : []),
+      ],
       stableDerivativeCacheRequired: args.requireNovelty,
       verificationArgs,
     },
@@ -1307,6 +1330,7 @@ async function main() {
     ledger: ledgerAssignment
       ? {
           assignmentId: args.assignmentId,
+          assignmentDigest: args.assignmentDigest,
           attemptNumber: args.attemptNumber,
           ledgerPath: args.ledgerPath,
         }

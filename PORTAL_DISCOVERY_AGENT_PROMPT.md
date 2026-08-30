@@ -82,9 +82,10 @@ candidates.
 
 For routine capture, generate `--phase plan --worker-packet --json` and give the
 worker only that output after the operator has started and authenticated the
-dedicated CDP browser. The
-packet binds the checked-in recipe and these authoritative policy documents by
-SHA-256, carries the exact Luna-low role and safety ceiling, and names the
+dedicated CDP browser. The packet binds the checked-in recipe and these
+authoritative policy documents by
+SHA-256, binds the control-plane assignment ID and digest when supplied,
+carries the exact Luna-low role and safety ceiling, and names the
 conditions that require reading the full policy. Do not paste all three policy
 documents into every capture session. If the packet is absent, any binding
 digest differs from the checkout, or an escalation trigger fires, read this
