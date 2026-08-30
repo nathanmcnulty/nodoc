@@ -310,13 +310,15 @@ Use four bounded roles instead of asking every worker to understand the entire
 research process:
 
 1. **Coordinator**
-   - Runs `--phase plan --json`, assigns one portal and checked-in recipe, and
+   - Runs `--phase plan --worker-packet --json`, assigns one portal and
+     checked-in recipe, and
      records a unique artifact directory. This is `gpt-5.6-sol` at high
      reasoning and owns the final quality gate.
 2. **Capture worker**
-   - Follows `AGENT_DISCOVERY_RUNBOOK.md` exactly and owns one CDP endpoint,
-     page target, and artifact directory for the duration of the run. This is
-     exact `gpt-5.6-luna` at low reasoning.
+   - Consumes the plan output's digest-bound `workerPacket` and owns one CDP
+     endpoint, page target, and artifact directory for the duration of the run.
+     It loads the full bound policy files only on a packet-listed escalation or
+     digest mismatch. This is exact `gpt-5.6-luna` at low reasoning.
 3. **Analysis worker**
    - Runs the checked-in `analyze` phase over completed immutable capture
      artifacts and reports the generated handoff; it does not reinterpret raw

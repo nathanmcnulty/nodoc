@@ -1361,6 +1361,17 @@ test("Exchange selects the approved exact-route bootstrap shape frontier", async
   assert.equal(result.status, "planned");
   assert.equal(result.brief.recipe, "tools/capture-recipes/exchange-bootstrap-shape-novelty.json");
   assert.equal(result.noveltyPlan.targets.length, 5);
+  assert.equal(result.workerPacket.assignmentType, "capture");
+  assert.deepEqual(result.workerPacket.role, {
+    model: "gpt-5.6-luna",
+    reasoning: "low",
+  });
+  assert.equal(result.workerPacket.bindings.noveltyPlanSha256.length, 64);
+  assert.equal(result.workerPacket.bindings.recipeSha256.length, 64);
+  assert.equal(result.workerPacket.packetSha256.length, 64);
+  assert.ok(result.workerPacket.execution.driverArgs.includes("--require-novelty"));
+  assert.ok(result.workerPacket.execution.verificationArgs.includes("--worker-packet"));
+  assert.ok(result.workerPacket.execution.verificationArgs.includes("plan"));
   assert.deepEqual(result.actionBudget.categories, {
     expandedReplayActions: 0,
     mandatoryOrchestrationActions: 1,
@@ -1391,6 +1402,34 @@ test("M365 Apps Inventory plan accounts for its mandatory orchestration action",
   });
   assert.equal(result.actionBudget.countedActions, 22);
   assert.equal(result.actionBudget.maxActions, 22);
+  assert.equal(result.workerPacket.bindings.policyFiles.length, 3);
+  assert.ok(result.workerPacket.bindings.policyFiles.every((binding) => binding.sha256.length === 64));
+  assert.ok(result.workerPacket.measurements.byteReduction > 0.8);
+  assert.equal(result.workerPacket.measurements.tokenEstimate, "not-reported-use-bytes-for-comparison");
+  assert.equal(result.workerPacket.execution.stableDerivativeCacheRequired, false);
+  assert.equal(result.workerPacket.authorization.activeOperationCeiling, "observe-only");
+});
+
+test("portal driver can emit only the compact capture worker packet", async () => {
+  const command = [
+    path.join(repoRoot, "tools", "run-portal-discovery.mjs"),
+    "--portal",
+    "m365-apps-inventory",
+    "--phase",
+    "plan",
+    "--worker-packet",
+    "--json",
+  ];
+  const { stdout } = await execFileAsync(process.execPath, command, { cwd: repoRoot });
+  const repeated = await execFileAsync(process.execPath, command, { cwd: repoRoot });
+  const result = JSON.parse(stdout);
+
+  assert.equal(result.schemaVersion, "1.0");
+  assert.equal(result.assignmentType, "capture");
+  assert.equal(result.brief, undefined);
+  assert.equal(result.noveltyPlan, undefined);
+  assert.ok(Buffer.byteLength(stdout, "utf8") < result.measurements.sourcePolicyBytes / 5);
+  assert.equal(repeated.stdout, stdout);
 });
 
 test("M365 Apps recipes block exhausted frontiers before browser allocation", async () => {
