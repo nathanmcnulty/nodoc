@@ -2642,6 +2642,34 @@
     "headerProfiles": {},
     "operations": [
       {
+        "operationId": "GraphResearch.RetrieveProjectFlightingStatuses",
+        "summary": "Retrieve Intune project flighting statuses",
+        "method": "GET",
+        "path": "/deviceManagement/retrieveProjectFlightingStatuses(projectNames=null)",
+        "operationContext": {
+          "surface": "Intune tenant administration and reporting",
+          "workflows": [
+            "Load Intune administration, reporting, endpoint analytics, device, or application overview surfaces that evaluate management feature flights."
+          ],
+          "permissions": [
+            "Exact delegated permission requirements remain under research; preserve the portal Graph token audience and current Intune administrator role when troubleshooting."
+          ],
+          "troubleshooting": [
+            "Treat 401 and 403 responses as authentication, consent, role, or Conditional Access evidence rather than route removal.",
+            "Feature-project and flight identifiers are service-controlled and may change independently of this operation shape."
+          ],
+          "provenance": [
+            {
+              "source": "live-authenticated-capture",
+              "confidence": "high",
+              "notes": [
+                "Two complete capture runs produced byte-identical sanitized Graph telemetry and matching response-shape evidence."
+              ]
+            }
+          ]
+        }
+      },
+      {
         "operationId": "GraphResearch.EstimateDirectoryAccess",
         "summary": "Estimate directory resource-action access",
         "method": "POST",
