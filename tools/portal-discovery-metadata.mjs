@@ -68,7 +68,7 @@ export const crawlMetadataByTitle = {
   },
   Exchange: {
     portalUrl: "https://admin.exchange.microsoft.com",
-    authModel: "Portal session cookie + same-origin `x-requested-with`",
+    authModel: "Legacy portal cookie or current admin-shell bearer token",
     crawlPriority: "high",
     nextPass: "normalized-family-diff",
     reason: "Recorder support now covers the Exchange beta host; use capture-vs-spec diffs to target remaining unresolved families.",
@@ -287,10 +287,11 @@ export const coverageOverlayByTitle = {
   },
   Exchange: {
     seedUrls: [
-      "https://admin.exchange.microsoft.com",
+      "https://admin.cloud.microsoft/exchange#/",
     ],
     observedHosts: [
       "admin.exchange.microsoft.com",
+      "exchange.admin.cloud.microsoft",
     ],
     lastSuccessfulPassDepth: "deep-interaction",
   },

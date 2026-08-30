@@ -4,18 +4,24 @@
   "decision": "accept-bounded-frontier",
   "workerModel": "gpt-5.6-luna",
   "workerReasoning": "xhigh",
-  "approvedAt": "2026-08-27T19:54:06.7496529Z",
+  "approvedAt": "2026-08-30T08:10:37.0314443Z",
   "source": {
-    "head": "e72294037a85b98a963b1df94dc7ce3259af4d7d",
+    "head": "719a22668732f60be02da16dcf727c7a60027b5d",
     "artifactPath": "tools/frontier-approvals/exchange-beta-bootstrap-shapes-source.json",
-    "artifactSha256": "5faa6d7d393a6e19962fd8dde2f55b7a22354f7e7a42b4ca359200b00cda1056",
-    "frontierSetId": "offline-frontier-set-05bd97f3d1da84a3baaf91aa",
-    "frontierSetDigest": "05bd97f3d1da84a3baaf91aace0d89fd2c31144a0a5091cf19e03bcb572c048a"
+    "artifactSha256": "cb295fb55cb5c526476ff9c47d1488b3b6f5bbf5a78bc103f0691cf56209efdc",
+    "frontierSetId": "offline-frontier-set-73220d3b57818da51a22d203",
+    "frontierSetDigest": "73220d3b57818da51a22d203590c4d41b3717ad41340870fc8c5d09599da64d1"
+  },
+  "reviewEvidence": {
+    "artifactDirectory": "exchange-beta-compact-20260830T074806232Z",
+    "summarySha256": "e895b6e21409517c43beea77ae3e1ff135b8accfe7f1e83ca24da83c4ac04343",
+    "rawRequestsSha256": "9986ccf79c8b6a0f9a6d5979bc36f71a31b0dbed802eba561a5e39417d0c200d",
+    "reviewDisposition": "Fixed exchange.admin.cloud.microsoft proxy accepted; completed response-shape targets retired."
   },
   "state": "Exchange admin center landing bootstrap",
   "canonicalShellUrl": "https://admin.cloud.microsoft/exchange#/",
   "apiEvidenceScope": {
-    "hosts": ["admin.exchange.microsoft.com"],
+    "hosts": ["admin.exchange.microsoft.com", "exchange.admin.cloud.microsoft"],
     "pathPrefixes": ["/beta"]
   },
   "safeActions": [
@@ -25,36 +31,16 @@
   ],
   "acceptedItems": [
     {
-      "frontierId": "offline-frontier-e63a223bcde84008d0c4cf45",
-      "frontierDigest": "e63a223bcde84008d0c4cf4597fee23b4e2a8df113fae42a47b01f9327244775",
-      "canonicalKey": "admin.exchange.microsoft.com GET /beta/CmdletInfo"
-    },
-    {
-      "frontierId": "offline-frontier-e3c8e7bd837c8f32e8f9256d",
-      "frontierDigest": "e3c8e7bd837c8f32e8f9256d9e7628ed3db5602c63c14bc69bf4e0b7ac6f55ba",
-      "canonicalKey": "admin.exchange.microsoft.com GET /beta/Shell"
-    },
-    {
       "frontierId": "offline-frontier-0044742deabf0bfd8bc7723f",
       "frontierDigest": "0044742deabf0bfd8bc7723f8e568db740724d1bc07b2312a7ab144e72a4db1e",
       "canonicalKey": "admin.exchange.microsoft.com GET /beta/TimeZone/ExchangeAdminCenter.MyTimeZone"
-    },
-    {
-      "frontierId": "offline-frontier-bdbd262c08201d5464b19c95",
-      "frontierDigest": "bdbd262c08201d5464b19c95cf4fe208a4fbee62c78ba8868a34d0075ecb449d",
-      "canonicalKey": "admin.exchange.microsoft.com GET /beta/UserProfile"
-    },
-    {
-      "frontierId": "offline-frontier-69ff8a1aabac4eaa65b2a5dc",
-      "frontierDigest": "69ff8a1aabac4eaa65b2a5dcd7cbb0ec236581e0c19ac928ca8714e8489ee18b",
-      "canonicalKey": "admin.exchange.microsoft.com GET /beta/UserProfile/ExchangeAdminCenter.GetFeedbackAttribute()"
     }
   ],
-  "deferredItemCount": 5,
-  "blockedItemCount": 4,
+  "deferredItemCount": 222,
+  "blockedItemCount": 222,
   "constraints": [
     "GET-only passive capture",
-    "Portal shell navigation may use admin.cloud.microsoft but API evidence remains limited to admin.exchange.microsoft.com /beta",
+    "API evidence is limited to the exact admin.exchange.microsoft.com and exchange.admin.cloud.microsoft /beta hosts",
     "No forms, writes, forwarding, trace jobs, or exports",
     "Token response routes do not qualify as novelty",
     "Acceptance requires a non-empty response shape absent from the checked-in OpenAPI"

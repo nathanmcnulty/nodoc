@@ -7,7 +7,7 @@
   },
   "noveltyFrontier": {
     "approvalArtifact": "tools/frontier-approvals/exchange-beta-bootstrap-shapes.json",
-    "approvalDigest": "1d0b54fe22f225d2b6ae63b58648d748b9b7283f4a6a923b04553afcf5f1c6ef",
+    "approvalDigest": "1d7fa2f13ac9a32cc38a523be9d5b7750c431df47835d79e6406f76b993054a8",
     "baseline": "checked-in-spec-and-coverage-ledgers",
     "baselineSignals": {
       "queryMetadata": [],
@@ -16,71 +16,23 @@
       "responseShapes": [],
       "routes": []
     },
-    "reopenCondition": "Five safe Exchange landing/bootstrap GET operations have only opaque additionalProperties response schemas and no live-capture or operation-context ledger entry.",
+    "reopenCondition": "The confirmed current-user time-zone GET still has an opaque additionalProperties response schema and no current-host response-shape evidence.",
     "targets": [
-      {
-        "id": "cmdlet-info-response-shape",
-        "state": "Exchange admin center landing bootstrap",
-        "evidenceLevel": "confirmed",
-        "expectedHostFamilies": ["admin.exchange.microsoft.com"],
-        "expectedRoutes": ["/beta/CmdletInfo"],
-        "expectedInformationClasses": ["response-shape", "response-metadata"],
-        "actionIndexes": [0, 1, 2],
-        "safeAction": "Reload the authenticated Exchange landing page and passively capture bootstrap GET traffic.",
-        "acceptanceKey": "cmdlet-info-nonempty-undocumented-shape",
-        "rationale": "The operation is confirmed live but its checked-in response is an opaque object without properties or examples."
-      },
-      {
-        "id": "shell-response-shape",
-        "state": "Exchange admin center landing bootstrap",
-        "evidenceLevel": "confirmed",
-        "expectedHostFamilies": ["admin.exchange.microsoft.com"],
-        "expectedRoutes": ["/beta/Shell"],
-        "expectedInformationClasses": ["response-shape", "response-metadata"],
-        "actionIndexes": [0, 1, 2],
-        "safeAction": "Reload the authenticated Exchange landing page and passively capture bootstrap GET traffic.",
-        "acceptanceKey": "shell-nonempty-undocumented-shape",
-        "rationale": "The shell route is confirmed on landing and transitions, but its response shape has never been documented."
-      },
       {
         "id": "my-time-zone-response-shape",
         "state": "Exchange admin center landing bootstrap",
         "evidenceLevel": "confirmed",
-        "expectedHostFamilies": ["admin.exchange.microsoft.com"],
+        "expectedHostFamilies": ["admin.exchange.microsoft.com", "exchange.admin.cloud.microsoft"],
         "expectedRoutes": ["/beta/TimeZone/ExchangeAdminCenter.MyTimeZone"],
         "expectedInformationClasses": ["response-shape", "response-metadata"],
         "actionIndexes": [0, 1, 2],
         "safeAction": "Reload the authenticated Exchange landing page and passively capture bootstrap GET traffic.",
         "acceptanceKey": "my-time-zone-nonempty-undocumented-shape",
         "rationale": "The current-user time-zone payload is modeled only as an opaque object."
-      },
-      {
-        "id": "user-profile-response-shape",
-        "state": "Exchange admin center landing bootstrap",
-        "evidenceLevel": "confirmed",
-        "expectedHostFamilies": ["admin.exchange.microsoft.com"],
-        "expectedRoutes": ["/beta/UserProfile"],
-        "expectedInformationClasses": ["response-shape", "response-metadata"],
-        "actionIndexes": [0, 1, 2],
-        "safeAction": "Reload the authenticated Exchange landing page and passively capture bootstrap GET traffic.",
-        "acceptanceKey": "user-profile-nonempty-undocumented-shape",
-        "rationale": "The non-token profile response is modeled only as an opaque object; exact-route matching excludes token child routes."
-      },
-      {
-        "id": "feedback-attribute-response-shape",
-        "state": "Exchange admin center landing bootstrap",
-        "evidenceLevel": "confirmed",
-        "expectedHostFamilies": ["admin.exchange.microsoft.com"],
-        "expectedRoutes": ["/beta/UserProfile/ExchangeAdminCenter.GetFeedbackAttribute()"],
-        "expectedInformationClasses": ["response-shape", "response-metadata"],
-        "actionIndexes": [0, 1, 2],
-        "safeAction": "Reload the authenticated Exchange landing page and passively capture bootstrap GET traffic.",
-        "acceptanceKey": "feedback-attribute-nonempty-undocumented-shape",
-        "rationale": "The non-token feedback attribute response is opaque and can be isolated from token siblings by exact route."
       }
     ]
   },
-  "matchHosts": ["admin.exchange.microsoft.com"],
+  "matchHosts": ["admin.exchange.microsoft.com", "exchange.admin.cloud.microsoft"],
   "matchPathPrefixes": ["/beta"],
   "postActionSettleMs": 10000,
   "settleMs": 12000,

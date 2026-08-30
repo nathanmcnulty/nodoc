@@ -341,6 +341,7 @@ test("launch bounds a persistent zero-candidate handoff and retains its manifest
         if (!launched) throw new BrowserCdpOwnerError("cdp-unavailable", "not launched");
         return { browser: "Microsoft Edge/140.0", webSocketDebuggerUrl: "ws://127.0.0.1/devtools/browser/root" };
       },
+      probeTargets: async () => ({ pageTargetCount: 1 }),
       findOwnerProcesses: async () => [],
       randomUUID: () => ownerToken,
       delay: async () => new Promise((resolvePromise) => setTimeout(resolvePromise, 1)),

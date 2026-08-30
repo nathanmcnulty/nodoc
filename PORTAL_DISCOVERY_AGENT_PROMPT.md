@@ -254,7 +254,7 @@ not useful discovery.
 
 Compile the offline frontier before allocating a browser:
 
-  npm run generate:portal-frontier -- --spec <portal-spec-id> --recipe <recipe-path> [--prior-artifact <candidate-json>] [--candidate-handoff <handoff-json>]
+  npm run generate:portal-frontier -- --spec <portal-spec-id> --recipe <recipe-path> [--prior-artifact <candidate-json>] [--candidate-handoff <handoff-json>] [--approved-only]
 
 The compiler compares checked-in OpenAPI metadata, coverage gaps, and prior
 sanitized artifacts. Its candidates are review work, not generated UI actions.
@@ -350,6 +350,16 @@ browser allocation. Generate the reviewable digest with
 `npm run approve:portal-operation -- --recipe <recipe> --operation <id> [--var name=value]`,
 then pass `--operation-ceiling <mode> --operation-approval-digest <digest>` to
 `discover:portal`.
+
+Separate portal-generated writes observed during ordinary navigation from
+agent-invoked active operations. A passive POST, PATCH, PUT, or DELETE can still
+be a real side effect: preserve its request/response evidence, identify the
+triggering checkpoint, and correlate a before and after read when the portal
+already emits them. If no after read exists, report an unverified likely side
+effect and the exact affected setting family. Do not manufacture an active
+operation receipt for traffic the agent did not intentionally invoke, and do
+not claim `unresolved-change` in the active-operation state machine solely from
+passive traffic.
 Before an active click, require completed Fetch setup for every attached child,
 a refreshed inventory with exactly one eligible control, and a binding to that
 control's concrete target/session. Never fall through to another same-URL target

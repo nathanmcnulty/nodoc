@@ -2,7 +2,9 @@ openapi: 3.0.1
 info:
   title: Exchange
   description: |
-    The Exchange API is used by the Exchange admin center (`admin.exchange.microsoft.com`)
+    The Exchange API is used by the Exchange admin center. It has been observed directly on
+    `admin.exchange.microsoft.com` and through the fixed
+    `exchange.admin.cloud.microsoft` Exchange proxy
     for same-origin shell bootstrap, user preference storage, mailbox and recipient detail
     blades, role administration, mobile device management, organization sharing, mail flow
     administration, migration state, public folder inventory, and report widgets.
@@ -30,9 +32,11 @@ info:
       - Troubleshoot
       - User roles
 
-    Requests relied on the authenticated Exchange admin center browser session, same-origin
-    `fetch`/XHR traffic, and `x-requested-with: XMLHttpRequest`. The observed cookie set
-    included `.AspNetCore.Cookies` plus companion chunk cookies on `admin.exchange.microsoft.com`.
+    Requests to the legacy direct host relied on the authenticated Exchange admin center browser
+    session, same-origin `fetch`/XHR traffic, and `x-requested-with: XMLHttpRequest`. The observed
+    cookie set included `.AspNetCore.Cookies` plus companion chunk cookies. A 2026-08-30 capture
+    confirmed that the current portal can instead route `/beta` operations through the fixed
+    `exchange.admin.cloud.microsoft` service host with bearer authorization.
 
     Shared `admin.microsoft.com` support, SharePoint, and feedback calls were also present in the
     live session, but those were not modeled here because they are either generic Microsoft 365
@@ -50,8 +54,11 @@ info:
 servers:
   - url: https://admin.exchange.microsoft.com
     description: Exchange admin center same-origin beta API
+  - url: https://exchange.admin.cloud.microsoft
+    description: Current Microsoft 365 admin shell proxy for the Exchange beta API
 security:
   - PortalSession: []
+  - PortalBearer: []
 components:
   securitySchemes:
     PortalSession:
@@ -62,6 +69,10 @@ components:
         Authenticated Exchange admin center browser session cookie. Observed requests also
         relied on companion chunk cookies such as `.AspNetCore.CookiesC1` and
         `.AspNetCore.CookiesC2` together with same-origin `x-requested-with: XMLHttpRequest`.
+    PortalBearer:
+      type: http
+      scheme: bearer
+      description: Bearer token attached by the authenticated Microsoft 365 admin shell proxy.
   parameters:
     primaryKey:
       name: primaryKey
@@ -186,6 +197,178 @@ components:
   schemas:
     GenericObject:
       type: object
+      additionalProperties: true
+    ExchangeShellBootstrap:
+      type: object
+      description: Shell bootstrap envelope confirmed through the fixed Exchange proxy host.
+      properties:
+        '@odata.context':
+          type: string
+        NavBarDataJson:
+          type: string
+          description: JSON-encoded navigation data consumed by the Microsoft 365 shell.
+        WorkloadId:
+          type: string
+          format: uuid
+      additionalProperties: true
+    ExchangeCmdletInfo:
+      type: object
+      properties:
+        CmdletName:
+          type: string
+        Parameters:
+          type: array
+          items:
+            type: string
+      additionalProperties: true
+    ExchangeCmdletInfoCollectionResponse:
+      type: object
+      properties:
+        '@odata.context':
+          type: string
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExchangeCmdletInfo'
+      additionalProperties: true
+    ExchangeTenantDataBoundary:
+      type: object
+      properties:
+        '@odata.context':
+          type: string
+        TenantId:
+          type: string
+          format: uuid
+        DataBoundary:
+          type: string
+          example: none
+        CountryLetterCode:
+          type: string
+          example: US
+      additionalProperties: true
+    ExchangeTenantMonitoring:
+      type: object
+      properties:
+        '@odata.context':
+          type: string
+        Id:
+          type: string
+          example: TenantMonitoringService
+        IsLoggedInTenantAllowed:
+          type: boolean
+          example: false
+      additionalProperties: true
+    ExchangeFeedbackAttributes:
+      type: object
+      description: Sanitized shape of the feedback context; identity values are intentionally omitted from examples.
+      properties:
+        '@odata.context':
+          type: string
+        appId:
+          type: string
+        browser:
+          type: string
+        geoName:
+          type: string
+        locale:
+          type: string
+        partner:
+          type: string
+        puid:
+          type: string
+        tenantId:
+          type: string
+          format: uuid
+        userEmail:
+          type: string
+          format: email
+        workload:
+          type: string
+      additionalProperties: true
+    ExchangeUserProfile:
+      type: object
+      description: Current-user shell, tenant, and feature-flight context returned during Exchange startup.
+      properties:
+        '@odata.context':
+          type: string
+        AdminRoles:
+          type: string
+          description: Portal-encoded role information.
+        FlightSettings:
+          type: object
+          description: Feature-flight map containing boolean switches and service endpoint strings.
+          additionalProperties: true
+        GSuiteWebAppClientId:
+          type: string
+        Locale:
+          type: string
+        Mkt:
+          type: string
+        ObjectId:
+          type: string
+          format: uuid
+        Puid:
+          type: string
+        SystemInformation:
+          type: object
+          properties:
+            AppVersion:
+              type: string
+            AriaTenant:
+              type: string
+            AugloopWebSocketEndpoint:
+              type: string
+              format: uri
+            EcpEndpoint:
+              type: string
+              format: uri
+            IsOCDIFlow:
+              type: boolean
+            M365Endpoint:
+              type: string
+              format: uri
+            OCPSEndpoint:
+              type: string
+              format: uri
+            OcvAppId:
+              type: string
+            Region:
+              type: string
+          additionalProperties: true
+        TenantInformation:
+          type: object
+          properties:
+            AllowedTargetTenantIds:
+              type: array
+              items:
+                type: string
+              description: Tenant IDs or the wildcard value `*` allowed by the current context.
+            IsGdap:
+              type: boolean
+            PartnerTenantId:
+              type: string
+              format: uuid
+              nullable: true
+            TenantId:
+              type: string
+              format: uuid
+            TenantName:
+              type: string
+              nullable: true
+          additionalProperties: true
+        UserDetails:
+          type: object
+          properties:
+            DisplayName:
+              type: string
+            FirstName:
+              type: string
+            LastName:
+              type: string
+            UserPrincipalName:
+              type: string
+              format: email
+          additionalProperties: true
       additionalProperties: true
     ODataCollectionResponse:
       type: object
@@ -389,7 +572,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GenericObject'
+                $ref: '#/components/schemas/ExchangeShellBootstrap'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -409,7 +592,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GenericObject'
+                $ref: '#/components/schemas/ExchangeCmdletInfoCollectionResponse'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -429,7 +612,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GenericObject'
+                $ref: '#/components/schemas/ExchangeTenantDataBoundary'
               example:
                 '@odata.context': https://admin.exchange.microsoft.com/beta/$metadata#TenantDataBoundary/$entity
                 TenantId: 00000000-0000-0000-0000-000000000000
@@ -454,7 +637,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GenericObject'
+                $ref: '#/components/schemas/ExchangeTenantMonitoring'
               example:
                 '@odata.context': https://admin.exchange.microsoft.com/beta/$metadata#TenantMonitoring/$entity
                 Id: TenantMonitoringService
@@ -515,7 +698,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GenericObject'
+                $ref: '#/components/schemas/ExchangeUserProfile'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -553,7 +736,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GenericObject'
+                $ref: '#/components/schemas/ExchangeFeedbackAttributes'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -647,6 +830,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ODataStringResponse'
+        '204':
+          description: The requested preference item is not set for the current user.
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':

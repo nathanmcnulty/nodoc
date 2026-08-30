@@ -90,12 +90,21 @@ test("redacts passive transport URL values and credentials", () => {
 test("normalizes observed hosts to trusted templates or tenant-safe families", () => {
   const trustedTemplates = [
     "admin.cloud.microsoft",
+    "exchange.admin.cloud.microsoft",
     "{tenant}-admin.sharepoint.com",
   ];
 
   assert.equal(
     sanitizeObservedHostFamily("admin.cloud.microsoft", trustedTemplates),
     "admin.cloud.microsoft",
+  );
+  assert.equal(
+    sanitizeObservedHostFamily("exchange.admin.cloud.microsoft", trustedTemplates),
+    "exchange.admin.cloud.microsoft",
+  );
+  assert.equal(
+    sanitizeObservedHostFamily("exchange.admin.cloud.microsoft"),
+    "exchange.admin.cloud.microsoft",
   );
   assert.equal(
     sanitizeObservedHostFamily("contoso-private-admin.sharepoint.com", trustedTemplates),

@@ -9,6 +9,10 @@ function parseArgs(argv) {
   const args = {};
   for (let index = 0; index < argv.length; index += 1) {
     const value = argv[index];
+    if (value === "--approved-only") {
+      args.approved_only = true;
+      continue;
+    }
     if (["--spec", "--recipe", "--coverage", "--prior-artifact", "--candidate-handoff", "--output"].includes(value)) {
       args[value.slice(2).replaceAll("-", "_")] = argv[index + 1];
       index += 1;
@@ -39,7 +43,18 @@ const result = compileOfflineFrontier({
   candidateHandoff: await readJsonIf(args.candidate_handoff, {}),
 });
 validateOfflineFrontier(result);
-const text = `${JSON.stringify(result, null, 2)}\n`;
+const output = args.approved_only
+  ? {
+      schemaVersion: 1,
+      specId: result.specId,
+      projection: "approved-only",
+      frontierSetId: result.frontierSetId,
+      frontierSetDigest: result.frontierSetDigest,
+      measurements: result.measurements,
+      items: result.items.filter((item) => item.status === "approved"),
+    }
+  : result;
+const text = `${JSON.stringify(output, null, 2)}\n`;
 if (args.output) {
   const output = path.resolve(args.output);
   await mkdir(path.dirname(output), { recursive: true });

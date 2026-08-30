@@ -1044,6 +1044,13 @@ an abort or successful rollback. Any sent request with failed or unknown post-
 state or rollback stops all further mutation work and later live lifecycles;
 preserve evidence and give the operator an exact remediation record.
 
+Keep portal-generated writes from normal navigation in a separate passive-side-
+effect inventory. They can represent real state changes even though they do not
+have an approved-operation receipt. Correlate any naturally emitted pre-read,
+write response, and post-read; when the post-read is absent, retain and report
+the likely side effect without asserting restoration or active-operation
+`unresolved-change`.
+
 The local `mutation-events.json` contains the sanitized detailed receipt.
 `summary.json`, `candidate-handoff.json`, `discovery-run.json`, grouped handoff
 metadata, and the ledger carry tenant-safe IDs, digests, states, accounting,
