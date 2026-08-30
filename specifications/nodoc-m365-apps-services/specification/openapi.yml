@@ -25,7 +25,7 @@ info:
 
     Documentation and specifications have been provided on a best-efforts basis and
     may not be 100% accurate.
-  version: 0.1.0
+  version: 0.2.0
   contact:
     name: nodoc
     url: https://github.com/nathanmcnulty/nodoc
@@ -230,11 +230,28 @@ externalDocs:
 paths:
   /intents/v1.0/ComponentGroupIntentShard:
     post:
+      operationId: M365AppsServices.ResolveComponentGroupIntentShard
       tags: [Intents]
       summary: Resolve component group shard
       description: |
         Resolves or initializes the component-group shard used by the portal shell.
         Observed as a body-less POST returning a boolean.
+      x-nodoc-operation-context:
+        surface: Microsoft 365 Apps admin center shell bootstrap
+        workflows:
+          - Resolve the service shard used by the portal before loading feature-specific experiences.
+        permissions:
+          - Requires the browser-obtained Microsoft 365 Apps services bearer token used by config.office.com.
+        availability:
+          level: tenant-conditional
+          notes:
+            - The returned boolean reflects whether shard resolution is available for the current tenant context.
+        troubleshooting:
+          - Preserve x-api-name, correlation, client-session, and requested-with headers when reproducing portal behavior.
+          - Although the response is a boolean, the body-less POST may initialize service-side routing and should not be treated as a generic safe probe.
+        provenance:
+          - source: authenticated-portal-capture
+            confidence: high
       responses:
         '200':
           description: Shard resolution succeeded
@@ -245,12 +262,34 @@ paths:
               example: true
   /odbhealth/v1.0/synchealth/reports/count:
     post:
+      operationId: M365AppsServices.GetOneDriveSyncBucketCounts
       tags: [OneDrive Sync]
       summary: Get OneDrive Sync bucket counts
       description: |
         Returns counts for multiple OneDrive Sync report filters in a single request.
         The request body is an array of filter expressions, and the response is keyed
         by filter index.
+      x-nodoc-operation-context:
+        surface: Microsoft 365 Apps admin center OneDrive Sync health
+        workflows:
+          - Populate OneDrive Sync health summary counters for multiple filters in one read-like POST.
+        permissions:
+          - Requires the portal bearer token and tenant access to OneDrive Sync health reporting.
+        requestShapes:
+          - name: ordered-filter-array
+            contentType: application/json
+            bodyKind: array
+            notes: Response keys correspond to the zero-based position of each filter expression.
+        availability:
+          level: feature-gated
+          notes:
+            - Data is available only when OneDrive Sync health reporting is enabled and populated for the tenant.
+        troubleshooting:
+          - An empty result can reflect an unpopulated reporting surface rather than route removal.
+          - Keep the filter array order stable when correlating response keys to requested counters.
+        provenance:
+          - source: authenticated-portal-capture
+            confidence: high
       requestBody:
         required: true
         content:
@@ -266,9 +305,27 @@ paths:
                 $ref: '#/components/schemas/IndexedCountMap'
   /odbhealth/v1.0/synchealth/reports/versioncount:
     get:
+      operationId: M365AppsServices.GetOneDriveSyncVersionDistribution
       tags: [OneDrive Sync]
       summary: Get OneDrive Sync version distribution
       description: Returns OneDrive Sync client version distribution grouped by update ring and platform type.
+      x-nodoc-operation-context:
+        surface: Microsoft 365 Apps admin center OneDrive Sync health
+        workflows:
+          - Build the OneDrive client-version and update-ring distribution shown on the Sync health page.
+        permissions:
+          - Requires the portal bearer token and tenant access to OneDrive Sync health reporting.
+        pagination:
+          style: none
+        availability:
+          level: feature-gated
+          notes:
+            - The array may be empty when no eligible devices have reported sync-health telemetry.
+        troubleshooting:
+          - Treat an empty 200 response separately from authentication failures and service errors.
+        provenance:
+          - source: authenticated-portal-capture
+            confidence: high
       responses:
         '200':
           description: Version distribution
@@ -280,9 +337,25 @@ paths:
                   $ref: '#/components/schemas/OneDriveVersionCount'
   /onboarding/odata/v1.0/EligibilityRecord:
     get:
+      operationId: M365AppsServices.GetEligibilityRecord
       tags: [Onboarding]
       summary: Get onboarding eligibility record
       description: Returns the tenant eligibility record that gates M365 Apps admin center features.
+      x-nodoc-operation-context:
+        surface: Microsoft 365 Apps admin center onboarding
+        workflows:
+          - Determine which shared-service experiences the current tenant is eligible to use.
+        permissions:
+          - Requires the browser-obtained Microsoft 365 Apps services bearer token.
+        pagination:
+          style: none
+        availability:
+          level: tenant-conditional
+        troubleshooting:
+          - Use the eligibilities array as a capability signal; do not infer route removal when a feature is absent.
+        provenance:
+          - source: authenticated-portal-capture
+            confidence: high
       responses:
         '200':
           description: Eligibility record
@@ -292,6 +365,7 @@ paths:
                 $ref: '#/components/schemas/EligibilityRecord'
   /onboarding/odata/v1.0/Agreementdata:
     get:
+      operationId: M365AppsServices.ListAgreementData
       tags: [Onboarding]
       summary: List feature-ring agreement records
       description: |
@@ -299,6 +373,33 @@ paths:
         experiences. The observed live request filtered the collection with
         `$filter=FeatureRing eq 'Preview'` and returned an empty `value` array
         for the current tenant.
+      x-nodoc-operation-context:
+        surface: Microsoft 365 Apps admin center onboarding and preview agreements
+        workflows:
+          - Check whether the tenant has agreement records for a requested feature ring.
+        permissions:
+          - Requires the browser-obtained Microsoft 365 Apps services bearer token.
+        variants:
+          - selector: $filter
+            location: query
+            knownValues:
+              - FeatureRing eq 'Preview'
+            notes: The observed preview query returned a successful empty collection in the captured tenant.
+        pagination:
+          style: odata
+          requestParameters:
+            - $filter
+          responseFields:
+            - value
+          notes:
+            - No continuation field was observed; preserve any future OData next-link evidence if the collection grows.
+        availability:
+          level: tenant-conditional
+        troubleshooting:
+          - A 200 response with an empty value array is valid tenant state, not evidence that the endpoint was removed.
+        provenance:
+          - source: authenticated-portal-capture
+            confidence: high
       parameters:
         - $ref: '#/components/parameters/featureFilter'
       responses:
@@ -310,9 +411,29 @@ paths:
                 $ref: '#/components/schemas/AgreementResponse'
   /onboarding/odata/v1.0/FeatureData:
     get:
+      operationId: M365AppsServices.ListFeatureDefinitions
       tags: [Onboarding]
       summary: List feature definitions
       description: Returns feature metadata, ring assignments, and eligibility requirements used by the portal.
+      x-nodoc-operation-context:
+        surface: Microsoft 365 Apps admin center onboarding
+        workflows:
+          - Discover service feature definitions, rings, agreements, and eligibility requirements before rendering setup choices.
+        permissions:
+          - Requires the browser-obtained Microsoft 365 Apps services bearer token.
+        pagination:
+          style: odata
+          responseFields:
+            - value
+          notes:
+            - No continuation field was observed in the captured response.
+        availability:
+          level: tenant-conditional
+        troubleshooting:
+          - Feature and ring names are service-controlled and may change independently of the response envelope.
+        provenance:
+          - source: authenticated-portal-capture
+            confidence: high
       responses:
         '200':
           description: Feature definitions
@@ -322,9 +443,29 @@ paths:
                 $ref: '#/components/schemas/FeatureDataResponse'
   /onboarding/odata/v1.0/FeatureProvisiondata:
     get:
+      operationId: M365AppsServices.GetFeatureProvisioningState
       tags: [Onboarding]
       summary: Query feature provisioning state
       description: Returns provisioning state for one or more features, typically scoped with an OData filter.
+      x-nodoc-operation-context:
+        surface: Microsoft 365 Apps admin center setup and provisioning
+        workflows:
+          - Read the current provisioning and migration state for one or more shared-service features.
+        permissions:
+          - Requires the browser-obtained Microsoft 365 Apps services bearer token.
+        pagination:
+          style: odata
+          requestParameters:
+            - $filter
+          responseFields:
+            - value
+        availability:
+          level: feature-gated
+        troubleshooting:
+          - Distinguish an empty value array from a provisioning failure or authorization error.
+        provenance:
+          - source: authenticated-portal-capture
+            confidence: high
       parameters:
         - $ref: '#/components/parameters/featureFilter'
       responses:
@@ -335,11 +476,26 @@ paths:
               schema:
                 $ref: '#/components/schemas/FeatureProvisionResponse'
     post:
+      operationId: M365AppsServices.ProvisionFeature
       tags: [Onboarding]
       summary: Provision or confirm a feature state
       description: |
         Observed as a body-less POST that returns an OData boolean wrapper.
         Treat this as a potentially state-changing provisioning call.
+      x-nodoc-operation-context:
+        surface: Microsoft 365 Apps admin center setup and provisioning
+        workflows:
+          - Provision or confirm a tenant feature selected through the portal setup experience.
+        permissions:
+          - Requires a portal bearer token and sufficient tenant administration permission to provision the selected feature.
+        availability:
+          level: feature-gated
+        troubleshooting:
+          - Do not invoke this operation for discovery unless an exact approved reversible-operation plan exists; a body-less request is still potentially state-changing.
+          - Read the GET provisioning state before and after any authorized invocation and preserve the exact feature filter and response evidence.
+        provenance:
+          - source: authenticated-portal-capture
+            confidence: high
       responses:
         '200':
           description: Provisioning completed or already satisfied
@@ -349,9 +505,27 @@ paths:
                 $ref: '#/components/schemas/ODataBooleanResponse'
   /releases/v1.0/OfficeReleases:
     get:
+      operationId: M365AppsServices.GetOfficeReleaseCatalog
       tags: [Release Catalog]
       summary: Get Office release catalog
       description: Returns the release catalog used by Device Configuration and release-selection experiences.
+      x-nodoc-operation-context:
+        surface: Microsoft 365 Apps admin center Device Configuration
+        workflows:
+          - Populate Office release-channel and build selectors with availability and end-of-support dates.
+        permissions:
+          - Requires the browser-obtained Microsoft 365 Apps services bearer token.
+        pagination:
+          style: none
+        availability:
+          level: global
+          notes:
+            - The catalog is service-controlled even though access still requires the portal authentication context.
+        troubleshooting:
+          - Channel aliases, versions, and CDN URLs change over time; consume them as catalog data rather than hard-coded constants.
+        provenance:
+          - source: authenticated-portal-capture
+            confidence: high
       responses:
         '200':
           description: Release catalog by servicing channel

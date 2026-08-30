@@ -60,6 +60,24 @@ test("Entra IAM has a stable unique operation ID for every operation", async () 
   });
 });
 
+test("M365 Apps Services has agent-ready context and stable operation IDs", async () => {
+  const specification = await loadBundledSpecification(
+    fileURLToPath(new URL(
+      "../../specifications/nodoc-m365-apps-services/specification/openapi.yml",
+      import.meta.url,
+    )),
+  );
+
+  assert.deepEqual(validateOperationIds(specification, "M365 Apps Services"), {
+    operationCount: 9,
+    operationIds: 9,
+  });
+  assert.equal(
+    getNormalizedOperationContextRecords(specification, "M365 Apps Services").operations.length,
+    9,
+  );
+});
+
 test("M365 Admin keeps SetTheme on its canonical company theme path", async () => {
   const specification = await loadBundledSpecification(
     fileURLToPath(new URL(
