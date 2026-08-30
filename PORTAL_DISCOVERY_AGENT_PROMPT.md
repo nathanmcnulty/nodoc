@@ -29,6 +29,10 @@ Every directory under `specifications` has a durable queued/attempted/reviewed
 state. Missing directories are blockers and cannot silently disappear from the
 queue.
 
+Portfolio status is newest-assignment-first and keeps assignment state separate
+from capture quality. Never treat a terminal `completed` assignment as accepted
+evidence unless `captureComplete` and the required immutable artifacts also pass.
+
 Every engagement has three co-equal outcomes:
 
 1. find operations not represented by any checked-in specification, across all
