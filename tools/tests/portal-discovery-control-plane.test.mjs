@@ -6,6 +6,7 @@ import {
   compileOrchestrationPlan,
   validateOrchestrationPlan,
   validateWorkerResult,
+  workerResultSubjectDigest,
   projectPortfolioStatus,
 } from "../portal-discovery-control-plane.mjs";
 
@@ -16,6 +17,13 @@ test("materialized portfolio and plan are stable and serialize shared capture le
   assert.equal(plan.mode, "report-only");
   assert.equal(plan.completion.terminal, "plan-ready");
   assert.equal(plan.totals.serializedCaptureCount <= plan.totals.captureCount, true);
+  assert.deepEqual(plan.modelPolicy.capture, { model: "gpt-5.6-luna", reasoning: "low" });
+  assert.deepEqual(plan.modelPolicy.orchestrator, { model: "gpt-5.6-sol", reasoning: "high" });
+  assert.equal(plan.assignments.find((entry) => entry.type === "review")?.reasoning, "xhigh");
+  assert.equal(plan.assignments.find((entry) => entry.type === "review")?.qualityGate.model, "gpt-5.6-sol");
+  const maxReviewPlan = compileOrchestrationPlan(manifest, { budgets: { maxCaptures: 1 }, options: { offlineReviewReasoning: "max" } });
+  assert.equal(maxReviewPlan.assignments.find((entry) => entry.type === "review")?.reasoning, "max");
+  assert.throws(() => compileOrchestrationPlan(manifest, { options: { offlineReviewReasoning: "high" } }), /xhigh or max/);
   validateOrchestrationPlan(plan);
 });
 
@@ -30,10 +38,22 @@ test("filtered Intune Autopatch controller blocks its satisfied deep recipe befo
   const manifest = await buildPortfolioManifest();
   const intune = manifest.portals.find((portal) => portal.specId === "intune-autopatch");
   assert.equal(intune?.recipe, "tools/capture-recipes/intune-autopatch-deep.json");
+  assert.equal(intune?.novelty.evidenceDisposition, "capture-freshness-gap");
 
   const plan = compileOrchestrationPlan({ ...manifest, portals: [intune] }, { budgets: { maxCaptures: 1 } });
   assert.equal(plan.assignments.some((entry) => entry.type === "capture"), false);
   assert.ok(plan.assignments.find((entry) => entry.type === "review")?.blockers.includes("novelty-satisfied"));
+  assert.ok(plan.assignments.find((entry) => entry.type === "review")?.blockers.includes("capture-freshness-gap"));
+});
+
+test("Entra PIM exposes missing immutable state provenance as its prebrowser blocker", async () => {
+  const manifest = await buildPortfolioManifest();
+  const pim = manifest.portals.find((portal) => portal.specId === "entra-pim");
+  assert.equal(pim?.novelty.evidenceDisposition, "missing-immutable-state-provenance");
+
+  const plan = compileOrchestrationPlan({ ...manifest, portals: [pim] }, { budgets: { maxCaptures: 1 } });
+  assert.equal(plan.assignments.some((entry) => entry.type === "capture"), false);
+  assert.ok(plan.assignments.find((entry) => entry.type === "review")?.blockers.includes("missing-immutable-state-provenance"));
 });
 
 test("filtered M365 Apps Services controller blocks its satisfied deep recipe before capture", async () => {
@@ -95,9 +115,27 @@ test("worker result preserves exact accounting and rejects cheap capability viol
   const manifest = await buildPortfolioManifest();
   const plan = compileOrchestrationPlan({ ...manifest, portals: [{ ...manifest.portals[0], novelty: { approvalDigest: "f".repeat(64), reopenCondition: "Exact new read-only state.", status: "active" }, riskTier: "low", outstandingGapClasses: [] }] });
   const assignment = plan.assignments.find((entry) => entry.type === "review" && entry.route === "cheap");
-  const result = { schemaVersion: 1, assignmentId: assignment.assignmentId, assignmentDigest: assignment.assignmentDigest, assignmentType: "review", status: "completed", model: "gpt-5.6-luna", decision: "no-action", reasonCodes: ["routine-read-only"], blockers: [], metrics: { complete: true }, recommendedNextAction: "none", lessons: ["reviewed immutable evidence"], lifecycleAccounting: { terminalOwnerShutdown: true, artifactLedgerAccounting: true }, processImprovementDisposition: "none", candidateAccounting: { accepted: [], rejected: [], escalated: [], blocked: [] }, evidenceAccounting: { accepted: [], rejected: [], escalated: [], blocked: [] } };
+  const workerResult = { schemaVersion: 1, assignmentId: assignment.assignmentId, assignmentDigest: assignment.assignmentDigest, assignmentType: "review", status: "completed", model: "gpt-5.6-luna", reasoning: "xhigh", decision: "no-action", reasonCodes: ["routine-read-only"], blockers: [], metrics: { complete: true }, recommendedNextAction: "none", lessons: ["reviewed immutable evidence"], lifecycleAccounting: { terminalOwnerShutdown: true, artifactLedgerAccounting: true }, processImprovementDisposition: "none", candidateAccounting: { accepted: [], rejected: [], escalated: [], blocked: [] }, evidenceAccounting: { accepted: [], rejected: [], escalated: [], blocked: [] } };
+  const result = {
+    ...workerResult,
+    qualityGate: {
+      schemaVersion: 1,
+      assignmentId: assignment.assignmentId,
+      assignmentDigest: assignment.assignmentDigest,
+      decision: "accept",
+      model: "gpt-5.6-sol",
+      reasoning: "high",
+      reviewedAt: "2026-08-27T00:00:00.000Z",
+      workerResultDigest: workerResultSubjectDigest(workerResult),
+    },
+  };
   assert.equal(validateWorkerResult(result, plan).sanitized, true);
-  assert.throws(() => validateWorkerResult({ ...result, model: "gpt-5.3-codex-spark" }, plan), /exact runtime model/);
+  assert.throws(() => validateWorkerResult({ ...result, model: "gpt-5.6-terra" }, plan), /exact runtime model/);
+  assert.throws(() => validateWorkerResult({ ...result, reasoning: "high" }, plan), /exact reasoning/);
   assert.throws(() => validateWorkerResult({ ...result, reasonCodes: ["state-changing"] }, plan), /capability violation/);
+  assert.throws(() => validateWorkerResult({ ...result, qualityGate: undefined }, plan), /requires a Sol orchestrator quality gate/);
+  assert.throws(() => validateWorkerResult({ ...result, qualityGate: { ...result.qualityGate, model: "gpt-5.6-luna" } }, plan), /exact runtime model gpt-5.6-sol/);
+  assert.throws(() => validateWorkerResult({ ...result, qualityGate: { ...result.qualityGate, decision: "reject" } }, plan), /did not accept/);
+  assert.throws(() => validateWorkerResult({ ...result, qualityGate: { ...result.qualityGate, workerResultDigest: "0".repeat(64) } }, plan), /digest mismatch/);
   assert.deepEqual(projectPortfolioStatus(manifest).portals.length, manifest.portals.length);
 });

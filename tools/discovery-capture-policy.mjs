@@ -123,6 +123,10 @@ function controlMatchesAction(control, action, snapshot) {
     control?.automationId,
   ].map((item) => normalizeText(item).toLowerCase()).filter(Boolean);
 
+  if (action?.type === "click-automation-id") {
+    return normalizeText(control?.automationId) === value;
+  }
+
   if (action?.type === "click-href") {
     if (normalizeText(control?.href) === value) {
       return true;
@@ -169,6 +173,7 @@ export function deriveActionEligibility(action, snapshots) {
       candidateCount: matchingControls.length,
       controlCount: controls.length,
       sessionId: snapshot.sessionId ?? null,
+      targetId: snapshot.targetId ?? null,
       targetType: snapshot.targetType ?? "page",
       targetUrl: snapshot.targetUrl ?? snapshot.url ?? null,
     });

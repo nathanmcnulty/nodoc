@@ -12,13 +12,21 @@ import {
 } from "../spec-quality-lib.mjs";
 import { claimAssignment, enqueueAssignment, updateAttempt } from "../portal-discovery-ledger.mjs";
 import { prepareLedgerAttempt } from "../portal-discovery-dispatch.mjs";
+import { frontierReadinessSupervisionTimeout } from "../run-portal-discovery.mjs";
 import {
   buildPartitionedCandidateHandoff,
+  validatePartitionFiles,
   validatePartitionedCandidateHandoff,
+  writePartitionedCandidateHandoff,
 } from "../discovery-candidate-handoff.mjs";
 
 const execFileAsync = promisify(execFile);
 const repoRoot = path.resolve(import.meta.dirname, "..", "..");
+
+test("frontier readiness supervision honors the larger pipeline timeout", () => {
+  assert.equal(frontierReadinessSupervisionTimeout(20000, 120000), 120000);
+  assert.equal(frontierReadinessSupervisionTimeout(120000, 120000), 150000);
+});
 
 test("partitioned handoff preserves identities, isolates adjacent evidence, and is deterministic", () => {
   const handoff = {
@@ -26,6 +34,19 @@ test("partitioned handoff preserves identities, isolates adjacent evidence, and 
     spec: { id: "alpha", title: "Alpha" },
     interactionHealth: null,
     interactionHealthStatus: { available: false, reason: "canonical-health-unavailable" },
+    activeOperations: {
+      schemaVersion: 1,
+      attemptCount: 0,
+      byState: {
+        "aborted-before-send": 0,
+        "sent-no-confirmed-change": 0,
+        "committed-and-restored": 0,
+        "unresolved-change": 0,
+      },
+      safeToContinue: true,
+      unresolvedOperationIds: [],
+      receipts: [],
+    },
     saturation: null,
     recovery: { captureStatus: "interrupted" },
     recommendedNextAction: { code: "complete-or-retry-capture" },
@@ -47,8 +68,61 @@ test("partitioned handoff preserves identities, isolates adjacent evidence, and 
   assert.ok(first.partitions.some(({ reviewClass, destination }) => reviewClass === "adjacent-confirmed-read" && destination.specId === "unassigned"));
   assert.equal(first.manifest.ownershipReview.suggestedCount, 1);
   assert.equal(first.partitions.find(({ reviewClass }) => reviewClass === "adjacent-confirmed-read").candidates[0].ownershipDisposition.suggestedSpecId, "beta");
-  assert.throws(() => validatePartitionedCandidateHandoff(handoff, { partitions: first.partitions.slice(1) }), /duplicated or dropped/);
+  assert.equal(first.manifest.partitions.every(({ recommendedModel }) => recommendedModel === "gpt-5.6-luna"), true);
+  assert.equal(first.manifest.partitions.every(({ recommendedReasoning }) => recommendedReasoning === "xhigh"), true);
+  assert.equal(validatePartitionedCandidateHandoff(handoff, first).candidateCount, 4);
+  assert.throws(() => validatePartitionedCandidateHandoff(handoff, { partitions: first.partitions.slice(1) }), /shared metadata|duplicated or dropped/u);
+  const altered = structuredClone(first);
+  altered.manifest.sharedMetadata.activeOperations.safeToContinue = false;
+  assert.throws(() => validatePartitionedCandidateHandoff(handoff, altered), /shared metadata/u);
   assert.match(JSON.stringify(first), /Items/);
+});
+
+test("partition files hash and validate shared active-operation metadata", async (t) => {
+  const outputDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-partitions-"));
+  t.after(() => rm(outputDir, { recursive: true, force: true }));
+  const activeOperations = {
+    schemaVersion: 1,
+    attemptCount: 0,
+    byState: {
+      "aborted-before-send": 0,
+      "sent-no-confirmed-change": 0,
+      "committed-and-restored": 0,
+      "unresolved-change": 0,
+    },
+    safeToContinue: true,
+    unresolvedOperationIds: [],
+    receipts: [],
+  };
+  const handoff = {
+    schemaVersion: 2,
+    spec: { id: "alpha", title: "Alpha" },
+    interactionHealth: null,
+    interactionHealthStatus: null,
+    activeOperations,
+    saturation: null,
+    recovery: { captureStatus: "complete" },
+    recommendedNextAction: { code: "none" },
+    confirmedReadCandidates: [],
+    confirmedSafetyReviewCandidates: [],
+    successfullyProbedCandidates: [],
+    bundleOnlyCandidates: [],
+    suppressedCandidates: [],
+    adjacentConfirmedReadCandidates: [],
+    adjacentConfirmedSafetyReviewCandidates: [],
+    adjacentSuccessfullyProbedCandidates: [],
+    adjacentBundleOnlyCandidates: [],
+  };
+  await writePartitionedCandidateHandoff(handoff, outputDir);
+  assert.deepEqual(await validatePartitionFiles(outputDir), {
+    candidateCount: 0,
+    evidenceFamilyCount: 0,
+  });
+  const sharedPath = path.join(outputDir, "shared-metadata.json");
+  const shared = JSON.parse(await readFile(sharedPath, "utf8"));
+  shared.activeOperations.safeToContinue = false;
+  await writeJson(sharedPath, shared);
+  await assert.rejects(() => validatePartitionFiles(outputDir), /digest mismatch/u);
 });
 
 async function writeJson(filePath, value) {
@@ -260,7 +334,7 @@ test("seeded retry resumes the exact terminal incomplete ledger attempt", async 
     ledgerPath,
     profile: "bounded",
     workerId: "worker",
-    model: "gpt-5.3-codex-spark",
+    model: "gpt-5.6-luna",
     reasoning: "low",
     priority: "normal",
     artifacts: seedDir,

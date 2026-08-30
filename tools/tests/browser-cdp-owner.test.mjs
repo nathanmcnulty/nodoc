@@ -154,6 +154,7 @@ test("launches a new owner with an unverified preflight contract", async () => {
         if (!launched) throw new BrowserCdpOwnerError("cdp-unavailable", "not launched");
         return { browser: "Microsoft Edge/140.0", webSocketDebuggerUrl: "ws://127.0.0.1/devtools/browser/root" };
       },
+      probeTargets: async () => ({ pageTargetCount: 1 }),
       findOwnerProcesses: async () => [{
         pid: 6161,
         executablePath: binaryPath,
@@ -193,6 +194,35 @@ test("accepts Edge-quoted dedicated profile arguments without weakening exact id
   }), profilePath), false);
 });
 
+test("new owner launch fails closed when CDP has no page target", async () => {
+  const ownerRoot = await mkdtemp(join(tmpdir(), "nodoc-cdp-owner-targetless-"));
+  const ownerProfile = join(ownerRoot, "profiles", "m365-admin");
+  let launched = false;
+  try {
+    await assert.rejects(startBrowserOwner(options({ ownerRoot, launchTimeoutMs: 5 }), {
+      readManifest: async () => null,
+      isPortAvailable: async () => true,
+      resolveBinary: async () => ({ product: "Edge", path: binaryPath }),
+      spawnBrowser: async () => { launched = true; return { pid: 5151 }; },
+      writeManifest: async () => {},
+      probeVersion: async () => {
+        if (!launched) throw new BrowserCdpOwnerError("cdp-unavailable", "not launched");
+        return { browser: "Microsoft Edge/140.0", webSocketDebuggerUrl: "ws://127.0.0.1/devtools/browser/root" };
+      },
+      probeTargets: async () => { throw new BrowserCdpOwnerError("target-unavailable", "CDP owner launched without a page target."); },
+      findOwnerProcesses: async () => [{
+        pid: 6161,
+        executablePath: binaryPath,
+        commandLine: `"${binaryPath}" --remote-debugging-port=9222 --user-data-dir="${ownerProfile}" --nodoc-cdp-owner=${ownerToken}`,
+      }],
+      randomUUID: () => ownerToken,
+      delay: async () => new Promise((resolvePromise) => setTimeout(resolvePromise, 1)),
+    }), (error) => error.code === "launch-validation-failed" && /page target/u.test(error.message));
+  } finally {
+    await rm(ownerRoot, { force: true, recursive: true });
+  }
+});
+
 test("treats an exact or suspicious profile reference as in-use", () => {
   assert.equal(isBrowserProcessUsingProfile({
     commandLine: `"${binaryPath}" --user-data-dir="${profilePath}"`,
@@ -224,6 +254,7 @@ test("launch retries a transient zero-candidate handoff before binding the exact
         if (!launched) throw new BrowserCdpOwnerError("cdp-unavailable", "not launched");
         return { browser: "Microsoft Edge/140.0", webSocketDebuggerUrl: "ws://127.0.0.1/devtools/browser/root" };
       },
+      probeTargets: async () => ({ pageTargetCount: 1 }),
       findOwnerProcesses: async () => {
         searches += 1;
         return searches === 1 ? [] : [{
@@ -401,6 +432,7 @@ test("constructs a loopback fixed-port dedicated-profile launch command", () => 
     `--user-data-dir=${profilePath}`,
     "--no-first-run",
     "--no-default-browser-check",
+    "--new-window",
     `--nodoc-cdp-owner=${ownerToken}`,
     "https://admin.cloud.microsoft/",
   ]);

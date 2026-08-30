@@ -3,6 +3,8 @@ import { sanitizeDiscoverySaturation } from "./discovery-saturation.mjs";
 import { createHash } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { portalDiscoveryModelPolicy } from "./portal-discovery-model-policy.mjs";
+import { validateOperationSummary } from "./portal-discovery-operation-safety.mjs";
 
 const supportedEvidence = new Set([
   "bundle-discovered",
@@ -95,13 +97,11 @@ function partitionDestination(candidate, specId, adjacent = false) {
   return { destinationSpec, hostFamily };
 }
 
-function recommendedPolicy(reviewClass) {
-  if (reviewClass === "confirmed-read") return { model: "gpt-5.3-codex-spark", reasoning: "low" };
-  if (reviewClass === "safety-review" || reviewClass.includes("safety")) {
-    return { model: "gpt-5.6-luna", reasoning: "high" };
-  }
-  if (reviewClass.includes("adjacent")) return { model: "gpt-5.6-luna", reasoning: "medium" };
-  return { model: "gpt-5.3-codex-spark", reasoning: "low" };
+function recommendedPolicy() {
+  return {
+    model: portalDiscoveryModelPolicy.offlineReview.model,
+    reasoning: portalDiscoveryModelPolicy.offlineReview.reasoning,
+  };
 }
 
 function compactCandidate(candidate, reviewClass) {
@@ -173,11 +173,14 @@ export function buildPartitionedCandidateHandoff(handoff, { outputDir = null } =
     spec: handoff.spec,
     interactionHealth: handoff.interactionHealth,
     interactionHealthStatus: handoff.interactionHealthStatus,
+    activeOperations: handoff.activeOperations,
     saturation: handoff.saturation,
     recovery: handoff.recovery,
+    graphTelemetry: handoff.graphTelemetry,
     recommendedNextAction: handoff.recommendedNextAction,
   };
   const sharedMetadataId = `shared-${digest(shared).slice(0, 24)}`;
+  const sharedMetadataSerialized = stableJson(shared);
   const partitions = Array.from(groups.values()).sort((a, b) =>
     `${a.destinationSpec}|${a.hostFamily}|${a.reviewClass}`.localeCompare(
       `${b.destinationSpec}|${b.hostFamily}|${b.reviewClass}`,
@@ -192,6 +195,7 @@ export function buildPartitionedCandidateHandoff(handoff, { outputDir = null } =
       candidates: group.candidates,
     };
     const serialized = stableJson(payload);
+    const recommended = recommendedPolicy();
     return {
       partitionId: `partition-${digest({ destination: payload.destination, reviewClass: payload.reviewClass }).slice(0, 24)}`,
       payload,
@@ -205,8 +209,8 @@ export function buildPartitionedCandidateHandoff(handoff, { outputDir = null } =
         evidenceFamilyCount: new Set(group.candidates.map(({ evidenceFamilyId }) => evidenceFamilyId)).size,
         serializedByteCount: Buffer.byteLength(serialized, "utf8"),
         stableDigest: createHash("sha256").update(serialized, "utf8").digest("hex"),
-        recommendedModel: recommendedPolicy(group.reviewClass).model,
-        recommendedReasoning: recommendedPolicy(group.reviewClass).reasoning,
+        recommendedModel: recommended.model,
+        recommendedReasoning: recommended.reasoning,
         blockers: [
           ...(group.reviewClass.includes("adjacent") ? ["explicit-spec-and-host-assignment-required"] : []),
           ...(handoff.recovery?.captureComplete === false ? ["capture-incomplete"] : []),
@@ -218,6 +222,8 @@ export function buildPartitionedCandidateHandoff(handoff, { outputDir = null } =
   const manifest = {
     schemaVersion: partitionSchemaVersion,
     sharedMetadataId,
+    sharedMetadataDigest: createHash("sha256").update(sharedMetadataSerialized, "utf8").digest("hex"),
+    sharedMetadataByteCount: Buffer.byteLength(sharedMetadataSerialized, "utf8"),
     sharedMetadata: shared,
     monolithicSchemaVersion: handoff.schemaVersion,
     partitions: partitions.map(({ manifest: entry }) => entry),
@@ -242,6 +248,21 @@ export function buildPartitionedCandidateHandoff(handoff, { outputDir = null } =
 }
 
 export function validatePartitionedCandidateHandoff(handoff, grouped) {
+  const expectedShared = {
+    schemaVersion: 1,
+    spec: handoff.spec,
+    interactionHealth: handoff.interactionHealth,
+    interactionHealthStatus: handoff.interactionHealthStatus,
+    activeOperations: handoff.activeOperations,
+    saturation: handoff.saturation,
+    recovery: handoff.recovery,
+    recommendedNextAction: handoff.recommendedNextAction,
+  };
+  if (JSON.stringify(grouped.manifest?.sharedMetadata) !== JSON.stringify(expectedShared)
+    || grouped.manifest?.sharedMetadataId !== `shared-${digest(expectedShared).slice(0, 24)}`) {
+    throw new Error("Partition reassembly failed: shared metadata does not match the monolithic handoff.");
+  }
+  if (expectedShared.activeOperations) validateOperationSummary(expectedShared.activeOperations);
   const expected = [];
   for (const [key, candidates] of [
     ["confirmed-read", handoff.confirmedReadCandidates], ["safety-review", handoff.confirmedSafetyReviewCandidates],
@@ -273,6 +294,20 @@ export async function writePartitionedCandidateHandoff(handoff, outputDir) {
 
 export async function validatePartitionFiles(outputDir) {
   const manifest = JSON.parse(await readFile(path.join(outputDir, "manifest.json"), "utf8"));
+  const sharedText = await readFile(path.join(outputDir, "shared-metadata.json"), "utf8");
+  const sharedDigest = createHash("sha256").update(sharedText, "utf8").digest("hex");
+  if (sharedDigest !== manifest.sharedMetadataDigest) {
+    throw new Error("Shared metadata digest mismatch.");
+  }
+  if (Buffer.byteLength(sharedText, "utf8") !== manifest.sharedMetadataByteCount) {
+    throw new Error("Shared metadata byte count mismatch.");
+  }
+  const sharedMetadata = JSON.parse(sharedText);
+  if (manifest.sharedMetadataId !== `shared-${digest(sharedMetadata).slice(0, 24)}`
+    || JSON.stringify(sharedMetadata) !== JSON.stringify(manifest.sharedMetadata)) {
+    throw new Error("Shared metadata identity mismatch.");
+  }
+  if (sharedMetadata.activeOperations) validateOperationSummary(sharedMetadata.activeOperations);
   const partitions = [];
   for (const entry of manifest.partitions) {
     const text = await readFile(path.join(outputDir, `${entry.partitionId}.json`), "utf8");
@@ -385,7 +420,37 @@ function sanitizeScopeReviewCandidate(candidate) {
   };
 }
 
-function deriveRecommendedNextAction(counts, metadataNextPass, recovery) {
+function sanitizeMutationSummary(summary) {
+  if (!summary || typeof summary !== "object") return null;
+  return {
+    schemaVersion: summary.schemaVersion ?? 1,
+    attemptCount: Number(summary.attemptCount ?? 0),
+    byState: Object.fromEntries(
+      Object.entries(summary.byState ?? {}).map(([key, value]) => [key, Number(value ?? 0)]),
+    ),
+    unresolvedOperationIds: (summary.unresolvedOperationIds ?? []).map(String).sort(),
+    safeToContinue: summary.safeToContinue === true,
+    receipts: (summary.receipts ?? []).map((receipt) => ({
+      schemaVersion: receipt.schemaVersion ?? 1,
+      operationId: String(receipt.operationId || ""),
+      mode: String(receipt.mode || ""),
+      approvalDigest: String(receipt.approvalDigest || ""),
+      executionState: String(receipt.executionState || ""),
+      unresolvedReason: receipt.unresolvedReason == null ? null : String(receipt.unresolvedReason),
+      accounting: receipt.accounting ?? null,
+    })),
+  };
+}
+
+function deriveRecommendedNextAction(counts, metadataNextPass, recovery, mutationSummary) {
+  if (mutationSummary?.safeToContinue === false) {
+    return {
+      code: "resolve-unresolved-active-operation",
+      operationIds: mutationSummary.unresolvedOperationIds,
+      summary:
+        "Stop live discovery and resolve the active-operation receipt before another browser lifecycle.",
+    };
+  }
   if (recovery?.captureStatus !== "complete") {
     return {
       code: recovery?.captureStatus === "authentication-blocked"
@@ -475,9 +540,13 @@ function deriveRecommendedNextAction(counts, metadataNextPass, recovery) {
 
 export function buildCandidateHandoff({
   candidateQueue,
+  graphTelemetry = null,
+  graphTelemetryAssessment = null,
+  graphResearchQueue = null,
   interactionHealth = null,
   interactionHealthStatus = null,
   metadataNextPass,
+  mutationSummary = null,
   recovery = null,
   specId,
   specTitle,
@@ -558,6 +627,24 @@ export function buildCandidateHandoff({
     bundleOnly: bundleOnlyCandidates.length,
     suppressed: suppressedCandidates.length,
   };
+  const activeOperations = sanitizeMutationSummary(mutationSummary);
+  const graphTelemetrySummary = graphTelemetry ? {
+    artifact: "graph-telemetry.json",
+    assessment: graphTelemetryAssessment,
+    contractSnapshot: graphTelemetry.contractSnapshot ?? null,
+    contractVersions: graphTelemetry.contractVersions ?? [],
+    measurements: graphTelemetry.measurements,
+    telemetryDigest: graphTelemetry.telemetryDigest,
+    telemetryId: graphTelemetry.telemetryId,
+    researchQueue: graphResearchQueue ? {
+      artifact: "graph-research-queue.json",
+      batchIssueCount: graphResearchQueue.batchIssues.length,
+      documentedEnrichmentCount: graphResearchQueue.documentedEnrichment.length,
+      errorOperationCount: graphResearchQueue.errorOperations.length,
+      queueDigest: graphResearchQueue.queueDigest,
+      undocumentedCandidateCount: graphResearchQueue.undocumentedCandidates.length,
+    } : null,
+  } : null;
 
   return {
     schemaVersion: 2,
@@ -566,12 +653,14 @@ export function buildCandidateHandoff({
       title: specTitle,
     },
     counts,
+    graphTelemetry: graphTelemetrySummary,
     interactionHealth: sanitizeInteractionHealth(interactionHealth),
     interactionHealthStatus: interactionHealthStatus ?? {
       available: Boolean(interactionHealth),
       reason: interactionHealth ? null : "canonical-health-unavailable",
       source: interactionHealth ? "summary-and-action-results" : "analysis-artifacts",
     },
+    activeOperations,
     saturation: sanitizeDiscoverySaturation(saturation),
     recovery,
     adjacentConfirmedReadCandidates,
@@ -583,6 +672,11 @@ export function buildCandidateHandoff({
     successfullyProbedCandidates,
     bundleOnlyCandidates,
     suppressedCandidates,
-    recommendedNextAction: deriveRecommendedNextAction(counts, metadataNextPass, recovery),
+    recommendedNextAction: deriveRecommendedNextAction(
+      counts,
+      metadataNextPass,
+      recovery,
+      activeOperations,
+    ),
   };
 }

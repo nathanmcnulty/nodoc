@@ -1,22 +1,32 @@
 {
   "portal": "Entra IAM",
-  "url": "https://entra.microsoft.com",
+  "url": "https://entra.microsoft.com/#view/Microsoft_AAD_IAM/CompanyRelationshipsMenuBlade/~/IdentityProviders/menuId/ExternalIdentitiesGettingStarted",
+  "pageTarget": {
+    "matchHosts": ["entra.microsoft.com"],
+    "matchPathPrefixes": ["/"],
+    "bootstrap": {
+      "matchHosts": ["entra.microsoft.com"],
+      "matchPathnames": ["/"]
+    }
+  },
   "matchHosts": [
     "entra.microsoft.com",
     "main.iam.ad.ext.azure.com"
   ],
+  "matchPathPrefixes": [
+    "/api/B2B/customIdentityProviders"
+  ],
   "noveltyStatus": {
     "status": "satisfied",
-    "reason": "The exact Users and Groups child-frame controls were each uniquely eligible, clicked successfully, and captured with healthy action attribution, but the terminal run produced no qualifying route, query, response-metadata, or non-empty response-shape delta.",
-    "nextRequirement": "Identify a new action-attributed Users or Groups child-frame route, query key, response status or media type, or non-empty response-shape field absent from the checked-in Ibiza IAM baseline; generic ReactBlade and UI assets do not qualify."
+    "reason": "The exact All identity providers state and reload completed with healthy action accounting, but the current portal emitted only the IAM permissions bootstrap and no main.iam GET /api/B2B/customIdentityProviders target signal.",
+    "nextRequirement": "Identify a different deterministic product-bearing state or current bundle-to-control mapping for the custom identity provider transport before another live run; do not replay this exact state unchanged, and do not infer removal without a captured error such as 404 or 410."
   },
   "postActionSettleMs": 8000,
   "evaluateTimeoutMs": 30000,
   "settleMs": 10000,
   "actions": [
-    "click-href-iframe=https://entra.microsoft.com/#blade/Microsoft_AAD_UsersAndTenants/UserManagementMenuBlade/menuId/",
-    "capture=users-iframe",
-    "click-href-iframe=https://entra.microsoft.com/#blade/Microsoft_AAD_IAM/GroupsManagementMenuBlade/menuId/Overview",
-    "capture=groups-iframe"
+    "reload=all-identity-providers",
+    "wait-ms=8000",
+    "capture=all-identity-providers"
   ]
 }

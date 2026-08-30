@@ -14,6 +14,7 @@ import {
   renewAttemptLease,
   resumeAttempt,
   updateAttempt,
+  updateAttemptFromDiscoveryRun,
 } from "../portal-discovery-ledger.mjs";
 
 async function fixture(t) {
@@ -230,6 +231,111 @@ test("terminal reconciliation is idempotent after stale recovery and releases on
     (await readLedgerRecords(ledgerPath)).filter(({ value }) => value.eventType === "attempt-updated").length,
     1,
   );
+});
+
+test("terminal reconciliation preserves sanitized active-operation state", async (t) => {
+  const ledgerPath = await fixture(t);
+  await enqueueAssignment(assignment(ledgerPath, "job-mutation"));
+  await claimAssignment({
+    ledgerPath,
+    assignmentId: "job-mutation",
+    workerId: "owner",
+  });
+  const result = await updateAttemptFromDiscoveryRun({
+    ledgerPath,
+    assignmentId: "job-mutation",
+    attemptNumber: 1,
+    discoveryRun: {
+      status: "blocked",
+      activeOperations: {
+        schemaVersion: 1,
+        attemptCount: 1,
+        byState: {
+          "aborted-before-send": 0,
+          "sent-no-confirmed-change": 0,
+          "committed-and-restored": 0,
+          "unresolved-change": 1,
+        },
+        safeToContinue: false,
+        unresolvedOperationIds: ["toggle-setting"],
+        receipts: [{
+          schemaVersion: 1,
+          operationId: "toggle-setting",
+          mode: "reversible-scalar",
+          approvalDigest: "a".repeat(64),
+          executionState: "unresolved-change",
+          unresolvedReason: "final-state-not-restored",
+          accounting: { applySent: true, rollbackSent: true },
+          requestBody: "must-not-survive-sanitization",
+        }],
+      },
+      blocker: { code: "mutation-rollback-unresolved" },
+    },
+  });
+  assert.equal(result.assignment.latestAttempt.activeOperations.safeToContinue, false);
+  assert.deepEqual(
+    result.assignment.latestAttempt.activeOperations.unresolvedOperationIds,
+    ["toggle-setting"],
+  );
+  assert.equal(
+    JSON.stringify(result.assignment.latestAttempt.activeOperations).includes("must-not-survive"),
+    false,
+  );
+});
+
+test("ledger coerces a completed run with unresolved active operations to blocked", async (t) => {
+  const ledgerPath = await fixture(t);
+  await enqueueAssignment(assignment(ledgerPath, "job-unsafe-complete"));
+  await claimAssignment({
+    ledgerPath,
+    assignmentId: "job-unsafe-complete",
+    workerId: "owner",
+  });
+  const activeOperations = {
+    schemaVersion: 1,
+    attemptCount: 1,
+    byState: {
+      "aborted-before-send": 0,
+      "sent-no-confirmed-change": 0,
+      "committed-and-restored": 0,
+      "unresolved-change": 1,
+    },
+    safeToContinue: false,
+    unresolvedOperationIds: ["toggle-setting"],
+    receipts: [{
+      schemaVersion: 1,
+      operationId: "toggle-setting",
+      mode: "reversible-scalar",
+      approvalDigest: "a".repeat(64),
+      executionState: "unresolved-change",
+      unresolvedReason: "final-state-not-restored",
+      accounting: { applySent: true, rollbackSent: true },
+    }],
+  };
+  const result = await updateAttemptFromDiscoveryRun({
+    ledgerPath,
+    assignmentId: "job-unsafe-complete",
+    attemptNumber: 1,
+    discoveryRun: { status: "completed", activeOperations },
+  });
+  assert.equal(result.assignment.latestAttempt.status, "blocked");
+  assert.equal(result.assignment.latestAttempt.blocker.code, "mutation-state-unresolved");
+
+  await enqueueAssignment(assignment(ledgerPath, "job-direct-unsafe-complete"));
+  await claimAssignment({
+    ledgerPath,
+    assignmentId: "job-direct-unsafe-complete",
+    workerId: "owner",
+  });
+  const direct = await updateAttempt({
+    ledgerPath,
+    assignmentId: "job-direct-unsafe-complete",
+    attemptNumber: 1,
+    status: "completed",
+    activeOperations,
+  });
+  assert.equal(direct.assignment.latestAttempt.status, "blocked");
+  assert.equal(direct.assignment.latestAttempt.blocker.code, "mutation-state-unresolved");
 });
 
 test("completed attempts reconcile corrected terminal metadata idempotently", async (t) => {

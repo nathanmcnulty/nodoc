@@ -1,0 +1,54 @@
+{
+  "portal": "Entra IAM",
+  "url": "https://entra.microsoft.com/#view/Microsoft_AAD_UsersAndTenants/UserManagementMenuBlade/~/AllUsers/menuId/",
+  "pageTarget": {
+    "matchHosts": ["entra.microsoft.com"],
+    "matchPathPrefixes": ["/"],
+    "bootstrap": {
+      "matchHosts": ["entra.microsoft.com"],
+      "matchPathnames": ["/"]
+    }
+  },
+  "matchHosts": [
+    "entra.microsoft.com",
+    "main.iam.ad.ext.azure.com"
+  ],
+  "matchPathPrefixes": ["/api"],
+  "graphTelemetryObjectives": {
+    "contractRequired": true,
+    "minimumOperationCount": 5,
+    "minimumNewOperationCount": 2,
+    "minimumBatchMemberCount": 1,
+    "minimumEnrichedOperationCount": 2,
+    "minimumCheckpointCount": 2,
+    "baselineOperationKeys": [
+      "beta GET /directory/administrativeUnits",
+      "beta GET /directory/recommendations",
+      "beta GET /groups",
+      "beta GET /groups/{id}/photos/48x48/$value",
+      "beta GET /organization",
+      "beta GET /reports/correlations",
+      "beta GET /subscribedSkus",
+      "beta GET /users",
+      "beta GET /users/{id}/photos/48x48/$value",
+      "beta POST /roleManagement/directory/estimateAccess",
+      "v1.0 GET /identity/identityProviders",
+      "v1.0 GET /organization",
+      "v1.0 GET /servicePrincipals/$count",
+      "v1.0 GET /subscribedSkus",
+      "v1.0 GET /users/$count"
+    ]
+  },
+  "postActionSettleMs": 8000,
+  "settleMs": 10000,
+  "actions": [
+    "navigate=https://entra.microsoft.com/#view/Microsoft_AAD_UsersAndTenants/UserManagementMenuBlade/~/AllUsers/menuId/",
+    "wait-ms=2000",
+    "reload=entra-all-users",
+    "wait-ms=6000",
+    "capture=entra-all-users",
+    "navigate=https://entra.microsoft.com/#view/Microsoft_AAD_IAM/GroupsManagementMenuBlade/~/AllGroups/menuId/",
+    "wait-ms=6000",
+    "capture=entra-all-groups"
+  ]
+}

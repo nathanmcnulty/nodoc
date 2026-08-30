@@ -1,0 +1,40 @@
+{
+  "portal": "Defender",
+  "url": "https://security.microsoft.com",
+  "pageTarget": {
+    "matchHosts": ["security.microsoft.com"],
+    "matchPathPrefixes": ["/"]
+  },
+  "matchHosts": ["security.microsoft.com", "mto.security.microsoft.com"],
+  "matchPathPrefixes": ["/apiproxy"],
+  "captureScripts": false,
+  "graphTelemetryObjectives": {
+    "contractRequired": true,
+    "minimumOperationCount": 2,
+    "minimumNewOperationCount": 1,
+    "minimumProxyOperationCount": 1,
+    "minimumEnrichedOperationCount": 1,
+    "minimumCheckpointCount": 2,
+    "minimumNewEnrichedProductOperationCount": 1,
+    "productProxyOnly": true,
+    "productExcludeOperationKeys": [
+      "v1.0 GET /admin/serviceAnnouncement/messages",
+      "v1.0 GET /users/{id}/photo/$value"
+    ],
+    "baselineOperationKeys": [
+      "v1.0 GET /subscribedSkus",
+      "v1.0 GET /users",
+      "v1.0 GET /users/{id}"
+    ]
+  },
+  "postActionSettleMs": 8000,
+  "settleMs": 10000,
+  "actions": [
+    "navigate=https://security.microsoft.com/graphs",
+    "wait-ms=8000",
+    "capture=defender-graphs",
+    "navigate=https://security.microsoft.com/machines",
+    "wait-ms=8000",
+    "capture=defender-machines"
+  ]
+}

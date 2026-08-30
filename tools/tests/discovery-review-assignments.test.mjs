@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
+import { mkdtemp, rm } from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
 import test from "node:test";
-import { buildReviewAssignmentPlan, measureReviewAssignmentPlan, validateReviewAssignmentPlan } from "../discovery-review-assignments.mjs";
+import { buildReviewAssignmentPlan, enqueueReviewAssignments, measureReviewAssignmentPlan, validateReviewAssignmentPlan } from "../discovery-review-assignments.mjs";
 
 function grouped(overrides = {}) {
   const partitions = [
@@ -34,4 +37,40 @@ test("health blockers escalate and invalid plan routes cannot be cheap", () => {
   }));
   assert.equal(plan.routingCounts.luna, 1);
   assert.throws(() => validateReviewAssignmentPlan({ ...plan, assignments: plan.assignments.map((a) => ({ ...a, route: "cheap", blockers: ["health-unavailable"] })) }), /cheap route/);
+});
+
+test("enqueues every model-backed offline review on Luna at xhigh or max", async () => {
+  const root = await mkdtemp(path.join(os.tmpdir(), "nodoc-review-model-"));
+  try {
+    const options = {
+      artifactDir: root,
+      endpoint: "https://alpha.example",
+      ledgerPath: path.join(root, "ledger.jsonl"),
+      portal: "Alpha",
+      recipeDigest: "a".repeat(64),
+      recipePath: "tools/capture-recipes/alpha.json",
+    };
+    const xhigh = await enqueueReviewAssignments(buildReviewAssignmentPlan(grouped()), options);
+    assert.equal(xhigh[0].assignment.latestAttempt.model, "gpt-5.6-luna");
+    assert.equal(xhigh[0].assignment.latestAttempt.reasoning, "xhigh");
+
+    const maxRoot = path.join(root, "max");
+    const max = await enqueueReviewAssignments(buildReviewAssignmentPlan(grouped()), {
+      ...options,
+      artifactDir: maxRoot,
+      ledgerPath: path.join(root, "max-ledger.jsonl"),
+      reviewReasoning: "max",
+    });
+    assert.equal(max[0].assignment.latestAttempt.reasoning, "max");
+    await assert.rejects(
+      enqueueReviewAssignments(buildReviewAssignmentPlan(grouped()), {
+        ...options,
+        ledgerPath: path.join(root, "invalid-ledger.jsonl"),
+        reviewReasoning: "high",
+      }),
+      /xhigh or max/,
+    );
+  } finally {
+    await rm(root, { force: true, recursive: true });
+  }
 });

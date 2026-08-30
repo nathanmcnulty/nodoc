@@ -62,8 +62,69 @@ test("OpenAPI baseline derives host-aware routes, query keys, and weak schema ga
   assert.equal(baseline.operations.length, 2);
   assert.deepEqual(baseline.operations[0].hosts, ["api.example.test"]);
   assert.deepEqual(baseline.operations[0].queryParameterNames, ["top"]);
+  assert.equal(baseline.operations[0].parameterCount, 1);
+  assert.deepEqual(baseline.operations[0].parameterExamplesDocumented, []);
+  assert.equal(baseline.operations[0].responseExampleDocumented, false);
+  assert.equal(baseline.operations[0].errorResponseStatuses.length, 0);
   assert.equal(baseline.operations[0].responseSchemaDocumented, true);
   assert.equal(baseline.operations[1].responseSchemaDocumented, false);
+});
+
+test("novelty evidence normalizes OpenAPI server base paths before route matching", () => {
+  const basePathRecipe = {
+    url: "https://portal.example.test",
+    actions: ["reload=bootstrap", "wait-ms=1000", "capture=bootstrap"],
+    noveltyFrontier: {
+      approvalDigest: "d".repeat(64),
+      baseline: "checked-in-openapi",
+      baselineSignals: { queryMetadata: [], requestShapes: [], responseMetadata: [], responseShapes: [], routes: [] },
+      reopenCondition: "The known bootstrap GET has an opaque response schema.",
+      targets: [{
+        acceptanceKey: "known-response-shape",
+        actionIndexes: [0, 1, 2],
+        evidenceLevel: "hypothesis",
+        expectedHostFamilies: ["api.example.test"],
+        expectedInformationClasses: ["response-shape"],
+        expectedRoutes: ["/items/{itemId}"],
+        id: "known-response-shape",
+        rationale: "The server URL contributes a runtime base path that is absent from the OpenAPI path key.",
+        safeAction: "Reload and passively capture the known GET.",
+        state: "Bootstrap",
+      }],
+    },
+  };
+  const baseline = deriveNoveltyBaseline({
+    servers: [{ url: "https://api.example.test/api" }],
+    paths: {
+      "/items/{itemId}": {
+        get: {
+          responses: { 200: { content: { "application/json": { schema: { type: "object", additionalProperties: true } } } } },
+        },
+      },
+    },
+  });
+  const assessment = assess({
+    recipe: basePathRecipe,
+    actionResults: [
+      { actionIndex: 0, page: "bootstrap", result: { didLoad: true, resolvedUrl: "https://portal.example.test", url: "https://portal.example.test" }, type: "reload", value: "bootstrap" },
+      { actionIndex: 1, page: "wait", type: "wait-ms", value: "1000" },
+      { actionIndex: 2, page: "capture", type: "capture", value: "bootstrap" },
+    ],
+    apiRecords: [{
+      method: "GET",
+      path: "/api/items/123",
+      responseBodySample: "{\"value\":\"redacted\"}",
+      responseShapeFingerprint: "shape-with-base-path",
+      seenOnPages: ["capture"],
+      status: 200,
+      url: "https://api.example.test/api/items/123",
+    }],
+    candidateHandoff: {},
+  }, baseline.operations);
+  assert.equal(assessment.status, "productive");
+  assert.deepEqual(assessment.targets[0].responseShapeSignals, [
+    "api.example.test GET /items/{itemId} shape-with-base-path",
+  ]);
 });
 
 const emptyDerivedBaseline = { source: "checked-in-openapi", operations: [] };
@@ -165,6 +226,20 @@ test("required novelty blocks a satisfied frontier until a new unmodeled state i
   );
 });
 
+test("satisfied frontiers reject unknown evidence dispositions", () => {
+  assert.throws(
+    () => buildNoveltyPlan({
+      noveltyStatus: {
+        status: "satisfied",
+        evidenceDisposition: "old-spec",
+        reason: "Prior work is complete.",
+        nextRequirement: "Provide exact new evidence.",
+      },
+    }),
+    /evidenceDisposition must be/,
+  );
+});
+
 test("active frontier requires exact reopen provenance and produces an immutable digest", () => {
   const plan = planFor(recipe);
   assert.match(plan.frontierDigest, /^[a-f0-9]{64}$/u);
@@ -261,6 +336,63 @@ test("post-run assessment distinguishes productive targeted shapes from no novel
   assert.equal(empty.status, "no-target-signal");
   assert.equal(empty.measurements.attemptedTargetCount, 1);
   assert.equal(empty.measurements.observedTargetCount, 0);
+});
+
+test("a declared documentation objective makes a sanitized known-route example productive", () => {
+  const documentationRecipe = {
+    ...recipe,
+    noveltyFrontier: {
+      ...recipe.noveltyFrontier,
+      targets: [{
+        ...recipe.noveltyFrontier.targets[0],
+        expectedDocumentationObjectives: ["response-example"],
+        expectedInformationClasses: ["response-shape"],
+      }],
+    },
+  };
+  const assessment = assess({
+    recipe: documentationRecipe,
+    actionResults: [
+      { page: "click", result: { clicked: true, transitionEvidence: { stateChanged: true } }, type: "click-label", value: "Enterprise applications" },
+      { page: "wait", type: "wait-ms", value: "6000" },
+      { page: "capture", type: "capture", value: "enterprise-applications" },
+    ],
+    apiRecords: [{
+      method: "GET",
+      path: "/ApplicationInsights/EnterpriseAppSignIns",
+      responseBodySample: "{\"value\":[{\"id\":\"redacted\"}]}",
+      responseShapeFingerprint: "known-shape",
+      seenOnPages: ["capture"],
+      status: 200,
+      url: "https://main.iam.ad.ext.azure.com/ApplicationInsights/EnterpriseAppSignIns",
+    }],
+  }, [{
+    hosts: ["main.iam.ad.ext.azure.com"],
+    method: "GET",
+    path: "/ApplicationInsights/EnterpriseAppSignIns",
+    queryParameterNames: [],
+    requestSchemaDocumented: true,
+    responseContentTypes: ["application/json"],
+    responseExampleDocumented: false,
+    responseSchemaDocumented: true,
+    responseStatuses: ["200"],
+  }]);
+  assert.equal(assessment.status, "productive");
+  assert.deepEqual(assessment.targets[0].responseShapeSignals, []);
+  assert.deepEqual(assessment.targets[0].documentationSignals, [
+    "main.iam.ad.ext.azure.com GET /ApplicationInsights/EnterpriseAppSignIns response-example",
+  ]);
+
+  assert.throws(() => planFor({
+    ...documentationRecipe,
+    noveltyFrontier: {
+      ...documentationRecipe.noveltyFrontier,
+      targets: [{
+        ...documentationRecipe.noveltyFrontier.targets[0],
+        expectedInformationClasses: ["query-metadata"],
+      }],
+    },
+  }), /must be backed by a compatible/);
 });
 
 test("dynamic crawl result rows do not break exact recipe action accounting", () => {

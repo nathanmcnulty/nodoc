@@ -152,7 +152,7 @@ function escapeRegex(value) {
 function pathTemplateToRegex(pathTemplate) {
   return new RegExp(
     `^${escapeRegex(normalizePath(pathTemplate)).replace(/\\\{[^}]+\\\}/gu, "[^/]+")}$`,
-    "u",
+    "iu",
   );
 }
 
@@ -858,7 +858,7 @@ function joinRoutePath(serverPath, routePath) {
 function hostTemplateToRegex(hostTemplate) {
   return new RegExp(
     `^${escapeRegex(hostTemplate).replace(/\\\{[^}]+\\\}/gu, "[^.]+")}$`,
-    "u",
+    "iu",
   );
 }
 
@@ -928,9 +928,11 @@ function getMatchingTemplateOperations(specContext, normalizedPath) {
 }
 
 function matchesPathPrefix(normalizedPath, prefix) {
-  return normalizedPath === prefix
-    || normalizedPath.startsWith(`${prefix}/`)
-    || normalizedPath.startsWith(`${prefix}(`);
+  const candidate = normalizedPath.toLowerCase();
+  const expected = prefix.toLowerCase();
+  return candidate === expected
+    || candidate.startsWith(`${expected}/`)
+    || candidate.startsWith(`${expected}(`);
 }
 
 function classifyObservationScope(observation, specContext) {

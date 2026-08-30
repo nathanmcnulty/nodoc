@@ -45,6 +45,7 @@
     "lastSuccessfulPassDepth": "bounded-normal-ui-diff",
     "captureRecipes": [
       "tools/capture-recipes/defender-deep.json",
+      "tools/capture-recipes/defender-graph-inventory.json",
       "tools/capture-recipes/defender-telemetry-verification.json",
       "tools/capture-recipes/defender-entity-replay.json"
     ],
@@ -212,13 +213,17 @@
     "lastSuccessfulPassDepth": "diff-first",
     "captureRecipes": [
       "tools/capture-recipes/entra-iam-deep.json",
+      "tools/capture-recipes/entra-graph-inventory.json",
       "tools/capture-recipes/entra-iam-seeded-replay.json"
     ],
     "promotedDiscoveries": [],
     "knownTelemetryExclusions": [],
-    "openGaps": [],
+    "openGaps": [
+      "The current All identity providers state did not emit the checked-in main.iam GET /B2B/customIdentityProviders operation. Reopen only with a different deterministic product-bearing state or current bundle-to-control mapping; non-observation alone is not removal evidence."
+    ],
     "notes": [
-      "Use child reactblade iframe targets rather than only the top-level shell when planning future Entra IAM follow-up passes."
+      "Use child reactblade iframe targets rather than only the top-level shell when planning future Entra IAM follow-up passes.",
+      "The August 2026 exact-state reload capture completed with healthy action accounting and observed only GET /api/Permissions on main.iam; it produced no in-scope confirmed candidate and no target signal for /B2B/customIdentityProviders."
     ]
   },
   {
@@ -462,6 +467,7 @@
     "lastSuccessfulPassDepth": "deep-interaction",
     "captureRecipes": [
       "tools/capture-recipes/intune-deep.json",
+      "tools/capture-recipes/intune-graph-inventory.json",
       "tools/capture-recipes/intune-portal-deep.json",
       "tools/capture-recipes/intune-seeded-replay.json"
     ],
@@ -536,6 +542,7 @@
     "lastSuccessfulPassDepth": "bounded-normal-ui-diff",
     "captureRecipes": [
       "tools/capture-recipes/m365-admin-deep.json",
+      "tools/capture-recipes/m365-admin-graph-inventory.json",
       "tools/capture-recipes/m365-admin-seeded-replay.json"
     ],
     "promotedDiscoveries": [
@@ -766,6 +773,46 @@
     "notes": []
   },
   {
+    "title": "Microsoft Graph Research",
+    "specId": "graph-research",
+    "specPath": "specifications/nodoc-graph-research/specification/openapi.yml",
+    "portalUrl": "https://graph.microsoft.com",
+    "seedUrls": [
+      "https://graph.microsoft.com"
+    ],
+    "authModel": "Delegated Microsoft Graph bearer token observed through portal-owned browser sessions",
+    "recorderSupported": false,
+    "crawlPriority": "diff-first",
+    "nextPass": "cross-portal-contract-delta-corroboration",
+    "nextPassReason": "Research-only ownership surface for Graph operations absent from pinned official v1.0 and beta contracts; collect evidence through owning portal recipes.",
+    "apiHosts": [
+      "https://graph.microsoft.com/beta",
+      "https://graph.microsoft.com/v1.0"
+    ],
+    "observedHosts": [
+      "graph.microsoft.com",
+      "admin.cloud.microsoft",
+      "purview.microsoft.com",
+      "security.microsoft.com"
+    ],
+    "pathPrefixes": [
+      "/roleManagement/"
+    ],
+    "operationCount": 1,
+    "lastSuccessfulPassDepth": "cross-portal-contract-delta-review",
+    "captureRecipes": [],
+    "promotedDiscoveries": [],
+    "knownTelemetryExclusions": [],
+    "openGaps": [
+      "Corroborate current Intune candidates with fresh complete captures and structured response shapes before promotion.",
+      "Exercise the Defender, Purview, and M365 Admin Graph proxy inventories with authenticated dedicated profiles."
+    ],
+    "notes": [
+      "This is a research ownership surface, not a standalone portal; capture through the owning portal recipes and promote only canonical Graph member operations absent from the pinned official contracts.",
+      "Proxy routes and the Graph batch wrapper remain in their owning portal specifications and evidence artifacts."
+    ]
+  },
+  {
     "title": "Power Platform",
     "specId": "power-platform",
     "specPath": "specifications/nodoc-power-platform/specification/openapi.yml",
@@ -906,6 +953,7 @@
     "lastSuccessfulPassDepth": "bounded-normal-ui-diff",
     "captureRecipes": [
       "tools/capture-recipes/purview-deep.json",
+      "tools/capture-recipes/purview-graph-inventory.json",
       "tools/capture-recipes/purview-seeded-replay.json"
     ],
     "promotedDiscoveries": [

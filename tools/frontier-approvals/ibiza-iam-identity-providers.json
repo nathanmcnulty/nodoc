@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "specId": "ibiza-iam",
+  "decision": "accept-bounded-frontier",
+  "workerModel": "gpt-5.6-luna",
+  "workerReasoning": "xhigh",
+  "approvedAt": "2026-08-29T19:50:53.1302842Z",
+  "source": {
+    "head": "e72294037a85b98a963b1df94dc7ce3259af4d7d",
+    "artifactPath": "tools/frontier-approvals/ibiza-iam-identity-providers-source.json",
+    "artifactSha256": "868e3cf91e4da8b826cbc550976457a3d16159504e3b67c6fb4ba03a4ff512f1",
+    "frontierSetId": "offline-frontier-set-103710e9e7970c335da635a9",
+    "frontierSetDigest": "103710e9e7970c335da635a9a12f587fa76fd9caf32d29597e11c84b14ee8f0f"
+  },
+  "state": "External Identities | All identity providers",
+  "canonicalShellUrl": "https://entra.microsoft.com/#view/Microsoft_AAD_IAM/CompanyRelationshipsMenuBlade/~/IdentityProviders/menuId/ExternalIdentitiesGettingStarted",
+  "apiEvidenceScope": {
+    "hosts": ["main.iam.ad.ext.azure.com"],
+    "pathPrefixes": ["/B2B/customIdentityProviders"]
+  },
+  "safeActions": [
+    "reload=all-identity-providers",
+    "wait-ms=8000",
+    "capture=all-identity-providers"
+  ],
+  "acceptedItems": [
+    {
+      "frontierId": "offline-frontier-bd0e2b60cd0631d8e8b45160",
+      "frontierDigest": "bd0e2b60cd0631d8e8b4516039d73063bdd00d066fa1ca310fe2e40d21b04c9a",
+      "canonicalKey": "main.iam.ad.ext.azure.com GET /B2B/customIdentityProviders"
+    },
+    {
+      "frontierId": "offline-frontier-c6d3f86bb5c0a68ad249bfa6",
+      "frontierDigest": "c6d3f86bb5c0a68ad249bfa69a9e1fa5a33429e55eb6578a0931a1dd7d49f5c8",
+      "canonicalKey": "main.iam.ad.ext.azure.com GET /B2B/customIdentityProviders"
+    }
+  ],
+  "deferredItemCount": 202,
+  "blockedItemCount": 0,
+  "constraints": [
+    "GET-only passive capture",
+    "The exact UI-to-API association is a hypothesis under test",
+    "Only main.iam.ad.ext.azure.com GET /B2B/customIdentityProviders can satisfy the frontier",
+    "Traffic to main.b2cadmin.ext.azure.com or any other host does not qualify",
+    "An empty or null request body does not establish request-shape evidence",
+    "No forms, provider creation, provider editing, or provider deletion"
+  ]
+}

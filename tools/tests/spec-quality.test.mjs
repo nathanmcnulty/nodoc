@@ -5,9 +5,46 @@ import { fileURLToPath } from "node:url";
 
 import {
   buildSpecQuality,
+  getNormalizedOperationContextRecords,
   loadBundledSpecification,
   validateOperationIds,
 } from "../spec-quality-lib.mjs";
+
+test("operation context accepts agent-oriented permissions, pagination, and troubleshooting guidance", () => {
+  const records = getNormalizedOperationContextRecords({
+    paths: {
+      "/items": {
+        get: {
+          operationId: "Items.List",
+          "x-nodoc-operation-context": {
+            permissions: ["Items.Read delegated scope"],
+            pagination: {
+              style: "cursor",
+              requestParameters: ["cursor"],
+              responseFields: ["nextCursor"],
+              notes: ["Omit cursor on the first request."],
+            },
+            troubleshooting: ["A 403 indicates the selected principal lacks Items.Read."],
+          },
+          responses: { 200: { description: "ok" } },
+        },
+      },
+    },
+  }, "fixture");
+  assert.deepEqual(records.operations[0].operationContext, {
+    permissions: ["Items.Read delegated scope"],
+    troubleshooting: ["A 403 indicates the selected principal lacks Items.Read."],
+    pagination: {
+      style: "cursor",
+      requestParameters: ["cursor"],
+      responseFields: ["nextCursor"],
+      notes: ["Omit cursor on the first request."],
+    },
+  });
+  assert.throws(() => getNormalizedOperationContextRecords({
+    paths: { "/items": { get: { "x-nodoc-operation-context": { pagination: { style: "guess" } } } } },
+  }, "fixture"), /invalid style/);
+});
 
 test("Entra IAM has a stable unique operation ID for every operation", async () => {
   const specification = await loadBundledSpecification(

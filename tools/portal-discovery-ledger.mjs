@@ -11,6 +11,8 @@ import {
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { validateOperationSummary } from "./portal-discovery-operation-safety.mjs";
+
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 export const defaultLedgerPath = path.join(repoRoot, ".portal-discovery-ledger.jsonl");
 export const ledgerSchemaVersion = 1;
@@ -89,6 +91,43 @@ const safeObjectKeys = new Set([
   "highValuePending",
   "scopeAmbiguity",
   "unknownEligibility",
+  "attemptCount",
+  "byState",
+  "unresolvedOperationIds",
+  "safeToContinue",
+  "receipts",
+  "operationId",
+  "mode",
+  "approvalDigest",
+  "executionState",
+  "unresolvedReason",
+  "applySent",
+  "rollbackSent",
+  "duplicateSteps",
+  "missingSteps",
+  "abortAcknowledged",
+  "matchedRequestCount",
+  "matchedSessionId",
+  "matchedTargetId",
+  "boundSessionId",
+  "boundTargetId",
+  "setupFailureCount",
+  "uniqueControl",
+  "unexpectedActiveRequestCount",
+  "documentInvalidated",
+  "targetTerminated",
+  "interceptionHeldOnContainmentFailure",
+  "artifactValidationFailed",
+  "interception",
+  "approvedRequestCount",
+  "duplicateApprovedRequestCount",
+  "stepCount",
+  "expectedStepCount",
+  "unexpectedSteps",
+  "aborted-before-send",
+  "sent-no-confirmed-change",
+  "committed-and-restored",
+  "unresolved-change",
 ]);
 
 function nowIso(now = Date.now()) {
@@ -201,6 +240,7 @@ function attemptShell(assignmentId, input = {}) {
     captureStatus: sanitizeText(input.captureStatus, 100),
     captureReason: sanitizeText(input.captureReason, 200),
     interactionHealth: sanitizeStructured(input.interactionHealth),
+    activeOperations: sanitizeStructured(input.activeOperations),
     saturation: sanitizeStructured(input.saturation),
     nextAction: sanitizeStructured(input.nextAction),
     blocker: sanitizeStructured(input.blocker),
@@ -238,6 +278,9 @@ function applyPatch(attempt, patch, now = Date.now()) {
     interactionHealth: patch.interactionHealth === undefined
       ? attempt.interactionHealth
       : sanitizeStructured(patch.interactionHealth),
+    activeOperations: patch.activeOperations === undefined
+      ? attempt.activeOperations
+      : sanitizeStructured(patch.activeOperations),
     saturation: patch.saturation === undefined
       ? attempt.saturation
       : sanitizeStructured(patch.saturation),
@@ -786,6 +829,20 @@ export async function resumeAttempt(input) {
 }
 
 export async function updateAttempt(input) {
+  if (input.activeOperations !== undefined && input.activeOperations !== null) {
+    input = { ...input, activeOperations: validateOperationSummary(input.activeOperations) };
+    if (
+      input.activeOperations.safeToContinue === false
+      && ["captured", "analyzed", "completed"].includes(input.status)
+    ) {
+      input.status = "blocked";
+      input.blocker = input.blocker ?? {
+        code: "mutation-state-unresolved",
+        operationIds: input.activeOperations.unresolvedOperationIds,
+        remediation: "Resolve the active operation before another live lifecycle.",
+      };
+    }
+  }
   const ledgerPath = input.ledgerPath || defaultLedgerPath;
   return withLedgerLock(ledgerPath, async () => {
     const assignmentId = assertValidAssignmentId(input.assignmentId);
@@ -814,6 +871,7 @@ export async function updateAttempt(input) {
         "captureStatus",
         "captureReason",
         "interactionHealth",
+        "activeOperations",
         "saturation",
         "nextAction",
         "blocker",
@@ -874,17 +932,34 @@ export async function updateAttemptFromDiscoveryRun(input) {
     throw new Error("discoveryRun is required for updateAttemptFromDiscoveryRun.");
   }
   const run = input.discoveryRun;
+  const activeOperations = run.activeOperations == null
+    ? null
+    : validateOperationSummary(run.activeOperations);
+  const unsafeActiveOperation = activeOperations?.safeToContinue === false;
+  const requestedStatus = run.status || "completed";
+  const status = unsafeActiveOperation
+    && ["captured", "analyzed", "completed"].includes(requestedStatus)
+    ? "blocked"
+    : requestedStatus;
+  const blocker = unsafeActiveOperation && !run.blocker
+    ? {
+        code: "mutation-state-unresolved",
+        operationIds: activeOperations.unresolvedOperationIds,
+        remediation: "Resolve the active operation before another live lifecycle.",
+      }
+    : run.blocker ?? null;
   return updateAttempt({
     ...input,
-    status: run.status || "completed",
+    status,
     counts: buildAttemptCountsFromRunState(run),
     captureComplete: run.capture?.captureComplete ?? null,
     captureStatus: run.capture?.captureStatus ?? null,
     captureReason: run.capture?.reason ?? null,
     interactionHealth: run.interactionHealth ?? null,
+    activeOperations,
     saturation: run.saturation ?? null,
     nextAction: run.recommendedNextAction ?? null,
-    blocker: run.blocker ?? null,
+    blocker,
     artifactDir: input.artifactDir || run.artifacts || run.artifactDir || undefined,
     artifactHashes: artifactHash(input.artifactDir || run.artifacts || run.artifactDir),
   });

@@ -11,8 +11,15 @@ const informationClasses = new Set([
   "query-metadata",
   "response-metadata",
 ]);
+const documentationObjectives = new Set([
+  "error-example",
+  "pagination-observation",
+  "request-example",
+  "response-example",
+]);
 const interactiveActionTypes = new Set([
   "click",
+  "click-automation-id",
   "click-contains",
   "click-href",
   "click-label",
@@ -56,6 +63,15 @@ function mediaIsInformative(media) {
   ));
 }
 
+function mediaHasExample(media) {
+  return Boolean(media && (
+    media.example !== undefined
+    || (media.examples && Object.keys(media.examples).length > 0)
+    || media.schema?.example !== undefined
+    || (media.schema?.examples && Object.keys(media.schema.examples).length > 0)
+  ));
+}
+
 function serverHosts(servers) {
   return [...new Set((servers ?? []).flatMap((server) => {
     try {
@@ -66,13 +82,39 @@ function serverHosts(servers) {
   }))].sort();
 }
 
+function serverBindings(servers) {
+  const bindings = (servers ?? []).flatMap((server) => {
+    try {
+      const parsed = new URL(String(server?.url || "").replace(/\{[^{}]+\}/gu, "server-variable"));
+      return [{
+        basePath: parsed.pathname.replace(/\/+$/u, "") || "/",
+        host: parsed.hostname.toLowerCase(),
+      }];
+    } catch {
+      return [];
+    }
+  });
+  return [...new Map(bindings.map((binding) => [`${binding.host} ${binding.basePath}`, binding])).values()]
+    .sort((left, right) => `${left.host} ${left.basePath}`.localeCompare(`${right.host} ${right.basePath}`));
+}
+
+function runtimeOperationPath(basePath, operationPath) {
+  const normalizedBase = String(basePath || "/").replace(/\/+$/u, "") || "/";
+  const normalizedOperation = String(operationPath || "/").startsWith("/")
+    ? String(operationPath || "/")
+    : `/${operationPath}`;
+  return normalizedBase === "/" ? normalizedOperation : `${normalizedBase}${normalizedOperation}`;
+}
+
 export function deriveNoveltyBaseline(specification) {
   const rootServers = specification?.servers ?? [];
+  const rootSecurity = specification?.security;
   const operations = [];
   for (const [pathname, pathItem] of Object.entries(specification?.paths ?? {})) {
     for (const [method, operation] of Object.entries(pathItem ?? {})) {
       if (!/^(get|head|options|post|put|patch|delete)$/u.test(method) || !operation || typeof operation !== "object") continue;
-      const hosts = serverHosts(operation.servers ?? pathItem.servers ?? rootServers);
+      const servers = operation.servers ?? pathItem.servers ?? rootServers;
+      const hosts = serverHosts(servers);
       const parameters = [...(pathItem.parameters ?? []), ...(operation.parameters ?? [])];
       const queryParameterNames = [...new Set(parameters
         .filter((parameter) => parameter?.in === "query" && typeof parameter.name === "string")
@@ -82,17 +124,52 @@ export function deriveNoveltyBaseline(specification) {
       const responseContentTypes = [...new Set(successfulResponses.flatMap(([, response]) => Object.keys(response?.content ?? {})))].sort();
       const responseStatuses = successfulResponses.map(([status]) => status).sort();
       const responseSchemaDocumented = successfulResponses.some(([, response]) => Object.values(response?.content ?? {}).some(mediaIsInformative));
+      const responseExampleDocumented = successfulResponses.some(([, response]) => Object.values(response?.content ?? {}).some(mediaHasExample));
+      const errorResponses = Object.entries(operation.responses ?? {}).filter(([status]) => /^[45]\d\d$/u.test(status));
       const requestMedia = Object.values(operation.requestBody?.content ?? {});
+      const requestContentTypes = Object.keys(operation.requestBody?.content ?? {}).sort();
       const requestSchemaDocumented = requestMedia.length === 0 || requestMedia.some(mediaIsInformative);
+      const operationContext = operation["x-nodoc-operation-context"] ?? null;
+      const parameterExamplesDocumented = parameters.filter((parameter) => (
+        parameter?.example !== undefined
+        || (parameter?.examples && Object.keys(parameter.examples).length > 0)
+        || parameter?.schema?.example !== undefined
+        || (parameter?.schema?.examples && Object.keys(parameter.schema.examples).length > 0)
+      )).map((parameter) => `${parameter.in}:${parameter.name}`).sort();
+      const listLike = method === "get" && (
+        /^List(?:\.|[A-Z])/u.test(String(operation.operationId ?? ""))
+        || /^list\b/iu.test(String(operation.summary ?? ""))
+      );
+      const paginationDocumented = parameters.some((parameter) => (
+        parameter?.in === "query"
+        && /^(?:\$?top|\$?skip|cursor|continuation(?:token)?|limit|offset|page(?:size|token)?)$/iu.test(String(parameter.name ?? ""))
+      )) || Boolean(operationContext?.pagination);
       operations.push({
         hosts,
         method: method.toUpperCase(),
         path: pathname,
+        listLike,
+        operationContextFields: operationContext && typeof operationContext === "object"
+          ? Object.keys(operationContext).sort()
+          : [],
+        paginationDocumented,
+        parameterCount: parameters.length,
+        parameterExamplesDocumented,
+        permissionsDocumented: operation.security !== undefined
+          || rootSecurity !== undefined
+          || Boolean(operationContext?.authProfile)
+          || Array.isArray(operationContext?.permissions),
         queryParameterNames,
+        requestContentTypes,
+        requestExampleDocumented: requestMedia.some(mediaHasExample),
         requestSchemaDocumented,
         responseContentTypes,
+        responseExampleDocumented,
         responseSchemaDocumented,
         responseStatuses,
+        errorExampleDocumented: errorResponses.some(([, response]) => Object.values(response?.content ?? {}).some(mediaHasExample)),
+        errorResponseStatuses: errorResponses.map(([status]) => status).sort(),
+        serverBindings: serverBindings(servers),
       });
     }
   }
@@ -151,6 +228,15 @@ export function buildNoveltyPlan(recipe, { required = false, derivedBaseline = n
         if (typeof noveltyStatus[key] !== "string" || !noveltyStatus[key].trim()) {
           fail(`noveltyStatus.${key} must be a non-empty string.`);
         }
+      }
+      const evidenceDispositions = new Set([
+        "capture-freshness-gap",
+        "frontier-exhausted",
+        "missing-immutable-state-provenance",
+      ]);
+      if (noveltyStatus.evidenceDisposition !== undefined
+        && !evidenceDispositions.has(noveltyStatus.evidenceDisposition)) {
+        fail("noveltyStatus.evidenceDisposition must be capture-freshness-gap, frontier-exhausted, or missing-immutable-state-provenance.");
       }
     }
     if (required) {
@@ -232,6 +318,25 @@ export function buildNoveltyPlan(recipe, { required = false, derivedBaseline = n
     if (expectedInformationClasses.some((value) => !informationClasses.has(value))) {
       fail(`${context}.expectedInformationClasses contains an unsupported class.`);
     }
+    const expectedDocumentationObjectives = uniqueStrings(
+      target.expectedDocumentationObjectives ?? [],
+      `${context}.expectedDocumentationObjectives`,
+      { allowEmpty: true },
+    );
+    if (expectedDocumentationObjectives.some((value) => !documentationObjectives.has(value))) {
+      fail(`${context}.expectedDocumentationObjectives contains an unsupported objective.`);
+    }
+    const objectiveClasses = {
+      "error-example": ["response-metadata", "response-shape"],
+      "pagination-observation": ["query-metadata", "response-shape"],
+      "request-example": ["request-shape"],
+      "response-example": ["response-shape"],
+    };
+    if (expectedDocumentationObjectives.some((objective) => (
+      !objectiveClasses[objective].some((value) => expectedInformationClasses.includes(value))
+    ))) {
+      fail(`${context}.expectedDocumentationObjectives must be backed by a compatible expectedInformationClasses entry.`);
+    }
 
     if (!Array.isArray(target.actionIndexes) || target.actionIndexes.length === 0) {
       fail(`${context}.actionIndexes must be a non-empty array.`);
@@ -254,6 +359,7 @@ export function buildNoveltyPlan(recipe, { required = false, derivedBaseline = n
       actionIndexes: [...actionIndexes].sort((left, right) => left - right),
       evidenceLevel: target.evidenceLevel,
       expectedHostFamilies,
+      expectedDocumentationObjectives,
       expectedInformationClasses,
       expectedRoutePrefixes,
       expectedRoutes,
@@ -346,7 +452,26 @@ export function buildNoveltyPlan(recipe, { required = false, derivedBaseline = n
   return plan;
 }
 
-function recordMatchesTarget(record, target) {
+function operationServerBindings(operation) {
+  if (Array.isArray(operation?.serverBindings) && operation.serverBindings.length > 0) {
+    return operation.serverBindings;
+  }
+  return (operation?.hosts ?? []).map((host) => ({ basePath: "/", host }));
+}
+
+function operationMatchesRecord(operation, hostname, method, pathname) {
+  if (operation.method !== method) return false;
+  return operationServerBindings(operation).some((binding) => binding.host === hostname
+    && routePattern(runtimeOperationPath(binding.basePath, operation.path)).test(pathname));
+}
+
+function targetMatchesCanonicalOperation(target, operation) {
+  return target.expectedHostFamilies.some((host) => operation.hosts.includes(host))
+    && (target.expectedRoutes.includes(operation.path)
+      || target.expectedRoutePrefixes.some((prefix) => routePrefixMatches(operation.path, prefix)));
+}
+
+function recordMatchesTarget(record, target, baselineOperations = []) {
   let hostname;
   try {
     hostname = new URL(record?.url).hostname.toLowerCase();
@@ -354,9 +479,12 @@ function recordMatchesTarget(record, target) {
     return false;
   }
   const pathname = String(record?.path || "");
-  return target.expectedHostFamilies.includes(hostname)
-    && (target.expectedRoutes.includes(pathname)
-      || target.expectedRoutePrefixes.some((prefix) => routePrefixMatches(pathname, prefix)));
+  if (!target.expectedHostFamilies.includes(hostname)) return false;
+  if (target.expectedRoutes.includes(pathname)
+    || target.expectedRoutePrefixes.some((prefix) => routePrefixMatches(pathname, prefix))) return true;
+  const method = String(record?.method || "GET").toUpperCase();
+  return baselineOperations.some((operation) => targetMatchesCanonicalOperation(target, operation)
+    && operationMatchesRecord(operation, hostname, method, pathname));
 }
 
 function candidateHostnames(candidate) {
@@ -419,6 +547,23 @@ function hasInformativeResponseShape(record) {
   }
 }
 
+function hasInformativeRequestExample(record) {
+  return (record?.requestBodySamples ?? []).some((sample) => (
+    typeof sample === "string" && sample.trim() && sample.trim() !== "{}" && sample.trim() !== "[]"
+  ));
+}
+
+function responseHasPaginationFields(record) {
+  if (typeof record?.responseBodySample !== "string") return false;
+  try {
+    const parsed = JSON.parse(record.responseBodySample);
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return false;
+    return Object.keys(parsed).some((key) => /^(?:@odata\.nextLink|next(?:Link|Cursor|PageToken)|continuationToken)$/iu.test(key));
+  } catch {
+    return false;
+  }
+}
+
 function signalKey(record, property, normalizedPath = record?.path) {
   const hostname = recordHostname(record);
   const method = String(record?.method || "GET").toUpperCase();
@@ -430,9 +575,8 @@ function signalKey(record, property, normalizedPath = record?.path) {
 function matchingBaselineOperation(record, operations) {
   const hostname = recordHostname(record);
   const method = String(record?.method || "GET").toUpperCase();
-  return operations.find((operation) => operation.method === method
-    && operation.hosts.includes(hostname)
-    && routePattern(operation.path).test(String(record?.path || ""))) ?? null;
+  const pathname = String(record?.path || "");
+  return operations.find((operation) => operationMatchesRecord(operation, hostname, method, pathname)) ?? null;
 }
 
 export function evaluateNoveltyEvidence({ recipe, noveltyPlan = null, actionResults = [], apiRecords = [], candidateHandoff } = {}) {
@@ -467,7 +611,7 @@ export function evaluateNoveltyEvidence({ recipe, noveltyPlan = null, actionResu
   const targets = plan.targets.map((target) => {
     const attempted = target.actionIndexes.every((index) => completedRecipeActionIndexes.has(index));
     const targetPages = new Set(target.actionIndexes.flatMap((index) => actionPages.get(index) ?? []));
-    const records = apiRecords.filter((record) => recordMatchesTarget(record, target)
+    const records = apiRecords.filter((record) => recordMatchesTarget(record, target, plan.baselineOperations)
       && recordBelongsToTarget(record, target, targetPages));
     const candidates = candidateLists(candidateHandoff).filter((candidate) => candidateMatchesTarget(candidate, target));
     const undocumentedRecords = records.filter((record) => candidates.some((candidate) => (
@@ -530,12 +674,36 @@ export function evaluateNoveltyEvidence({ recipe, noveltyPlan = null, actionResu
         return signals;
       }))).sort()
       : [];
+    const acceptedDocumentation = new Set(target.expectedDocumentationObjectives ?? []);
+    const documentationSignals = Array.from(new Set(signalRecords.flatMap((record) => {
+      const operation = matchingBaselineOperation(record, plan.baselineOperations);
+      if (!operation) return [];
+      const prefix = `${recordHostname(record)} ${String(record.method || "GET").toUpperCase()} ${operation.path}`;
+      const signals = [];
+      if (acceptedDocumentation.has("response-example")
+        && !operation.responseExampleDocumented
+        && hasInformativeResponseShape(record)) signals.push(`${prefix} response-example`);
+      if (acceptedDocumentation.has("request-example")
+        && !operation.requestExampleDocumented
+        && hasInformativeRequestExample(record)) signals.push(`${prefix} request-example`);
+      if (acceptedDocumentation.has("error-example")
+        && !operation.errorExampleDocumented
+        && /^[45]/u.test(String(record.status ?? ""))
+        && hasInformativeResponseShape(record)) signals.push(`${prefix} error-example:${record.status}`);
+      if (acceptedDocumentation.has("pagination-observation")
+        && operation.listLike
+        && !operation.paginationDocumented
+        && ((record.queryParameterNames ?? []).some((name) => /^(?:\$?top|\$?skip|cursor|continuation(?:token)?|limit|offset|page(?:size|token)?)$/iu.test(name))
+          || responseHasPaginationFields(record))) signals.push(`${prefix} pagination-observation`);
+      return signals;
+    }))).sort();
     const materializedSignalCount = routeSignals.length
       + hostSignals.length
       + responseShapeSignals.length
       + requestShapeSignals.length
       + queryMetadataSignals.length
-      + responseMetadataSignals.length;
+      + responseMetadataSignals.length
+      + documentationSignals.length;
     const checkpointMetrics = target.actionIndexes
       .flatMap((index) => recipeActionResults.filter((result) => result.actionIndex === index))
       .map((result) => result.checkpointMetrics)
@@ -573,6 +741,7 @@ export function evaluateNoveltyEvidence({ recipe, noveltyPlan = null, actionResu
       matchedRecordCount: records.length,
       materializedSignalCount,
       costYield,
+      documentationSignals,
       queryMetadataSignals,
       requestShapeSignals,
       responseMetadataSignals,
