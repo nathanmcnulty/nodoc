@@ -80,9 +80,17 @@ child targets, and host families; evidence partitions are confirmed traffic,
 safe probes, bundle-only leads, suppressed candidates, and adjacent/scope-review
 candidates.
 
-Copy this prompt into a new agent session after the operator has started and
-authenticated the dedicated CDP browser described in
-`AGENT_DISCOVERY_RUNBOOK.md`.
+For routine capture, generate `--phase plan --worker-packet --json` and give the
+worker only that output after the operator has started and authenticated the
+dedicated CDP browser. The
+packet binds the checked-in recipe and these authoritative policy documents by
+SHA-256, carries the exact Luna-low role and safety ceiling, and names the
+conditions that require reading the full policy. Do not paste all three policy
+documents into every capture session. If the packet is absent, any binding
+digest differs from the checkout, or an escalation trigger fires, read this
+prompt and `AGENT_DISCOVERY_RUNBOOK.md` in full before continuing.
+
+The following expanded prompt remains the manual and escalation form.
 
 ```text
 Perform bounded API discovery for `<portal-title>` (`<portal-spec-id>`).
@@ -96,9 +104,13 @@ This capture assignment requires exact `gpt-5.6-luna` at low reasoning. Return
 the runtime model and reasoning level. Do not continue under another model or
 silently change reasoning level.
 
-The first action, before reading any repository documentation, is to switch to
-the named target worktree, or use absolute `git -C <target-worktree>` paths.
-Then read `AGENT_DISCOVERY_RUNBOOK.md` and follow it exactly. Report and verify
+The first action is to switch to the named target worktree, or use absolute
+`git -C <target-worktree>` paths, then regenerate the packet with its
+`execution.verificationArgs` and require an identical `packetSha256`. When a
+verified packet is present, follow its bounded scope and evidence contract;
+read the full runbook on any packet-listed escalation trigger. Without a
+verified packet, read
+`AGENT_DISCOVERY_RUNBOOK.md` and follow it exactly. Report and verify
 the expected kickoff SHA, actual kickoff SHA, and clean/dirty status against the
 orchestrator baseline; report the expected final SHA, actual final SHA, and
 clean/dirty status too.
@@ -303,7 +315,7 @@ the affected host family; a unique matching spec remains only a suggestion.
 
 Run the deterministic interface:
 
-  npm run discover:portal -- --portal <portal-spec-id> --profile bounded --phase plan --require-novelty --json
+  npm run discover:portal -- --portal <portal-spec-id> --profile bounded --phase plan --require-novelty --worker-packet --json
 
 Then create a unique artifact directory and a stable derivative bundle-cache
 directory outside the repository and run:

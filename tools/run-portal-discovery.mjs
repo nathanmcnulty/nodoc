@@ -71,6 +71,25 @@ import { loadGraphContractCache } from "./graph-contract-cache.mjs";
 import { evaluateGraphTelemetryObjectives } from "./graph-telemetry-objectives.mjs";
 
 const validPhases = new Set(["all", "analyze", "capture", "plan"]);
+const capturePolicyFiles = [
+  "PORTAL_DISCOVERY_AGENT_PROMPT.md",
+  "AGENT_DISCOVERY_RUNBOOK.md",
+  "AGENT_DISCOVERY_PLAYBOOK.md",
+];
+
+function stableJson(value) {
+  if (Array.isArray(value)) {
+    return `[${value.map(stableJson).join(",")}]`;
+  }
+  if (value && typeof value === "object") {
+    return `{${Object.keys(value).sort().map((key) => `${JSON.stringify(key)}:${stableJson(value[key])}`).join(",")}}`;
+  }
+  return JSON.stringify(value);
+}
+
+function sha256(value) {
+  return createHash("sha256").update(value).digest("hex");
+}
 
 export function buildPreflightCriteria(recipe) {
   const pageTarget = resolvePageTargetCriteria(recipe);
@@ -178,6 +197,7 @@ function parseArgs(argv) {
     operationCeiling: "observe-only",
     reasoning: null,
     workerId: null,
+    workerPacketOnly: false,
     view: "all",
     status: null,
     promotionRef: null,
@@ -217,6 +237,8 @@ function parseArgs(argv) {
       args.noLedger = true;
     } else if (argument === "--json") {
       args.json = true;
+    } else if (argument === "--worker-packet") {
+      args.workerPacketOnly = true;
     } else if (argument === "--portal" && next) {
       args.portal = next;
       index += 1;
@@ -348,6 +370,9 @@ function parseArgs(argv) {
     }
     if (!validPhases.has(args.phase)) {
       throw new Error(`Invalid --phase "${args.phase}". Use plan, capture, analyze, or all.`);
+    }
+    if (args.workerPacketOnly && args.phase !== "plan") {
+      throw new Error("--worker-packet is only valid with --phase plan.");
     }
     if (args.phase !== "plan" && !args.artifacts) {
       throw new Error(`--artifacts <directory> is required for phase "${args.phase}".`);
@@ -611,6 +636,110 @@ function buildBrief(specRecord, recipePath) {
       "candidate queue generated",
       "structured blocker emitted",
     ],
+  };
+}
+
+export async function buildCaptureWorkerPacket({
+  actionBudget,
+  args,
+  brief,
+  noveltyPlan,
+  recipePath,
+}) {
+  const policyBindings = await Promise.all(capturePolicyFiles.map(async (relativePath) => {
+    const contents = await readFile(path.join(repoRoot, relativePath));
+    return {
+      bytes: contents.byteLength,
+      path: relativePath,
+      sha256: sha256(contents),
+    };
+  }));
+  const recipeContents = await readFile(recipePath);
+  const driverArgs = [
+    "--portal", brief.specId,
+    "--profile", "bounded",
+    "--phase", "all",
+    ...(args.requireNovelty ? ["--require-novelty"] : []),
+    "--operation-ceiling", args.operationCeiling,
+    ...(args.operationApprovalDigest
+      ? ["--operation-approval-digest", args.operationApprovalDigest]
+      : []),
+  ];
+  const verificationArgs = [...driverArgs];
+  verificationArgs[verificationArgs.indexOf("--phase") + 1] = "plan";
+  verificationArgs.push("--worker-packet", "--json");
+  const packetCore = {
+    assignmentType: "capture",
+    authorization: {
+      activeOperationCeiling: args.operationCeiling,
+      operationApprovalDigest: args.operationApprovalDigest,
+      passiveCaptureMethods: "all-observed-methods",
+      specificationEdits: false,
+    },
+    bindings: {
+      noveltyPlanSha256: noveltyPlan ? sha256(stableJson(noveltyPlan)) : null,
+      policyFiles: policyBindings,
+      recipe: brief.recipe,
+      recipeSha256: sha256(recipeContents),
+    },
+    evidenceContract: {
+      authoritativeArtifacts: [
+        "discovery-run.json",
+        "summary.json",
+        "candidate-handoff.json",
+      ],
+      preserveFailedArtifacts: true,
+      promotionAuthorized: false,
+      reportMode: "compact-structured-output",
+    },
+    execution: {
+      actionBudget,
+      driverArgs,
+      freshArtifactDirectoryRequired: true,
+      liveLifecycleConcurrency: 1,
+      stableDerivativeCacheRequired: args.requireNovelty,
+      verificationArgs,
+    },
+    role: {
+      model: "gpt-5.6-luna",
+      reasoning: "low",
+    },
+    schemaVersion: "1.0",
+    scope: {
+      allowedEvidence: brief.allowedEvidence,
+      pathPrefixes: brief.pathPrefixes,
+      portal: brief.portal,
+      portalUrl: brief.portalUrl,
+      serverUrls: brief.serverUrls,
+      specId: brief.specId,
+      specPath: brief.specPath,
+    },
+    stopConditions: brief.stopConditions,
+    escalation: {
+      readAuthoritativePolicyFiles: true,
+      triggers: [
+        "binding-digest-mismatch",
+        "structured-blocker",
+        "active-operation-requested",
+        "authentication-or-target-repair",
+        "seeded-retry-or-recovery",
+        "scope-or-safety-ambiguity",
+      ],
+    },
+  };
+  const packetBytes = Buffer.byteLength(stableJson(packetCore), "utf8");
+  const sourcePolicyBytes = policyBindings.reduce((sum, binding) => sum + binding.bytes, 0);
+  return {
+    ...packetCore,
+    measurements: {
+      byteReduction: sourcePolicyBytes > 0
+        ? Number((1 - (packetBytes / sourcePolicyBytes)).toFixed(4))
+        : null,
+      packetCoreBytes: packetBytes,
+      sourcePolicyBytes,
+      tokenEstimate: "not-reported-use-bytes-for-comparison",
+    },
+    packetSha256: sha256(stableJson(packetCore)),
   };
 }
 
@@ -1026,7 +1155,20 @@ async function main() {
   }
 
   if (args.phase === "plan") {
-    console.log(JSON.stringify({ actionBudget, brief, noveltyPlan, status: "planned" }, null, 2));
+    const workerPacket = await buildCaptureWorkerPacket({
+      actionBudget,
+      args,
+      brief,
+      noveltyPlan,
+      recipePath,
+    });
+    console.log(JSON.stringify(
+      args.workerPacketOnly
+        ? workerPacket
+        : { actionBudget, brief, noveltyPlan, status: "planned", workerPacket },
+      null,
+      2,
+    ));
     return;
   }
 

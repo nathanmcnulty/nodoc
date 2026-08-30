@@ -547,11 +547,20 @@ healthy completed capture may be analyzed again without reopening the browser.
 
 ## Execution
 
-1. Read the machine-generated portal brief:
+1. Generate the machine-bound capture worker packet:
 
    ```powershell
-   npm run discover:portal -- --portal m365-admin --profile bounded --phase plan --require-novelty --json
+   npm run discover:portal -- --portal m365-admin --profile bounded --phase plan --require-novelty --worker-packet --json
    ```
+
+   The coordinator hands the capture worker only the returned packet, not the
+   entire prompt, runbook, playbook, or `noveltyPlan`. In the target checkout,
+   rerun the packet's `execution.verificationArgs` and require the same
+   `packetSha256` before browser work. The packet is sufficient for routine
+   deterministic execution; read the bound policy files in full if the digest
+   differs or any listed escalation trigger occurs.
+   `measurements` compares UTF-8 bytes only and intentionally does not claim an
+   exact tokenizer saving.
 
 2. Choose a unique, fresh artifact directory outside the repository for every
    execution, including reruns after authentication:
