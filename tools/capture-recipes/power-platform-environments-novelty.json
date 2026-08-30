@@ -5,37 +5,11 @@
     "matchHosts": ["admin.powerplatform.microsoft.com"],
     "matchPathPrefixes": ["/"]
   },
-  "noveltyFrontier": {
-    "approvalArtifact": "tools/frontier-approvals/power-platform-environments-example.json",
-    "approvalDigest": "0293f96a8450447711b29d19d9f49347e65c98de106d8865ffe6519d1ac7df64",
-    "baseline": "checked-in-spec-and-coverage-ledgers",
-    "baselineSignals": {
-      "queryMetadata": [],
-      "requestShapes": [],
-      "responseMetadata": [],
-      "responseShapes": [],
-      "routes": []
-    },
-    "reopenCondition": "The documented Power Platform Environments collection still lacks a sanitized response example from a current authenticated portal session.",
-    "targets": [
-      {
-        "id": "environments-collection-response-example",
-        "state": "Power Platform admin center Environments list",
-        "evidenceLevel": "confirmed",
-        "expectedHostFamilies": ["api.bap.microsoft.com"],
-        "expectedRoutes": ["/providers/Microsoft.BusinessAppPlatform/scopes/admin/environments"],
-        "expectedInformationClasses": ["response-shape"],
-        "expectedDocumentationObjectives": ["response-example"],
-        "actionIndexes": [0, 1, 2],
-        "safeAction": "Open Environments from the authenticated Power Platform admin center, wait for the list to settle, and passively capture its GET response.",
-        "acceptanceKey": "environments-current-sanitized-response-example",
-        "rationale": "A current sanitized collection example materially improves tool building and troubleshooting without changing tenant state."
-      }
-    ]
-  },
-  "frontierControlReadiness": {
-    "actionIndexes": [0],
-    "timeoutMs": 20000
+  "noveltyStatus": {
+    "status": "satisfied",
+    "evidenceDisposition": "frontier-exhausted",
+    "reason": "A healthy authenticated capture observed the exact Environments collection GET in the targeted UI state and supplied current response shape, status, media type, query metadata, and a basis for a sanitized example.",
+    "nextRequirement": "Identify an exact unmodeled Power Platform route, query key, error status, media type, or non-empty response shape in a different deterministic UI state before another novelty run; do not replay the Environments list unchanged."
   },
   "matchHosts": ["api.bap.microsoft.com"],
   "matchPathPrefixes": ["/providers/Microsoft.BusinessAppPlatform/scopes/admin/environments"],

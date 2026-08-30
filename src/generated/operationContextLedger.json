@@ -3674,6 +3674,49 @@
     },
     "operations": [
       {
+        "operationId": "BusinessAppPlatform_get_providers_Microsoft_BusinessAppPlatform_scopes_admin_environments",
+        "summary": "GET /providers/Microsoft.BusinessAppPlatform/scopes/admin/environments",
+        "method": "GET",
+        "path": "/providers/Microsoft.BusinessAppPlatform/scopes/admin/environments",
+        "operationContext": {
+          "surface": "Environments > All environments",
+          "workflows": [
+            "Inventory environments before selecting an environment-scoped operation.",
+            "Use $select and $expand to bound large administrative responses."
+          ],
+          "permissions": [
+            "Requires a Power Platform service bearer token and an administrative role allowed to list environments."
+          ],
+          "troubleshooting": [
+            "A successful response can still contain environments with different provisioning, runtime, or management states.",
+            "Treat nested properties as optional because environment type, region, lifecycle state, and licensing affect the returned shape."
+          ],
+          "pagination": {
+            "style": "odata",
+            "requestParameters": [
+              "$top"
+            ],
+            "responseFields": [
+              "value",
+              "nextLink"
+            ],
+            "notes": [
+              "A current targeted response returned value; a separate current bootstrap request also exposed nextLink."
+            ]
+          },
+          "headerProfile": "power-platform-service-bearer",
+          "provenance": [
+            {
+              "source": "authenticated-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Exact collection GET returned 200 application/json from the Environments list state in the August 2026 bounded capture."
+              ]
+            }
+          ]
+        }
+      },
+      {
         "operationId": "BusinessAppPlatform_get_tenantIsolationPolicy",
         "summary": "GET /providers/PowerPlatform.Governance/v1/tenants/{tenantId}/tenantIsolationPolicy",
         "method": "GET",
