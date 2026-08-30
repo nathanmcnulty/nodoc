@@ -21,7 +21,7 @@ info:
     providers (identified by GUID) handle different review types:
     - `F40AE6A6-7BFC-4ABF-9E2A-63120C21A538` — Feature flags and configuration
     - `D5EC9F3B-324E-4F8A-AF55-B69EDD48ECBE` — Access review requests
-  version: 0.1.0
+  version: 0.2.0
   contact:
     name: nodoc
     url: https://github.com/nathanmcnulty/nodoc
@@ -320,11 +320,30 @@ externalDocs:
 paths:
   /accessReviews/v2.0/approvalWorkflowProviders:
     get:
+      operationId: AccessReviews.ListApprovalWorkflowProviders
       tags: [Providers]
       summary: List approval workflow providers
       description: |
         Retrieves all registered approval workflow providers. Each provider
         handles a specific type of access review or approval workflow.
+      x-nodoc-operation-context:
+        surface: Entra Identity Governance Access reviews bootstrap
+        workflows:
+          - Discover provider IDs before calling provider-scoped configuration or review operations.
+        permissions:
+          - Requires the Access Reviews service bearer token and a directory role permitted to view access reviews.
+        pagination:
+          style: odata
+          responseFields: [value]
+          notes:
+            - No continuation field was observed in the captured provider list.
+        availability:
+          level: permission-conditional
+        troubleshooting:
+          - Use returned provider IDs instead of hard-coding GUIDs when the service exposes a current provider inventory.
+        provenance:
+          - source: authenticated-portal-capture
+            confidence: high
       responses:
         '200':
           description: List of approval workflow providers
@@ -339,11 +358,28 @@ paths:
                       type: object
   /accessReviews/v2.0/approvalWorkflowProviders/{providerId}/featureFlags:
     get:
+      operationId: AccessReviews.GetProviderFeatureFlags
       tags: [Configuration]
       summary: Get feature flags for a provider
       description: |
         Retrieves the feature flags configuration for the specified provider.
         Used by the portal to determine which UI features are enabled.
+      x-nodoc-operation-context:
+        surface: Entra Identity Governance Access reviews configuration
+        workflows:
+          - Determine which provider-specific Access reviews experiences the portal should enable.
+        permissions:
+          - Requires the Access Reviews service bearer token and visibility into the selected provider.
+        pagination:
+          style: none
+        availability:
+          level: feature-gated
+        troubleshooting:
+          - A disabled flag is service configuration, not evidence that the related endpoint was removed.
+          - Verify providerId against the provider inventory when a known provider returns 404.
+        provenance:
+          - source: authenticated-portal-capture
+            confidence: high
       parameters:
         - $ref: '#/components/parameters/providerId'
       responses:
@@ -360,12 +396,28 @@ paths:
                 isArFusionAuthorative: false
   /accessReviews/v2.0/approvalWorkflowProviders/{providerId}/partnerTenantSettings:
     get:
+      operationId: AccessReviews.GetPartnerTenantSettings
       tags: [Configuration]
       summary: Get partner tenant settings
       description: |
         Retrieves partner/tenant-specific settings for the access reviews provider.
         Includes configuration like default review duration, notification settings,
         and auto-apply behavior.
+      x-nodoc-operation-context:
+        surface: Entra Identity Governance Access reviews settings
+        workflows:
+          - Load provider-specific tenant defaults used by the Access reviews Settings experience.
+        permissions:
+          - Requires the Access Reviews service bearer token and permission to view access review settings.
+        pagination:
+          style: none
+        availability:
+          level: tenant-conditional
+        troubleshooting:
+          - Distinguish an empty settings object from authorization, provider-selection, and service errors.
+        provenance:
+          - source: authenticated-portal-capture
+            confidence: high
       parameters:
         - $ref: '#/components/parameters/providerId'
       responses:
@@ -383,6 +435,25 @@ paths:
         Retrieves access review business flows surfaced by the Access reviews > Programs
         experience. Confirmed live from the Identity Governance Programs blade.
       operationId: AccessReviews.ListBusinessFlows
+      x-nodoc-operation-context:
+        surface: Entra Identity Governance Access reviews Programs
+        workflows:
+          - Enumerate access review business flows shown on the Programs blade.
+        permissions:
+          - Requires the Access Reviews service bearer token and permission to view access review programs.
+        pagination:
+          style: odata
+          requestParameters: [$count, $top, $skip]
+          responseFields: ['@odata.count', value]
+          notes:
+            - Advance $skip in bounded pages when the returned value count reaches $top.
+        availability:
+          level: tenant-conditional
+        troubleshooting:
+          - A successful empty collection can mean the tenant has no configured programs.
+        provenance:
+          - source: authenticated-portal-capture
+            confidence: high
       parameters:
         - $ref: '#/components/parameters/providerId'
         - name: $count
@@ -477,12 +548,31 @@ paths:
                     summary: null
   /accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests:
     get:
+      operationId: AccessReviews.ListRequests
       tags: [Requests]
       summary: List access review requests
       description: |
         Retrieves access review requests (campaigns/definitions) for the specified
         provider. Each request represents an access review definition that may have
         multiple instances (recurrence cycles).
+      x-nodoc-operation-context:
+        surface: Entra Identity Governance Access reviews definitions
+        workflows:
+          - Enumerate access review definitions before selecting a request or its recurrence instances.
+        permissions:
+          - Requires the Access Reviews service bearer token and permission to view access reviews.
+        pagination:
+          style: odata
+          requestParameters: [$filter, $top, $skip]
+          responseFields: ['@odata.count', value]
+        availability:
+          level: tenant-conditional
+        troubleshooting:
+          - Preserve the portal filter and providerId when reconciling a missing definition.
+          - An empty value array is valid when no reviews match the current filter.
+        provenance:
+          - source: authenticated-portal-capture
+            confidence: high
       parameters:
         - $ref: '#/components/parameters/providerId'
         - $ref: '#/components/parameters/$filter'
@@ -496,12 +586,29 @@ paths:
               schema:
                 $ref: '#/components/schemas/AccessReviewRequestListResponse'
     post:
+      operationId: AccessReviews.CreateRequest
       tags: [Requests]
       summary: Create an access review request
       description: |
         Creates a new access review definition/campaign.
 
         **Warning:** This endpoint creates access review campaigns.
+      x-nodoc-operation-context:
+        surface: Entra Identity Governance access review creation
+        workflows:
+          - Create a new access review definition and its recurrence policy.
+        permissions:
+          - Requires the Access Reviews service bearer token and permission to create access review definitions.
+        availability:
+          level: permission-conditional
+        troubleshooting:
+          - This is not a reversible-scalar discovery operation; do not invoke it merely to learn the request schema.
+          - Capture validation errors only from an explicitly authorized creation workflow with a complete intended payload.
+        provenance:
+          - source: portal-traffic-and-bundle-reconstruction
+            confidence: medium
+            notes:
+              - The exact create body remains intentionally underspecified rather than inferred from unrelated review objects.
       parameters:
         - $ref: '#/components/parameters/providerId'
       requestBody:
@@ -517,12 +624,32 @@ paths:
           description: Invalid request
   /accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requestsAwaitingMyDecision:
     get:
+      operationId: AccessReviews.ListRequestsAwaitingMyDecision
       tags: [Requests]
       summary: List access review requests awaiting my decision
       description: |
         Retrieves access review definitions currently awaiting a decision from the
         signed-in reviewer. Confirmed live from the Access Reviews landing page,
         which filtered the request set by `decisionsCriteria`.
+      x-nodoc-operation-context:
+        surface: Entra Identity Governance reviewer landing page
+        workflows:
+          - List review definitions currently requiring action from the signed-in reviewer.
+        permissions:
+          - Requires the Access Reviews service bearer token and reviewer visibility into the selected provider.
+        pagination:
+          style: odata
+          requestParameters: [$filter, $top, $skip, $count, $select, $orderby]
+          responseFields: ['@odata.count', value]
+        availability:
+          level: user-context
+          notes:
+            - Results depend on the signed-in reviewer and currently active review assignments.
+        troubleshooting:
+          - A successful empty value array means no review currently awaits this caller; it is not a removal signal.
+        provenance:
+          - source: authenticated-portal-capture
+            confidence: high
       parameters:
         - $ref: '#/components/parameters/providerId'
         - $ref: '#/components/parameters/$filter'
@@ -565,6 +692,25 @@ paths:
         Retrieves report rows shown by the Access reviews > Review History experience.
         Confirmed live from the Identity Governance Review History blade.
       operationId: AccessReviews.ListReports
+      x-nodoc-operation-context:
+        surface: Entra Identity Governance Access reviews Review History
+        workflows:
+          - Retrieve completed and historical review rows shown by the Review History blade.
+        permissions:
+          - Requires the Access Reviews service bearer token and permission to view access review history.
+        pagination:
+          style: odata
+          requestParameters: [$filter, $top]
+          responseFields: ['@odata.count', value]
+          notes:
+            - The observed route did not expose $skip, so preserve any future continuation evidence before automating deep history traversal.
+        availability:
+          level: tenant-conditional
+        troubleshooting:
+          - Treat a successful empty history as tenant state and retain the filter when comparing portal and API results.
+        provenance:
+          - source: authenticated-portal-capture
+            confidence: high
       parameters:
         - $ref: '#/components/parameters/$filter'
         - $ref: '#/components/parameters/$top'
@@ -598,8 +744,24 @@ paths:
                     endDateTime: '2026-02-10T18:09:30.283Z'
   /accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests/{requestId}:
     get:
+      operationId: AccessReviews.GetRequest
       tags: [Requests]
       summary: Get a specific access review request
+      x-nodoc-operation-context:
+        surface: Entra Identity Governance access review definition details
+        workflows:
+          - Read one access review definition before enumerating instances or troubleshooting configuration.
+        permissions:
+          - Requires the Access Reviews service bearer token and visibility into the selected review definition.
+        pagination:
+          style: none
+        availability:
+          level: request-dependent
+        troubleshooting:
+          - A 404 can indicate a stale requestId, wrong providerId, or a deleted definition; validate both identifiers before classifying removal.
+        provenance:
+          - source: authenticated-portal-capture
+            confidence: high
       parameters:
         - $ref: '#/components/parameters/providerId'
         - $ref: '#/components/parameters/requestId'
@@ -607,12 +769,27 @@ paths:
         '200':
           description: Access review request details
     patch:
+      operationId: AccessReviews.UpdateRequest
       tags: [Requests]
       summary: Update an access review request
       description: |
         Updates an existing access review definition.
 
         **Warning:** This endpoint modifies access review configuration.
+      x-nodoc-operation-context:
+        surface: Entra Identity Governance access review definition editing
+        workflows:
+          - Update configuration on an existing access review definition.
+        permissions:
+          - Requires the Access Reviews service bearer token and permission to modify the selected review definition.
+        availability:
+          level: request-dependent
+        troubleshooting:
+          - Invoke only with an exact before-state snapshot, intended patch, concurrency evidence when available, and verified after-state.
+          - Broad or nested policy changes are outside the reversible-scalar discovery ceiling.
+        provenance:
+          - source: portal-traffic-and-bundle-reconstruction
+            confidence: medium
       parameters:
         - $ref: '#/components/parameters/providerId'
         - $ref: '#/components/parameters/requestId'
@@ -626,12 +803,27 @@ paths:
         '200':
           description: Access review request updated
     delete:
+      operationId: AccessReviews.DeleteRequest
       tags: [Requests]
       summary: Delete an access review request
       description: |
         Deletes an access review definition and all its instances.
 
         **Warning:** This endpoint permanently deletes access review data.
+      x-nodoc-operation-context:
+        surface: Entra Identity Governance access review definition deletion
+        workflows:
+          - Permanently delete an access review definition and its instances.
+        permissions:
+          - Requires the Access Reviews service bearer token and permission to delete the selected review definition.
+        availability:
+          level: request-dependent
+        troubleshooting:
+          - Never invoke this destructive operation for discovery or endpoint-health testing.
+          - A missing definition should be investigated with GET and portal history evidence, not validated by another delete attempt.
+        provenance:
+          - source: portal-traffic-and-bundle-reconstruction
+            confidence: medium
       parameters:
         - $ref: '#/components/parameters/providerId'
         - $ref: '#/components/parameters/requestId'
@@ -640,11 +832,30 @@ paths:
           description: Access review request deleted
   /accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests/{requestId}/instances:
     get:
+      operationId: AccessReviews.ListRequestInstances
       tags: [Instances]
       summary: List instances of an access review
       description: |
         Retrieves all instances (review cycles) for a specific access review request.
         For recurring reviews, each recurrence creates a new instance.
+      x-nodoc-operation-context:
+        surface: Entra Identity Governance access review instance history
+        workflows:
+          - Enumerate recurrence instances for one access review definition.
+        permissions:
+          - Requires the Access Reviews service bearer token and visibility into the parent review definition.
+        pagination:
+          style: odata
+          responseFields: [value]
+          notes:
+            - No continuation field was modeled; preserve future next-link or offset evidence if observed.
+        availability:
+          level: request-dependent
+        troubleshooting:
+          - A definition can exist with no instances before its first scheduled run.
+        provenance:
+          - source: authenticated-portal-capture
+            confidence: high
       parameters:
         - $ref: '#/components/parameters/providerId'
         - $ref: '#/components/parameters/requestId'
@@ -657,8 +868,24 @@ paths:
                 $ref: '#/components/schemas/AccessReviewInstanceListResponse'
   /accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests/{requestId}/instances/{instanceId}:
     get:
+      operationId: AccessReviews.GetRequestInstance
       tags: [Instances]
       summary: Get a specific access review instance
+      x-nodoc-operation-context:
+        surface: Entra Identity Governance access review instance details
+        workflows:
+          - Read one recurrence instance before retrieving decisions or diagnosing lifecycle state.
+        permissions:
+          - Requires the Access Reviews service bearer token and visibility into the parent review definition.
+        pagination:
+          style: none
+        availability:
+          level: request-dependent
+        troubleshooting:
+          - Validate providerId, requestId, and instanceId together before interpreting a 404 as removal.
+        provenance:
+          - source: authenticated-portal-capture
+            confidence: high
       parameters:
         - $ref: '#/components/parameters/providerId'
         - $ref: '#/components/parameters/requestId'
@@ -673,11 +900,29 @@ paths:
           description: Access review instance details
   /accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests/{requestId}/instances/{instanceId}/decisions:
     get:
+      operationId: AccessReviews.ListInstanceDecisions
       tags: [Decisions]
       summary: List decisions for an access review instance
       description: |
         Retrieves all review decisions for a specific instance. Each decision
         represents one reviewer's determination for one reviewed access.
+      x-nodoc-operation-context:
+        surface: Entra Identity Governance access review decisions
+        workflows:
+          - Enumerate reviewer decisions for a selected access review instance.
+        permissions:
+          - Requires the Access Reviews service bearer token and permission to view decisions for the instance.
+        pagination:
+          style: odata
+          requestParameters: [$filter, $top]
+          responseFields: [value]
+        availability:
+          level: request-dependent
+        troubleshooting:
+          - Empty decisions can be valid for a newly started instance or a filter that matches no reviewed access.
+        provenance:
+          - source: authenticated-portal-capture
+            confidence: high
       parameters:
         - $ref: '#/components/parameters/providerId'
         - $ref: '#/components/parameters/requestId'
@@ -703,12 +948,27 @@ paths:
                       type: object
   /accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests/{requestId}/instances/{instanceId}/stop:
     post:
+      operationId: AccessReviews.StopInstance
       tags: [Instances]
       summary: Stop an access review instance
       description: |
         Stops a currently active access review instance.
 
         **Warning:** This endpoint terminates an active review.
+      x-nodoc-operation-context:
+        surface: Entra Identity Governance access review lifecycle
+        workflows:
+          - Stop an active access review instance before its scheduled completion.
+        permissions:
+          - Requires the Access Reviews service bearer token and permission to manage the selected review instance.
+        availability:
+          level: request-dependent
+        troubleshooting:
+          - Never invoke this lifecycle-changing operation for discovery; it cannot be safely reverted by restarting the same instance.
+          - Confirm current instance state with GET before diagnosing a rejected stop request.
+        provenance:
+          - source: portal-traffic-and-bundle-reconstruction
+            confidence: medium
       parameters:
         - $ref: '#/components/parameters/providerId'
         - $ref: '#/components/parameters/requestId'
@@ -723,6 +983,7 @@ paths:
           description: Review instance stopped
   /accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests/{requestId}/instances/{instanceId}/applyDecisions:
     post:
+      operationId: AccessReviews.ApplyInstanceDecisions
       tags: [Instances]
       summary: Apply decisions for an access review instance
       description: |
@@ -730,6 +991,20 @@ paths:
         the actual access changes (removal, approval, etc.) based on the decisions.
 
         **Warning:** This endpoint applies access changes.
+      x-nodoc-operation-context:
+        surface: Entra Identity Governance access review lifecycle
+        workflows:
+          - Apply completed review decisions to the governed resources and identities.
+        permissions:
+          - Requires the Access Reviews service bearer token and permission to apply decisions for the selected instance.
+        availability:
+          level: request-dependent
+        troubleshooting:
+          - Never invoke this operation for discovery; it can remove or approve real access and is not a reversible-scalar change.
+          - Use instance and decision GET operations to troubleshoot eligibility and completion state without applying changes.
+        provenance:
+          - source: portal-traffic-and-bundle-reconstruction
+            confidence: medium
       parameters:
         - $ref: '#/components/parameters/providerId'
         - $ref: '#/components/parameters/requestId'
@@ -744,12 +1019,27 @@ paths:
           description: Decisions applied
   /accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests/{requestId}/instances/{instanceId}/resetDecisions:
     post:
+      operationId: AccessReviews.ResetInstanceDecisions
       tags: [Instances]
       summary: Reset decisions for an access review instance
       description: |
         Resets all decisions for an active review instance back to NotReviewed.
 
         **Warning:** This endpoint clears all review progress.
+      x-nodoc-operation-context:
+        surface: Entra Identity Governance access review lifecycle
+        workflows:
+          - Reset recorded decisions for an active review instance to NotReviewed.
+        permissions:
+          - Requires the Access Reviews service bearer token and permission to manage decisions for the selected instance.
+        availability:
+          level: request-dependent
+        troubleshooting:
+          - Never invoke this destructive lifecycle action for discovery; previous reviewer progress cannot be reconstructed reliably.
+          - Inspect instance and decision state with GET operations when the portal offers or suppresses the reset action.
+        provenance:
+          - source: portal-traffic-and-bundle-reconstruction
+            confidence: medium
       parameters:
         - $ref: '#/components/parameters/providerId'
         - $ref: '#/components/parameters/requestId'

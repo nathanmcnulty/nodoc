@@ -476,6 +476,585 @@
     ]
   },
   {
+    "title": "Entra IDGov",
+    "specId": "entra-idgov",
+    "specPath": "specifications/nodoc-entra-idgov/specification/openapi.yml",
+    "nodocRoute": null,
+    "nodocCategory": "Entra",
+    "headerProfiles": {},
+    "operations": [
+      {
+        "operationId": "AccessReviews.ListApprovalWorkflowProviders",
+        "summary": "List approval workflow providers",
+        "method": "GET",
+        "path": "/accessReviews/v2.0/approvalWorkflowProviders",
+        "operationContext": {
+          "surface": "Entra Identity Governance Access reviews bootstrap",
+          "workflows": [
+            "Discover provider IDs before calling provider-scoped configuration or review operations."
+          ],
+          "permissions": [
+            "Requires the Access Reviews service bearer token and a directory role permitted to view access reviews."
+          ],
+          "troubleshooting": [
+            "Use returned provider IDs instead of hard-coding GUIDs when the service exposes a current provider inventory."
+          ],
+          "pagination": {
+            "style": "odata",
+            "responseFields": [
+              "value"
+            ],
+            "notes": [
+              "No continuation field was observed in the captured provider list."
+            ]
+          },
+          "availability": {
+            "level": "permission-conditional"
+          },
+          "provenance": [
+            {
+              "source": "authenticated-portal-capture",
+              "confidence": "high"
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "AccessReviews.GetProviderFeatureFlags",
+        "summary": "Get feature flags for a provider",
+        "method": "GET",
+        "path": "/accessReviews/v2.0/approvalWorkflowProviders/{providerId}/featureFlags",
+        "operationContext": {
+          "surface": "Entra Identity Governance Access reviews configuration",
+          "workflows": [
+            "Determine which provider-specific Access reviews experiences the portal should enable."
+          ],
+          "permissions": [
+            "Requires the Access Reviews service bearer token and visibility into the selected provider."
+          ],
+          "troubleshooting": [
+            "A disabled flag is service configuration, not evidence that the related endpoint was removed.",
+            "Verify providerId against the provider inventory when a known provider returns 404."
+          ],
+          "pagination": {
+            "style": "none"
+          },
+          "availability": {
+            "level": "feature-gated"
+          },
+          "provenance": [
+            {
+              "source": "authenticated-portal-capture",
+              "confidence": "high"
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "AccessReviews.GetPartnerTenantSettings",
+        "summary": "Get partner tenant settings",
+        "method": "GET",
+        "path": "/accessReviews/v2.0/approvalWorkflowProviders/{providerId}/partnerTenantSettings",
+        "operationContext": {
+          "surface": "Entra Identity Governance Access reviews settings",
+          "workflows": [
+            "Load provider-specific tenant defaults used by the Access reviews Settings experience."
+          ],
+          "permissions": [
+            "Requires the Access Reviews service bearer token and permission to view access review settings."
+          ],
+          "troubleshooting": [
+            "Distinguish an empty settings object from authorization, provider-selection, and service errors."
+          ],
+          "pagination": {
+            "style": "none"
+          },
+          "availability": {
+            "level": "tenant-conditional"
+          },
+          "provenance": [
+            {
+              "source": "authenticated-portal-capture",
+              "confidence": "high"
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "AccessReviews.ListBusinessFlows",
+        "summary": "List business flows for a provider",
+        "method": "GET",
+        "path": "/accessReviews/v2.0/approvalWorkflowProviders/{providerId}/businessFlows",
+        "operationContext": {
+          "surface": "Entra Identity Governance Access reviews Programs",
+          "workflows": [
+            "Enumerate access review business flows shown on the Programs blade."
+          ],
+          "permissions": [
+            "Requires the Access Reviews service bearer token and permission to view access review programs."
+          ],
+          "troubleshooting": [
+            "A successful empty collection can mean the tenant has no configured programs."
+          ],
+          "pagination": {
+            "style": "odata",
+            "requestParameters": [
+              "$count",
+              "$top",
+              "$skip"
+            ],
+            "responseFields": [
+              "@odata.count",
+              "value"
+            ],
+            "notes": [
+              "Advance $skip in bounded pages when the returned value count reaches $top."
+            ]
+          },
+          "availability": {
+            "level": "tenant-conditional"
+          },
+          "provenance": [
+            {
+              "source": "authenticated-portal-capture",
+              "confidence": "high"
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "AccessReviews.ListRequests",
+        "summary": "List access review requests",
+        "method": "GET",
+        "path": "/accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests",
+        "operationContext": {
+          "surface": "Entra Identity Governance Access reviews definitions",
+          "workflows": [
+            "Enumerate access review definitions before selecting a request or its recurrence instances."
+          ],
+          "permissions": [
+            "Requires the Access Reviews service bearer token and permission to view access reviews."
+          ],
+          "troubleshooting": [
+            "Preserve the portal filter and providerId when reconciling a missing definition.",
+            "An empty value array is valid when no reviews match the current filter."
+          ],
+          "pagination": {
+            "style": "odata",
+            "requestParameters": [
+              "$filter",
+              "$top",
+              "$skip"
+            ],
+            "responseFields": [
+              "@odata.count",
+              "value"
+            ]
+          },
+          "availability": {
+            "level": "tenant-conditional"
+          },
+          "provenance": [
+            {
+              "source": "authenticated-portal-capture",
+              "confidence": "high"
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "AccessReviews.CreateRequest",
+        "summary": "Create an access review request",
+        "method": "POST",
+        "path": "/accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests",
+        "operationContext": {
+          "surface": "Entra Identity Governance access review creation",
+          "workflows": [
+            "Create a new access review definition and its recurrence policy."
+          ],
+          "permissions": [
+            "Requires the Access Reviews service bearer token and permission to create access review definitions."
+          ],
+          "troubleshooting": [
+            "This is not a reversible-scalar discovery operation; do not invoke it merely to learn the request schema.",
+            "Capture validation errors only from an explicitly authorized creation workflow with a complete intended payload."
+          ],
+          "availability": {
+            "level": "permission-conditional"
+          },
+          "provenance": [
+            {
+              "source": "portal-traffic-and-bundle-reconstruction",
+              "confidence": "medium",
+              "notes": [
+                "The exact create body remains intentionally underspecified rather than inferred from unrelated review objects."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "AccessReviews.ListRequestsAwaitingMyDecision",
+        "summary": "List access review requests awaiting my decision",
+        "method": "GET",
+        "path": "/accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requestsAwaitingMyDecision",
+        "operationContext": {
+          "surface": "Entra Identity Governance reviewer landing page",
+          "workflows": [
+            "List review definitions currently requiring action from the signed-in reviewer."
+          ],
+          "permissions": [
+            "Requires the Access Reviews service bearer token and reviewer visibility into the selected provider."
+          ],
+          "troubleshooting": [
+            "A successful empty value array means no review currently awaits this caller; it is not a removal signal."
+          ],
+          "pagination": {
+            "style": "odata",
+            "requestParameters": [
+              "$filter",
+              "$top",
+              "$skip",
+              "$count",
+              "$select",
+              "$orderby"
+            ],
+            "responseFields": [
+              "@odata.count",
+              "value"
+            ]
+          },
+          "availability": {
+            "level": "user-context",
+            "notes": [
+              "Results depend on the signed-in reviewer and currently active review assignments."
+            ]
+          },
+          "provenance": [
+            {
+              "source": "authenticated-portal-capture",
+              "confidence": "high"
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "AccessReviews.ListReports",
+        "summary": "List access review reports",
+        "method": "GET",
+        "path": "/accessReviews/v2.0/reports",
+        "operationContext": {
+          "surface": "Entra Identity Governance Access reviews Review History",
+          "workflows": [
+            "Retrieve completed and historical review rows shown by the Review History blade."
+          ],
+          "permissions": [
+            "Requires the Access Reviews service bearer token and permission to view access review history."
+          ],
+          "troubleshooting": [
+            "Treat a successful empty history as tenant state and retain the filter when comparing portal and API results."
+          ],
+          "pagination": {
+            "style": "odata",
+            "requestParameters": [
+              "$filter",
+              "$top"
+            ],
+            "responseFields": [
+              "@odata.count",
+              "value"
+            ],
+            "notes": [
+              "The observed route did not expose $skip, so preserve any future continuation evidence before automating deep history traversal."
+            ]
+          },
+          "availability": {
+            "level": "tenant-conditional"
+          },
+          "provenance": [
+            {
+              "source": "authenticated-portal-capture",
+              "confidence": "high"
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "AccessReviews.GetRequest",
+        "summary": "Get a specific access review request",
+        "method": "GET",
+        "path": "/accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests/{requestId}",
+        "operationContext": {
+          "surface": "Entra Identity Governance access review definition details",
+          "workflows": [
+            "Read one access review definition before enumerating instances or troubleshooting configuration."
+          ],
+          "permissions": [
+            "Requires the Access Reviews service bearer token and visibility into the selected review definition."
+          ],
+          "troubleshooting": [
+            "A 404 can indicate a stale requestId, wrong providerId, or a deleted definition; validate both identifiers before classifying removal."
+          ],
+          "pagination": {
+            "style": "none"
+          },
+          "availability": {
+            "level": "request-dependent"
+          },
+          "provenance": [
+            {
+              "source": "authenticated-portal-capture",
+              "confidence": "high"
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "AccessReviews.UpdateRequest",
+        "summary": "Update an access review request",
+        "method": "PATCH",
+        "path": "/accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests/{requestId}",
+        "operationContext": {
+          "surface": "Entra Identity Governance access review definition editing",
+          "workflows": [
+            "Update configuration on an existing access review definition."
+          ],
+          "permissions": [
+            "Requires the Access Reviews service bearer token and permission to modify the selected review definition."
+          ],
+          "troubleshooting": [
+            "Invoke only with an exact before-state snapshot, intended patch, concurrency evidence when available, and verified after-state.",
+            "Broad or nested policy changes are outside the reversible-scalar discovery ceiling."
+          ],
+          "availability": {
+            "level": "request-dependent"
+          },
+          "provenance": [
+            {
+              "source": "portal-traffic-and-bundle-reconstruction",
+              "confidence": "medium"
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "AccessReviews.DeleteRequest",
+        "summary": "Delete an access review request",
+        "method": "DELETE",
+        "path": "/accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests/{requestId}",
+        "operationContext": {
+          "surface": "Entra Identity Governance access review definition deletion",
+          "workflows": [
+            "Permanently delete an access review definition and its instances."
+          ],
+          "permissions": [
+            "Requires the Access Reviews service bearer token and permission to delete the selected review definition."
+          ],
+          "troubleshooting": [
+            "Never invoke this destructive operation for discovery or endpoint-health testing.",
+            "A missing definition should be investigated with GET and portal history evidence, not validated by another delete attempt."
+          ],
+          "availability": {
+            "level": "request-dependent"
+          },
+          "provenance": [
+            {
+              "source": "portal-traffic-and-bundle-reconstruction",
+              "confidence": "medium"
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "AccessReviews.ListRequestInstances",
+        "summary": "List instances of an access review",
+        "method": "GET",
+        "path": "/accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests/{requestId}/instances",
+        "operationContext": {
+          "surface": "Entra Identity Governance access review instance history",
+          "workflows": [
+            "Enumerate recurrence instances for one access review definition."
+          ],
+          "permissions": [
+            "Requires the Access Reviews service bearer token and visibility into the parent review definition."
+          ],
+          "troubleshooting": [
+            "A definition can exist with no instances before its first scheduled run."
+          ],
+          "pagination": {
+            "style": "odata",
+            "responseFields": [
+              "value"
+            ],
+            "notes": [
+              "No continuation field was modeled; preserve future next-link or offset evidence if observed."
+            ]
+          },
+          "availability": {
+            "level": "request-dependent"
+          },
+          "provenance": [
+            {
+              "source": "authenticated-portal-capture",
+              "confidence": "high"
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "AccessReviews.GetRequestInstance",
+        "summary": "Get a specific access review instance",
+        "method": "GET",
+        "path": "/accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests/{requestId}/instances/{instanceId}",
+        "operationContext": {
+          "surface": "Entra Identity Governance access review instance details",
+          "workflows": [
+            "Read one recurrence instance before retrieving decisions or diagnosing lifecycle state."
+          ],
+          "permissions": [
+            "Requires the Access Reviews service bearer token and visibility into the parent review definition."
+          ],
+          "troubleshooting": [
+            "Validate providerId, requestId, and instanceId together before interpreting a 404 as removal."
+          ],
+          "pagination": {
+            "style": "none"
+          },
+          "availability": {
+            "level": "request-dependent"
+          },
+          "provenance": [
+            {
+              "source": "authenticated-portal-capture",
+              "confidence": "high"
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "AccessReviews.ListInstanceDecisions",
+        "summary": "List decisions for an access review instance",
+        "method": "GET",
+        "path": "/accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests/{requestId}/instances/{instanceId}/decisions",
+        "operationContext": {
+          "surface": "Entra Identity Governance access review decisions",
+          "workflows": [
+            "Enumerate reviewer decisions for a selected access review instance."
+          ],
+          "permissions": [
+            "Requires the Access Reviews service bearer token and permission to view decisions for the instance."
+          ],
+          "troubleshooting": [
+            "Empty decisions can be valid for a newly started instance or a filter that matches no reviewed access."
+          ],
+          "pagination": {
+            "style": "odata",
+            "requestParameters": [
+              "$filter",
+              "$top"
+            ],
+            "responseFields": [
+              "value"
+            ]
+          },
+          "availability": {
+            "level": "request-dependent"
+          },
+          "provenance": [
+            {
+              "source": "authenticated-portal-capture",
+              "confidence": "high"
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "AccessReviews.StopInstance",
+        "summary": "Stop an access review instance",
+        "method": "POST",
+        "path": "/accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests/{requestId}/instances/{instanceId}/stop",
+        "operationContext": {
+          "surface": "Entra Identity Governance access review lifecycle",
+          "workflows": [
+            "Stop an active access review instance before its scheduled completion."
+          ],
+          "permissions": [
+            "Requires the Access Reviews service bearer token and permission to manage the selected review instance."
+          ],
+          "troubleshooting": [
+            "Never invoke this lifecycle-changing operation for discovery; it cannot be safely reverted by restarting the same instance.",
+            "Confirm current instance state with GET before diagnosing a rejected stop request."
+          ],
+          "availability": {
+            "level": "request-dependent"
+          },
+          "provenance": [
+            {
+              "source": "portal-traffic-and-bundle-reconstruction",
+              "confidence": "medium"
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "AccessReviews.ApplyInstanceDecisions",
+        "summary": "Apply decisions for an access review instance",
+        "method": "POST",
+        "path": "/accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests/{requestId}/instances/{instanceId}/applyDecisions",
+        "operationContext": {
+          "surface": "Entra Identity Governance access review lifecycle",
+          "workflows": [
+            "Apply completed review decisions to the governed resources and identities."
+          ],
+          "permissions": [
+            "Requires the Access Reviews service bearer token and permission to apply decisions for the selected instance."
+          ],
+          "troubleshooting": [
+            "Never invoke this operation for discovery; it can remove or approve real access and is not a reversible-scalar change.",
+            "Use instance and decision GET operations to troubleshoot eligibility and completion state without applying changes."
+          ],
+          "availability": {
+            "level": "request-dependent"
+          },
+          "provenance": [
+            {
+              "source": "portal-traffic-and-bundle-reconstruction",
+              "confidence": "medium"
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "AccessReviews.ResetInstanceDecisions",
+        "summary": "Reset decisions for an access review instance",
+        "method": "POST",
+        "path": "/accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests/{requestId}/instances/{instanceId}/resetDecisions",
+        "operationContext": {
+          "surface": "Entra Identity Governance access review lifecycle",
+          "workflows": [
+            "Reset recorded decisions for an active review instance to NotReviewed."
+          ],
+          "permissions": [
+            "Requires the Access Reviews service bearer token and permission to manage decisions for the selected instance."
+          ],
+          "troubleshooting": [
+            "Never invoke this destructive lifecycle action for discovery; previous reviewer progress cannot be reconstructed reliably.",
+            "Inspect instance and decision state with GET operations when the portal offers or suppresses the reset action."
+          ],
+          "availability": {
+            "level": "request-dependent"
+          },
+          "provenance": [
+            {
+              "source": "portal-traffic-and-bundle-reconstruction",
+              "confidence": "medium"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
     "title": "M365 Admin",
     "specId": "m365-admin",
     "specPath": "specifications/nodoc-m365-admin/specification/openapi.yml",
