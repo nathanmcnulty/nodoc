@@ -706,6 +706,10 @@ export async function startBrowserOwner(options = {}, dependencies = {}) {
         expectedProduct: binary.product,
         timeoutMs: Math.min(options.timeoutMs ?? defaultTimeoutMs, Math.max(1, deadline - Date.now())),
       });
+      await deps.probeTargets({
+        endpoint: config.endpoint,
+        timeoutMs: Math.min(options.timeoutMs ?? defaultTimeoutMs, Math.max(1, deadline - Date.now())),
+      });
       const candidates = await findExactOwnerCandidatesSafely(
         deps,
         manifest,
@@ -727,10 +731,6 @@ export async function startBrowserOwner(options = {}, dependencies = {}) {
         continue;
       }
       const resolvedPid = candidates.candidates[0].pid;
-      await deps.probeTargets({
-        endpoint: config.endpoint,
-        timeoutMs: Math.min(options.timeoutMs ?? defaultTimeoutMs, Math.max(1, deadline - Date.now())),
-      });
       if (manifest.pid !== resolvedPid) {
         manifest.pid = resolvedPid;
         await deps.writeManifest(config.manifestPath, manifest);

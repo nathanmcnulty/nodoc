@@ -137,6 +137,7 @@ test("launches a new owner with an unverified preflight contract", async () => {
   const ownerRoot = await mkdtemp(join(tmpdir(), "nodoc-cdp-owner-"));
   let launched = false;
   let writtenManifest;
+  const validationOrder = [];
   try {
     const result = await startBrowserOwner(options({ ownerRoot }), {
       readManifest: async () => null,
@@ -152,14 +153,21 @@ test("launches a new owner with an unverified preflight contract", async () => {
       },
       probeVersion: async () => {
         if (!launched) throw new BrowserCdpOwnerError("cdp-unavailable", "not launched");
+        validationOrder.push("version");
         return { browser: "Microsoft Edge/140.0", webSocketDebuggerUrl: "ws://127.0.0.1/devtools/browser/root" };
       },
-      probeTargets: async () => ({ pageTargetCount: 1 }),
-      findOwnerProcesses: async () => [{
-        pid: 6161,
-        executablePath: binaryPath,
-        commandLine: `"${binaryPath}" --remote-debugging-port=9222 --user-data-dir=${join(ownerRoot, "profiles", "m365-admin")} --nodoc-cdp-owner=${ownerToken}`,
-      }],
+      probeTargets: async () => {
+        validationOrder.push("targets");
+        return { pageTargetCount: 1 };
+      },
+      findOwnerProcesses: async () => {
+        validationOrder.push("owner");
+        return [{
+          pid: 6161,
+          executablePath: binaryPath,
+          commandLine: `"${binaryPath}" --remote-debugging-port=9222 --user-data-dir=${join(ownerRoot, "profiles", "m365-admin")} --nodoc-cdp-owner=${ownerToken}`,
+        }];
+      },
       randomUUID: () => ownerToken,
     });
     assert.equal(result.reused, false);
@@ -167,6 +175,7 @@ test("launches a new owner with an unverified preflight contract", async () => {
     assertOwnerReadyNextStep(result.nextStep);
     assert.equal(writtenManifest.ownerToken, ownerToken);
     assert.equal(writtenManifest.pid, 6161);
+    assert.deepEqual(validationOrder, ["version", "targets", "owner"]);
   } finally {
     await rm(ownerRoot, { force: true, recursive: true });
   }
