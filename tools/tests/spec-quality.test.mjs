@@ -78,6 +78,24 @@ test("M365 Apps Services has agent-ready context and stable operation IDs", asyn
   );
 });
 
+test("Entra IDGov has agent-ready context and stable operation IDs", async () => {
+  const specification = await loadBundledSpecification(
+    fileURLToPath(new URL(
+      "../../specifications/nodoc-entra-idgov/specification/openapi.yml",
+      import.meta.url,
+    )),
+  );
+
+  assert.deepEqual(validateOperationIds(specification, "Entra IDGov"), {
+    operationCount: 17,
+    operationIds: 17,
+  });
+  assert.equal(
+    getNormalizedOperationContextRecords(specification, "Entra IDGov").operations.length,
+    17,
+  );
+});
+
 test("M365 Admin keeps SetTheme on its canonical company theme path", async () => {
   const specification = await loadBundledSpecification(
     fileURLToPath(new URL(
