@@ -177,6 +177,7 @@ export function buildLaunchCommand({
       `--user-data-dir=${dedicatedProfile}`,
       "--no-first-run",
       "--no-default-browser-check",
+      "--new-window",
       `--nodoc-cdp-owner=${ownerToken}`,
       url.href,
     ],
@@ -250,6 +251,27 @@ export async function probeCdpVersion({
     protocolVersion: String(version.Protocol ?? ""),
     webSocketDebuggerUrl: version.webSocketDebuggerUrl,
   };
+}
+
+export async function probeCdpPageTargets({ endpoint, timeoutMs = defaultTimeoutMs, fetchImpl = fetch } = {}) {
+  const base = new URL(endpoint);
+  if (base.protocol !== "http:" || base.hostname !== DEFAULT_CDP_HOST || base.pathname !== "/" || base.search || base.hash) {
+    fail("endpoint-invalid", `endpoint must be exactly http://${DEFAULT_CDP_HOST}:<fixed-port>/.`);
+  }
+  let response;
+  try {
+    response = await fetchImpl(new URL("/json/list", base), { signal: AbortSignal.timeout(timeoutMs) });
+  } catch {
+    fail("target-unavailable", `CDP /json/list was unavailable within ${timeoutMs}ms.`);
+  }
+  if (!response.ok) fail("target-unavailable", `/json/list returned HTTP ${response.status}.`);
+  const text = await response.text();
+  if (Buffer.byteLength(text) > 2 * 1024 * 1024) fail("target-unavailable", "/json/list exceeded the bounded response size.");
+  let targets;
+  try { targets = JSON.parse(text); } catch { fail("target-unavailable", "/json/list did not return valid JSON."); }
+  const pages = Array.isArray(targets) ? targets.filter((entry) => entry?.type === "page" && typeof entry.webSocketDebuggerUrl === "string") : [];
+  if (pages.length === 0) fail("target-unavailable", "CDP owner launched without a page target.");
+  return { pageTargetCount: pages.length };
 }
 
 function validateManifest(value, expected) {
@@ -447,6 +469,7 @@ const defaultDependencies = {
   inspectProcess: inspectWindowsProcess,
   isPortAvailable: defaultPortAvailable,
   probeVersion: probeCdpVersion,
+  probeTargets: probeCdpPageTargets,
   readManifest: readOwnerManifest,
   removeManifest: (path) => rm(path, { force: true }),
   resolveBinary: resolveBrowserBinary,
@@ -704,6 +727,10 @@ export async function startBrowserOwner(options = {}, dependencies = {}) {
         continue;
       }
       const resolvedPid = candidates.candidates[0].pid;
+      await deps.probeTargets({
+        endpoint: config.endpoint,
+        timeoutMs: Math.min(options.timeoutMs ?? defaultTimeoutMs, Math.max(1, deadline - Date.now())),
+      });
       if (manifest.pid !== resolvedPid) {
         manifest.pid = resolvedPid;
         await deps.writeManifest(config.manifestPath, manifest);

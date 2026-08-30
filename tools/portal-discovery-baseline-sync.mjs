@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 export const baselineApprovalSchemaVersion = 1;
 export const baselineSyncSchemaVersion = 1;
 export const baselineApprovalModel = "gpt-5.6-luna";
+export const baselineApprovalReasonings = Object.freeze(["xhigh", "max"]);
 
 const signalClasses = new Map([
   ["query-metadata", "queryMetadata"],
@@ -31,6 +32,7 @@ export function validateBaselineApproval(approval, { sourceArtifact, specId } = 
   const verifiedSource = validateSourceArtifact(sourceArtifact);
   if (!approval || approval.schemaVersion !== baselineApprovalSchemaVersion) throw new Error("Unsupported baseline approval schema.");
   if (approval.workerModel !== baselineApprovalModel) throw new Error(`Baseline approval requires exact model ${baselineApprovalModel}.`);
+  if (!baselineApprovalReasonings.includes(approval.workerReasoning)) throw new Error("Baseline approval reasoning must be xhigh or max.");
   if (approval.decision !== "accept") throw new Error("Only accepted baseline approvals can be synchronized.");
   if (approval.specId !== specId) throw new Error("Baseline approval spec scope changed.");
   if (!signalClasses.has(approval.signalClass)) throw new Error("Baseline approval signalClass is unsupported.");

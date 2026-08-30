@@ -2634,6 +2634,44 @@
     ]
   },
   {
+    "title": "Microsoft Graph Research",
+    "specId": "graph-research",
+    "specPath": "specifications/nodoc-graph-research/specification/openapi.yml",
+    "nodocRoute": null,
+    "nodocCategory": "Microsoft Graph Research",
+    "headerProfiles": {},
+    "operations": [
+      {
+        "operationId": "GraphResearch.EstimateDirectoryAccess",
+        "summary": "Estimate directory resource-action access",
+        "method": "POST",
+        "path": "/roleManagement/directory/estimateAccess",
+        "operationContext": {
+          "surface": "Entra users and groups",
+          "workflows": [
+            "Open the Entra users or groups inventory and allow the blade to evaluate the current principal's directory access."
+          ],
+          "permissions": [
+            "Exact delegated permission requirements remain under research; preserve the portal token audience and consented scopes when troubleshooting."
+          ],
+          "troubleshooting": [
+            "Treat 401 and 403 responses as authentication, consent, role, or Conditional Access evidence rather than proof that the route was removed.",
+            "Preserve the request body because the resource action and directory scope determine the returned decision."
+          ],
+          "provenance": [
+            {
+              "source": "live-authenticated-capture",
+              "confidence": "high",
+              "notes": [
+                "Independently observed with successful direct responses in two complete captures; Graph batch members supplied request-shape corroboration only."
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
     "title": "Power Platform",
     "specId": "power-platform",
     "specPath": "specifications/nodoc-power-platform/specification/openapi.yml",

@@ -10,11 +10,16 @@ import {
 } from "./portal-discovery-metadata.mjs";
 import { getLedgerViewFromFile, enqueueAssignment, normalizeEndpoint } from "./portal-discovery-ledger.mjs";
 import { buildSpecInventory, repoRoot } from "./spec-quality-lib.mjs";
+import {
+  portalDiscoveryModelPolicy,
+  validateOfflineReviewReasoning,
+} from "./portal-discovery-model-policy.mjs";
 
 export const portfolioManifestSchemaVersion = 1;
 export const orchestrationPlanSchemaVersion = 1;
 export const workerResultSchemaVersion = 1;
-export const requiredReviewModel = "gpt-5.6-luna";
+export const requiredReviewModel = portalDiscoveryModelPolicy.offlineReview.model;
+export const requiredOrchestratorModel = portalDiscoveryModelPolicy.orchestrator.model;
 export const defaultPortfolioManifestPath = path.join(repoRoot, "tools", "portal-discovery-portfolio.json");
 
 const routes = new Set(["cheap", "luna", "manual", "orchestrator"]);
@@ -46,6 +51,9 @@ function positiveInteger(value, label) {
 }
 function assignmentDigest(value) {
   return digest(Object.fromEntries(Object.entries(value).filter(([key]) => key !== "assignmentId" && key !== "assignmentDigest")));
+}
+export function workerResultSubjectDigest(value) {
+  return digest(Object.fromEntries(Object.entries(value ?? {}).filter(([key]) => key !== "qualityGate")));
 }
 function sanitize(value) {
   if (value === null || value === undefined) return null;
@@ -136,6 +144,7 @@ export async function buildPortfolioManifest(manifestPath = defaultPortfolioMani
       return {
         ...portal,
         novelty: {
+          evidenceDisposition: sanitize(recipe.noveltyStatus.evidenceDisposition),
           nextRequirement: sanitize(recipe.noveltyStatus.nextRequirement),
           status: "satisfied",
         },
@@ -164,7 +173,10 @@ function routeForPortal(portal, summary, options = {}) {
   if (!portal.enabled) return { route: "orchestrator", reasonCodes: ["disabled"] };
   if (portal.auth.requiresProfile && !portal.auth.profile) return { route: "orchestrator", reasonCodes: ["missing-auth-profile"] };
   if (!portal.recipe) return { route: "orchestrator", reasonCodes: ["missing-recipe"] };
-  if (portal.novelty?.status === "satisfied") return { route: "orchestrator", reasonCodes: ["novelty-satisfied"] };
+  if (portal.novelty?.status === "satisfied") return {
+    route: "orchestrator",
+    reasonCodes: ["novelty-satisfied", portal.novelty.evidenceDisposition].filter(Boolean),
+  };
   if (portal.novelty?.status !== "active") return { route: "orchestrator", reasonCodes: ["novelty-frontier-missing"] };
   if (!/^[a-f0-9]{64}$/u.test(String(portal.novelty.approvalDigest || "")) || !portal.novelty.reopenCondition) {
     return { route: "orchestrator", reasonCodes: ["novelty-frontier-unapproved"] };
@@ -186,13 +198,16 @@ export function compileOrchestrationPlan(manifest, { ledger = {}, budgets = {}, 
   const summary = ledgerSummary(ledger);
   const maxCaptures = budgets.maxCaptures ?? Number.POSITIVE_INFINITY;
   const maxAssignments = budgets.maxAssignments ?? Number.POSITIVE_INFINITY;
+  const offlineReviewReasoning = validateOfflineReviewReasoning(
+    options.offlineReviewReasoning ?? portalDiscoveryModelPolicy.offlineReview.reasoning,
+  );
   positiveInteger(Number.isFinite(maxCaptures) ? maxCaptures : 0, "maxCaptures");
   const assignments = [];
   const captureByLease = new Map();
   for (const portal of manifest.portals) {
     const route = routeForPortal(portal, summary, options);
     const captureKey = `${portal.endpoint.leaseFamily}|${portal.auth.profile}`;
-    const capture = { type: "capture", specId: portal.specId, portal: portal.title, endpointLease: captureKey, profile: portal.auth.profile, recipe: portal.recipe, route: "orchestrator", model: "deterministic", reasoning: "none", budgets: portal.captureBudget, preconditions: portal.enabled ? ["validated-manifest", "authenticated-profile", "fresh-artifact-directory"] : ["portal-enabled"], completionGates: ["sanitized-summary", "candidate-handoff", "no-authoritative-mutation"], blockers: route.reasonCodes, terminal: portal.enabled ? "capture-result-required" : "disabled", nextAction: portal.enabled ? "allocate-fresh-artifacts" : "none", serializedGroup: captureKey };
+    const capture = { type: "capture", specId: portal.specId, portal: portal.title, endpointLease: captureKey, profile: portal.auth.profile, recipe: portal.recipe, route: "orchestrator", model: portalDiscoveryModelPolicy.capture.model, reasoning: portalDiscoveryModelPolicy.capture.reasoning, budgets: portal.captureBudget, preconditions: portal.enabled ? ["validated-manifest", "authenticated-profile", "fresh-artifact-directory"] : ["portal-enabled"], completionGates: ["sanitized-summary", "candidate-handoff", "operation-lifecycle-accounted"], blockers: route.reasonCodes, terminal: portal.enabled ? "capture-result-required" : "disabled", nextAction: portal.enabled ? "allocate-fresh-artifacts" : "none", serializedGroup: captureKey };
     capture.assignmentId = `capture-${digest(capture).slice(0, 24)}`;
     capture.assignmentDigest = assignmentDigest(capture);
     captureByLease.set(captureKey, [...(captureByLease.get(captureKey) ?? []), capture]);
@@ -216,14 +231,14 @@ export function compileOrchestrationPlan(manifest, { ledger = {}, budgets = {}, 
   for (const capture of serializedCaptures) if (captureIds.has(capture.assignmentId)) assignments.push(capture);
   for (const portal of manifest.portals) {
     const route = routeForPortal(portal, summary, options);
-    const review = { type: "review", specId: portal.specId, portal: portal.title, route: route.route, model: requiredReviewModel, reasoning: "high", budgets: { timeoutMs: budgets.reviewTimeoutMs ?? 120000, retryCount: budgets.retryCount ?? 1, maxPayloadBytes: budgets.maxPayloadBytes ?? 262144 }, preconditions: ["capture-summary-sanitized", "assignment-scope-known"], completionGates: ["exact-candidate-accounting", "exact-evidence-accounting", "legal-decision", "terminal-live-lifecycle-accounted", "process-improvement-dispositioned"], blockers: route.reasonCodes, terminal: route.route === "orchestrator" ? "blocked" : "worker-result-required", nextAction: route.route === "orchestrator" ? "repair-preconditions" : "validate-worker-result", scope: { candidateIds: [], evidenceIds: [] } };
+    const review = { type: "review", specId: portal.specId, portal: portal.title, route: route.route, model: requiredReviewModel, reasoning: offlineReviewReasoning, qualityGate: { model: portalDiscoveryModelPolicy.orchestrator.model, reasoning: portalDiscoveryModelPolicy.orchestrator.reasoning, responsibility: "orchestrator-acceptance" }, budgets: { timeoutMs: budgets.reviewTimeoutMs ?? 120000, retryCount: budgets.retryCount ?? 1, maxPayloadBytes: budgets.maxPayloadBytes ?? 262144 }, preconditions: ["capture-summary-sanitized", "assignment-scope-known"], completionGates: ["exact-candidate-accounting", "exact-evidence-accounting", "legal-decision", "terminal-live-lifecycle-accounted", "process-improvement-dispositioned", "orchestrator-quality-gate"], blockers: route.reasonCodes, terminal: route.route === "orchestrator" ? "blocked" : "worker-result-required", nextAction: route.route === "orchestrator" ? "repair-preconditions" : "validate-worker-result", scope: { candidateIds: [], evidenceIds: [] } };
     review.assignmentId = `review-${digest(review).slice(0, 24)}`;
     review.assignmentDigest = assignmentDigest(review);
     assignments.push(review);
   }
   assignments.sort((a, b) => a.assignmentId.localeCompare(b.assignmentId));
   const limited = assignments.slice(0, maxAssignments);
-  const planCore = { schemaVersion: orchestrationPlanSchemaVersion, manifestId: manifest.manifestId, sourceManifestDigest: digest(manifest), options: sanitize(options), budgets: sanitize(budgets), assignments: limited };
+  const planCore = { schemaVersion: orchestrationPlanSchemaVersion, manifestId: manifest.manifestId, sourceManifestDigest: digest(manifest), modelPolicy: portalDiscoveryModelPolicy, options: sanitize(options), budgets: sanitize(budgets), assignments: limited };
   const plan = { ...planCore, planId: `plan-${digest(planCore).slice(0, 24)}`, planDigest: digest(planCore), mode: options.apply ? "apply-opt-in" : "report-only", completion: { terminal: limited.length < assignments.length ? "budget-exhausted" : "plan-ready", nextAction: options.apply ? "explicit-enqueue" : "review-plan" }, totals: { assignmentCount: limited.length, captureCount: limited.filter((entry) => entry.type === "capture").length, reviewCount: limited.filter((entry) => entry.type === "review").length, serializedCaptureCount: limited.filter((entry) => entry.type === "capture").length ? new Set(limited.filter((entry) => entry.type === "capture").map((entry) => entry.endpointLease)).size : 0, parallelOfflineCount: limited.filter((entry) => entry.type === "review" && entry.route !== "orchestrator").length, maxWorkerPayloadBytes: Math.max(0, ...limited.map((entry) => Buffer.byteLength(stableJson(entry), "utf8"))), rejectedResultCount: 0 } };
   return plan;
 }
@@ -257,6 +272,7 @@ export function validateWorkerResult(result, plan) {
   if (!statuses.has(result.status) || !transitions["running"].has(result.status) && result.status !== "completed") throw new Error(`Illegal worker result status ${result.status}.`);
   if (!decisions.has(result.decision)) throw new Error("Worker result decision is invalid.");
   if (assignment.type === "review" && result.model !== requiredReviewModel) throw new Error(`Review result requires exact runtime model ${requiredReviewModel}.`);
+  if (assignment.type === "review" && result.reasoning !== assignment.reasoning) throw new Error(`Review result requires exact reasoning ${assignment.reasoning}.`);
   if (assignment.type === "review" && !terminalReviewDecisions.has(result.decision)) throw new Error("Review result must have a terminal disposition.");
   if (!Array.isArray(result.reasonCodes) || result.reasonCodes.some((code) => typeof code !== "string")) throw new Error("Worker result reasonCodes are required.");
   for (const key of ["blockers", "metrics", "recommendedNextAction", "lessons", "lifecycleAccounting", "processImprovementDisposition"]) if (result[key] === undefined) throw new Error(`Worker result requires ${key}.`);
@@ -272,6 +288,16 @@ export function validateWorkerResult(result, plan) {
   if (new Set(allIds(candidateAccounting)).size !== candidateIds.size || new Set(allIds(evidenceAccounting)).size !== evidenceIds.size) throw new Error("Worker result does not preserve exact candidate/evidence cardinality.");
   const violation = capabilityViolation(result, assignment);
   if (violation) throw new Error(`Worker capability violation: ${violation}.`);
+  if (assignment.type === "review") {
+    const gate = result.qualityGate;
+    if (!gate || gate.schemaVersion !== 1) throw new Error("Review result requires a Sol orchestrator quality gate.");
+    if (gate.model !== assignment.qualityGate?.model || gate.model !== requiredOrchestratorModel) throw new Error(`Quality gate requires exact runtime model ${requiredOrchestratorModel}.`);
+    if (gate.reasoning !== assignment.qualityGate?.reasoning) throw new Error(`Quality gate requires exact reasoning ${assignment.qualityGate?.reasoning}.`);
+    if (gate.decision !== "accept") throw new Error("Sol orchestrator quality gate did not accept the worker result.");
+    if (gate.assignmentId !== assignment.assignmentId || gate.assignmentDigest !== assignment.assignmentDigest) throw new Error("Quality gate assignment binding mismatch.");
+    if (gate.workerResultDigest !== workerResultSubjectDigest(result)) throw new Error("Quality gate worker-result digest mismatch.");
+    if (!/^\d{4}-\d{2}-\d{2}T/u.test(String(gate.reviewedAt || ""))) throw new Error("Quality gate reviewedAt must be an ISO timestamp.");
+  }
   return { ...clone(result), sanitized: true, assignmentType: assignment.type };
 }
 
@@ -294,7 +320,7 @@ export async function enqueueOrchestrationPlan(plan, { ledgerPath, apply = false
   if (!apply) throw new Error("Applying an orchestration plan requires explicit apply opt-in.");
   const results = [];
   for (const assignment of plan.assignments.filter((entry) => entry.type === "capture" && entry.route === "orchestrator")) {
-    results.push(await enqueueAssignment({ ledgerPath, assignmentId: assignment.assignmentId, specId: assignment.specId, portal: assignment.portal, recipePath: assignment.recipe, recipeDigest: digest(assignment.recipe), endpoint: assignment.endpointLease.split("|")[0], profile: assignment.profile, phase: "all", model: "deterministic", reasoning: "none", priority: 20 }));
+    results.push(await enqueueAssignment({ ledgerPath, assignmentId: assignment.assignmentId, specId: assignment.specId, portal: assignment.portal, recipePath: assignment.recipe, recipeDigest: digest(assignment.recipe), endpoint: assignment.endpointLease.split("|")[0], profile: assignment.profile, phase: "all", model: portalDiscoveryModelPolicy.capture.model, reasoning: portalDiscoveryModelPolicy.capture.reasoning, priority: 20 }));
   }
   return results;
 }

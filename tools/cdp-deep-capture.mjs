@@ -27,6 +27,16 @@ import {
   shouldPreferActiveSessionAttribution,
 } from "./cdp-attribution.mjs";
 import { collectCdpDomSnapshots } from "./cdp-snapshot-collector.mjs";
+import { parseGraphTransportUrl } from "./graph-telemetry.mjs";
+import {
+  buildAbortOperationReceipt,
+  buildReversibleOperationReceipt,
+  handlePausedOperationRequest,
+  matchesOperationRequest,
+  operationStepAtActionIndex,
+  summarizeOperationReceipts,
+  validateOperationAuthorization,
+} from "./portal-discovery-operation-safety.mjs";
 
 let apiBase = "http://127.0.0.1:9222";
 const defaultNavigationTimeoutMs = 15000;
@@ -102,6 +112,7 @@ function parseActionSpec(value) {
   if (![
     "capture",
     "click-contains",
+    "click-automation-id",
     "click-href",
     "click-label",
     "crawl-links",
@@ -171,13 +182,32 @@ function shapeOf(value, depth = 0) {
     return { array: shapes.map((item) => JSON.parse(item)) };
   }
   if (typeof value === "object") {
-    return Object.fromEntries(
-      Object.keys(value)
-        .sort((left, right) => left.localeCompare(right))
-        .map((key) => [key, shapeOf(value[key], depth + 1)]),
-    );
+    const result = {};
+    let dynamic = false;
+    for (const key of Object.keys(value).sort((left, right) => left.localeCompare(right)).slice(0, 128)) {
+      if (key.length > 128
+          || /[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}/iu.test(key)
+          || /[\w.+-]+@[\w.-]+\.[a-z]{2,}/iu.test(key)
+          || /\.onmicrosoft\.com/iu.test(key)) {
+        dynamic = true;
+        continue;
+      }
+      result[key] = shapeOf(value[key], depth + 1);
+    }
+    if (dynamic) result["{dynamicProperty}"] = "unknown";
+    return result;
   }
   return typeof value;
+}
+
+function bodyShapeSummary(value) {
+  if (!value) return null;
+  try {
+    const parsed = typeof value === "string" ? JSON.parse(value) : value;
+    return shapeOf(parsed);
+  } catch {
+    return { nonJson: typeof value };
+  }
 }
 
 function bodyShapeFingerprint(value) {
@@ -212,6 +242,10 @@ function requestEvidence(request) {
       })),
       requestShapeFingerprint,
       responseShapeFingerprint,
+      requestShapeSummary: request.requestShapeSummary ?? bodyShapeSummary(request.requestBody),
+      responseShapeSummary: request.responseShapeSummary ?? bodyShapeSummary(request.responseBody),
+      requestHeaderNames: uniqueSorted(normalizeHeaderEntries(request.headers).map(([name]) => name)),
+      responseHeaderNames: uniqueSorted(normalizeHeaderEntries(request.responseHeaders).map(([name]) => name)),
     };
   } catch {
     return {
@@ -221,6 +255,10 @@ function requestEvidence(request) {
         request.requestShapeFingerprint ?? bodyShapeFingerprint(request.requestBody),
       responseShapeFingerprint:
         request.responseShapeFingerprint ?? bodyShapeFingerprint(request.responseBody),
+      requestShapeSummary: request.requestShapeSummary ?? bodyShapeSummary(request.requestBody),
+      responseShapeSummary: request.responseShapeSummary ?? bodyShapeSummary(request.responseBody),
+      requestHeaderNames: uniqueSorted(normalizeHeaderEntries(request.headers).map(([name]) => name)),
+      responseHeaderNames: uniqueSorted(normalizeHeaderEntries(request.responseHeaders).map(([name]) => name)),
     };
   }
 }
@@ -568,6 +606,10 @@ function applyRecipeConfig(args, recipeConfig, recipePath) {
     args.actions = ensureArray(recipeConfig.actions).map(normalizeRecipeAction);
   }
 
+  if (recipeConfig.activeOperations) {
+    args.activeOperations = ensureArray(recipeConfig.activeOperations);
+  }
+
   if (recipeConfig.captureScripts !== undefined) {
     args.captureScripts = Boolean(recipeConfig.captureScripts);
   }
@@ -582,6 +624,8 @@ function applyRecipeConfig(args, recipeConfig, recipePath) {
 
 async function parseArgs(argv) {
   const args = {
+    activeOperations: [],
+    activeOperationPlan: null,
     actions: [],
     captureScripts: true,
     cdpEndpoint: "http://127.0.0.1:9222",
@@ -597,6 +641,8 @@ async function parseArgs(argv) {
     matchPathPrefixes: [],
     navigationTimeoutMs: defaultNavigationTimeoutMs,
     networkIdleMs: defaultNetworkIdleMs,
+    operationApprovalDigest: null,
+    operationCeiling: "observe-only",
     outDir: null,
     portal: null,
     postActionSettleMs: defaultPostActionSettleMs,
@@ -893,6 +939,28 @@ async function parseArgs(argv) {
       continue;
     }
 
+    if (arg === "--operation-ceiling" && next) {
+      args.operationCeiling = next.trim();
+      index += 1;
+      continue;
+    }
+
+    if (arg.startsWith("--operation-ceiling=")) {
+      args.operationCeiling = arg.slice("--operation-ceiling=".length).trim();
+      continue;
+    }
+
+    if (arg === "--operation-approval-digest" && next) {
+      args.operationApprovalDigest = next.trim().toLowerCase();
+      index += 1;
+      continue;
+    }
+
+    if (arg.startsWith("--operation-approval-digest=")) {
+      args.operationApprovalDigest = arg.slice("--operation-approval-digest=".length).trim().toLowerCase();
+      continue;
+    }
+
     if (arg.startsWith("--action=")) {
       args.actions.push(parseActionSpec(arg.slice("--action=".length)));
       continue;
@@ -951,6 +1019,22 @@ async function parseArgs(argv) {
     }
   }
 
+  args.activeOperationPlan = validateOperationAuthorization({
+    activeOperations: args.activeOperations,
+    actions: args.actions,
+    approvalDigest: args.operationApprovalDigest,
+    ceiling: args.operationCeiling,
+  });
+  if (args.activeOperationPlan) {
+    const allowedHosts = new Set(args.matchHosts.map((value) => String(value).toLowerCase()));
+    for (const step of Object.values(args.activeOperationPlan.steps)) {
+      const hostname = new URL(step.url).hostname.toLowerCase();
+      if (!allowedHosts.has(hostname)) {
+        throw new Error(`Active operation host ${JSON.stringify(hostname)} must be listed exactly in matchHosts.`);
+      }
+    }
+  }
+
   return args;
 }
 
@@ -998,6 +1082,50 @@ function truncate(value, maxLength = 5000) {
   }
 
   return `${value.slice(0, maxLength)}\n...[truncated ${value.length - maxLength} chars]`;
+}
+
+function graphBatchRequestMetadata(url, body) {
+  try {
+    const graph = parseGraphTransportUrl(url);
+    if (!graph || graph.path !== "/$batch") return null;
+    const parsed = JSON.parse(body);
+    return {
+      requestParsed: true,
+      responseParsed: false,
+      requests: (Array.isArray(parsed?.requests) ? parsed.requests : []).slice(0, 50).map((entry) => ({
+        idDigest: sha256(entry?.id).slice(0, 24),
+        method: String(entry?.method || "GET").toUpperCase(),
+        url: String(entry?.url || ""),
+        bodyShapeFingerprint: bodyShapeFingerprint(entry?.body ?? null),
+        bodyShapeSummary: bodyShapeSummary(entry?.body ?? null),
+        headerNames: uniqueSorted(normalizeHeaderEntries(entry?.headers).map(([name]) => name)),
+      })),
+      responses: [],
+    };
+  } catch {
+    return null;
+  }
+}
+
+function graphBatchResponseMetadata(existing, body) {
+  if (!existing) return null;
+  try {
+    const parsed = JSON.parse(body);
+    return {
+      ...existing,
+      responseParsed: true,
+      responses: (Array.isArray(parsed?.responses) ? parsed.responses : []).slice(0, 50).map((entry) => ({
+        idDigest: sha256(entry?.id).slice(0, 24),
+        status: Number.isFinite(Number(entry?.status)) ? Number(entry.status) : null,
+        mimeType: entry?.headers?.["Content-Type"] ?? entry?.headers?.["content-type"] ?? null,
+        bodyShapeFingerprint: bodyShapeFingerprint(entry?.body ?? null),
+        bodyShapeSummary: bodyShapeSummary(entry?.body ?? null),
+        headerNames: uniqueSorted(normalizeHeaderEntries(entry?.headers).map(([name]) => name)),
+      })),
+    };
+  } catch {
+    return { ...existing, responseParsed: false };
+  }
 }
 
 const redactedBodyValue = "[redacted]";
@@ -1315,9 +1443,11 @@ async function resolveTarget(args) {
 
 async function closeTarget(targetId) {
   try {
-    await fetch(`${apiBase}/json/close/${targetId}`);
+    const response = await fetch(`${apiBase}/json/close/${targetId}`);
+    return response.ok;
   } catch {
     // Best effort only.
+    return false;
   }
 }
 
@@ -1571,12 +1701,14 @@ function buildDomSnapshotExpression() {
   })()`;
 }
 
-function buildClickExpression(action) {
+function buildClickExpression(action, { requireUnique = false } = {}) {
   const encodedMode = JSON.stringify(action.type);
   const encodedValue = JSON.stringify(String(action.value || ""));
+  const encodedRequireUnique = JSON.stringify(requireUnique);
   return `(() => {
     const mode = ${encodedMode};
     const rawValue = ${encodedValue};
+    const requireUnique = ${encodedRequireUnique};
     const normalizeText = (value) => String(value || "").replace(/\\s+/g, " ").trim();
     const normalizedNeedle = normalizeText(rawValue);
     const lowerNeedle = normalizedNeedle.toLowerCase();
@@ -1627,6 +1759,10 @@ function buildClickExpression(action) {
         return candidate.href === rawValue || candidate.absoluteHref === rawValue;
       }
 
+      if (mode === "click-automation-id") {
+        return candidate.automationId === normalizedNeedle;
+      }
+
       const haystacks = [candidate.text, candidate.ariaLabel, candidate.automationId]
         .map((item) => item.toLowerCase())
         .filter(Boolean);
@@ -1638,7 +1774,11 @@ function buildClickExpression(action) {
     });
 
     if (matches.length === 0) {
-      return { clicked: false };
+      return { clicked: false, matchCount: 0 };
+    }
+
+    if (requireUnique && matches.length !== 1) {
+      return { clicked: false, matchCount: matches.length, uniqueControlRequired: true };
     }
 
     matches.sort((left, right) => {
@@ -1649,9 +1789,10 @@ function buildClickExpression(action) {
 
     const match = matches[0];
     match.element.scrollIntoView({ block: "center", inline: "center" });
-    match.element.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, composed: true }));
     if (typeof match.element.click === "function") {
       match.element.click();
+    } else {
+      match.element.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, composed: true }));
     }
 
     return {
@@ -1659,6 +1800,7 @@ function buildClickExpression(action) {
       ariaLabel: match.ariaLabel,
       automationId: match.automationId,
       clicked: true,
+      matchCount: matches.length,
       href: match.href,
       role: match.role,
       tag: match.tag,
@@ -1775,6 +1917,7 @@ function toApiRecord(request, portalName) {
     return {
       schemaVersion: captureArtifactSchemaVersion,
       ...requestEvidence(request),
+      abortedBeforeSend: request.abortedBeforeSend === true,
       attribution: request.attribution,
       confidence: "confirmed-traffic",
       method: request.method,
@@ -1784,6 +1927,7 @@ function toApiRecord(request, portalName) {
       querySamples: querySample ? [querySample] : [],
       requestBodySamples: request.requestBody ? [request.requestBody] : [],
       responseBodySample: request.responseBody ?? null,
+      graphBatch: request.graphBatch ?? null,
       seenOnPages: [request.pageLabel],
       status: request.status ?? null,
       url: request.url,
@@ -1792,6 +1936,7 @@ function toApiRecord(request, portalName) {
     return {
       schemaVersion: captureArtifactSchemaVersion,
       ...requestEvidence(request),
+      abortedBeforeSend: request.abortedBeforeSend === true,
       attribution: request.attribution,
       confidence: "confirmed-traffic",
       method: request.method,
@@ -1801,6 +1946,7 @@ function toApiRecord(request, portalName) {
       querySamples: [],
       requestBodySamples: request.requestBody ? [request.requestBody] : [],
       responseBodySample: request.responseBody ?? null,
+      graphBatch: request.graphBatch ?? null,
       seenOnPages: [request.pageLabel],
       status: request.status ?? null,
       url: request.url,
@@ -2036,9 +2182,19 @@ async function main() {
   const probeAssociations = new Map();
   const passiveTransports = [];
   const actionResults = [];
+  const operationReceipts = [];
+  const operationInterceptionEvents = new Map();
   const actionStartedAt = new Map([[-1, Date.now()]]);
   const boundedNetworkSessions = new Set();
   const configuredSessions = new Set();
+  const fetchEnabledSessions = new Set();
+  const fetchAbortedNetworkRequests = new Set();
+  const pendingFetchHandlers = new Set();
+  const pendingTargetSetups = new Set();
+  let activeAbortContext = null;
+  let stopForUnresolvedMutation = false;
+  let skipRollback = false;
+  let summaryWritten = false;
   let currentActionIndex = -1;
   let currentContext = {
     actionIndex: currentActionIndex,
@@ -2051,6 +2207,145 @@ async function main() {
   const sessions = attributionRegistry.sessions;
   let currentLoadResolver = null;
   let lastNetworkActivityAt = Date.now();
+
+  async function persistOperationReceipts() {
+    if (!args.outDir || args.frontierReadinessOnly) return;
+    await writeFile(
+      path.join(args.outDir, "mutation-events.json"),
+      `${JSON.stringify({
+        schemaVersion: 1,
+        authorization: {
+          ceiling: args.operationCeiling,
+          approvalDigest: args.operationApprovalDigest,
+        },
+        receipts: operationReceipts,
+        summary: summarizeOperationReceipts(operationReceipts),
+      }, null, 2)}\n`,
+      "utf8",
+    );
+  }
+
+  async function replaceOperationReceipt(receipt) {
+    const existingIndex = operationReceipts.findIndex(
+      (entry) => entry.operationId === receipt.operationId,
+    );
+    if (existingIndex >= 0) operationReceipts.splice(existingIndex, 1, receipt);
+    else operationReceipts.push(receipt);
+    await persistOperationReceipts();
+    return receipt;
+  }
+
+  function interceptionAccounting(context, overrides = {}) {
+    return {
+      approvedRequestCount: context?.approvedRequestCount ?? 0,
+      documentInvalidated: false,
+      duplicateApprovedRequestCount: context?.duplicateApprovedRequestCount ?? 0,
+      matchedRequestCount: context?.matchedRequestCount ?? 0,
+      matchedSessionId: context?.matchedSessionId ?? null,
+      matchedTargetId: context?.matchedTargetId ?? null,
+      boundSessionId: context?.boundSessionId ?? null,
+      boundTargetId: context?.boundTargetId ?? null,
+      setupFailureCount: context?.setupFailures?.length ?? 0,
+      targetTerminated: false,
+      unexpectedActiveRequestCount: context?.unexpectedActiveRequestCount ?? 0,
+      uniqueControl: context?.uniqueControl === true,
+      ...overrides,
+    };
+  }
+
+  async function persistReversibleInterceptionContext(context, overrides = {}) {
+    operationInterceptionEvents.set(
+      context.stepName,
+      interceptionAccounting(context, overrides),
+    );
+    const receipt = buildReversibleOperationReceipt(
+      args.activeOperationPlan,
+      capturedRequests,
+      {
+        completedAt: new Date().toISOString(),
+        interception: Object.fromEntries(operationInterceptionEvents),
+      },
+    );
+    await replaceOperationReceipt(receipt);
+    return receipt;
+  }
+
+  async function enableFetchForSession(sessionId = null) {
+    const key = sessionId ?? "root";
+    if (fetchEnabledSessions.has(key)) return;
+    await client.send("Fetch.enable", {
+      patterns: [{ requestStage: "Request", urlPattern: "*" }],
+    }, sessionId);
+    fetchEnabledSessions.add(key);
+  }
+
+  async function beginAbortInterception(plan, stepName = "invoke") {
+    if (activeAbortContext) {
+      throw new Error("Only one active-operation interception may be active at a time.");
+    }
+    let resolveEvent;
+    const eventPromise = new Promise((resolve) => {
+      resolveEvent = resolve;
+    });
+    activeAbortContext = {
+      event: null,
+      eventPromise,
+      approvedRequestCount: 0,
+      containmentOnly: false,
+      duplicateApprovedRequestCount: 0,
+      matchedRequestCount: 0,
+      matchedSessionId: null,
+      matchedTargetId: null,
+      setupFailures: [],
+      plan,
+      resolveEvent,
+      stepName,
+      uniqueControl: false,
+      unexpectedActiveRequestCount: 0,
+    };
+    try {
+      const sessionIds = Array.from(configuredSessions, (key) => key === "root" ? null : key);
+      for (const sessionId of sessionIds) await enableFetchForSession(sessionId);
+    } catch (error) {
+      for (const key of Array.from(fetchEnabledSessions)) {
+        try {
+          await client.send("Fetch.disable", {}, key === "root" ? null : key);
+        } catch {
+          // Closing the CDP client remains the final fail-closed cleanup.
+        }
+        fetchEnabledSessions.delete(key);
+      }
+      activeAbortContext = null;
+      throw new Error(`mutation-interception-unavailable: ${error.message}`);
+    }
+    return activeAbortContext;
+  }
+
+  async function endAbortInterception({ disable = true } = {}) {
+    if (!disable && activeAbortContext) {
+      // Flip the live context before draining handlers. A handler that resumes
+      // from durable-intent persistence must observe containment and fail closed.
+      activeAbortContext.containmentOnly = true;
+    }
+    if (pendingFetchHandlers.size > 0) {
+      await Promise.allSettled(Array.from(pendingFetchHandlers));
+    }
+    if (disable) {
+      const sessionKeys = Array.from(fetchEnabledSessions);
+      for (const key of sessionKeys) {
+        try {
+          await client.send("Fetch.disable", {}, key === "root" ? null : key);
+        } catch {
+          // The receipt still fails closed unless the exact abort was acknowledged.
+        } finally {
+          fetchEnabledSessions.delete(key);
+        }
+      }
+    }
+    const context = activeAbortContext;
+    if (disable) activeAbortContext = null;
+    return context;
+  }
 
   function setCaptureContext(pageLabel, actionIndex = currentActionIndex, pageUrl = null, attempt = 0) {
     currentContext = {
@@ -2105,8 +2400,142 @@ async function main() {
       }
     }
 
+    if (activeAbortContext) {
+      await enableFetchForSession(sessionId);
+    }
     configuredSessions.add(key);
   }
+
+  client.on("Fetch.requestPaused", (params, metadata) => {
+    const context = activeAbortContext;
+    const sessionId = metadata.sessionId ?? null;
+    const requestSessionId = sessionId ?? "root";
+    const request = {
+      attribution: resolveEventAttribution("Fetch.requestPaused", sessionId, params),
+      evidenceId: buildStableEvidenceId("mutation", {
+        actionIndex: currentActionIndex,
+        method: params.request?.method,
+        normalizedUrl: normalizeAttributionUrl(params.request?.url),
+        operationId: context?.plan?.operationId ?? null,
+        sessionId,
+      }),
+      headers: params.request?.headers ?? {},
+      method: params.request?.method ?? null,
+      requestBody: truncate(sanitizeCapturedBody(params.request?.postData ?? null)),
+      requestShapeFingerprint: bodyShapeFingerprint(params.request?.postData ?? null),
+      responseBody: null,
+      sessionId: requestSessionId,
+      status: null,
+      targetId: sessions.get(sessionId)?.targetId ?? null,
+      url: params.request?.url ?? null,
+    };
+    const handler = (async () => {
+      if (!context) {
+        await client.send("Fetch.continueRequest", { requestId: params.requestId }, sessionId);
+        return;
+      }
+      const isFirstApprovedReversibleRequest = context.plan.mode === "reversible-scalar"
+        && context.containmentOnly !== true
+        && context.approvedRequestCount === 0
+        && matchesOperationRequest(
+          context.plan.steps[context.stepName],
+          request,
+          {
+            boundSessionId: context.boundSessionId,
+            boundTargetId: context.boundTargetId,
+          },
+        );
+      if (isFirstApprovedReversibleRequest) {
+        // Persist an unresolved intent before acknowledging Fetch.continueRequest.
+        // If the process exits after the acknowledgement, the ledger still blocks.
+        await persistReversibleInterceptionContext(context);
+      }
+      const outcome = await handlePausedOperationRequest({
+        approvedRequestCount: context.approvedRequestCount,
+        boundSessionId: context.boundSessionId,
+        boundTargetId: context.boundTargetId,
+        containmentOnly: context.containmentOnly === true,
+        plan: context.plan,
+        request,
+        requestId: params.requestId,
+        send: (method, commandParams) => client.send(method, commandParams, sessionId),
+        stepName: context.stepName,
+      });
+      if (outcome.action === "continued-read") return;
+      const exactMatch = [
+        "continued-approved-operation",
+        "failed-approved-operation",
+        "failed-duplicate-approved-operation",
+      ].includes(outcome.action);
+      if (exactMatch) context.matchedRequestCount += 1;
+      if (exactMatch) {
+        context.matchedSessionId = request.sessionId;
+        context.matchedTargetId = request.targetId;
+      }
+      if (outcome.action === "continued-approved-operation") {
+        context.approvedRequestCount += 1;
+      } else if (outcome.action === "failed-duplicate-approved-operation") {
+        context.duplicateApprovedRequestCount += 1;
+      } else if (!exactMatch) {
+        context.unexpectedActiveRequestCount += 1;
+      }
+      if (outcome.failRequestAcknowledged && params.networkId) {
+        const networkKey = requestKey(params.networkId, sessionId);
+        fetchAbortedNetworkRequests.add(networkKey);
+        const pendingRecord = requestMap.get(networkKey);
+        if (pendingRecord) pendingRecord.abortedBeforeSend = true;
+      }
+      const event = {
+        action: outcome.action,
+        approvedRequestCount: context.approvedRequestCount,
+        duplicateApprovedRequestCount: context.duplicateApprovedRequestCount,
+        failRequestAcknowledged: outcome.failRequestAcknowledged,
+        failure: exactMatch ? null : "unexpected-active-request-failed-closed",
+        fetchRequestId: params.requestId,
+        matchedRequestCount: context.matchedRequestCount,
+        matchedSessionId: context.matchedSessionId,
+        matchedTargetId: context.matchedTargetId,
+        networkId: params.networkId ?? null,
+        request,
+        unexpectedActiveRequestCount: context.unexpectedActiveRequestCount,
+      };
+      if (exactMatch || !context.event) context.event = event;
+      context.event.approvedRequestCount = context.approvedRequestCount;
+      context.event.duplicateApprovedRequestCount = context.duplicateApprovedRequestCount;
+      context.event.matchedRequestCount = context.matchedRequestCount;
+      context.event.matchedSessionId = context.matchedSessionId;
+      context.event.matchedTargetId = context.matchedTargetId;
+      context.event.unexpectedActiveRequestCount = context.unexpectedActiveRequestCount;
+      if (context.plan.mode === "reversible-scalar") {
+        await persistReversibleInterceptionContext(context);
+      }
+      context.resolveEvent(context.event);
+    })().catch(async (error) => {
+      let failRequestAcknowledged = false;
+      try {
+        await client.send("Fetch.failRequest", {
+          errorReason: "Aborted",
+          requestId: params.requestId,
+        }, sessionId);
+        failRequestAcknowledged = true;
+      } catch {
+        failRequestAcknowledged = false;
+      }
+      if (context) {
+        context.event = {
+          failRequestAcknowledged,
+          failure: error instanceof Error ? error.message : String(error),
+          fetchRequestId: params.requestId,
+          matchedRequestCount: context.matchedRequestCount,
+          networkId: params.networkId ?? null,
+          request,
+          unexpectedActiveRequestCount: context.unexpectedActiveRequestCount,
+        };
+        context.resolveEvent(context.event);
+      }
+    }).finally(() => pendingFetchHandlers.delete(handler));
+    pendingFetchHandlers.add(handler);
+  });
 
   client.on("Page.loadEventFired", (_params, metadata) => {
     if (metadata.sessionId) {
@@ -2116,7 +2545,7 @@ async function main() {
     currentLoadResolver?.();
   });
 
-  client.on("Target.attachedToTarget", async (params, metadata) => {
+  client.on("Target.attachedToTarget", (params, metadata) => {
     const childSessionId = params.sessionId ?? null;
     if (!childSessionId || childSessionId === metadata.sessionId) {
       return;
@@ -2128,12 +2557,31 @@ async function main() {
       metadata.sessionId ?? null,
     );
 
-    try {
-      await configureSession(childSessionId);
-      await client.send("Runtime.runIfWaitingForDebugger", {}, childSessionId);
-    } catch {
-      // Best effort only.
-    }
+    const setup = (async () => {
+      try {
+        await configureSession(childSessionId);
+        await client.send("Runtime.runIfWaitingForDebugger", {}, childSessionId);
+      } catch (error) {
+        if (activeAbortContext) {
+          activeAbortContext.setupFailures.push({
+            detail: error instanceof Error ? error.message : String(error),
+            sessionId: childSessionId,
+          });
+          activeAbortContext.event = activeAbortContext.event ?? {
+            failRequestAcknowledged: false,
+            failure: "child-target-interception-setup-failed",
+            fetchRequestId: null,
+            matchedRequestCount: activeAbortContext.matchedRequestCount,
+            networkId: null,
+            request: null,
+            unexpectedActiveRequestCount: activeAbortContext.unexpectedActiveRequestCount,
+          };
+          activeAbortContext.resolveEvent(activeAbortContext.event);
+        }
+      }
+    })();
+    pendingTargetSetups.add(setup);
+    setup.finally(() => pendingTargetSetups.delete(setup));
   });
 
   client.on("Target.detachedFromTarget", (params, metadata) => {
@@ -2173,6 +2621,7 @@ async function main() {
     const requestUrl = params.request?.url;
     const sessionId = metadata.sessionId ?? null;
     const key = requestKey(params.requestId, sessionId);
+    const abortedBeforeSend = fetchAbortedNetworkRequests.has(key);
     const attribution = resolveEventAttribution("Network.requestWillBeSent", sessionId, params);
     const probeId = requestUrl
       ? probeAssociations.get(`${sessionId ?? "root"}:${normalizeAttributionUrl(requestUrl)}`) ?? null
@@ -2222,6 +2671,7 @@ async function main() {
     const sanitizedRequestBody = sanitizeCapturedBody(params.request.postData ?? null);
     requestMap.set(key, {
       attribution,
+      abortedBeforeSend,
       evidenceId: buildStableEvidenceId("request", {
         actionIndex: attribution.actionIndex,
         attempt: attribution.attempt,
@@ -2238,7 +2688,9 @@ async function main() {
       pageLabel: attribution.pageLabel,
       probeId,
       requestBody: truncate(sanitizedRequestBody),
+      graphBatch: graphBatchRequestMetadata(requestUrl, sanitizedRequestBody),
       requestShapeFingerprint: bodyShapeFingerprint(sanitizedRequestBody),
+      requestShapeSummary: bodyShapeSummary(sanitizedRequestBody),
       resourceType,
       sessionId,
       startedAt: params.timestamp,
@@ -2326,8 +2778,10 @@ async function main() {
               requestId: params.requestId,
             }, metadata.sessionId);
             const sanitizedResponseBody = sanitizeCapturedBody(decodeBoundedCdpBody(body));
+            record.graphBatch = graphBatchResponseMetadata(record.graphBatch, sanitizedResponseBody);
             record.responseBody = truncate(sanitizedResponseBody);
             record.responseShapeFingerprint = bodyShapeFingerprint(sanitizedResponseBody);
+            record.responseShapeSummary = bodyShapeSummary(sanitizedResponseBody);
           } catch {
             record.responseBody = null;
           }
@@ -2612,16 +3066,38 @@ async function main() {
         probeId: request.probeId ?? null,
         probeOutcome: request.probeId ? probeOutcomes.get(request.probeId) ?? null : null,
         requestBody: request.requestBody ?? null,
+        graphBatch: request.graphBatch ?? null,
         responseBody: request.responseBody ?? null,
         status: request.status ?? null,
         url: request.url,
+        abortedBeforeSend: request.abortedBeforeSend === true,
       }));
 
-      await withPhaseTimeout(
-        writeBundleArtifacts,
-        Math.min(timeoutMs, args.scriptCaptureTimeoutMs),
-        "script-capture",
-      );
+      try {
+        await withPhaseTimeout(
+          writeBundleArtifacts,
+          Math.min(timeoutMs, args.scriptCaptureTimeoutMs),
+          "script-capture",
+        );
+      } catch (error) {
+        if (!(error instanceof CapturePhaseTimeoutError) || error.phase !== "script-capture") throw error;
+        latestBundleSummary = {
+          ...latestBundleSummary,
+          captureStatus: "timed-out",
+          timeoutMs: error.timeoutMs,
+        };
+        await writeFile(
+          path.join(args.outDir, "bundle-capture-failure.json"),
+          `${JSON.stringify({
+            schemaVersion: captureArtifactSchemaVersion,
+            phase: error.phase,
+            status: "timed-out",
+            timeoutMs: error.timeoutMs,
+            impact: "bundle-analysis-incomplete-network-evidence-preserved",
+          }, null, 2)}\n`,
+          "utf8",
+        );
+      }
       await writeMergedArray(
         path.join(args.outDir, "api-records.json"),
         apiRecords,
@@ -2741,6 +3217,7 @@ async function main() {
       .map((request) => ({
         matchesCurrentSpec: shouldMatchRequest(request.url, args),
         attribution: request.attribution,
+        abortedBeforeSend: request.abortedBeforeSend === true,
         method: request.method,
         path: new URL(request.url).pathname,
         sessionId: request.sessionId ?? null,
@@ -2953,16 +3430,75 @@ async function main() {
       });
   }
 
-  async function runClickAction(action, preActionSnapshots = null) {
+  async function runClickAction(
+    action,
+    preActionSnapshots = null,
+    { requireUnique = false, requiredTargetUrl = null } = {},
+  ) {
+    if (requireUnique && pendingTargetSetups.size > 0) {
+      await Promise.allSettled(Array.from(pendingTargetSetups));
+    }
     const beforeUrl = await getRootUrl();
     const beforeStateFingerprint = await getRootStateFingerprint();
     const beforeTargetIds = new Set(sessions.keys());
-    const beforeSnapshots = preActionSnapshots ?? await collectSnapshots();
-    const eligibility = deriveActionEligibility(action, beforeSnapshots);
-    for (const [sessionId, targetInfo] of getOrderedSessions(action.scope)) {
+    const beforeSnapshots = requireUnique
+      ? await collectSnapshots()
+      : preActionSnapshots ?? await collectSnapshots();
+    const eligibleSnapshots = requiredTargetUrl
+      ? beforeSnapshots.filter((snapshot) => {
+          try {
+            return new URL(snapshot.targetUrl ?? snapshot.url).toString() === requiredTargetUrl;
+          } catch {
+            return false;
+          }
+        })
+      : beforeSnapshots;
+    const eligibility = deriveActionEligibility(action, eligibleSnapshots);
+    if (requireUnique && eligibility?.candidateCount !== 1) {
+      return {
+        afterUrl: beforeUrl,
+        beforeUrl,
+        clicked: false,
+        eligibility,
+        matchCount: eligibility?.candidateCount ?? null,
+        uniqueControlRequired: true,
+      };
+    }
+    const boundInventory = requireUnique
+      ? eligibility.targetFrameInventory.find((entry) => entry.candidateCount === 1)
+      : null;
+    if (requireUnique && activeAbortContext && boundInventory) {
+      activeAbortContext.boundSessionId = boundInventory.sessionId;
+      activeAbortContext.boundTargetId = boundInventory.targetId;
+    }
+    const orderedSessions = getOrderedSessions(action.scope).filter(([, targetInfo]) => {
+      if (!requiredTargetUrl) return true;
+      try {
+        return new URL(targetInfo?.targetUrl).toString() === requiredTargetUrl;
+      } catch {
+        return false;
+      }
+    }).filter(([sessionId, targetInfo]) => {
+      if (!boundInventory) return true;
+      const normalizedSessionId = sessionId ?? "root";
+      return normalizedSessionId === boundInventory.sessionId
+        && (boundInventory.targetId == null || targetInfo?.targetId === boundInventory.targetId);
+    });
+    for (const [sessionId, targetInfo] of orderedSessions) {
+      if (requireUnique && activeAbortContext?.setupFailures.length > 0) {
+        return {
+          afterUrl: beforeUrl,
+          beforeUrl,
+          clicked: false,
+          eligibility,
+          failure: "operation-interception-setup-failed",
+          matchCount: eligibility.candidateCount,
+          uniqueControlRequired: true,
+        };
+      }
       try {
         attributionRegistry.setSessionContext(sessionId, currentContext);
-        const result = await evaluateJson(client, buildClickExpression(action), sessionId);
+        const result = await evaluateJson(client, buildClickExpression(action, { requireUnique }), sessionId);
         if (!result?.clicked) {
           continue;
         }
@@ -2988,11 +3524,26 @@ async function main() {
             (targetId) => !beforeTargetIds.has(targetId),
           ),
           targetTitle: targetInfo?.targetTitle ?? null,
+          targetId: targetInfo?.targetId ?? null,
           targetType: targetInfo?.targetType ?? "page",
           targetUrl: targetInfo?.targetUrl ?? null,
         };
-      } catch {
-        // Try the next session.
+      } catch (error) {
+        if (requireUnique) {
+          return {
+            afterUrl: beforeUrl,
+            beforeUrl,
+            clicked: false,
+            eligibility,
+            failure: "bound-operation-target-evaluation-failed",
+            failureDetail: error instanceof Error ? error.message : String(error),
+            matchCount: eligibility.candidateCount,
+            targetId: targetInfo?.targetId ?? null,
+            sessionId: sessionId ?? "root",
+            uniqueControlRequired: true,
+          };
+        }
+        // Non-active discovery may try the next matching session.
       }
     }
 
@@ -3002,6 +3553,183 @@ async function main() {
       clicked: false,
       eligibility,
     };
+  }
+
+  async function runAbortOperationAction(action, preActionSnapshots) {
+    const plan = args.activeOperationPlan;
+    let context;
+    try {
+      context = await beginAbortInterception(plan);
+    } catch (error) {
+      const receipt = buildAbortOperationReceipt(plan, {
+        failRequestAcknowledged: false,
+        matchedRequestCount: 0,
+        request: null,
+        setupFailureCount: 1,
+        unexpectedActiveRequestCount: 0,
+        uniqueControl: false,
+      }, { completedAt: new Date().toISOString() });
+      await replaceOperationReceipt(receipt);
+      throw error;
+    }
+    let clickResult;
+    let event = null;
+    let documentInvalidated = false;
+    let targetTerminated = false;
+    let currentlyProven = false;
+    try {
+      clickResult = await runClickAction(action, preActionSnapshots, {
+        requireUnique: true,
+        requiredTargetUrl: plan.steps.invoke.targetUrl,
+      });
+      context.uniqueControl = clickResult?.clicked === true
+        && clickResult?.eligibility?.candidateCount === 1
+        && clickResult?.matchCount === 1;
+      if (clickResult?.clicked) {
+        event = await Promise.race([
+          context.eventPromise,
+          delay(args.postActionSettleMs).then(() => null),
+        ]);
+      }
+    } finally {
+      currentlyProven = context.event?.failRequestAcknowledged === true
+        && context.matchedRequestCount === 1
+        && context.unexpectedActiveRequestCount === 0
+        && context.setupFailures.length === 0;
+      if (clickResult?.clicked && !currentlyProven) {
+        // Enter containment before navigation or close can yield to a late Fetch event.
+        context.containmentOnly = true;
+        try {
+          await client.send("Page.navigate", { url: "about:blank" });
+          await delay(Math.min(args.networkIdleMs, 1000));
+          documentInvalidated = true;
+        } catch {
+          documentInvalidated = false;
+        }
+        try {
+          const result = await client.send("Target.closeTarget", { targetId: target.id });
+          targetTerminated = result?.success === true;
+        } catch {
+          targetTerminated = false;
+        }
+        if (!targetTerminated) targetTerminated = await closeTarget(target.id);
+      }
+      const completedContext = await endAbortInterception({
+        disable: currentlyProven || targetTerminated || !clickResult?.clicked,
+      });
+      event = event ?? completedContext?.event ?? null;
+    }
+    const receipt = buildAbortOperationReceipt(plan, {
+      ...(event ?? {}),
+      boundSessionId: context.boundSessionId ?? null,
+      boundTargetId: context.boundTargetId ?? null,
+      matchedRequestCount: context.matchedRequestCount,
+      matchedSessionId: context.matchedSessionId,
+      matchedTargetId: context.matchedTargetId,
+      setupFailureCount: context.setupFailures.length,
+      uniqueControl: context.uniqueControl,
+      unexpectedActiveRequestCount: context.unexpectedActiveRequestCount,
+    }, { completedAt: new Date().toISOString() });
+    receipt.accounting.documentInvalidated = documentInvalidated;
+    receipt.accounting.boundSessionId = context.boundSessionId ?? null;
+    receipt.accounting.boundTargetId = context.boundTargetId ?? null;
+    receipt.accounting.targetTerminated = targetTerminated;
+    receipt.accounting.interceptionHeldOnContainmentFailure = clickResult?.clicked === true
+      && !currentlyProven
+      && !targetTerminated;
+    await replaceOperationReceipt(receipt);
+    return {
+      ...clickResult,
+      operation: {
+        operationId: receipt.operationId,
+        executionState: receipt.executionState,
+        unresolvedReason: receipt.unresolvedReason,
+      },
+    };
+  }
+
+  async function runReversibleMutationAction(action, preActionSnapshots, operationStep) {
+    const plan = args.activeOperationPlan;
+    let context;
+    try {
+      context = await beginAbortInterception(plan, operationStep.name);
+    } catch (error) {
+      const failedContext = {
+        approvedRequestCount: 0,
+        duplicateApprovedRequestCount: 0,
+        matchedRequestCount: 0,
+        setupFailures: [{ detail: error instanceof Error ? error.message : String(error) }],
+        stepName: operationStep.name,
+        unexpectedActiveRequestCount: 0,
+        uniqueControl: false,
+      };
+      await persistReversibleInterceptionContext(failedContext);
+      throw error;
+    }
+    let clickResult;
+    let documentInvalidated = false;
+    let targetTerminated = false;
+    try {
+      clickResult = await runClickAction(action, preActionSnapshots, {
+        requireUnique: true,
+        requiredTargetUrl: operationStep.targetUrl,
+      });
+      context.uniqueControl = clickResult?.clicked === true
+        && clickResult?.eligibility?.candidateCount === 1
+        && clickResult?.matchCount === 1;
+      if (clickResult?.clicked) {
+        await Promise.race([
+          context.eventPromise,
+          delay(args.postActionSettleMs),
+        ]);
+      }
+    } finally {
+      if (clickResult?.clicked && context.approvedRequestCount === 0) {
+        // Enter containment before navigation, close, or pending-handler drain.
+        context.containmentOnly = true;
+        try {
+          await client.send("Page.navigate", { url: "about:blank" });
+          await delay(Math.min(args.networkIdleMs, 1000));
+          documentInvalidated = true;
+        } catch {
+          documentInvalidated = false;
+        }
+        try {
+          const result = await client.send("Target.closeTarget", { targetId: target.id });
+          targetTerminated = result?.success === true;
+        } catch {
+          targetTerminated = false;
+        }
+        if (!targetTerminated) targetTerminated = await closeTarget(target.id);
+      }
+      await endAbortInterception({
+        disable: context.approvedRequestCount > 0
+          || targetTerminated
+          || !clickResult?.clicked,
+      });
+    }
+    const interception = interceptionAccounting(context, {
+      documentInvalidated,
+      interceptionHeldOnContainmentFailure: clickResult?.clicked === true
+        && context.approvedRequestCount === 0
+        && !targetTerminated,
+      targetTerminated,
+    });
+    operationInterceptionEvents.set(operationStep.name, interception);
+    return { ...clickResult, operationInterception: interception };
+  }
+
+  async function refreshReversibleOperationReceipt() {
+    const receipt = buildReversibleOperationReceipt(
+      args.activeOperationPlan,
+      capturedRequests,
+      {
+        completedAt: new Date().toISOString(),
+        interception: Object.fromEntries(operationInterceptionEvents),
+      },
+    );
+    await replaceOperationReceipt(receipt);
+    return receipt;
   }
 
   async function runSeededReplayAction(action, basePageLabel) {
@@ -3296,10 +4024,29 @@ async function main() {
     await captureCheckpoint(currentContext.pageLabel);
 
     for (const [index, action] of args.actions.entries()) {
+      if (stopForUnresolvedMutation) break;
       const pageLabel = buildActionLabel(action, index);
       currentActionIndex = index;
       actionStartedAt.set(index, Date.now());
       setCaptureContext(pageLabel);
+      const operationStep = operationStepAtActionIndex(args.activeOperationPlan, index);
+
+      if (
+        args.activeOperationPlan?.mode === "reversible-scalar"
+        && operationStep?.name === "rollback"
+        && skipRollback
+      ) {
+        actionResults.push({
+          actionIndex: index,
+          page: pageLabel,
+          required: action.required,
+          result: { skipped: true, reason: "post-state-equals-pre-state" },
+          scope: action.scope,
+          type: action.type,
+          value: action.value,
+        });
+        continue;
+      }
 
       if (action.type === "wait-ms") {
         await delay(Number(action.value));
@@ -3373,6 +4120,34 @@ async function main() {
         });
         await waitForNetworkIdle(args.postActionSettleMs);
         await captureCheckpoint(pageLabel);
+        if (args.activeOperationPlan?.mode === "reversible-scalar" && operationStep) {
+          const receipt = await refreshReversibleOperationReceipt();
+          if (operationStep.name === "preState") {
+            const beforeValue = receipt.scalar.beforeValue;
+            const validBefore = args.activeOperationPlan.scalar.type === "boolean"
+              ? typeof beforeValue === "boolean"
+              : Number.isSafeInteger(beforeValue);
+            const preEvidence = receipt.evidence.preState;
+            const validPreResponse = Number.isInteger(preEvidence?.status)
+              && preEvidence.status >= 200
+              && preEvidence.status < 300
+              && Boolean(preEvidence.responseHeaders?.etag);
+            if (!validBefore || !validPreResponse) stopForUnresolvedMutation = true;
+          }
+          if (operationStep.name === "postState") {
+            if (receipt.unresolvedReason === "no-change-final-state-pending") {
+              skipRollback = true;
+            } else if (receipt.unresolvedReason !== "rollback-request-not-observed") {
+              stopForUnresolvedMutation = true;
+            }
+          }
+          if (
+            operationStep.name === "finalState"
+            && receipt.executionState === "unresolved-change"
+          ) {
+            stopForUnresolvedMutation = true;
+          }
+        }
         continue;
       }
 
@@ -3425,7 +4200,18 @@ async function main() {
       const beforePageState = pageStates.at(-1);
       const beforeUrl = await getRootUrl();
       const beforeRequestFamilies = new Set(capturedRequests.map(requestFamily));
-      const clickResult = await runClickAction(action, beforeSnapshots);
+      const clickResult = args.activeOperationPlan?.mode === "abort-only" && operationStep?.name === "invoke"
+        ? await runAbortOperationAction(action, beforeSnapshots)
+        : args.activeOperationPlan?.mode === "reversible-scalar"
+          && ["apply", "rollback"].includes(operationStep?.name)
+          ? await runReversibleMutationAction(action, beforeSnapshots, operationStep)
+          : await runClickAction(action, beforeSnapshots, {
+            requireUnique: args.activeOperationPlan?.mode === "reversible-scalar"
+              && ["apply", "rollback"].includes(operationStep?.name),
+            requiredTargetUrl: args.activeOperationPlan?.mode === "reversible-scalar"
+              ? operationStep?.targetUrl ?? null
+              : null,
+          });
       const actionResult = {
         actionIndex: index,
         highValue: action.highValue === true,
@@ -3437,6 +4223,17 @@ async function main() {
         value: action.value,
       };
       actionResults.push(actionResult);
+      if (args.activeOperationPlan?.mode === "reversible-scalar" && operationStep) {
+        const receipt = await refreshReversibleOperationReceipt();
+        actionResult.result.operation = {
+          operationId: receipt.operationId,
+          executionState: receipt.executionState,
+          unresolvedReason: receipt.unresolvedReason,
+        };
+        if (operationStep.name === "apply" && !receipt.accounting.applySent) {
+          stopForUnresolvedMutation = true;
+        }
+      }
       const checkpoint = await captureCheckpoint(pageLabel);
       const afterRequestFamilies = new Set(capturedRequests.map(requestFamily));
       actionResult.result.transitionEvidence = buildTransitionEvidence({
@@ -3450,10 +4247,20 @@ async function main() {
           .filter((family) => !beforeRequestFamilies.has(family))
           .sort(),
       });
+      if (
+        args.activeOperationPlan?.mode === "abort-only"
+        && operationStep?.name === "invoke"
+        && clickResult.operation?.executionState === "unresolved-change"
+      ) {
+        stopForUnresolvedMutation = true;
+      }
     }
 
     await waitForNetworkIdle(args.postActionSettleMs);
     await flushArtifacts();
+    if (args.activeOperationPlan?.mode === "reversible-scalar") {
+      await refreshReversibleOperationReceipt();
+    }
     const filteredRequests = capturedRequests.filter((request) => shouldMatchRequest(request.url, args));
     const scopedHosts = uniqueSorted(filteredRequests.map((request) => {
       try {
@@ -3475,6 +4282,7 @@ async function main() {
       capturedApiRequests: capturedRequests.length,
       finalUrl: await getRootUrl(),
       interactionHealth: actionValidation.interactionHealth,
+      mutationSummary: summarizeOperationReceipts(operationReceipts),
       outDir: args.outDir,
       pageCount: pageStates.length,
       passiveTransportCount: passiveTransports.length,
@@ -3493,8 +4301,21 @@ async function main() {
       `${JSON.stringify(summary, null, 2)}\n`,
       "utf8",
     );
+    summaryWritten = true;
     console.log(JSON.stringify(summary, null, 2));
   } finally {
+    if (
+      !args.frontierReadinessOnly
+      && args.activeOperationPlan?.mode === "reversible-scalar"
+      && !summaryWritten
+    ) {
+      try {
+        await waitForNetworkIdle(Math.min(args.postActionSettleMs, 5000));
+        await refreshReversibleOperationReceipt();
+      } catch {
+        // Preserve any earlier incremental receipt; missing terminal evidence stays unresolved.
+      }
+    }
     await client.close();
     if (target.closeWhenDone) {
       await closeTarget(target.id);

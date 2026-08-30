@@ -5,9 +5,16 @@ but every live browser-owner/CDP lifecycle is globally serialized across all spe
 and portal hosts. Exactly one owner, preflight, alignment, ledger attempt, capture,
 finalization, and shutdown lifecycle may be active at a time. A next live lifecycle
 waits for terminal owner shutdown, artifact/ledger accounting, evidence review,
-qualified spec/Postman PR disposition, and process-improvement disposition. Review
-and controller sessions require exact runtime model `gpt-5.6-luna`; wrong-model
-output is rejected.
+qualified spec/Postman PR disposition, and process-improvement disposition.
+
+The model policy is exact and fail-closed. The coordinating/orchestrating session
+uses `gpt-5.6-sol` at high reasoning and owns assignment quality, acceptance, and
+the final quality gate. Bounded live CDP capture uses `gpt-5.6-luna` at low
+reasoning. Offline evidence, safety, scope, and promotion review uses exact
+`gpt-5.6-luna` at `xhigh` by default; the orchestrator may select `max` for an
+especially ambiguous or high-risk review. Sol reviews Luna's structured output
+but does not replace the required Luna review artifact. A wrong model or reasoning
+level for the assigned role is rejected.
 
 Workers receive one schema-versioned assignment from the offline controller. The
 worker must return the assignment ID and digest, assignment type, terminal status,
@@ -21,6 +28,20 @@ change the ledger or specifications.
 Every directory under `specifications` has a durable queued/attempted/reviewed
 state. Missing directories are blockers and cannot silently disappear from the
 queue.
+
+Every engagement has three co-equal outcomes:
+
+1. find operations not represented by any checked-in specification, across all
+   observed HTTP methods plus GraphQL, RPC, streaming, and job-style transports;
+2. recheck known operations and identify those that now error, no longer emit,
+   or may have been removed, while distinguishing removal candidates from auth,
+   feature, tenant-data, parameter, and transient-service failures; and
+3. fill incomplete operation data, including parameters, request bodies,
+   response statuses, media types, schemas, auth/routing context, descriptions,
+   examples, and evidence provenance.
+
+Do not optimize only for new GET paths. A known-route replay is useful when it
+produces endpoint-health evidence or fills a concrete metadata gap.
 
 Process-improvement assignments/results may classify known deterministic reason
 codes and prepare evidence-linked proposals only; Luna or an operator must
@@ -67,6 +88,10 @@ dependencies, repair the environment, review unrelated portals, promote
 findings, create a branch or pull request, or merge changes. The orchestrator
 owns those stages.
 
+This capture assignment requires exact `gpt-5.6-luna` at low reasoning. Return
+the runtime model and reasoning level. Do not continue under another model or
+silently change reasoning level.
+
 The first action, before reading any repository documentation, is to switch to
 the named target worktree, or use absolute `git -C <target-worktree>` paths.
 Then read `AGENT_DISCOVERY_RUNBOOK.md` and follow it exactly. Report and verify
@@ -79,13 +104,13 @@ a commit. Apply recovery in this order: a complete immutable capture artifact
 is accepted evidence; analyze it once and reconstruct the report instead of
 retrying the worker. An incomplete capture is not accepted evidence; preserve
 it, record its hash, and use the seeded retry in a new artifact directory. Only
-when no materialized usable capture or report exists after null output, a
-low-capability capture assignment uses exactly `gpt-5.3-codex-spark`, retries
-exactly once with a compact read-only report-first request, then escalates
-exactly to `gpt-5.6-luna` if that retry remains null. Assignments already routed
-to Luna or manual review keep that route. Preserve every materialized
-failed-worker artifact and record its hash. Do not launch a broad wave until a
-representative probe materializes accepted output.
+when no materialized usable capture or report exists after null output, retry
+the exact Luna-low assignment once with a compact report-first request. If that
+retry also returns null, the Sol orchestrator inspects the assignment and
+artifact directory, then either issues one fresh bounded Luna-low assignment or
+records a structured blocker. Sol does not become the capture worker. Preserve
+every materialized failed-worker artifact and record its hash. Do not launch a
+broad wave until a representative probe materializes accepted output.
 
 Before interpreting counts, normalize each observation and checked-in
 specification operation to an uppercase method, path template, and canonical
@@ -146,11 +171,13 @@ before preflight or ledger-attempt consumption; report the structured blocker
 and remediation instead of truncating or silently omitting actions.
 
 An expensive capture also requires a checked-in `noveltyFrontier`. Each target
-must name the unvisited UI state, expected host/route family, expected request
-or response-shape/metadata signal, evidence level, safe deterministic recipe
-actions, and an acceptance key. Run plans with `--require-novelty`; matched
-known traffic is baseline context, not discovery yield. Every planned frontier
-target must be attempted or receive a structured blocker. The terminal
+must name the unvisited UI state or known operation being revalidated, expected
+host/route family, expected request or response-shape/metadata/health signal,
+evidence level, safe deterministic recipe actions, and an acceptance key. Run
+plans with `--require-novelty`; matched known traffic is baseline context unless
+it fills a declared metadata gap or establishes a new health/regression signal.
+Every planned frontier target must be attempted or receive a structured blocker.
+The terminal
 `novelty-assessment.json` must classify the run as `productive`,
 `frontier-incomplete`, `no-target-signal`, or `no-novelty`. A complete artifact
 set with zero expected-route records is `no-target-signal`, not `no-novelty`;
@@ -161,6 +188,52 @@ same-URL navigation emitted traffic. A completed `no-novelty` run is not a
 successful discovery and must not be repeated unchanged. It can support a
 saturation conclusion only after canonical health passes and no critical
 frontier item remains.
+
+Treat evidence age and API novelty as separate dimensions. A stale spec or a
+missing live-ledger repetition is a `capture-freshness-gap`, not authorization
+to replay a satisfied recipe. A weak or generic schema may reopen capture only
+when sanitized immutable evidence proves a non-empty response shape and an
+exact deterministic UI state can be approved. If row/detail provenance is
+missing, record `missing-immutable-state-provenance` and stop before browser
+allocation rather than inventing a selector, identifier, or candidate ID.
+
+Endpoint yield is broader than new routes. For every known operation, inventory
+and improve: portal surface and workflow; required headers, auth profile,
+permissions, and tenant/feature prerequisites; path/query/body variants and
+pagination; sanitized request and success-response examples; observed error
+statuses, error bodies, and remediation; availability; side effects and
+reversibility; and provenance/confidence. A checked-in target may declare
+`expectedDocumentationObjectives` for `request-example`, `response-example`,
+`error-example`, or `pagination-observation`. A sanitized action-attributed
+example for a known documented schema then counts as productive enrichment even
+when it is not a new route or shape. Never persist credentials, tokens, cookies,
+tenant identifiers, or unsanitized user/customer data as an example.
+
+Treat Microsoft Graph traffic as a first-class adjacent telemetry lane, not as
+discardable shell noise in any portal. Preserve direct Graph operations and
+approved proxy transports (`security.microsoft.com/apiproxy/msgraph`,
+`purview.microsoft.com/apiproxy/msgraph`, and
+`admin.cloud.microsoft/fd/msgraph`) and expand parseable `/$batch` members.
+Do not infer Graph from Azure Resource Graph, GraphQL, `graphData`, Yammer hosts,
+token audiences, or lookalike paths. Compare method and normalized
+path against both v1.0 and beta from one pinned, hashed snapshot of Microsoft's
+official metadata before calling anything undocumented. Documented Graph calls
+still enrich portal workflow, permission, pagination, request/response-shape,
+error, and troubleshooting evidence; do not duplicate those public operations
+into a portal-owned OpenAPI spec. Route contract deltas to a separate Graph
+research/ownership review and, after admission validation, the dedicated
+`Microsoft Graph Research` specification. Only the tenant-safe `graph-telemetry.json` projection
+may enter handoff; raw Graph bodies remain local evidence because they can contain
+tenant IDs, users, organization data, and other customer content. Safe shape
+summaries and header names may be retained; header and body values may not.
+Preserve sanitized batch-wrapper status, member-status, parse, and malformed-
+member diagnostics so a failed or invalid batch is not erased merely because it
+produced no usable child operation.
+For a Graph-focused inventory recipe, declare `graphTelemetryObjectives` with a
+tenant-safe checked-in operation-key baseline and minimum new, enriched, batch,
+proxy, and checkpoint counts as appropriate. The run is productive only when the verified contract
+snapshot is present and every declared minimum is met; a generic `/me` replay is
+not useful discovery.
 
 Compile the offline frontier before allocating a browser:
 
@@ -187,13 +260,19 @@ unioned `seenOnPages` list so one target cannot inherit another target's query
 or shape signal. Empty JSON arrays or objects are not response-shape evidence.
 
 Accepted runtime keys enter the overlay only through a schema-validated
-`baseline-approval.json` from exact model `gpt-5.6-luna`. The approval binds the
-spec, canonical signal, evidence IDs, terminal canonical health, and source
+`baseline-approval.json` from exact model `gpt-5.6-luna` at `xhigh` or `max`.
+The approval records `workerReasoning` and binds the spec, canonical signal,
+evidence IDs, terminal canonical health, and source
 artifact digest. `npm run sync:portal-baseline -- compile <input.json>` emits an
 append-only, idempotent sync result. The input names `sourceArtifactPath`; the
 compiler hashes that file and verifies every approved evidence ID against its
 immutable `evidenceIndex`. Free-form prose, wrong-model output, stale artifact
 hashes, missing evidence, and scope changes never mutate the baseline.
+
+Every model-backed review result also requires a machine-validated nested Sol
+quality gate. Exact `gpt-5.6-sol` at high reasoning must accept the result and
+bind its assignment ID, assignment digest, and worker-result digest; missing,
+rejected, wrong-role, or stale gates fail closed.
 
 When a frontier depends on a specific visible control, declare
 `frontierControlReadiness` with the exact targeted click action indexes and a
@@ -240,20 +319,92 @@ Read the primary output files named by the runbook, including
 `candidate-handoff.json`. The `all` phase already performs the normalized
 family diff; do not recommend that diff as a separate post-run command. This is
 an execution-only validation: do not edit, commit, or push repository files.
-Browser/CDP/live capture and write execution require explicit operator
-authorization. Do not submit forms, invoke writes, follow redirects, export secrets, or copy
-cookies, bearer tokens, or tenant data into chat. Landing supported findings is
-a separate human-reviewed specification PR.
+Browser/CDP/live capture and active operation execution require explicit operator
+authorization with an exact ceiling: `observe-only`, `abort-only`, or
+`reversible-scalar`. Passive capture retains every observed method; do not filter
+non-GET traffic merely because it may change state. For an active operation,
+prefer a checked-in runner action that proves the request was aborted before
+backend execution. The checked-in runner supports one active operation plan per
+run. The operator must pass the plan's exact ceiling and offline-computed digest;
+the plan must bind an exact `click-automation-id`, target page URL, method,
+request URL, request-body shape fingerprint, and action index. The fingerprint
+must come from passive traffic or checked-in bundle evidence. Missing or mismatched authorization fails before
+browser allocation. Generate the reviewable digest with
+`npm run approve:portal-operation -- --recipe <recipe> --operation <id> [--var name=value]`,
+then pass `--operation-ceiling <mode> --operation-approval-digest <digest>` to
+`discover:portal`.
+Before an active click, require completed Fetch setup for every attached child,
+a refreshed inventory with exactly one eligible control, and a binding to that
+control's concrete target/session. Never fall through to another same-URL target
+after active-target evaluation fails. A paused request counts as an exact match
+only when its emitting CDP target and session equal that runtime binding.
+
+For `abort-only`, the runner enables CDP Fetch interception at Request stage on
+the root and attached child sessions before the click. It continues ordinary
+reads, fails unexpected non-GET or active-looking GET traffic closed, and calls
+`Fetch.failRequest` for the one exact approved request. Only the acknowledged
+failure of exactly one matched request from exactly one eligible control is
+`aborted-before-send`. An interception setup failure, extra active request,
+ambiguous control, timeout, or failed CDP command is `unresolved-change`; the
+runner invalidates the active document while interception is still enabled and
+attempts to close the exact page target. If containment cannot be acknowledged,
+interception remains enabled in containment-only mode until the CDP session
+terminates: ordinary reads may continue, but every later mutation or
+active-looking GET is failed. The runner blocks later live work.
+
+Treat `aborted-before-send` as proof about the exact paused browser request only:
+it was failed at CDP Fetch Request stage instead of continued to the network.
+Do not infer that temporary local UI state was unchanged; report checkpoint and
+transition evidence separately.
+
+`reversible-scalar` is limited to one
+known object and one low-impact bool, bounded integer, or similarly trivial
+scalar with a captured original value and deterministic rollback. It never
+covers create/delete, identity or access changes, credentials, exports, jobs,
+shared shell actions, bulk actions, retention/destructive settings, or changes
+whose scope or rollback is uncertain. Required local evidence is a successful
+pre-state read, mutation request/response, and post-state read. When post-state
+confirms the test value, also require a rollback request/response and final read
+proving restoration. When post-state proves the original value never changed,
+do not send a rollback; require one final read confirming the original value.
+Every captured response must succeed, and any apply/rollback pair must carry
+ETag/If-Match concurrency proof. Full sanitized evidence is stored locally in
+`mutation-events.json`; only state, IDs, digests, accounting, and remediation
+flow into `summary.json`, `candidate-handoff.json`, and the ledger.
+
+The apply and rollback clicks also run inside Fetch Request-stage gates. Each
+gate continues exactly one approved request and fails duplicate or unexpected
+active requests before send; the receipt includes the gate accounting. Any sent
+request with failed or unknown post-state or rollback is an unresolved real
+change: stop all further mutation work, preserve the evidence, and call out the
+exact operator remediation without copying tenant values into chat.
+The runner durably writes an unresolved intent before acknowledging an approved
+mutation, validates receipt/summary consistency, recovers mutation state when
+the capture process fails, and forbids the ledger from recording an unsafe
+active-operation summary as completed. Artifact validation independently
+rechecks terminal Fetch-gate accounting, target/session bindings, step evidence,
+scalar restoration, concurrency proof, and exact plan linkage; a claimed safe
+state without those fields is rejected.
+It also rejects mutation artifacts whose operation ID, ceiling, or approval
+digest does not match the current authorized plan.
+
+Do not follow redirects, export secrets, or copy cookies, bearer tokens, or
+tenant data into chat. Landing supported findings is a separate human-reviewed
+specification PR.
 
 Return the exact compact completion structure from the runbook, including the
 target worktree, expected and actual kickoff SHA, kickoff clean/dirty status,
 expected and actual final SHA, final clean/dirty status, and every artifact path
-with immutable status and SHA-256 hash. Distinguish
-confirmed reads, confirmed candidates needing safety classification, successful
-probes, bundle-only candidates, suppressions, and adjacent scope-review
-evidence. Report adjacent confirmed reads, confirmed non-GETs, successful
-probes, and bundle-only leads separately; they require explicit specification
-and host-family assignment and are not promotion-ready for the target spec.
+with immutable status and SHA-256 hash. Distinguish confirmed reads, confirmed
+non-GETs, confirmed candidates needing safety classification, successful probes,
+bundle-only candidates, suppressions, known-operation health/regression evidence,
+operation execution states, and adjacent scope-review evidence. Report adjacent
+confirmed reads, confirmed non-GETs, successful probes, and bundle-only leads
+separately; they require explicit specification and host-family assignment and
+are not promotion-ready for the target spec. Report every active-operation
+attempt as `aborted-before-send`, `sent-no-confirmed-change`,
+`committed-and-restored`, or `unresolved-change`; absence of a response or an
+unchanged UI is never proof that no change occurred.
 Use the driver's evidence-driven recommended next action. If the driver emits a
 blocker, report its code and remediation rather than improvising around it.
 

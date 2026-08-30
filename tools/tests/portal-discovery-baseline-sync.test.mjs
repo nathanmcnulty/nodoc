@@ -19,6 +19,7 @@ function approval(overrides = {}) {
     signalClass: "response-shape",
     evidenceIds: ["evidence-1"],
     workerModel: "gpt-5.6-luna",
+    workerReasoning: "xhigh",
     decision: "accept",
     sourceArtifactDigest,
     health: { complete: true, available: true, accountingConsistent: true },
@@ -39,7 +40,8 @@ test("Luna-approved signals append idempotently with immutable provenance", () =
 
 test("baseline sync rejects wrong model, stale evidence, scope drift, and incomplete health", () => {
   for (const invalid of [
-    approval({ workerModel: "gpt-5.3-codex-spark" }),
+    approval({ workerModel: "gpt-5.6-terra" }),
+    approval({ workerReasoning: "high" }),
     approval({ sourceArtifactDigest: "2".repeat(64) }),
     approval({ specId: "beta" }),
     approval({ health: { complete: false, available: true, accountingConsistent: true } }),

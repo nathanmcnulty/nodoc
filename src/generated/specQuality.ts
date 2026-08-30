@@ -200,6 +200,39 @@ export const generatedSpecDataByTitle = {
       "description": "Solid structure with examples, but still meaningful debt to reduce."
     }
   },
+  "Microsoft Graph Research": {
+    "title": "Microsoft Graph Research",
+    "specPath": "specifications/nodoc-graph-research/specification/openapi.yml",
+    "specSourceUrl": "https://github.com/nathanmcnulty/nodoc/tree/main/specifications/nodoc-graph-research/specification",
+    "specDownloadUrl": "https://raw.githubusercontent.com/nathanmcnulty/nodoc/main/specifications/nodoc-graph-research/specification/openapi.yml",
+    "operationCount": 1,
+    "tagCount": 1,
+    "tagGroupCount": 1,
+    "ungroupedTagCount": 0,
+    "duplicateGroupedTagCount": 0,
+    "singleTagGroupCount": 1,
+    "hostLikeTagGroupCount": 0,
+    "navigationStandardized": true,
+    "displayNameTagCount": 0,
+    "metadataComplete": true,
+    "contactDefined": true,
+    "licenseDefined": true,
+    "externalDocsDefined": true,
+    "allServersDescribed": true,
+    "placeholderCount": 0,
+    "blankDescriptionCount": 0,
+    "publicLiveCaptureDescriptionCount": 0,
+    "headerProfileCount": 0,
+    "operationContextCount": 1,
+    "requestExampleCount": 1,
+    "successResponseExampleCount": 1,
+    "evidenceMentionCount": 4,
+    "maturity": {
+      "label": "Growing",
+      "tone": "warning",
+      "description": "Solid structure with examples, but still meaningful debt to reduce."
+    }
+  },
   "Entra IAM": {
     "title": "Entra IAM",
     "specPath": "specifications/nodoc-ibiza-iam/specification/openapi.yml",

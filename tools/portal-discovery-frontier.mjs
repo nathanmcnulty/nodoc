@@ -9,7 +9,11 @@ export const frontierClasses = [
   "safety-ownership-schema-conflict", "incomplete-health", "benchmark-regression",
 ];
 export const offlineFrontierSchemaVersion = 1;
-const gapClasses = new Set(["route", "query", "request-shape", "response-shape", "response-metadata", "ownership"]);
+const gapClasses = new Set([
+  "route", "query", "request-shape", "response-shape", "response-metadata", "ownership",
+  "operation-context", "parameter-example", "request-example", "response-example",
+  "error-behavior", "permissions", "pagination",
+]);
 
 const stableJson = (value) => `${JSON.stringify(value)}\n`;
 export const frontierDigest = (value) => createHash("sha256").update(stableJson(value), "utf8").digest("hex");
@@ -150,6 +154,26 @@ export function compileOfflineFrontier({ specId, specification = {}, coverage = 
     if (!operation.requestSchemaDocumented) add({ hostFamily: host, gapClass: "request-shape", canonicalKey: key, evidence: ["openapi"], sourceRefs: ["checked-in-openapi"], requiredActionState: mapping, status: mapping && executablePlan ? "approved" : "candidate", blockers: mapping && executablePlan ? [] : ["exact-ui-state-approval-required"] });
     if (!operation.responseSchemaDocumented) add({ hostFamily: host, gapClass: "response-shape", canonicalKey: key, evidence: ["openapi"], sourceRefs: ["checked-in-openapi"], requiredActionState: mapping, status: mapping && executablePlan ? "approved" : "candidate", blockers: mapping && executablePlan ? [] : ["exact-ui-state-approval-required"] });
     if (operation.responseStatuses.length === 0 || operation.responseContentTypes.length === 0) add({ hostFamily: host, gapClass: "response-metadata", canonicalKey: key, evidence: ["openapi"], sourceRefs: ["checked-in-openapi"], requiredActionState: mapping, status: mapping && executablePlan ? "approved" : "candidate", blockers: mapping && executablePlan ? [] : ["exact-ui-state-approval-required"] });
+    const enrichment = (gapClass, applies) => {
+      if (!applies) return;
+      add({
+        hostFamily: host,
+        gapClass,
+        canonicalKey: key,
+        evidence: ["openapi-documentation-inventory"],
+        sourceRefs: ["checked-in-openapi"],
+        requiredActionState: mapping,
+        status: "candidate",
+        blockers: ["sanitized-documentation-evidence-required"],
+      });
+    };
+    enrichment("operation-context", operation.operationContextFields.length === 0);
+    enrichment("parameter-example", operation.parameterCount > operation.parameterExamplesDocumented.length);
+    enrichment("request-example", operation.requestContentTypes.length > 0 && !operation.requestExampleDocumented);
+    enrichment("response-example", !operation.responseExampleDocumented);
+    enrichment("error-behavior", operation.errorResponseStatuses.length === 0 || !operation.errorExampleDocumented);
+    enrichment("permissions", !operation.permissionsDocumented);
+    enrichment("pagination", operation.listLike && !operation.paginationDocumented);
   }
   for (const gap of [...(coverage.openGaps ?? []), ...(coverage.openGapClasses ?? [])]) {
     add({ gapClass: inferredGapClass(gap), canonicalKey: `coverage ${safeText(gap)}`, evidence: ["coverage-ledger"], sourceRefs: ["coverage-ledger"], blockers: ["exact-route-and-ui-state-required"] });
@@ -178,7 +202,21 @@ export function compileOfflineFrontier({ specId, specification = {}, coverage = 
         ? "capture-authorized"
         : "blocked-no-exact-frontier";
   const core = { schemaVersion: offlineFrontierSchemaVersion, specId: safeText(specId), items, terminal };
-  return { ...core, frontierSetId: `offline-frontier-set-${frontierDigest(core).slice(0, 24)}`, frontierSetDigest: frontierDigest(core), measurements: { approvedCount: approved.length, candidateCount: items.filter((entry) => entry.status === "candidate").length, itemCount: items.length, unresolvedOwnershipCount: unresolvedOwnership.length } };
+  return {
+    ...core,
+    frontierSetId: `offline-frontier-set-${frontierDigest(core).slice(0, 24)}`,
+    frontierSetDigest: frontierDigest(core),
+    measurements: {
+      approvedCount: approved.length,
+      candidateCount: items.filter((entry) => entry.status === "candidate").length,
+      countsByGapClass: Object.fromEntries([...gapClasses].sort().map((name) => [
+        name,
+        items.filter((entry) => entry.gapClass === name).length,
+      ])),
+      itemCount: items.length,
+      unresolvedOwnershipCount: unresolvedOwnership.length,
+    },
+  };
 }
 
 export function validateOfflineFrontier(value) {

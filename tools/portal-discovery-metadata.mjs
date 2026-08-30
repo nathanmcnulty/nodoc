@@ -115,6 +115,13 @@ export const crawlMetadataByTitle = {
     nextPass: "full-layered-crawl",
     reason: "Recorder support now exists for the shared services host, so use a broader crawl to expand M365 Apps discovery.",
   },
+  "Microsoft Graph Research": {
+    portalUrl: "https://graph.microsoft.com",
+    authModel: "Delegated Microsoft Graph bearer token observed through portal-owned browser sessions",
+    crawlPriority: "diff-first",
+    nextPass: "cross-portal-contract-delta-corroboration",
+    reason: "Research-only ownership surface for Graph operations absent from pinned official v1.0 and beta contracts; collect evidence through owning portal recipes.",
+  },
   "Power Platform": {
     portalUrl: "https://admin.powerplatform.microsoft.com",
     authModel: "Portal bearer tokens + service-specific audiences",
@@ -228,6 +235,10 @@ export const coverageOverlayByTitle = {
     lastSuccessfulPassDepth: "diff-first",
     notes: [
       "Use child reactblade iframe targets rather than only the top-level shell when planning future Entra IAM follow-up passes.",
+      "The August 2026 exact-state reload capture completed with healthy action accounting and observed only GET /api/Permissions on main.iam; it produced no in-scope confirmed candidate and no target signal for /B2B/customIdentityProviders.",
+    ],
+    openGaps: [
+      "The current All identity providers state did not emit the checked-in main.iam GET /B2B/customIdentityProviders operation. Reopen only with a different deterministic product-bearing state or current bundle-to-control mapping; non-observation alone is not removal evidence.",
     ],
   },
   "Entra IDGov": {
@@ -345,6 +356,26 @@ export const coverageOverlayByTitle = {
       "clients.config.office.net",
     ],
     lastSuccessfulPassDepth: "deep-interaction",
+  },
+  "Microsoft Graph Research": {
+    seedUrls: [
+      "https://graph.microsoft.com",
+    ],
+    observedHosts: [
+      "graph.microsoft.com",
+      "admin.cloud.microsoft",
+      "purview.microsoft.com",
+      "security.microsoft.com",
+    ],
+    lastSuccessfulPassDepth: "cross-portal-contract-delta-review",
+    notes: [
+      "This is a research ownership surface, not a standalone portal; capture through the owning portal recipes and promote only canonical Graph member operations absent from the pinned official contracts.",
+      "Proxy routes and the Graph batch wrapper remain in their owning portal specifications and evidence artifacts.",
+    ],
+    openGaps: [
+      "Corroborate current Intune candidates with fresh complete captures and structured response shapes before promotion.",
+      "Exercise the Defender, Purview, and M365 Admin Graph proxy inventories with authenticated dedicated profiles.",
+    ],
   },
   "M365 Admin": {
     seedUrls: [
@@ -577,6 +608,7 @@ export const coverageOverlayByTitle = {
 export const captureRecipesByTitle = {
   Defender: [
     "tools/capture-recipes/defender-deep.json",
+    "tools/capture-recipes/defender-graph-inventory.json",
     "tools/capture-recipes/defender-telemetry-verification.json",
     "tools/capture-recipes/defender-entity-replay.json",
   ],
@@ -586,6 +618,7 @@ export const captureRecipesByTitle = {
   ],
   "Entra IAM": [
     "tools/capture-recipes/entra-iam-deep.json",
+    "tools/capture-recipes/entra-graph-inventory.json",
     "tools/capture-recipes/entra-iam-seeded-replay.json",
   ],
   "Entra IDGov": [
@@ -612,11 +645,13 @@ export const captureRecipesByTitle = {
   ],
   "Intune Portal": [
     "tools/capture-recipes/intune-deep.json",
+    "tools/capture-recipes/intune-graph-inventory.json",
     "tools/capture-recipes/intune-portal-deep.json",
     "tools/capture-recipes/intune-seeded-replay.json",
   ],
   "M365 Admin": [
     "tools/capture-recipes/m365-admin-deep.json",
+    "tools/capture-recipes/m365-admin-graph-inventory.json",
     "tools/capture-recipes/m365-admin-seeded-replay.json",
   ],
   "M365 Apps Config": [
@@ -640,6 +675,7 @@ export const captureRecipesByTitle = {
   ],
   Purview: [
     "tools/capture-recipes/purview-deep.json",
+    "tools/capture-recipes/purview-graph-inventory.json",
     "tools/capture-recipes/purview-seeded-replay.json",
   ],
   "Purview Portal": [

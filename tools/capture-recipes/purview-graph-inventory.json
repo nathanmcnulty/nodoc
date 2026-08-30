@@ -1,0 +1,52 @@
+{
+  "portal": "Purview",
+  "url": "https://purview.microsoft.com",
+  "pageTarget": {
+    "matchHosts": ["purview.microsoft.com"],
+    "matchPathPrefixes": ["/"]
+  },
+  "matchHosts": ["purview.microsoft.com"],
+  "matchPathPrefixes": ["/apiproxy"],
+  "captureScripts": false,
+  "graphTelemetryObjectives": {
+    "contractRequired": true,
+    "minimumOperationCount": 3,
+    "minimumNewOperationCount": 1,
+    "minimumProxyOperationCount": 1,
+    "minimumEnrichedOperationCount": 2,
+    "minimumCheckpointCount": 3,
+    "minimumNewEnrichedProductOperationCount": 1,
+    "productProxyOnly": true,
+    "productExcludeOperationKeys": [
+      "v1.0 GET /admin/serviceAnnouncement/messages",
+      "v1.0 GET /subscribedSkus",
+      "v1.0 GET /users/{id}/photo/$value"
+    ],
+    "baselineOperationKeys": [
+      "beta GET /identity/conditionalAccess/policies",
+      "beta GET /roleManagement/directory/transitiveRoleAssignments",
+      "v1.0 GET /admin/serviceAnnouncement/messages",
+      "v1.0 GET /directory/administrativeUnits",
+      "v1.0 GET /directoryRoles",
+      "v1.0 GET /me/getMemberObjects",
+      "v1.0 GET /roleManagement/directory/roleAssignments",
+      "v1.0 GET /subscribedSkus"
+    ]
+  },
+  "postActionSettleMs": 8000,
+  "settleMs": 10000,
+  "actions": [
+    "navigate=https://purview.microsoft.com/datalifecyclemanagement",
+    "wait-ms=8000",
+    "capture=purview-records-management-graph",
+    "navigate=https://purview.microsoft.com/insiderriskmgmt",
+    "wait-ms=8000",
+    "capture=purview-insider-risk-graph",
+    "navigate=https://purview.microsoft.com/datalossprevention/overview",
+    "wait-ms=8000",
+    "capture=purview-data-loss-prevention-graph",
+    "navigate=https://purview.microsoft.com/compliancemanager/assessmentspage",
+    "wait-ms=8000",
+    "capture=purview-compliance-manager-graph"
+  ]
+}

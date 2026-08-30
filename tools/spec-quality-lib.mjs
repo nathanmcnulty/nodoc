@@ -1149,6 +1149,49 @@ function normalizeOperationContext(
     normalized.workflows = workflows;
   }
 
+  const permissions = normalizeOperationContextStringArray(value.permissions, context, "permissions");
+  if (permissions !== undefined) {
+    normalized.permissions = permissions;
+  }
+
+  const troubleshooting = normalizeOperationContextStringArray(
+    value.troubleshooting,
+    context,
+    "troubleshooting",
+  );
+  if (troubleshooting !== undefined) {
+    normalized.troubleshooting = troubleshooting;
+  }
+
+  if (value.pagination !== undefined) {
+    if (!value.pagination || typeof value.pagination !== "object" || Array.isArray(value.pagination)) {
+      throw new Error(`${context} has an invalid pagination value.`);
+    }
+    const paginationContext = `${context} pagination`;
+    const style = normalizeOperationContextString(value.pagination.style, paginationContext, "style");
+    const validStyles = new Set(["none", "offset", "cursor", "link", "odata", "custom"]);
+    if (!validStyles.has(style)) {
+      throw new Error(`${paginationContext} has an invalid style value.`);
+    }
+    const requestParameters = normalizeOperationContextStringArray(
+      value.pagination.requestParameters,
+      paginationContext,
+      "requestParameters",
+    );
+    const responseFields = normalizeOperationContextStringArray(
+      value.pagination.responseFields,
+      paginationContext,
+      "responseFields",
+    );
+    const notes = normalizeOperationContextStringArray(value.pagination.notes, paginationContext, "notes");
+    normalized.pagination = {
+      style,
+      ...(requestParameters !== undefined ? { requestParameters } : {}),
+      ...(responseFields !== undefined ? { responseFields } : {}),
+      ...(notes !== undefined ? { notes } : {}),
+    };
+  }
+
   const headerProfile = normalizeOperationContextString(
     value.headerProfile,
     context,
@@ -1358,7 +1401,7 @@ function getNormalizedAuthProfiles(specification, title) {
   );
 }
 
-function getNormalizedOperationContextRecords(specification, title) {
+export function getNormalizedOperationContextRecords(specification, title) {
   const headerProfiles = getNormalizedHeaderProfiles(specification, title);
   const authProfiles = getNormalizedAuthProfiles(specification, title);
   const headerProfileNames = new Set(Object.keys(headerProfiles));

@@ -36,7 +36,13 @@ test("offline frontier compiler never authorizes capture without an exact approv
   const blocked = compileOfflineFrontier({ specId: "alpha", specification, coverage: {}, recipe: {} });
   validateOfflineFrontier(blocked);
   assert.equal(blocked.terminal, "blocked-no-exact-frontier");
-  assert.equal(blocked.items[0].status, "candidate");
+  assert.ok(blocked.items.every((item) => item.status === "candidate"));
+  assert.deepEqual(
+    [...new Set(blocked.items.map((item) => item.gapClass))].sort(),
+    ["error-behavior", "operation-context", "permissions", "response-example", "response-metadata", "response-shape"],
+  );
+  assert.equal(blocked.measurements.countsByGapClass["response-example"], 1);
+  assert.equal(blocked.measurements.countsByGapClass.pagination, 0);
 
   const recipe = {
     url: "https://portal.example.test",
@@ -50,7 +56,8 @@ test("offline frontier compiler never authorizes capture without an exact approv
   };
   const approved = compileOfflineFrontier({ specId: "alpha", specification, coverage: {}, recipe });
   assert.equal(approved.terminal, "capture-authorized");
-  assert.equal(approved.items[0].requiredActionState.targetId, "items-shape");
+  assert.equal(approved.items.find((item) => item.gapClass === "response-shape")?.requiredActionState.targetId, "items-shape");
+  assert.ok(approved.items.find((item) => item.gapClass === "response-example")?.blockers.includes("sanitized-documentation-evidence-required"));
 
   const ownershipBlocked = compileOfflineFrontier({ specId: "alpha", specification: { paths: {} }, recipe, candidateHandoff: { adjacentConfirmedReadCandidates: [{ hostFamily: "other.example", method: "GET", normalizedPath: "/items", evidenceIds: ["evidence-1"] }] } });
   assert.equal(ownershipBlocked.terminal, "blocked-adjacent-ownership");

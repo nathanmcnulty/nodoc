@@ -48,10 +48,27 @@ import {
 } from "./portal-discovery-recipe.mjs";
 import { planActionBudget } from "./portal-discovery-action-budget.mjs";
 import {
+  summarizeOperationReceipts,
+  validateMutationEventsArtifact,
+  validateOperationSummary,
+} from "./portal-discovery-operation-safety.mjs";
+import {
   buildNoveltyPlan,
   deriveNoveltyBaseline,
   evaluateNoveltyEvidence,
 } from "./portal-discovery-novelty.mjs";
+import {
+  operationStepAtActionIndex,
+  validateOperationAuthorization,
+} from "./portal-discovery-operation-safety.mjs";
+import {
+  buildGraphResearchQueue,
+  buildGraphTelemetry,
+  validateGraphResearchQueue,
+  validateGraphTelemetry,
+} from "./graph-telemetry.mjs";
+import { loadGraphContractCache } from "./graph-contract-cache.mjs";
+import { evaluateGraphTelemetryObjectives } from "./graph-telemetry-objectives.mjs";
 
 const validPhases = new Set(["all", "analyze", "capture", "plan"]);
 
@@ -133,6 +150,10 @@ export function validateSelectedRecipeTarget(recipe) {
   }
 }
 
+export function frontierReadinessSupervisionTimeout(readinessTimeoutMs, supervisionTimeoutMs) {
+  return Math.max(supervisionTimeoutMs, readinessTimeoutMs + 30000);
+}
+
 function parseArgs(argv) {
   const args = {
     artifacts: null,
@@ -153,6 +174,8 @@ function parseArgs(argv) {
     expectedProduct: null,
     priority: "normal",
     model: null,
+    operationApprovalDigest: null,
+    operationCeiling: "observe-only",
     reasoning: null,
     workerId: null,
     view: "all",
@@ -171,6 +194,8 @@ function parseArgs(argv) {
     seedArtifacts: null,
     targetId: null,
     bundleCacheDir: null,
+    graphContractDir: process.env.LOCALAPPDATA ? path.join(process.env.LOCALAPPDATA, "nodoc-cdp", "graph-contract") : null,
+    graphContractDisabled: false,
     supervisionTimeoutMs: 120000,
     captureSupervisionTimeoutMs: 900000,
     variables: [],
@@ -240,6 +265,12 @@ function parseArgs(argv) {
     } else if (argument === "--reasoning" && next) {
       args.reasoning = next;
       index += 1;
+    } else if (argument === "--operation-ceiling" && next) {
+      args.operationCeiling = next.trim();
+      index += 1;
+    } else if (argument === "--operation-approval-digest" && next) {
+      args.operationApprovalDigest = next.trim().toLowerCase();
+      index += 1;
     } else if (argument === "--worker-id" && next) {
       args.workerId = next;
       index += 1;
@@ -281,6 +312,11 @@ function parseArgs(argv) {
     } else if (argument === "--bundle-cache-dir" && next) {
       args.bundleCacheDir = path.resolve(next);
       index += 1;
+    } else if (argument === "--graph-contract-dir" && next) {
+      args.graphContractDir = path.resolve(next);
+      index += 1;
+    } else if (argument === "--no-graph-contract") {
+      args.graphContractDisabled = true;
     } else if (argument === "--supervision-timeout-ms" && next) {
       args.supervisionTimeoutMs = Number(next);
       index += 1;
@@ -412,13 +448,51 @@ async function selectRecipe(specRecord, explicitRecipe, { requireNovelty = false
     ?? null;
 }
 
-async function inspectRecipeSafety(recipePath) {
-  const recipe = JSON.parse(await readFile(recipePath, "utf8"));
+function expandRecipeVariables(value, variables) {
+  if (typeof value === "string") {
+    return value.replace(/\$\{([^}]+)\}/gu, (_match, name) => {
+      if (!Object.prototype.hasOwnProperty.call(variables, name)) {
+        throw new Error(`Recipe variable ${JSON.stringify(name)} was not provided.`);
+      }
+      return String(variables[name]);
+    });
+  }
+  if (Array.isArray(value)) return value.map((entry) => expandRecipeVariables(entry, variables));
+  if (value && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, entry]) => [key, expandRecipeVariables(entry, variables)]),
+    );
+  }
+  return value;
+}
+
+function recipeVariables(recipe, cliVariables) {
+  const variables = { ...(recipe.variables ?? {}) };
+  for (const specification of cliVariables ?? []) {
+    const separator = specification.indexOf("=");
+    if (separator <= 0) throw new Error(`Invalid --var value ${JSON.stringify(specification)}.`);
+    variables[specification.slice(0, separator).trim()] = specification.slice(separator + 1);
+  }
+  return variables;
+}
+
+async function inspectRecipeSafety(recipePath, args = {}) {
+  const sourceRecipe = JSON.parse(await readFile(recipePath, "utf8"));
+  const recipe = expandRecipeVariables(
+    sourceRecipe,
+    recipeVariables(sourceRecipe, args.variables),
+  );
+  const activeOperationPlan = validateOperationAuthorization({
+    activeOperations: recipe.activeOperations ?? [],
+    actions: recipe.actions ?? [],
+    approvalDigest: args.operationApprovalDigest,
+    ceiling: args.operationCeiling ?? "observe-only",
+  });
   const unsafeActionPattern =
-    /(?:^|[\s/_-])(?:delete|execute|export|generate|invoke|log-?out|publish|remove|run|save|sign-?out|start|submit|sync|trigger)(?:$|[\s/_.?&=-])/iu;
+    /(?:^|[\s/_-])(?:apply|confirm|create|delete|disable|enable|execute|export|generate|invoke|log-?out|publish|remove|reset|run|save|sign-?out|start|submit|sync|trigger|update)(?:$|[\s/_.?&=-])/iu;
   const unsafeActions = [];
 
-  for (const action of recipe.actions ?? []) {
+  for (const [actionIndex, action] of (recipe.actions ?? []).entries()) {
     const rawType = typeof action === "string"
       ? action.split("=", 1)[0]
       : String(action?.type || "");
@@ -426,7 +500,8 @@ async function inspectRecipeSafety(recipePath) {
       ? action.slice(action.indexOf("=") + 1)
       : String(action?.value || "");
     const type = rawType.replace(/-(?:root|iframe)$/u, "");
-    if (type.startsWith("click") && unsafeActionPattern.test(value)) {
+    const authorizedStep = operationStepAtActionIndex(activeOperationPlan, actionIndex);
+    if (type.startsWith("click") && unsafeActionPattern.test(value) && !authorizedStep) {
       unsafeActions.push(`${rawType}=${value}`);
     }
     if (type === "navigate") {
@@ -449,6 +524,7 @@ async function inspectRecipeSafety(recipePath) {
   }
 
   return {
+    activeOperationPlan,
     safe: unsafeActions.length === 0,
     unsafeActions,
   };
@@ -604,6 +680,74 @@ async function readInteractionHealth(artifactDir) {
   return sanitizeInteractionHealth(aggregateInteractionHealth(actionResults, {
     reported: reportedInteractionHealth?.counts,
   }));
+}
+
+function unresolvedOperationSummary(plan, reason) {
+  return summarizeOperationReceipts([{
+    schemaVersion: 1,
+    operationId: plan.operationId,
+    mode: plan.mode,
+    approvalDigest: plan.approvalDigest,
+    executionState: "unresolved-change",
+    unresolvedReason: reason,
+    accounting: { artifactValidationFailed: true },
+    evidence: {},
+  }]);
+}
+
+async function readVerifiedMutationSummary(
+  artifactDir,
+  { activeOperationPlan = null, captureSummary = null } = {},
+) {
+  let events = null;
+  try {
+    events = JSON.parse(await readFile(path.join(artifactDir, "mutation-events.json"), "utf8"));
+  } catch (error) {
+    if (error?.code !== "ENOENT") {
+      if (activeOperationPlan) {
+        return unresolvedOperationSummary(activeOperationPlan, "mutation-artifact-invalid");
+      }
+      throw error;
+    }
+  }
+  try {
+    if (!events) {
+      if (activeOperationPlan) {
+        return unresolvedOperationSummary(activeOperationPlan, "mutation-artifact-missing");
+      }
+      return captureSummary?.mutationSummary
+        ? validateOperationSummary(captureSummary.mutationSummary)
+        : null;
+    }
+    return validateMutationEventsArtifact(events, {
+      activeOperationPlan,
+      captureSummary: captureSummary?.mutationSummary ?? null,
+    });
+  } catch (error) {
+    if (activeOperationPlan) {
+      return unresolvedOperationSummary(activeOperationPlan, "mutation-artifact-inconsistent");
+    }
+    throw error;
+  }
+}
+
+function operationBlocker(mutationSummary, { captureFailure = null } = {}) {
+  if (!mutationSummary || mutationSummary.safeToContinue !== false) return null;
+  const unresolvedReceipt = mutationSummary.receipts?.find(
+    (receipt) => receipt.executionState === "unresolved-change",
+  );
+  return {
+    code: unresolvedReceipt?.mode === "abort-only"
+      ? "mutation-abort-unproven"
+      : "mutation-rollback-unresolved",
+    detail: captureFailure
+      ? "Capture failed while an active operation lacks terminal abort or restoration proof."
+      : "An active operation lacks terminal abort or restoration proof.",
+    operationIds: mutationSummary.unresolvedOperationIds,
+    ...(captureFailure ? { captureFailure } : {}),
+    remediation:
+      "Stop live work, inspect mutation-events.json locally, and resolve the named operation before another live lifecycle.",
+  };
 }
 
 async function inspectCaptureCompleteness(artifactDir) {
@@ -844,9 +988,17 @@ async function main() {
   let selectedRecipe;
   let actionBudget;
   let noveltyPlan;
+  let recipeSafety;
   try {
     selectedRecipe = JSON.parse(await readFile(recipePath, "utf8"));
     validateSelectedRecipeTarget(selectedRecipe);
+    recipeSafety = await inspectRecipeSafety(recipePath, args);
+    if (!recipeSafety.safe) {
+      const error = new Error("The selected recipe contains active-looking actions outside the authorized operation plan.");
+      error.code = "unsafe-recipe-action";
+      error.blocker = { unsafeActions: recipeSafety.unsafeActions };
+      throw error;
+    }
     const derivedBaseline = deriveNoveltyBaseline(await loadBundledSpecification(path.resolve(repoRoot, specRecord.specPath)));
     noveltyPlan = buildNoveltyPlan(selectedRecipe, { required: args.requireNovelty, derivedBaseline });
     actionBudget = buildActionBudget(selectedRecipe);
@@ -858,7 +1010,11 @@ async function main() {
       startedAt: new Date().toISOString(),
       status: "blocked",
       blocker: {
-        code: ["action-budget-exceeded", "novelty-frontier-invalid", "recipe-target-invalid"].includes(error?.code) ? error.code : "recipe-invalid",
+        code: ["action-budget-exceeded", "novelty-frontier-invalid", "recipe-target-invalid", "unsafe-recipe-action"].includes(error?.code)
+          ? error.code
+          : /operation|approval|ceiling/iu.test(error?.message ?? "")
+            ? "mutation-authorization-required"
+            : "recipe-invalid",
         detail: error instanceof Error ? error.message : String(error),
         ...(error?.blocker ?? {}),
       },
@@ -917,16 +1073,35 @@ async function main() {
           args.cdpEndpoint,
           "--frontier-readiness-only",
         ];
+        if (recipeSafety.activeOperationPlan) {
+          readinessArgs.push(
+            "--operation-ceiling",
+            args.operationCeiling,
+            "--operation-approval-digest",
+            args.operationApprovalDigest,
+          );
+        }
         for (const variable of args.variables) {
           readinessArgs.push("--var", variable);
         }
         const readinessTimeoutMs = Number(selectedRecipe.frontierControlReadiness.timeoutMs) || 15000;
-        args.frontierReadiness = await runNodeJson(
-          path.join(repoRoot, "tools", "cdp-deep-capture.mjs"),
-          readinessArgs,
-          Math.max(30000, readinessTimeoutMs + 30000),
-          { cwd: repoRoot },
-        );
+        try {
+          args.frontierReadiness = await runNodeJson(
+            path.join(repoRoot, "tools", "cdp-deep-capture.mjs"),
+            readinessArgs,
+            frontierReadinessSupervisionTimeout(readinessTimeoutMs, args.supervisionTimeoutMs),
+            { cwd: repoRoot },
+          );
+        } catch (error) {
+          if (error instanceof ProcessSupervisionTimeoutError) {
+            error.code = "frontier-control-timeout";
+            error.blocker = {
+              timeoutMs: error.timeoutMs,
+              remediation: "Preserve the browser owner, verify the target remains responsive, and retry readiness without consuming a ledger attempt.",
+            };
+          }
+          throw error;
+        }
         if (args.frontierReadiness.status !== "ready") {
           const readinessError = new Error("Required frontier controls are not uniquely available on the authenticated target.");
           readinessError.code = "frontier-control-unavailable";
@@ -948,7 +1123,7 @@ async function main() {
       startedAt: new Date().toISOString(),
       status: "blocked",
       blocker: {
-        code: ["action-budget-exceeded", "frontier-control-unavailable"].includes(error?.code)
+        code: ["action-budget-exceeded", "frontier-control-timeout", "frontier-control-unavailable"].includes(error?.code)
           ? error.code
           : error?.message?.startsWith("browser-cdp-preflight:") ? "browser-cdp-preflight-failed" : "ledger-dispatch-conflict",
         detail: error instanceof Error ? error.message : String(error),
@@ -969,6 +1144,11 @@ async function main() {
     brief,
     phase: args.phase,
     noveltyPlan,
+    activeOperationAuthorization: {
+      ceiling: args.operationCeiling,
+      approvalDigest: args.operationApprovalDigest,
+      operationId: recipeSafety.activeOperationPlan?.operationId ?? null,
+    },
     startedAt: new Date().toISOString(),
     status: "running",
     preflight: args.preflightAlignment
@@ -999,6 +1179,11 @@ async function main() {
   let interactionHealthStatus = null;
   let captureSummary = null;
   let noveltyAssessment = null;
+  let graphTelemetry = null;
+  let graphResearchQueue = null;
+  let graphTelemetryAssessment = null;
+  let mutationBlocker = null;
+  let mutationSummary = null;
   let actionResults = [];
   let recipe = null;
   try {
@@ -1028,7 +1213,6 @@ async function main() {
         return;
       }
 
-      const recipeSafety = await inspectRecipeSafety(recipePath);
       if (!recipeSafety.safe) {
         runState.status = "blocked";
         runState.blocker = {
@@ -1057,6 +1241,14 @@ async function main() {
       }
       if (args.bundleCacheDir) {
         captureArgs.push("--bundle-cache-dir", args.bundleCacheDir);
+      }
+      if (recipeSafety.activeOperationPlan) {
+        captureArgs.push(
+          "--operation-ceiling",
+          args.operationCeiling,
+          "--operation-approval-digest",
+          args.operationApprovalDigest,
+        );
       }
       for (const variable of args.variables) {
         captureArgs.push("--var", variable);
@@ -1093,6 +1285,14 @@ async function main() {
           timeoutMs: failure?.timeoutMs ?? args.captureSupervisionTimeoutMs,
           remediation: "Preserve the immutable artifacts and retry into a new empty directory, optionally seeded from this capture.",
         };
+        mutationSummary = await readVerifiedMutationSummary(args.artifacts, {
+          activeOperationPlan: recipeSafety.activeOperationPlan,
+        });
+        runState.activeOperations = mutationSummary;
+        const mutationFailureBlocker = operationBlocker(mutationSummary, {
+          captureFailure: runState.blocker,
+        });
+        if (mutationFailureBlocker) runState.blocker = mutationFailureBlocker;
         await persistTerminalRun(args, runState);
         process.exitCode = 2;
         console.error(JSON.stringify(runState, null, 2));
@@ -1102,6 +1302,12 @@ async function main() {
       captureSummary = JSON.parse(
         await readFile(path.join(args.artifacts, "summary.json"), "utf8"),
       );
+      mutationSummary = await readVerifiedMutationSummary(args.artifacts, {
+        activeOperationPlan: recipeSafety.activeOperationPlan,
+        captureSummary,
+      });
+      runState.activeOperations = mutationSummary;
+      mutationBlocker = operationBlocker(mutationSummary);
       captureCompleteness = await inspectCaptureCompleteness(args.artifacts);
       runState.capture = captureCompleteness;
       interactionHealth = await readInteractionHealth(args.artifacts);
@@ -1221,6 +1427,46 @@ async function main() {
           if (error?.code !== "ENOENT" && !(error instanceof SyntaxError)) throw error;
         }
       }
+      mutationSummary = mutationSummary ?? await readVerifiedMutationSummary(args.artifacts, {
+        activeOperationPlan: recipeSafety.activeOperationPlan,
+        captureSummary,
+      });
+      runState.activeOperations = mutationSummary;
+      if (mutationSummary?.safeToContinue === false && !mutationBlocker) {
+        mutationBlocker = operationBlocker(mutationSummary);
+      }
+      let analysisApiRecords = [];
+      try {
+        analysisApiRecords = JSON.parse(await readFile(path.join(args.artifacts, "api-records.json"), "utf8"));
+      } catch (error) {
+        if (error?.code !== "ENOENT" && !(error instanceof SyntaxError)) throw error;
+      }
+      const graphContracts = args.graphContractDisabled ? null : await loadGraphContractCache(args.graphContractDir);
+      graphTelemetry = buildGraphTelemetry({ apiRecords: analysisApiRecords, ...(graphContracts ?? {}) });
+      validateGraphTelemetry(graphTelemetry);
+      await writeFile(
+        path.join(args.artifacts, "graph-telemetry.json"),
+        `${JSON.stringify(graphTelemetry, null, 2)}\n`,
+        "utf8",
+      );
+      graphResearchQueue = buildGraphResearchQueue(graphTelemetry);
+      validateGraphResearchQueue(graphResearchQueue);
+      await writeFile(
+        path.join(args.artifacts, "graph-research-queue.json"),
+        `${JSON.stringify(graphResearchQueue, null, 2)}\n`,
+        "utf8",
+      );
+      graphTelemetryAssessment = evaluateGraphTelemetryObjectives({
+        objectives: recipe.graphTelemetryObjectives,
+        telemetry: graphTelemetry,
+      });
+      if (graphTelemetryAssessment) {
+        await writeFile(
+          path.join(args.artifacts, "graph-telemetry-assessment.json"),
+          `${JSON.stringify(graphTelemetryAssessment, null, 2)}\n`,
+          "utf8",
+        );
+      }
       const candidateQueuePath = path.join(args.artifacts, "candidate-queue.json");
       const candidateHandoffPath = path.join(args.artifacts, "candidate-handoff.json");
       const candidateArgs = [
@@ -1256,6 +1502,7 @@ async function main() {
       }
       const candidateQueue = JSON.parse(await readFile(candidateQueuePath, "utf8"));
       const saturation = evaluateDiscoverySaturation({
+        activeOperations: mutationSummary,
         actionResults,
         candidateQueue,
         capture: captureCompleteness,
@@ -1271,21 +1518,19 @@ async function main() {
         interactionHealth,
         interactionHealthStatus,
         metadataNextPass: brief.metadataNextPass,
+        graphTelemetry,
+        graphTelemetryAssessment,
+        graphResearchQueue,
+        mutationSummary,
         recovery: captureCompleteness,
         specId: specRecord.specId,
         specTitle: specRecord.title,
         saturation,
       });
       if (noveltyPlan) {
-        let apiRecords = [];
-        try {
-          apiRecords = JSON.parse(await readFile(path.join(args.artifacts, "api-records.json"), "utf8"));
-        } catch (error) {
-          if (error?.code !== "ENOENT" && !(error instanceof SyntaxError)) throw error;
-        }
         noveltyAssessment = evaluateNoveltyEvidence({
           actionResults,
-          apiRecords,
+          apiRecords: analysisApiRecords,
           candidateHandoff,
           noveltyPlan,
           recipe,
@@ -1323,10 +1568,14 @@ async function main() {
       runState.candidateCounts = candidateHandoff.counts;
       runState.recommendedNextAction = candidateHandoff.recommendedNextAction;
       runState.novelty = noveltyAssessment;
+      runState.graphTelemetryAssessment = graphTelemetryAssessment;
       runState.saturation = saturation;
     }
 
-    if (noveltyAssessment && noveltyAssessment.status !== "productive") {
+    if (mutationBlocker) {
+      runState.status = "blocked";
+      runState.blocker = mutationBlocker;
+    } else if (noveltyAssessment && noveltyAssessment.status !== "productive") {
       runState.status = "blocked";
       runState.blocker = {
         code: noveltyAssessment.status,
@@ -1336,6 +1585,13 @@ async function main() {
             ? "The capture artifacts completed, but no expected frontier route materialized; this run cannot satisfy or retire the frontier."
             : "The capture did not attempt every checked-in frontier target successfully.",
         remediation: runState.recommendedNextAction?.summary ?? "Revise the frontier before another live allocation.",
+      };
+    } else if (graphTelemetryAssessment && graphTelemetryAssessment.status !== "productive") {
+      runState.status = "blocked";
+      runState.blocker = {
+        code: graphTelemetryAssessment.status,
+        detail: `The Graph telemetry crawl did not satisfy: ${graphTelemetryAssessment.failedChecks.join(", ")}.`,
+        remediation: "Preserve the evidence and revise the exact read-only Graph telemetry states before retrying.",
       };
     } else {
       runState.status = "completed";
@@ -1348,6 +1604,7 @@ async function main() {
     );
     if (args.saturation && !runState.saturation) {
       runState.saturation = evaluateDiscoverySaturation({
+        activeOperations: mutationSummary,
         actionResults,
         capture: captureCompleteness,
         interactionHealth,
@@ -1368,6 +1625,15 @@ async function main() {
         : null,
       groupedCandidateHandoff: args.groupedHandoffDir
         ? path.join(args.groupedHandoffDir, "manifest.json")
+        : null,
+      graphTelemetry: ["all", "analyze"].includes(args.phase)
+        ? path.join(args.artifacts, "graph-telemetry.json")
+        : null,
+      graphResearchQueue: ["all", "analyze"].includes(args.phase)
+        ? path.join(args.artifacts, "graph-research-queue.json")
+        : null,
+      graphTelemetryAssessment: graphTelemetryAssessment
+        ? path.join(args.artifacts, "graph-telemetry-assessment.json")
         : null,
       noveltyAssessment: noveltyPlan && ["all", "analyze"].includes(args.phase)
         ? path.join(args.artifacts, "novelty-assessment.json")

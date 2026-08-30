@@ -1,0 +1,63 @@
+{
+  "portal": "M365 Admin",
+  "url": "https://admin.cloud.microsoft/#/homepage",
+  "pageTarget": {
+    "matchHosts": ["admin.cloud.microsoft"],
+    "matchPathPrefixes": ["/"]
+  },
+  "matchHosts": ["admin.cloud.microsoft", "admin.microsoft.com"],
+  "matchPathPrefixes": ["/admin", "/fd"],
+  "captureScripts": false,
+  "graphTelemetryObjectives": {
+    "contractRequired": true,
+    "minimumOperationCount": 5,
+    "minimumNewOperationCount": 1,
+    "minimumProxyOperationCount": 2,
+    "minimumEnrichedOperationCount": 2,
+    "minimumCheckpointCount": 3,
+    "minimumNewEnrichedProductOperationCount": 1,
+    "productProxyOnly": true,
+    "productExcludeOperationKeys": [
+      "v1.0 GET /users/{id}/extensions/commerce.Common.Preferences"
+    ],
+    "baselineOperationKeys": [
+      "beta GET /deviceManagement",
+      "beta GET /deviceManagement/configurationCategories",
+      "beta GET /deviceManagement/configurationPolicies",
+      "beta GET /deviceManagement/configurationSettings",
+      "beta GET /solutions/backupRestore",
+      "beta GET /solutions/backupRestore/emailNotificationsSetting",
+      "beta GET /solutions/backupRestore/protectionPolicies",
+      "v1.0 GET /devices",
+      "v1.0 GET /devices/$count",
+      "v1.0 GET /subscribedSkus",
+      "v1.0 GET /users/$count",
+      "v1.0 GET /users/{id}/extensions/commerce.Common.Preferences"
+    ]
+  },
+  "postActionSettleMs": 8000,
+  "settleMs": 10000,
+  "actions": [
+    "navigate=https://admin.cloud.microsoft/#/groups",
+    "wait-ms=8000",
+    "capture=m365-groups-graph",
+    "navigate=https://admin.cloud.microsoft/#/adminunits",
+    "wait-ms=8000",
+    "capture=m365-administrative-units-graph",
+    "navigate=https://admin.cloud.microsoft/#/rbac/directory",
+    "wait-ms=8000",
+    "capture=m365-directory-roles-graph",
+    "navigate=https://admin.cloud.microsoft/#/IntuneDevices",
+    "wait-ms=8000",
+    "capture=m365-intune-devices-graph",
+    "navigate=https://admin.cloud.microsoft/#/Edge",
+    "wait-ms=8000",
+    "capture=m365-edge-management-graph",
+    "navigate=https://admin.cloud.microsoft/#/Settings/IntegratedApps",
+    "wait-ms=8000",
+    "capture=m365-integrated-apps-graph",
+    "navigate=https://admin.cloud.microsoft/#/subscriptions",
+    "wait-ms=8000",
+    "capture=m365-subscriptions-graph"
+  ]
+}

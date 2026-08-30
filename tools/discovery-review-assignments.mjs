@@ -1,6 +1,10 @@
 import { createHash } from "node:crypto";
 import { enqueueAssignment } from "./portal-discovery-ledger.mjs";
 import { recommendDerivativeReuse } from "./discovery-derivative-families.mjs";
+import {
+  portalDiscoveryModelPolicy,
+  validateOfflineReviewReasoning,
+} from "./portal-discovery-model-policy.mjs";
 
 export const reviewAssignmentSchemaVersion = 1;
 
@@ -146,8 +150,10 @@ export async function enqueueReviewAssignments(plan, {
   portal,
   endpoint,
   profile = "bounded",
+  reviewReasoning = portalDiscoveryModelPolicy.offlineReview.reasoning,
 } = {}) {
   validateReviewAssignmentPlan(plan);
+  validateOfflineReviewReasoning(reviewReasoning);
   const results = [];
   for (const assignment of plan.assignments) {
     if (assignment.route === "block" || assignment.route === "manual") continue;
@@ -162,8 +168,8 @@ export async function enqueueReviewAssignments(plan, {
       profile,
       phase: "review",
       artifactDir,
-      model: assignment.route === "cheap" ? "gpt-5.3-codex-spark" : "gpt-5.6-luna",
-      reasoning: assignment.route === "cheap" ? "low" : "high",
+      model: portalDiscoveryModelPolicy.offlineReview.model,
+      reasoning: reviewReasoning,
       counts: { candidates: assignment.candidateCount, evidenceFamilies: assignment.evidenceFamilyCount },
       blocker: assignment.blockers.length ? { codes: assignment.blockers } : null,
     }));

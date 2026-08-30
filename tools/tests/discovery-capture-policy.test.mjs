@@ -78,6 +78,22 @@ test("healthy repeated zero-gain windows are stoppable only when enabled", () =>
   assert.equal(signal.applied, true);
 });
 
+test("unresolved active operations block healthy saturation", () => {
+  const signal = evaluateDiscoverySaturation({
+    activeOperations: { safeToContinue: false, unresolvedOperationIds: ["toggle-setting"] },
+    actionResults: [unchangedClick(), unchangedClick(), unchangedClick(), unchangedClick()],
+    capture: { captureComplete: true },
+    interactionHealth: { accounting: { consistent: true } },
+    interactionHealthStatus: { available: true },
+    enabled: true,
+    applyStop: true,
+    thresholds: { windowSize: 2, minimumEvidenceWindows: 2, consecutiveWindows: 2 },
+  });
+  assert.equal(signal.applied, false);
+  assert.ok(signal.blockers.includes("unresolved-active-operation"));
+  assert.equal(signal.remainingEligibleWork.unresolvedActiveOperations, 1);
+});
+
 test("missing summary makes saturation unavailable", () => {
   const signal = evaluateDiscoverySaturation({
     actionResults: [click(1), click(2)],
@@ -339,6 +355,7 @@ test("pre-action inventories distinguish eligible controls from absent controls"
         candidateCount: 1,
         controlCount: 1,
         sessionId: "root",
+        targetId: null,
         targetType: "page",
         targetUrl: "https://entra.microsoft.com/",
       }],

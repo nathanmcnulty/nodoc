@@ -1,0 +1,196 @@
+openapi: 3.0.1
+info:
+  title: Microsoft Graph Research
+  x-nodoc-category: Microsoft Graph Research
+  description: |
+    This research specification contains only Microsoft Graph operations observed in authenticated
+    Microsoft portals that were absent from both the pinned official Microsoft Graph v1.0 and beta
+    OpenAPI contracts at review time.
+
+    These operations are undocumented, unsupported, and potentially unstable. Their presence here
+    does not imply Microsoft support or suitability for production use. Every operation is admitted
+    only after successful live evidence, structured request or response shapes, corroboration, and
+    comparison with a pinned `microsoftgraph/msgraph-metadata` snapshot. Portal proxy transports and
+    the Graph `$batch` wrapper remain evidence transports; paths in this specification are canonical
+    direct Microsoft Graph operations.
+  version: 0.1.0
+  contact:
+    name: nodoc
+    url: https://github.com/nathanmcnulty/nodoc
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+externalDocs:
+  description: Official Microsoft Graph metadata used for contract-delta comparison
+  url: https://github.com/microsoftgraph/msgraph-metadata
+x-nodoc-graph-contract:
+  repository: microsoftgraph/msgraph-metadata
+  commitSha: 1c83b0a4b892c35080695906dc55c662736119ad
+  manifestDigest: 3abe1a79847a9ee3e7983b372e8c5cb0f8a3c6b3baf97edf1cbc36d0fb341f9f
+  sources:
+    beta:
+      sha256: d184cb3f6614af2237e6d3634c37f5cbcb97dfc7317c0f4ed7905894c90af567
+      operationCount: 29626
+    v1.0:
+      sha256: 2c17c478d7bda389b03af93593bbc66077b767d319011a9e96cf253ff4f02c73
+      operationCount: 17777
+servers:
+  - url: https://graph.microsoft.com/beta
+    description: Microsoft Graph beta endpoint
+  - url: https://graph.microsoft.com/v1.0
+    description: Microsoft Graph v1.0 endpoint
+security:
+  - bearerAuth: []
+tags:
+  - name: RoleManagement
+    description: Undocumented role-management and effective-access research operations.
+x-tagGroups:
+  - name: Microsoft Graph Research
+    tags: [RoleManagement]
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Delegated Microsoft Graph bearer token acquired through a normal browser or broker flow.
+  schemas:
+    ResourceActionAuthorizationCheck:
+      type: object
+      required: [directoryScopeId, resourceAction]
+      properties:
+        directoryScopeId:
+          type: string
+          description: Directory scope against which access is estimated.
+          example: /
+        resourceAction:
+          type: string
+          description: Microsoft Entra resource action whose effective access is estimated.
+          example: microsoft.directory/groups/standard/read
+    EstimateAccessRequest:
+      type: object
+      required: [resourceActionAuthorizationChecks]
+      properties:
+        resourceActionAuthorizationChecks:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ResourceActionAuthorizationCheck'
+    AccessEstimate:
+      type: object
+      properties:
+        accessDecision:
+          type: string
+          description: Effective-access decision returned for the requested action and scope.
+          example: allowed
+        directoryScopeId:
+          type: string
+          example: /
+        missingClaims:
+          type: array
+          items:
+            type: string
+          description: Claims required before the requested action can be authorized.
+        resourceAction:
+          type: string
+          example: microsoft.directory/groups/standard/read
+    EstimateAccessResponse:
+      type: object
+      properties:
+        '@odata.context':
+          type: string
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/AccessEstimate'
+paths:
+  /roleManagement/directory/estimateAccess:
+    post:
+      operationId: GraphResearch.EstimateDirectoryAccess
+      summary: Estimate directory resource-action access
+      description: |
+        Evaluate whether the current principal has effective access to one or more Microsoft Entra
+        directory resource actions at specified scopes. Although transported as POST because it has
+        a structured request body, observed portal use was read-like and returned an authorization
+        estimate without changing tenant configuration.
+      tags: [RoleManagement]
+      servers:
+        - url: https://graph.microsoft.com/beta
+      x-nodoc-operation-safety:
+        class: read-like-post
+        tenantMutationObserved: false
+        notes:
+          - Repeated authenticated portal observations returned HTTP 200 with matching shapes.
+          - No tenant configuration change or unresolved active operation was associated with the observations.
+      x-nodoc-graph-evidence:
+        contractCommit: 1c83b0a4b892c35080695906dc55c662736119ad
+        contractManifestDigest: 3abe1a79847a9ee3e7983b372e8c5cb0f8a3c6b3baf97edf1cbc36d0fb341f9f
+        evidenceCount: 2
+        corroboratingCaptureCount: 2
+        captureComplete: true
+        interactionHealth: healthy
+        unresolvedMutation: false
+        evidenceRecord: evidence/estimate-directory-access.json
+        successfulStatuses: [200]
+        transports: [direct]
+        corroboratingRequestTransports: [batch-member]
+        portalSurfaces: [Entra IAM]
+        artifactIds:
+          - entra-graph-inventory-20260829T185031361
+          - ibiza-iam-reactblade-final-20260819T205155
+        telemetryDigests:
+          - 686280195d96a55fba000fbdc8e0759905f3b5b5b747417251a8f01d2922dacb
+          - 9cbd51b38091b966f14ab5fe53f0cbde0d088a6826589140e15320fbc12dcb19
+        operationIds:
+          - graph-observation-35b5314b9cdd21db90a74b32
+          - graph-observation-a08979cbceba3ac863377c3b
+        requestShapeDigests:
+          - 1ca914ea323a95a1175d0520a40b3c99f987c41d7ed5cc284bbccd0d095432e9
+          - 6b926e91681d586db0765ce3196c8d24e22d76a1b4e73d3b8e337ce00a8752a0
+        responseShapeDigests:
+          - 0783275d4af680a51e59968c7723db5917ae588d72442e6fa580c94928805651
+          - 6cac7c038de2206df737a466eeface99ce4215a2897cba0736c2c0e98892df4c
+      x-nodoc-operation-context:
+        surface: Entra users and groups
+        workflows:
+          - Open the Entra users or groups inventory and allow the blade to evaluate the current principal's directory access.
+        permissions:
+          - Exact delegated permission requirements remain under research; preserve the portal token audience and consented scopes when troubleshooting.
+        troubleshooting:
+          - Treat 401 and 403 responses as authentication, consent, role, or Conditional Access evidence rather than proof that the route was removed.
+          - Preserve the request body because the resource action and directory scope determine the returned decision.
+        provenance:
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - Independently observed with successful direct responses in two complete captures; Graph batch members supplied request-shape corroboration only.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EstimateAccessRequest'
+            example:
+              resourceActionAuthorizationChecks:
+                - directoryScopeId: /
+                  resourceAction: microsoft.directory/groups/standard/read
+      responses:
+        '200':
+          description: Effective-access estimates for the requested resource actions and scopes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EstimateAccessResponse'
+              example:
+                '@odata.context': https://graph.microsoft.com/beta/$metadata#Collection(microsoft.graph.resourceActionAuthorizationDecision)
+                value:
+                  - accessDecision: allowed
+                    directoryScopeId: /
+                    missingClaims: []
+                    resourceAction: microsoft.directory/groups/standard/read
+        '400':
+          description: The resource-action authorization check was malformed or incomplete.
+        '401':
+          description: Microsoft Graph authentication was missing or invalid.
+        '403':
+          description: The caller lacked permission to estimate access for the requested scope.

@@ -14,12 +14,14 @@ import {
   validateRecipeTargetMetadata,
 } from "./portal-discovery-recipe.mjs";
 import { buildNoveltyPlan } from "./portal-discovery-novelty.mjs";
+import { validateActiveOperationPlan } from "./portal-discovery-operation-safety.mjs";
 
 const portfolioManifestPath = path.join(repoRoot, "tools", "portal-discovery-portfolio.json");
 
 const supportedRecipeActionTypes = new Set([
   "capture",
   "click",
+  "click-automation-id",
   "click-contains",
   "click-href",
   "click-label",
@@ -188,6 +190,20 @@ async function validateRecipeFile(errors, recipePath) {
     }
   }
 
+  if (recipe.activeOperations !== undefined && !Array.isArray(recipe.activeOperations)) {
+    fail(errors, `${recipePath}: activeOperations must be an array when present.`);
+  } else if ((recipe.activeOperations?.length ?? 0) > 1) {
+    fail(errors, `${recipePath}: a recipe may contain at most one active operation plan.`);
+  } else {
+    for (const operation of recipe.activeOperations ?? []) {
+      try {
+        validateActiveOperationPlan(operation, { actions: recipe.actions });
+      } catch (error) {
+        fail(errors, `${recipePath}: invalid active operation plan (${error.message}).`);
+      }
+    }
+  }
+
   if (recipe.matchHosts && !Array.isArray(recipe.matchHosts)) {
     fail(errors, `${recipePath}: matchHosts must be an array when present.`);
   }
@@ -218,7 +234,26 @@ async function validateRecipeFile(errors, recipePath) {
           const approval = JSON.parse(stripBom(approvalSource));
           const approvalDigest = createHash("sha256").update(approvalSource, "utf8").digest("hex");
           if (approvalDigest !== recipe.noveltyFrontier.approvalDigest) fail(errors, `${recipePath}: approvalArtifact digest does not match approvalDigest.`);
-          if (approval.workerModel !== "gpt-5.6-luna" || approval.decision !== "accept-bounded-frontier" || !Array.isArray(approval.acceptedItems) || approval.acceptedItems.length === 0) fail(errors, `${recipePath}: approvalArtifact is not an exact Luna bounded-frontier approval.`);
+          if (approval.workerModel !== "gpt-5.6-luna" || !["xhigh", "max"].includes(approval.workerReasoning) || approval.decision !== "accept-bounded-frontier" || !Array.isArray(approval.acceptedItems) || approval.acceptedItems.length === 0) fail(errors, `${recipePath}: approvalArtifact is not an exact Luna xhigh/max bounded-frontier approval.`);
+          const sourceArtifactPath = String(approval.source?.artifactPath || "").trim();
+          if (!sourceArtifactPath) {
+            fail(errors, `${recipePath}: approvalArtifact requires a checked-in source.artifactPath.`);
+          } else {
+            const sourceAbsolute = path.resolve(repoRoot, sourceArtifactPath);
+            const sourceRelative = path.relative(repoRoot, sourceAbsolute);
+            if (sourceRelative.startsWith("..") || path.isAbsolute(sourceRelative)) {
+              fail(errors, `${recipePath}: approval source artifact must remain inside the repository.`);
+            } else {
+              const sourceText = await readFile(sourceAbsolute, "utf8");
+              const sourceSha256 = createHash("sha256").update(sourceText, "utf8").digest("hex");
+              const sourceArtifact = JSON.parse(stripBom(sourceText));
+              if (approval.source?.artifactSha256 !== sourceSha256) fail(errors, `${recipePath}: approval source artifact hash mismatch.`);
+              if (approval.source?.frontierSetId !== sourceArtifact.frontierSetId || approval.source?.frontierSetDigest !== sourceArtifact.frontierSetDigest) fail(errors, `${recipePath}: approval source frontier identity mismatch.`);
+              const approvedItems = (sourceArtifact.items ?? []).filter((item) => item.status === "approved");
+              const accepted = approval.acceptedItems ?? [];
+              if (accepted.length !== approvedItems.length || accepted.some((item) => !approvedItems.some((sourceItem) => sourceItem.frontierId === item.frontierId && sourceItem.frontierDigest === item.frontierDigest && sourceItem.canonicalKey === item.canonicalKey))) fail(errors, `${recipePath}: approval acceptedItems do not exactly match the approved source frontier.`);
+            }
+          }
         }
       }
     }

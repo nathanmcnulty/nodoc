@@ -102,6 +102,7 @@ export function evaluateDiscoverySaturation({
   capture = null,
   interactionHealth = null,
   interactionHealthStatus = null,
+  activeOperations = null,
   recipe = null,
   requiredActionFailures = [],
   enabled = false,
@@ -127,6 +128,9 @@ export function evaluateDiscoverySaturation({
   const unresolvedRequiredFailures = (requiredActionFailures?.length ?? 0)
     + (interactionHealth?.counts?.highValueMisses ?? 0);
   const interactionFailure = interactionHealth?.recommendation?.recommended === true;
+  const unresolvedActiveOperations = activeOperations?.safeToContinue === false
+    ? activeOperations.unresolvedOperationIds?.length ?? 1
+    : 0;
   const lowGainWindows = windows.filter((window) => window.gain.total <= thresholds.lowGainThreshold);
   let consecutiveLowGainWindows = 0;
   for (let index = windows.length - 1; index >= 0; index -= 1) {
@@ -142,6 +146,7 @@ export function evaluateDiscoverySaturation({
   if (unresolvedRequiredFailures > 0) blockers.push("unresolved-required-failure");
   if (scopeAmbiguity > 0) blockers.push("scope-ambiguity");
   if (interactionFailure) blockers.push("interaction-failure");
+  if (unresolvedActiveOperations > 0) blockers.push("unresolved-active-operation");
   const evidenceReady = windows.length >= thresholds.minimumEvidenceWindows;
   const repeatedLowGain = consecutiveLowGainWindows >= thresholds.consecutiveWindows;
   const healthySaturation = evidenceReady && repeatedLowGain && blockers.length === 0;
@@ -182,6 +187,7 @@ export function evaluateDiscoverySaturation({
       highValuePending: highValuePending ? 1 : 0,
       scopeAmbiguity,
       unknownEligibility,
+      unresolvedActiveOperations,
     },
     blockers: sortedUnique(blockers),
     windows,
@@ -211,6 +217,7 @@ export function sanitizeDiscoverySaturation(signal) {
       highValuePending: integer(signal.remainingEligibleWork?.highValuePending),
       scopeAmbiguity: integer(signal.remainingEligibleWork?.scopeAmbiguity),
       unknownEligibility: integer(signal.remainingEligibleWork?.unknownEligibility),
+      unresolvedActiveOperations: integer(signal.remainingEligibleWork?.unresolvedActiveOperations),
     },
     blockers: sortedUnique(signal.blockers),
     windows: (Array.isArray(signal.windows) ? signal.windows : []).map((window, index) => ({
