@@ -51,13 +51,13 @@ test("offline frontier compiler never authorizes capture without an exact approv
       approvalDigest: "d".repeat(64),
       baselineSignals: { queryMetadata: [], requestShapes: [], responseMetadata: [], responseShapes: [], routes: [] },
       reopenCondition: "The items view has an undocumented response shape.",
-      targets: [{ acceptanceKey: "items-shape", actionIndexes: [0, 1], evidenceLevel: "confirmed", expectedHostFamilies: ["api.example.test"], expectedInformationClasses: ["response-shape"], expectedRoutePrefixes: ["/items"], id: "items-shape", rationale: "Schema is opaque.", safeAction: "Open the read-only items view.", state: "Items" }],
+      targets: [{ acceptanceKey: "items-shape", actionIndexes: [0, 1], evidenceLevel: "confirmed", expectedDocumentationObjectives: ["response-example"], expectedHostFamilies: ["api.example.test"], expectedInformationClasses: ["response-shape"], expectedRoutePrefixes: ["/items"], id: "items-shape", rationale: "Schema is opaque.", safeAction: "Open the read-only items view.", state: "Items" }],
     },
   };
   const approved = compileOfflineFrontier({ specId: "alpha", specification, coverage: {}, recipe });
   assert.equal(approved.terminal, "capture-authorized");
   assert.equal(approved.items.find((item) => item.gapClass === "response-shape")?.requiredActionState.targetId, "items-shape");
-  assert.ok(approved.items.find((item) => item.gapClass === "response-example")?.blockers.includes("sanitized-documentation-evidence-required"));
+  assert.equal(approved.items.find((item) => item.gapClass === "response-example")?.status, "approved");
 
   const ownershipBlocked = compileOfflineFrontier({ specId: "alpha", specification: { paths: {} }, recipe, candidateHandoff: { adjacentConfirmedReadCandidates: [{ hostFamily: "other.example", method: "GET", normalizedPath: "/items", evidenceIds: ["evidence-1"] }] } });
   assert.equal(ownershipBlocked.terminal, "blocked-adjacent-ownership");

@@ -1,0 +1,24 @@
+{
+  "portal": "Power Platform",
+  "url": "https://admin.powerplatform.microsoft.com",
+  "pageTarget": {
+    "matchHosts": ["admin.powerplatform.microsoft.com"],
+    "matchPathPrefixes": ["/"]
+  },
+  "noveltyStatus": {
+    "status": "satisfied",
+    "evidenceDisposition": "frontier-exhausted",
+    "reason": "A healthy authenticated capture observed the exact Environments collection GET in the targeted UI state and supplied current response shape, status, media type, query metadata, and a basis for a sanitized example.",
+    "nextRequirement": "Identify an exact unmodeled Power Platform route, query key, error status, media type, or non-empty response shape in a different deterministic UI state before another novelty run; do not replay the Environments list unchanged."
+  },
+  "matchHosts": ["api.bap.microsoft.com"],
+  "matchPathPrefixes": ["/providers/Microsoft.BusinessAppPlatform/scopes/admin/environments"],
+  "postActionSettleMs": 10000,
+  "settleMs": 12000,
+  "maxActions": 4,
+  "actions": [
+    "click-contains-root=Environments",
+    "wait-ms=8000",
+    "capture=environments"
+  ]
+}

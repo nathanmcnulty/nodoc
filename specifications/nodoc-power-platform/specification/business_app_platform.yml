@@ -427,9 +427,11 @@ paths:
     get:
       operationId: BusinessAppPlatform_get_providers_Microsoft_BusinessAppPlatform_scopes_admin_environments
       summary: "GET /providers/Microsoft.BusinessAppPlatform/scopes/admin/environments"
+      description: List Power Platform environments visible to the signed-in administrator.
       x-nodoc-live-capture:
         source: "authenticated Power Platform admin center"
         browsedPages:
+          - "Power Platform admin center: Environments list"
           - "https://admin.powerplatform.microsoft.com/billing/licenses/PowerApps/overview"
           - "https://admin.powerplatform.microsoft.com/billing/licenses/PowerApps/recommendations"
           - "https://admin.powerplatform.microsoft.com/billing/licenses/copilotStudio/overview"
@@ -437,6 +439,28 @@ paths:
         additionalPageCount: 83
       tags:
         - BusinessAppPlatform
+      x-nodoc-operation-context:
+        surface: Environments > All environments
+        headerProfile: power-platform-service-bearer
+        workflows:
+          - Inventory environments before selecting an environment-scoped operation.
+          - Use $select and $expand to bound large administrative responses.
+        permissions:
+          - Requires a Power Platform service bearer token and an administrative role allowed to list environments.
+        pagination:
+          style: odata
+          requestParameters: [$top]
+          responseFields: [value, nextLink]
+          notes:
+            - A current targeted response returned value; a separate current bootstrap request also exposed nextLink.
+        troubleshooting:
+          - A successful response can still contain environments with different provisioning, runtime, or management states.
+          - Treat nested properties as optional because environment type, region, lifecycle state, and licensing affect the returned shape.
+        provenance:
+          - source: authenticated-portal-capture
+            confidence: high
+            notes:
+              - Exact collection GET returned 200 application/json from the Environments list state in the August 2026 bounded capture.
       parameters:
         - name: "$expand"
           in: query
@@ -449,13 +473,20 @@ paths:
           required: false
           schema:
             type: string
-            example: "properties/linkedEnvironmentMetadata/resourceId eq 621c0f33-3fd1-f011-83fb-000d3a106b3b"
+            example: "properties/linkedEnvironmentMetadata/resourceId eq '{environmentId}'"
         - name: "$top"
           in: query
           required: false
           schema:
             type: integer
             example: 1
+        - name: "$select"
+          in: query
+          required: false
+          description: Comma-separated projection of environment fields and nested properties.
+          schema:
+            type: string
+            example: "name,location,properties.displayName,properties.environmentSku,properties.provisioningState"
         - name: "api-version"
           in: query
           required: false
@@ -464,7 +495,264 @@ paths:
             example: "2021-04-01"
       responses:
         '200':
-          description: "200 captured response"
+          description: Environment collection observed in current portal traffic.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  nextLink:
+                    type: string
+                    format: uri
+                  value:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        location:
+                          type: string
+                        properties:
+                          type: object
+                          properties:
+                            azureRegion:
+                              type: string
+                            cluster:
+                              type: object
+                              properties:
+                                category:
+                                  type: string
+                            connectedGroups:
+                              type: array
+                              items:
+                                type: object
+                                additionalProperties: true
+                            createdBy:
+                              type: object
+                              properties:
+                                displayName:
+                                  type: string
+                                email:
+                                  type: string
+                                id:
+                                  type: string
+                                tenantId:
+                                  type: string
+                                type:
+                                  type: string
+                                userPrincipalName:
+                                  type: string
+                            displayName:
+                              type: string
+                            createdTime:
+                              type: string
+                              format: date-time
+                            provisioningState:
+                              type: string
+                            environmentSku:
+                              type: string
+                            clientUris:
+                              type: object
+                              properties:
+                                admin:
+                                  type: string
+                                  format: uri
+                                maker:
+                                  type: string
+                                  format: uri
+                            governanceConfiguration:
+                              type: object
+                              properties:
+                                protectionLevel:
+                                  type: string
+                            linkedEnvironmentMetadata:
+                              type: object
+                              properties:
+                                backgroundOperationsState:
+                                  type: string
+                                baseLanguage:
+                                  type: integer
+                                createdTime:
+                                  type: string
+                                  format: date-time
+                                crmGeo:
+                                  type: string
+                                domainName:
+                                  type: string
+                                friendlyName:
+                                  type: string
+                                instanceApiUrl:
+                                  type: string
+                                  format: uri
+                                instanceState:
+                                  type: string
+                                instanceUrl:
+                                  type: string
+                                  format: uri
+                                isDormant:
+                                  type: boolean
+                                platformSku:
+                                  type: string
+                                resourceId:
+                                  type: string
+                                scaleGroup:
+                                  type: string
+                                schemaType:
+                                  type: string
+                                uniqueName:
+                                  type: string
+                                version:
+                                  type: string
+                              additionalProperties: true
+                            lastActivity:
+                              type: object
+                              properties:
+                                lastActivity:
+                                  type: object
+                                  properties:
+                                    lastActivityTime:
+                                      type: string
+                                      format: date-time
+                            lifecycleOperationsEnforcement:
+                              type: object
+                              properties:
+                                allowedOperations:
+                                  type: array
+                                  items:
+                                    type: object
+                                    properties:
+                                      type:
+                                        type: object
+                                        properties:
+                                          id:
+                                            type: string
+                                disallowedOperations:
+                                  type: array
+                                  items:
+                                    type: object
+                                    properties:
+                                      reason:
+                                        type: object
+                                        properties:
+                                          message:
+                                            type: string
+                                          type:
+                                            type: string
+                                      type:
+                                        type: object
+                                        properties:
+                                          id:
+                                            type: string
+                            protectionStatus:
+                              type: object
+                              properties:
+                                keyManagedBy:
+                                  type: string
+                            retentionPeriod:
+                              type: string
+                            runtimeEndpoints:
+                              type: object
+                              properties:
+                                microsoft.ApiManagement:
+                                  type: string
+                                  format: uri
+                                microsoft.BusinessAppPlatform:
+                                  type: string
+                                  format: uri
+                                microsoft.CommonDataModel:
+                                  type: string
+                                  format: uri
+                                microsoft.Flow:
+                                  type: string
+                                  format: uri
+                                microsoft.PowerApps:
+                                  type: string
+                                  format: uri
+                                microsoft.PowerAppsAdvisor:
+                                  type: string
+                                  format: uri
+                                microsoft.PowerVirtualAgents:
+                                  type: string
+                                  format: uri
+                              additionalProperties:
+                                type: string
+                                format: uri
+                            scheduledLifecycleOperations:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  type:
+                                    type: string
+                                  scheduledDateTime:
+                                    type: string
+                                    format: date-time
+                                  canExtend:
+                                    type: boolean
+                                additionalProperties: true
+                            states:
+                              type: object
+                              properties:
+                                disasterRecovery:
+                                  type: object
+                                  properties:
+                                    copyLocation:
+                                      type: string
+                                    id:
+                                      type: string
+                                management:
+                                  type: object
+                                  properties:
+                                    id:
+                                      type: string
+                                runtime:
+                                  type: object
+                                  properties:
+                                    id:
+                                      type: string
+                                    requestedBy:
+                                      type: object
+                                      properties:
+                                        displayName:
+                                          type: string
+                                        type:
+                                          type: string
+                                    runtimeReasonCode:
+                                      type: string
+                          additionalProperties: true
+                      additionalProperties: true
+                additionalProperties: true
+              example:
+                nextLink: "https://example.invalid/continuation?token=redacted"
+                value:
+                  - name: "example-environment"
+                    location: "region-name"
+                    properties:
+                      displayName: "Example environment"
+                      createdTime: "2026-01-01T00:00:00Z"
+                      provisioningState: "state"
+                      environmentSku: "sku"
+                      clientUris:
+                        admin: "https://example.invalid/admin"
+                        maker: "https://example.invalid/maker"
+                      governanceConfiguration:
+                        protectionLevel: "protection-level"
+                      createdBy:
+                        displayName: "Example administrator"
+                        id: "redacted-user-id"
+                        tenantId: "redacted-tenant-id"
+                        type: "user"
+                      linkedEnvironmentMetadata:
+                        instanceState: "instance-state"
+                        isDormant: false
+                        platformSku: "platform-sku"
+                      retentionPeriod: "retention-period"
+                      states:
+                        management:
+                          id: "management-state"
+                        runtime:
+                          id: "runtime-state"
   /providers/Microsoft.BusinessAppPlatform/scopes/admin/environments/{environmentId}:
     servers:
       - url: "https://api.bap.microsoft.com"

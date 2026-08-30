@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "specId": "power-platform",
+  "decision": "accept-bounded-frontier",
+  "workerModel": "gpt-5.6-luna",
+  "workerReasoning": "xhigh",
+  "approvedAt": "2026-08-30T09:04:47.3413869Z",
+  "source": {
+    "head": "f62ea5462a407b3af8e921668da6738973b669ee",
+    "artifactPath": "tools/frontier-approvals/power-platform-environments-example-source.json",
+    "artifactSha256": "8b5d0043f000c208862657532aa8a8b6c9e2bf89048179165a658e09b4cfe049",
+    "frontierSetId": "offline-frontier-set-390272719af585feb44d5d2d",
+    "frontierSetDigest": "390272719af585feb44d5d2de5c7492c5402ca109de6534edddb609c3bfdc2be"
+  },
+  "state": "Power Platform admin center Environments list",
+  "canonicalShellUrl": "https://admin.powerplatform.microsoft.com",
+  "apiEvidenceScope": {
+    "hosts": ["api.bap.microsoft.com"],
+    "pathPrefixes": ["/providers/Microsoft.BusinessAppPlatform/scopes/admin/environments"]
+  },
+  "safeActions": [
+    "click-contains-root=Environments",
+    "wait-ms=8000",
+    "capture=environments"
+  ],
+  "acceptedItems": [
+    {
+      "frontierId": "offline-frontier-7a4558198947eb1fba6c84e9",
+      "frontierDigest": "7a4558198947eb1fba6c84e9962d7439058323b2b74c17bab85cb0dc91dda1da",
+      "canonicalKey": "api.bap.microsoft.com GET /providers/Microsoft.BusinessAppPlatform/scopes/admin/environments"
+    }
+  ],
+  "deferredItemCount": 1251,
+  "blockedItemCount": 1249,
+  "constraints": [
+    "GET-only passive capture from the exact Environments list state",
+    "Acceptance requires a sanitized non-empty current response example for the exact collection route",
+    "Descendant environment routes do not satisfy this frontier",
+    "Graph, proxy, and adjacent-host telemetry is retained for separate ownership review and cannot satisfy this frontier",
+    "No forms, environment selection, tenant settings, writes, exports, or active probes"
+  ]
+}
