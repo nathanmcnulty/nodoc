@@ -551,6 +551,11 @@ action-attributed evidence. Prefer representative success, empty, populated,
 permission-denied, validation-error, feature-disabled, and not-found cases when
 they can be reached safely; do not chase every tenant-specific value.
 
+At portfolio closeout, run `npm run validate:spec-evaluations`. Every published
+spec must resolve to `satisfied`, `blocked-prerequisite`, or `derived-current`.
+Treat `active-frontier` and `needs-frontier` as unfinished work, not as a reason
+to spend another browser session without a deterministic information target.
+
 ## Recommended workflow
 
 ### 1. Review the current repo baseline

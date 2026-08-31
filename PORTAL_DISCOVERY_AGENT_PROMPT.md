@@ -206,6 +206,13 @@ successful discovery and must not be repeated unchanged. It can support a
 saturation conclusion only after canonical health passes and no critical
 frontier item remains.
 
+For an all-spec refresh, finish with `npm run validate:spec-evaluations` and do
+not claim portfolio completion while any specification reports
+`active-frontier` or `needs-frontier`. `blocked-prerequisite` is an acceptable
+evaluated disposition only when its recipe records the exact condition required
+to reopen capture. Microsoft Graph Research is `derived-current` only after the
+owning portal Graph inventories have been reviewed against the pinned contract.
+
 Treat evidence age and API novelty as separate dimensions. A stale spec or a
 missing live-ledger repetition is a `capture-freshness-gap`, not authorization
 to replay a satisfied recipe. A weak or generic schema may reopen capture only

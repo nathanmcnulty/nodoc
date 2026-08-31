@@ -236,6 +236,14 @@ or schema improvement before starting the next live lifecycle. Never use a
 documentation-only commit or generated-file refresh as proof that a spec was
 recently rediscovered.
 
+For portfolio-wide refresh work, close the loop with
+`npm run validate:spec-evaluations`. The audit accepts exactly three terminal
+dispositions: a satisfied checked-in novelty frontier, a blocked prerequisite
+that names the deterministic evidence needed to reopen capture, or a derived
+research surface such as Microsoft Graph Research that is refreshed through
+its owning portal captures. An active or missing frontier keeps the portfolio
+open; file modification time alone never satisfies the gate.
+
 ## Required input
 
 The task must name one portal by title or spec ID, for example `M365 Admin` or
