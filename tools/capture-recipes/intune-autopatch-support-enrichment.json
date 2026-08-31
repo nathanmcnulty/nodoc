@@ -1,0 +1,38 @@
+{
+  "portal": "Intune Autopatch",
+  "url": "https://intune.microsoft.com",
+  "pageTarget": {
+    "matchHosts": ["intune.microsoft.com"],
+    "matchPathPrefixes": ["/"]
+  },
+  "matchHosts": [
+    "intune.microsoft.com",
+    "services.autopatch.microsoft.com"
+  ],
+  "noveltyStatus": {
+    "status": "satisfied",
+    "evidenceDisposition": "shared-support-backend-discovered",
+    "reason": "The required Windows Autopatch support scenario completed and emitted the shared admin.microsoft.com Concierge operation family; it did not emit the older services.autopatch.microsoft.com support entitlement route.",
+    "nextRequirement": "Do not replay this state solely for freshness. Reopen it only for a newly identified support operation, request shape, response shape, status, or media type."
+  },
+  "captureScripts": false,
+  "postActionSettleMs": 10000,
+  "settleMs": 12000,
+  "actions": [
+    {
+      "type": "click-contains",
+      "scope": "root",
+      "value": "Support",
+      "required": true
+    },
+    "wait-ms=8000",
+    {
+      "type": "click-contains",
+      "value": "Windows Autopatch",
+      "required": true,
+      "highValue": true
+    },
+    "wait-ms=8000",
+    "capture=autopatch-support-entitlement"
+  ]
+}
