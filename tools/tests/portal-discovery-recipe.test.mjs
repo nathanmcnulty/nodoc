@@ -13,6 +13,7 @@ import {
   buildBootstrapPreflightCriteria,
   buildPreflightCriteria,
   expandRecipeVariables,
+  prepareRecipeForRun,
   recipeVariables,
   validateSelectedRecipeTarget,
 } from "../run-portal-discovery.mjs";
@@ -90,6 +91,17 @@ test("CLI variables are expanded before recipe-gated target preflight", () => {
     rejectBodyPattern: undefined,
   });
   assert.equal(recipe.url, "https://sharemylabs-admin.sharepoint.com/_layouts/15/online/AdminHome.aspx#/home");
+});
+
+test("the same expanded recipe is used by capture analysis", () => {
+  const recipe = prepareRecipeForRun({
+    url: "https://${tenant}-admin.sharepoint.com/",
+    actions: ["navigate=https://${tenant}-admin.sharepoint.com/#/contentSecurityPolicy"],
+  }, ["tenant=sharemylabs"]);
+  assert.equal(recipe.url, "https://sharemylabs-admin.sharepoint.com/");
+  assert.deepEqual(recipe.actions, [
+    "navigate=https://sharemylabs-admin.sharepoint.com/#/contentSecurityPolicy",
+  ]);
 });
 
 test("page-target validation fails for an entry route outside its criteria", () => {
