@@ -2,15 +2,15 @@
   "schemaVersion": 1,
   "specId": "exchange-beta",
   "projection": "approved-only",
-  "frontierSetId": "offline-frontier-set-db3fafe13adeb9f4cb105c27",
-  "frontierSetDigest": "db3fafe13adeb9f4cb105c27ee51b052f8b8ca30e7632b1e6de9bdc52e84ff28",
+  "frontierSetId": "offline-frontier-set-9947b8af319876f7edc78d5f",
+  "frontierSetDigest": "9947b8af319876f7edc78d5f6eafe607d72d9e16df3ba8d1d7d5acd94f80bb20",
   "measurements": {
-    "approvedCount": 1,
-    "candidateCount": 222,
+    "approvedCount": 2,
+    "candidateCount": 221,
     "countsByGapClass": {
       "error-behavior": 61,
       "operation-context": 61,
-      "ownership": 31,
+      "ownership": 0,
       "pagination": 31,
       "parameter-example": 0,
       "permissions": 0,
@@ -22,10 +22,41 @@
       "response-shape": 9,
       "route": 0
     },
-    "itemCount": 254,
-    "unresolvedOwnershipCount": 31
+    "itemCount": 223,
+    "unresolvedOwnershipCount": 0
   },
   "items": [
+    {
+      "schemaVersion": 1,
+      "specId": "exchange-beta",
+      "hostFamily": "admin.exchange.microsoft.com",
+      "gapClass": "response-example",
+      "canonicalKey": "admin.exchange.microsoft.com GET /beta/TimeZone/ExchangeAdminCenter.MyTimeZone",
+      "evidence": [
+        "openapi-documentation-inventory"
+      ],
+      "sourceRefs": [
+        "checked-in-openapi"
+      ],
+      "requiredActionState": {
+        "actionIndexes": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "documentationObjectives": [
+          "error-example",
+          "response-example"
+        ],
+        "state": "Legacy-host Exchange admin center landing bootstrap",
+        "targetId": "my-time-zone-response-shape"
+      },
+      "status": "approved",
+      "blockers": [],
+      "frontierId": "offline-frontier-6a1ffd573ae7ee988d2383ee",
+      "frontierDigest": "6a1ffd573ae7ee988d2383eedc713f96b39bc0c82f4ca45128db2503e849ad50"
+    },
     {
       "schemaVersion": 1,
       "specId": "exchange-beta",
@@ -42,16 +73,20 @@
         "actionIndexes": [
           0,
           1,
-          2
+          2,
+          3
         ],
-        "documentationObjectives": [],
+        "documentationObjectives": [
+          "error-example",
+          "response-example"
+        ],
         "state": "Legacy-host Exchange admin center landing bootstrap",
         "targetId": "my-time-zone-response-shape"
       },
       "status": "approved",
       "blockers": [],
-      "frontierId": "offline-frontier-2a50b52781e574cb3007dfcf",
-      "frontierDigest": "2a50b52781e574cb3007dfcfb72079835a0c7eaf64e9f8fe960394743c16eb8c"
+      "frontierId": "offline-frontier-db2e47ac3b36da80a45f8328",
+      "frontierDigest": "db2e47ac3b36da80a45f83285721c4db14f2fedbc3dcc70f49e840d13ca9f9cf"
     }
   ]
 }

@@ -7,7 +7,7 @@
   },
   "noveltyFrontier": {
     "approvalArtifact": "tools/frontier-approvals/exchange-beta-bootstrap-shapes.json",
-    "approvalDigest": "419c85517cc4cb5448ba0030579b2839967a0447d028af91f3b2a7e330e07655",
+    "approvalDigest": "1f23b23e5148d0f3bdd80b3f64bdfbe154730bfea0af7c930936e8fba0539ee3",
     "baseline": "checked-in-spec-and-coverage-ledgers",
     "baselineSignals": {
       "queryMetadata": [],
@@ -16,7 +16,7 @@
       "responseShapes": [],
       "routes": []
     },
-    "reopenCondition": "The confirmed current-user time-zone GET still has an opaque additionalProperties response schema and no current-host response-shape evidence.",
+    "reopenCondition": "Neither the current-shell nor legacy-host landing emitted the confirmed current-user time-zone GET; an exact same-origin GET is needed to distinguish an existing but unused route from a removed or erroring route.",
     "targets": [
       {
         "id": "my-time-zone-response-shape",
@@ -25,10 +25,11 @@
         "expectedHostFamilies": ["admin.exchange.microsoft.com", "exchange.admin.cloud.microsoft"],
         "expectedRoutes": ["/beta/TimeZone/ExchangeAdminCenter.MyTimeZone"],
         "expectedInformationClasses": ["response-shape", "response-metadata"],
-        "actionIndexes": [0, 1, 2],
-        "safeAction": "Reload the authenticated legacy-host Exchange landing page and passively capture bootstrap GET traffic.",
-        "acceptanceKey": "my-time-zone-nonempty-undocumented-shape",
-        "rationale": "The current-user time-zone payload is modeled only as an opaque object."
+        "expectedDocumentationObjectives": ["error-example", "response-example"],
+        "actionIndexes": [0, 1, 2, 3],
+        "safeAction": "Reload the authenticated legacy-host Exchange landing page, issue one exact same-origin GET for the documented current-user time-zone route, and capture its status and sanitized response contract.",
+        "acceptanceKey": "my-time-zone-current-contract",
+        "rationale": "Both current-shell and legacy-host landing reloads omitted this previously confirmed route; a single same-origin GET can establish whether it still succeeds, now errors, or has been removed."
       }
     ]
   },
@@ -36,10 +37,11 @@
   "matchPathPrefixes": ["/beta"],
   "postActionSettleMs": 10000,
   "settleMs": 12000,
-  "maxActions": 4,
+  "maxActions": 5,
   "actions": [
     "reload=exchange-legacy-host-bootstrap",
-    "wait-ms=5000",
+    "probe-get=/beta/TimeZone/ExchangeAdminCenter.MyTimeZone",
+    "wait-ms=3000",
     "capture=exchange-legacy-host-bootstrap"
   ]
 }

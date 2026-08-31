@@ -4,21 +4,21 @@
   "decision": "accept-bounded-frontier",
   "workerModel": "gpt-5.6-luna",
   "workerReasoning": "xhigh",
-  "approvedAt": "2026-08-31T08:42:26.0850259Z",
+  "approvedAt": "2026-08-31T16:22:20.5456770Z",
   "source": {
-    "head": "221c2890d5359e9b074de435620bf8f77b53b7af",
+    "head": "a8edf1fd90f5a70a4128db4039f380b940100e64",
     "artifactPath": "tools/frontier-approvals/exchange-beta-bootstrap-shapes-source.json",
-    "artifactSha256": "51406e4c243beb021660ad01da9532ffb608bc7bc505b633abf05edd9fadc217",
-    "frontierSetId": "offline-frontier-set-db3fafe13adeb9f4cb105c27",
-    "frontierSetDigest": "db3fafe13adeb9f4cb105c27ee51b052f8b8ca30e7632b1e6de9bdc52e84ff28"
+    "artifactSha256": "c0efc3510a953709551dd33d51c6508f07ae20cd9e4653770a6d694b545823f9",
+    "frontierSetId": "offline-frontier-set-9947b8af319876f7edc78d5f",
+    "frontierSetDigest": "9947b8af319876f7edc78d5f6eafe607d72d9e16df3ba8d1d7d5acd94f80bb20"
   },
   "reviewEvidence": {
-    "artifactDirectory": "exchange-bootstrap-shape-20260831T082000Z",
-    "summarySha256": "9050e5cd09c02938683e142f3ed31fe452795b65d257a478f59da2d73c744aea",
-    "rawRequestsSha256": "7af9a165952db9601cd3e55945bfac36ba4e96dfd0234fae87e806602ece8644",
-    "reviewDisposition": "The current admin.cloud landing no longer emitted MyTimeZone; the authenticated legacy-host landing reload is accepted as the exact passive retry."
+    "artifactDirectory": "exchange-legacy-bootstrap-20260831T084600Z",
+    "summarySha256": "f4c3b1e84f54f05099c5e4dc28a1d32aaac1be3a826354bfe44a831ee8f44c51",
+    "rawRequestsSha256": "bcdb5e31296eb3b38a3d77920aa81f4f74853f3edfbe0a3c126a0b1dbe66f2c7",
+    "reviewDisposition": "Neither authenticated landing capture emitted MyTimeZone. One exact same-origin GET is accepted to distinguish a live but unused route from a removed or erroring route."
   },
-  "state": "Legacy-host Exchange admin center landing bootstrap",
+  "state": "Legacy-host Exchange admin center exact current-contract probe",
   "canonicalShellUrl": "https://admin.exchange.microsoft.com/#/",
   "apiEvidenceScope": {
     "hosts": ["admin.exchange.microsoft.com", "exchange.admin.cloud.microsoft"],
@@ -26,23 +26,30 @@
   },
   "safeActions": [
     "reload=exchange-legacy-host-bootstrap",
-    "wait-ms=5000",
+    "probe-get=/beta/TimeZone/ExchangeAdminCenter.MyTimeZone",
+    "wait-ms=3000",
     "capture=exchange-legacy-host-bootstrap"
   ],
   "acceptedItems": [
     {
-      "frontierId": "offline-frontier-2a50b52781e574cb3007dfcf",
-      "frontierDigest": "2a50b52781e574cb3007dfcfb72079835a0c7eaf64e9f8fe960394743c16eb8c",
+      "frontierId": "offline-frontier-6a1ffd573ae7ee988d2383ee",
+      "frontierDigest": "6a1ffd573ae7ee988d2383eedc713f96b39bc0c82f4ca45128db2503e849ad50",
+      "canonicalKey": "admin.exchange.microsoft.com GET /beta/TimeZone/ExchangeAdminCenter.MyTimeZone"
+    },
+    {
+      "frontierId": "offline-frontier-db2e47ac3b36da80a45f8328",
+      "frontierDigest": "db2e47ac3b36da80a45f83285721c4db14f2fedbc3dcc70f49e840d13ca9f9cf",
       "canonicalKey": "admin.exchange.microsoft.com GET /beta/TimeZone/ExchangeAdminCenter.MyTimeZone"
     }
   ],
-  "deferredItemCount": 222,
-  "blockedItemCount": 222,
+  "deferredItemCount": 221,
+  "blockedItemCount": 221,
   "constraints": [
-    "GET-only passive capture",
-    "API evidence is limited to the exact admin.exchange.microsoft.com and exchange.admin.cloud.microsoft /beta hosts",
-    "No forms, writes, forwarding, trace jobs, or exports",
-    "Token response routes do not qualify as novelty",
-    "Acceptance requires a non-empty response shape absent from the checked-in OpenAPI"
+    "Issue one relative same-origin GET only, followed by passive capture",
+    "API evidence is limited to the exact admin.exchange.microsoft.com and exchange.admin.cloud.microsoft /beta scope",
+    "Use manual redirects and do not follow a redirect into an unapproved host or path",
+    "No forms, writes, exports, forwarding, trace jobs, query or body authoring, custom header authoring, or unrelated-route promotion",
+    "Sanitize status, content type, and response shape; never expose tokens, cookies, tenant identifiers, or raw sensitive bodies",
+    "Acceptance requires either an informative 2xx response body or shape, or a typed 4xx or 5xx response with an informative sanitized error contract; empty bodies, empty collections, bare 404 responses, and redirects do not qualify"
   ]
 }
