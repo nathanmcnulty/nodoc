@@ -25,6 +25,7 @@ const interactiveActionTypes = new Set([
   "click-label",
   "crawl-links",
   "navigate",
+  "probe-get",
   "reload",
   "replay-seeded-links",
   "replay-seeded-routes",
@@ -547,6 +548,69 @@ function hasInformativeResponseShape(record) {
   }
 }
 
+function structuralShape(value, depth = 0) {
+  if (depth > 10) return "truncated";
+  if (value === null) return "null";
+  if (Array.isArray(value)) {
+    const shapes = [...new Set(value.slice(0, 20).map((item) => JSON.stringify(structuralShape(item, depth + 1))))].sort();
+    return { array: shapes.map((item) => JSON.parse(item)) };
+  }
+  if (typeof value === "object") {
+    const entries = [];
+    let dynamic = false;
+    for (const key of Object.keys(value).sort().slice(0, 128)) {
+      if (key.length > 128
+        || /[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}/iu.test(key)
+        || /[\w.+-]+@[\w.-]+\.[a-z]{2,}/iu.test(key)
+        || /\.onmicrosoft\.com/iu.test(key)) {
+        dynamic = true;
+        continue;
+      }
+      entries.push([key, structuralShape(value[key], depth + 1)]);
+    }
+    if (dynamic) entries.push(["{dynamicProperty}", "unknown"]);
+    return Object.fromEntries(entries);
+  }
+  return typeof value;
+}
+
+function responseShapeFingerprint(value) {
+  if (typeof value !== "string" || !value.trim()) return null;
+  try {
+    return createHash("sha256").update(JSON.stringify(structuralShape(JSON.parse(value)))).digest("hex");
+  } catch {
+    return createHash("sha256").update("non-json:string").digest("hex");
+  }
+}
+
+function probeActionRecords(actionResults) {
+  return actionResults.flatMap((actionResult) => {
+    const result = actionResult?.result ?? {};
+    const materializedOutcomes = new Set(["auth-blocked", "confirmed", "http-error", "not-found"]);
+    if (actionResult?.type !== "probe-get"
+      || !materializedOutcomes.has(result.outcome)
+      || !Number.isInteger(result.status)
+      || !result.url) return [];
+    try {
+      const parsed = new URL(result.url);
+      return [{
+        attribution: { actionIndex: actionResult.actionIndex },
+        method: "GET",
+        mimeType: String(result.contentType || "").split(";", 1)[0] || null,
+        path: parsed.pathname,
+        queryParameterNames: [...new Set(parsed.searchParams.keys())].sort(),
+        responseBodySample: typeof result.body === "string" ? result.body : null,
+        responseShapeFingerprint: responseShapeFingerprint(result.body),
+        seenOnPages: actionResult.page ? [actionResult.page] : [],
+        status: result.status ?? null,
+        url: result.url,
+      }];
+    } catch {
+      return [];
+    }
+  });
+}
+
 function hasInformativeRequestExample(record) {
   return (record?.requestBodySamples ?? []).some((sample) => (
     typeof sample === "string" && sample.trim() && sample.trim() !== "{}" && sample.trim() !== "[]"
@@ -591,6 +655,13 @@ export function evaluateNoveltyEvidence({ recipe, noveltyPlan = null, actionResu
       : !/^seed(?:-|$)/u.test(String(result?.page ?? ""))
   ));
   const indexedResultsAvailable = recipeActionResults.some((result) => Number.isInteger(result?.actionIndex));
+  const evidenceRecords = [...apiRecords];
+  for (const probeRecord of probeActionRecords(actionResults)) {
+    const duplicate = evidenceRecords.some((record) => record?.url === probeRecord.url
+      && record?.attribution?.actionIndex === probeRecord.attribution.actionIndex
+      && record?.responseBodySample === probeRecord.responseBodySample);
+    if (!duplicate) evidenceRecords.push(probeRecord);
+  }
   let resultCursor = 0;
   for (const [index, action] of recipe.actions.entries()) {
     const expected = actionDescriptor(action);
@@ -611,7 +682,7 @@ export function evaluateNoveltyEvidence({ recipe, noveltyPlan = null, actionResu
   const targets = plan.targets.map((target) => {
     const attempted = target.actionIndexes.every((index) => completedRecipeActionIndexes.has(index));
     const targetPages = new Set(target.actionIndexes.flatMap((index) => actionPages.get(index) ?? []));
-    const records = apiRecords.filter((record) => recordMatchesTarget(record, target, plan.baselineOperations)
+    const records = evidenceRecords.filter((record) => recordMatchesTarget(record, target, plan.baselineOperations)
       && recordBelongsToTarget(record, target, targetPages));
     const candidates = candidateLists(candidateHandoff).filter((candidate) => candidateMatchesTarget(candidate, target));
     const undocumentedRecords = records.filter((record) => candidates.some((candidate) => (

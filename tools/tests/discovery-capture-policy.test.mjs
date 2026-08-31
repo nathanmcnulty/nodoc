@@ -234,9 +234,39 @@ test("required action failures are surfaced deterministically", () => {
 
 test("confirmed required probes count as successful actions", () => {
   assert.equal(actionResultSucceeded({
-    result: { outcome: "confirmed" },
+    result: { outcome: "confirmed", status: 200 },
     type: "probe-get",
   }), true);
+});
+
+test("typed HTTP probe responses count as attempted even when the endpoint errors", () => {
+  assert.equal(actionResultSucceeded({
+    result: { outcome: "http-error", status: 410 },
+    type: "probe-get",
+  }), true);
+  assert.equal(actionResultSucceeded({
+    result: { outcome: "redirect-blocked", status: 302 },
+    type: "probe-get",
+  }), false);
+});
+
+test("failed required probes are surfaced deterministically", () => {
+  assert.deepEqual(summarizeActionResults([{
+    page: "probe",
+    required: true,
+    result: { outcome: "probe-failed" },
+    type: "probe-get",
+    value: "/beta/example",
+  }]), {
+    requiredActionCount: 1,
+    requiredActionFailureCount: 1,
+    requiredActionFailures: [{
+      page: "probe",
+      type: "probe-get",
+      value: "/beta/example",
+    }],
+    countedActionCount: 1,
+  });
 });
 
 test("explicit reload requires a completed load event", () => {

@@ -1055,6 +1055,82 @@
     ]
   },
   {
+    "title": "Exchange",
+    "specId": "exchange-beta",
+    "specPath": "specifications/nodoc-exchange-beta/specification/openapi.yml",
+    "nodocRoute": null,
+    "nodocCategory": null,
+    "headerProfiles": {},
+    "operations": [
+      {
+        "operationId": "ExchangeBeta.Bootstrap.GetMyTimeZone",
+        "summary": "Get the current user's Exchange time zone",
+        "method": "GET",
+        "path": "/beta/TimeZone/ExchangeAdminCenter.MyTimeZone",
+        "operationContext": {
+          "surface": "Exchange admin center shell and localized settings",
+          "workflows": [
+            "Read the current user's effective Exchange time zone for localized portal behavior."
+          ],
+          "pagination": {
+            "style": "none"
+          },
+          "headerProfile": "exchange-admin-portal-context",
+          "availability": {
+            "level": "tenant-conditional",
+            "notes": [
+              "A same-origin authenticated GET returned 200 from the legacy Exchange admin center host."
+            ]
+          },
+          "provenance": [
+            {
+              "source": "live-authenticated-probe",
+              "confidence": "high",
+              "notes": [
+                "The response was captured with one approved same-origin GET after passive landing captures omitted the route."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "ExchangeBeta.MailFlow.GetTdpAutoForwardingReport",
+        "summary": "Get TDP auto-forwarding report data",
+        "method": "GET",
+        "path": "/beta/MailflowReportTDP/ExchangeAdminCenter.AutoForwarding(StartDate={startDate},EndDate={endDate})",
+        "operationContext": {
+          "surface": "Exchange admin center home dashboard",
+          "workflows": [
+            "Open the authenticated dashboard and allow the Auto-forwarded messages card to load its trailing seven-day report window."
+          ],
+          "pagination": {
+            "style": "none",
+            "notes": [
+              "The observed request returned a single OData collection envelope with no continuation field."
+            ]
+          },
+          "headerProfile": "exchange-admin-portal-context",
+          "availability": {
+            "level": "tenant-conditional",
+            "notes": [
+              "The current tenant returned a successful empty collection, which confirms the route but not the non-empty item contract.",
+              "`StartDate` and `EndDate` are Unix epoch timestamps in milliseconds embedded in the OData function path."
+            ]
+          },
+          "provenance": [
+            {
+              "source": "live-authenticated-capture",
+              "confidence": "high",
+              "notes": [
+                "Confirmed as a 200 `application/json` GET through `exchange.admin.cloud.microsoft` during the Exchange home-page reload."
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
     "title": "M365 Admin",
     "specId": "m365-admin",
     "specPath": "specifications/nodoc-m365-admin/specification/openapi.yml",

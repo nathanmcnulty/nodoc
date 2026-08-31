@@ -5,33 +5,11 @@
     "matchHosts": ["admin.exchange.microsoft.com", "admin.cloud.microsoft"],
     "matchPathPrefixes": ["/"]
   },
-  "noveltyFrontier": {
-    "approvalArtifact": "tools/frontier-approvals/exchange-beta-bootstrap-shapes.json",
-    "approvalDigest": "1f23b23e5148d0f3bdd80b3f64bdfbe154730bfea0af7c930936e8fba0539ee3",
-    "baseline": "checked-in-spec-and-coverage-ledgers",
-    "baselineSignals": {
-      "queryMetadata": [],
-      "requestShapes": [],
-      "responseMetadata": [],
-      "responseShapes": [],
-      "routes": []
-    },
-    "reopenCondition": "Neither the current-shell nor legacy-host landing emitted the confirmed current-user time-zone GET; an exact same-origin GET is needed to distinguish an existing but unused route from a removed or erroring route.",
-    "targets": [
-      {
-        "id": "my-time-zone-response-shape",
-        "state": "Legacy-host Exchange admin center landing bootstrap",
-        "evidenceLevel": "confirmed",
-        "expectedHostFamilies": ["admin.exchange.microsoft.com", "exchange.admin.cloud.microsoft"],
-        "expectedRoutes": ["/beta/TimeZone/ExchangeAdminCenter.MyTimeZone"],
-        "expectedInformationClasses": ["response-shape", "response-metadata"],
-        "expectedDocumentationObjectives": ["error-example", "response-example"],
-        "actionIndexes": [0, 1, 2, 3],
-        "safeAction": "Reload the authenticated legacy-host Exchange landing page, issue one exact same-origin GET for the documented current-user time-zone route, and capture its status and sanitized response contract.",
-        "acceptanceKey": "my-time-zone-current-contract",
-        "rationale": "Both current-shell and legacy-host landing reloads omitted this previously confirmed route; a single same-origin GET can establish whether it still succeeds, now errors, or has been removed."
-      }
-    ]
+  "noveltyStatus": {
+    "status": "satisfied",
+    "evidenceDisposition": "frontier-exhausted",
+    "reason": "Two authenticated landing captures omitted MyTimeZone, then one approved same-origin GET returned 200 application/json with a concrete TimeZone entity; the current contract and a sanitized response example are now promoted.",
+    "nextRequirement": "Identify another exact unmodeled Exchange route, query key, error status, media type, or response shape in a different deterministic state; do not repeat the dashboard landing or MyTimeZone probe unchanged."
   },
   "matchHosts": ["admin.exchange.microsoft.com", "exchange.admin.cloud.microsoft"],
   "matchPathPrefixes": ["/beta"],
@@ -40,7 +18,11 @@
   "maxActions": 5,
   "actions": [
     "reload=exchange-legacy-host-bootstrap",
-    "probe-get=/beta/TimeZone/ExchangeAdminCenter.MyTimeZone",
+    {
+      "type": "probe-get",
+      "value": "/beta/TimeZone/ExchangeAdminCenter.MyTimeZone",
+      "required": true
+    },
     "wait-ms=3000",
     "capture=exchange-legacy-host-bootstrap"
   ]

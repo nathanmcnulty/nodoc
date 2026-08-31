@@ -177,10 +177,53 @@ function isLikelyIdentifier(value) {
   );
 }
 
+function splitOdataArguments(value) {
+  const parts = [];
+  let current = "";
+  let quote = null;
+  for (const character of String(value || "")) {
+    if ((character === "'" || character === "\"") && (!quote || quote === character)) {
+      quote = quote ? null : character;
+    }
+    if (character === "," && !quote) {
+      parts.push(current.trim());
+      current = "";
+    } else {
+      current += character;
+    }
+  }
+  if (current.trim()) parts.push(current.trim());
+  return parts;
+}
+
+function normalizeNamedOdataArgument(argument) {
+  const match = /^([A-Za-z_][A-Za-z0-9_]*)=(.*)$/u.exec(argument);
+  if (!match) return null;
+  const [, name, rawValue] = match;
+  const trimmedValue = rawValue.trim();
+  const quote = (
+    (trimmedValue.startsWith("'") && trimmedValue.endsWith("'"))
+    || (trimmedValue.startsWith("\"") && trimmedValue.endsWith("\""))
+  ) ? trimmedValue[0] : "";
+  const value = quote ? trimmedValue.slice(1, -1) : trimmedValue;
+  if (/^(?:false|null|true)$/iu.test(value)) return `${name}=${trimmedValue}`;
+
+  const shouldParameterize = isLikelyIdentifier(value)
+    || /(?:Address|Alias|Date|Email|Id|Key|Name|Type)$/u.test(name);
+  if (!shouldParameterize) return `${name}=${trimmedValue}`;
+  const placeholder = `{${name[0].toLowerCase()}${name.slice(1)}}`;
+  return `${name}=${quote}${placeholder}${quote}`;
+}
+
 function normalizeParenthesizedValue(inner) {
   const trimmed = String(inner || "").trim();
   if (!trimmed) {
     return "";
+  }
+
+  const namedArguments = splitOdataArguments(trimmed).map(normalizeNamedOdataArgument);
+  if (namedArguments.length > 0 && namedArguments.every(Boolean)) {
+    return namedArguments.join(",");
   }
 
   const quote =

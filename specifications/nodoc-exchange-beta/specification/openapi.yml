@@ -36,7 +36,8 @@ info:
     session, same-origin `fetch`/XHR traffic, and `x-requested-with: XMLHttpRequest`. The observed
     cookie set included `.AspNetCore.Cookies` plus companion chunk cookies. A 2026-08-30 capture
     confirmed that the current portal can instead route `/beta` operations through the fixed
-    `exchange.admin.cloud.microsoft` service host with bearer authorization.
+    `exchange.admin.cloud.microsoft` service host with bearer authorization. A 2026-08-31
+    same-origin probe reconfirmed the legacy-host current-user time-zone contract.
 
     Shared `admin.microsoft.com` support, SharePoint, and feedback calls were also present in the
     live session, but those were not modeled here because they are either generic Microsoft 365
@@ -44,7 +45,7 @@ info:
 
     Documentation and specifications have been provided on a best-efforts basis and may not be
     100% accurate.
-  version: 0.1.0
+  version: 0.2.0
   contact:
     name: nodoc
     url: https://github.com/nathanmcnulty/nodoc
@@ -257,6 +258,35 @@ components:
         IsLoggedInTenantAllowed:
           type: boolean
           example: false
+      additionalProperties: true
+    ExchangeTimeZone:
+      type: object
+      description: Time-zone entity returned for the current Exchange admin center user.
+      required:
+        - Id
+        - Name
+        - Offset
+        - IsDST
+      properties:
+        '@odata.context':
+          type: string
+        Id:
+          type: string
+          description: Windows time-zone identifier.
+          example: Alaskan Standard Time
+        Name:
+          type: string
+          description: Localized display name presented by the portal.
+          example: (UTC-09:00) Alaska Time (Anchorage)
+        Offset:
+          type: integer
+          format: int32
+          description: Effective UTC offset in minutes for the observed date, including daylight saving time.
+          example: -480
+        IsDST:
+          type: boolean
+          description: Whether daylight saving time is active for the returned effective offset.
+          example: true
       additionalProperties: true
     ExchangeFeedbackAttributes:
       type: object
@@ -671,15 +701,43 @@ paths:
       tags: [Bootstrap]
       summary: Get the current user's Exchange time zone
       description: |
-        Returns the caller's active time zone selection for the Exchange admin center.
+        Returns the caller's active time zone selection for the Exchange admin center. This route
+        remained live on the legacy host even though neither the current-shell nor legacy landing
+        reload emitted it automatically during the August 2026 discovery pass.
       operationId: ExchangeBeta.Bootstrap.GetMyTimeZone
+      x-nodoc-live-capture:
+        source: authenticated Exchange admin center exact same-origin GET
+        browsedPages:
+          - https://admin.exchange.microsoft.com/#/
+      x-nodoc-operation-context:
+        surface: Exchange admin center shell and localized settings
+        workflows:
+          - Read the current user's effective Exchange time zone for localized portal behavior.
+        headerProfile: exchange-admin-portal-context
+        availability:
+          level: tenant-conditional
+          notes:
+            - A same-origin authenticated GET returned 200 from the legacy Exchange admin center host.
+        pagination:
+          style: none
+        provenance:
+          - source: live-authenticated-probe
+            confidence: high
+            notes:
+              - The response was captured with one approved same-origin GET after passive landing captures omitted the route.
       responses:
         '200':
           description: Current Exchange time zone returned successfully.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GenericObject'
+                $ref: '#/components/schemas/ExchangeTimeZone'
+              example:
+                '@odata.context': https://admin.exchange.microsoft.com/beta/$metadata#TimeZone/$entity
+                Id: Alaskan Standard Time
+                Name: (UTC-09:00) Alaska Time (Anchorage)
+                Offset: -480
+                IsDST: true
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -1027,6 +1085,59 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ODataCollectionResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  "/beta/MailflowReportTDP/ExchangeAdminCenter.AutoForwarding(StartDate={startDate},EndDate={endDate})":
+    get:
+      tags: [MailFlow]
+      summary: Get TDP auto-forwarding report data
+      description: |
+        Returns the auto-forwarded messages dataset used by the Exchange admin center home
+        dashboard. This TDP route is distinct from the older `MailflowReport` forwarding route.
+        The August 2026 landing capture requested the trailing seven-day window and returned an
+        empty OData collection.
+      operationId: ExchangeBeta.MailFlow.GetTdpAutoForwardingReport
+      x-nodoc-live-capture:
+        source: authenticated Microsoft 365 admin shell Exchange dashboard
+        browsedPages:
+          - https://admin.cloud.microsoft/exchange#/
+      parameters:
+        - $ref: '#/components/parameters/startDate'
+        - $ref: '#/components/parameters/endDate'
+      x-nodoc-operation-context:
+        surface: Exchange admin center home dashboard
+        workflows:
+          - Open the authenticated dashboard and allow the Auto-forwarded messages card to load its trailing seven-day report window.
+        headerProfile: exchange-admin-portal-context
+        availability:
+          level: tenant-conditional
+          notes:
+            - The current tenant returned a successful empty collection, which confirms the route but not the non-empty item contract.
+            - "`StartDate` and `EndDate` are Unix epoch timestamps in milliseconds embedded in the OData function path."
+        pagination:
+          style: none
+          notes:
+            - The observed request returned a single OData collection envelope with no continuation field.
+        provenance:
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - Confirmed as a 200 `application/json` GET through `exchange.admin.cloud.microsoft` during the Exchange home-page reload.
+      responses:
+        '200':
+          description: TDP auto-forwarding report data returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ODataCollectionResponse'
+              example:
+                '@odata.context': https://exchange.admin.cloud.microsoft/beta/$metadata#Collection(ExchangeAdminCenter.MailflowForwardingModel)
+                value: []
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
