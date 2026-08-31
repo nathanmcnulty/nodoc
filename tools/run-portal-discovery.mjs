@@ -1147,6 +1147,18 @@ async function main() {
   let recipeSafety;
   try {
     const sourceRecipe = JSON.parse(await readFile(recipePath, "utf8"));
+    if (sourceRecipe?.capturePrerequisite?.status === "blocked") {
+      const error = new Error(`capture prerequisite is not satisfied; ${sourceRecipe.capturePrerequisite.nextRequirement}`);
+      error.code = "capture-prerequisite-missing";
+      error.blocker = {
+        reason: sourceRecipe.capturePrerequisite.reason,
+        remediation: sourceRecipe.capturePrerequisite.nextRequirement,
+      };
+      throw error;
+    }
+    if (args.requireNovelty && sourceRecipe?.noveltyStatus?.status === "satisfied" && !sourceRecipe?.noveltyFrontier) {
+      buildNoveltyPlan(sourceRecipe, { required: true });
+    }
     selectedRecipe = prepareRecipeForRun(sourceRecipe, args.variables);
     validateSelectedRecipeTarget(selectedRecipe);
     recipeSafety = await inspectRecipeSafety(recipePath, args);
@@ -1167,7 +1179,7 @@ async function main() {
       startedAt: new Date().toISOString(),
       status: "blocked",
       blocker: {
-        code: ["action-budget-exceeded", "novelty-frontier-invalid", "recipe-target-invalid", "unsafe-recipe-action"].includes(error?.code)
+        code: ["action-budget-exceeded", "capture-prerequisite-missing", "novelty-frontier-invalid", "recipe-target-invalid", "unsafe-recipe-action"].includes(error?.code)
           ? error.code
           : /operation|approval|ceiling/iu.test(error?.message ?? "")
             ? "mutation-authorization-required"
