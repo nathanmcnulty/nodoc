@@ -565,8 +565,17 @@ export const coverageOverlayByTitle = {
       "admin.teams.microsoft.com",
     ],
     lastSuccessfulPassDepth: "deep-interaction",
+    knownTelemetryExclusions: [
+      route("POST", "/api/instrument/logclient", "Same-origin Teams admin shell logging sink observed during authenticated Manage users navigation and excluded from the reusable data API surface."),
+    ],
     notes: [
       "Teams already has a deeper capture baseline in the repo, so future follow-up should remain diff-driven.",
+      "A bounded authenticated August 2026 Manage users capture enriched the existing user collection with its projection, ordering, active-user filter, page size, continuation link, assigned-plan contract, and a tenant-safe response example.",
+      "The same pass retained five direct Microsoft Graph reads and classified all five against the current public contract; none produced an undocumented or error candidate.",
+    ],
+    openGaps: [
+      "Other Teams operations still expose generic or opaque response schemas; choose one deterministic portal state with a non-empty response at a time instead of replaying Manage users.",
+      "Populated telephone-number entries were not present in the current user inventory, so their item contract remains unconfirmed.",
     ],
   },
   "Viva Engage": {
@@ -701,6 +710,7 @@ export const captureRecipesByTitle = {
     "tools/capture-recipes/sharepoint-admin-seeded-replay.json",
   ],
   Teams: [
+    "tools/capture-recipes/teams-manage-users-novelty.json",
     "tools/capture-recipes/teams-deep.json",
     "tools/capture-recipes/teams-seeded-replay.json",
   ],

@@ -4902,6 +4902,53 @@
       },
       {
         "operationId": null,
+        "summary": "List Teams user records",
+        "method": "GET",
+        "path": "/Teams.User/users",
+        "operationContext": {
+          "surface": "Users > Manage users",
+          "workflows": [
+            "Inventory Teams-enabled users and inspect directory, licensing, voice, and location state.",
+            "Troubleshoot why a user is missing from the active Teams administration inventory."
+          ],
+          "troubleshooting": [
+            "The portal filters `SoftDeletionTimeStamp eq null`; omit or change that filter deliberately when investigating deleted users.",
+            "An empty `telephoneNumbers` array does not establish the shape of populated telephone-number entries.",
+            "Preserve the returned continuation link and projection when reproducing portal pagination behavior."
+          ],
+          "pagination": {
+            "style": "link",
+            "requestParameters": [
+              "pageSize"
+            ],
+            "responseFields": [
+              "@nextLink",
+              "users"
+            ],
+            "notes": [
+              "The portal requested 20 records and received a continuation link; follow the returned link instead of manufacturing a token."
+            ]
+          },
+          "headerProfile": "teams-service-bearer",
+          "availability": {
+            "level": "permission-conditional",
+            "notes": [
+              "Field presence varies with user type, assigned services, and data-provider availability."
+            ]
+          },
+          "provenance": [
+            {
+              "source": "authenticated-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "A bounded August 2026 Manage users capture returned 200 with a non-empty collection and no mutation requests."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": null,
         "summary": "List civic address filters",
         "method": "GET",
         "path": "/Skype.Ncs/civicAddresses/filters",

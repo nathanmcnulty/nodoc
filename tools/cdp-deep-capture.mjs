@@ -15,6 +15,7 @@ import {
   buildTransitionEvidence,
   decodeBoundedCdpBody,
   deriveActionEligibility,
+  deriveControlSelectorHints,
   responseBodyCaptureLimit,
   shouldRequestResponseBody,
   summarizeActionResults,
@@ -2885,6 +2886,7 @@ async function main() {
       return {
         actionIndex,
         candidateCount,
+        candidateHints: deriveControlSelectorHints(action, snapshots),
         reason: candidateCount === 1
           ? "unique-visible-control-present"
           : candidateCount === 0

@@ -114,7 +114,7 @@ function scopeMatchesSnapshot(scope, snapshot) {
   return true;
 }
 
-function controlMatchesAction(control, action, snapshot) {
+export function controlMatchesAction(control, action, snapshot) {
   const value = normalizeText(action?.value);
   const lowerValue = value.toLowerCase();
   const textValues = [
@@ -143,6 +143,55 @@ function controlMatchesAction(control, action, snapshot) {
   }
 
   return textValues.some((item) => item === lowerValue);
+}
+
+function safeControlHintText(value) {
+  const text = normalizeText(value);
+  if (!text || text.length > 160) return null;
+  if (/\b[\w.+-]+@[\w.-]+\.[a-z]{2,}\b/iu.test(text)) return null;
+  if (/\b[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\b/iu.test(text)) return null;
+  return text;
+}
+
+function safeControlHintHref(value, targetUrl) {
+  if (!value) return null;
+  try {
+    const parsed = new URL(value, targetUrl || undefined);
+    if (!/^https?:$/u.test(parsed.protocol) || parsed.username || parsed.password) return null;
+    const sensitiveSegment = parsed.pathname.split("/").some((segment) => (
+      segment.includes("@")
+      || segment.length > 48
+      || /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu.test(segment)
+    ));
+    return sensitiveSegment ? null : `${parsed.origin}${parsed.pathname}`;
+  } catch {
+    return null;
+  }
+}
+
+export function deriveControlSelectorHints(action, snapshots, limit = 8) {
+  if (!isClickAction(action) || !Array.isArray(snapshots)) return [];
+  const hints = [];
+  for (const snapshot of snapshots) {
+    if (snapshot?.error || !scopeMatchesSnapshot(action.scope, snapshot)) continue;
+    for (const control of Array.isArray(snapshot.controls) ? snapshot.controls : []) {
+      if (!controlMatchesAction(control, action, snapshot)) continue;
+      const hint = {
+        ariaLabel: safeControlHintText(control?.ariaLabel),
+        automationId: safeControlHintText(control?.automationId),
+        href: safeControlHintHref(control?.href, snapshot?.targetUrl ?? snapshot?.url),
+        role: safeControlHintText(control?.role),
+        tag: safeControlHintText(control?.tag),
+        text: safeControlHintText(control?.text),
+      };
+      const compact = Object.fromEntries(Object.entries(hint).filter(([, value]) => value));
+      if (Object.keys(compact).some((key) => ["ariaLabel", "automationId", "href", "text"].includes(key))) {
+        hints.push(compact);
+      }
+      if (hints.length >= limit) return hints;
+    }
+  }
+  return hints;
 }
 
 export function deriveActionEligibility(action, snapshots) {

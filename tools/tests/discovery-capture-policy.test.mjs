@@ -6,6 +6,7 @@ import {
   actionResultSucceeded,
   buildInteractionHealthStatus,
   deriveActionEligibility,
+  deriveControlSelectorHints,
   decodeBoundedCdpBody,
   shouldRequestResponseBody,
   summarizeActionResults,
@@ -370,6 +371,24 @@ test("pre-action inventories distinguish eligible controls from absent controls"
     }]).status,
     "absent-not-applicable",
   );
+});
+
+test("control readiness exposes bounded selector hints without identifiers", () => {
+  const action = { scope: "root", type: "click-contains", value: "Users" };
+  const hints = deriveControlSelectorHints(action, [{
+    controls: [
+      { href: "/users", tag: "a", text: "Users" },
+      { automationId: "users-nav", role: "button", text: "View users" },
+      { href: "/users/2438c0ab-7e44-4c7b-9138-5d8dd64035d1", text: "Users person@example.test" },
+    ],
+    sessionId: "root",
+    targetType: "page",
+    targetUrl: "https://admin.teams.microsoft.com/dashboard",
+  }]);
+  assert.deepEqual(hints, [
+    { href: "https://admin.teams.microsoft.com/users", tag: "a", text: "Users" },
+    { automationId: "users-nav", role: "button", text: "View users" },
+  ]);
 });
 
 test("healthy eligible misses do not escalate without transition corroboration", () => {

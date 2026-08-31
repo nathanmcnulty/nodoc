@@ -1,0 +1,24 @@
+{
+  "portal": "Teams",
+  "url": "https://admin.teams.microsoft.com",
+  "pageTarget": {
+    "matchHosts": ["admin.teams.microsoft.com"],
+    "matchPathPrefixes": ["/"]
+  },
+  "noveltyStatus": {
+    "status": "satisfied",
+    "evidenceDisposition": "frontier-exhausted",
+    "reason": "A healthy authenticated Manage users capture returned the exact collection GET with a non-empty response shape, four query keys, continuation-link pagination, and enough evidence for a sanitized example.",
+    "nextRequirement": "Identify another exact unmodeled Teams route, query key, error status, media type, or non-empty response shape in a deterministic UI state before another novelty run; do not replay Manage users unchanged."
+  },
+  "matchHosts": ["api.interfaces.records.teams.microsoft.com"],
+  "matchPathPrefixes": ["/Teams.User/users"],
+  "postActionSettleMs": 10000,
+  "settleMs": 12000,
+  "maxActions": 4,
+  "actions": [
+    "navigate=https://admin.teams.microsoft.com/users",
+    "wait-ms=8000",
+    "capture=manage-users"
+  ]
+}
