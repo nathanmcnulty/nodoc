@@ -102,9 +102,8 @@ paths:
                   IsCompactMode: { type: boolean }
                   ShowLess: { type: boolean }
                   ShownColumns:
-                    type: array
                     nullable: true
-                    items: {}
+                    description: Captured as null; the non-null shape remains unobserved.
                   workloadType: { type: integer }
         '401':
           $ref: common.yml#/components/responses/Unauthorized

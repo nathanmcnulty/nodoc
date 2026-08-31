@@ -1177,6 +1177,7 @@ function classifyStaticAssetObservation(observation) {
   const scriptSuffixSignal = /\.(?:js|mjs)$/iu.test(normalizedPath);
   const typescriptSourceSignal = /\.tsx?$/iu.test(normalizedPath);
   const yammerLocaleCatalogSignal = /\/yammer-locale\/[^/]+\/[^/]+\.json$/iu.test(normalizedPath);
+  const securityCopilotLocaleCatalogSignal = /^\/languages\/strings\/[^/]+\.json$/iu.test(normalizedPath);
   const shellCatalogSignal = /^\/shellux\/(?:allthemes\.[a-f0-9]{8,}\.json|[^/]+\/shellstrings\.[a-f0-9]{8,}\.json)$/iu.test(normalizedPath);
   const bootAnalyticsAssetSignal = /\/resources\/boot-analytics-ping\.js$/iu.test(normalizedPath);
   const hashedAssetSignal = /(?:^|\/)[^/]*(?:[.-])[a-f0-9]{8,}(?:\.[^/]+)?$/iu.test(normalizedPath);
@@ -1191,6 +1192,7 @@ function classifyStaticAssetObservation(observation) {
     ...(scriptSuffixSignal ? ["script-suffix"] : []),
     ...(typescriptSourceSignal ? ["typescript-source-suffix"] : []),
     ...(yammerLocaleCatalogSignal ? ["yammer-locale-catalog"] : []),
+    ...(securityCopilotLocaleCatalogSignal ? ["security-copilot-locale-catalog"] : []),
     ...(shellCatalogSignal ? ["shell-static-catalog"] : []),
     ...(bootAnalyticsAssetSignal ? ["boot-analytics-asset"] : []),
     ...(hashedAssetSignal ? ["hashed-asset-name"] : []),
@@ -1205,6 +1207,7 @@ function classifyStaticAssetObservation(observation) {
     || (bundleOnlySignal && (strongSuffixSignal || scriptSuffixSignal || hashedAssetSignal))
     || (bundleOnlySignal && typescriptSourceSignal)
     || yammerLocaleCatalogSignal
+    || securityCopilotLocaleCatalogSignal
     || shellCatalogSignal
     || bootAnalyticsAssetSignal
   );

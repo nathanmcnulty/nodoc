@@ -762,6 +762,31 @@ test("in-scope localization resjson assets are suppressed as static evidence", a
   }
 });
 
+test("Security Copilot localization JSON remains static feature telemetry", async () => {
+  const artifactDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-security-copilot-locales-"));
+
+  try {
+    await writeJson(path.join(artifactDir, "api-records.json"), [{
+      method: "GET",
+      mimeType: "application/json",
+      path: "/languages/strings/agents.json",
+      seenOnPages: ["agents"],
+      status: 200,
+      url: "https://securitycopilot.microsoft.com/languages/strings/agents.json",
+    }]);
+    const result = await runAnalyze("security-copilot", artifactDir);
+    assert.ok(result.candidateQueue.suppressedCandidates.some((candidate) => (
+      candidate.normalizedPath === "/languages/strings/agents.json"
+      && candidate.suppressionNote.includes("Known static portal asset")
+    )));
+    assert.equal(result.candidateQueue.scopeReviewCandidates.some((candidate) => (
+      candidate.normalizedPath === "/languages/strings/agents.json"
+    )), false);
+  } finally {
+    await rm(artifactDir, { force: true, recursive: true });
+  }
+});
+
 test("static-looking suffix never suppresses confirmed live API transport", async () => {
   const artifactDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-live-static-looking-api-"));
   try {

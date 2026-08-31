@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "artifactId": "security-copilot-refresh-20260831T230000Z",
+  "sourcePortal": "Security Copilot",
+  "sourceState": "Home, Agents, Promptbooks, Manage workspaces, Usage monitoring, Security Store, Build, Builder, and portal localization resources",
+  "assignedSpecId": "security-copilot",
+  "assignedHost": "securitycopilot.microsoft.com",
+  "terminalStatus": "completed",
+  "captureComplete": true,
+  "interactionAccountingConsistent": true,
+  "requiredActionFailureCount": 0,
+  "unresolvedMutation": false,
+  "hashes": {
+    "summary.json": "29b4b41e491c183707cf6f0bdb69663ff25aa54c24700726593b1b3edd2bb91c",
+    "api-records.json": "465cab207a5c8f361b2fc3c569bf30e5a85ae7775c770252b2491e25293c8ee9",
+    "candidate-queue.json": "1eae03e90fbe16aae6b4e86a582b8fdf409263e15b408f4cd30debe39d70b39b",
+    "candidate-handoff.json": "62132e4f2f870cad17a4e05e3af4bedd1c32dfac33c551c726c28baddf270195",
+    "discovery-run.json": "859237163938954adbc1163fdcd9fce49b618a38e296dd5bc63ff5234f1c87b3",
+    "page-states.json": "acee44c3e7b1fe1a2b82a4ce548e7e083c9c7367f38e67fb7fc7b18221cd41be",
+    "graph-telemetry.json": "a7531662f9a62a0eda45c8f48058fd3c97dadfcaba947335c09bc539037c6c27",
+    "graph-research-queue.json": "5567d07366ef03616ad068a49c969aca41179ef4c67ed0827a2d44793e71554f"
+  },
+  "promotedOperations": [],
+  "observedNamespaces": [
+    "admin",
+    "agentchat",
+    "agents",
+    "common",
+    "mysessions",
+    "pluginBuilder",
+    "plugins",
+    "promptbar",
+    "promptbooks",
+    "session",
+    "store",
+    "timezones",
+    "tours"
+  ],
+  "staticResourceResponseShapeDigests": {
+    "/languages/strings/admin.json": "f72171c61753c80f34e308594579b957d87f9ec3da86553a3717e74df4b37ff0",
+    "/languages/strings/agentchat.json": "09e3f5022dd1844ebf91b7da586252b0bd16f0222465391a199c41f8e7081b2c",
+    "/languages/strings/agents.json": "9def108f5f3597adc976aa370519e2b4243b3322acdedcf58d1eca2236a4ec3a",
+    "/languages/strings/common.json": "193c1a0b3725638ada33bdc644567d358b0f094370efe352113c00008ffc10ff",
+    "/languages/strings/mysessions.json": "78806a48c3f2d02efce81dc53389c5902179acf6386ecabcc8fc34042bfcb829",
+    "/languages/strings/pluginBuilder.json": "22a7cf02373ae600527dad26da7937f2fa45f07edb6f9813784f26029815118f",
+    "/languages/strings/plugins.json": "032f72b81b2bc1e69d37ea497aba36b822c3969be1af49d0ac2f38ee4477efba",
+    "/languages/strings/promptbar.json": "72781c6ed4601947fe3a37ceae7c5a0ef42a4b2cd3d731177c8bb4fd26e4682c",
+    "/languages/strings/promptbooks.json": "75b0c32cfa98cac82efa8440fb4d65db0c656cb370cf968dbd714867c30498e4",
+    "/languages/strings/session.json": "757f084898ad5257f5f8cdf551e9b6255a8102c3b2777185492bfe8c39f8120b",
+    "/languages/strings/store.json": "aab67eb17962298fbac187cbab784d3de0361940afbd4b9f07b230d9660650ef",
+    "/languages/strings/timezones.json": "a2df63e80f894f944059c10c311179c53a2ce93f2740949e7b4f7e56dec166c2",
+    "/languages/strings/tours.json": "efd2d7ed582ac878d135064dfaa6900a439dd831f6264929efaf90afcee628a6"
+  },
+  "deferredOperations": [
+    {
+      "operation": "GET /auth/signout",
+      "reason": "Bundle-only sign-out route with no confirmed response contract and session-ending semantics."
+    }
+  ],
+  "rejectedStaticResources": [
+    {
+      "resourceFamily": "GET /languages/strings/{namespace}.json",
+      "reason": "Confirmed same-origin localization bundles are retained as feature-discovery telemetry but excluded from the callable product API specification. Exact sanitized response-shape digests remain in the immutable artifact.",
+      "observedNamespaceCount": 13
+    }
+  ],
+  "excludedAdjacentOperations": [
+    {
+      "operations": [
+        "GET https://management.azure.com/subscriptions",
+        "GET https://management.azure.com/tenants"
+      ],
+      "reason": "Documented Azure Resource Manager discovery reads shared across portals rather than Security Copilot product APIs."
+    },
+    {
+      "operation": "POST /OneCollector/1.0",
+      "reason": "Browser telemetry containing tenant and session metadata; excluded from product API specifications."
+    }
+  ]
+}

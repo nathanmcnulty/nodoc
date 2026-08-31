@@ -5,6 +5,12 @@
     "matchHosts": ["securitycopilot.microsoft.com"],
     "matchPathPrefixes": ["/"]
   },
+  "noveltyStatus": {
+    "status": "satisfied",
+    "evidenceDisposition": "frontier-exhausted",
+    "reason": "A complete healthy run found all Security Copilot product API traffic already modeled; portal localization bundles were retained as static-resource telemetry, shared ARM reads were excluded, and the sign-out route remained bundle-only.",
+    "nextRequirement": "Identify an exact unmodeled Security Copilot product route, method, query key, status, media type, response shape, or deterministic feature state before another full deep run; do not replay these surfaces solely for freshness."
+  },
   "matchHosts": [
     "securitycopilot.microsoft.com",
     "api.securitycopilot.microsoft.com",
