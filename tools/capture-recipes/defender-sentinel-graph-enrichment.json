@@ -1,0 +1,48 @@
+{
+  "portal": "Defender",
+  "url": "https://security.microsoft.com",
+  "pageTarget": {
+    "matchHosts": ["security.microsoft.com"],
+    "matchPathPrefixes": ["/graphs"],
+    "bootstrap": {
+      "matchHosts": ["security.microsoft.com"],
+      "matchPathnames": ["/"]
+    }
+  },
+  "inspectionPolicy": {
+    "mode": "observe-only",
+    "prohibitedControlPatterns": [
+      "Turn on graph",
+      "Set up graph",
+      "Enable connector",
+      "Start trial",
+      "Purchase"
+    ]
+  },
+  "capturePrerequisite": {
+    "status": "blocked",
+    "reason": "This newly separated Sentinel Graph readiness/error frontier has not yet received the required exact Luna xhigh/max evidence and safety review artifact.",
+    "nextRequirement": "Have exact gpt-5.6-luna at xhigh or max approve the observe-only graph-instance, tenant-check, and connector-status frontier and bind its immutable approval artifact before live allocation."
+  },
+  "matchHosts": ["security.microsoft.com"],
+  "matchPathPrefixes": [
+    "/apiproxy/securityplatform/graphs",
+    "/apiproxy/securityplatform/sentinelgraph",
+    "/apiproxy/mtp/sccManagement"
+  ],
+  "captureScripts": false,
+  "postActionSettleMs": 12000,
+  "settleMs": 12000,
+  "actions": [
+    {
+      "type": "navigate",
+      "value": "https://security.microsoft.com/graphs",
+      "required": true,
+      "highValue": true
+    },
+    "wait-ms=12000",
+    "capture=sentinel-graph-readiness",
+    "wait-ms=8000",
+    "capture=sentinel-graph-status-retry"
+  ]
+}

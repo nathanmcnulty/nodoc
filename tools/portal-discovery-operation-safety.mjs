@@ -11,7 +11,8 @@ export const operationExecutionStates = Object.freeze([
 ]);
 
 const activeOperationModes = new Set(["abort-only", "reversible-scalar"]);
-const mutationMethods = new Set(["POST", "PUT", "PATCH"]);
+const abortableOperationMethods = new Set(["POST", "PUT", "PATCH", "DELETE"]);
+const reversibleMutationMethods = new Set(["POST", "PUT", "PATCH"]);
 const activeClickActionType = "click-automation-id";
 const sha256Pattern = /^[a-f0-9]{64}$/u;
 
@@ -68,7 +69,7 @@ function normalizeActionType(action) {
   return String(action?.type || "").replace(/-(root|iframe)$/u, "");
 }
 
-function validateStep(step, label, actions, { read = false } = {}) {
+function validateStep(step, label, actions, { allowDelete = false, read = false } = {}) {
   if (!step || typeof step !== "object") {
     throw new Error(`${label} is required.`);
   }
@@ -76,8 +77,9 @@ function validateStep(step, label, actions, { read = false } = {}) {
     throw new Error(`${label}.actionIndex must be a non-negative integer.`);
   }
   const method = String(step.method || "").toUpperCase();
-  if (read ? method !== "GET" : !mutationMethods.has(method)) {
-    throw new Error(`${label}.method must be ${read ? "GET" : "POST, PUT, or PATCH"}.`);
+  const allowedMutationMethods = allowDelete ? abortableOperationMethods : reversibleMutationMethods;
+  if (read ? method !== "GET" : !allowedMutationMethods.has(method)) {
+    throw new Error(`${label}.method must be ${read ? "GET" : allowDelete ? "POST, PUT, PATCH, or DELETE" : "POST, PUT, or PATCH"}.`);
   }
   const url = normalizeExactUrl(step.url, `${label}.url`);
   const targetUrl = read ? null : normalizeExactUrl(step.targetUrl, `${label}.targetUrl`);
@@ -133,7 +135,7 @@ export function validateActiveOperationPlan(input, { actions = null } = {}) {
       mode,
       approvalDigest: suppliedApprovalDigest,
       steps: {
-        invoke: validateStep(input.steps?.invoke, "steps.invoke", actions),
+        invoke: validateStep(input.steps?.invoke, "steps.invoke", actions, { allowDelete: true }),
       },
     };
   } else {

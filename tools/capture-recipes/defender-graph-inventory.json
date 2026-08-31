@@ -3,12 +3,17 @@
   "url": "https://security.microsoft.com",
   "pageTarget": {
     "matchHosts": ["security.microsoft.com"],
-    "matchPathPrefixes": ["/"]
+    "matchPathPrefixes": ["/user"],
+    "allowedEntryQueryParameters": ["aad", "tab", "tid"],
+    "bootstrap": {
+      "matchHosts": ["security.microsoft.com"],
+      "matchPathnames": ["/"]
+    }
   },
   "capturePrerequisite": {
     "status": "blocked",
-    "reason": "The current graphs and machines states produced only excluded service-announcement proxy telemetry and direct profile-photo traffic, so the product Graph enrichment objective remained incomplete.",
-    "nextRequirement": "Add a deterministic read-only Defender product state known to invoke a non-baseline /apiproxy/msgraph operation. Do not replay graphs and machines unchanged, and do not activate Set up graph."
+    "reason": "Identity Explorer is now the deterministic non-baseline Defender Graph state, but the revised parameterized frontier has not yet received the required exact Luna xhigh/max review artifact.",
+    "nextRequirement": "Have exact gpt-5.6-luna at xhigh or max approve the parameterized aad/tab/tid Identity Explorer frontier and bind its immutable approval artifact before supplying runtime aad and tenantId variables."
   },
   "matchHosts": ["security.microsoft.com", "mto.security.microsoft.com"],
   "matchPathPrefixes": ["/apiproxy"],
@@ -19,7 +24,7 @@
     "minimumNewOperationCount": 1,
     "minimumProxyOperationCount": 1,
     "minimumEnrichedOperationCount": 1,
-    "minimumCheckpointCount": 2,
+    "minimumCheckpointCount": 1,
     "minimumNewEnrichedProductOperationCount": 1,
     "productProxyOnly": true,
     "productExcludeOperationKeys": [
@@ -35,11 +40,13 @@
   "postActionSettleMs": 8000,
   "settleMs": 10000,
   "actions": [
-    "navigate=https://security.microsoft.com/graphs",
-    "wait-ms=8000",
-    "capture=defender-graphs",
-    "navigate=https://security.microsoft.com/machines",
-    "wait-ms=8000",
-    "capture=defender-machines"
+    {
+      "type": "navigate",
+      "value": "https://security.microsoft.com/user?aad=${aad}&tab=huntingGraph&tid=${tenantId}",
+      "required": true,
+      "highValue": true
+    },
+    "wait-ms=10000",
+    "capture=defender-identity-explorer"
   ]
 }

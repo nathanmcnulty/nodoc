@@ -38,6 +38,7 @@ import {
   summarizeOperationReceipts,
   validateOperationAuthorization,
 } from "./portal-discovery-operation-safety.mjs";
+import { buildPassiveOperationReceipts } from "./portal-discovery-passive-operations.mjs";
 
 let apiBase = "http://127.0.0.1:9222";
 const defaultNavigationTimeoutMs = 15000;
@@ -619,6 +620,10 @@ function applyRecipeConfig(args, recipeConfig, recipePath) {
     args.frontierControlReadiness = recipeConfig.frontierControlReadiness;
   }
 
+  if (recipeConfig.inspectionPolicy !== undefined) {
+    args.inspectionPolicy = recipeConfig.inspectionPolicy;
+  }
+
   args.seedRouteGroups = normalizeSeedRouteGroups(recipeConfig.seedRouteGroups);
   args.actionBudget = planActionBudget(recipeConfig, { maxActions: recipeConfig.maxActions });
 }
@@ -638,6 +643,7 @@ async function parseArgs(argv) {
     bodyCaptureTimeoutMs: defaultBodyCaptureTimeoutMs,
     scriptCaptureTimeoutMs: defaultScriptCaptureTimeoutMs,
     label: null,
+    inspectionPolicy: null,
     matchHosts: [],
     matchPathPrefixes: [],
     navigationTimeoutMs: defaultNavigationTimeoutMs,
@@ -1026,6 +1032,15 @@ async function parseArgs(argv) {
     approvalDigest: args.operationApprovalDigest,
     ceiling: args.operationCeiling,
   });
+  if (args.inspectionPolicy?.mode === "observe-only") {
+    const allowedInspectionActions = new Set(["capture", "navigate", "reload", "wait-ms"]);
+    if (args.operationCeiling !== "observe-only" || args.activeOperationPlan) {
+      throw new Error("Observe-only inspection recipes cannot authorize active operations.");
+    }
+    if (args.actions.some((action) => !allowedInspectionActions.has(action.type))) {
+      throw new Error("Observe-only inspection recipes may use only navigate, reload, wait-ms, and capture actions.");
+    }
+  }
   if (args.activeOperationPlan) {
     const allowedHosts = new Set(args.matchHosts.map((value) => String(value).toLowerCase()));
     for (const step of Object.values(args.activeOperationPlan.steps)) {
@@ -3140,6 +3155,15 @@ async function main() {
         passiveTransports,
         (item) => `${item.transport} ${item.url} ${item.page} ${item.attribution?.sessionId ?? "root"}`,
       );
+      await writeFile(
+        path.join(args.outDir, "passive-operation-receipts.json"),
+        `${JSON.stringify(buildPassiveOperationReceipts({
+          actionResults,
+          operationReceipts,
+          requests: capturedRequests,
+        }), null, 2)}\n`,
+        "utf8",
+      );
     }, timeoutMs, phase);
   }
 
@@ -4293,10 +4317,16 @@ async function main() {
       capturedApiRequests: capturedRequests.length,
       finalUrl: await getRootUrl(),
       interactionHealth: actionValidation.interactionHealth,
+      inspectionPolicy: args.inspectionPolicy?.mode ?? null,
       mutationSummary: summarizeOperationReceipts(operationReceipts),
       outDir: args.outDir,
       pageCount: pageStates.length,
       passiveTransportCount: passiveTransports.length,
+      passiveOperationSummary: buildPassiveOperationReceipts({
+        actionResults,
+        operationReceipts,
+        requests: capturedRequests,
+      }).summary,
       portal: args.portal,
       recipePath: args.recipePath,
       reusedExistingTarget: Boolean(target.reusedExistingTarget),

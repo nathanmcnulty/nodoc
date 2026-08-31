@@ -1525,7 +1525,7 @@ test("portal driver prefers the bounded Defender deep recipe", async () => {
   assert.equal(result.brief.recipe, "tools/capture-recipes/defender-deep.json");
 });
 
-test("Defender Graph inventory blocks until a new product state is defined", async () => {
+test("Defender Graph inventory blocks pending exact review before browser allocation", async () => {
   await assert.rejects(
     execFileAsync(process.execPath, [
       path.join(repoRoot, "tools", "run-portal-discovery.mjs"),
@@ -1541,7 +1541,30 @@ test("Defender Graph inventory blocks until a new product state is defined", asy
       const result = JSON.parse(error.stderr);
       return result.status === "blocked"
         && result.blocker.code === "capture-prerequisite-missing"
-        && /non-baseline \/apiproxy\/msgraph operation/.test(result.blocker.remediation);
+        && /gpt-5\.6-luna/.test(result.blocker.remediation);
+    },
+  );
+
+  await assert.rejects(
+    execFileAsync(process.execPath, [
+      path.join(repoRoot, "tools", "run-portal-discovery.mjs"),
+      "--portal",
+      "defender-xdr",
+      "--recipe",
+      "tools/capture-recipes/defender-graph-inventory.json",
+      "--var",
+      "aad=11111111-1111-1111-1111-111111111111",
+      "--var",
+      "tenantId=22222222-2222-2222-2222-222222222222",
+      "--phase",
+      "plan",
+      "--json",
+    ], { cwd: repoRoot }),
+    (error) => {
+      const result = JSON.parse(error.stderr);
+      return result.status === "blocked"
+        && result.blocker.code === "capture-prerequisite-missing"
+        && /gpt-5\.6-luna/.test(result.blocker.remediation);
     },
   );
 });

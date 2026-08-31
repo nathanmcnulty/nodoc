@@ -224,7 +224,10 @@ operations. For each passive non-GET, retain its action/checkpoint attribution,
 status, request shape, response shape, and any naturally emitted before/after
 reads. When only a before read and successful write are visible, report a
 likely real but unverified side effect; do not relabel it as an active-operation
-`unresolved-change` because no approved operation was invoked.
+`unresolved-change` because no approved operation was invoked. The runner writes
+this reviewer projection to `passive-operation-receipts.json`; use its evidence
+IDs to open the corresponding `raw-requests.json` records only when body-level
+review is necessary.
 
 For a multi-spec session, use one spec as a process-calibration unit at a time.
 Prefer the oldest material specification update that has a valid frontier and
@@ -306,9 +309,12 @@ not discovery work:
    work. Treat explicit `pageTarget` host/path values as UI criteria and
    top-level `matchHosts`/`matchPathPrefixes` as network-capture filters; never
    substitute the latter for the former. A legacy SPA fragment is valid only
-   when the entry is HTTPS, same-origin, query-free, and constrained by an
-   explicit clean host/path `pageTarget`; fragments are never matching or
-   capture criteria.
+   when the entry is HTTPS, same-origin, and constrained by an explicit clean
+   host/path `pageTarget`; fragments are never matching or capture criteria.
+   Entry queries require an exact non-secret
+   `pageTarget.allowedEntryQueryParameters` allowlist. Unknown keys,
+   credential-like keys, and checked-in tenant values fail closed; query values
+   remain run variables and never become page-target or capture criteria.
    For an expensive discovery assignment, also pass `--require-novelty` and
    require a non-empty `noveltyPlan`. Each frontier target must be tied to exact
    checked-in action indexes and declare its UI state, expected host/route,
@@ -917,6 +923,13 @@ Forbidden:
 - editing specifications during discovery
 - copying bearer tokens, cookies, or tenant data into chat or committed files
 
+Pricing, catalog, eligibility, and Trials surfaces are safe to inspect only
+through a checked-in observe-only inspection recipe. Do not activate a trial,
+create paid capacity, purchase, buy, or start a billable resource. An
+`inspectionPolicy.mode: observe-only` recipe is mechanically limited to
+navigation, reload, wait, and capture actions and cannot contain an active
+operation plan.
+
 ### Active-operation authorization and evidence
 
 The authorization ceiling is one of:
@@ -948,6 +961,8 @@ checked-in bundle evidence; an active operation cannot be the first source of
 its own payload authorization.
 The target host must be listed exactly in `matchHosts`. Generic label/contains
 clicks cannot authorize an active operation.
+Abort-only accepts exact POST, PUT, PATCH, and DELETE requests. DELETE is not a
+reversible scalar operation and must never be continued to the backend.
 Immediately before an active click, the runner waits for every attached child
 target to finish Fetch setup, refreshes the control inventory, and binds the one
 eligible control to its concrete CDP target ID and session ID. Evaluation
@@ -1032,7 +1047,11 @@ rollback stops all further mutation work and all later live lifecycles until the
 operator receives an explicit remediation record. Missing evidence is unknown,
 not success.
 
-The full sanitized receipt is written locally to `mutation-events.json`.
+The full sanitized active-operation receipt is written locally to
+`mutation-events.json`. Naturally emitted non-GET traffic is written separately
+to `passive-operation-receipts.json`, with action/session/target attribution,
+semantic-risk classification, response evidence, and nearby read references.
+The latter does not claim verified before/after correlation or restoration.
 `summary.json`, `candidate-handoff.json` (including grouped shared metadata),
 `discovery-run.json`, and the ledger carry only sanitized operation IDs,
 approval digests, execution states, accounting, unresolved IDs, and remediation.

@@ -169,10 +169,14 @@ reach the checked-in entry URL or fail closed; it is not an arbitrary wait:
 The plan must first validate the selected recipe's target metadata. An explicit
 `pageTarget` describes the browser UI only; top-level `matchHosts` and
 `matchPathPrefixes` remain network-capture filters and must not be reused as UI
-criteria. A legacy SPA fragment is allowed only for an HTTPS, same-origin,
-query-free entry URL with an explicit clean host/path `pageTarget`; the fragment
-never becomes a target criterion or capture filter. A metadata blocker is
-terminal before browser allocation or ledger mutation.
+criteria. A legacy SPA fragment is allowed only for an HTTPS, same-origin entry
+URL with an explicit clean host/path `pageTarget`; the fragment never becomes a
+target criterion or capture filter. Entry queries are forbidden by default. A
+deterministic entity route may declare an exact non-secret
+`pageTarget.allowedEntryQueryParameters` allowlist; unknown or credential-like
+keys fail before browser allocation. Query values remain run-specific evidence,
+not target criteria or checked-in defaults. A metadata blocker is terminal
+before browser allocation or ledger mutation.
 
   npm run discover:portal -- --portal <portal-spec-id> --profile bounded --phase all --artifacts <fresh-artifact-directory>
 
@@ -366,7 +370,10 @@ already emits them. If no after read exists, report an unverified likely side
 effect and the exact affected setting family. Do not manufacture an active
 operation receipt for traffic the agent did not intentionally invoke, and do
 not claim `unresolved-change` in the active-operation state machine solely from
-passive traffic.
+passive traffic. Read `passive-operation-receipts.json` before raw traffic: it
+records sanitized operation keys, request/response shapes, status or failure,
+target/session/action attribution, semantic risk, and nearby before/after read
+references. Those temporal references are context, not verified restoration.
 Before an active click, require completed Fetch setup for every attached child,
 a refreshed inventory with exactly one eligible control, and a binding to that
 control's concrete target/session. Never fall through to another same-URL target
@@ -390,6 +397,9 @@ Treat `aborted-before-send` as proof about the exact paused browser request only
 it was failed at CDP Fetch Request stage instead of continued to the network.
 Do not infer that temporary local UI state was unchanged; report checkpoint and
 transition evidence separately.
+
+Abort-only plans may target exact POST, PUT, PATCH, or DELETE requests. DELETE
+is never eligible for `reversible-scalar`; it must be captured without sending.
 
 `reversible-scalar` is limited to one
 known object and one low-impact bool, bounded integer, or similarly trivial
@@ -421,6 +431,15 @@ scalar restoration, concurrency proof, and exact plan linkage; a claimed safe
 state without those fields is rejected.
 It also rejects mutation artifacts whose operation ID, ceiling, or approval
 digest does not match the current authorized plan.
+
+Pricing, catalog, eligibility, and Trials pages may be inspected through a
+checked-in `inspectionPolicy.mode: observe-only` recipe. Such a recipe permits
+only navigation, reload, wait, and capture actions and cannot declare an active
+operation. Never activate a trial, create paid capacity, purchase, buy, or start
+a billable resource from an inspection recipe. If an ordinary page load emits a
+provisioning-looking request, preserve it in the passive-operation receipt and
+report its verification gap; do not assume that a 2xx response proves either a
+completed change or a rollback.
 
 Do not follow redirects, export secrets, or copy cookies, bearer tokens, or
 tenant data into chat. Landing supported findings is a separate human-reviewed

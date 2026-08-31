@@ -114,10 +114,27 @@ export function validateRecipeTargetMetadata(recipe) {
     entryUrl.protocol !== "https:"
     || entryUrl.username
     || entryUrl.password
-    || entryUrl.search
     || (entryUrl.hash && !hasExplicitPageTarget)
   ) {
-    throw new Error("recipe entry URL must be HTTPS without credentials or query; fragments require an explicit pageTarget.");
+    throw new Error("recipe entry URL must be HTTPS without credentials; fragments require an explicit pageTarget.");
+  }
+  const entryQueryParameterNames = Array.from(new Set(entryUrl.searchParams.keys())).sort();
+  if (entryQueryParameterNames.length > 0) {
+    const allowed = recipe?.pageTarget?.allowedEntryQueryParameters;
+    if (!Array.isArray(allowed) || allowed.length === 0) {
+      throw new Error("recipe entry query requires pageTarget.allowedEntryQueryParameters.");
+    }
+    const normalizedAllowed = allowed.map((value) => String(value || "").trim()).filter(Boolean);
+    if (normalizedAllowed.length !== allowed.length || new Set(normalizedAllowed).size !== normalizedAllowed.length) {
+      throw new Error("pageTarget.allowedEntryQueryParameters must contain unique non-empty strings.");
+    }
+    if (normalizedAllowed.some((value) => /token|secret|password|credential|authorization|code/iu.test(value))) {
+      throw new Error("pageTarget.allowedEntryQueryParameters must not allow credential-like query keys.");
+    }
+    const allowedSet = new Set(normalizedAllowed);
+    if (entryQueryParameterNames.some((value) => !allowedSet.has(value))) {
+      throw new Error("recipe entry query contains a key not listed in pageTarget.allowedEntryQueryParameters.");
+    }
   }
   const classification = classifyGetProbeUrl(entryUrl.href, recipeUrl.href);
   if (!classification.allowed) {
@@ -136,6 +153,7 @@ export function validateRecipeTargetMetadata(recipe) {
   }
   return {
     entryUrl: entryUrl.href,
+    entryQueryParameterNames,
     featureCriteria,
     bootstrapCriteria,
   };

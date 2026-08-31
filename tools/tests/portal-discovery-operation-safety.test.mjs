@@ -10,6 +10,7 @@ import {
   summarizeOperationReceipts,
   validateOperationAuthorization,
   validateMutationEventsArtifact,
+  validateActiveOperationPlan,
   validateOperationSummary,
 } from "../portal-discovery-operation-safety.mjs";
 
@@ -267,6 +268,21 @@ test("abort receipt requires one exact request, unique control, and complete Fet
     unexpectedActiveRequestCount: 0,
     uniqueControl: true,
   }).executionState, "unresolved-change");
+});
+
+test("abort-only plans can capture DELETE while reversible scalar plans remain non-destructive", () => {
+  const deletePlan = abortPlan();
+  deletePlan.steps.invoke.method = "DELETE";
+  deletePlan.approvalDigest = computeOperationApprovalDigest(deletePlan);
+  assert.equal(validateActiveOperationPlan(deletePlan).steps.invoke.method, "DELETE");
+
+  const reversibleDelete = reversiblePlan();
+  reversibleDelete.steps.apply.method = "DELETE";
+  reversibleDelete.steps.rollback.method = "DELETE";
+  assert.throws(
+    () => validateActiveOperationPlan(reversibleDelete),
+    /POST, PUT, or PATCH/,
+  );
 });
 
 test("reversible Fetch gate allows one exact mutation and aborts a duplicate", async () => {
