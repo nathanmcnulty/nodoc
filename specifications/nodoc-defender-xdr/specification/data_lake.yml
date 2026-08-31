@@ -1,4 +1,44 @@
 paths:
+  /securityplatform/graphs/graph-instances:
+    get:
+      summary: List security graph instances
+      description: >-
+        Retrieve the graph instances available to the Defender security graph
+        experience. The captured tenant returned an empty collection.
+      operationId: DataLake.ListGraphInstances
+      tags: [Data Lake]
+      x-nodoc-operation-safety:
+        class: read-only
+        tenantMutationObserved: false
+      x-nodoc-evidence:
+        record: ../evidence/defender-graph-refresh.json
+        responseShapeDigest: 3eae6310778a88b36d764cc64c1ae30b5183ba8d22808f09cf8847483b44ff47
+      parameters:
+        - name: graphTypes
+          in: query
+          required: false
+          description: Comma-separated graph types requested by the portal.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Available security graph instances.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [value]
+                properties:
+                  value:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: true
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
   /securityplatform/lake/databases:
     get:
       summary: List data lake databases

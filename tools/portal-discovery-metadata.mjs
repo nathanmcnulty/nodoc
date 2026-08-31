@@ -190,6 +190,7 @@ export const coverageOverlayByTitle = {
     ],
     lastSuccessfulPassDepth: "bounded-normal-ui-diff",
     promotedDiscoveries: [
+      route("GET", "/apiproxy/securityplatform/graphs/graph-instances", "Promoted from a fresh Defender Security Graph inventory with an exact empty-collection response shape."),
       route("GET", "/apiproxy/arm/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OperationsManagement/solutions/SecurityInsights({solutionName})", "Promoted from bounded normal-UI Defender traffic with all Azure identifiers parameterized."),
       route("GET", "/apiproxy/mcas/cas/api/v1/app_connectors/dashboard/get_app_connectors_count_by_status", "Promoted from bounded normal-UI Defender for Cloud Apps traffic."),
       route("GET", "/apiproxy/medeina/settings/datashare", "Promoted from bounded normal-UI Security Copilot settings traffic."),
@@ -199,10 +200,14 @@ export const coverageOverlayByTitle = {
       route("POST", "/api/log/Put", "Telemetry and performance sink confirmed during the checked-in Defender verification recipe."),
       route("POST", "/apiproxy/mtp/phoenixSocomatApi/recording/upload/encoded", "Passive UI recording upload confirmed in normal portal traffic; intentionally excluded from the documented API surface and probe planning."),
     ],
+    knownCandidateExclusions: [
+      route("GET", "/apiproxy/mtp/userPreferences/api/mgmt/userpreferencesservice/userPreference/{preferenceKey}", "Deferred because the observed tenant-scoped suffix is not proven to be a stable wildcard preference resource."),
+    ],
     openGaps: [
-      "No Defender operationLiveCaptureLedger record exists; static evidence must not be promoted as live capture.",
+      "The Defender product Graph objective remains blocked until a deterministic read-only state emits a non-baseline /apiproxy/msgraph operation.",
     ],
     notes: [
+      "A fresh Graph-focused pass promoted the Security Graph instance inventory and enriched two Purview-owned shared routes; its product Graph objective remains blocked pending a deterministic non-baseline proxy state.",
       "The checked-in Defender coverage includes same-origin nav, representative entity pages, and MTO-backed proxy APIs.",
       "A dedicated live verification pass confirmed Defender also emits POST /api/log/Put, so candidate diffs now suppress it as telemetry-only traffic.",
       "A bounded normal-UI pass promoted four read-only families and retained the recurring recording upload as a telemetry exclusion.",
@@ -373,10 +378,7 @@ export const coverageOverlayByTitle = {
     notes: [
       "This is a research ownership surface, not a standalone portal; capture through the owning portal recipes and promote only canonical Graph member operations absent from the pinned official contracts.",
       "Proxy routes and the Graph batch wrapper remain in their owning portal specifications and evidence artifacts.",
-    ],
-    openGaps: [
-      "Corroborate the remaining Intune candidates with fresh complete captures and structured response shapes before promotion.",
-      "Exercise the Defender, Purview, and M365 Admin Graph proxy inventories with authenticated dedicated profiles.",
+      "Fresh Entra, Intune, Purview, Defender, and M365 Admin inventories have now exercised direct and proxied Graph telemetry; no additional contract-undocumented operation currently meets promotion requirements.",
     ],
   },
   "M365 Admin": {
@@ -386,8 +388,12 @@ export const coverageOverlayByTitle = {
     observedHosts: [
       "admin.cloud.microsoft",
     ],
-    lastSuccessfulPassDepth: "bounded-normal-ui-diff",
+    lastSuccessfulPassDepth: "graph-proxy-inventory",
     promotedDiscoveries: [
+      route("GET", "/admin/api/Intune/devices", "Promoted from the fresh Intune devices inventory state with a sanitized managed-device projection."),
+      route("GET", "/admin/api/rbac/adminunit/customization", "Promoted from the fresh administrative-units inventory state."),
+      route("GET", "/admin/api/rbac/roles/customization", "Promoted from the fresh directory-roles inventory state."),
+      route("GET", "/fd/MSGraph/beta/admin/cloudLicensing/allotments", "Promoted from the fresh subscriptions state with two observed OData response shapes."),
       route("GET", "/admin/api/copilot/getPreferences", "Promoted from bounded normal-UI Copilot traffic."),
       route("GET", "/admin/api/Domains/Summary", "Promoted from bounded normal-UI Domains traffic."),
       route("GET", "/admin/api/licenses/requests/summary", "Promoted from bounded normal-UI licensing traffic."),
@@ -410,12 +416,21 @@ export const coverageOverlayByTitle = {
       route("POST", "/fd/arm/providers/Microsoft.Billing/billingAccounts/{billingAccountId}/checkAccess", "Confirmed as a read-only authorization decision POST in bounded normal-UI billing traffic with the billing identifier parameterized."),
     ],
     openGaps: [
+      "The administrative-unit getadminunits POST remains deferred until read-only semantics and its mutation-shaped response fields are resolved.",
       "Provider-registration POSTs observed during marketplace and subscription loading remain intentionally unpromoted because replay could change tenant resource-provider state.",
       "The captured substrate suggestions POST remains intentionally unpromoted because it is an active search operation rather than a safe discovery probe.",
     ],
     notes: [
+      "A fresh seven-state Graph inventory promoted four reads and produced nine documented Graph operations, eight enrichments, and no Graph Research candidate.",
       "Drive future M365 Admin discovery from candidate diffs before another broad live crawl.",
       "A bounded normal-UI pass evaluated 23 confirmed candidates and promoted 20 read-only or read-equivalent operations.",
+    ],
+    knownCandidateExclusions: [
+      route("POST", "/admin/api/rbac/adminunit/getadminunits", "Deferred because the read-like paging request returns mutation-shaped administrative-unit fields and read-only semantics are not yet proven."),
+      route("POST", "/fd/arm/providers/Microsoft.SaaSHub/register", "Provider registration is side-effect-capable and unsafe to replay."),
+    ],
+    knownTelemetryExclusions: [
+      route("POST", "/api/instrument/logclient", "Shared Microsoft 365 admin shell telemetry sink."),
     ],
   },
   "Power Platform": {
@@ -485,6 +500,7 @@ export const coverageOverlayByTitle = {
     ],
     notes: [
       "Keep same-origin Purview Portal /api traffic distinct from the broader Purview proxy surface during follow-up diffing.",
+      "A Defender cross-portal capture enriched Insider Risk analytics insight metadata and Microsoft Graph service-announcement response schemas without adding a Graph Research operation.",
       "A fresh proxy-focused pass captured 601 API requests, promoted two endpoint DLP reads, and found seven officially documented Graph operations with no Graph Research candidate.",
       "A bounded normal-UI pass evaluated 15 confirmed candidates, promoted all 11 GET candidates as 10 parameterized paths, promoted one read-only calculation POST, and excluded three unsafe or ambiguous POSTs.",
     ],
