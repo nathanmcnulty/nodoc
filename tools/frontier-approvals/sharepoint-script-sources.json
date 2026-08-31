@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "specId": "sharepoint-admin",
+  "decision": "accept-bounded-frontier",
+  "workerModel": "gpt-5.6-luna",
+  "workerReasoning": "xhigh",
+  "approvedAt": "2026-08-30T09:40:00Z",
+  "source": {
+    "head": "38e160d",
+    "artifactPath": "tools/frontier-approvals/sharepoint-script-sources-source.json",
+    "artifactSha256": "36f04ce611b6de6470dff9ef44eb1e759a71b5f6121c452ef5738a8b58dd4365",
+    "frontierSetId": "offline-frontier-set-716c1f72db13da5e77df2634",
+    "frontierSetDigest": "716c1f72db13da5e77df26349e83268301c21ce851e81e2a865ba4a32a4f3750"
+  },
+  "state": "SharePoint admin center Advanced > Script sources",
+  "canonicalShellUrl": "https://{tenant}-admin.sharepoint.com/_layouts/15/online/AdminHome.aspx#/contentSecurityPolicy",
+  "apiEvidenceScope": {
+    "hosts": ["{tenant}-admin.sharepoint.com"],
+    "pathPrefixes": ["/_api/SPO.SPOContentSecurityPolicyConfiguration"]
+  },
+  "safeActions": [
+    "click-contains-root=Advanced",
+    "wait-ms=2000",
+    "click-label-root=Script sources",
+    "wait-ms=6000",
+    "capture=script-sources"
+  ],
+  "acceptedItems": [
+    {
+      "frontierId": "offline-frontier-25953f898dba7fcfd2f7a27a",
+      "frontierDigest": "25953f898dba7fcfd2f7a27ac63a1bcae8eaa369e998a48ae5f552e91873a18f",
+      "canonicalKey": "server-variable-admin.sharepoint.com GET /_api/SPO.SPOContentSecurityPolicyConfiguration"
+    }
+  ],
+  "deferredItemCount": 173,
+  "blockedItemCount": 173,
+  "constraints": [
+    "Passive capture from the exact Script sources inventory state only",
+    "Acceptance requires a sanitized current 200 application/json response for the exact GET",
+    "Do not open Add source, submit a script source, change content security policy, or invoke any mutation",
+    "Ambient portal operations remain telemetry and cannot satisfy this frontier",
+    "No active probing or direct replay"
+  ]
+}

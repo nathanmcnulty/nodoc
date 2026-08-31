@@ -691,6 +691,7 @@ export const captureRecipesByTitle = {
     "tools/capture-recipes/security-copilot-seeded-replay.json",
   ],
   SharePoint: [
+    "tools/capture-recipes/sharepoint-script-sources-novelty.json",
     "tools/capture-recipes/sharepoint-admin-deep.json",
     "tools/capture-recipes/sharepoint-admin-seeded-replay.json",
   ],

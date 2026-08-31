@@ -1,0 +1,63 @@
+{
+  "portal": "SharePoint",
+  "url": "https://${tenant}-admin.sharepoint.com/_layouts/15/online/AdminHome.aspx#/home",
+  "pageTarget": {
+    "matchHosts": ["${tenant}-admin.sharepoint.com"],
+    "matchPathPrefixes": ["/_layouts/15/online/AdminHome.aspx"]
+  },
+  "noveltyFrontier": {
+    "approvalArtifact": "tools/frontier-approvals/sharepoint-script-sources.json",
+    "approvalDigest": "2c1d72ffdd86277dec350d9a51831a1270a089223ff7870e2c62d3e34021c0e6",
+    "baseline": "checked-in-spec-and-coverage-ledgers",
+    "baselineSignals": {
+      "queryMetadata": [],
+      "requestShapes": [],
+      "responseMetadata": [],
+      "responseShapes": [],
+      "routes": []
+    },
+    "reopenCondition": "The current Script sources page emits a confirmed same-origin JSON GET that is absent from the checked-in SharePoint Admin specification.",
+    "targets": [
+      {
+        "id": "script-sources-configuration-get",
+        "state": "SharePoint admin center Advanced > Script sources",
+        "evidenceLevel": "confirmed",
+        "expectedHostFamilies": [
+          "server-variable-admin.sharepoint.com",
+          "sharemylabs-admin.sharepoint.com"
+        ],
+        "expectedRoutes": [
+          "/_api/SPO.SPOContentSecurityPolicyConfiguration"
+        ],
+        "expectedInformationClasses": [
+          "new-route-family",
+          "response-shape",
+          "response-metadata"
+        ],
+        "expectedDocumentationObjectives": [
+          "response-example"
+        ],
+        "actionIndexes": [0, 1, 2, 3, 4],
+        "safeAction": "Open the read-only Script sources inventory and passively capture its configuration GET.",
+        "acceptanceKey": "script-sources-configuration-current-json",
+        "rationale": "The exact current GET is not modeled and its response contract is unknown."
+      }
+    ]
+  },
+  "frontierControlReadiness": {
+    "actionIndexes": [0, 2],
+    "timeoutMs": 15000
+  },
+  "matchHosts": ["${tenant}-admin.sharepoint.com"],
+  "matchPathPrefixes": ["/_api/SPO.SPOContentSecurityPolicyConfiguration"],
+  "postActionSettleMs": 10000,
+  "settleMs": 12000,
+  "maxActions": 6,
+  "actions": [
+    "click-contains-root=Advanced",
+    "wait-ms=2000",
+    "click-label-root=Script sources",
+    "wait-ms=6000",
+    "capture=script-sources"
+  ]
+}
