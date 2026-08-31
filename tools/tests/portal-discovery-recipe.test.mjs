@@ -12,6 +12,8 @@ import {
 import {
   buildBootstrapPreflightCriteria,
   buildPreflightCriteria,
+  expandRecipeVariables,
+  recipeVariables,
   validateSelectedRecipeTarget,
 } from "../run-portal-discovery.mjs";
 
@@ -65,6 +67,29 @@ test("orchestration uses page-target criteria without changing network capture f
     { matchHosts: inventoryRecipe.matchHosts, matchPathPrefixes: inventoryRecipe.matchPathPrefixes },
     { matchHosts: ["config.office.com", "query.inventory.insights.office.net"], matchPathPrefixes: ["/inventory"] },
   );
+});
+
+test("CLI variables are expanded before recipe-gated target preflight", () => {
+  const sourceRecipe = {
+    url: "https://${tenant}-admin.sharepoint.com/_layouts/15/online/AdminHome.aspx#/home",
+    pageTarget: {
+      matchHosts: ["${tenant}-admin.sharepoint.com"],
+      matchPathPrefixes: ["/_layouts/15/online/AdminHome.aspx"],
+    },
+  };
+  const recipe = expandRecipeVariables(
+    sourceRecipe,
+    recipeVariables(sourceRecipe, ["tenant=sharemylabs"]),
+  );
+  assert.deepEqual(buildPreflightCriteria(recipe), {
+    matchHosts: ["sharemylabs-admin.sharepoint.com"],
+    matchPathPrefixes: ["/_layouts/15/online/AdminHome.aspx"],
+    urlPattern: undefined,
+    titlePattern: undefined,
+    expectedTitlePattern: undefined,
+    rejectBodyPattern: undefined,
+  });
+  assert.equal(recipe.url, "https://sharemylabs-admin.sharepoint.com/_layouts/15/online/AdminHome.aspx#/home");
 });
 
 test("page-target validation fails for an entry route outside its criteria", () => {

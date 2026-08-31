@@ -483,7 +483,7 @@ async function selectRecipe(specRecord, explicitRecipe, { requireNovelty = false
     ?? null;
 }
 
-function expandRecipeVariables(value, variables) {
+export function expandRecipeVariables(value, variables) {
   if (typeof value === "string") {
     return value.replace(/\$\{([^}]+)\}/gu, (_match, name) => {
       if (!Object.prototype.hasOwnProperty.call(variables, name)) {
@@ -501,7 +501,7 @@ function expandRecipeVariables(value, variables) {
   return value;
 }
 
-function recipeVariables(recipe, cliVariables) {
+export function recipeVariables(recipe, cliVariables) {
   const variables = { ...(recipe.variables ?? {}) };
   for (const specification of cliVariables ?? []) {
     const separator = specification.indexOf("=");
@@ -1142,7 +1142,11 @@ async function main() {
   let noveltyPlan;
   let recipeSafety;
   try {
-    selectedRecipe = JSON.parse(await readFile(recipePath, "utf8"));
+    const sourceRecipe = JSON.parse(await readFile(recipePath, "utf8"));
+    selectedRecipe = expandRecipeVariables(
+      sourceRecipe,
+      recipeVariables(sourceRecipe, args.variables),
+    );
     validateSelectedRecipeTarget(selectedRecipe);
     recipeSafety = await inspectRecipeSafety(recipePath, args);
     if (!recipeSafety.safe) {
