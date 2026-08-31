@@ -43,12 +43,20 @@
   "postActionSettleMs": 8000,
   "settleMs": 10000,
   "actions": [
-    "navigate=https://entra.microsoft.com/#view/Microsoft_AAD_UsersAndTenants/UserManagementMenuBlade/~/AllUsers/menuId/",
     "wait-ms=2000",
-    "reload=entra-all-users",
+    {
+      "type": "reload",
+      "value": "entra-all-users",
+      "required": true
+    },
     "wait-ms=6000",
     "capture=entra-all-users",
-    "navigate=https://entra.microsoft.com/#view/Microsoft_AAD_IAM/GroupsManagementMenuBlade/~/AllGroups/menuId/",
+    {
+      "type": "navigate",
+      "value": "https://entra.microsoft.com/#view/Microsoft_AAD_IAM/GroupsManagementMenuBlade/~/AllGroups/menuId/",
+      "required": true,
+      "highValue": true
+    },
     "wait-ms=6000",
     "capture=entra-all-groups"
   ]
