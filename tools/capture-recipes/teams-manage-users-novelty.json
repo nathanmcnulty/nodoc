@@ -1,0 +1,52 @@
+{
+  "portal": "Teams",
+  "url": "https://admin.teams.microsoft.com",
+  "pageTarget": {
+    "matchHosts": ["admin.teams.microsoft.com"],
+    "matchPathPrefixes": ["/"]
+  },
+  "noveltyFrontier": {
+    "approvalArtifact": "tools/frontier-approvals/teams-manage-users.json",
+    "approvalDigest": "e9da97dee51a36791d3550a8b60a0d772a30f284d10decea0c9ccba6e0477368",
+    "baseline": "checked-in-spec-and-coverage-ledgers",
+    "baselineSignals": {
+      "queryMetadata": [],
+      "requestShapes": [],
+      "responseMetadata": [],
+      "responseShapes": [],
+      "routes": []
+    },
+    "reopenCondition": "The confirmed Manage users collection GET still has an opaque additionalProperties response schema, no sanitized response example, and no pagination observation.",
+    "targets": [
+      {
+        "id": "manage-users-collection-enrichment",
+        "state": "Teams admin center Users > Manage users inventory",
+        "evidenceLevel": "confirmed",
+        "expectedHostFamilies": ["api.interfaces.records.teams.microsoft.com"],
+        "expectedRoutes": ["/Teams.User/users"],
+        "expectedInformationClasses": ["query-metadata", "response-shape", "response-metadata"],
+        "expectedDocumentationObjectives": ["response-example", "pagination-observation"],
+        "actionIndexes": [0, 1, 2, 3, 4],
+        "safeAction": "Open Users > Manage users and passively capture the collection inventory request without selecting or changing a user.",
+        "acceptanceKey": "manage-users-nonempty-collection-contract",
+        "rationale": "The current collection operation is known but remains opaque to agents that need to inventory users, page results, or troubleshoot missing records."
+      }
+    ]
+  },
+  "frontierControlReadiness": {
+    "actionIndexes": [0, 2],
+    "timeoutMs": 20000
+  },
+  "matchHosts": ["api.interfaces.records.teams.microsoft.com"],
+  "matchPathPrefixes": ["/Teams.User/users"],
+  "postActionSettleMs": 10000,
+  "settleMs": 12000,
+  "maxActions": 6,
+  "actions": [
+    "click-contains-root=Users",
+    "wait-ms=5000",
+    "click-contains=Manage users",
+    "wait-ms=8000",
+    "capture=manage-users"
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "specId": "teams",
+  "decision": "accept-bounded-frontier",
+  "workerModel": "gpt-5.6-luna",
+  "workerReasoning": "xhigh",
+  "approvedAt": "2026-08-31T05:02:15.3740768Z",
+  "source": {
+    "head": "ab57ff511fadf0b90bf1922ffc9b8285775829c1",
+    "artifactPath": "tools/frontier-approvals/teams-manage-users-source.json",
+    "artifactSha256": "332381a20a3a5579a09a6645c5592b3477bfec17a61a5f54ca587c0fb1d23f90",
+    "frontierSetId": "offline-frontier-set-2ea6e3c0818dd9438d383cb5",
+    "frontierSetDigest": "2ea6e3c0818dd9438d383cb5ba2b1648141149645816d338c1d2ada65bb7376f"
+  },
+  "state": "Teams admin center Users > Manage users inventory",
+  "canonicalShellUrl": "https://admin.teams.microsoft.com",
+  "apiEvidenceScope": {
+    "hosts": ["api.interfaces.records.teams.microsoft.com"],
+    "pathPrefixes": ["/Teams.User/users"]
+  },
+  "safeActions": [
+    "click-contains-root=Users",
+    "wait-ms=5000",
+    "click-contains=Manage users",
+    "wait-ms=8000",
+    "capture=manage-users"
+  ],
+  "acceptedItems": [
+    {
+      "frontierId": "offline-frontier-18ce7cbff9633798075d47b3",
+      "frontierDigest": "18ce7cbff9633798075d47b32db756dd31ab920bf3ae945b8ba9f0e72f70c81a",
+      "canonicalKey": "api.interfaces.records.teams.microsoft.com GET /Teams.User/users"
+    }
+  ],
+  "deferredItemCount": 439,
+  "blockedItemCount": 438,
+  "constraints": [
+    "GET-only passive capture from the exact Users > Manage users state",
+    "Acceptance requires a sanitized non-empty response shape or representative collection example for the exact collection route",
+    "Per-user detail and policy routes do not satisfy this frontier",
+    "Graph, shared shell, telemetry, and adjacent-host traffic is retained for separate ownership review and cannot satisfy this frontier",
+    "No user selection, policy assignment, export, form submission, write, or active probe"
+  ]
+}

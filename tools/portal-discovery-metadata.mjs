@@ -701,6 +701,7 @@ export const captureRecipesByTitle = {
     "tools/capture-recipes/sharepoint-admin-seeded-replay.json",
   ],
   Teams: [
+    "tools/capture-recipes/teams-manage-users-novelty.json",
     "tools/capture-recipes/teams-deep.json",
     "tools/capture-recipes/teams-seeded-replay.json",
   ],
