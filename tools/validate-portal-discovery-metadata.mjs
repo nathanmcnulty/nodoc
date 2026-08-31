@@ -133,6 +133,35 @@ function validateRecipeAction(errors, recipePath, action) {
   }
 }
 
+function recipeActionType(action) {
+  if (typeof action === "string") {
+    const separator = action.indexOf("=");
+    return (separator > 0 ? action.slice(0, separator) : action).replace(/-(root|iframe)$/u, "");
+  }
+  return String(action?.type || "").replace(/-(root|iframe)$/u, "");
+}
+
+function validateInspectionPolicy(errors, recipePath, recipe) {
+  if (recipe.inspectionPolicy === undefined) return;
+  const policy = recipe.inspectionPolicy;
+  if (!policy || typeof policy !== "object" || Array.isArray(policy) || policy.mode !== "observe-only") {
+    fail(errors, `${recipePath}: inspectionPolicy.mode must be observe-only.`);
+    return;
+  }
+  const prohibited = policy.prohibitedControlPatterns;
+  if (!Array.isArray(prohibited) || prohibited.length === 0 || prohibited.some((value) => !String(value || "").trim())) {
+    fail(errors, `${recipePath}: observe-only inspectionPolicy requires prohibitedControlPatterns.`);
+  }
+  const allowed = new Set(["capture", "navigate", "reload", "wait-ms"]);
+  const disallowed = (recipe.actions ?? []).map(recipeActionType).filter((type) => !allowed.has(type));
+  if (disallowed.length > 0) {
+    fail(errors, `${recipePath}: observe-only inspection recipes may use only navigate, reload, wait-ms, and capture actions.`);
+  }
+  if ((recipe.activeOperations?.length ?? 0) > 0) {
+    fail(errors, `${recipePath}: observe-only inspection recipes cannot declare activeOperations.`);
+  }
+}
+
 function validateSeedRouteGroups(errors, recipePath, seedRouteGroups) {
   for (const [groupName, group] of Object.entries(seedRouteGroups ?? {})) {
     const routeTemplates = Array.isArray(group?.routeTemplates) ? group.routeTemplates : [];
@@ -211,6 +240,8 @@ async function validateRecipeFile(errors, recipePath) {
   if (recipe.matchPathPrefixes && !Array.isArray(recipe.matchPathPrefixes)) {
     fail(errors, `${recipePath}: matchPathPrefixes must be an array when present.`);
   }
+
+  validateInspectionPolicy(errors, recipePath, recipe);
 
   if (recipe.maxActions !== undefined && (!Number.isInteger(recipe.maxActions) || recipe.maxActions < 0)) {
     fail(errors, `${recipePath}: maxActions must be a non-negative integer when present.`);

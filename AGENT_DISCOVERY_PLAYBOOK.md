@@ -699,6 +699,10 @@ Rule of thumb:
   - response content type
   - response body sample
   - page(s) where it was seen
+  - action, target, and session attribution
+  - response status or transport failure
+  - semantic safety classification for every non-GET
+  - nearby before/after read evidence IDs, without overstating correlation
 
 Recommended pattern:
 
@@ -1054,7 +1058,10 @@ effect inventory. They can represent real state changes even though they do not
 have an approved-operation receipt. Correlate any naturally emitted pre-read,
 write response, and post-read; when the post-read is absent, retain and report
 the likely side effect without asserting restoration or active-operation
-`unresolved-change`.
+`unresolved-change`. Start review from `passive-operation-receipts.json`; it is
+the compact operation ledger over the body-level evidence in
+`raw-requests.json`. Its before/after IDs are temporal context in the same
+action/session/target, not proof that they read the changed resource.
 
 The local `mutation-events.json` contains the sanitized detailed receipt.
 `summary.json`, `candidate-handoff.json`, `discovery-run.json`, grouped handoff
@@ -1074,6 +1081,24 @@ exports, jobs, bulk actions, shared shell or webshell, retention/destructive
 settings, or anything with uncertain scope or rollback. Treat export-start
 routes as job starters and capture their shape only through proven abort support;
 capture a separate follow-up status poller when it occurs passively.
+
+Exact DELETE requests may be captured under `abort-only`, where they must be
+failed before send. They are never eligible for `reversible-scalar`.
+
+### 7a. Inspect monetization surfaces without activating them
+
+Pricing, catalog, eligibility, and Trials pages can reveal useful entitlement,
+capacity, provisioning, and API telemetry. Use a checked-in observe-only
+inspection recipe that contains only navigate, reload, wait, and capture
+actions. List visible activation controls in
+`inspectionPolicy.prohibitedControlPatterns`; the policy is both reviewable and
+machine-validated.
+
+Do not activate a trial, create paid capacity, purchase, buy, or start a
+billable resource from this workflow. A background provisioning-looking call
+emitted by page hydration remains passive evidence: record its response and
+before/after context, flag a successful unverified side effect, and never infer
+completion or rollback from the route name or HTTP status alone.
 
 ### 8. Author specs with evidence labels
 

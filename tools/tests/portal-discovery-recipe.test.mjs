@@ -160,7 +160,36 @@ test("explicit page-target criteria fail closed when malformed or empty", () => 
       ...inventoryRecipe,
       actions: ["navigate=https://config.office.com/officeSettings/inventory?operation=delete"],
     }),
-    /HTTPS without credentials or query/,
+    /allowedEntryQueryParameters/,
+  );
+});
+
+test("parameterized feature routes may allow an exact non-secret entry query key set", () => {
+  const recipe = {
+    url: "https://security.microsoft.com",
+    pageTarget: {
+      matchHosts: ["security.microsoft.com"],
+      matchPathPrefixes: ["/user"],
+      allowedEntryQueryParameters: ["aad", "tab", "tid"],
+      bootstrap: { matchHosts: ["security.microsoft.com"], matchPathnames: ["/"] },
+    },
+    actions: ["navigate=https://security.microsoft.com/user?aad=${aad}&tab=huntingGraph&tid=${tenantId}"],
+  };
+  const result = validateRecipeTargetMetadata(recipe);
+  assert.deepEqual(result.entryQueryParameterNames, ["aad", "tab", "tid"]);
+  assert.throws(
+    () => validateRecipeTargetMetadata({
+      ...recipe,
+      pageTarget: { ...recipe.pageTarget, allowedEntryQueryParameters: ["aad", "token", "tab", "tid"] },
+    }),
+    /credential-like/,
+  );
+  assert.throws(
+    () => validateRecipeTargetMetadata({
+      ...recipe,
+      pageTarget: { ...recipe.pageTarget, allowedEntryQueryParameters: ["aad", "tab"] },
+    }),
+    /not listed/,
   );
 });
 

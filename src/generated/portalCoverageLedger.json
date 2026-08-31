@@ -45,7 +45,10 @@
     "lastSuccessfulPassDepth": "bounded-normal-ui-diff",
     "captureRecipes": [
       "tools/capture-recipes/defender-deep.json",
+      "tools/capture-recipes/defender-attack-map-enrichment.json",
+      "tools/capture-recipes/defender-app-governance-enrichment.json",
       "tools/capture-recipes/defender-graph-inventory.json",
+      "tools/capture-recipes/defender-sentinel-graph-enrichment.json",
       "tools/capture-recipes/defender-telemetry-verification.json",
       "tools/capture-recipes/defender-entity-replay.json"
     ],
@@ -96,10 +99,12 @@
       }
     ],
     "openGaps": [
-      "The Defender product Graph objective remains blocked until a deterministic read-only state emits a non-baseline /apiproxy/msgraph operation."
+      "Run the parameterized Identity Explorer recipe with a seeded user object to retain method, request, response, and Graph-contract evidence for the newly identified non-baseline proxy operations.",
+      "Capture the Attack map, App Governance inventory, and Sentinel Graph readiness recipes in dedicated immutable runs so the shared attack-surface query body shapes and the failing connector status can be attributed to exact product states."
     ],
     "notes": [
-      "A fresh Graph-focused pass promoted the Security Graph instance inventory and enriched two Purview-owned shared routes; its product Graph objective remains blocked pending a deterministic non-baseline proxy state.",
+      "The Graph-focused recipe now targets parameterized Identity Explorer state instead of replaying the exhausted graphs and machines states.",
+      "Focused recipes separate Attack map, App Governance, and Sentinel Graph readiness traffic because multiple views share the opaque POST-backed attack-surface query transport.",
       "The checked-in Defender coverage includes same-origin nav, representative entity pages, and MTO-backed proxy APIs.",
       "A dedicated live verification pass confirmed Defender also emits POST /api/log/Put, so candidate diffs now suppress it as telemetry-only traffic.",
       "A bounded normal-UI pass promoted four read-only families and retained the recurring recording upload as a telemetry exclusion.",
@@ -1225,6 +1230,7 @@
     "captureRecipes": [
       "tools/capture-recipes/security-copilot-deep.json",
       "tools/capture-recipes/security-copilot-builder-followup.json",
+      "tools/capture-recipes/security-copilot-trial-inspection.json",
       "tools/capture-recipes/security-copilot-seeded-replay.json"
     ],
     "promotedDiscoveries": [

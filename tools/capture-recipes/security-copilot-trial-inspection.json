@@ -1,0 +1,48 @@
+{
+  "portal": "Security Copilot",
+  "url": "https://securitycopilot.microsoft.com",
+  "pageTarget": {
+    "matchHosts": ["securitycopilot.microsoft.com"],
+    "matchPathPrefixes": ["/trial"],
+    "bootstrap": {
+      "matchHosts": ["securitycopilot.microsoft.com"],
+      "matchPathnames": ["/"]
+    }
+  },
+  "inspectionPolicy": {
+    "mode": "observe-only",
+    "prohibitedControlPatterns": [
+      "Start trial",
+      "Activate trial",
+      "Create capacity",
+      "Purchase",
+      "Buy"
+    ]
+  },
+  "matchHosts": [
+    "securitycopilot.microsoft.com",
+    "api.securitycopilot.microsoft.com",
+    "api.securityplatform.microsoft.com",
+    "us.api.securityplatform.microsoft.com"
+  ],
+  "matchPathPrefixes": [
+    "/trial",
+    "/provisioning",
+    "/usage",
+    "/account",
+    "/api/gateway"
+  ],
+  "captureScripts": false,
+  "postActionSettleMs": 10000,
+  "settleMs": 10000,
+  "actions": [
+    {
+      "type": "navigate",
+      "value": "https://securitycopilot.microsoft.com/trial",
+      "required": true,
+      "highValue": true
+    },
+    "wait-ms=10000",
+    "capture=trial-eligibility-inspection"
+  ]
+}

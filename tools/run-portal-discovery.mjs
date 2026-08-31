@@ -52,6 +52,7 @@ import {
   validateMutationEventsArtifact,
   validateOperationSummary,
 } from "./portal-discovery-operation-safety.mjs";
+import { validatePassiveOperationReceiptArtifact } from "./portal-discovery-passive-operations.mjs";
 import {
   buildNoveltyPlan,
   deriveNoveltyBaseline,
@@ -917,6 +918,22 @@ async function inspectCaptureCompleteness(artifactDir) {
         reason: "summary-invalid",
         source: "summary.json",
       };
+    }
+    if (summary.passiveOperationSummary) {
+      try {
+        const passiveOperations = JSON.parse(await readFile(
+          path.join(artifactDir, "passive-operation-receipts.json"),
+          "utf8",
+        ));
+        validatePassiveOperationReceiptArtifact(passiveOperations, summary.passiveOperationSummary);
+      } catch (error) {
+        return {
+          captureStatus: "corrupted-minimum-artifacts",
+          captureComplete: false,
+          reason: error?.code === "ENOENT" ? "passive-operation-receipts-missing" : "passive-operation-receipts-invalid",
+          source: "passive-operation-receipts.json",
+        };
+      }
     }
     const authenticationBarrier = await detectAuthenticationBarrier(artifactDir, summary);
     if (authenticationBarrier) {
