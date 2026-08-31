@@ -533,6 +533,34 @@ test("Purview unsafe POST observations are suppressed from generated queues", as
   }
 });
 
+test("confirmed API candidates retain their observed origin and provenance", async () => {
+  const artifactDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-confirmed-origin-"));
+  try {
+    await writeJson(path.join(artifactDir, "api-records.json"), [{
+      method: "GET",
+      path: "/_api/SPO.SPOContentSecurityPolicyConfiguration",
+      url: "https://contoso-admin.sharepoint.com/_api/SPO.SPOContentSecurityPolicyConfiguration",
+      seenOnPages: ["script-sources"],
+    }]);
+    const { stdout } = await execFileAsync(process.execPath, [
+      path.join(repoRoot, "tools", "generate-crawl-candidates.mjs"),
+      "--spec",
+      "sharepoint-admin",
+      "--artifacts",
+      artifactDir,
+      "--json",
+    ], { cwd: repoRoot });
+    const queue = JSON.parse(stdout);
+    const candidate = queue.candidates.find((entry) => (
+      entry.normalizedPath === "/_api/SPO.SPOContentSecurityPolicyConfiguration"
+    ));
+    assert.deepEqual(candidate.baseUrls, ["https://contoso-admin.sharepoint.com"]);
+    assert.deepEqual(candidate.provenances, ["network"]);
+  } finally {
+    await rm(artifactDir, { force: true, recursive: true });
+  }
+});
+
 test("analyze emits a sanitized actionable handoff for Purview-like evidence", async () => {
   const artifactDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-purview-handoff-"));
   const tenantId = "2f1c7bb8-2d31-4c2a-9f86-6778c9382bbc";

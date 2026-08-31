@@ -446,6 +446,14 @@ function buildObservation(record, sourceFile, evidence, context = {}) {
   const normalizedPath = normalizeRoutePath(rawPath);
   const method = normalizeMethod(record.method ?? record.requestMethod);
   const hostname = extractHostname(record.url) ?? extractHostname(rawPath);
+  let baseUrl = null;
+  if (typeof record.url === "string") {
+    try {
+      baseUrl = new URL(record.url).origin;
+    } catch {
+      baseUrl = null;
+    }
+  }
 
   if (!normalizedPath || !method) {
     return null;
@@ -473,6 +481,12 @@ function buildObservation(record, sourceFile, evidence, context = {}) {
         ? record.featureFamily.trim()
         : deriveFeatureFamily(normalizedPath),
     hostname,
+    baseUrl,
+    provenance: evidence === "confirmed"
+      ? "network"
+      : evidence === "probed"
+        ? "probe"
+        : null,
     confidenceScore: confidenceForObservation(
       evidence,
       seenOnPages.size,
