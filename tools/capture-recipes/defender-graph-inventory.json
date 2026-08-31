@@ -5,6 +5,11 @@
     "matchHosts": ["security.microsoft.com"],
     "matchPathPrefixes": ["/"]
   },
+  "capturePrerequisite": {
+    "status": "blocked",
+    "reason": "The current graphs and machines states produced only excluded service-announcement proxy telemetry and direct profile-photo traffic, so the product Graph enrichment objective remained incomplete.",
+    "nextRequirement": "Add a deterministic read-only Defender product state known to invoke a non-baseline /apiproxy/msgraph operation. Do not replay graphs and machines unchanged, and do not activate Set up graph."
+  },
   "matchHosts": ["security.microsoft.com", "mto.security.microsoft.com"],
   "matchPathPrefixes": ["/apiproxy"],
   "captureScripts": false,

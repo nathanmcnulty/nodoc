@@ -1,4 +1,116 @@
 paths:
+  /admin/api/Intune/devices:
+    get:
+      summary: List Intune-managed devices
+      description: Retrieve the managed-device projection used by the Microsoft 365 admin center.
+      operationId: UsersGroups.ListIntuneDevices
+      tags: [UsersGroups]
+      x-nodoc-operation-safety:
+        class: read-only
+        tenantMutationObserved: false
+      x-nodoc-evidence:
+        record: ../evidence/m365-admin-graph-refresh.json
+        responseShapeDigest: ab3cbb5f360f2728e023e5f063ea23b708733972ea85c351c3659755f7105dd0
+      responses:
+        '200':
+          description: Managed devices visible to the current administrator.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    ChassisType: { type: string, nullable: true }
+                    ComplianceState: { type: string, nullable: true }
+                    DeviceType: { type: string, nullable: true }
+                    DisplayName: { type: string }
+                    Id: { type: string }
+                    LastSyncDateTime: { type: string, format: date-time }
+                    ManagementType: { type: integer }
+                    Model: { type: string, nullable: true }
+                    OperatingSystem: { type: string }
+                    OsVersion: { type: string }
+                    RegisteredDate: { type: string, format: date-time }
+                    State: { type: string }
+                    SupportsFactoryReset: { type: boolean }
+                    SupportsRemoveCompanyData: { type: boolean }
+                    SupportsRemoveDevice: { type: boolean }
+                    UserDisplayName: { type: string }
+                    UserEmail: { type: string }
+                    UserId: { type: string }
+                    UserPrincipalName: { type: string }
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+  /admin/api/rbac/adminunit/customization:
+    get:
+      summary: Get administrative-unit list customization
+      operationId: UsersGroups.GetAdministrativeUnitCustomization
+      tags: [UsersGroups]
+      x-nodoc-operation-safety:
+        class: read-only
+        tenantMutationObserved: false
+      x-nodoc-evidence:
+        record: ../evidence/m365-admin-graph-refresh.json
+        responseShapeDigest: b4d122e5bd03eb9ccc3eb14bebe5712ab33dc6495160bf9a8b9aa96be754b0b8
+      responses:
+        '200':
+          description: Administrative-unit list display settings.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [IsCompactMode]
+                properties:
+                  IsCompactMode: { type: boolean }
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+  /admin/api/rbac/roles/customization:
+    get:
+      summary: Get directory-role list customization
+      operationId: UsersGroups.GetDirectoryRoleCustomization
+      tags: [UsersGroups]
+      x-nodoc-operation-safety:
+        class: read-only
+        tenantMutationObserved: false
+      x-nodoc-evidence:
+        record: ../evidence/m365-admin-graph-refresh.json
+        responseShapeDigest: d62b6d131f4b000011ded674abc2569c32bbeafe9dfa70691af532e64e011335
+      responses:
+        '200':
+          description: Directory-role list display settings.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ColumnVisibility:
+                    type: object
+                    properties:
+                      Category: { type: boolean }
+                      Description: { type: boolean }
+                      IsFavorited: { type: boolean }
+                  FavoritedRoles:
+                    type: array
+                    items: {}
+                  IsCompactMode: { type: boolean }
+                  ShowLess: { type: boolean }
+                  ShownColumns:
+                    type: array
+                    nullable: true
+                    items: {}
+                  workloadType: { type: integer }
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
   /admin/api/Users/getunlicenseduserscount:
     get:
       summary: Get unlicensed user count

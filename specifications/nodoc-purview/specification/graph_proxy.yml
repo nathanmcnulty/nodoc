@@ -177,6 +177,12 @@ paths:
         Retrieve service announcement messages via the Microsoft Graph proxy.
         Returns service health and change notification messages from Microsoft 365.
       tags: [GraphProxy]
+      x-nodoc-operation-safety:
+        class: read-only
+        tenantMutationObserved: false
+      x-nodoc-evidence:
+        record: ../evidence/defender-cross-portal-refresh.json
+        responseShapeDigest: b06bfa455be239d9072c8bf42e8a9fc2cb3bc8867ca00a32f57a96a97d2a9583
       parameters:
         - name: $filter
           in: query
@@ -203,7 +209,67 @@ paths:
             application/json:
               schema:
                 type: object
-                description: pending
+                properties:
+                  '@odata.context':
+                    type: string
+                  value:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        actionRequiredByDateTime:
+                          type: string
+                          format: date-time
+                          nullable: true
+                        body:
+                          type: object
+                          properties:
+                            content:
+                              type: string
+                            contentType:
+                              type: string
+                        category:
+                          type: string
+                        details:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              name:
+                                type: string
+                              value:
+                                type: string
+                        endDateTime:
+                          type: string
+                          format: date-time
+                        hasAttachments:
+                          type: boolean
+                        id:
+                          type: string
+                        isMajorChange:
+                          type: boolean
+                        lastModifiedDateTime:
+                          type: string
+                          format: date-time
+                        services:
+                          type: array
+                          items:
+                            type: string
+                        severity:
+                          type: string
+                        startDateTime:
+                          type: string
+                          format: date-time
+                        tags:
+                          type: array
+                          items:
+                            type: string
+                        title:
+                          type: string
+                        viewPoint:
+                          type: object
+                          nullable: true
+                          additionalProperties: true
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 

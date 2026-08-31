@@ -1,4 +1,75 @@
 paths:
+  /fd/MSGraph/beta/admin/cloudLicensing/allotments:
+    get:
+      summary: List cloud licensing allotments
+      description: Retrieve tenant cloud-license allotments through the Microsoft Graph beta proxy.
+      operationId: GraphProxy.ListCloudLicensingAllotments
+      tags: [GraphProxy]
+      x-nodoc-operation-safety:
+        class: read-only
+        tenantMutationObserved: false
+      x-nodoc-evidence:
+        record: ../evidence/m365-admin-graph-refresh.json
+        responseShapeDigests:
+          - e4f623ea8802a6719ee84a8271550d56d327b4a8d64b88bece2ed3ace64545f6
+          - 7c9dc94fbe6e8531521a6b624008605f87ceebd6c24b7edfceeb66da2528fe72
+      parameters:
+        - name: $select
+          in: query
+          required: false
+          schema: { type: string }
+        - name: $top
+          in: query
+          required: false
+          schema: { type: integer }
+        - name: $skiptoken
+          in: query
+          required: false
+          schema: { type: string }
+      responses:
+        '200':
+          description: Cloud licensing allotments.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  '@odata.context': { type: string }
+                  '@odata.nextLink': { type: string }
+                  value:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        allottedUnits: { type: integer }
+                        assignableTo: { type: string }
+                        consumedUnits: { type: integer }
+                        id: { type: string }
+                        skuId: { type: string }
+                        skuPartNumber: { type: string }
+                        services:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              assignableTo: { type: string }
+                              planId: { type: string }
+                              planName: { type: string }
+                        subscriptions:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              nextLifecycleDate: { type: string, format: date-time }
+                              startDate: { type: string, format: date-time }
+                              state: { type: string }
+                              subscriptionId: { type: string }
+                              tags: { type: string }
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
   /fd/msgraph/v1.0/users/$count:
     get:
       summary: Get user count

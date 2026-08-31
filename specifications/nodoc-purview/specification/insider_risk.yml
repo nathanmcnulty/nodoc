@@ -7,6 +7,12 @@ paths:
         Retrieve insider risk analytics insight metadata for a specific date.
         Returns metadata about available risk analytics insights for the tenant.
       tags: [InsiderRisk]
+      x-nodoc-operation-safety:
+        class: read-only
+        tenantMutationObserved: false
+      x-nodoc-evidence:
+        record: ../evidence/defender-cross-portal-refresh.json
+        responseShapeDigest: 35ab762c6caaf0eb0590c94910166569805271cf05027c0fc4ce531008b15263
       parameters:
         - name: tenantId
           in: path
@@ -26,6 +32,19 @@ paths:
         '200':
           description: OK
           content:
+            application/json:
+              schema:
+                type: object
+                required: [id, signalsStartDateTimeUtc, signalsEndDateTimeUtc]
+                properties:
+                  id:
+                    type: string
+                  signalsStartDateTimeUtc:
+                    type: string
+                    format: date-time
+                  signalsEndDateTimeUtc:
+                    type: string
+                    format: date-time
             text/plain:
               schema:
                 type: string
