@@ -687,6 +687,7 @@ export const captureRecipesByTitle = {
     "tools/capture-recipes/exchange-seeded-replay.json",
   ],
   "Intune Autopatch": [
+    "tools/capture-recipes/intune-autopatch-support-enrichment.json",
     "tools/capture-recipes/intune-autopatch-deep.json",
     "tools/capture-recipes/intune-deep.json",
     "tools/capture-recipes/intune-seeded-replay.json",
