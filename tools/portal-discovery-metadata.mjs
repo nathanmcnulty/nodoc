@@ -456,8 +456,10 @@ export const coverageOverlayByTitle = {
     observedHosts: [
       "purview.microsoft.com",
     ],
-    lastSuccessfulPassDepth: "bounded-normal-ui-diff",
+    lastSuccessfulPassDepth: "graph-proxy-inventory",
     promotedDiscoveries: [
+      route("GET", "/apiproxy/edlp/dlpInternalApi/api/cloud/dlp/machines/count", "Promoted from a fresh bounded Data Loss Prevention overview capture with an exact aggregate response shape."),
+      route("GET", "/apiproxy/edlp/dlpInternalApi/api/cloud/dlp/machines/summaryStatus", "Promoted from a fresh bounded Data Loss Prevention overview capture with a time-bucketed aggregate response shape."),
       route("GET", "/apiproxy/di/Find/InsiderRiskTag", "Promoted from bounded normal-UI Insider Risk traffic with the tenant identifier parameterized."),
       route("GET", "/apiproxy/insiderrisk/insiderrisk/api/v1.0/{tenantId}/InsiderRiskTenantActivityAnalytics('{activityCategory}')", "Promoted from bounded normal-UI Insider Risk analytics traffic."),
       route("GET", "/apiproxy/insiderrisk/insiderrisk/api/v1.0/{tenantId}/InsiderRiskTenantPolicyAnalytics('{policyAnalyticsType}')", "Promoted from bounded normal-UI Insider Risk analytics traffic for two observed analytics types."),
@@ -471,16 +473,19 @@ export const coverageOverlayByTitle = {
       route("POST", "/apiproxy/insiderrisk/insiderrisk/api/v1.0/{tenantId}/IptAllIndicatorsMergedProfile", "Confirmed as a bounded read-only indicator-profile calculation in normal-UI traffic."),
     ],
     knownCandidateExclusions: [
+      route("POST", "/apiproxy/gws/ipmlservice/CategoryTrainingModel/getAll", "Deferred because the capture did not prove read-only semantics and the response surface contains sensitive identity, location, and credential-like fields."),
       route("POST", "/apiproxy/insiderrisk/insiderrisk/api/v1.0/{id}/IRMEasyPolicy", "Policy POST omitted because the capture does not prove that replay is free of policy state changes."),
       route("POST", "/apiproxy/insiderrisk/insiderrisk/api/v1.0/{id}/OnboardingChecklist", "State-changing onboarding task update observed in normal-UI traffic; intentionally excluded from documentation and probe planning."),
       route("POST", "/apiproxy/msgraph/v1.0/$batch", "Generic Graph batch wrapper omitted because it can carry mutations and the captured tenant-specific subrequest is not a stable operation contract."),
     ],
     openGaps: [
+      "The CategoryTrainingModel getAll POST remains unpromoted until repeated evidence and explicit read-like POST safety proof are available.",
       "The IRMEasyPolicy POST remains unpromoted unless a future intercepted capture proves it is a bounded read-only lookup.",
       "The generic Microsoft Graph batch wrapper remains unpromoted; document stable inner operations individually when they can be generalized safely.",
     ],
     notes: [
       "Keep same-origin Purview Portal /api traffic distinct from the broader Purview proxy surface during follow-up diffing.",
+      "A fresh proxy-focused pass captured 601 API requests, promoted two endpoint DLP reads, and found seven officially documented Graph operations with no Graph Research candidate.",
       "A bounded normal-UI pass evaluated 15 confirmed candidates, promoted all 11 GET candidates as 10 parameterized paths, promoted one read-only calculation POST, and excluded three unsafe or ambiguous POSTs.",
     ],
   },

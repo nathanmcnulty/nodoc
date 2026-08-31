@@ -1,4 +1,97 @@
 paths:
+  /edlp/dlpInternalApi/api/cloud/dlp/machines/count:
+    get:
+      operationId: getEndpointDlpMachineCount
+      summary: Get endpoint DLP machine count
+      description: >-
+        Retrieve the endpoint DLP machine count for a lookback window, with
+        optional policy-update and configuration-status filters.
+      tags: [DLPDevices]
+      x-nodoc-operation-safety:
+        class: read-only
+        tenantMutationObserved: false
+      x-nodoc-evidence:
+        record: ../evidence/purview-graph-refresh.json
+        responseShapeDigest: fcc8f147274bc649a777f85ceeb2a7b91222e1e6903e53ef9135e13820ca1618
+      parameters:
+        - name: lookingBackInDays
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: lastPolicyUpdateTime
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: configurationStatus
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Endpoint DLP machine count.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [Count]
+                properties:
+                  Count:
+                    type: integer
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+  /edlp/dlpInternalApi/api/cloud/dlp/machines/summaryStatus:
+    get:
+      operationId: getEndpointDlpMachineSummaryStatus
+      summary: Get endpoint DLP machine status history
+      description: >-
+        Retrieve aggregate endpoint DLP machine counts over time for a
+        lookback window and optional policy-update cutoff.
+      tags: [DLPDevices]
+      x-nodoc-operation-safety:
+        class: read-only
+        tenantMutationObserved: false
+      x-nodoc-evidence:
+        record: ../evidence/purview-graph-refresh.json
+        responseShapeDigest: 96b9efcd1ccffab4e2ee9d33e939e21c09fc738d8e8bbc4df2d1cb8d9d25baa5
+      parameters:
+        - name: lookingBackInDays
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: lastPolicyUpdateTime
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Time-bucketed endpoint DLP machine counts.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  required: [TimeLabel, TotalCount]
+                  properties:
+                    TimeLabel:
+                      type: string
+                    TotalCount:
+                      type: integer
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
   /mtp/ndr/dlpmachines/count:
     get:
       operationId: getDlpMachineCount

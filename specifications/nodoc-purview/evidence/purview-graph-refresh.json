@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "artifactId": "purview-graph-refresh-20260831T214500Z",
+  "sourcePortal": "Purview",
+  "sourceState": "Records Management, Insider Risk, Data Loss Prevention, and Compliance Manager Graph inventory",
+  "assignedSpecId": "purview",
+  "assignedHost": "purview.microsoft.com",
+  "terminalStatus": "completed",
+  "captureComplete": true,
+  "interactionAccountingConsistent": true,
+  "requiredActionFailureCount": 0,
+  "unresolvedMutation": false,
+  "hashes": {
+    "summary.json": "4b0e23723f57d31dfdaaa3f3824550f8ae552bb4bb40eb6291e437ae08cb650e",
+    "api-records.json": "7a9c099625c7f5ce5cb58f939c04b5444e24bff4f3a52143b3c91d42054de8de",
+    "candidate-queue.json": "eab4de94b1a26c137fbe0622cf558ccb612bbf8fd657fa8c6ee4b47f0b266910",
+    "candidate-handoff.json": "b1847639ff0c3f79b8dfb51eae40fa57ff496ba055389b468d9dc901868df0f5",
+    "discovery-run.json": "85e0e33d33d1c09d025ab7c432138ad891210beaec63412b7632c6ab0f86a481",
+    "page-states.json": "a61c0e112f681d692dac17160855eb6664b9581b18bb7d3e9806874ae5c591f0"
+  },
+  "graphTelemetry": {
+    "contractCommit": "1c83b0a4b892c35080695906dc55c662736119ad",
+    "contractManifestDigest": "3abe1a79847a9ee3e7983b372e8c5cb0f8a3c6b3baf97edf1cbc36d0fb341f9f",
+    "telemetryDigest": "18242dffef46b251dd303d2a5b90ceaedab79e13a8b23c72609d064131ca6d49",
+    "operationCount": 7,
+    "undocumentedCandidateCount": 0
+  },
+  "promotedOperations": [
+    "GET /edlp/dlpInternalApi/api/cloud/dlp/machines/count",
+    "GET /edlp/dlpInternalApi/api/cloud/dlp/machines/summaryStatus"
+  ],
+  "deferredOperations": [
+    {
+      "operation": "POST /gws/ipmlservice/CategoryTrainingModel/getAll",
+      "reason": "Read-only semantics were not proven and the observed response contains sensitive identity, location, and credential-like fields."
+    }
+  ]
+}
