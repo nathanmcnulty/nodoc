@@ -957,14 +957,24 @@
       "/spo/",
       "/WdatpPublicApi/"
     ],
-    "operationCount": 134,
-    "lastSuccessfulPassDepth": "bounded-normal-ui-diff",
+    "operationCount": 136,
+    "lastSuccessfulPassDepth": "graph-proxy-inventory",
     "captureRecipes": [
       "tools/capture-recipes/purview-deep.json",
       "tools/capture-recipes/purview-graph-inventory.json",
       "tools/capture-recipes/purview-seeded-replay.json"
     ],
     "promotedDiscoveries": [
+      {
+        "method": "GET",
+        "note": "Promoted from a fresh bounded Data Loss Prevention overview capture with an exact aggregate response shape.",
+        "path": "/apiproxy/edlp/dlpInternalApi/api/cloud/dlp/machines/count"
+      },
+      {
+        "method": "GET",
+        "note": "Promoted from a fresh bounded Data Loss Prevention overview capture with a time-bucketed aggregate response shape.",
+        "path": "/apiproxy/edlp/dlpInternalApi/api/cloud/dlp/machines/summaryStatus"
+      },
       {
         "method": "GET",
         "note": "Promoted from bounded normal-UI Insider Risk traffic with the tenant identifier parameterized.",
@@ -1024,6 +1034,11 @@
     "knownCandidateExclusions": [
       {
         "method": "POST",
+        "note": "Deferred because the capture did not prove read-only semantics and the response surface contains sensitive identity, location, and credential-like fields.",
+        "path": "/apiproxy/gws/ipmlservice/CategoryTrainingModel/getAll"
+      },
+      {
+        "method": "POST",
         "note": "Policy POST omitted because the capture does not prove that replay is free of policy state changes.",
         "path": "/apiproxy/insiderrisk/insiderrisk/api/v1.0/{id}/IRMEasyPolicy"
       },
@@ -1040,11 +1055,13 @@
     ],
     "knownTelemetryExclusions": [],
     "openGaps": [
+      "The CategoryTrainingModel getAll POST remains unpromoted until repeated evidence and explicit read-like POST safety proof are available.",
       "The IRMEasyPolicy POST remains unpromoted unless a future intercepted capture proves it is a bounded read-only lookup.",
       "The generic Microsoft Graph batch wrapper remains unpromoted; document stable inner operations individually when they can be generalized safely."
     ],
     "notes": [
       "Keep same-origin Purview Portal /api traffic distinct from the broader Purview proxy surface during follow-up diffing.",
+      "A fresh proxy-focused pass captured 601 API requests, promoted two endpoint DLP reads, and found seven officially documented Graph operations with no Graph Research candidate.",
       "A bounded normal-UI pass evaluated 15 confirmed candidates, promoted all 11 GET candidates as 10 parameterized paths, promoted one read-only calculation POST, and excluded three unsafe or ambiguous POSTs."
     ]
   },

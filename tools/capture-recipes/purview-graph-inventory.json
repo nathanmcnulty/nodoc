@@ -5,6 +5,12 @@
     "matchHosts": ["purview.microsoft.com"],
     "matchPathPrefixes": ["/"]
   },
+  "noveltyStatus": {
+    "status": "satisfied",
+    "evidenceDisposition": "frontier-exhausted",
+    "reason": "A complete healthy proxy-focused run promoted two endpoint DLP GET operations and found only already-documented Microsoft Graph operations; the classifier getAll POST remains deferred because read-only semantics were not proven.",
+    "nextRequirement": "Identify an exact unmodeled Purview proxy route, query key, status, media type, response shape, or privacy-reviewed Graph proxy operation in a different deterministic state before another run; do not replay these four routes solely for freshness."
+  },
   "matchHosts": ["purview.microsoft.com"],
   "matchPathPrefixes": ["/apiproxy"],
   "captureScripts": false,

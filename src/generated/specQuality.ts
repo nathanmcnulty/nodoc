@@ -502,7 +502,7 @@ export const generatedSpecDataByTitle = {
     "specPath": "specifications/nodoc-purview/specification/openapi.yml",
     "specSourceUrl": "https://github.com/nathanmcnulty/nodoc/tree/main/specifications/nodoc-purview/specification",
     "specDownloadUrl": "https://raw.githubusercontent.com/nathanmcnulty/nodoc/main/specifications/nodoc-purview/specification/openapi.yml",
-    "operationCount": 134,
+    "operationCount": 136,
     "tagCount": 18,
     "tagGroupCount": 6,
     "ungroupedTagCount": 0,
