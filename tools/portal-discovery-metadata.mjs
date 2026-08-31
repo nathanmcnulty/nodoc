@@ -715,6 +715,7 @@ export const captureRecipesByTitle = {
     "tools/capture-recipes/teams-seeded-replay.json",
   ],
   "Viva Engage": [
+    "tools/capture-recipes/viva-engage-token-helper-novelty.json",
     "tools/capture-recipes/viva-engage-admin-roles-deep.json",
     "tools/capture-recipes/viva-engage-admin-deep.json",
     "tools/capture-recipes/viva-engage-external-networks-deep.json",
