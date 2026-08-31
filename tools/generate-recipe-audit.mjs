@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 
 import { buildSpecInventory, repoRoot } from "./spec-quality-lib.mjs";
 import {
@@ -182,21 +183,21 @@ function buildRecommendedNext(summary, specTitle, operationCount) {
   return "maintain-and-diff";
 }
 
-function buildEvaluationStatus(summary) {
+export function buildEvaluationStatus(summary) {
   if (summary.derivedResearchSurface) {
     return "derived-current";
   }
 
-  if (summary.satisfiedNoveltyCount > 0) {
-    return "satisfied";
+  if (summary.noveltyTargetCount > 0) {
+    return "active-frontier";
   }
 
   if (summary.blockedPrerequisiteCount > 0) {
     return "blocked-prerequisite";
   }
 
-  if (summary.noveltyTargetCount > 0) {
-    return "active-frontier";
+  if (summary.satisfiedNoveltyCount > 0) {
+    return "satisfied";
   }
 
   return "needs-frontier";
@@ -293,4 +294,6 @@ async function main() {
   }
 }
 
-await main();
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  await main();
+}
