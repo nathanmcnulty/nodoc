@@ -563,6 +563,40 @@ test("confirmed API candidates retain their observed origin and provenance", asy
   }
 });
 
+test("embedded Graph batch members do not become portal API candidates", async () => {
+  const artifactDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-graph-batch-scope-"));
+  try {
+    await writeJson(path.join(artifactDir, "api-records.json"), [{
+      method: "POST",
+      path: "/beta/$batch",
+      url: "https://graph.microsoft.com/beta/$batch",
+      graphBatch: {
+        requests: [{
+          method: "GET",
+          url: "/users/00000000-0000-0000-0000-000000000000/photos/48x48/$value",
+        }],
+      },
+    }]);
+    const { stdout } = await execFileAsync(process.execPath, [
+      path.join(repoRoot, "tools", "generate-crawl-candidates.mjs"),
+      "--spec",
+      "ibiza-iam",
+      "--artifacts",
+      artifactDir,
+      "--json",
+    ], { cwd: repoRoot });
+    const queue = JSON.parse(stdout);
+    assert.equal(
+      [...queue.candidates, ...queue.scopeReviewCandidates].some(
+        ({ normalizedPath }) => normalizedPath === "/users/{id}/photos/48x48/$value",
+      ),
+      false,
+    );
+  } finally {
+    await rm(artifactDir, { force: true, recursive: true });
+  }
+});
+
 test("named OData function arguments are parameterized without changing fixed booleans", async () => {
   const artifactDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-odata-function-arguments-"));
   try {
