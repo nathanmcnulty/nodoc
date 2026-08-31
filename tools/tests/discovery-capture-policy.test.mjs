@@ -126,6 +126,26 @@ test("high-value pending work blocks a healthy stop", () => {
   assert.deepEqual(signal.blockers, ["high-value-pending-action"]);
 });
 
+test("successful high-value clicks with nested eligibility are not pending", () => {
+  const signal = evaluateDiscoverySaturation({
+    actionResults: [{
+      type: "click-contains",
+      highValue: true,
+      result: {
+        clicked: true,
+        eligibility: { status: "eligible" },
+        transitionEvidence: { stateChanged: true },
+      },
+    }],
+    capture: { captureComplete: true },
+    interactionHealth: { accounting: { consistent: true } },
+    interactionHealthStatus: { available: true },
+    enabled: true,
+  });
+  assert.equal(signal.remainingEligibleWork.highValuePending, 0);
+  assert.ok(!signal.blockers.includes("high-value-pending-action"));
+});
+
 test("unknown eligibility and interaction escalation block stopping", () => {
   const unknown = evaluateDiscoverySaturation({
     actionResults: [

@@ -27,7 +27,7 @@ function normalizeThresholds(input = {}) {
 function clickSucceeded(action) {
   const result = action?.result ?? {};
   const transition = action?.transitionEvidence ?? result.transitionEvidence ?? {};
-  return action?.eligibility?.status === "eligible"
+  return actionEligibility(action) === "eligible"
     && (result.clicked === true || action?.succeeded === true)
     && (
       result.beforeUrl !== result.afterUrl
