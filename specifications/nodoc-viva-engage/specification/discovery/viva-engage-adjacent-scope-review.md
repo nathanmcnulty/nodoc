@@ -1,5 +1,24 @@
 # Viva Engage bounded discovery adjacency scope-review handoff
 
+## August 2026 current-pass addendum
+
+The dedicated authenticated frontier completed with 222 API requests, 146 in the Viva scope,
+zero intentional mutation attempts, and a healthy final session. It reconfirmed the cross-host
+token helper twice as `200 text/html`; neither observation retained a response body, so the
+evidence does not establish whether the body was empty or unavailable to the capture mechanism.
+
+The improved analyzer correlated 27 live GraphQL operation names with tenant-safe variable names,
+status/media metadata, and response-field paths. `UpdateAppActivityStateClients` was emitted
+passively by normal landing hydration and returned 200, but discovery did not intentionally invoke
+it and has no separately verified before-state, after-state, or restoration receipt. One direct
+Microsoft Graph profile-photo read matched the current documented Graph contract; no undocumented
+Graph route or Graph error candidate was found.
+
+Static classification now recognizes the versioned Yammer locale catalogs, shared shell string and
+theme catalogs, and the OWA boot analytics asset. This removed 20 static assets from the adjacent
+ownership queue while preserving confirmed API transport. The reanalyzed current pass has four
+adjacent confirmed reads and six adjacent safety items; the ownership rules below still apply.
+
 Portal: Viva Engage  
 Spec: viva-engage  
 Artifacts directory: `C:\Users\NATHAN~1\AppData\Local\Temp\nodoc-viva-engage-bundle-retry-a288c459-0894-487d-97b3-b228229483b8`

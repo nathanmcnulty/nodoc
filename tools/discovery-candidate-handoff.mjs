@@ -177,6 +177,7 @@ export function buildPartitionedCandidateHandoff(handoff, { outputDir = null } =
     saturation: handoff.saturation,
     recovery: handoff.recovery,
     graphTelemetry: handoff.graphTelemetry,
+    liveGraphqlTelemetry: handoff.liveGraphqlTelemetry ?? null,
     recommendedNextAction: handoff.recommendedNextAction,
   };
   const sharedMetadataId = `shared-${digest(shared).slice(0, 24)}`;
@@ -256,6 +257,8 @@ export function validatePartitionedCandidateHandoff(handoff, grouped) {
     activeOperations: handoff.activeOperations,
     saturation: handoff.saturation,
     recovery: handoff.recovery,
+    graphTelemetry: handoff.graphTelemetry,
+    liveGraphqlTelemetry: handoff.liveGraphqlTelemetry ?? null,
     recommendedNextAction: handoff.recommendedNextAction,
   };
   if (JSON.stringify(grouped.manifest?.sharedMetadata) !== JSON.stringify(expectedShared)
@@ -439,6 +442,33 @@ function sanitizeMutationSummary(summary) {
       unresolvedReason: receipt.unresolvedReason == null ? null : String(receipt.unresolvedReason),
       accounting: receipt.accounting ?? null,
     })),
+  };
+}
+
+function sanitizeLiveGraphqlTelemetry(operations) {
+  if (!Array.isArray(operations) || operations.length === 0) return null;
+  const sanitized = operations.map((operation) => ({
+    name: String(operation.name || ""),
+    operationType: ["query", "mutation", "subscription"].includes(operation.operationType)
+      ? operation.operationType
+      : null,
+    bundleCorroborated: operation.bundleCorroborated === true,
+    writeLike: operation.writeLike === true,
+    writeLikeSignals: (operation.writeLikeSignals ?? []).map(String).sort(),
+    observedRecordCount: Number(operation.observedRecordCount ?? 0),
+    statuses: (operation.statuses ?? []).map(Number).filter(Number.isInteger).sort((a, b) => a - b),
+    mimeTypes: (operation.mimeTypes ?? []).map(String).sort(),
+    variableNames: (operation.variableNames ?? []).map(String).sort(),
+    responseFieldPaths: (operation.responseFieldPaths ?? []).map(String).sort(),
+    seenOnPages: (operation.seenOnPages ?? []).map(String).sort(),
+  })).sort((left, right) => left.name.localeCompare(right.name));
+  return {
+    schemaVersion: 1,
+    operationCount: sanitized.length,
+    mutationCount: sanitized.filter(({ operationType }) => operationType === "mutation").length,
+    writeLikeCount: sanitized.filter(({ writeLike }) => writeLike).length,
+    unknownTypeCount: sanitized.filter(({ operationType }) => operationType == null).length,
+    operations: sanitized,
   };
 }
 
@@ -645,6 +675,7 @@ export function buildCandidateHandoff({
       undocumentedCandidateCount: graphResearchQueue.undocumentedCandidates.length,
     } : null,
   } : null;
+  const liveGraphqlTelemetry = sanitizeLiveGraphqlTelemetry(candidateQueue.liveGraphqlOperations);
 
   return {
     schemaVersion: 2,
@@ -654,6 +685,7 @@ export function buildCandidateHandoff({
     },
     counts,
     graphTelemetry: graphTelemetrySummary,
+    liveGraphqlTelemetry,
     interactionHealth: sanitizeInteractionHealth(interactionHealth),
     interactionHealthStatus: interactionHealthStatus ?? {
       available: Boolean(interactionHealth),

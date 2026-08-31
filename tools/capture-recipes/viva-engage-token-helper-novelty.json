@@ -5,33 +5,11 @@
     "matchHosts": ["engage.cloud.microsoft"],
     "matchPathPrefixes": ["/main/admin"]
   },
-  "noveltyFrontier": {
-    "approvalArtifact": "tools/frontier-approvals/viva-engage-token-helper.json",
-    "approvalDigest": "b7ab4649774e46642de8860ab4c2dd0eca005271a488a0a8b3b5463a9101506c",
-    "baseline": "checked-in-spec-and-coverage-ledgers",
-    "baselineSignals": {
-      "queryMetadata": [],
-      "requestShapes": [],
-      "responseMetadata": [],
-      "responseShapes": [],
-      "routes": []
-    },
-    "reopenCondition": "The confirmed cross-host token-helper GET still has no retained response body, response schema, response media type, or sanitized response example.",
-    "targets": [
-      {
-        "id": "aad-token-helper-response-contract",
-        "state": "Authenticated Viva Engage admin landing bootstrap",
-        "evidenceLevel": "confirmed",
-        "expectedHostFamilies": ["api.engage.cloud.microsoft"],
-        "expectedRoutes": ["/api/v1/oauth2/aad_access_token"],
-        "expectedInformationClasses": ["response-shape", "response-metadata"],
-        "expectedDocumentationObjectives": ["response-example"],
-        "actionIndexes": [0, 1, 2],
-        "safeAction": "Reload the exact authenticated admin landing route and passively capture its bootstrap without selecting controls or changing tenant state.",
-        "acceptanceKey": "token-helper-current-response-contract",
-        "rationale": "The helper is confirmed but agents cannot currently distinguish an empty, structured, or token-status response because the retained browser capture ended after headers."
-      }
-    ]
+  "noveltyStatus": {
+    "status": "satisfied",
+    "evidenceDisposition": "frontier-exhausted",
+    "reason": "A healthy authenticated landing and explicit reload reconfirmed the token helper as 200 text/html, while neither retained a response body; the pass also supplied tenant-safe live GraphQL operation and response-field telemetry.",
+    "nextRequirement": "Use a different exact consuming state or capture mechanism that demonstrably retains a non-empty helper body, or target another exact unmodeled Viva route, GraphQL operation, error, media type, or shape; do not replay the admin landing unchanged."
   },
   "matchHosts": [
     "engage.cloud.microsoft",
