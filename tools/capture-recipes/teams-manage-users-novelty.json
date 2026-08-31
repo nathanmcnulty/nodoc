@@ -7,7 +7,7 @@
   },
   "noveltyFrontier": {
     "approvalArtifact": "tools/frontier-approvals/teams-manage-users.json",
-    "approvalDigest": "e9da97dee51a36791d3550a8b60a0d772a30f284d10decea0c9ccba6e0477368",
+    "approvalDigest": "55f15800954eb06d011d792b2d751d31938df31d4387a4599a49aea07edd4904",
     "baseline": "checked-in-spec-and-coverage-ledgers",
     "baselineSignals": {
       "queryMetadata": [],
@@ -26,26 +26,24 @@
         "expectedRoutes": ["/Teams.User/users"],
         "expectedInformationClasses": ["query-metadata", "response-shape", "response-metadata"],
         "expectedDocumentationObjectives": ["response-example", "pagination-observation"],
-        "actionIndexes": [0, 1, 2, 3, 4],
-        "safeAction": "Open Users > Manage users and passively capture the collection inventory request without selecting or changing a user.",
+        "actionIndexes": [0, 1, 2],
+        "safeAction": "Open the Users navigation control, whose current accessible description identifies the Manage users inventory, and passively capture its collection request without selecting or changing a user.",
         "acceptanceKey": "manage-users-nonempty-collection-contract",
         "rationale": "The current collection operation is known but remains opaque to agents that need to inventory users, page results, or troubleshoot missing records."
       }
     ]
   },
   "frontierControlReadiness": {
-    "actionIndexes": [0, 2],
+    "actionIndexes": [0],
     "timeoutMs": 20000
   },
   "matchHosts": ["api.interfaces.records.teams.microsoft.com"],
   "matchPathPrefixes": ["/Teams.User/users"],
   "postActionSettleMs": 10000,
   "settleMs": 12000,
-  "maxActions": 6,
+  "maxActions": 4,
   "actions": [
     "click-contains-root=Users",
-    "wait-ms=5000",
-    "click-contains=Manage users",
     "wait-ms=8000",
     "capture=manage-users"
   ]
