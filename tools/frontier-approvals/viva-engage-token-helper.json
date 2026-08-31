@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "specId": "viva-engage",
+  "decision": "accept-bounded-frontier",
+  "workerModel": "gpt-5.6-luna",
+  "workerReasoning": "xhigh",
+  "approvedAt": "2026-08-31T06:04:47.7361732Z",
+  "source": {
+    "head": "128f0c1042dd1764b79d6ede2742520eb7599c1f",
+    "artifactPath": "tools/frontier-approvals/viva-engage-token-helper-source.json",
+    "artifactSha256": "87c5395e39faf097f54c941e658dc066cc499a5a0ae37f654e4f4e3f632a5b25",
+    "frontierSetId": "offline-frontier-set-db8e3119e51529df850e88ea",
+    "frontierSetDigest": "db8e3119e51529df850e88ea1f28107ba61bc47ff2b2feb8f8129e1e50ab5fe5"
+  },
+  "state": "Authenticated Viva Engage admin landing bootstrap",
+  "canonicalShellUrl": "https://engage.cloud.microsoft/main/admin",
+  "apiEvidenceScope": {
+    "hosts": ["api.engage.cloud.microsoft"],
+    "pathPrefixes": ["/api/v1/oauth2/aad_access_token"]
+  },
+  "safeActions": [
+    "reload=admin-landing-token-helper",
+    "wait-ms=8000",
+    "capture=admin-landing-token-helper"
+  ],
+  "acceptedItems": [
+    {
+      "frontierId": "offline-frontier-8f936a9729006db591fefd68",
+      "frontierDigest": "8f936a9729006db591fefd68c23ad5a1f17112b4e1dd102016b4cb0790fbc73f",
+      "canonicalKey": "api.engage.cloud.microsoft GET /api/v1/oauth2/aad_access_token"
+    },
+    {
+      "frontierId": "offline-frontier-d136b14158c430109bfb09d2",
+      "frontierDigest": "d136b14158c430109bfb09d2f73e0807b4109f410a5b01fb498e12d151e40ba2",
+      "canonicalKey": "api.engage.cloud.microsoft GET /api/v1/oauth2/aad_access_token"
+    },
+    {
+      "frontierId": "offline-frontier-8d4bbb40a6d53a5e986d428e",
+      "frontierDigest": "8d4bbb40a6d53a5e986d428e30e4d17d4e2c1ba7fcee240d3b9795cb0bb1d016",
+      "canonicalKey": "api.engage.cloud.microsoft GET /api/v1/oauth2/aad_access_token"
+    }
+  ],
+  "deferredItemCount": 6,
+  "blockedItemCount": 6,
+  "constraints": [
+    "Exact authenticated admin target and passive observe-only capture",
+    "Acceptance requires an informative sanitized response shape, media type, or example; empty JSON is insufficient",
+    "No controls, forms, probes, redirects, or write operations",
+    "Unrelated passively emitted methods remain classified local evidence and cannot satisfy this frontier",
+    "Tokens, cookies, tenant identifiers, and raw response bodies never enter the repository"
+  ]
+}

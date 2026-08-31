@@ -5217,7 +5217,8 @@
             "level": "tenant-conditional",
             "notes": [
               "The authenticated landing capture observed this bearer-backed GET request without a request body.",
-              "The browser aborted the helper response after headers were received, so the response body was not retained in the capture artifacts.",
+              "Both the initial authenticated landing and an explicit reload returned 200 with `text/html` metadata, but the browser retained no response body in either capture.",
+              "The evidence cannot distinguish an empty response from a body that was unavailable to the capture mechanism; agents must not assume either case.",
               "The shipped bundle still constructs this route through Yammer-named helper code and can add `X-Yammer-ThirdPartyCookieBlocked` when that condition is detected."
             ]
           },
@@ -5226,7 +5227,7 @@
               "source": "live-authenticated-capture",
               "confidence": "high",
               "notes": [
-                "The helper request was captured directly from the default Edge profile during the authenticated admin landing flow."
+                "The helper request was captured twice from a dedicated authenticated Edge profile during the admin landing and explicit reload flows."
               ]
             }
           ]

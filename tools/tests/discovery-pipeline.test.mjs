@@ -749,6 +749,119 @@ test("bundle-only TypeScript module paths are suppressed without hiding confirme
   }
 });
 
+test("unbound bundle regex fragments do not become endpoint candidates", async () => {
+  const artifactDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-bundle-regex-fragments-"));
+  try {
+    await writeJson(path.join(artifactDir, "bundle-candidates.json"), {
+      candidates: [
+        { candidatePath: "/api" },
+        { candidatePath: "/api/(" },
+        { candidatePath: "/api/([/_0-9a-zA-Z]+" },
+        { candidatePath: "/api/v1/topic/available" },
+      ],
+    });
+    const result = await runAnalyze("viva-engage", artifactDir);
+    assert.deepEqual(
+      result.candidateQueue.candidates.map((candidate) => candidate.normalizedPath),
+      ["/api/v1/topic/available"],
+    );
+  } finally {
+    await rm(artifactDir, { force: true, recursive: true });
+  }
+});
+
+test("live GraphQL operations retain bundle-corroborated mutation type and tenant-safe shape paths", async () => {
+  const artifactDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-live-graphql-telemetry-"));
+  try {
+    await Promise.all([
+      writeJson(path.join(artifactDir, "api-records.json"), [{
+        method: "POST",
+        path: "/graphql",
+        status: 200,
+        mimeType: "application/json",
+        requestBodySamples: [{
+          operationName: "UpdateExampleClients",
+          variables: { input: { enabled: true } },
+        }],
+        responseShapeSummary: {
+          data: { updateExample: { enabled: "boolean", objectId: "string" } },
+        },
+        seenOnPages: ["settings"],
+      }]),
+      writeJson(path.join(artifactDir, "bundle-candidates.json"), {
+        graphqlOperations: [{
+          name: "UpdateExampleClients",
+          operationType: "mutation",
+          confidence: 1,
+          provenance: "ast",
+          sourceFile: "settings.js",
+        }],
+      }),
+    ]);
+    const result = await runAnalyze("viva-engage", artifactDir);
+    assert.deepEqual(result.candidateQueue.liveGraphqlOperations, [{
+      name: "UpdateExampleClients",
+      operationType: "mutation",
+      bundleCorroborated: true,
+      writeLike: true,
+      writeLikeSignals: [
+        "bundle-operation-type",
+        "operation-name-prefix",
+        "response-field-prefix",
+      ],
+      observedRecordCount: 1,
+      statuses: [200],
+      mimeTypes: ["application/json"],
+      variableNames: ["input"],
+      responseFieldPaths: [
+        "data.updateExample.enabled",
+        "data.updateExample.objectId",
+      ],
+      seenOnPages: ["settings"],
+    }]);
+    assert.equal(result.candidateQueue.summary.liveGraphqlMutationCount, 1);
+    assert.equal(result.candidateQueue.summary.liveGraphqlWriteLikeCount, 1);
+    assert.equal(result.candidateHandoff.liveGraphqlTelemetry.mutationCount, 1);
+    assert.equal(result.candidateHandoff.liveGraphqlTelemetry.writeLikeCount, 1);
+    assert.equal(result.candidateHandoff.liveGraphqlTelemetry.operations[0].operationType, "mutation");
+    assert.doesNotMatch(JSON.stringify(result.candidateHandoff.liveGraphqlTelemetry), /enabled":true/u);
+  } finally {
+    await rm(artifactDir, { force: true, recursive: true });
+  }
+});
+
+test("Viva locale and shared shell catalogs are classified as static adjacent evidence", async () => {
+  const artifactDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-viva-static-catalogs-"));
+  try {
+    await writeJson(path.join(artifactDir, "api-records.json"), [
+      {
+        method: "GET",
+        path: "/yammer/20260826001.1/yammer-locale/en-us/adminSettings.json",
+        url: "https://res.cdn.office.net/yammer/20260826001.1/yammer-locale/en-us/adminSettings.json",
+        seenOnPages: ["admin"],
+      },
+      {
+        method: "GET",
+        path: "/shellux/allthemes.f44d6be8e52ee17eaf666a1fbe1b6647.json",
+        url: "https://res.cdn.office.net/shellux/allthemes.f44d6be8e52ee17eaf666a1fbe1b6647.json",
+        seenOnPages: ["admin"],
+      },
+      {
+        method: "GET",
+        path: "/owamail/version/resources/boot-analytics-ping.js",
+        url: "https://outlook.office.com/owamail/version/resources/boot-analytics-ping.js",
+        seenOnPages: ["admin"],
+      },
+    ]);
+    const result = await runAnalyze("viva-engage", artifactDir);
+    assert.equal(result.candidateQueue.summary.adjacentStaticAssetObservationCount, 3);
+    assert.equal(result.candidateQueue.scopeReviewCandidates.length, 0);
+    assert.equal(result.candidateQueue.suppressedCandidates.length, 3);
+  } finally {
+    await rm(artifactDir, { force: true, recursive: true });
+  }
+});
+
 test("adjacent Power Platform-like evidence is tenant-safe and never promotion-active", async () => {
   const artifactDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-power-platform-scope-"));
   const tenantId = "5e2f94d1-730e-46f3-b567-e79c3946ab11";

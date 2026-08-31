@@ -1336,8 +1336,9 @@
       "/graphql/"
     ],
     "operationCount": 5,
-    "lastSuccessfulPassDepth": "deep-realtime-relay-capture",
+    "lastSuccessfulPassDepth": "bounded-token-helper-frontier-and-live-graphql-correlation",
     "captureRecipes": [
+      "tools/capture-recipes/viva-engage-token-helper-novelty.json",
       "tools/capture-recipes/viva-engage-admin-roles-deep.json",
       "tools/capture-recipes/viva-engage-admin-deep.json",
       "tools/capture-recipes/viva-engage-external-networks-deep.json",
@@ -1372,6 +1373,123 @@
         "path": "/cometd/connect"
       }
     ],
+    "knownCandidateExclusions": [
+      {
+        "method": "GET",
+        "note": "Shared Microsoft 365 shell navigation route; not owned by the Viva Engage API surface.",
+        "path": "/api/shell/navbardata"
+      },
+      {
+        "method": "GET",
+        "note": "Shared Microsoft 365 shell boot logging route; not owned by the Viva Engage API surface.",
+        "path": "/api/bootlog/bootfailure"
+      },
+      {
+        "method": "GET",
+        "note": "Shared Microsoft 365 client-shell route; not owned by the Viva Engage API surface.",
+        "path": "/api/clientshell/GetOriginAllowList"
+      },
+      {
+        "method": "GET",
+        "note": "Shared Microsoft 365 shell instrumentation route; not owned by the Viva Engage API surface.",
+        "path": "/api/instrument/logclient"
+      },
+      {
+        "method": "GET",
+        "note": "Shared Microsoft 365 My Apps route; not owned by the Viva Engage API surface.",
+        "path": "/api/myapps/GetAllApplications"
+      },
+      {
+        "method": "GET",
+        "note": "Shared Microsoft 365 My Apps route; not owned by the Viva Engage API surface.",
+        "path": "/api/myapps/GetAllApps"
+      },
+      {
+        "method": "GET",
+        "note": "Shared Microsoft 365 My Apps route; not owned by the Viva Engage API surface.",
+        "path": "/api/myapps/GetAppDataCache"
+      },
+      {
+        "method": "GET",
+        "note": "Shared Microsoft 365 My Apps route; not owned by the Viva Engage API surface.",
+        "path": "/api/myapps/GetAppDetails"
+      },
+      {
+        "method": "GET",
+        "note": "Shared Microsoft 365 My Apps route; not owned by the Viva Engage API surface.",
+        "path": "/api/myapps/GetIcon"
+      },
+      {
+        "method": "GET",
+        "note": "Shared Microsoft 365 shell preference route; not owned by the Viva Engage API surface.",
+        "path": "/api/settings/darkmode"
+      },
+      {
+        "method": "GET",
+        "note": "Shared Microsoft 365 shell preference route; not owned by the Viva Engage API surface.",
+        "path": "/api/settings/datetimeformats"
+      },
+      {
+        "method": "GET",
+        "note": "Shared Microsoft 365 shell preference route; not owned by the Viva Engage API surface.",
+        "path": "/api/settings/theme"
+      },
+      {
+        "method": "GET",
+        "note": "Shared Microsoft 365 shell bootstrap route; not owned by the Viva Engage API surface.",
+        "path": "/api/shell/getshellinfo"
+      },
+      {
+        "method": "GET",
+        "note": "Shared Microsoft 365 shell bootstrap route; not owned by the Viva Engage API surface.",
+        "path": "/api/shellbootstrapper"
+      },
+      {
+        "method": "GET",
+        "note": "Shared Microsoft 365 shell bootstrap route; not owned by the Viva Engage API surface.",
+        "path": "/api/shellbootstrapper/{id}/oneshell"
+      },
+      {
+        "method": "GET",
+        "note": "Shared Microsoft 365 shell storage route; not owned by the Viva Engage API surface.",
+        "path": "/api/storage/{id}/{id}/{id}"
+      },
+      {
+        "method": "GET",
+        "note": "Shared Microsoft 365 shell theme route; not owned by the Viva Engage API surface.",
+        "path": "/api/theme/tenant"
+      },
+      {
+        "method": "GET",
+        "note": "Shared Microsoft 365 shell version route; not owned by the Viva Engage API surface.",
+        "path": "/api/uxversion"
+      },
+      {
+        "method": "GET",
+        "note": "Substring mined from OneShell's `/shellux/api/cn/` sovereign-cloud asset prefix; not a Viva Engage endpoint.",
+        "path": "/api/cn"
+      },
+      {
+        "method": "GET",
+        "note": "Substring mined from OneShell's `/shellux/api/mil/` sovereign-cloud asset prefix; not a Viva Engage endpoint.",
+        "path": "/api/mil"
+      },
+      {
+        "method": "GET",
+        "note": "Substring mined from OneShell's `/shellux/api/us/` sovereign-cloud asset prefix; not a Viva Engage endpoint.",
+        "path": "/api/us"
+      },
+      {
+        "method": "GET",
+        "note": "Substring mined from the shared OneShell bundle's external `https://arc.msn.com/v4/api/selection` advertising call; not a Viva Engage endpoint.",
+        "path": "/api/selection"
+      },
+      {
+        "method": "GET",
+        "note": "Literal error-message text mined from the shared OWA boot bundle with no runtime Viva observation; not a Viva Engage endpoint candidate.",
+        "path": "/api/v1/topic/capabilities"
+      }
+    ],
     "knownTelemetryExclusions": [
       {
         "method": "POST",
@@ -1395,7 +1513,8 @@
       }
     ],
     "openGaps": [
-      "Intercept the next step after code generation or code entry if `setup-external-network` ever advances beyond the shared `ExternalNetworksAdminSettingsClients` bootstrap query and shell-state reads, because the no-submit access-code control probe did not emit a distinct write or redemption family."
+      "Intercept the next step after code generation or code entry if `setup-external-network` ever advances beyond the shared `ExternalNetworksAdminSettingsClients` bootstrap query and shell-state reads, because the no-submit access-code control probe did not emit a distinct write or redemption family.",
+      "Intentional GraphQL mutation discovery needs an operation-name and body-aware abort gate plus a verified before/after receipt. The shared `POST /graphql` transport is too broad for method-and-path-only interception."
     ],
     "notes": [
       "The authenticated default-Edge landing capture confirmed 27 unique persisted GraphQL operations, including `RealtimeConnectionSettingsClients`, plus a stable bearer-plus-`x-request-id` GraphQL header profile and no cookie header on the captured authenticated admin API requests for this pass.",
@@ -1406,7 +1525,13 @@
       "The same-origin `RealtimeConnectionSettingsClients` response returned transient `*.rt.yammer.com/cometd/` relay hosts, after which the browser performed Bayeux handshake, subscribe, and connect POSTs with redacted `token` and `hub_tenant_token` fields in the body rather than `Authorization` or cookie headers.",
       "A bearer-backed GET `/api/v1/oauth2/aad_access_token` helper was also observed on `api.engage.cloud.microsoft`; bundle code still requests it through Yammer-named helper logic with `X-Yammer-OAuthTokenExpiration` and optional `X-Yammer-ThirdPartyCookieBlocked` headers.",
       "A review of the checked-in April 2026 raw-request artifacts still found no direct admin request to `broadcast.yammer.com` or `msgraph.yammer.com`, so both hosts remain unpromoted config references.",
-      "The guessed `/main/admin/external-networks` path changed the URL but rendered the generic admin landing state during this pass; the canonical external admin surface resolved under `external-networks-settings` instead."
+      "The guessed `/main/admin/external-networks` path changed the URL but rendered the generic admin landing state during this pass; the canonical external admin surface resolved under `external-networks-settings` instead.",
+      "An August 2026 token-helper frontier repeated the healthy authenticated landing and an explicit reload: both returned 200 `text/html` metadata for `/api/v1/oauth2/aad_access_token`, but neither retained a response body, so the evidence does not establish an empty-body contract.",
+      "The same pass correlated 27 live GraphQL operations with tenant-safe variable names, status/media metadata, and response-field paths; document kinds remain `unresolved` where the current bundle set did not corroborate query versus mutation.",
+      "`UpdateAppActivityStateClients` was passively emitted by normal landing hydration and returned 200, but discovery did not intentionally invoke it and has no verified before/after or restoration receipt.",
+      "One direct Microsoft Graph profile-photo read matched the current public Graph contract; the pass found no undocumented Graph route and no Graph error candidate.",
+      "The static classifier now removes 20 versioned Yammer locale and shared-shell catalogs from the adjacent ownership queue without hiding confirmed API transport.",
+      "The five remaining bundle-only strings were traced to shared OneShell or OWA bundles: three sovereign-cloud `/shellux` substrings, one external MSN advertising route, and one OWA error-message literal. They are excluded from Viva endpoint planning unless first observed on a product-owned host at runtime."
     ]
   }
 ]

@@ -35,7 +35,7 @@ info:
 
     Documentation and specifications have been provided on a best-efforts basis and may not be
     100% accurate.
-  version: 0.4.2
+  version: 0.5.0
   contact:
     name: nodoc
     url: https://github.com/nathanmcnulty/nodoc
@@ -321,6 +321,196 @@ paths:
         returned a tenant- and user-scoped `cometdBaseUrl` that the browser immediately used for
         transient `*.rt.yammer.com` Bayeux relay traffic.
       operationId: AdminGraphQL_PostGraphql
+      x-nodoc-graphqlOperationTypeNotes:
+        unresolved: The current bundle set did not corroborate the GraphQL document kind; it does not mean the operation semantics are unknown or safe to invoke.
+      x-nodoc-graphqlOperations:
+        - operationName: AdminFeatureAccessSettingsClients
+          operationType: query
+          variables: []
+          responseFields:
+            - data.settings.adminSettings.viewerCanDeleteUser
+            - data.settings.adminSettings.viewerCanHideUsersForNetworkInDiscovery
+            - data.settings.adminSettings.viewerCanManageComplianceData
+            - data.settings.adminSettings.viewerCanManageMultiTenantOrganizationPolicy
+            - data.settings.adminSettings.viewerCanManageViewOnlyModeUsers
+            - data.settings.analytics.viewerCanAccessAdminSettings
+            - data.settings.analytics.viewerCanEditCampaignAnalyticsSettings
+            - data.settings.analytics.viewerCanEditLeadershipAnalyticsSettings
+            - data.settings.analytics.viewerCanEditNetworkActivityAnalyticsSettings
+            - data.settings.analytics.viewerCanEditNetworkQuestionAnalyticsSettings
+            - data.settings.leader.viewerCanEditSettings
+            - data.settings.networkQuestion.viewerCanEditNetworkQuestionsOnlyMode
+            - data.settings.networkQuestion.viewerCanEditSettings
+        - operationName: AllLeadersInUsersNetwork
+          operationType: unresolved
+          variables: [endCursor, leadersCount]
+          responseFields: [data.allLeaders.edges, data.allLeaders.pageInfo]
+          pagination: Relay connection with `endCursor` and `pageInfo`.
+        - operationName: AppViewPropertiesClients
+          operationType: query
+          variables: [id, keys]
+          responseFields: [data.viewer.appViewProperties]
+        - operationName: CommunicationsDashboardAccessGateQuery
+          operationType: unresolved
+          variables: []
+          responseFields:
+            - data.settings.adminRoles.viewerAllowedUserAdminRoleAssignments
+            - data.settings.campaigns.viewerCanAccessCampaignsRecommendations
+            - data.viewer.canAccessDashboard
+            - data.viewer.canAccessDigitalSafety
+            - data.viewer.canAccessLeaderManagement
+            - data.viewer.canViewNetworkActivity
+        - operationName: CurrentNetworkUsagePolicyClients
+          operationType: query
+          variables: []
+          responseFields: [data.settings.network.usagePolicy]
+        - operationName: CurrentUserClients
+          operationType: unresolved
+          variables: []
+          responseFields:
+            - data.settings.network
+            - data.viewer.isNetworkAdmin
+            - data.viewer.isVerifiedNetworkAdmin
+            - data.viewer.isRestrictedToViewOnlyMode
+            - data.viewer.user
+            - data.viewer.userPreferences
+        - operationName: CurrentUserNetworksClients
+          operationType: query
+          variables: []
+          responseFields: [data.viewer.networks.edges]
+        - operationName: DismissablePromptsClients
+          operationType: query
+          variables: [promptKeys, promptTypes]
+          responseFields: [data.viewer.dismissablePrompts, data.viewer.dismissablePromptsByType]
+        - operationName: FeatureAccessInsightsClients
+          operationType: unresolved
+          variables: [includeDigitalSafety]
+          responseFields:
+            - data.viewer.canViewActivity
+            - data.viewer.canViewLeadershipActivity
+            - data.viewer.canViewNetworkActivity
+        - operationName: FeatureAccessSettingsClients
+          operationType: unresolved
+          variables: []
+          responseFields:
+            - data.settings.adminRoles
+            - data.settings.adminSettings
+            - data.settings.article
+            - data.settings.campaigns
+            - data.settings.copilot
+            - data.settings.group
+            - data.settings.leader
+            - data.settings.network
+            - data.settings.networkQuestion
+            - data.settings.stories
+            - data.settings.storyline
+            - data.viewer
+        - operationName: GroupAgentPreviewBannerQuery
+          operationType: query
+          variables: [dismissablePromptKey]
+          responseFields: [data.settings.network.isGroupAgentEnabled, data.viewer.dismissablePrompts]
+        - operationName: InboxNavigationTabsQuery
+          operationType: query
+          variables: [withRealtimeChannel]
+          responseFields:
+            - data.viewer.inbox.inboxUnreadCount
+            - data.viewer.inbox.threads.realtimeChannelId
+            - data.viewer.user
+        - operationName: InformationBarrierSettingsClients
+          operationType: unresolved
+          variables: [userId]
+          responseFields:
+            - data.user.hasInformationBarrierRestrictions
+            - data.user.id
+            - data.user.officeUserId
+            - data.viewer.shouldShowInformationBarrierPublisherWarning
+        - operationName: LoadNetworkBrandThemeContentQuery
+          operationType: query
+          variables: []
+          responseFields: [data.settings.networkBranding, data.settings.tenantConfiguration]
+        - operationName: MultiTenantOrganizationClients
+          operationType: unresolved
+          variables: []
+          responseFields:
+            - data.multiTenantOrganization
+            - data.settings.group.viewerCanAccessMultiTenantOrganizationGroups
+        - operationName: NavigationGroupsClients
+          operationType: query
+          variables: []
+          responseFields:
+            - data.publicGroupEventRealtimeChannelId
+            - data.viewer.favoriteGroups.edges
+            - data.viewer.groups.edges
+            - data.viewer.privateGroupEventRealtimeChannelId
+        - operationName: NetworkTopicSettingsClients
+          operationType: query
+          variables: []
+          responseFields:
+            - data.settings.copilot.viewerCanAccessAIAssistedAnswers
+            - data.settings.network.isOfficeTopicsEnabled
+            - data.settings.network.networkTopicsState
+        - operationName: NotificationsBellUnseenCountQuery
+          operationType: unresolved
+          variables: []
+          responseFields:
+            - data.viewer.notifications.realtimeChannelId
+            - data.viewer.notifications.viewerUnseenCount
+        - operationName: RealtimeConnectionSettingsClients
+          operationType: query
+          variables: []
+          responseFields: [data.settings.realtimeConnectionSettings.cometdBaseUrl]
+        - operationName: StorylineSettingsClients
+          operationType: unresolved
+          variables: []
+          responseFields: [data.settings.stories, data.settings.storyline, data.viewer.user.wallFeed]
+        - operationName: TenantConfigurationAndRoles
+          operationType: query
+          variables: []
+          responseFields: [data.allAdmins.edges, data.allLeaders.edges, data.viewer.adminRoles]
+        - operationName: UnseenThreadIdsInCommunitiesClients
+          operationType: query
+          variables: [communityIds, includeUnseenThreadsOrReplies, includeUnseenThreadStarters]
+          responseFields: [data.nodes]
+        - operationName: UpdateAppActivityStateClients
+          operationType: unresolved
+          writeLike: true
+          variables: [input]
+          responseFields: [data.updateAppActivityState.userId]
+          notes: The landing page passively emitted `input.appActivityState`; no intentional invocation, before-state read, or restoration receipt exists.
+        - operationName: useHasM365CopilotAccessQuery
+          operationType: query
+          variables: []
+          responseFields:
+            - data.settings.copilot.viewerCanAccessM365Copilot
+            - data.viewer.isRestrictedToViewOnlyMode
+        - operationName: useM365CopilotAdoptionGroupQuery
+          operationType: query
+          variables: []
+          responseFields: [data.viewer.m365CopilotAdoptionGroup]
+        - operationName: UserAchievementSettingsClient
+          operationType: query
+          variables: [includeInputFields]
+          responseFields:
+            - data.settings.userAchievement.adminSettingsType
+            - data.settings.userAchievement.viewerCanEditSettings
+        - operationName: UserProfileMenuButtonQuery
+          operationType: query
+          variables: []
+          responseFields:
+            - data.settings.network.id
+            - data.settings.network.viewerCanScheduleDraftPosts
+            - data.viewer.inbox.draftThreads.edges
+            - data.viewer.user.id
+      x-nodoc-passiveWriteObservations:
+        - operationName: UpdateAppActivityStateClients
+          transport: POST /graphql
+          requestFields: [variables.input.appActivityState]
+          responseFields: [data.updateAppActivityState.userId]
+          observedStatus: 200
+          receiptStatus: untracked-passive-portal-operation
+          notes:
+            - The operation was emitted by normal admin landing hydration, not intentionally invoked by discovery.
+            - The capture made no separately authorized mutation attempt and therefore has no verified before/after or restoration receipt.
       requestBody:
         required: true
         content:
@@ -556,6 +746,38 @@ paths:
               schema:
                 $ref: '#/components/schemas/GraphQLResponse'
               examples:
+                adminFeatureAccessSettingsResponse:
+                  summary: Admin feature-access capability shape
+                  value:
+                    data:
+                      settings:
+                        adminSettings:
+                          viewerCanDeleteUser: false
+                          viewerCanHideUsersForNetworkInDiscovery: false
+                          viewerCanManageComplianceData: false
+                          viewerCanManageMultiTenantOrganizationPolicy: false
+                          viewerCanManageViewOnlyModeUsers: false
+                        analytics:
+                          viewerCanAccessAdminSettings: false
+                          viewerCanEditCampaignAnalyticsSettings: false
+                          viewerCanEditLeadershipAnalyticsSettings: false
+                          viewerCanEditNetworkActivityAnalyticsSettings: false
+                          viewerCanEditNetworkQuestionAnalyticsSettings: false
+                        leader:
+                          viewerCanEditSettings: false
+                        networkQuestion:
+                          viewerCanEditNetworkQuestionsOnlyMode: false
+                          viewerCanEditSettings: false
+                tenantConfigurationAndRolesResponse:
+                  summary: Current admin and leader role inventory shape
+                  value:
+                    data:
+                      allAdmins:
+                        edges: []
+                      allLeaders:
+                        edges: []
+                      viewer:
+                        adminRoles: [string]
                 realtimeConnectionSettingsResponse:
                   summary: GraphQL response that returns the transient realtime relay base URL
                   value:
@@ -610,16 +832,22 @@ paths:
           level: tenant-conditional
           notes:
             - The authenticated landing capture observed this bearer-backed GET request without a request body.
-            - The browser aborted the helper response after headers were received, so the response body was not retained in the capture artifacts.
+            - Both the initial authenticated landing and an explicit reload returned 200 with `text/html` metadata, but the browser retained no response body in either capture.
+            - The evidence cannot distinguish an empty response from a body that was unavailable to the capture mechanism; agents must not assume either case.
             - The shipped bundle still constructs this route through Yammer-named helper code and can add `X-Yammer-ThirdPartyCookieBlocked` when that condition is detected.
         provenance:
           - source: live-authenticated-capture
             confidence: high
             notes:
-              - The helper request was captured directly from the default Edge profile during the authenticated admin landing flow.
+              - The helper request was captured twice from a dedicated authenticated Edge profile during the admin landing and explicit reload flows.
       responses:
         '200':
-          description: Token-helper response observed, but response content was not retained by the capture after the browser aborted the request.
+          description: |
+            The August 2026 landing and explicit reload both returned 200 with `text/html` response
+            metadata. The browser again did not retain a body, so this operation should be treated as
+            a token-state or refresh signal rather than as a reusable token-return contract.
+          content:
+            text/html: {}
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':

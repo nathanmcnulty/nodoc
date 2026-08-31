@@ -1,0 +1,31 @@
+{
+  "portal": "Viva Engage",
+  "url": "https://engage.cloud.microsoft/main/admin",
+  "pageTarget": {
+    "matchHosts": ["engage.cloud.microsoft"],
+    "matchPathPrefixes": ["/main/admin"]
+  },
+  "noveltyStatus": {
+    "status": "satisfied",
+    "evidenceDisposition": "frontier-exhausted",
+    "reason": "A healthy authenticated landing and explicit reload reconfirmed the token helper as 200 text/html, while neither retained a response body; the pass also supplied tenant-safe live GraphQL operation and response-field telemetry.",
+    "nextRequirement": "Use a different exact consuming state or capture mechanism that demonstrably retains a non-empty helper body, or target another exact unmodeled Viva route, GraphQL operation, error, media type, or shape; do not replay the admin landing unchanged."
+  },
+  "matchHosts": [
+    "engage.cloud.microsoft",
+    "api.engage.cloud.microsoft",
+    "graph.microsoft.com",
+    "www.yammer.com",
+    "msgraph.yammer.com",
+    "broadcast.yammer.com",
+    "*.rt.yammer.com"
+  ],
+  "postActionSettleMs": 12000,
+  "settleMs": 14000,
+  "maxActions": 4,
+  "actions": [
+    "reload=admin-landing-token-helper",
+    "wait-ms=8000",
+    "capture=admin-landing-token-helper"
+  ]
+}

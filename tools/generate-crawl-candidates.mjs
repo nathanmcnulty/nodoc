@@ -577,8 +577,128 @@ function collectGraphqlOperations(data) {
     ));
 }
 
+function collectResponseFieldPaths(value, prefix = [], output = new Set(), depth = 0) {
+  if (output.size >= 256 || depth > 12 || value == null) return output;
+  if (typeof value === "string") {
+    if (prefix.length > 0) output.add(prefix.join("."));
+    return output;
+  }
+  if (Array.isArray(value)) {
+    const last = prefix.at(-1) ?? "value";
+    const arrayPrefix = last.endsWith("[]")
+      ? prefix
+      : [...prefix.slice(0, -1), `${last}[]`];
+    for (const item of value.slice(0, 4)) {
+      collectResponseFieldPaths(item, arrayPrefix, output, depth + 1);
+    }
+    return output;
+  }
+  if (typeof value !== "object") return output;
+  for (const [key, child] of Object.entries(value)) {
+    if (output.size >= 256) break;
+    if (key === "array") {
+      collectResponseFieldPaths(child, [...prefix.slice(0, -1), `${prefix.at(-1) ?? "value"}[]`], output, depth + 1);
+    } else {
+      collectResponseFieldPaths(child, [...prefix, key], output, depth + 1);
+    }
+  }
+  return output;
+}
+
+function parseGraphqlBodies(samples) {
+  const bodies = [];
+  for (const sample of Array.isArray(samples) ? samples : []) {
+    let parsed = sample;
+    if (typeof sample === "string") {
+      try { parsed = JSON.parse(sample); } catch { continue; }
+    }
+    for (const body of Array.isArray(parsed) ? parsed : [parsed]) {
+      if (body && typeof body === "object" && !Array.isArray(body)) bodies.push(body);
+    }
+  }
+  return bodies;
+}
+
+function collectLiveGraphqlOperations(data, bundleOperations = []) {
+  const typesByName = new Map();
+  for (const operation of bundleOperations) {
+    if (!typesByName.has(operation.name)) typesByName.set(operation.name, new Set());
+    typesByName.get(operation.name).add(operation.operationType);
+  }
+  const operations = new Map();
+  walkArtifact(data, (value) => {
+    if (
+      String(value?.method || "").toUpperCase() !== "POST"
+      || normalizeRoutePath(value?.path || value?.url) !== "/graphql"
+    ) return;
+    for (const body of parseGraphqlBodies(value.requestBodySamples)) {
+      const name = String(body.operationName || body.operationAlias || "").trim();
+      if (!/^[A-Za-z_][A-Za-z0-9_]{0,127}$/u.test(name)) continue;
+      if (!operations.has(name)) {
+        operations.set(name, {
+          name,
+          mimeTypes: new Set(),
+          responseFieldPaths: new Set(),
+          seenOnPages: new Set(),
+          statuses: new Set(),
+          variableNames: new Set(),
+          observedRecordCount: 0,
+        });
+      }
+      const operation = operations.get(name);
+      operation.observedRecordCount += 1;
+      if (value.mimeType) operation.mimeTypes.add(String(value.mimeType).toLowerCase());
+      if (Number.isInteger(Number(value.status))) operation.statuses.add(Number(value.status));
+      for (const page of normalizeStringArray(value.seenOnPages)) operation.seenOnPages.add(page);
+      for (const variableName of Object.keys(body.variables ?? {})) {
+        if (/^[A-Za-z_][A-Za-z0-9_]{0,127}$/u.test(variableName)) operation.variableNames.add(variableName);
+      }
+      for (const fieldPath of collectResponseFieldPaths(value.responseShapeSummary)) {
+        operation.responseFieldPaths.add(fieldPath);
+      }
+    }
+  });
+  return Array.from(operations.values()).map((operation) => {
+    const observedTypes = Array.from(typesByName.get(operation.name) ?? []).sort();
+    const responseFieldPaths = Array.from(operation.responseFieldPaths).sort();
+    const writeLikeSignals = [
+      ...(observedTypes.includes("mutation") ? ["bundle-operation-type"] : []),
+      ...(/^(?:Create|Delete|Dismiss|Generate|Redeem|Remove|Set|Update)(?=[A-Z]|$)/u.test(operation.name)
+        ? ["operation-name-prefix"]
+        : []),
+      ...(responseFieldPaths.some((fieldPath) => /^data\.(?:create|delete|dismiss|generate|redeem|remove|set|update)(?=[A-Z.]|$)/u.test(fieldPath))
+        ? ["response-field-prefix"]
+        : []),
+    ];
+    return {
+      name: operation.name,
+      operationType: observedTypes.length === 1 ? observedTypes[0] : null,
+      bundleCorroborated: observedTypes.length > 0,
+      writeLike: writeLikeSignals.length > 0,
+      writeLikeSignals: Array.from(new Set(writeLikeSignals)).sort(),
+      observedRecordCount: operation.observedRecordCount,
+      statuses: Array.from(operation.statuses).sort((left, right) => left - right),
+      mimeTypes: Array.from(operation.mimeTypes).sort(),
+      variableNames: Array.from(operation.variableNames).sort(),
+      responseFieldPaths,
+      seenOnPages: Array.from(operation.seenOnPages).sort(),
+    };
+  }).sort((left, right) => left.name.localeCompare(right.name));
+}
+
 function pathStartsWithKnownPrefix(value, allowedPrefixes) {
   return allowedPrefixes.some((prefix) => matchesPathPrefix(value, prefix));
+}
+
+function isUnboundBundleExtractionFragment(normalizedPath, method, hostname) {
+  if (method || hostname) {
+    return false;
+  }
+
+  return normalizedPath === "/api"
+    || normalizedPath.endsWith("(")
+    || normalizedPath.includes("[")
+    || normalizedPath.includes("+");
 }
 
 function collectBundleCandidateRecords(data, allowedPrefixes) {
@@ -596,6 +716,9 @@ function collectBundleCandidateRecords(data, allowedPrefixes) {
 
     const method = normalizeMethod(record.method);
     const hostname = extractHostname(record.url) ?? extractHostname(value);
+    if (isUnboundBundleExtractionFragment(normalizedPath, method, hostname)) {
+      return;
+    }
     candidates.set(`${hostname ?? "NO_HOST"} ${method ?? "ANY"} ${normalizedPath}`, {
       baseUrl: typeof record.baseUrl === "string" ? record.baseUrl : null,
       confidenceScore: Number.isFinite(record.confidence)
@@ -655,7 +778,11 @@ function extractBundleMatches(text, allowedPrefixes) {
         .split("?")[0]
         .replace(/[)"'`,;]+$/u, "");
       const normalizedPath = normalizeRoutePath(cleaned);
-      if (normalizedPath && pathStartsWithKnownPrefix(normalizedPath, allowedPrefixes)) {
+      if (
+        normalizedPath
+        && pathStartsWithKnownPrefix(normalizedPath, allowedPrefixes)
+        && !isUnboundBundleExtractionFragment(normalizedPath, null, null)
+      ) {
         matches.add(normalizedPath);
       }
     }
@@ -1000,6 +1127,9 @@ function classifyStaticAssetObservation(observation) {
   const strongSuffixSignal = /\.(?:resjson|css|map|woff2?|ttf|eot|png|jpe?g|gif|svg|ico)$/iu.test(normalizedPath);
   const scriptSuffixSignal = /\.(?:js|mjs)$/iu.test(normalizedPath);
   const typescriptSourceSignal = /\.tsx?$/iu.test(normalizedPath);
+  const yammerLocaleCatalogSignal = /\/yammer-locale\/[^/]+\/[^/]+\.json$/iu.test(normalizedPath);
+  const shellCatalogSignal = /^\/shellux\/(?:allthemes\.[a-f0-9]{8,}\.json|[^/]+\/shellstrings\.[a-f0-9]{8,}\.json)$/iu.test(normalizedPath);
+  const bootAnalyticsAssetSignal = /\/resources\/boot-analytics-ping\.js$/iu.test(normalizedPath);
   const hashedAssetSignal = /(?:^|\/)[^/]*(?:[.-])[a-f0-9]{8,}(?:\.[^/]+)?$/iu.test(normalizedPath);
   const mimeSignal = /^(?:text\/css|application\/(?:javascript|x-javascript|font-woff)|text\/javascript|font\/|image\/)/u.test(contentType);
   const bundleOnlySignal = observation.evidence === "bundle-discovered" && !observation.method;
@@ -1011,6 +1141,9 @@ function classifyStaticAssetObservation(observation) {
     ...(strongSuffixSignal ? ["static-suffix"] : []),
     ...(scriptSuffixSignal ? ["script-suffix"] : []),
     ...(typescriptSourceSignal ? ["typescript-source-suffix"] : []),
+    ...(yammerLocaleCatalogSignal ? ["yammer-locale-catalog"] : []),
+    ...(shellCatalogSignal ? ["shell-static-catalog"] : []),
+    ...(bootAnalyticsAssetSignal ? ["boot-analytics-asset"] : []),
     ...(hashedAssetSignal ? ["hashed-asset-name"] : []),
     ...(mimeSignal ? ["static-content-type"] : []),
     ...(bundleOnlySignal ? ["bundle-only-no-api-method"] : []),
@@ -1022,6 +1155,9 @@ function classifyStaticAssetObservation(observation) {
     || (mimeSignal && (scriptSuffixSignal || hashedAssetSignal))
     || (bundleOnlySignal && (strongSuffixSignal || scriptSuffixSignal || hashedAssetSignal))
     || (bundleOnlySignal && typescriptSourceSignal)
+    || yammerLocaleCatalogSignal
+    || shellCatalogSignal
+    || bootAnalyticsAssetSignal
   );
   return { evidence, isStatic };
 }
@@ -1410,6 +1546,9 @@ async function main() {
   const graphqlOperations = bundleCandidates
     ? collectGraphqlOperations(bundleCandidates)
     : [];
+  const liveGraphqlOperations = apiRecords
+    ? collectLiveGraphqlOperations(apiRecords, graphqlOperations)
+    : [];
   const observations = [
     ...(apiRecords ? collectObservations(apiRecords, artifactFiles.apiRecords, "confirmed") : []),
     ...(pageStates ? collectObservations(pageStates, artifactFiles.pageStates, "confirmed") : []),
@@ -1480,10 +1619,14 @@ async function main() {
     summary,
     candidates,
     graphqlOperations,
+    liveGraphqlOperations,
     scopeReviewCandidates,
     suppressedCandidates,
   };
   summary.graphqlOperationCount = graphqlOperations.length;
+  summary.liveGraphqlOperationCount = liveGraphqlOperations.length;
+  summary.liveGraphqlMutationCount = liveGraphqlOperations.filter(({ operationType }) => operationType === "mutation").length;
+  summary.liveGraphqlWriteLikeCount = liveGraphqlOperations.filter(({ writeLike }) => writeLike).length;
 
   await maybeWriteOutput(args.output, payload);
 
