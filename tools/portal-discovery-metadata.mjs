@@ -545,11 +545,16 @@ export const coverageOverlayByTitle = {
       "{tenant}-admin.sharepoint.com",
     ],
     lastSuccessfulPassDepth: "deep-interaction",
+    promotedDiscoveries: [
+      route("GET", "/_api/SPO.SPOContentSecurityPolicyConfiguration", "Promoted from the current Advanced > Script sources capture; the captured tenant returned an empty Items collection."),
+    ],
     notes: [
       "A live April 2026 tenant shell snapshot confirmed stable admin hash routes for #/home, #/siteManagement, #/recycleBin, #/settings, #/migration, #/classicFeatures, and #/advancedManagement.",
+      "A bounded authenticated August 2026 pass promoted the Script sources configuration read with a current response envelope and bundle-confirmed item member names.",
     ],
     openGaps: [
-      "The current tenant nav also exposes SharePoint Embedded, Reports subpages such as Data access governance and OneDrive accounts, and Advanced > Script sources; those surfaces still need route-specific capture before promoting any additional same-origin /_api routes.",
+      "The current tenant nav also exposes SharePoint Embedded and Reports subpages such as Data access governance and OneDrive accounts; those surfaces still need route-specific capture before promoting any additional same-origin /_api routes.",
+      "The client bundle references POST /_api/SPO.SPOContentSecurityPolicyConfiguration/UpdateScriptSources, but that write remains unpromoted until an abort-before-send or verified reversible-operation receipt captures its exact request and response contract.",
     ],
   },
   Teams: {

@@ -260,6 +260,45 @@ components:
         - IsReadOnly
         - Value
       additionalProperties: true
+    ContentSecurityPolicyScriptSource:
+      type: object
+      description: |
+        Script-source item shape read by the current admin-center client bundle.
+        The targeted live response contained an empty `Items` collection, so
+        values for these members were not observed in the captured tenant.
+      properties:
+        Source:
+          type: string
+          description: Allowed script-source value displayed by the admin center.
+        Modified:
+          type: string
+          format: date-time
+          nullable: true
+          description: Last-modified timestamp parsed by the admin-center client when present.
+        Manual:
+          type: boolean
+          description: Whether the client treats the source as manually configured.
+      additionalProperties: true
+    ContentSecurityPolicyConfigurationResponse:
+      type: object
+      properties:
+        '@odata.context':
+          type: string
+          format: uri
+        '@odata.type':
+          type: string
+        '@odata.id':
+          type: string
+          format: uri
+        '@odata.editLink':
+          type: string
+        Items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContentSecurityPolicyScriptSource'
+      required:
+        - Items
+      additionalProperties: true
     TenantAdminEndpointsResponse:
       type: object
       properties:
@@ -585,6 +624,53 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
+
+  /_api/SPO.SPOContentSecurityPolicyConfiguration:
+    get:
+      tags: [Settings]
+      summary: Get allowed script sources
+      description: |
+        Returns the SharePoint content-security-policy script-source
+        configuration shown under Advanced > Script sources. The targeted live
+        tenant returned an empty `Items` collection. The item member names are
+        additionally corroborated by the shipped admin-center client bundle,
+        but populated values have not yet been observed.
+      operationId: SharePointAdmin.GetContentSecurityPolicyConfiguration
+      x-nodoc-operation-context:
+        surface: Advanced > Script sources
+        headerProfile: sharepoint-admin-read
+        workflows:
+          - Inventory the script sources currently displayed by the SharePoint admin center.
+          - Troubleshoot whether a source is present before evaluating a portal-side configuration change.
+        permissions:
+          - Requires an authenticated SharePoint admin-center session with access to the Advanced settings surface.
+        troubleshooting:
+          - An empty Items collection is a valid successful response and indicates that this tenant exposed no configured script sources to the current portal view.
+          - Treat Source, Modified, and Manual as optional until a populated live response confirms their presence and nullability.
+          - The related UpdateScriptSources POST is intentionally not documented because the current evidence does not include an intercepted or reversibly verified write.
+        provenance:
+          - source: authenticated-portal-capture
+            confidence: high
+            notes:
+              - Exact same-origin GET returned 200 application/json from the Script sources route in the August 2026 bounded capture.
+              - Source, Modified, and Manual were confirmed as item members by the client bundle parser; the live Items array itself was empty.
+      responses:
+        '200':
+          description: Script-source configuration returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentSecurityPolicyConfigurationResponse'
+              example:
+                '@odata.context': https://{tenant}-admin.sharepoint.com/_api/$metadata#SPOContentSecurityPolicyConfigurations/$entity
+                '@odata.type': '#Microsoft.Online.SharePoint.TenantAdministration.SPOContentSecurityPolicyConfiguration'
+                '@odata.id': https://{tenant}-admin.sharepoint.com/_api/SPO.SPOContentSecurityPolicyConfiguration
+                '@odata.editLink': SPO.SPOContentSecurityPolicyConfiguration
+                Items: []
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
 
   /_api/SPO.Tenant:
     get:

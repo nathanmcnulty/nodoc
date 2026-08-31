@@ -535,11 +535,12 @@ test("Purview unsafe POST observations are suppressed from generated queues", as
 
 test("confirmed API candidates retain their observed origin and provenance", async () => {
   const artifactDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-confirmed-origin-"));
+  const candidatePath = "/_api/Nodoc.ConfirmedOriginProbe";
   try {
     await writeJson(path.join(artifactDir, "api-records.json"), [{
       method: "GET",
-      path: "/_api/SPO.SPOContentSecurityPolicyConfiguration",
-      url: "https://contoso-admin.sharepoint.com/_api/SPO.SPOContentSecurityPolicyConfiguration",
+      path: candidatePath,
+      url: `https://contoso-admin.sharepoint.com${candidatePath}`,
       seenOnPages: ["script-sources"],
     }]);
     const { stdout } = await execFileAsync(process.execPath, [
@@ -552,8 +553,9 @@ test("confirmed API candidates retain their observed origin and provenance", asy
     ], { cwd: repoRoot });
     const queue = JSON.parse(stdout);
     const candidate = queue.candidates.find((entry) => (
-      entry.normalizedPath === "/_api/SPO.SPOContentSecurityPolicyConfiguration"
+      entry.normalizedPath === candidatePath
     ));
+    assert.ok(candidate, "expected the fixture route to remain undocumented");
     assert.deepEqual(candidate.baseUrls, ["https://contoso-admin.sharepoint.com"]);
     assert.deepEqual(candidate.provenances, ["network"]);
   } finally {

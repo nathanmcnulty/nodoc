@@ -4544,6 +4544,38 @@
     },
     "operations": [
       {
+        "operationId": "SharePointAdmin.GetContentSecurityPolicyConfiguration",
+        "summary": "Get allowed script sources",
+        "method": "GET",
+        "path": "/_api/SPO.SPOContentSecurityPolicyConfiguration",
+        "operationContext": {
+          "surface": "Advanced > Script sources",
+          "workflows": [
+            "Inventory the script sources currently displayed by the SharePoint admin center.",
+            "Troubleshoot whether a source is present before evaluating a portal-side configuration change."
+          ],
+          "permissions": [
+            "Requires an authenticated SharePoint admin-center session with access to the Advanced settings surface."
+          ],
+          "troubleshooting": [
+            "An empty Items collection is a valid successful response and indicates that this tenant exposed no configured script sources to the current portal view.",
+            "Treat Source, Modified, and Manual as optional until a populated live response confirms their presence and nullability.",
+            "The related UpdateScriptSources POST is intentionally not documented because the current evidence does not include an intercepted or reversibly verified write."
+          ],
+          "headerProfile": "sharepoint-admin-read",
+          "provenance": [
+            {
+              "source": "authenticated-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Exact same-origin GET returned 200 application/json from the Script sources route in the August 2026 bounded capture.",
+                "Source, Modified, and Manual were confirmed as item members by the client bundle parser; the live Items array itself was empty."
+              ]
+            }
+          ]
+        }
+      },
+      {
         "operationId": "SharePointAdmin.GetStorageQuotas",
         "summary": "Get storage quotas",
         "method": "GET",

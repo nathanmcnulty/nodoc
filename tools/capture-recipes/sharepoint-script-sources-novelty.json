@@ -5,44 +5,11 @@
     "matchHosts": ["${tenant}-admin.sharepoint.com"],
     "matchPathPrefixes": ["/_layouts/15/online/AdminHome.aspx"]
   },
-  "noveltyFrontier": {
-    "approvalArtifact": "tools/frontier-approvals/sharepoint-script-sources.json",
-    "approvalDigest": "fb80ca815fc42b6dd5ab54ff61e51c64269d98165a5aaa02d6e92de7d15e4c44",
-    "baseline": "checked-in-spec-and-coverage-ledgers",
-    "baselineSignals": {
-      "queryMetadata": [],
-      "requestShapes": [],
-      "responseMetadata": [],
-      "responseShapes": [],
-      "routes": []
-    },
-    "reopenCondition": "The current Script sources page emits a confirmed same-origin JSON GET that is absent from the checked-in SharePoint Admin specification.",
-    "targets": [
-      {
-        "id": "script-sources-configuration-get",
-        "state": "SharePoint admin center Advanced > Script sources",
-        "evidenceLevel": "confirmed",
-        "expectedHostFamilies": [
-          "server-variable-admin.sharepoint.com",
-          "sharemylabs-admin.sharepoint.com"
-        ],
-        "expectedRoutes": [
-          "/_api/SPO.SPOContentSecurityPolicyConfiguration"
-        ],
-        "expectedInformationClasses": [
-          "new-route-family",
-          "response-shape",
-          "response-metadata"
-        ],
-        "expectedDocumentationObjectives": [
-          "response-example"
-        ],
-        "actionIndexes": [0, 1, 2],
-        "safeAction": "Navigate directly to the verified read-only Script sources inventory route and passively capture its configuration GET.",
-        "acceptanceKey": "script-sources-configuration-current-json",
-        "rationale": "The exact current GET is not modeled and its response contract is unknown."
-      }
-    ]
+  "noveltyStatus": {
+    "status": "satisfied",
+    "evidenceDisposition": "frontier-exhausted",
+    "reason": "A healthy authenticated capture observed the exact Script sources configuration GET and supplied a current 200 application/json response envelope, an empty Items example, and bundle-confirmed item field names.",
+    "nextRequirement": "Identify another exact unmodeled SharePoint route, query key, error status, media type, or non-empty response shape in a deterministic UI state before another novelty run; do not replay Script sources unchanged."
   },
   "matchHosts": ["${tenant}-admin.sharepoint.com"],
   "matchPathPrefixes": ["/_api/SPO.SPOContentSecurityPolicyConfiguration"],
