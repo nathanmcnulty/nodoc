@@ -1,0 +1,56 @@
+{
+  "portal": "Entra PIM",
+  "url": "https://entra.microsoft.com/#home",
+  "pageTarget": {
+    "matchHosts": ["entra.microsoft.com"],
+    "matchPathPrefixes": ["/"],
+    "bootstrap": {
+      "matchHosts": ["entra.microsoft.com"],
+      "matchPathnames": ["/"]
+    }
+  },
+  "matchHosts": ["entra.microsoft.com", "api.azrbac.mspim.azure.com"],
+  "matchPathPrefixes": ["/api"],
+  "captureScripts": false,
+  "noveltyStatus": {
+    "status": "satisfied",
+    "evidenceDisposition": "missing-immutable-state-provenance",
+    "reason": "Authenticated captures on the current portal shell exposed neither the retired PIM hrefs nor actionable Privileged Identity Management, Microsoft Entra roles, Assignments, or Expired assignments controls.",
+    "nextRequirement": "Record a stable current PIM entry route or action-bound control inventory before retrying this expired-assignment state; do not replay the retired href or absent label sequences unchanged."
+  },
+  "postActionSettleMs": 6000,
+  "settleMs": 7000,
+  "actions": [
+    {
+      "type": "click-contains",
+      "scope": "root",
+      "value": "Privileged Identity Management",
+      "required": true
+    },
+    "wait-ms=4000",
+    {
+      "type": "click-contains",
+      "value": "Microsoft Entra roles",
+      "required": true
+    },
+    "wait-ms=3000",
+    {
+      "type": "click-contains",
+      "value": "Assignments",
+      "required": true
+    },
+    "wait-ms=3000",
+    {
+      "type": "click-contains",
+      "value": "Expired assignments",
+      "required": true,
+      "highValue": true
+    },
+    "wait-ms=5000",
+    {
+      "type": "capture",
+      "value": "expired-role-assignments",
+      "required": true
+    }
+  ]
+}
