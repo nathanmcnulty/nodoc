@@ -106,6 +106,8 @@ tags:
     description: Operations relating to Microsoft Viva settings.
   - name: Miscellaneous
     description: Portal bootstrap, recommendations, directory sync errors, and other utility operations that support the admin portal infrastructure.
+  - name: Support
+    description: Read-only Microsoft 365 shared support and Concierge configuration operations.
   - name: Navigation
     description: Operations relating to portal navigation and UI preferences.
   - name: Features
@@ -136,7 +138,7 @@ x-tagGroups:
   - name: Users & communications
     tags: [UsersGroups, MessageCenter, Navigation]
   - name: Reporting & operations
-    tags: [Reports, Search, ServiceHealth, Features, Miscellaneous, Edge]
+    tags: [Reports, Search, ServiceHealth, Features, Miscellaneous, Support, Edge]
 externalDocs:
   description: Checked-in source specification and supporting modules.
   url: https://github.com/nathanmcnulty/nodoc/tree/main/specifications/nodoc-m365-admin/specification
@@ -733,6 +735,22 @@ paths:
     $ref: viva.yml#/paths/~1admin~1api~1viva~1modules
   /admin/api/viva/glint/lookupClient:
     $ref: viva.yml#/paths/~1admin~1api~1viva~1glint~1lookupClient
+
+  # Shared support and Concierge
+  /api/concierge/DefaultMinimizeSupportWidget:
+    $ref: support.yml#/paths/~1api~1concierge~1DefaultMinimizeSupportWidget
+  /api/concierge/FeatureSettings:
+    $ref: support.yml#/paths/~1api~1concierge~1FeatureSettings
+  /api/concierge/GetLazyLodingConfig:
+    $ref: support.yml#/paths/~1api~1concierge~1GetLazyLodingConfig
+  /api/concierge/IsInfrequentUser:
+    $ref: support.yml#/paths/~1api~1concierge~1IsInfrequentUser
+  /api/concierge/IsMCBubbleEnable:
+    $ref: support.yml#/paths/~1api~1concierge~1IsMCBubbleEnable
+  /api/concierge/ShowGuidedSupportJourney:
+    $ref: support.yml#/paths/~1api~1concierge~1ShowGuidedSupportJourney
+  /api/tenantauthorization/SupportVendors:
+    $ref: support.yml#/paths/~1api~1tenantauthorization~1SupportVendors
 
   # Miscellaneous
   /fd/dms/odata/C2RReleaseInfo:

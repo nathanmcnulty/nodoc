@@ -1,0 +1,258 @@
+components:
+  schemas:
+    SupportFeatureSettings:
+      type: object
+      required: [BizAssistPlacements, IsUpSellEnable]
+      properties:
+        BizAssistPlacements:
+          type: object
+          required: [CancelCount, TicketDetailsShow]
+          properties:
+            CancelCount:
+              type: integer
+            TicketDetailsShow:
+              type: boolean
+        IsUpSellEnable:
+          type: boolean
+    SupportLanguage:
+      type: object
+      required: [LCID, Name, NativeName]
+      properties:
+        LCID:
+          type: integer
+        Name:
+          type: string
+        NativeName:
+          type: string
+    SupportTimeZone:
+      type: object
+      required: [DisplayName, IanaTimeZone, Id, offset]
+      properties:
+        DisplayName:
+          type: string
+        IanaTimeZone:
+          type: string
+        Id:
+          type: string
+        offset:
+          type: string
+    LazyLoadingSupportConfig:
+      type: object
+      required: [CanTenantEscalateForSED, CanTenantEscalateToEngineer, SupportLanguages, TimeZones]
+      properties:
+        CanTenantEscalateForSED:
+          type: boolean
+        CanTenantEscalateToEngineer:
+          type: boolean
+        SupportLanguages:
+          type: array
+          items:
+            $ref: '#/components/schemas/SupportLanguage'
+        TimeZones:
+          type: array
+          items:
+            $ref: '#/components/schemas/SupportTimeZone'
+    DirectSupportVendor:
+      type: object
+      required: [CommunityLink, CountryCode, MoreInfo, PhoneNumber, TicketCreationLink]
+      properties:
+        CommunityLink:
+          type: string
+          format: uri
+        CountryCode:
+          type: string
+        MoreInfo:
+          type: string
+        PhoneNumber:
+          type: string
+        TicketCreationLink:
+          type: string
+          format: uri-reference
+    SupportVendorsResponse:
+      type: object
+      required: [DirectSupport, Partners]
+      properties:
+        DirectSupport:
+          $ref: '#/components/schemas/DirectSupportVendor'
+        Partners:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+
+paths:
+  /api/concierge/DefaultMinimizeSupportWidget:
+    get:
+      operationId: Support.GetDefaultMinimizeSupportWidget
+      summary: Get the default support-widget minimized state
+      tags: [Support]
+      servers:
+        - url: https://admin.microsoft.com
+      x-nodoc-operation-safety:
+        class: read-only
+        tenantMutationObserved: false
+      x-nodoc-evidence:
+        record: ../evidence/shared-support-concierge.json
+        responseShapeDigest: a5b031ab62bc416d720c0410d802ea46b910c4fbe85c50a946ccc658b74e677e
+      responses:
+        '200':
+          description: The default minimized state.
+          content:
+            application/json:
+              schema:
+                type: boolean
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+  /api/concierge/FeatureSettings:
+    get:
+      operationId: Support.GetFeatureSettings
+      summary: Get shared support feature settings
+      tags: [Support]
+      servers:
+        - url: https://admin.microsoft.com
+      x-nodoc-operation-safety:
+        class: read-only
+        tenantMutationObserved: false
+      x-nodoc-evidence:
+        record: ../evidence/shared-support-concierge.json
+        responseShapeDigest: f3b54acf7d5724b9acb5e15286c97166c8555c5cd7f12560ef31a4ce173f3037
+      responses:
+        '200':
+          description: Shared support feature settings.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupportFeatureSettings'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+  /api/concierge/GetLazyLodingConfig:
+    get:
+      operationId: Support.GetLazyLoadingConfig
+      summary: Get deferred support configuration
+      description: The portal path retains the observed `Loding` spelling.
+      tags: [Support]
+      servers:
+        - url: https://admin.microsoft.com
+      x-nodoc-operation-safety:
+        class: read-only
+        tenantMutationObserved: false
+      x-nodoc-evidence:
+        record: ../evidence/shared-support-concierge.json
+        responseShapeDigest: 24cf2f117870e26bc8f6bb26ad4ae68b88f6b0f7186ab4c0620a2d1544028f0b
+      responses:
+        '200':
+          description: Escalation capabilities, languages, and time zones.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LazyLoadingSupportConfig'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+  /api/concierge/IsInfrequentUser:
+    get:
+      operationId: Support.GetIsInfrequentUser
+      summary: Check whether the current user is an infrequent support user
+      tags: [Support]
+      servers:
+        - url: https://admin.microsoft.com
+      x-nodoc-operation-safety:
+        class: read-only
+        tenantMutationObserved: false
+      x-nodoc-evidence:
+        record: ../evidence/shared-support-concierge.json
+        responseShapeDigest: a5b031ab62bc416d720c0410d802ea46b910c4fbe85c50a946ccc658b74e677e
+      responses:
+        '200':
+          description: Infrequent-user determination.
+          content:
+            application/json:
+              schema:
+                type: boolean
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+  /api/concierge/IsMCBubbleEnable:
+    get:
+      operationId: Support.GetIsMicrosoftCloudBubbleEnabled
+      summary: Check whether the Microsoft Cloud support bubble is enabled
+      tags: [Support]
+      servers:
+        - url: https://admin.microsoft.com
+      x-nodoc-operation-safety:
+        class: read-only
+        tenantMutationObserved: false
+      x-nodoc-evidence:
+        record: ../evidence/shared-support-concierge.json
+        responseShapeDigest: a5b031ab62bc416d720c0410d802ea46b910c4fbe85c50a946ccc658b74e677e
+      responses:
+        '200':
+          description: Support-bubble feature state.
+          content:
+            application/json:
+              schema:
+                type: boolean
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+  /api/concierge/ShowGuidedSupportJourney:
+    get:
+      operationId: Support.GetShowGuidedSupportJourney
+      summary: Check whether to show the guided support journey
+      tags: [Support]
+      servers:
+        - url: https://admin.microsoft.com
+      x-nodoc-operation-safety:
+        class: read-only
+        tenantMutationObserved: false
+      x-nodoc-evidence:
+        record: ../evidence/shared-support-concierge.json
+        responseShapeDigest: a5b031ab62bc416d720c0410d802ea46b910c4fbe85c50a946ccc658b74e677e
+      responses:
+        '200':
+          description: Guided-journey feature state.
+          content:
+            application/json:
+              schema:
+                type: boolean
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
+
+  /api/tenantauthorization/SupportVendors:
+    get:
+      operationId: Support.GetSupportVendors
+      summary: Get support vendors available to the tenant
+      tags: [Support]
+      servers:
+        - url: https://admin.microsoft.com
+      x-nodoc-operation-safety:
+        class: read-only
+        tenantMutationObserved: false
+      x-nodoc-evidence:
+        record: ../evidence/shared-support-concierge.json
+        responseShapeDigest: 112a97427fbeb92c7be6ff5c392365d05963e117b50335a2fc42a211b02b735d
+      responses:
+        '200':
+          description: Direct Microsoft support details and partner entries.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupportVendorsResponse'
+        '401':
+          $ref: common.yml#/components/responses/Unauthorized
+        '403':
+          $ref: common.yml#/components/responses/Forbidden
