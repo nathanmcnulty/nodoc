@@ -552,6 +552,7 @@ export const coverageOverlayByTitle = {
     notes: [
       "The documented scope intentionally excludes generic login, telemetry, and Azure Resource Manager discovery calls even though the portal used them during startup.",
       "The Build and Builder pass confirmed live configuration and requirement-check reads without submitting any agent or plugin creation changes.",
+      "An August 2026 healthy deep pass exercised Home, Agents, Promptbooks, Manage workspaces, Usage monitoring, Security Store, Build, and Builder with no unresolved mutation and no new product API contract; thirteen same-origin /languages/strings/*.json bundles were retained as static feature-discovery telemetry rather than promoted as callable APIs.",
     ],
     openGaps: [
       "Builder save flows, agent setup submits, promptbook creation submits, and plugin configuration writes still need intercepted capture before promotion.",

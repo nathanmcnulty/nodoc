@@ -346,6 +346,39 @@ components:
           items:
             type: string
       additionalProperties: true
+    CapacityNotFoundResponse:
+      type: object
+      description: Error returned when the current workspace has no attached Security Copilot capacity.
+      properties:
+        message:
+          type: string
+        code:
+          type: string
+          example: NotFound
+        error:
+          type: object
+          properties:
+            message:
+              type: string
+            copilotErrorId:
+              type: string
+              example: capacityResourceNotFound
+            code:
+              type: string
+              example: NotFound
+            innerError:
+              type: object
+              properties:
+                message:
+                  nullable: true
+                date:
+                  type: string
+                correlationId:
+                  type: string
+            traceId:
+              type: string
+          additionalProperties: true
+      additionalProperties: true
     DataShareSettings:
       type: object
       description: Tenant-level data-sharing and workspace feature settings shown in Security Copilot administration views.
@@ -481,6 +514,9 @@ paths:
         this returned a contextual `404 NotFound` with `capacityResourceNotFound` because no capacity
         was attached to the workspace, which still confirms the route and its error contract.
       operationId: SecurityCopilotPortal.Auth.GetExpiryDate
+      x-nodoc-evidence:
+        record: ../evidence/security-copilot-refresh.json
+        responseShapeDigest: 16aead62746687dc4d4e9cc14732e4b678414eed1e09be6299d5589752ebb023
       responses:
         '200':
           description: Capacity-authentication expiry details returned successfully.
@@ -493,7 +529,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GenericObject'
+                $ref: '#/components/schemas/CapacityNotFoundResponse'
 
   /users/features:
     get:
