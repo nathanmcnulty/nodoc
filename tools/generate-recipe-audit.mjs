@@ -51,6 +51,7 @@ async function readRecipeMetrics(recipePath) {
     navigateActions: descriptors.filter((entry) => entry.type === "navigate").length,
     noveltyTargetCount: noveltyPlan?.measurements.frontierTargetCount ?? 0,
     noveltyTargetedActionCount: noveltyPlan?.measurements.frontierTargetedActionCount ?? 0,
+    blockedPrerequisiteCount: recipe.capturePrerequisite?.status === "blocked" ? 1 : 0,
     satisfiedNoveltyCount: recipe.noveltyStatus?.status === "satisfied" ? 1 : 0,
     rootClicks: descriptors.filter((entry) => entry.scope === "root" && entry.type.startsWith("click")).length,
     seededLinkActions: descriptors.filter((entry) => entry.type === "replay-seeded-links").length,
@@ -65,6 +66,7 @@ function sumRecipeMetrics(recipePaths, metricsByPath) {
     const metrics = metricsByPath.get(recipePath) ?? {};
     for (const key of [
       "actionCount",
+      "blockedPrerequisiteCount",
       "captureActions",
       "iframeClicks",
       "navigateActions",
@@ -86,6 +88,7 @@ function sumRecipeMetrics(recipePaths, metricsByPath) {
     return aggregate;
   }, {
     actionCount: 0,
+    blockedPrerequisiteCount: 0,
     captureActions: 0,
     iframeClicks: 0,
     navigateActions: 0,
@@ -103,8 +106,12 @@ function sumRecipeMetrics(recipePaths, metricsByPath) {
 function buildMissingAxes(summary) {
   const missing = [];
 
-  if (summary.recipeCount === 0) {
+  if (summary.recipeCount === 0 && !summary.derivedResearchSurface) {
     missing.push("recipe");
+  }
+
+  if (summary.derivedResearchSurface) {
+    return missing;
   }
 
   if (summary.recipeCount > 0 && summary.rootClicks + summary.navigateActions === 0) {
@@ -123,7 +130,12 @@ function buildMissingAxes(summary) {
     missing.push("interaction-checkpoints");
   }
 
-  if (summary.recipeCount > 0 && summary.noveltyTargetCount === 0 && summary.satisfiedNoveltyCount === 0) {
+  if (
+    summary.recipeCount > 0
+    && summary.noveltyTargetCount === 0
+    && summary.satisfiedNoveltyCount === 0
+    && summary.blockedPrerequisiteCount === 0
+  ) {
     missing.push("novelty-frontier");
   }
 
@@ -131,12 +143,20 @@ function buildMissingAxes(summary) {
 }
 
 function buildRecommendedNext(summary, specTitle, operationCount) {
+  if (summary.derivedResearchSurface) {
+    return "collect-through-owning-portals";
+  }
+
   if (summary.recipeCount === 0) {
     return "add-base-recipe";
   }
 
   if (summary.noveltyTargetCount === 0 && summary.satisfiedNoveltyCount > 0) {
     return "blocked-satisfied-await-new-approved-frontier";
+  }
+
+  if (summary.noveltyTargetCount === 0 && summary.blockedPrerequisiteCount > 0) {
+    return "blocked-prerequisite-await-new-approved-frontier";
   }
 
   if (summary.noveltyTargetCount === 0) {
@@ -162,6 +182,26 @@ function buildRecommendedNext(summary, specTitle, operationCount) {
   return "maintain-and-diff";
 }
 
+function buildEvaluationStatus(summary) {
+  if (summary.derivedResearchSurface) {
+    return "derived-current";
+  }
+
+  if (summary.satisfiedNoveltyCount > 0) {
+    return "satisfied";
+  }
+
+  if (summary.blockedPrerequisiteCount > 0) {
+    return "blocked-prerequisite";
+  }
+
+  if (summary.noveltyTargetCount > 0) {
+    return "active-frontier";
+  }
+
+  return "needs-frontier";
+}
+
 async function main() {
   const specInventory = await buildSpecInventory();
   const recorderSource = await readFile(
@@ -181,12 +221,19 @@ async function main() {
     .map((specRecord) => {
       const recipePathsForTitle = captureRecipesByTitle[specRecord.title] ?? [];
       const recipeSummary = sumRecipeMetrics(recipePathsForTitle, metricsByPath);
+      const derivedResearchSurface = specRecord.specId === "graph-research";
       const summary = {
         ...recipeSummary,
         crawlPriority: crawlMetadataByTitle[specRecord.title]?.crawlPriority ?? "unknown",
         missingAxes: buildMissingAxes({
           ...recipeSummary,
+          derivedResearchSurface,
           recipeCount: recipePathsForTitle.length,
+        }),
+        derivedResearchSurface,
+        evaluationStatus: buildEvaluationStatus({
+          ...recipeSummary,
+          derivedResearchSurface,
         }),
         nextPass: crawlMetadataByTitle[specRecord.title]?.nextPass ?? "unknown",
         operationCount: specRecord.operationCount,
@@ -195,6 +242,7 @@ async function main() {
         recipePaths: recipePathsForTitle,
         recommendedNext: buildRecommendedNext({
           ...recipeSummary,
+          derivedResearchSurface,
           recipeCount: recipePathsForTitle.length,
         }, specRecord.title, specRecord.operationCount),
         score: [
@@ -228,12 +276,21 @@ async function main() {
     seeded: row.seededLinkActions + row.seededRouteActions,
     checkpoints: row.captureActions + row.waitActions,
     novelty: row.noveltyTargetCount,
+    evaluation: row.evaluationStatus,
     next: row.recommendedNext,
     missing: row.missingAxes.join(", ") || "none",
   })));
 
-  const noRecipe = rows.filter((row) => row.recipeCount === 0).map((row) => row.title);
+  const noRecipe = rows
+    .filter((row) => row.recipeCount === 0 && !row.derivedResearchSurface)
+    .map((row) => row.title);
   console.log(`Missing checked-in recipes (${noRecipe.length}): ${noRecipe.join(", ") || "none"}`);
+
+  const unevaluated = rows.filter((row) => ["active-frontier", "needs-frontier"].includes(row.evaluationStatus));
+  console.log(`Specifications awaiting evaluation (${unevaluated.length}): ${unevaluated.map((row) => row.title).join(", ") || "none"}`);
+  if (process.argv.includes("--require-evaluated") && unevaluated.length > 0) {
+    process.exitCode = 1;
+  }
 }
 
 await main();
