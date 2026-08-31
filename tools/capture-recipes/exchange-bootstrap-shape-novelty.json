@@ -1,13 +1,13 @@
 {
   "portal": "Exchange",
-  "url": "https://admin.cloud.microsoft/exchange#/",
+  "url": "https://admin.exchange.microsoft.com/#/",
   "pageTarget": {
     "matchHosts": ["admin.exchange.microsoft.com", "admin.cloud.microsoft"],
     "matchPathPrefixes": ["/"]
   },
   "noveltyFrontier": {
     "approvalArtifact": "tools/frontier-approvals/exchange-beta-bootstrap-shapes.json",
-    "approvalDigest": "1d7fa2f13ac9a32cc38a523be9d5b7750c431df47835d79e6406f76b993054a8",
+    "approvalDigest": "419c85517cc4cb5448ba0030579b2839967a0447d028af91f3b2a7e330e07655",
     "baseline": "checked-in-spec-and-coverage-ledgers",
     "baselineSignals": {
       "queryMetadata": [],
@@ -20,13 +20,13 @@
     "targets": [
       {
         "id": "my-time-zone-response-shape",
-        "state": "Exchange admin center landing bootstrap",
+        "state": "Legacy-host Exchange admin center landing bootstrap",
         "evidenceLevel": "confirmed",
         "expectedHostFamilies": ["admin.exchange.microsoft.com", "exchange.admin.cloud.microsoft"],
         "expectedRoutes": ["/beta/TimeZone/ExchangeAdminCenter.MyTimeZone"],
         "expectedInformationClasses": ["response-shape", "response-metadata"],
         "actionIndexes": [0, 1, 2],
-        "safeAction": "Reload the authenticated Exchange landing page and passively capture bootstrap GET traffic.",
+        "safeAction": "Reload the authenticated legacy-host Exchange landing page and passively capture bootstrap GET traffic.",
         "acceptanceKey": "my-time-zone-nonempty-undocumented-shape",
         "rationale": "The current-user time-zone payload is modeled only as an opaque object."
       }
@@ -38,8 +38,8 @@
   "settleMs": 12000,
   "maxActions": 4,
   "actions": [
-    "reload=exchange-bootstrap",
+    "reload=exchange-legacy-host-bootstrap",
     "wait-ms=5000",
-    "capture=exchange-bootstrap"
+    "capture=exchange-legacy-host-bootstrap"
   ]
 }

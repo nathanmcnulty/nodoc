@@ -4,35 +4,35 @@
   "decision": "accept-bounded-frontier",
   "workerModel": "gpt-5.6-luna",
   "workerReasoning": "xhigh",
-  "approvedAt": "2026-08-30T08:10:37.0314443Z",
+  "approvedAt": "2026-08-31T08:42:26.0850259Z",
   "source": {
-    "head": "719a22668732f60be02da16dcf727c7a60027b5d",
+    "head": "221c2890d5359e9b074de435620bf8f77b53b7af",
     "artifactPath": "tools/frontier-approvals/exchange-beta-bootstrap-shapes-source.json",
-    "artifactSha256": "cb295fb55cb5c526476ff9c47d1488b3b6f5bbf5a78bc103f0691cf56209efdc",
-    "frontierSetId": "offline-frontier-set-73220d3b57818da51a22d203",
-    "frontierSetDigest": "73220d3b57818da51a22d203590c4d41b3717ad41340870fc8c5d09599da64d1"
+    "artifactSha256": "51406e4c243beb021660ad01da9532ffb608bc7bc505b633abf05edd9fadc217",
+    "frontierSetId": "offline-frontier-set-db3fafe13adeb9f4cb105c27",
+    "frontierSetDigest": "db3fafe13adeb9f4cb105c27ee51b052f8b8ca30e7632b1e6de9bdc52e84ff28"
   },
   "reviewEvidence": {
-    "artifactDirectory": "exchange-beta-compact-20260830T074806232Z",
-    "summarySha256": "e895b6e21409517c43beea77ae3e1ff135b8accfe7f1e83ca24da83c4ac04343",
-    "rawRequestsSha256": "9986ccf79c8b6a0f9a6d5979bc36f71a31b0dbed802eba561a5e39417d0c200d",
-    "reviewDisposition": "Fixed exchange.admin.cloud.microsoft proxy accepted; completed response-shape targets retired."
+    "artifactDirectory": "exchange-bootstrap-shape-20260831T082000Z",
+    "summarySha256": "9050e5cd09c02938683e142f3ed31fe452795b65d257a478f59da2d73c744aea",
+    "rawRequestsSha256": "7af9a165952db9601cd3e55945bfac36ba4e96dfd0234fae87e806602ece8644",
+    "reviewDisposition": "The current admin.cloud landing no longer emitted MyTimeZone; the authenticated legacy-host landing reload is accepted as the exact passive retry."
   },
-  "state": "Exchange admin center landing bootstrap",
-  "canonicalShellUrl": "https://admin.cloud.microsoft/exchange#/",
+  "state": "Legacy-host Exchange admin center landing bootstrap",
+  "canonicalShellUrl": "https://admin.exchange.microsoft.com/#/",
   "apiEvidenceScope": {
     "hosts": ["admin.exchange.microsoft.com", "exchange.admin.cloud.microsoft"],
     "pathPrefixes": ["/beta"]
   },
   "safeActions": [
-    "reload=exchange-bootstrap",
+    "reload=exchange-legacy-host-bootstrap",
     "wait-ms=5000",
-    "capture=exchange-bootstrap"
+    "capture=exchange-legacy-host-bootstrap"
   ],
   "acceptedItems": [
     {
-      "frontierId": "offline-frontier-0044742deabf0bfd8bc7723f",
-      "frontierDigest": "0044742deabf0bfd8bc7723f8e568db740724d1bc07b2312a7ab144e72a4db1e",
+      "frontierId": "offline-frontier-2a50b52781e574cb3007dfcf",
+      "frontierDigest": "2a50b52781e574cb3007dfcfb72079835a0c7eaf64e9f8fe960394743c16eb8c",
       "canonicalKey": "admin.exchange.microsoft.com GET /beta/TimeZone/ExchangeAdminCenter.MyTimeZone"
     }
   ],
