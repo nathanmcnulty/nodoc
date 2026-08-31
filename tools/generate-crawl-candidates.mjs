@@ -999,6 +999,7 @@ function classifyStaticAssetObservation(observation) {
   const prefixSignal = knownStaticAssetPrefixes.some((prefix) => lowerPath.startsWith(prefix.toLowerCase()));
   const strongSuffixSignal = /\.(?:resjson|css|map|woff2?|ttf|eot|png|jpe?g|gif|svg|ico)$/iu.test(normalizedPath);
   const scriptSuffixSignal = /\.(?:js|mjs)$/iu.test(normalizedPath);
+  const typescriptSourceSignal = /\.tsx?$/iu.test(normalizedPath);
   const hashedAssetSignal = /(?:^|\/)[^/]*(?:[.-])[a-f0-9]{8,}(?:\.[^/]+)?$/iu.test(normalizedPath);
   const mimeSignal = /^(?:text\/css|application\/(?:javascript|x-javascript|font-woff)|text\/javascript|font\/|image\/)/u.test(contentType);
   const bundleOnlySignal = observation.evidence === "bundle-discovered" && !observation.method;
@@ -1009,6 +1010,7 @@ function classifyStaticAssetObservation(observation) {
     ...(prefixSignal ? ["known-static-prefix"] : []),
     ...(strongSuffixSignal ? ["static-suffix"] : []),
     ...(scriptSuffixSignal ? ["script-suffix"] : []),
+    ...(typescriptSourceSignal ? ["typescript-source-suffix"] : []),
     ...(hashedAssetSignal ? ["hashed-asset-name"] : []),
     ...(mimeSignal ? ["static-content-type"] : []),
     ...(bundleOnlySignal ? ["bundle-only-no-api-method"] : []),
@@ -1019,6 +1021,7 @@ function classifyStaticAssetObservation(observation) {
     || (prefixSignal && (scriptSuffixSignal || hashedAssetSignal || mimeSignal))
     || (mimeSignal && (scriptSuffixSignal || hashedAssetSignal))
     || (bundleOnlySignal && (strongSuffixSignal || scriptSuffixSignal || hashedAssetSignal))
+    || (bundleOnlySignal && typescriptSourceSignal)
   );
   return { evidence, isStatic };
 }

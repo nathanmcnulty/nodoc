@@ -718,6 +718,37 @@ test("static-looking suffix never suppresses confirmed live API transport", asyn
   }
 });
 
+test("bundle-only TypeScript module paths are suppressed without hiding confirmed API transport", async () => {
+  const artifactDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-typescript-source-noise-"));
+  try {
+    await Promise.all([
+      writeJson(path.join(artifactDir, "bundle-candidates.json"), {
+        candidates: [{
+          candidatePath: "/config/environment.ts",
+          method: null,
+          sourceFile: "feature.js",
+        }],
+      }),
+      writeJson(path.join(artifactDir, "api-records.json"), [{
+        method: "GET",
+        mimeType: "application/json",
+        path: "/api/export.ts",
+        seenOnPages: ["export"],
+      }]),
+    ]);
+    const result = await runAnalyze("teams", artifactDir);
+    assert.ok(result.candidateQueue.suppressedCandidates.some((candidate) => (
+      candidate.normalizedPath === "/config/environment.ts"
+      && candidate.suppressionNote.includes("Known static portal asset")
+    )));
+    assert.ok(result.candidateQueue.candidates.some((candidate) => (
+      candidate.normalizedPath === "/api/export.ts"
+    )));
+  } finally {
+    await rm(artifactDir, { force: true, recursive: true });
+  }
+});
+
 test("adjacent Power Platform-like evidence is tenant-safe and never promotion-active", async () => {
   const artifactDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-power-platform-scope-"));
   const tenantId = "5e2f94d1-730e-46f3-b567-e79c3946ab11";

@@ -160,6 +160,15 @@ components:
       schema:
         type: string
         example: AggregationEndTime ge 2026-03-05T00:00:00.000Z
+    PageSize:
+      name: pageSize
+      in: query
+      required: false
+      description: Maximum number of user records requested for the current page.
+      schema:
+        type: integer
+        minimum: 1
+        example: 20
     Count:
       name: Count
       in: query
@@ -427,14 +436,91 @@ components:
           items:
             $ref: '#/components/schemas/GenericArrayItem'
       additionalProperties: true
+    TeamsAssignedPlan:
+      type: object
+      description: Service-plan assignment included with a Teams user record.
+      properties:
+        assignedTimestamp:
+          type: string
+          format: date-time
+        capability:
+          type: string
+        capabilityStatus:
+          type: string
+        isInGracePeriod:
+          type: boolean
+        serviceInstance:
+          type: string
+        servicePlanId:
+          type: string
+          format: uuid
+        subscribedPlanId:
+          type: string
+          format: uuid
+      additionalProperties: true
     TeamsUserRecord:
       type: object
       description: Teams user record returned by the interfaces records service.
       properties:
+        accountType:
+          type: string
         assignedPlans:
           type: array
           items:
-            $ref: '#/components/schemas/GenericArrayItem'
+            $ref: '#/components/schemas/TeamsAssignedPlan'
+        city:
+          type: string
+        dataProviderErrors:
+          $ref: '#/components/schemas/GenericObject'
+        directoryStatus:
+          type: string
+        displayName:
+          type: string
+        enterpriseVoiceEnabled:
+          type: boolean
+        featureTypes:
+          type: array
+          items:
+            type: string
+        givenName:
+          type: string
+        interpretedUserType:
+          type: string
+        objectId:
+          type: string
+          format: uuid
+        state:
+          type: string
+        surname:
+          type: string
+        teamsUpgradeNotificationsEnabled:
+          type: string
+        teamsUpgradePolicyIsReadOnly:
+          type: string
+        telephoneNumbers:
+          type: array
+          description: Telephone-number entries. The current capture returned empty arrays, so the item contract remains unconfirmed.
+          items: {}
+        usageLocation:
+          type: string
+        userPrincipalName:
+          type: string
+          format: email
+        userType:
+          type: string
+      additionalProperties: true
+    TeamsUsersCollectionResponse:
+      type: object
+      description: Paged Teams user inventory returned by the interfaces records service.
+      required: [users]
+      properties:
+        '@nextLink':
+          type: string
+          description: Service-provided continuation link for the next page, when more records are available.
+        users:
+          type: array
+          items:
+            $ref: '#/components/schemas/TeamsUserRecord'
       additionalProperties: true
     TelephoneNumberAggregationResponse:
       type: object
@@ -1413,14 +1499,92 @@ paths:
       summary: List Teams user records
       description: |
         User inventory route observed from `Users > Manage users` before drilling into per-user detail
-        pages.
+        pages. The portal requests a projected, ordered page that excludes soft-deleted records and
+        follows the service-provided `@nextLink` when another page is available.
+      parameters:
+        - name: $select
+          in: query
+          required: false
+          description: Comma-separated projection used by the Manage users inventory.
+          schema:
+            type: string
+            example: OwnerUrn,EnterpriseVoiceEnabled,DirectoryStatus,FeatureTypes,UserType,AccountType,state,city,surname,givenName,telephoneNumbers
+        - name: $orderby
+          in: query
+          required: false
+          description: OData ordering clause used by the inventory.
+          schema:
+            type: string
+            example: displayName
+        - name: $filter
+          in: query
+          required: false
+          description: OData filter used to exclude soft-deleted records from the active inventory.
+          schema:
+            type: string
+            example: SoftDeletionTimeStamp eq null
+        - $ref: '#/components/parameters/PageSize'
+      x-nodoc-operation-context:
+        surface: Users > Manage users
+        workflows:
+          - Inventory Teams-enabled users and inspect directory, licensing, voice, and location state.
+          - Troubleshoot why a user is missing from the active Teams administration inventory.
+        headerProfile: teams-service-bearer
+        pagination:
+          style: link
+          requestParameters: [pageSize]
+          responseFields: ['@nextLink', users]
+          notes:
+            - The portal requested 20 records and received a continuation link; follow the returned link instead of manufacturing a token.
+        availability:
+          level: permission-conditional
+          notes:
+            - Field presence varies with user type, assigned services, and data-provider availability.
+        troubleshooting:
+          - The portal filters `SoftDeletionTimeStamp eq null`; omit or change that filter deliberately when investigating deleted users.
+          - An empty `telephoneNumbers` array does not establish the shape of populated telephone-number entries.
+          - Preserve the returned continuation link and projection when reproducing portal pagination behavior.
+        provenance:
+          - source: authenticated-portal-capture
+            confidence: high
+            notes:
+              - A bounded August 2026 Manage users capture returned 200 with a non-empty collection and no mutation requests.
       responses:
         '200':
           description: Teams user inventory payload.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GenericObject'
+                $ref: '#/components/schemas/TeamsUsersCollectionResponse'
+              example:
+                '@nextLink': '{continuation-link}'
+                users:
+                  - accountType: string
+                    assignedPlans:
+                      - assignedTimestamp: '2026-08-31T00:00:00Z'
+                        capability: string
+                        capabilityStatus: string
+                        isInGracePeriod: false
+                        serviceInstance: string
+                        servicePlanId: 11111111-1111-4111-8111-111111111111
+                        subscribedPlanId: 22222222-2222-4222-8222-222222222222
+                    city: Example City
+                    dataProviderErrors: {}
+                    directoryStatus: string
+                    displayName: Example Administrator
+                    enterpriseVoiceEnabled: false
+                    featureTypes: [string]
+                    givenName: Example
+                    interpretedUserType: string
+                    objectId: 33333333-3333-4333-8333-333333333333
+                    state: Example State
+                    surname: Administrator
+                    teamsUpgradeNotificationsEnabled: string
+                    teamsUpgradePolicyIsReadOnly: string
+                    telephoneNumbers: []
+                    usageLocation: US
+                    userPrincipalName: administrator@example.invalid
+                    userType: string
         '401':
           $ref: '#/components/responses/Unauthorized'
   /Skype.User/users/{userId}/policies:
