@@ -483,7 +483,7 @@ async function selectRecipe(specRecord, explicitRecipe, { requireNovelty = false
     ?? null;
 }
 
-function expandRecipeVariables(value, variables) {
+export function expandRecipeVariables(value, variables) {
   if (typeof value === "string") {
     return value.replace(/\$\{([^}]+)\}/gu, (_match, name) => {
       if (!Object.prototype.hasOwnProperty.call(variables, name)) {
@@ -501,7 +501,7 @@ function expandRecipeVariables(value, variables) {
   return value;
 }
 
-function recipeVariables(recipe, cliVariables) {
+export function recipeVariables(recipe, cliVariables) {
   const variables = { ...(recipe.variables ?? {}) };
   for (const specification of cliVariables ?? []) {
     const separator = specification.indexOf("=");
@@ -511,12 +511,16 @@ function recipeVariables(recipe, cliVariables) {
   return variables;
 }
 
+export function prepareRecipeForRun(sourceRecipe, cliVariables) {
+  return expandRecipeVariables(
+    sourceRecipe,
+    recipeVariables(sourceRecipe, cliVariables),
+  );
+}
+
 async function inspectRecipeSafety(recipePath, args = {}) {
   const sourceRecipe = JSON.parse(await readFile(recipePath, "utf8"));
-  const recipe = expandRecipeVariables(
-    sourceRecipe,
-    recipeVariables(sourceRecipe, args.variables),
-  );
+  const recipe = prepareRecipeForRun(sourceRecipe, args.variables);
   const activeOperationPlan = validateOperationAuthorization({
     activeOperations: recipe.activeOperations ?? [],
     actions: recipe.actions ?? [],
@@ -1142,7 +1146,8 @@ async function main() {
   let noveltyPlan;
   let recipeSafety;
   try {
-    selectedRecipe = JSON.parse(await readFile(recipePath, "utf8"));
+    const sourceRecipe = JSON.parse(await readFile(recipePath, "utf8"));
+    selectedRecipe = prepareRecipeForRun(sourceRecipe, args.variables);
     validateSelectedRecipeTarget(selectedRecipe);
     recipeSafety = await inspectRecipeSafety(recipePath, args);
     if (!recipeSafety.safe) {
@@ -1358,7 +1363,8 @@ async function main() {
     if (error?.code !== "ENOENT" && !(error instanceof SyntaxError)) throw error;
   }
   try {
-    recipe = JSON.parse(await readFile(recipePath, "utf8"));
+    const sourceRecipe = JSON.parse(await readFile(recipePath, "utf8"));
+    recipe = prepareRecipeForRun(sourceRecipe, args.variables);
   } catch (error) {
     if (error?.code !== "ENOENT" && !(error instanceof SyntaxError)) throw error;
   }

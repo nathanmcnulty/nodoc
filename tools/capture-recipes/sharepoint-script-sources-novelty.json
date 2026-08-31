@@ -1,0 +1,24 @@
+{
+  "portal": "SharePoint",
+  "url": "https://${tenant}-admin.sharepoint.com/_layouts/15/online/AdminHome.aspx#/home",
+  "pageTarget": {
+    "matchHosts": ["${tenant}-admin.sharepoint.com"],
+    "matchPathPrefixes": ["/_layouts/15/online/AdminHome.aspx"]
+  },
+  "noveltyStatus": {
+    "status": "satisfied",
+    "evidenceDisposition": "frontier-exhausted",
+    "reason": "A healthy authenticated capture observed the exact Script sources configuration GET and supplied a current 200 application/json response envelope, an empty Items example, and bundle-confirmed item field names.",
+    "nextRequirement": "Identify another exact unmodeled SharePoint route, query key, error status, media type, or non-empty response shape in a deterministic UI state before another novelty run; do not replay Script sources unchanged."
+  },
+  "matchHosts": ["${tenant}-admin.sharepoint.com"],
+  "matchPathPrefixes": ["/_api/SPO.SPOContentSecurityPolicyConfiguration"],
+  "postActionSettleMs": 10000,
+  "settleMs": 12000,
+  "maxActions": 4,
+  "actions": [
+    "navigate=https://${tenant}-admin.sharepoint.com/_layouts/15/online/AdminHome.aspx#/contentSecurityPolicy",
+    "wait-ms=6000",
+    "capture=script-sources"
+  ]
+}

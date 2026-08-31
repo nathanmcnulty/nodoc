@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "specId": "sharepoint-admin",
+  "observationKind": "read-only-browser-reconnaissance",
+  "observedAt": "2026-08-30T09:38:20Z",
+  "state": "SharePoint admin center Advanced > Script sources",
+  "canonicalShellUrl": "https://{tenant}-admin.sharepoint.com/_layouts/15/online/AdminHome.aspx#/contentSecurityPolicy",
+  "confirmedReadCandidates": [
+    {
+      "candidateId": "sharepoint-script-sources-configuration-get",
+      "hostFamily": "server-variable-admin.sharepoint.com",
+      "method": "GET",
+      "normalizedPath": "/_api/SPO.SPOContentSecurityPolicyConfiguration",
+      "evidence": "confirmed",
+      "documentationStatus": "undocumented",
+      "evidenceIds": [
+        "browser-cdp-response-200-application-json"
+      ],
+      "provenance": [
+        "read-only-browser-network-observation"
+      ],
+      "reasons": [
+        "exact-current-ui-state",
+        "not-present-in-checked-in-specification"
+      ]
+    }
+  ],
+  "constraints": [
+    "Reconnaissance authorizes a dedicated passive capture only; it is not promotion evidence.",
+    "The live tenant hostname and identifiers are represented symbolically.",
+    "No settings were changed and no add-source workflow was opened."
+  ]
+}
