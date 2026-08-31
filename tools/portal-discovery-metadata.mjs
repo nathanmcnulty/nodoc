@@ -677,6 +677,7 @@ export const captureRecipesByTitle = {
     "tools/capture-recipes/entra-iga-novelty.json",
   ],
   "Entra PIM": [
+    "tools/capture-recipes/entra-pim-expired-assignments-enrichment.json",
     "tools/capture-recipes/entra-pim-novelty.json",
     "tools/capture-recipes/entra-pim-deep.json",
     "tools/capture-recipes/entra-pim-seeded-replay.json",
