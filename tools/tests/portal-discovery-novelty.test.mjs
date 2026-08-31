@@ -127,6 +127,118 @@ test("novelty evidence normalizes OpenAPI server base paths before route matchin
   ]);
 });
 
+test("confirmed probe actions enrich documented routes even when candidate filtering omits them", () => {
+  const probeRecipe = {
+    url: "https://api.example.test",
+    actions: [{ type: "probe-get", value: "/items/current", required: true }, "capture=known-item"],
+    noveltyFrontier: {
+      approvalDigest: "e".repeat(64),
+      baseline: "checked-in-openapi",
+      baselineSignals: { queryMetadata: [], requestShapes: [], responseMetadata: [], responseShapes: [], routes: [] },
+      reopenCondition: "The known route lacks a response schema and example.",
+      targets: [{
+        acceptanceKey: "known-probe-response",
+        actionIndexes: [0, 1],
+        evidenceLevel: "probed",
+        expectedHostFamilies: ["api.example.test"],
+        expectedInformationClasses: ["response-shape"],
+        expectedDocumentationObjectives: ["response-example"],
+        expectedRoutes: ["/items/current"],
+        id: "known-probe-response",
+        rationale: "Capture the live response contract.",
+        safeAction: "Issue one exact same-origin GET.",
+        state: "Known item",
+      }],
+    },
+  };
+  const operations = deriveNoveltyBaseline({
+    servers: [{ url: "https://api.example.test" }],
+    paths: { "/items/current": { get: { responses: { 200: { description: "Success" } } } } },
+  }).operations;
+  const assessment = assess({
+    recipe: probeRecipe,
+    actionResults: [{
+      actionIndex: 0,
+      page: "probe",
+      required: true,
+      result: {
+        body: '{"id":"redacted","enabled":true}',
+        contentType: "application/json; charset=utf-8",
+        outcome: "confirmed",
+        status: 200,
+        url: "https://api.example.test/items/current",
+      },
+      type: "probe-get",
+      value: "/items/current",
+    }, { actionIndex: 1, page: "capture", result: { capturedOnly: true }, type: "capture", value: "known-item" }],
+    apiRecords: [],
+    candidateHandoff: {},
+  }, operations);
+  assert.equal(assessment.status, "productive");
+  assert.equal(assessment.targets[0].matchedRecordCount, 1);
+  assert.equal(assessment.targets[0].responseShapeSignals.length, 1);
+  assert.deepEqual(assessment.targets[0].documentationSignals, [
+    "api.example.test GET /items/current response-example",
+  ]);
+});
+
+test("typed probe errors can satisfy an error-example frontier without becoming request failures", () => {
+  const errorRecipe = {
+    url: "https://api.example.test",
+    actions: [{ type: "probe-get", value: "/items/retired", required: true }, "capture=retired-item"],
+    noveltyFrontier: {
+      approvalDigest: "f".repeat(64),
+      baseline: "checked-in-openapi",
+      baselineSignals: { queryMetadata: [], requestShapes: [], responseMetadata: [], responseShapes: [], routes: [] },
+      reopenCondition: "The endpoint may now be retired and lacks an error example.",
+      targets: [{
+        acceptanceKey: "retired-error",
+        actionIndexes: [0, 1],
+        evidenceLevel: "probed",
+        expectedHostFamilies: ["api.example.test"],
+        expectedInformationClasses: ["response-metadata"],
+        expectedDocumentationObjectives: ["error-example"],
+        expectedRoutes: ["/items/retired"],
+        id: "retired-error",
+        rationale: "Capture a typed removal response.",
+        safeAction: "Issue one exact same-origin GET.",
+        state: "Retired item",
+      }],
+    },
+  };
+  const operations = deriveNoveltyBaseline({
+    servers: [{ url: "https://api.example.test" }],
+    paths: { "/items/retired": { get: { responses: { 200: { description: "Success" } } } } },
+  }).operations;
+  const assessment = assess({
+    recipe: errorRecipe,
+    actionResults: [{
+      actionIndex: 0,
+      page: "probe",
+      required: true,
+      result: {
+        body: '{"error":{"code":"Gone","message":"This route was retired."}}',
+        contentType: "application/json",
+        outcome: "http-error",
+        status: 410,
+        url: "https://api.example.test/items/retired",
+      },
+      type: "probe-get",
+      value: "/items/retired",
+    }, { actionIndex: 1, page: "capture", result: { capturedOnly: true }, type: "capture", value: "retired-item" }],
+    apiRecords: [],
+    candidateHandoff: {},
+  }, operations);
+  assert.equal(assessment.status, "productive");
+  assert.deepEqual(assessment.targets[0].documentationSignals, [
+    "api.example.test GET /items/retired error-example:410",
+  ]);
+  assert.deepEqual(assessment.targets[0].responseMetadataSignals, [
+    "api.example.test GET /items/retired mime:application/json",
+    "api.example.test GET /items/retired status:410",
+  ]);
+});
+
 const emptyDerivedBaseline = { source: "checked-in-openapi", operations: [] };
 
 function planFor(value, operations = []) {

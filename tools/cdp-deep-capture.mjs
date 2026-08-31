@@ -3909,6 +3909,7 @@ async function main() {
   }
 
   async function runProbeGetAction(action, pageLabel, actionIndex) {
+    const evaluationFailures = [];
     for (const [attempt, [sessionId, targetInfo]] of getOrderedSessions(action.scope).entries()) {
       try {
         attributionRegistry.setSessionContext(sessionId, currentContext);
@@ -3983,11 +3984,19 @@ async function main() {
           targetTitle: targetInfo?.targetTitle ?? null,
           targetType: targetInfo?.targetType ?? "page",
         };
-      } catch {
+      } catch (error) {
+        evaluationFailures.push({
+          failure: "probe-evaluation-failed",
+          failureDetail: error instanceof Error ? error.message : String(error),
+          sessionId: sessionId ?? "root",
+          targetId: targetInfo?.targetId ?? null,
+          targetType: targetInfo?.targetType ?? "page",
+        });
         // Try another DOM-capable target.
       }
     }
     return {
+      evaluationFailures,
       outcome: "probe-failed",
       url: action.value,
     };

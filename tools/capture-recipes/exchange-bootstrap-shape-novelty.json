@@ -1,45 +1,29 @@
 {
   "portal": "Exchange",
-  "url": "https://admin.cloud.microsoft/exchange#/",
+  "url": "https://admin.exchange.microsoft.com/#/",
   "pageTarget": {
     "matchHosts": ["admin.exchange.microsoft.com", "admin.cloud.microsoft"],
     "matchPathPrefixes": ["/"]
   },
-  "noveltyFrontier": {
-    "approvalArtifact": "tools/frontier-approvals/exchange-beta-bootstrap-shapes.json",
-    "approvalDigest": "1d7fa2f13ac9a32cc38a523be9d5b7750c431df47835d79e6406f76b993054a8",
-    "baseline": "checked-in-spec-and-coverage-ledgers",
-    "baselineSignals": {
-      "queryMetadata": [],
-      "requestShapes": [],
-      "responseMetadata": [],
-      "responseShapes": [],
-      "routes": []
-    },
-    "reopenCondition": "The confirmed current-user time-zone GET still has an opaque additionalProperties response schema and no current-host response-shape evidence.",
-    "targets": [
-      {
-        "id": "my-time-zone-response-shape",
-        "state": "Exchange admin center landing bootstrap",
-        "evidenceLevel": "confirmed",
-        "expectedHostFamilies": ["admin.exchange.microsoft.com", "exchange.admin.cloud.microsoft"],
-        "expectedRoutes": ["/beta/TimeZone/ExchangeAdminCenter.MyTimeZone"],
-        "expectedInformationClasses": ["response-shape", "response-metadata"],
-        "actionIndexes": [0, 1, 2],
-        "safeAction": "Reload the authenticated Exchange landing page and passively capture bootstrap GET traffic.",
-        "acceptanceKey": "my-time-zone-nonempty-undocumented-shape",
-        "rationale": "The current-user time-zone payload is modeled only as an opaque object."
-      }
-    ]
+  "noveltyStatus": {
+    "status": "satisfied",
+    "evidenceDisposition": "frontier-exhausted",
+    "reason": "Two authenticated landing captures omitted MyTimeZone, then one approved same-origin GET returned 200 application/json with a concrete TimeZone entity; the current contract and a sanitized response example are now promoted.",
+    "nextRequirement": "Identify another exact unmodeled Exchange route, query key, error status, media type, or response shape in a different deterministic state; do not repeat the dashboard landing or MyTimeZone probe unchanged."
   },
   "matchHosts": ["admin.exchange.microsoft.com", "exchange.admin.cloud.microsoft"],
   "matchPathPrefixes": ["/beta"],
   "postActionSettleMs": 10000,
   "settleMs": 12000,
-  "maxActions": 4,
+  "maxActions": 5,
   "actions": [
-    "reload=exchange-bootstrap",
-    "wait-ms=5000",
-    "capture=exchange-bootstrap"
+    "reload=exchange-legacy-host-bootstrap",
+    {
+      "type": "probe-get",
+      "value": "/beta/TimeZone/ExchangeAdminCenter.MyTimeZone",
+      "required": true
+    },
+    "wait-ms=3000",
+    "capture=exchange-legacy-host-bootstrap"
   ]
 }

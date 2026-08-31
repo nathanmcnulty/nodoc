@@ -73,7 +73,8 @@ export function actionResultSucceeded(actionResult) {
     );
   }
   if (type === "probe-get") {
-    return result.outcome === "confirmed";
+    return ["auth-blocked", "confirmed", "http-error", "not-found"].includes(result.outcome)
+      && Number.isInteger(result.status);
   }
   if (type === "replay-seeded-links" || type === "replay-seeded-routes") {
     return Number(result.replayedCount) > 0;

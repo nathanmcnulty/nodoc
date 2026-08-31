@@ -563,6 +563,33 @@ test("confirmed API candidates retain their observed origin and provenance", asy
   }
 });
 
+test("named OData function arguments are parameterized without changing fixed booleans", async () => {
+  const artifactDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-odata-function-arguments-"));
+  try {
+    await writeJson(path.join(artifactDir, "api-records.json"), [
+      {
+        method: "GET",
+        path: "/beta/Nodoc.AutoForwarding(StartDate=1787559346481,EndDate=1788164146481)",
+        seenOnPages: ["exchange-home"],
+      },
+      {
+        method: "GET",
+        path: "/beta/Nodoc.FixedBoolean(Archive=false)",
+        seenOnPages: ["mailbox"],
+      },
+    ]);
+    const result = await runAnalyze("exchange-beta", artifactDir);
+    assert.ok(result.candidateQueue.candidates.some(({ normalizedPath }) => (
+      normalizedPath === "/beta/Nodoc.AutoForwarding(StartDate={startDate},EndDate={endDate})"
+    )));
+    assert.ok(result.candidateQueue.candidates.some(({ normalizedPath }) => (
+      normalizedPath === "/beta/Nodoc.FixedBoolean(Archive=false)"
+    )));
+  } finally {
+    await rm(artifactDir, { force: true, recursive: true });
+  }
+});
+
 test("analyze emits a sanitized actionable handoff for Purview-like evidence", async () => {
   const artifactDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-purview-handoff-"));
   const tenantId = "2f1c7bb8-2d31-4c2a-9f86-6778c9382bbc";
@@ -1521,55 +1548,26 @@ test("completed Entra and Autopatch frontiers block before browser allocation", 
   }
 });
 
-test("Exchange selects the approved exact-route bootstrap shape frontier", async () => {
-  const { stdout } = await execFileAsync(process.execPath, [
-    path.join(repoRoot, "tools", "run-portal-discovery.mjs"),
-    "--portal",
-    "exchange-beta",
-    "--phase",
-    "plan",
-    "--require-novelty",
-    "--json",
-  ], { cwd: repoRoot });
-  const result = JSON.parse(stdout);
-  assert.equal(result.status, "planned");
-  assert.equal(result.brief.recipe, "tools/capture-recipes/exchange-bootstrap-shape-novelty.json");
-  assert.equal(result.noveltyPlan.targets.length, 1);
-  assert.equal(result.noveltyPlan.targets[0].id, "my-time-zone-response-shape");
-  assert.deepEqual(result.noveltyPlan.targets[0].expectedHostFamilies, [
-    "admin.exchange.microsoft.com",
-    "exchange.admin.cloud.microsoft",
-  ]);
-  assert.equal(result.workerPacket.assignmentType, "capture");
-  assert.deepEqual(result.workerPacket.role, {
-    model: "gpt-5.6-luna",
-    reasoning: "low",
-  });
-  assert.equal(result.workerPacket.bindings.noveltyPlanSha256.length, 64);
-  assert.equal(result.workerPacket.bindings.recipeSha256.length, 64);
-  assert.equal(result.workerPacket.packetSha256.length, 64);
-  assert.ok(result.workerPacket.execution.driverArgs.includes("--require-novelty"));
-  assert.deepEqual(
-    result.workerPacket.execution.driverArgs.slice(
-      result.workerPacket.execution.driverArgs.indexOf("--model"),
-      result.workerPacket.execution.driverArgs.indexOf("--model") + 4,
-    ),
-    ["--model", "gpt-5.6-luna", "--reasoning", "low"],
+test("Exchange blocks its completed exact-route bootstrap frontier", async () => {
+  await assert.rejects(
+    execFileAsync(process.execPath, [
+      path.join(repoRoot, "tools", "run-portal-discovery.mjs"),
+      "--portal",
+      "exchange-beta",
+      "--phase",
+      "plan",
+      "--require-novelty",
+      "--json",
+    ], { cwd: repoRoot }),
+    (error) => {
+      const result = JSON.parse(error.stderr);
+      return result.status === "blocked"
+        && result.brief.recipe === "tools/capture-recipes/exchange-bootstrap-shape-novelty.json"
+        && result.blocker.code === "novelty-frontier-invalid"
+        && /prior novelty frontier is satisfied/.test(result.blocker.detail)
+        && /do not repeat the dashboard landing or MyTimeZone probe unchanged/.test(result.blocker.detail);
+    },
   );
-  assert.ok(result.workerPacket.execution.driverArgs.includes("--endpoint"));
-  assert.ok(result.workerPacket.execution.driverArgs.includes("--cdp-endpoint"));
-  assert.ok(result.workerPacket.execution.verificationArgs.includes("--worker-packet"));
-  assert.ok(result.workerPacket.execution.verificationArgs.includes("plan"));
-  assert.deepEqual(result.actionBudget.categories, {
-    expandedReplayActions: 0,
-    mandatoryOrchestrationActions: 1,
-    recipeActions: 3,
-  });
-  assert.equal(result.actionBudget.maxActions, 4);
-  assert.deepEqual(result.noveltyPlan.actions
-    .filter((action) => action.classification === "frontier-targeted")
-    .map((action) => action.type), ["reload", "wait-ms", "capture"]);
-  assert.ok(result.noveltyPlan.targets.every((target) => target.expectedRoutes.length === 1 && target.expectedRoutePrefixes.length === 0));
 });
 
 test("M365 Apps Inventory plan accounts for its mandatory orchestration action", async () => {

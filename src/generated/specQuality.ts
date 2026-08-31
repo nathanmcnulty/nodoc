@@ -172,7 +172,7 @@ export const generatedSpecDataByTitle = {
     "specPath": "specifications/nodoc-exchange-beta/specification/openapi.yml",
     "specSourceUrl": "https://github.com/nathanmcnulty/nodoc/tree/main/specifications/nodoc-exchange-beta/specification",
     "specDownloadUrl": "https://raw.githubusercontent.com/nathanmcnulty/nodoc/main/specifications/nodoc-exchange-beta/specification/openapi.yml",
-    "operationCount": 61,
+    "operationCount": 62,
     "tagCount": 9,
     "tagGroupCount": 2,
     "ungroupedTagCount": 0,
@@ -190,14 +190,14 @@ export const generatedSpecDataByTitle = {
     "blankDescriptionCount": 0,
     "publicLiveCaptureDescriptionCount": 0,
     "headerProfileCount": 0,
-    "operationContextCount": 0,
+    "operationContextCount": 2,
     "requestExampleCount": 0,
-    "successResponseExampleCount": 2,
-    "evidenceMentionCount": 2,
+    "successResponseExampleCount": 4,
+    "evidenceMentionCount": 10,
     "maturity": {
-      "label": "Growing",
-      "tone": "warning",
-      "description": "Solid structure with examples, but still meaningful debt to reduce."
+      "label": "Advanced",
+      "tone": "success",
+      "description": "Low placeholder debt with multiple response examples."
     }
   },
   "Microsoft Graph Research": {

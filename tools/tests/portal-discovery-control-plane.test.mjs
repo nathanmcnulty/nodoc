@@ -46,7 +46,15 @@ test("materialized portfolio and plan are stable and serialize shared capture le
 test("applied capture plans bind the ledger to the checked-in recipe bytes", async () => {
   const manifest = await buildPortfolioManifest();
   const exchange = manifest.portals.find((portal) => portal.specId === "exchange-beta");
-  const plan = compileOrchestrationPlan({ ...manifest, portals: [exchange] });
+  const activeExchange = {
+    ...exchange,
+    novelty: {
+      approvalDigest: "a".repeat(64),
+      reopenCondition: "A synthetic active frontier exercises exact recipe-byte binding.",
+      status: "active",
+    },
+  };
+  const plan = compileOrchestrationPlan({ ...manifest, portals: [activeExchange] });
   const capture = plan.assignments.find((assignment) => assignment.type === "capture");
   const temporary = await mkdtemp(path.join(os.tmpdir(), "nodoc-control-enqueue-"));
   try {
@@ -62,7 +70,7 @@ test("applied capture plans bind the ledger to the checked-in recipe bytes", asy
   }
 });
 
-test("compile-plan --apply enqueues assignments and returns an applied receipt", async () => {
+test("compile-plan --apply returns an empty receipt when every capture frontier is blocked", async () => {
   const temporary = await mkdtemp(path.join(os.tmpdir(), "nodoc-control-cli-"));
   const ledgerPath = path.join(temporary, "ledger.jsonl");
   try {
@@ -76,9 +84,9 @@ test("compile-plan --apply enqueues assignments and returns an applied receipt",
     ], { cwd: repoRoot });
     const receipt = JSON.parse(stdout);
     assert.equal(receipt.mode, "applied");
-    assert.equal(receipt.enqueue.count > 0, true);
+    assert.equal(receipt.enqueue.count, 0);
     assert.equal(receipt.enqueue.assignments.length, receipt.enqueue.count);
-    assert.match(await readFile(ledgerPath, "utf8"), /"eventType":"assignment-created"/u);
+    await assert.rejects(readFile(ledgerPath, "utf8"), /ENOENT/u);
   } finally {
     await rm(temporary, { force: true, recursive: true });
   }
@@ -137,11 +145,15 @@ test("controller honors only canonical portal-owned recipe pins", async () => {
   }
 });
 
-test("controller prefers an active frontier over a satisfied companion recipe", async () => {
+test("controller records the completed Exchange frontier as satisfied", async () => {
   const manifest = await buildPortfolioManifest();
   const exchange = manifest.portals.find((portal) => portal.specId === "exchange-beta");
   assert.equal(exchange?.recipe, "tools/capture-recipes/exchange-bootstrap-shape-novelty.json");
-  assert.equal(exchange?.novelty.status, "active");
+  assert.equal(exchange?.novelty.status, "satisfied");
+  assert.equal(exchange?.novelty.evidenceDisposition, "frontier-exhausted");
+  const plan = compileOrchestrationPlan({ ...manifest, portals: [exchange] }, { budgets: { maxCaptures: 1 } });
+  assert.equal(plan.assignments.some((entry) => entry.type === "capture"), false);
+  assert.ok(plan.assignments.find((entry) => entry.type === "review")?.blockers.includes("novelty-satisfied"));
 });
 
 test("Entra PIM exposes missing immutable state provenance as its prebrowser blocker", async () => {

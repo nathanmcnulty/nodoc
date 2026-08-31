@@ -1,5 +1,38 @@
 [
   {
+    "title": "Exchange",
+    "specId": "exchange-beta",
+    "specPath": "specifications/nodoc-exchange-beta/specification/openapi.yml",
+    "nodocRoute": null,
+    "nodocCategory": null,
+    "operations": [
+      {
+        "operationId": "ExchangeBeta.Bootstrap.GetMyTimeZone",
+        "summary": "Get the current user's Exchange time zone",
+        "method": "GET",
+        "path": "/beta/TimeZone/ExchangeAdminCenter.MyTimeZone",
+        "source": "authenticated Exchange admin center exact same-origin GET",
+        "browsedPages": [
+          "https://admin.exchange.microsoft.com/#/"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "ExchangeBeta.MailFlow.GetTdpAutoForwardingReport",
+        "summary": "Get TDP auto-forwarding report data",
+        "method": "GET",
+        "path": "/beta/MailflowReportTDP/ExchangeAdminCenter.AutoForwarding(StartDate={startDate},EndDate={endDate})",
+        "source": "authenticated Microsoft 365 admin shell Exchange dashboard",
+        "browsedPages": [
+          "https://admin.cloud.microsoft/exchange#/"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      }
+    ]
+  },
+  {
     "title": "Intune Autopatch",
     "specId": "intune-autopatch",
     "specPath": "specifications/nodoc-intune-autopatch/specification/openapi.yml",

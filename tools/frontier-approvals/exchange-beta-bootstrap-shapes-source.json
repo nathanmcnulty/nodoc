@@ -2,11 +2,11 @@
   "schemaVersion": 1,
   "specId": "exchange-beta",
   "projection": "approved-only",
-  "frontierSetId": "offline-frontier-set-73220d3b57818da51a22d203",
-  "frontierSetDigest": "73220d3b57818da51a22d203590c4d41b3717ad41340870fc8c5d09599da64d1",
+  "frontierSetId": "offline-frontier-set-9947b8af319876f7edc78d5f",
+  "frontierSetDigest": "9947b8af319876f7edc78d5f6eafe607d72d9e16df3ba8d1d7d5acd94f80bb20",
   "measurements": {
-    "approvedCount": 1,
-    "candidateCount": 222,
+    "approvedCount": 2,
+    "candidateCount": 221,
     "countsByGapClass": {
       "error-behavior": 61,
       "operation-context": 61,
@@ -30,6 +30,37 @@
       "schemaVersion": 1,
       "specId": "exchange-beta",
       "hostFamily": "admin.exchange.microsoft.com",
+      "gapClass": "response-example",
+      "canonicalKey": "admin.exchange.microsoft.com GET /beta/TimeZone/ExchangeAdminCenter.MyTimeZone",
+      "evidence": [
+        "openapi-documentation-inventory"
+      ],
+      "sourceRefs": [
+        "checked-in-openapi"
+      ],
+      "requiredActionState": {
+        "actionIndexes": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "documentationObjectives": [
+          "error-example",
+          "response-example"
+        ],
+        "state": "Legacy-host Exchange admin center landing bootstrap",
+        "targetId": "my-time-zone-response-shape"
+      },
+      "status": "approved",
+      "blockers": [],
+      "frontierId": "offline-frontier-6a1ffd573ae7ee988d2383ee",
+      "frontierDigest": "6a1ffd573ae7ee988d2383eedc713f96b39bc0c82f4ca45128db2503e849ad50"
+    },
+    {
+      "schemaVersion": 1,
+      "specId": "exchange-beta",
+      "hostFamily": "admin.exchange.microsoft.com",
       "gapClass": "response-shape",
       "canonicalKey": "admin.exchange.microsoft.com GET /beta/TimeZone/ExchangeAdminCenter.MyTimeZone",
       "evidence": [
@@ -42,15 +73,20 @@
         "actionIndexes": [
           0,
           1,
-          2
+          2,
+          3
         ],
-        "state": "Exchange admin center landing bootstrap",
+        "documentationObjectives": [
+          "error-example",
+          "response-example"
+        ],
+        "state": "Legacy-host Exchange admin center landing bootstrap",
         "targetId": "my-time-zone-response-shape"
       },
       "status": "approved",
       "blockers": [],
-      "frontierId": "offline-frontier-0044742deabf0bfd8bc7723f",
-      "frontierDigest": "0044742deabf0bfd8bc7723f8e568db740724d1bc07b2312a7ab144e72a4db1e"
+      "frontierId": "offline-frontier-db2e47ac3b36da80a45f8328",
+      "frontierDigest": "db2e47ac3b36da80a45f83285721c4db14f2fedbc3dcc70f49e840d13ca9f9cf"
     }
   ]
 }
