@@ -1500,6 +1500,27 @@ test("portal driver prefers the bounded Defender deep recipe", async () => {
   assert.equal(result.brief.recipe, "tools/capture-recipes/defender-deep.json");
 });
 
+test("Defender Graph inventory blocks until a new product state is defined", async () => {
+  await assert.rejects(
+    execFileAsync(process.execPath, [
+      path.join(repoRoot, "tools", "run-portal-discovery.mjs"),
+      "--portal",
+      "defender-xdr",
+      "--recipe",
+      "tools/capture-recipes/defender-graph-inventory.json",
+      "--phase",
+      "plan",
+      "--json",
+    ], { cwd: repoRoot }),
+    (error) => {
+      const result = JSON.parse(error.stderr);
+      return result.status === "blocked"
+        && result.blocker.code === "capture-prerequisite-missing"
+        && /non-baseline \/apiproxy\/msgraph operation/.test(result.blocker.remediation);
+    },
+  );
+});
+
 test("portal driver blocks a satisfied Entra IGA novelty frontier before browser allocation", async () => {
   await assert.rejects(
     execFileAsync(process.execPath, [
@@ -1536,6 +1557,27 @@ test("Entra B2C blocks its exhausted frontier before browser allocation", async 
       return result.status === "blocked"
         && result.blocker.code === "novelty-frontier-invalid"
         && /prior novelty frontier is satisfied/.test(result.blocker.detail);
+    },
+  );
+});
+
+test("satisfied parameterized recipes block before unresolved variables", async () => {
+  await assert.rejects(
+    execFileAsync(process.execPath, [
+      path.join(repoRoot, "tools", "run-portal-discovery.mjs"),
+      "--portal",
+      "sharepoint-admin",
+      "--phase",
+      "plan",
+      "--require-novelty",
+      "--json",
+    ], { cwd: repoRoot }),
+    (error) => {
+      const result = JSON.parse(error.stderr);
+      return result.status === "blocked"
+        && result.blocker.code === "novelty-frontier-invalid"
+        && /prior novelty frontier is satisfied/.test(result.blocker.detail)
+        && !/Recipe variable/.test(result.blocker.detail);
     },
   );
 });
