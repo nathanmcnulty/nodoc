@@ -477,8 +477,11 @@ function walkArtifact(value, handler, context = {}) {
   const nextContext = mergePageContext(context, value);
   handler(value, nextContext);
 
-  for (const child of Object.values(value)) {
-    walkArtifact(child, handler, nextContext);
+  for (const [key, child] of Object.entries(value)) {
+    walkArtifact(child, handler, {
+      ...nextContext,
+      embeddedGraphBatch: nextContext.embeddedGraphBatch === true || key === "graphBatch",
+    });
   }
 }
 
@@ -546,6 +549,9 @@ function collectObservations(data, sourceFile, evidence) {
   const observations = [];
 
   walkArtifact(data, (value, context) => {
+    if (context.embeddedGraphBatch === true) {
+      return;
+    }
     if (!shouldTreatAsObservation(value)) {
       return;
     }
