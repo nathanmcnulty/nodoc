@@ -7,7 +7,7 @@
   },
   "noveltyFrontier": {
     "approvalArtifact": "tools/frontier-approvals/sharepoint-script-sources.json",
-    "approvalDigest": "2c1d72ffdd86277dec350d9a51831a1270a089223ff7870e2c62d3e34021c0e6",
+    "approvalDigest": "fb80ca815fc42b6dd5ab54ff61e51c64269d98165a5aaa02d6e92de7d15e4c44",
     "baseline": "checked-in-spec-and-coverage-ledgers",
     "baselineSignals": {
       "queryMetadata": [],
@@ -37,26 +37,20 @@
         "expectedDocumentationObjectives": [
           "response-example"
         ],
-        "actionIndexes": [0, 1, 2, 3, 4],
-        "safeAction": "Open the read-only Script sources inventory and passively capture its configuration GET.",
+        "actionIndexes": [0, 1, 2],
+        "safeAction": "Navigate directly to the verified read-only Script sources inventory route and passively capture its configuration GET.",
         "acceptanceKey": "script-sources-configuration-current-json",
         "rationale": "The exact current GET is not modeled and its response contract is unknown."
       }
     ]
   },
-  "frontierControlReadiness": {
-    "actionIndexes": [0, 2],
-    "timeoutMs": 15000
-  },
   "matchHosts": ["${tenant}-admin.sharepoint.com"],
   "matchPathPrefixes": ["/_api/SPO.SPOContentSecurityPolicyConfiguration"],
   "postActionSettleMs": 10000,
   "settleMs": 12000,
-  "maxActions": 6,
+  "maxActions": 4,
   "actions": [
-    "click-contains-root=Advanced",
-    "wait-ms=2000",
-    "click-label-root=Script sources",
+    "navigate=https://${tenant}-admin.sharepoint.com/_layouts/15/online/AdminHome.aspx#/contentSecurityPolicy",
     "wait-ms=6000",
     "capture=script-sources"
   ]
