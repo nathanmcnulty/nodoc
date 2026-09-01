@@ -135,6 +135,33 @@ test("Teams catalog and quality count operations rather than path keys", async (
   assert.match(teamsCatalogSeed ?? "", /operations: 100/u);
 });
 
+test("Defender sibling specs separate native and MTO wrapper ownership under one category", async () => {
+  const defender = await loadBundledSpecification(
+    fileURLToPath(new URL(
+      "../../specifications/nodoc-defender-xdr/specification/openapi.yml",
+      import.meta.url,
+    )),
+  );
+  const mto = await loadBundledSpecification(
+    fileURLToPath(new URL(
+      "../../specifications/nodoc-defender-mto/specification/openapi.yml",
+      import.meta.url,
+    )),
+  );
+
+  assert.equal(defender.info.title, "Defender XDR");
+  assert.equal(mto.info.title, "Defender XDR (MTO)");
+  assert.equal(defender.info["x-nodoc-category"], "Defender");
+  assert.equal(mto.info["x-nodoc-category"], "Defender");
+  assert.equal(Object.keys(defender.paths).some((path) => path.startsWith("/mtoapi/")), false);
+  assert.equal(mto.paths["/mtoapi/mtp/incidentDashboard/Dashboard/ActiveIncidentsSummary"].get.operationId, "MultiTenant.GetActiveIncidentsSummary");
+  assert.equal(mto.paths["/mtoapi/mtp/rbacManagementApi/rbac/machine_groups"].get["x-nodoc-shared-semantics"].operationId, "EndpointDevices.GetMachineGroups");
+  assert.deepEqual(validateOperationIds(mto, "Defender XDR (MTO)"), {
+    operationCount: 19,
+    operationIds: 19,
+  });
+});
+
 test("operation ID validation rejects missing and duplicate IDs", () => {
   assert.throws(
     () => validateOperationIds({ paths: {

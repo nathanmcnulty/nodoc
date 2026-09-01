@@ -257,6 +257,16 @@ summaries and header names may be retained; header and body values may not.
 Preserve sanitized batch-wrapper status, member-status, parse, and malformed-
 member diagnostics so a failed or invalid batch is not erased merely because it
 produced no usable child operation.
+
+Treat alternate portal views as first-class provenance boundaries when they
+change operator scope, routing context, or response envelopes. For example,
+`mto.security.microsoft.com` is the Defender multi-tenant organization view:
+classify each observed operation as MTO-wrapped, native Defender shared, or
+shared-shell/telemetry before assigning ownership. Put `/mtoapi/` wrapper
+contracts in the Defender XDR (MTO) spec, keep native Defender routes in
+Defender XDR, and cross-reference shared semantics instead of duplicating an
+operation merely because both portals emit it.
+
 For a Graph-focused inventory recipe, declare `graphTelemetryObjectives` with a
 tenant-safe checked-in operation-key baseline and minimum new, enriched, batch,
 proxy, and checkpoint counts as appropriate. The run is productive only when the verified contract

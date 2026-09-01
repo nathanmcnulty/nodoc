@@ -648,6 +648,13 @@ paths:
         version. Observed live on the Exposure Management overview page.
       operationId: ExposureManagement.QueryAttackSurface
       tags: [Exposure Management]
+      x-nodoc-operation-safety:
+        class: read-only-query
+        tenantMutationObserved: false
+      x-nodoc-evidence:
+        record: ../evidence/defender-attack-map-refresh.json
+        requestShapeDigest: 569f856263def34eafe19f938938d4c7433da944bb89fe4582a250e8fef77391
+        responseShapeDigest: 242714bab12b0b3855ec908abbf4377d08796758f8d4ebceb0c4184c09f0cfaa
       requestBody:
         required: true
         content:
@@ -706,6 +713,18 @@ paths:
                     items:
                       type: object
                       description: Query result row — shape depends on the KQL projection.
+                      additionalProperties: true
+              example:
+                totalRecords: 1
+                count: 1
+                skipToken: null
+                data:
+                  - cloudAssets: 0
+                    criticalCloudAssets: 0
+                    criticalIdentityAssets: 0
+                    criticalVmAssets: 0
+                    identityAssets: 0
+                    vmAssets: 0
         '401':
           $ref: common.yml#/components/responses/Unauthorized
         '403':

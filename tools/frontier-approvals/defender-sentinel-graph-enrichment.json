@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "specId": "defender-xdr",
+  "decision": "accept-bounded-frontier",
+  "workerModel": "gpt-5.6-luna",
+  "workerReasoning": "xhigh",
+  "approvedAt": "2026-08-31T23:00:00.000Z",
+  "source": {
+    "head": "1bbc0f3974defd07e96e17c9f9e2b795628bd03e",
+    "artifactPath": "tools/frontier-approvals/defender-sentinel-graph-enrichment-source.json",
+    "artifactSha256": "b36a2086f142ee438cb1b1e4fc8666b77c676620838ce3453dc370e2250f93c8",
+    "frontierSetId": "offline-frontier-set-9754ff7ac249a3949bb7f8bd",
+    "frontierSetDigest": "9754ff7ac249a3949bb7f8bdbce91cb307e9af5bc474477e7b0e64e9fde1234d"
+  },
+  "state": "Defender Sentinel Graph readiness",
+  "canonicalShellUrl": "https://security.microsoft.com/graphs",
+  "apiEvidenceScope": {
+    "hosts": ["security.microsoft.com", "mto.security.microsoft.com"],
+    "pathPrefixes": ["/apiproxy/securityplatform/graphs", "/apiproxy/securityplatform/sentinelgraph"]
+  },
+  "safeActions": [
+    "navigate=graphs",
+    "wait-ms=12000",
+    "capture=sentinel-graph-readiness",
+    "wait-ms=8000",
+    "capture=sentinel-graph-status-retry"
+  ],
+  "acceptedItems": [
+    {"frontierId":"offline-frontier-4d6b268cdf30cd16025e3dc2","frontierDigest":"4d6b268cdf30cd16025e3dc220ce0781ea64fa56aa224c34537f64148776d638","canonicalKey":"mto.security.microsoft.com POST /securityplatform/sentinelgraph/provisioning/checkTenant"},
+    {"frontierId":"offline-frontier-31c8c52f3a86decf8de55c87","frontierDigest":"31c8c52f3a86decf8de55c8783fe585e1f44e824550d66add265a50ce0025e90","canonicalKey":"mto.security.microsoft.com POST /securityplatform/sentinelgraph/provisioning/checkTenant"},
+    {"frontierId":"offline-frontier-a84de0cd96c302ccca765ede","frontierDigest":"a84de0cd96c302ccca765ede54b670c81b50cd42e472653fe3d1305c613216d7","canonicalKey":"mto.security.microsoft.com GET /securityplatform/graphs/graph-instances"},
+    {"frontierId":"offline-frontier-686b17fbf07e80609365cdd7","frontierDigest":"686b17fbf07e80609365cdd77c19eab837da158ef423bb51356a29ead3e89877","canonicalKey":"mto.security.microsoft.com GET /securityplatform/sentinelgraph/catalog/tables"},
+    {"frontierId":"offline-frontier-1af152a1cecb60dac2876f5e","frontierDigest":"1af152a1cecb60dac2876f5e9b7db9cc4d2d4dccba7dfd331a4184d2be831a14","canonicalKey":"mto.security.microsoft.com POST /securityplatform/sentinelgraph/provisioning/checkTenant"},
+    {"frontierId":"offline-frontier-270e4f111e5e9df19d9c85b7","frontierDigest":"270e4f111e5e9df19d9c85b7f990392a6582f9c9c4c9f8cf97a1854fa1273ff1","canonicalKey":"mto.security.microsoft.com POST /securityplatform/sentinelgraph/provisioning/checkTenant"}
+  ],
+  "deferredItemCount": 2685,
+  "blockedItemCount": 2685,
+  "constraints": [
+    "Observe-only passive navigation and capture",
+    "Never select Turn on graph, Set up graph, Enable connector, Start trial, or Purchase",
+    "Do not provision, create, or modify graph instances or connectors",
+    "Sanitize status, headers, identifiers, and response bodies"
+  ]
+}

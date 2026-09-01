@@ -901,6 +901,12 @@ paths:
         such as OS, health status, and risk level.
       operationId: EndpointDevices.GetDeviceTotals
       tags: [Endpoint Devices]
+      x-nodoc-operation-safety:
+        class: read-only
+        tenantMutationObserved: false
+      x-nodoc-evidence:
+        record: ../evidence/defender-attack-map-refresh.json
+        responseShapeDigest: 02f72f6dbfb14652f3bccffaa36ac992e0134268e3228c8a4503673be46230a0
       parameters:
         - name: hideLowFidelityDevices
           in: query
@@ -920,8 +926,40 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                description: pending - device totals data
+                type: array
+                items:
+                  type: object
+                  required:
+                    - DeviceCount
+                    - IsActiveOnboarded
+                    - IsCriticalAsset
+                    - IsInternetFacing
+                    - IsLowFidelity
+                    - IsNewDevice
+                  properties:
+                    AssetValue: {type: string, nullable: true}
+                    DeviceCategory: {type: string, nullable: true}
+                    DeviceCount: {type: integer}
+                    ExposureScore: {type: string}
+                    IsActiveOnboarded: {type: boolean}
+                    IsCriticalAsset: {type: boolean}
+                    IsInternetFacing: {type: boolean}
+                    IsLowFidelity: {type: boolean}
+                    IsNewDevice: {type: boolean}
+                    OnboardingStatus: {type: string}
+                    RiskScore: {type: string}
+              example:
+                - AssetValue: null
+                  DeviceCategory: null
+                  DeviceCount: 1
+                  ExposureScore: None
+                  IsActiveOnboarded: true
+                  IsCriticalAsset: false
+                  IsInternetFacing: false
+                  IsLowFidelity: false
+                  IsNewDevice: false
+                  OnboardingStatus: Onboarded
+                  RiskScore: None
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 

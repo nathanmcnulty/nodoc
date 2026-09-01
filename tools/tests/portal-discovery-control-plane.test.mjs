@@ -70,10 +70,13 @@ test("applied capture plans bind the ledger to the checked-in recipe bytes", asy
   }
 });
 
-test("compile-plan --apply returns an empty receipt when every capture frontier is blocked", async () => {
+test("compile-plan --apply does not fabricate captures for a fully evaluated portfolio", async () => {
   const temporary = await mkdtemp(path.join(os.tmpdir(), "nodoc-control-cli-"));
   const ledgerPath = path.join(temporary, "ledger.jsonl");
   try {
+    const manifest = await buildPortfolioManifest();
+    const plan = compileOrchestrationPlan(manifest);
+    const expectedCaptures = plan.assignments.filter((assignment) => assignment.type === "capture");
     const { stdout } = await execFileAsync(process.execPath, [
       path.join(repoRoot, "tools", "portal-discovery-control-plane.mjs"),
       "compile-plan",
@@ -84,9 +87,9 @@ test("compile-plan --apply returns an empty receipt when every capture frontier 
     ], { cwd: repoRoot });
     const receipt = JSON.parse(stdout);
     assert.equal(receipt.mode, "applied");
-    assert.equal(receipt.enqueue.count, 0);
-    assert.equal(receipt.enqueue.assignments.length, receipt.enqueue.count);
-    await assert.rejects(readFile(ledgerPath, "utf8"), /ENOENT/u);
+    assert.equal(receipt.enqueue.count, expectedCaptures.length);
+    assert.equal(expectedCaptures.length, 0);
+    assert.deepEqual(receipt.enqueue.assignments, []);
   } finally {
     await rm(temporary, { force: true, recursive: true });
   }

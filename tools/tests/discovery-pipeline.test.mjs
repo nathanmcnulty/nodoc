@@ -364,6 +364,46 @@ test("seeded retry resumes the exact terminal incomplete ledger attempt", async 
   assert.equal(retryArgs.attemptNumber, 2);
 });
 
+test("failed analysis can be retried against the same completed immutable capture", async (t) => {
+  const rootDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-ledger-analysis-retry-"));
+  const ledgerPath = path.join(rootDir, "ledger.jsonl");
+  const artifactDir = path.join(rootDir, "artifacts");
+  await mkdir(artifactDir);
+  const recipePath = path.join(repoRoot, "tools", "capture-recipes", "entra-b2c-deep.json");
+  const args = {
+    noLedger: false,
+    phase: "analyze",
+    endpoint: "https://entra.microsoft.com",
+    ledgerPath,
+    profile: "bounded",
+    workerId: "worker",
+    model: "gpt-5.6-luna",
+    reasoning: "low",
+    priority: "normal",
+    artifacts: artifactDir,
+    captureSupervisionTimeoutMs: 1000,
+    supervisionTimeoutMs: 1000,
+  };
+  const spec = { specId: "entra-b2c", title: "Entra B2C" };
+  const first = await prepareLedgerAttempt(args, spec, recipePath);
+  await updateAttempt({
+    ledgerPath,
+    assignmentId: first.assignmentId,
+    attemptNumber: 1,
+    status: "failed",
+    captureComplete: true,
+    captureStatus: "complete",
+    blocker: { code: "pipeline-failed" },
+  });
+
+  const retryArgs = { ...args };
+  const resumed = await prepareLedgerAttempt(retryArgs, spec, recipePath);
+  assert.equal(resumed.latestAttempt.attemptNumber, 2);
+  assert.equal(resumed.latestAttempt.status, "running");
+  assert.equal(resumed.latestAttempt.artifactDir, "[external]/artifacts");
+  assert.equal(retryArgs.attemptNumber, 2);
+});
+
 test("legacy analysis remains explicitly opt-out from ledger dispatch", async (t) => {
   const artifactDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-ledger-legacy-"));
   try {
@@ -1525,7 +1565,7 @@ test("portal driver prefers the bounded Defender deep recipe", async () => {
   assert.equal(result.brief.recipe, "tools/capture-recipes/defender-deep.json");
 });
 
-test("Defender Graph inventory blocks pending exact review before browser allocation", async () => {
+test("Defender Graph inventory requires runtime identity variables and then blocks its satisfied frontier", async () => {
   await assert.rejects(
     execFileAsync(process.execPath, [
       path.join(repoRoot, "tools", "run-portal-discovery.mjs"),
@@ -1540,8 +1580,8 @@ test("Defender Graph inventory blocks pending exact review before browser alloca
     (error) => {
       const result = JSON.parse(error.stderr);
       return result.status === "blocked"
-        && result.blocker.code === "capture-prerequisite-missing"
-        && /gpt-5\.6-luna/.test(result.blocker.remediation);
+        && result.blocker.code === "recipe-invalid"
+        && /variable "aad" was not provided/.test(result.blocker.detail);
     },
   );
 
@@ -1558,13 +1598,14 @@ test("Defender Graph inventory blocks pending exact review before browser alloca
       "tenantId=22222222-2222-2222-2222-222222222222",
       "--phase",
       "plan",
+      "--require-novelty",
       "--json",
     ], { cwd: repoRoot }),
     (error) => {
       const result = JSON.parse(error.stderr);
       return result.status === "blocked"
-        && result.blocker.code === "capture-prerequisite-missing"
-        && /gpt-5\.6-luna/.test(result.blocker.remediation);
+        && result.blocker.code === "novelty-frontier-invalid"
+        && /prior novelty frontier is satisfied/.test(result.blocker.detail);
     },
   );
 });

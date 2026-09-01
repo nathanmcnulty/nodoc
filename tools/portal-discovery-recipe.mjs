@@ -72,19 +72,29 @@ export function resolvePageTargetBootstrapCriteria(recipe) {
   if (!Array.isArray(bootstrap.matchHosts) || bootstrap.matchHosts.length === 0) {
     throw new Error("pageTarget.bootstrap.matchHosts must include at least one host.");
   }
-  if (!Array.isArray(bootstrap.matchPathnames) || bootstrap.matchPathnames.length === 0) {
-    throw new Error("pageTarget.bootstrap.matchPathnames must include at least one pathname.");
+  const matchPathnames = bootstrap.matchPathnames ?? [];
+  const matchPathPrefixes = bootstrap.matchPathPrefixes ?? [];
+  if (!Array.isArray(matchPathnames) || !Array.isArray(matchPathPrefixes) || (matchPathnames.length === 0 && matchPathPrefixes.length === 0)) {
+    throw new Error("pageTarget.bootstrap must include at least one pathname or path prefix.");
   }
   if (bootstrap.matchHosts.some((host) => typeof host !== "string" || !host.trim())) {
     throw new Error("pageTarget.bootstrap.matchHosts must contain non-empty strings.");
   }
-  if (bootstrap.matchPathnames.some((pathname) => (
+  if (matchPathnames.some((pathname) => (
     typeof pathname !== "string"
     || !pathname.startsWith("/")
     || pathname.includes("?")
     || pathname.includes("#")
   ))) {
     throw new Error("pageTarget.bootstrap.matchPathnames must contain clean absolute pathnames.");
+  }
+  if (matchPathPrefixes.some((prefix) => (
+    typeof prefix !== "string"
+    || !prefix.startsWith("/")
+    || prefix.includes("?")
+    || prefix.includes("#")
+  ))) {
+    throw new Error("pageTarget.bootstrap.matchPathPrefixes must contain clean absolute path prefixes.");
   }
 
   const featureCriteria = resolvePageTargetCriteria(recipe);
@@ -95,7 +105,8 @@ export function resolvePageTargetBootstrapCriteria(recipe) {
 
   return {
     matchHosts: [...bootstrap.matchHosts].map((host) => host.toLowerCase()),
-    matchPathnames: [...bootstrap.matchPathnames],
+    ...(matchPathnames.length > 0 ? { matchPathnames: [...matchPathnames] } : {}),
+    ...(matchPathPrefixes.length > 0 ? { matchPathPrefixes: [...matchPathPrefixes] } : {}),
   };
 }
 
@@ -145,9 +156,17 @@ export function validateRecipeTargetMetadata(recipe) {
     throw new Error("recipe entry URL does not match pageTarget host/path criteria.");
   }
   const bootstrapCriteria = resolvePageTargetBootstrapCriteria(recipe);
+  const bootstrapPathMatches = !bootstrapCriteria
+    || (
+      (bootstrapCriteria.matchPathnames?.length ?? 0) === 0
+        || bootstrapCriteria.matchPathnames.includes(recipeUrl.pathname)
+    ) && (
+      (bootstrapCriteria.matchPathPrefixes?.length ?? 0) === 0
+        || bootstrapCriteria.matchPathPrefixes.some((prefix) => recipeUrl.pathname.startsWith(prefix))
+    );
   if (bootstrapCriteria && (
     !bootstrapCriteria.matchHosts.includes(recipeUrl.hostname.toLowerCase())
-    || !bootstrapCriteria.matchPathnames.includes(recipeUrl.pathname)
+    || !bootstrapPathMatches
   )) {
     throw new Error("declared root URL does not match pageTarget.bootstrap host/path criteria.");
   }

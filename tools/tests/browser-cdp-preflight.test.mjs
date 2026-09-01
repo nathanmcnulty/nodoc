@@ -148,6 +148,43 @@ test("aligns one authenticated same-portal bootstrap target without changing its
   }
 });
 
+test("aligns a redirected portal landing to an allowlisted parameterized feature URL", async () => {
+  const current = target({ title: "Home - Microsoft Defender", url: "https://security.microsoft.com/homepage?tid=current" });
+  const restore = installWebSocket({
+    evaluate: () => ({ title: current.title, url: current.url, bodyText: "Home" }),
+    onCommand: (message) => {
+      if (message.method === "Page.navigate") current.url = message.params.url;
+      return message.method === "Page.navigate" ? { frameId: "frame-1" } : {};
+    },
+  });
+  const cdp = await mockCdp([current]);
+  try {
+    const entryUrl = "https://security.microsoft.com/user?aad=entity&tab=huntingGraph&tid=tenant";
+    const result = await alignBrowserCdpTarget({
+      endpoint: cdp.endpoint,
+      expectedProduct: "Edge",
+      entryUrl,
+      featureCriteria: {
+        matchHosts: ["security.microsoft.com"],
+        matchPathPrefixes: ["/user"],
+        allowedEntryQueryParameters: ["aad", "tab", "tid"],
+      },
+      bootstrapCriteria: {
+        matchHosts: ["security.microsoft.com"],
+        matchPathPrefixes: ["/"],
+      },
+      stabilityMs: 10,
+      pollMs: 2,
+    });
+    assert.equal(result.alignment.status, "aligned");
+    assert.equal(result.target.id, "page-1");
+    assert.equal(result.evaluation.url, entryUrl);
+  } finally {
+    restore();
+    await cdp.close();
+  }
+});
+
 test("waits for the same target ID to publish its navigated URL before strict preflight", async () => {
   const current = target({ title: "Home - Microsoft 365 Apps admin center", url: "https://config.office.com/officeSettings" });
   let navigationStarted = false;

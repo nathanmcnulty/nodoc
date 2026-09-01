@@ -78,24 +78,59 @@ type ApiCatalogSeed = Omit<
 
 const apiCatalogSeed: ApiCatalogSeed[] = [
   {
-    title: "Defender",
+    title: "Defender XDR",
     slug: "/defender",
-    family: "Security portal",
-    operations: 558,
+    family: "Defender",
+    operations: 585,
     authModel: "Portal session cookie (`sccauth`)",
     baseUrl: "https://security.microsoft.com/apiproxy",
     summary:
-      "Security operations coverage across alerts, incidents, case management, hunting, multi-tenant management, cloud apps, investigation pivots, endpoint, identity, vulnerability, configuration, and exposure workflows.",
+      "Security operations coverage across alerts, incidents, case management, hunting, cloud apps, investigation pivots, endpoint, identity, vulnerability, configuration, and exposure workflows.",
     highlights: [
       "Alerts, incidents, case management, and AutoIR coverage",
       "Advanced hunting, custom detections, and live response",
       "Cloud Apps discovery, App Governance policies, entity resolution, and device/file-page pivots",
-      "Multi-tenant tenant groups, assignments, and wrapped case, hunting, identity, and configuration reads",
       "Threat Analytics detail pivots, Attack simulation training, XSPM connectors, and Sentinel graph/data lake routes",
     ],
     collectionPath: "postman/collections/defender.collection.json",
     collectionDownloadUrl:
       "https://raw.githubusercontent.com/nathanmcnulty/nodoc/main/postman/collections/defender.collection.json",
+  },
+  {
+    title: "Defender XDR (MTO)",
+    slug: "/defender-mto",
+    family: "Defender",
+    operations: 19,
+    authModel: "Defender portal session + MTO tenant and XSRF routing context",
+    baseUrl: "https://mto.security.microsoft.com/apiproxy",
+    summary:
+      "Multi-tenant organization portal coverage for tenant selection, tenant groups, content distribution, hunting, identity, cases, workload readiness, and MTO-wrapped Defender operations.",
+    highlights: [
+      "Tenant picker, effective tenant groups, and tenant-context bootstrap",
+      "MTO-wrapped incidents, endpoint RBAC, hunting, cases, and identity inventory",
+      "Explicit links between MTO wrapper contracts and shared native Defender semantics",
+    ],
+    collectionPath: "postman/collections/defender-mto.collection.json",
+    collectionDownloadUrl:
+      "https://raw.githubusercontent.com/nathanmcnulty/nodoc/main/postman/collections/defender-mto.collection.json",
+  },
+  {
+    title: "Microsoft Graph Research",
+    slug: "/microsoft-graph-research",
+    family: "Microsoft Graph",
+    operations: 2,
+    authModel: "Delegated Microsoft Graph bearer token",
+    baseUrl: "https://graph.microsoft.com/beta",
+    summary:
+      "Research-only operations observed in Microsoft portals and verified absent from pinned official Microsoft Graph v1.0 and beta contracts.",
+    highlights: [
+      "Pinned official-contract comparison for every admitted operation",
+      "Successful live evidence and corroborated request or response shapes",
+      "Direct Graph paths only; portal proxies remain evidence transports",
+    ],
+    collectionPath: "postman/collections/graph-research.collection.json",
+    collectionDownloadUrl:
+      "https://raw.githubusercontent.com/nathanmcnulty/nodoc/main/postman/collections/graph-research.collection.json",
   },
   {
     title: "M365 Admin",

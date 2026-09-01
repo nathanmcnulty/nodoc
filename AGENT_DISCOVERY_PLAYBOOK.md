@@ -1573,6 +1573,17 @@ What helped:
 - Stopwatch + log-file execution made it obvious that healthy generation was finishing in minutes, while shell wrappers could still look hung or replay stale output.
 - Targeted collection generation was faster for iteration and kept random Postman IDs and synthetic examples from dirtying unrelated files.
 - Giving sibling specs from the same portal a shared `info.x-nodoc-category` kept the Scalar navbar grouped under one parent instead of creating duplicate top-level entries.
+- Model alternate operator views as sibling specs when the portal origin,
+  tenant scope, routing context, or response envelope materially differs. The
+  Defender MTO view owns `/mtoapi/` wrappers, while Defender XDR owns native
+  routes; shared semantics are linked rather than copied. Give both specs the
+  `Defender` category so the site presents one Defender header with distinct
+  Defender XDR and Defender XDR (MTO) entries.
+- Long-lived shell and dashboard requests can keep an authenticated portal
+  above the generic network-idle threshold. Prefer preflight/mandatory
+  navigation followed by explicit wait and capture checkpoints; a redundant
+  required navigation can falsely fail even when the redirected feature page
+  loaded and useful traffic was captured.
 
 Current takeaway:
 

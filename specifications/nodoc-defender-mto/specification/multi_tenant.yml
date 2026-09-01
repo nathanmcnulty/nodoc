@@ -101,6 +101,12 @@ paths:
         unified RBAC pages.
       operationId: MultiTenant.GetEffectiveTenantGroup
       tags: [Multi-Tenant]
+      x-nodoc-operation-safety:
+        class: read-only
+        tenantMutationObserved: false
+      x-nodoc-evidence:
+        record: ../evidence/defender-mto-landing-refresh.json
+        responseShapeDigest: 3f4d8ae10ad40e2f3f9184e7a92853e96b62e591f02f1c11aabbe26fb03eceff
       x-nodoc-operation-context:
         surface: Multi-tenant shell
         workflows:
@@ -122,6 +128,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TenantGroup'
+              example:
+                entityType: TenantGroup
+                name: Managed tenants
+                tenantGroupId: 00000000-0000-0000-0000-000000000001
+                tenantId: 00000000-0000-0000-0000-000000000002
+                type: 0
+                description: Effective tenant selection
+                allTenantsCount: 1
+                exposedTargetTenantsInfo: []
+                creationTime: '2026-01-01T00:00:00Z'
+                lastUpdated: '2026-01-01T00:00:00Z'
+                lastUpdatedByUpn: null
+                _etag: sanitized-etag
+                ttl: 0
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -165,6 +185,12 @@ paths:
         per-tenant execution metadata for the current MTO selection.
       operationId: MultiTenant.GetTenantContext
       tags: [Multi-Tenant]
+      x-nodoc-operation-safety:
+        class: read-only
+        tenantMutationObserved: false
+      x-nodoc-evidence:
+        record: ../evidence/defender-mto-landing-refresh.json
+        responseShapeDigest: 7ea168423a6c275ef4d73d87ee5a0df85d154949eaaf887686820333eada4e67
       parameters:
         - name: realTime
           in: query
@@ -200,6 +226,19 @@ paths:
                     description: >-
                       MTO-wrapped Defender tenant bootstrap, including environment,
                       workload activation, directory roles, and MTP permission state.
+                    properties:
+                      featureGroups:
+                        type: array
+                        items:
+                          type: array
+                          items: {type: integer}
+                      featuresNames:
+                        type: array
+                        items: {type: string}
+                      tenantsData:
+                        type: object
+                        description: Tenant-keyed bootstrap data; property names are runtime tenant identifiers.
+                        additionalProperties: true
                   metadata:
                     $ref: '#/components/schemas/MtoResponseMetadata'
                   isMtoResponse:
@@ -209,6 +248,16 @@ paths:
                   - result
                   - metadata
                   - isMtoResponse
+              example:
+                result:
+                  featureGroups: []
+                  featuresNames: []
+                  tenantsData: {}
+                metadata:
+                  completedTenants: []
+                  responses: {}
+                  isResultBase64Encoded: false
+                isMtoResponse: true
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -296,6 +345,185 @@ paths:
 
         '404':
           $ref: common.yml#/components/responses/NotFound
+
+  /mtoapi/mtp/incidentDashboard/Dashboard/ActiveIncidentsSummary:
+    get:
+      summary: Get MTO active incident summary
+      description: >-
+        Retrieve the cross-tenant incident count, trend series, and leading
+        incidents rendered on the MTO landing dashboard. This is the MTO wrapper
+        for the native Defender incident-dashboard read; the wrapper adds result
+        and execution-metadata envelopes for the current multi-tenant scope.
+      operationId: MultiTenant.GetActiveIncidentsSummary
+      tags: [Multi-Tenant]
+      x-nodoc-operation-safety:
+        class: read-only
+        tenantMutationObserved: false
+      x-nodoc-evidence:
+        record: ../evidence/defender-mto-landing-refresh.json
+        responseShapeDigest: 8b5242583dc11358ad4237d680758aa77e623f6d1eeb482546f3f818479f7fe9
+      x-nodoc-shared-semantics:
+        specId: defender-xdr
+        operationId: Incidents.GetActiveIncidentsSummary
+        nativePath: /mtp/incidentDashboard/Dashboard/ActiveIncidentsSummary
+        relationship: mto-wrapper
+      x-nodoc-operation-context:
+        surface: MTO landing dashboard
+        workflows:
+          - Open or reload the Defender XDR multi-tenant organization homepage.
+        authProfile: defender-mto-tenant-context
+        availability:
+          level: tenant-conditional
+          notes:
+            - Results aggregate only tenants available to the signed-in operator and current MTO selection.
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Confirmed twice during passive landing-page hydration with no deliberate mutation.
+      parameters:
+        - name: readFromCache
+          in: query
+          schema: {type: boolean}
+          description: Whether the wrapper may return cached dashboard data.
+        - name: latestIncidentsCount
+          in: query
+          schema: {type: integer, minimum: 0}
+          description: Maximum number of leading incidents to include.
+        - name: lookbackIndays
+          in: query
+          schema: {type: integer, minimum: 1}
+          description: Trend lookback window in days, preserving the portal's observed casing.
+      responses:
+        '200':
+          description: MTO-wrapped incident dashboard summary.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [result, metadata, isMtoResponse]
+                properties:
+                  result:
+                    type: object
+                    required: [activeIncidentCount, alertsTrend, incidentsTrend, topIncidents]
+                    properties:
+                      activeIncidentCount: {type: integer}
+                      alertsTrend:
+                        type: array
+                        items: {$ref: '#/components/schemas/MtoTrendPoint'}
+                      incidentsTrend:
+                        type: array
+                        items: {$ref: '#/components/schemas/MtoTrendPoint'}
+                      topIncidents:
+                        type: array
+                        items:
+                          type: object
+                          additionalProperties: true
+                          properties:
+                            IncidentId: {type: integer}
+                            Title: {type: string}
+                            Severity: {type: integer}
+                            Status: {type: integer}
+                            TenantId: {type: string}
+                            AlertCount: {type: integer}
+                            UserCount: {type: integer}
+                            MachineCount: {type: integer}
+                  metadata: {$ref: '#/components/schemas/MtoResponseMetadata'}
+                  isMtoResponse: {type: boolean}
+              example:
+                result:
+                  activeIncidentCount: 2
+                  alertsTrend: [{TimeUtc: '2026-01-01T00:00:00Z', Count: 1}]
+                  incidentsTrend: [{TimeUtc: '2026-01-01T00:00:00Z', Count: 1}]
+                  topIncidents: []
+                metadata:
+                  completedTenants: []
+                  responses: {}
+                  isResultBase64Encoded: false
+                isMtoResponse: true
+        '401': {$ref: common.yml#/components/responses/Unauthorized}
+        '403': {$ref: common.yml#/components/responses/Forbidden}
+        '404': {$ref: common.yml#/components/responses/NotFound}
+
+  /mtoapi/mtp/rbacManagementApi/rbac/machine_groups:
+    get:
+      summary: List MTO machine groups
+      description: >-
+        Retrieve Defender for Endpoint RBAC machine groups through the MTO
+        wrapper. The native machine-group semantics are shared with Defender XDR;
+        this operation documents the cross-tenant result and metadata envelope.
+      operationId: MultiTenant.ListMachineGroups
+      tags: [Multi-Tenant]
+      x-nodoc-operation-safety:
+        class: read-only
+        tenantMutationObserved: false
+      x-nodoc-evidence:
+        record: ../evidence/defender-mto-landing-refresh.json
+        responseShapeDigest: 2d058ef372d63a5e6ba50f2ed506058fe87888a9820637ad19ddcaae5b31056d
+      x-nodoc-shared-semantics:
+        specId: defender-xdr
+        operationId: EndpointDevices.GetMachineGroups
+        nativePath: /mtp/rbacManagementApi/rbac/machine_groups
+        relationship: mto-wrapper
+      x-nodoc-operation-context:
+        surface: MTO landing dashboard
+        workflows:
+          - Hydrate MTO endpoint RBAC context while the landing dashboard loads.
+        authProfile: defender-mto-tenant-context
+        availability:
+          level: tenant-conditional
+          notes:
+            - Returned groups and counts depend on selected tenants and operator permissions.
+        provenance:
+          - source: live-portal-capture
+            confidence: high
+            notes:
+              - Confirmed during two passive MTO landing captures.
+      parameters:
+        - name: addAadGroupNames
+          in: query
+          schema: {type: boolean}
+          description: Include related Entra group names when available.
+        - name: addMachineGroupCount
+          in: query
+          schema: {type: boolean}
+          description: Include machine counts for each returned group.
+      responses:
+        '200':
+          description: MTO-wrapped machine-group inventory.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [result, metadata, isMtoResponse]
+                properties:
+                  result:
+                    type: object
+                    required: [items]
+                    properties:
+                      items:
+                        type: array
+                        items: {$ref: '#/components/schemas/MtoMachineGroup'}
+                  metadata: {$ref: '#/components/schemas/MtoResponseMetadata'}
+                  isMtoResponse: {type: boolean}
+              example:
+                result:
+                  items:
+                    - MachineGroupId: 1
+                      Name: Default
+                      Description: Default machine group
+                      Priority: 1
+                      MachineCount: 0
+                      IsUnassignedMachineGroup: true
+                      AutoRemediationLevel: 0
+                metadata:
+                  completedTenants: []
+                  responses: {}
+                  isResultBase64Encoded: false
+                isMtoResponse: true
+        '401': {$ref: common.yml#/components/responses/Unauthorized}
+        '403': {$ref: common.yml#/components/responses/Forbidden}
+        '404': {$ref: common.yml#/components/responses/NotFound}
 
   /mtp/userPreferences/api/mgmt/userpreferencesservice/userPreference/advanced_hunting_mto:
     get:
@@ -1109,3 +1337,34 @@ components:
           description: When the status was last updated.
           type: string
           format: date-time
+    MtoTrendPoint:
+      type: object
+      description: Timestamped count used by MTO incident and alert trend series.
+      required: [TimeUtc, Count]
+      properties:
+        TimeUtc:
+          type: string
+          format: date-time
+        Count:
+          type: integer
+    MtoMachineGroup:
+      type: object
+      description: Defender for Endpoint RBAC machine group returned through the MTO wrapper.
+      required: [MachineGroupId, Name, Priority, IsUnassignedMachineGroup, AutoRemediationLevel]
+      properties:
+        MachineGroupId: {type: integer}
+        Name: {type: string}
+        Description: {type: string, nullable: true}
+        Priority: {type: integer}
+        MachineCount: {type: integer}
+        IsUnassignedMachineGroup: {type: boolean}
+        AutoRemediationLevel: {type: integer}
+        LastUpdated: {type: string, format: date-time}
+        GroupRules:
+          type: array
+          items:
+            type: object
+            properties:
+              OperatorType: {type: integer}
+              Property: {type: integer}
+              PropertyValue: {type: string}

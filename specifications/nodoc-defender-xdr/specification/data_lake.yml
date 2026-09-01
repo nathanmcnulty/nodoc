@@ -11,7 +11,7 @@ paths:
         class: read-only
         tenantMutationObserved: false
       x-nodoc-evidence:
-        record: ../evidence/defender-graph-refresh.json
+        record: ../evidence/defender-sentinel-graph-refresh.json
         responseShapeDigest: 3eae6310778a88b36d764cc64c1ae30b5183ba8d22808f09cf8847483b44ff47
       parameters:
         - name: graphTypes
@@ -34,6 +34,8 @@ paths:
                     items:
                       type: object
                       additionalProperties: true
+              example:
+                value: []
         '401':
           $ref: common.yml#/components/responses/Unauthorized
         '403':
@@ -106,12 +108,29 @@ paths:
         for the security platform data lake.
       operationId: DataLake.CheckSentinelProvisioning
       tags: [Data Lake]
+      x-nodoc-operation-safety:
+        class: read-only-query
+        tenantMutationObserved: false
+      x-nodoc-evidence:
+        record: ../evidence/defender-sentinel-graph-refresh.json
+        requestShapeDigest: 44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a
+        responseShapeDigest: 4b1451ed740c37b55c3199f05e4b9bd825e4c7fb5f114df0e04fa000c84c45b2
+      parameters:
+        - name: api-version
+          in: query
+          schema: {type: string}
+          description: Security platform provisioning API version emitted by the portal.
+        - name: includeFeatures
+          in: query
+          schema: {type: boolean}
+          description: Include feature eligibility and rollout flags in the response.
       requestBody:
         content:
           application/json:
             schema:
               type: object
-              description: pending - tenant provisioning check request
+              description: The observed readiness check sends an empty JSON object.
+            example: {}
       responses:
         '200':
           description: OK
@@ -119,7 +138,31 @@ paths:
             application/json:
               schema:
                 type: object
-                description: pending - Sentinel provisioning status
+                required: [accountProperties, eligibleFeatures]
+                properties:
+                  accountProperties:
+                    type: object
+                    required: [status, primaryRegion, errorCode, features]
+                    properties:
+                      status: {type: string}
+                      primaryRegion: {type: string}
+                      errorCode: {type: string}
+                      features:
+                        type: object
+                        additionalProperties: {type: string}
+                  eligibleFeatures:
+                    type: array
+                    items: {type: string}
+              example:
+                accountProperties:
+                  status: NotProvisioned
+                  primaryRegion: westus
+                  errorCode: ''
+                  features:
+                    Graph_USX: Disabled
+                    Graph_USX_Optional: Disabled
+                    Lake_USX: Disabled
+                eligibleFeatures: []
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 

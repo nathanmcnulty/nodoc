@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "specId": "defender-xdr",
+  "decision": "accept-bounded-frontier",
+  "workerModel": "gpt-5.6-luna",
+  "workerReasoning": "xhigh",
+  "approvedAt": "2026-08-31T23:00:00.000Z",
+  "source": {
+    "head": "1bbc0f3974defd07e96e17c9f9e2b795628bd03e",
+    "artifactPath": "tools/frontier-approvals/defender-attack-map-enrichment-source.json",
+    "artifactSha256": "90bba9d29f8e51ac0a507a764ea952bae57f7e32e7355d600967927ca1d883d1",
+    "frontierSetId": "offline-frontier-set-d746dff5b424a6c9465ad944",
+    "frontierSetDigest": "d746dff5b424a6c9465ad944884943920ca151a67a9dce19fa59e3b2777f76fb"
+  },
+  "state": "Defender Attack map",
+  "canonicalShellUrl": "https://security.microsoft.com/security-graph",
+  "apiEvidenceScope": {
+    "hosts": ["security.microsoft.com", "mto.security.microsoft.com"],
+    "pathPrefixes": ["/apiproxy/mtp/xspmatlas/attacksurface", "/apiproxy/mtp/ndr/machines"]
+  },
+  "safeActions": [
+    "navigate=security-graph",
+    "wait-ms=12000",
+    "capture=attack-map-initial",
+    "wait-ms=8000",
+    "capture=attack-map-settled"
+  ],
+  "acceptedItems": [
+    {"frontierId":"offline-frontier-cd8c94f39b7ffc19986e4111","frontierDigest":"cd8c94f39b7ffc19986e4111fcbbc28209726cd38eac0ad2dfd84ae83af3a58c","canonicalKey":"mto.security.microsoft.com GET /mtp/ndr/machines/deviceTotals"},
+    {"frontierId":"offline-frontier-d5af543e663986fb492db6ce","frontierDigest":"d5af543e663986fb492db6ce028ad1cf34605af3102fb0640172b65832a14277","canonicalKey":"mto.security.microsoft.com POST /mtp/xspmatlas/attacksurface/query"},
+    {"frontierId":"offline-frontier-27ba6a7e3babd7d6c6f86b48","frontierDigest":"27ba6a7e3babd7d6c6f86b485ec441169e406c5953eee4d99085c75ef64336f1","canonicalKey":"mto.security.microsoft.com GET /mtp/ndr/machines/deviceTotals"}
+  ],
+  "deferredItemCount": 2688,
+  "blockedItemCount": 2688,
+  "constraints": [
+    "Passive navigation and capture only",
+    "No request authoring, form submission, writes, exports, or setup controls",
+    "Sanitize all identifiers and response bodies before retaining evidence"
+  ]
+}

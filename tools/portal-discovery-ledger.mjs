@@ -487,6 +487,7 @@ export function buildLedgerState(records, now = Date.now()) {
         attemptNumber: 1,
         phase: payload.phase,
         artifactDir: payload.artifactDir,
+        artifactHashes: payload.artifactHashes,
         model: payload.model,
         reasoning: payload.reasoning,
         checkpointCursor: payload.checkpointCursor,

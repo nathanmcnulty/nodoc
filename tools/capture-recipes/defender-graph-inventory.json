@@ -4,16 +4,55 @@
   "pageTarget": {
     "matchHosts": ["security.microsoft.com"],
     "matchPathPrefixes": ["/user"],
-    "allowedEntryQueryParameters": ["aad", "tab", "tid"],
+    "allowedEntryQueryParameters": ["aad", "accountName", "accountDomain", "radiusUserId", "upn", "tab", "tid"],
     "bootstrap": {
       "matchHosts": ["security.microsoft.com"],
-      "matchPathnames": ["/"]
+      "matchPathPrefixes": ["/"]
     }
   },
-  "capturePrerequisite": {
-    "status": "blocked",
-    "reason": "Identity Explorer is now the deterministic non-baseline Defender Graph state, but the revised parameterized frontier has not yet received the required exact Luna xhigh/max review artifact.",
-    "nextRequirement": "Have exact gpt-5.6-luna at xhigh or max approve the parameterized aad/tab/tid Identity Explorer frontier and bind its immutable approval artifact before supplying runtime aad and tenantId variables."
+  "noveltyStatus": {
+    "status": "satisfied",
+    "reason": "The parameterized Identity Explorer state was exercised twice and emitted only known shared-shell Graph traffic; the intended identity detail calls were not reproducible from the checked-in transition.",
+    "nextRequirement": "Add a deterministic reload or identity-page-to-tab transition that reproduces an exact unmodeled Defender or Graph proxy operation before another run.",
+    "approvalArtifact": "tools/frontier-approvals/defender-graph-inventory.json",
+    "approvalDigest": "3c3b3dc3d67c01cc35171a486627d56c21ba5f3b347a95f5a2a23ecea911523e",
+    "baseline": "checked-in-spec-and-coverage-ledgers",
+    "baselineSignals": {
+      "queryMetadata": [],
+      "requestShapes": [],
+      "responseMetadata": [],
+      "responseShapes": [],
+      "routes": []
+    },
+    "reopenCondition": "The parameterized Defender Identity Explorer state emits an action-attributed Graph proxy route or response contract not represented in the checked-in Defender baseline.",
+    "targets": [
+      {
+        "id": "graph-user-inventory-contract",
+        "state": "Defender Identity Explorer",
+        "evidenceLevel": "confirmed",
+        "expectedHostFamilies": ["mto.security.microsoft.com", "security.microsoft.com"],
+        "expectedRoutes": ["/msgraph/v1.0/users"],
+        "expectedInformationClasses": ["query-metadata", "response-shape", "response-metadata"],
+        "expectedDocumentationObjectives": ["response-example", "error-example", "pagination-observation"],
+        "actionIndexes": [0, 2],
+        "safeAction": "Open the parameterized Identity Explorer state and passively capture its Graph-backed user inventory request.",
+        "acceptanceKey": "identity-explorer-graph-user-inventory-contract",
+        "rationale": "Identity Explorer is a deterministic product state that naturally emits Graph-backed reads and can enrich list response, paging, and error behavior without mutation."
+      },
+      {
+        "id": "graph-user-detail-contract",
+        "state": "Defender Identity Explorer",
+        "evidenceLevel": "confirmed",
+        "expectedHostFamilies": ["mto.security.microsoft.com", "security.microsoft.com"],
+        "expectedRoutes": ["/msgraph/v1.0/users/{UserId}"],
+        "expectedInformationClasses": ["response-shape", "response-metadata"],
+        "expectedDocumentationObjectives": ["response-example", "error-example"],
+        "actionIndexes": [0, 2],
+        "safeAction": "Open the parameterized Identity Explorer state and passively capture the selected user Graph detail request.",
+        "acceptanceKey": "identity-explorer-graph-user-detail-contract",
+        "rationale": "The user detail read provides a concrete representative Graph proxy response while runtime identifiers remain supplied only through uncommitted variables."
+      }
+    ]
   },
   "matchHosts": ["security.microsoft.com", "mto.security.microsoft.com"],
   "matchPathPrefixes": ["/apiproxy"],
@@ -42,7 +81,7 @@
   "actions": [
     {
       "type": "navigate",
-      "value": "https://security.microsoft.com/user?aad=${aad}&tab=huntingGraph&tid=${tenantId}",
+      "value": "https://security.microsoft.com/user?aad=${aad}&accountName=${accountName}&accountDomain=${accountDomain}&radiusUserId=${radiusUserId}&upn=${upn}&tab=huntingGraph&tid=${tenantId}",
       "required": true,
       "highValue": true
     },

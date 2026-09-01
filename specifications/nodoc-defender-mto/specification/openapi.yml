@@ -1,0 +1,124 @@
+openapi: 3.0.1
+info:
+  title: Defender XDR (MTO)
+  x-nodoc-category: Defender
+  x-nodoc-route: defender-mto
+  description: |
+    Undocumented operations used by the Microsoft Defender XDR multi-tenant
+    organization portal at `mto.security.microsoft.com`.
+
+    This is a portal-view specification. Many operations wrap native Defender
+    XDR services beneath `/mtoapi/` so an operator can work across the tenants
+    available to their MTO scope. A route in this specification therefore does
+    not imply a separate backend implementation; it records the MTO transport,
+    selection context, response envelope, and portal workflow that agents need
+    to reproduce or troubleshoot the multi-tenant experience.
+
+    Native `security.microsoft.com` operations remain in the Defender XDR spec.
+    MTO-wrapped operations are kept here even when their result payload mirrors
+    a native Defender operation, avoiding duplicate ownership while preserving
+    the observable portal contract.
+  version: '1.0'
+  contact:
+    name: nodoc
+    url: https://github.com/nathanmcnulty/nodoc
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+servers:
+  - url: https://mto.security.microsoft.com/apiproxy
+    description: Defender XDR multi-tenant organization portal proxy
+security:
+  - PortalSession: []
+components:
+  securitySchemes:
+    PortalSession:
+      type: apiKey
+      in: cookie
+      name: sccauth
+      description: Authenticated Defender browser session; raw cookie values must never be retained.
+tags:
+  - name: Multi-Tenant
+    description: MTO shell, tenant selection, distribution, and wrapped Defender operations.
+x-tagGroups:
+  - name: Defender XDR (MTO)
+    tags: [Multi-Tenant]
+externalDocs:
+  description: Checked-in source specification and live-capture evidence.
+  url: https://github.com/nathanmcnulty/nodoc/tree/main/specifications/nodoc-defender-mto
+x-nodoc-authProfiles:
+  defender-mto-tenant-context:
+    description: Tenant-selection and cross-tenant routing context used by the Defender MTO portal.
+    principalContext:
+      label: Global Admin
+      privilegeLevel: maximum-observed
+      notes:
+        - Effective access and visible tenant scope vary with the signed-in operator.
+    cookies:
+      - name: sccauth
+        description: Defender portal session cookie.
+      - name: XSRF-TOKEN
+        description: Anti-forgery cookie paired with X-XSRF-TOKEN where required.
+    notes:
+      - Requests can require X-XSRF-TOKEN, tenant routing headers, and the `mtoproxyurl=MTO` hint.
+      - Never retain raw cookie, token, tenant, or user values in committed evidence.
+    permissionSignals:
+      - name: tenant-picker
+        sourcePath: /mtoapi/tenants/TenantPicker
+        notes:
+          - Enumerates the tenants visible to the current operator and the effective selection.
+      - name: tenant-context-bootstrap
+        sourcePath: /mtoapi/mtp/sccManagement/mgmt/TenantContext
+        notes:
+          - Supplies selected-tenant and workload readiness context before MTO pages render.
+  defender-copilot-entitlement:
+    description: Security Copilot entitlement and readiness state observed through the MTO wrapper.
+    principalContext:
+      label: Global Admin
+      privilegeLevel: maximum-observed
+      notes:
+        - Availability depends on tenant entitlement and current operator access.
+    permissionSignals:
+      - name: mto-security-copilot-trial
+        sourcePath: /mtoapi/cdssecuritycopilot/trial
+        notes:
+          - Read-only readiness response; discovery must never start a trial.
+paths:
+  /mtoapi/tenants/TenantPicker:
+    $ref: multi_tenant.yml#/paths/~1mtoapi~1tenants~1TenantPicker
+  /mtoapi/recentItems:
+    $ref: multi_tenant.yml#/paths/~1mtoapi~1recentItems
+  /mtoapi/tenantGroups:
+    $ref: multi_tenant.yml#/paths/~1mtoapi~1tenantGroups
+  /mtoapi/tenantGroups/effective/:
+    $ref: multi_tenant.yml#/paths/~1mtoapi~1tenantGroups~1effective~1
+  /mtoapi/assignments:
+    $ref: multi_tenant.yml#/paths/~1mtoapi~1assignments
+  /mtoapi/mtp/sccManagement/mgmt/TenantContext:
+    $ref: multi_tenant.yml#/paths/~1mtoapi~1mtp~1sccManagement~1mgmt~1TenantContext
+  /mtoapi/mtp/huntingService/queries/:
+    $ref: multi_tenant.yml#/paths/~1mtoapi~1mtp~1huntingService~1queries~1
+  /mtoapi/mtp/userExposedRbacGroups/UserExposedRbacGroups:
+    $ref: multi_tenant.yml#/paths/~1mtoapi~1mtp~1userExposedRbacGroups~1UserExposedRbacGroups
+  /mtp/userPreferences/api/mgmt/userpreferencesservice/userPreference/advanced_hunting_mto:
+    $ref: multi_tenant.yml#/paths/~1mtp~1userPreferences~1api~1mgmt~1userpreferencesservice~1userPreference~1advanced_hunting_mto
+  /mtoapi/mtp/CaseManagement/be/cases:
+    $ref: multi_tenant.yml#/paths/~1mtoapi~1mtp~1CaseManagement~1be~1cases
+  /mtoapi/mtp/CaseManagement/be/templates/{TemplateId}:
+    $ref: multi_tenant.yml#/paths/~1mtoapi~1mtp~1CaseManagement~1be~1templates~1{TemplateId}
+  /mtoapi/mdi/identity/userapiservice/identities:
+    $ref: multi_tenant.yml#/paths/~1mtoapi~1mdi~1identity~1userapiservice~1identities
+  /mtoapi/mdi/identity/userapiservice/identities/aggregatedData:
+    $ref: multi_tenant.yml#/paths/~1mtoapi~1mdi~1identity~1userapiservice~1identities~1aggregatedData
+  /mtoapi/mdi/identity/userapiservice/identities/count:
+    $ref: multi_tenant.yml#/paths/~1mtoapi~1mdi~1identity~1userapiservice~1identities~1count
+  /mtoapi/cdssecuritycopilot/trial:
+    $ref: multi_tenant.yml#/paths/~1mtoapi~1cdssecuritycopilot~1trial
+  /mtoapi/tenants/{TenantId}/workloadStatus:
+    $ref: multi_tenant.yml#/paths/~1mtoapi~1tenants~1{TenantId}~1workloadStatus
+  /mtoapi/tenants/{TenantId}/huntingQueries/run:
+    $ref: multi_tenant.yml#/paths/~1mtoapi~1tenants~1{TenantId}~1huntingQueries~1run
+  /mtoapi/mtp/incidentDashboard/Dashboard/ActiveIncidentsSummary:
+    $ref: multi_tenant.yml#/paths/~1mtoapi~1mtp~1incidentDashboard~1Dashboard~1ActiveIncidentsSummary
+  /mtoapi/mtp/rbacManagementApi/rbac/machine_groups:
+    $ref: multi_tenant.yml#/paths/~1mtoapi~1mtp~1rbacManagementApi~1rbac~1machine_groups

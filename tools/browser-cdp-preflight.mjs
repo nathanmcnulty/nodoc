@@ -223,8 +223,19 @@ function trustedEntryUrl(entryUrl, featureCriteria, bootstrapCriteria) {
   } catch {
     failWith("entry-url-invalid", "recipe entry URL must be a valid URL.");
   }
-  if (parsed.protocol !== "https:" || parsed.username || parsed.password || parsed.search) {
-    failWith("entry-url-untrusted", "recipe entry URL must be HTTPS without credentials or query.");
+  if (parsed.protocol !== "https:" || parsed.username || parsed.password) {
+    failWith("entry-url-untrusted", "recipe entry URL must be HTTPS without credentials.");
+  }
+  const entryQueryNames = Array.from(new Set(parsed.searchParams.keys()));
+  const allowedEntryQueryParameters = featureCriteria.allowedEntryQueryParameters ?? [];
+  if (
+    entryQueryNames.length > 0
+    && (
+      allowedEntryQueryParameters.length === 0
+      || entryQueryNames.some((name) => !allowedEntryQueryParameters.includes(name))
+    )
+  ) {
+    failWith("entry-url-untrusted", "recipe entry URL query is outside the approved parameter-name allowlist.");
   }
   const classification = classifyGetProbeUrl(parsed.href, parsed.origin);
   if (!classification.allowed) {
