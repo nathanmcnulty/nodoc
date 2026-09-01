@@ -77,21 +77,28 @@ export async function prepareLedgerAttempt(args, specRecord, recipePath) {
       args.attemptNumber = attempt.attemptNumber;
       return assignment;
     }
-    if (
-      args.seedArtifacts
+    const retryCompletedAnalysis = args.phase === "analyze"
+      && ["blocked", "failed"].includes(attempt?.status)
+      && attempt.captureComplete === true
+      && attempt.artifactHashes?.artifactDir === createHash("sha256").update(path.resolve(args.artifacts)).digest("hex");
+    const retryIncompleteCapture = args.seedArtifacts
       && ["blocked", "failed", "stale"].includes(attempt?.status)
-      && attempt.captureComplete !== true
+      && attempt.captureComplete !== true;
+    if (
+      (retryCompletedAnalysis || retryIncompleteCapture)
       && assignment.endpoint === endpoint
       && assignment.profile === args.profile
       && assignment.phase === args.phase
       && assignment.recipeDigest === digest
     ) {
-      const seedRun = JSON.parse(await readFile(path.join(args.seedArtifacts, "discovery-run.json"), "utf8"));
-      if (
-        seedRun?.ledger?.assignmentId !== assignmentId
-        || Number(seedRun?.ledger?.attemptNumber) !== attempt.attemptNumber
-      ) {
-        throw new Error(`Seed artifacts do not identify terminal attempt ${attempt.attemptNumber} for ${assignmentId}.`);
+      if (retryIncompleteCapture) {
+        const seedRun = JSON.parse(await readFile(path.join(args.seedArtifacts, "discovery-run.json"), "utf8"));
+        if (
+          seedRun?.ledger?.assignmentId !== assignmentId
+          || Number(seedRun?.ledger?.attemptNumber) !== attempt.attemptNumber
+        ) {
+          throw new Error(`Seed artifacts do not identify terminal attempt ${attempt.attemptNumber} for ${assignmentId}.`);
+        }
       }
       await resumeAttempt({
         ledgerPath: args.ledgerPath,

@@ -116,6 +116,34 @@ function shapeDigest(value) {
   return value === null || value === undefined ? null : digest(shape(value));
 }
 
+function sanitizeShapeSummary(value, depth = 0) {
+  if (depth > 8) return "depth-limit";
+  if (Array.isArray(value)) return value.map((entry) => sanitizeShapeSummary(entry, depth + 1));
+  if (value && typeof value === "object") {
+    const result = {};
+    let hasDynamicProperties = false;
+    for (const [key, entry] of Object.entries(value)) {
+      if (containsSensitiveMaterial(key)) {
+        hasDynamicProperties = true;
+        continue;
+      }
+      result[key] = sanitizeShapeSummary(entry, depth + 1);
+    }
+    if (hasDynamicProperties) result["{dynamicProperty}"] = "unknown";
+    return result;
+  }
+  return typeof value === "string" && containsSensitiveMaterial(value) ? "redacted" : value;
+}
+
+function sanitizeEvidenceLabel(value) {
+  let decoded = String(value || "");
+  try { decoded = decodeURIComponent(decoded); } catch { /* retain the observed label */ }
+  return decoded
+    .replace(/[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}/giu, "{id}")
+    .replace(/[\w.+-]+@[\w.-]+\.[a-z]{2,}/giu, "{id}")
+    .replace(/[a-z\d.-]+\.onmicrosoft\.com/giu, "{tenant-domain}");
+}
+
 function contractOperations(specification) {
   if (specification?.schemaVersion === 1 && Array.isArray(specification.operations)) {
     return specification.operations.map(({ method, path }) => {
@@ -176,8 +204,8 @@ function operationCore({ method, graph, status = null, mimeType = null, request 
     requestShapeSummaries: request === null ? [] : [shape(request)],
     responseShapeSummaries: response === null ? [] : [shape(response)],
     actionIndexes: Number.isInteger(attribution?.actionIndex) ? [attribution.actionIndex] : [],
-    checkpoints: attribution?.checkpoint ? [String(attribution.checkpoint)] : [],
-    seenOnPages: sorted(seenOnPages.map(String)),
+    checkpoints: attribution?.checkpoint ? [sanitizeEvidenceLabel(attribution.checkpoint)] : [],
+    seenOnPages: sorted(seenOnPages.map(sanitizeEvidenceLabel)),
     sources: [source],
     portalOwners: portalOwner ? [portalOwner] : [],
     requestHeaderNames: sorted(requestHeaderNames.map((entry) => String(entry).toLowerCase())),
@@ -209,8 +237,8 @@ function directOperations(records) {
     });
     if (record.requestShapeFingerprint) operation.requestShapeDigests = [record.requestShapeFingerprint];
     if (record.responseShapeFingerprint) operation.responseShapeDigests = [record.responseShapeFingerprint];
-    if (record.requestShapeSummary) operation.requestShapeSummaries = [record.requestShapeSummary];
-    if (record.responseShapeSummary) operation.responseShapeSummaries = [record.responseShapeSummary];
+    if (record.requestShapeSummary) operation.requestShapeSummaries = [sanitizeShapeSummary(record.requestShapeSummary)];
+    if (record.responseShapeSummary) operation.responseShapeSummaries = [sanitizeShapeSummary(record.responseShapeSummary)];
     return [operation];
   });
 }
@@ -248,8 +276,8 @@ function batchOperations(records) {
       });
       if (entry.bodyShapeFingerprint) operation.requestShapeDigests = [entry.bodyShapeFingerprint];
       if (matchedResponse?.bodyShapeFingerprint) operation.responseShapeDigests = [matchedResponse.bodyShapeFingerprint];
-      if (entry.bodyShapeSummary) operation.requestShapeSummaries = [entry.bodyShapeSummary];
-      if (matchedResponse?.bodyShapeSummary) operation.responseShapeSummaries = [matchedResponse.bodyShapeSummary];
+      if (entry.bodyShapeSummary) operation.requestShapeSummaries = [sanitizeShapeSummary(entry.bodyShapeSummary)];
+      if (matchedResponse?.bodyShapeSummary) operation.responseShapeSummaries = [sanitizeShapeSummary(matchedResponse.bodyShapeSummary)];
       operations.push(operation);
     }
   }
@@ -278,7 +306,7 @@ function batchDiagnostics(records) {
       requestParsed: record.graphBatch?.requestParsed ?? request !== null,
       responseParsed: record.graphBatch?.responseParsed ?? response !== null,
       actionIndex: Number.isInteger(record.attribution?.actionIndex) ? record.attribution.actionIndex : null,
-      checkpoint: record.attribution?.checkpoint ? String(record.attribution.checkpoint) : null,
+      checkpoint: record.attribution?.checkpoint ? sanitizeEvidenceLabel(record.attribution.checkpoint) : null,
       transportKind: parent.transport.kind,
       transportHost: parent.transport.host,
       transportPathPrefix: parent.transport.pathPrefix,

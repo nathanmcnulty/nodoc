@@ -1,10 +1,10 @@
 [
   {
-    "title": "Defender",
+    "title": "Defender XDR",
     "specId": "defender-xdr",
     "specPath": "specifications/nodoc-defender-xdr/specification/openapi.yml",
-    "nodocRoute": null,
-    "nodocCategory": null,
+    "nodocRoute": "defender",
+    "nodocCategory": "Defender",
     "headerProfiles": {
       "defender-cloud-apps-tenant-context": {
         "description": "Tenant-bound Defender for Cloud Apps request profile observed on the security.microsoft.com proxy.",
@@ -81,43 +81,6 @@
           }
         ]
       },
-      "defender-mto-tenant-context": {
-        "description": "Tenant-selection and cross-tenant routing context reused by the Defender multi-tenant management portal.",
-        "notes": [
-          "MTO requests can depend on the Defender session plus an X-XSRF-TOKEN header and mtoproxyurl=MTO routing hint."
-        ],
-        "principalContext": {
-          "label": "Global Admin",
-          "privilegeLevel": "maximum-observed",
-          "notes": [
-            "Observed with a Global Admin account holding broad administrative privileges.",
-            "Effective permissions and visible tenant scope can vary for users with narrower roles."
-          ]
-        },
-        "permissionSignals": [
-          {
-            "name": "tenant-picker",
-            "sourcePath": "/mtoapi/tenants/TenantPicker",
-            "notes": [
-              "Tenant picker responses enumerate the accessible tenant set and effective selection context for the signed-in operator."
-            ]
-          },
-          {
-            "name": "effective-tenant-group",
-            "sourcePath": "/mtoapi/tenantGroups/effective/",
-            "notes": [
-              "Effective tenant-group responses show which managed-tenant grouping the current operator is actively scoped to across MTO experiences."
-            ]
-          },
-          {
-            "name": "tenant-context-bootstrap",
-            "sourcePath": "/mtoapi/mtp/sccManagement/mgmt/TenantContext",
-            "notes": [
-              "Tenant-context bootstrap responses expose the selected tenant, workload state, and MTO execution metadata used before downstream pages load."
-            ]
-          }
-        ]
-      },
       "defender-copilot-entitlement": {
         "description": "Security Copilot entitlement and readiness checks surfaced through Defender portal service helpers.",
         "principalContext": {
@@ -141,13 +104,6 @@
             "sourcePath": "/cdssecuritycopilot/trial",
             "notes": [
               "Trial responses expose tenant-level onboarding and entitlement state for Security Copilot experiences."
-            ]
-          },
-          {
-            "name": "mto-security-copilot-trial",
-            "sourcePath": "/mtoapi/cdssecuritycopilot/trial",
-            "notes": [
-              "The MTO wrapper probes Security Copilot readiness from multi-tenant hunting and detection experiences and can return contextual proxy-prefix validation errors."
             ]
           }
         ]
@@ -246,6 +202,184 @@
           ]
         }
       },
+      {
+        "operationId": "PortalServices.GetShellInfo",
+        "summary": "Get shell info",
+        "method": "GET",
+        "path": "/shell/api/shell/shellinfo",
+        "operationContext": {
+          "surface": "Portal shell",
+          "workflows": [
+            "Load or refresh the Defender XDR shell before feature blades and cross-solution entry points fully hydrate."
+          ],
+          "authProfile": "defender-session-baseline",
+          "availability": {
+            "level": "user-context",
+            "notes": [
+              "Returned shell state reflects the signed-in operator, current tenant, and enabled Defender surfaces."
+            ]
+          }
+        }
+      },
+      {
+        "operationId": "PortalServices.GetMedeinaAuth",
+        "summary": "Get Medeina (Copilot) auth",
+        "method": "GET",
+        "path": "/medeina/auth",
+        "operationContext": {
+          "surface": "Security Copilot entrypoint",
+          "workflows": [
+            "Open Security Copilot entry points or related Defender experiences that check Copilot readiness."
+          ],
+          "authProfile": "defender-copilot-entitlement",
+          "availability": {
+            "level": "tenant-conditional",
+            "notes": [
+              "Returned auth and readiness state depends on tenant enablement and the signed-in operator."
+            ]
+          }
+        }
+      },
+      {
+        "operationId": "PortalServices.GetMedeinaDataShareSettings",
+        "summary": "Get Security Copilot data-sharing settings",
+        "method": "GET",
+        "path": "/medeina/settings/datashare",
+        "operationContext": {
+          "surface": "Security Copilot settings",
+          "authProfile": "defender-copilot-entitlement",
+          "availability": {
+            "level": "tenant-conditional",
+            "notes": [
+              "Returned settings depend on Security Copilot enablement for the current tenant."
+            ]
+          },
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Observed as a successful normal-UI read during bounded Defender navigation."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "PortalServices.GetMedeinaCapacities",
+        "summary": "Get Security Copilot capacities",
+        "method": "GET",
+        "path": "/medeina/usage/capacities",
+        "operationContext": {
+          "surface": "Security Copilot settings",
+          "authProfile": "defender-copilot-entitlement",
+          "availability": {
+            "level": "tenant-conditional",
+            "notes": [
+              "Capacity state can be absent when no Security Copilot capacity is available."
+            ]
+          },
+          "provenance": [
+            {
+              "source": "live-portal-capture",
+              "confidence": "high",
+              "notes": [
+                "Observed as a successful normal-UI read during bounded Defender navigation."
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operationId": "PortalServices.GetSecurityCopilotTrial",
+        "summary": "Get Security Copilot trial status",
+        "method": "GET",
+        "path": "/cdssecuritycopilot/trial",
+        "operationContext": {
+          "surface": "Security Copilot entrypoint",
+          "workflows": [
+            "Load trial, onboarding, or entitlement UX for Security Copilot from the Defender portal."
+          ],
+          "authProfile": "defender-copilot-entitlement",
+          "availability": {
+            "level": "tenant-conditional",
+            "notes": [
+              "Trial state is specific to the current tenant and may be absent where Security Copilot onboarding is disabled."
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "title": "Defender XDR (MTO)",
+    "specId": "defender-mto",
+    "specPath": "specifications/nodoc-defender-mto/specification/openapi.yml",
+    "nodocRoute": "defender-mto",
+    "nodocCategory": "Defender",
+    "headerProfiles": {},
+    "authProfiles": {
+      "defender-mto-tenant-context": {
+        "description": "Tenant-selection and cross-tenant routing context used by the Defender MTO portal.",
+        "notes": [
+          "Requests can require X-XSRF-TOKEN, tenant routing headers, and the `mtoproxyurl=MTO` hint.",
+          "Never retain raw cookie, token, tenant, or user values in committed evidence."
+        ],
+        "principalContext": {
+          "label": "Global Admin",
+          "privilegeLevel": "maximum-observed",
+          "notes": [
+            "Effective access and visible tenant scope vary with the signed-in operator."
+          ]
+        },
+        "cookies": [
+          {
+            "name": "sccauth",
+            "description": "Defender portal session cookie."
+          },
+          {
+            "name": "XSRF-TOKEN",
+            "description": "Anti-forgery cookie paired with X-XSRF-TOKEN where required."
+          }
+        ],
+        "permissionSignals": [
+          {
+            "name": "tenant-picker",
+            "sourcePath": "/mtoapi/tenants/TenantPicker",
+            "notes": [
+              "Enumerates the tenants visible to the current operator and the effective selection."
+            ]
+          },
+          {
+            "name": "tenant-context-bootstrap",
+            "sourcePath": "/mtoapi/mtp/sccManagement/mgmt/TenantContext",
+            "notes": [
+              "Supplies selected-tenant and workload readiness context before MTO pages render."
+            ]
+          }
+        ]
+      },
+      "defender-copilot-entitlement": {
+        "description": "Security Copilot entitlement and readiness state observed through the MTO wrapper.",
+        "principalContext": {
+          "label": "Global Admin",
+          "privilegeLevel": "maximum-observed",
+          "notes": [
+            "Availability depends on tenant entitlement and current operator access."
+          ]
+        },
+        "permissionSignals": [
+          {
+            "name": "mto-security-copilot-trial",
+            "sourcePath": "/mtoapi/cdssecuritycopilot/trial",
+            "notes": [
+              "Read-only readiness response; discovery must never start a trial."
+            ]
+          }
+        ]
+      }
+    },
+    "operations": [
       {
         "operationId": "MultiTenant.ListTenants",
         "summary": "Get MTO tenant picker",
@@ -367,55 +501,20 @@
         }
       },
       {
-        "operationId": "PortalServices.GetShellInfo",
-        "summary": "Get shell info",
+        "operationId": "MultiTenant.GetActiveIncidentsSummary",
+        "summary": "Get MTO active incident summary",
         "method": "GET",
-        "path": "/shell/api/shell/shellinfo",
+        "path": "/mtoapi/mtp/incidentDashboard/Dashboard/ActiveIncidentsSummary",
         "operationContext": {
-          "surface": "Portal shell",
+          "surface": "MTO landing dashboard",
           "workflows": [
-            "Load or refresh the Defender XDR shell before feature blades and cross-solution entry points fully hydrate."
+            "Open or reload the Defender XDR multi-tenant organization homepage."
           ],
-          "authProfile": "defender-session-baseline",
-          "availability": {
-            "level": "user-context",
-            "notes": [
-              "Returned shell state reflects the signed-in operator, current tenant, and enabled Defender surfaces."
-            ]
-          }
-        }
-      },
-      {
-        "operationId": "PortalServices.GetMedeinaAuth",
-        "summary": "Get Medeina (Copilot) auth",
-        "method": "GET",
-        "path": "/medeina/auth",
-        "operationContext": {
-          "surface": "Security Copilot entrypoint",
-          "workflows": [
-            "Open Security Copilot entry points or related Defender experiences that check Copilot readiness."
-          ],
-          "authProfile": "defender-copilot-entitlement",
+          "authProfile": "defender-mto-tenant-context",
           "availability": {
             "level": "tenant-conditional",
             "notes": [
-              "Returned auth and readiness state depends on tenant enablement and the signed-in operator."
-            ]
-          }
-        }
-      },
-      {
-        "operationId": "PortalServices.GetMedeinaDataShareSettings",
-        "summary": "Get Security Copilot data-sharing settings",
-        "method": "GET",
-        "path": "/medeina/settings/datashare",
-        "operationContext": {
-          "surface": "Security Copilot settings",
-          "authProfile": "defender-copilot-entitlement",
-          "availability": {
-            "level": "tenant-conditional",
-            "notes": [
-              "Returned settings depend on Security Copilot enablement for the current tenant."
+              "Results aggregate only tenants available to the signed-in operator and current MTO selection."
             ]
           },
           "provenance": [
@@ -423,24 +522,27 @@
               "source": "live-portal-capture",
               "confidence": "high",
               "notes": [
-                "Observed as a successful normal-UI read during bounded Defender navigation."
+                "Confirmed twice during passive landing-page hydration with no deliberate mutation."
               ]
             }
           ]
         }
       },
       {
-        "operationId": "PortalServices.GetMedeinaCapacities",
-        "summary": "Get Security Copilot capacities",
+        "operationId": "MultiTenant.ListMachineGroups",
+        "summary": "List MTO machine groups",
         "method": "GET",
-        "path": "/medeina/usage/capacities",
+        "path": "/mtoapi/mtp/rbacManagementApi/rbac/machine_groups",
         "operationContext": {
-          "surface": "Security Copilot settings",
-          "authProfile": "defender-copilot-entitlement",
+          "surface": "MTO landing dashboard",
+          "workflows": [
+            "Hydrate MTO endpoint RBAC context while the landing dashboard loads."
+          ],
+          "authProfile": "defender-mto-tenant-context",
           "availability": {
             "level": "tenant-conditional",
             "notes": [
-              "Capacity state can be absent when no Security Copilot capacity is available."
+              "Returned groups and counts depend on selected tenants and operator permissions."
             ]
           },
           "provenance": [
@@ -448,29 +550,10 @@
               "source": "live-portal-capture",
               "confidence": "high",
               "notes": [
-                "Observed as a successful normal-UI read during bounded Defender navigation."
+                "Confirmed during two passive MTO landing captures."
               ]
             }
           ]
-        }
-      },
-      {
-        "operationId": "PortalServices.GetSecurityCopilotTrial",
-        "summary": "Get Security Copilot trial status",
-        "method": "GET",
-        "path": "/cdssecuritycopilot/trial",
-        "operationContext": {
-          "surface": "Security Copilot entrypoint",
-          "workflows": [
-            "Load trial, onboarding, or entitlement UX for Security Copilot from the Defender portal."
-          ],
-          "authProfile": "defender-copilot-entitlement",
-          "availability": {
-            "level": "tenant-conditional",
-            "notes": [
-              "Trial state is specific to the current tenant and may be absent where Security Copilot onboarding is disabled."
-            ]
-          }
         }
       }
     ]

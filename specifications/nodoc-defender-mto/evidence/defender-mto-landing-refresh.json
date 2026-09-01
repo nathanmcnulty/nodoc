@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "artifactId": "defender-mto-landing-refresh-20260831",
+  "sourcePortal": "Defender XDR (MTO)",
+  "sourceState": "Multi-tenant organization landing page",
+  "assignedSpecId": "defender-mto",
+  "assignedHost": "mto.security.microsoft.com",
+  "terminalStatus": "completed",
+  "captureComplete": true,
+  "interactionAccountingConsistent": true,
+  "requiredActionFailureCount": 0,
+  "unresolvedMutation": false,
+  "deliberateMutationAttemptCount": 0,
+  "graphTelemetryObserved": false,
+  "hashes": {
+    "summary.json": "62d2e33c82559ab6d25d2328336b541c97404f24c2a37c82d9c71e0e41c94237",
+    "api-records.json": "c41027a0df63be3e6a789280556e6af379faec70ad7d91aea9655b40dee75ad7",
+    "candidate-queue.json": "d945cb9f257df22fb0103cc02786b57c9e08fb99666853a94768b7a02528515f",
+    "candidate-handoff.json": "452839ef2c1eed724f97a3f49d7382a7b5d9bafbc7cbb04053beb0181c3da326",
+    "discovery-run.json": "71c4b25e132f475eb938db5c7d6192dbb3e3717c5522d4d2155e1862dac171d2",
+    "novelty-assessment.json": "f867d3d03b7f0d41fc62cc386b6acaf9c23f5bb97ebe736bad3d439a4ba3e1d2"
+  },
+  "promotedOperations": [
+    "GET /mtoapi/mtp/incidentDashboard/Dashboard/ActiveIncidentsSummary",
+    "GET /mtoapi/mtp/rbacManagementApi/rbac/machine_groups",
+    "GET /mtoapi/mtp/sccManagement/mgmt/TenantContext",
+    "GET /mtoapi/tenantGroups/effective/"
+  ],
+  "shapeDigests": {
+    "activeIncidentsSummaryResponse": "8b5242583dc11358ad4237d680758aa77e623f6d1eeb482546f3f818479f7fe9",
+    "machineGroupsResponse": "2d058ef372d63a5e6ba50f2ed506058fe87888a9820637ad19ddcaae5b31056d",
+    "tenantContextResponse": "7ea168423a6c275ef4d73d87ee5a0df85d154949eaaf887686820333eada4e67",
+    "effectiveTenantGroupResponse": "3f4d8ae10ad40e2f3f9184e7a92853e96b62e591f02f1c11aabbe26fb03eceff"
+  },
+  "sharedOperationPolicy": "MTO-wrapped routes retain MTO ownership and link to native Defender semantics when applicable; native routes are not duplicated into this spec solely because the MTO portal calls them."
+}

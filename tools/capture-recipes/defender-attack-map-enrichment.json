@@ -6,13 +6,52 @@
     "matchPathPrefixes": ["/security-graph"],
     "bootstrap": {
       "matchHosts": ["security.microsoft.com"],
-      "matchPathnames": ["/"]
+      "matchPathPrefixes": ["/"]
     }
   },
-  "capturePrerequisite": {
-    "status": "blocked",
-    "reason": "This newly separated Attack map frontier has not yet received the required exact Luna xhigh/max evidence and safety review artifact.",
-    "nextRequirement": "Have exact gpt-5.6-luna at xhigh or max approve the bounded Attack map request/response-shape frontier and bind its immutable approval artifact before live allocation."
+  "noveltyStatus": {
+    "status": "satisfied",
+    "reason": "The passive Attack map capture materialized request and response examples for the attack-surface query and device-totals contracts, and both are now promoted with immutable evidence.",
+    "nextRequirement": "Identify an exact Attack map route, query key, status, media type, or non-empty response shape absent from the checked-in Defender XDR baseline before another run.",
+    "approvalArtifact": "tools/frontier-approvals/defender-attack-map-enrichment.json",
+    "approvalDigest": "3f28d67300632fc658ba6f87e53cbd8f55eaf77de58fa6fcf54cfac49cc305ba",
+    "baseline": "checked-in-spec-and-coverage-ledgers",
+    "baselineSignals": {
+      "queryMetadata": [],
+      "requestShapes": [],
+      "responseMetadata": [],
+      "responseShapes": [],
+      "routes": []
+    },
+    "reopenCondition": "The Attack map state emits an action-attributed attack-surface or endpoint-device operation whose request or response contract is not represented in the checked-in Defender baseline.",
+    "targets": [
+      {
+        "id": "attack-surface-query-contract",
+        "state": "Defender Attack map",
+        "evidenceLevel": "confirmed",
+        "expectedHostFamilies": ["mto.security.microsoft.com", "security.microsoft.com"],
+        "expectedRoutes": ["/mtp/xspmatlas/attacksurface/query"],
+        "expectedInformationClasses": ["request-shape", "response-shape", "response-metadata"],
+        "expectedDocumentationObjectives": ["request-example", "response-example", "error-example"],
+        "actionIndexes": [0, 2, 4],
+        "safeAction": "Navigate to Attack map and passively capture the normal query and endpoint-device traffic.",
+        "acceptanceKey": "attack-surface-query-request-response-contract",
+        "rationale": "The UI emits a body-bearing query operation whose live request and response examples can enrich the documented contract without authoring or replaying a request."
+      },
+      {
+        "id": "endpoint-device-totals-contract",
+        "state": "Defender Attack map",
+        "evidenceLevel": "confirmed",
+        "expectedHostFamilies": ["mto.security.microsoft.com", "security.microsoft.com"],
+        "expectedRoutes": ["/mtp/ndr/machines/deviceTotals"],
+        "expectedInformationClasses": ["response-shape", "response-metadata"],
+        "expectedDocumentationObjectives": ["response-example", "error-example"],
+        "actionIndexes": [0, 2, 4],
+        "safeAction": "Navigate to Attack map and passively capture the normal endpoint-device totals response.",
+        "acceptanceKey": "endpoint-device-totals-response-contract",
+        "rationale": "The device totals read is a stable passive companion to the Attack map and provides a second response family for shape and error enrichment."
+      }
+    ]
   },
   "matchHosts": ["security.microsoft.com"],
   "matchPathPrefixes": [

@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "artifactId": "defender-sentinel-graph-refresh-20260831",
+  "sourcePortal": "Defender XDR",
+  "sourceState": "Sentinel Graph readiness",
+  "assignedSpecId": "defender-xdr",
+  "assignedHost": "security.microsoft.com",
+  "terminalStatus": "completed",
+  "captureComplete": true,
+  "interactionAccountingConsistent": true,
+  "unresolvedMutation": false,
+  "hashes": {
+    "summary.json": "8595ea8fcb3950c8c6ff79bf517f3dc0b0a48744c1019776276070deff0f3aa5",
+    "api-records.json": "cd3024fdfb1738af5822f1114576c95a02e02d3315e5b2ddf9432a5c5b425c78",
+    "candidate-handoff.json": "94edb39cff4768dcc16e3e2106899d3e1e6bc329b539167401423fb879c8ed06",
+    "novelty-assessment.json": "86690510ad5c010329a0f01b13462fc6f6f291603692c608d66ec061dcaf8d76"
+  },
+  "promotedOperations": [
+    "GET /securityplatform/graphs/graph-instances",
+    "POST /securityplatform/sentinelgraph/provisioning/checkTenant"
+  ],
+  "shapeDigests": {
+    "graphInstancesResponse": "3eae6310778a88b36d764cc64c1ae30b5183ba8d22808f09cf8847483b44ff47",
+    "tenantCheckRequest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "tenantCheckResponse": "4b1451ed740c37b55c3199f05e4b9bd825e4c7fb5f114df0e04fa000c84c45b2"
+  },
+  "deferredState": "The catalog route did not emit because Sentinel Graph was not ready in the observed tenant state."
+}

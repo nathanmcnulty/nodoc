@@ -97,6 +97,9 @@ export function buildPreflightCriteria(recipe) {
   return {
     matchHosts: pageTarget.matchHosts,
     matchPathPrefixes: pageTarget.matchPathPrefixes,
+    ...(Array.isArray(recipe?.pageTarget?.allowedEntryQueryParameters)
+      ? { allowedEntryQueryParameters: [...recipe.pageTarget.allowedEntryQueryParameters] }
+      : {}),
     urlPattern: recipe.matchUrlPattern,
     titlePattern: recipe.matchTitlePattern,
     expectedTitlePattern: recipe.expectedTitlePattern,
@@ -672,6 +675,7 @@ export async function buildCaptureWorkerPacket({
   const recipeContents = await readFile(recipePath);
   const driverArgs = [
     "--portal", brief.specId,
+    "--recipe", brief.recipe,
     "--profile", "bounded",
     "--phase", "all",
     ...(args.requireNovelty ? ["--require-novelty"] : []),
@@ -686,6 +690,7 @@ export async function buildCaptureWorkerPacket({
     ...(args.operationApprovalDigest
       ? ["--operation-approval-digest", args.operationApprovalDigest]
       : []),
+    ...args.variables.flatMap((variable) => ["--var", variable]),
   ];
   const verificationArgs = [...driverArgs];
   verificationArgs[verificationArgs.indexOf("--phase") + 1] = "plan";

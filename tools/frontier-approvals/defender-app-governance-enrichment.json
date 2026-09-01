@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "specId": "defender-xdr",
+  "decision": "accept-bounded-frontier",
+  "workerModel": "gpt-5.6-luna",
+  "workerReasoning": "xhigh",
+  "approvedAt": "2026-08-31T23:00:00.000Z",
+  "source": {
+    "head": "1bbc0f3974defd07e96e17c9f9e2b795628bd03e",
+    "artifactPath": "tools/frontier-approvals/defender-app-governance-enrichment-source.json",
+    "artifactSha256": "f7bfa1f71f67a3f9defec00abbb0874f664bdb8d0ea496a2b4efafa83601f75f",
+    "frontierSetId": "offline-frontier-set-47b121c1427fb44c8f36fc7c",
+    "frontierSetDigest": "47b121c1427fb44c8f36fc7cabe7115338195455aa75e1d470f33a7337d86d6d"
+  },
+  "state": "Defender App Governance inventory",
+  "canonicalShellUrl": "https://security.microsoft.com/cloudapps/app-governance",
+  "apiEvidenceScope": {
+    "hosts": ["security.microsoft.com", "mto.security.microsoft.com"],
+    "pathPrefixes": ["/apiproxy/mcas"]
+  },
+  "safeActions": [
+    "navigate=cloudapps-app-governance",
+    "wait-ms=12000",
+    "capture=app-governance-inventory",
+    "wait-ms=8000",
+    "capture=app-governance-settled"
+  ],
+  "acceptedItems": [
+    {"frontierId":"offline-frontier-f5ff6dda38a02afd19cca3f5","frontierDigest":"f5ff6dda38a02afd19cca3f52ec9eab7d42ebdc7fcc7546f2cd1f42e7e87d44e","canonicalKey":"mto.security.microsoft.com POST /mcas/cas/api/v1/app_permissions"},
+    {"frontierId":"offline-frontier-94390b15b46bce7f960e2a7b","frontierDigest":"94390b15b46bce7f960e2a7bc10bfad2507fd6eeabf7980d4886ac951275eba2","canonicalKey":"mto.security.microsoft.com POST /mcas/cas/api/v1/app_permissions"},
+    {"frontierId":"offline-frontier-43b761d4ed9a6bf9559956c9","frontierDigest":"43b761d4ed9a6bf9559956c98f7506f7ea4555853416152aaf8e6565168a6d0e","canonicalKey":"mto.security.microsoft.com POST /mcas/cas/api/v1/app_permissions"},
+    {"frontierId":"offline-frontier-eb649c980ee2f646eb690dc0","frontierDigest":"eb649c980ee2f646eb690dc09ef8b29eeca6962f3a223eb02a3b8307e373d6fc","canonicalKey":"mto.security.microsoft.com POST /mcas/cas/api/v1/app_permissions"}
+  ],
+  "deferredItemCount": 2687,
+  "blockedItemCount": 2687,
+  "constraints": [
+    "Passive navigation and capture only",
+    "Do not create, edit, delete, consent, or authorize an application",
+    "Do not export or start a trial; sanitize all retained evidence"
+  ]
+}

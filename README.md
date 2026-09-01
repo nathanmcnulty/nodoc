@@ -13,7 +13,9 @@ The project currently publishes the following API definitions:
 
 | API | Ops | Access model | Site page | Checked-in Postman collection |
 | --- | ---: | --- | --- | --- |
-| Defender | 558 | Portal session cookie (`sccauth`) | [Browse](https://nodoc.nathanmcnulty.com/defender) | `postman/collections/defender.collection.json` |
+| Defender XDR | 585 | Portal session cookie (`sccauth`) | [Browse](https://nodoc.nathanmcnulty.com/defender) | `postman/collections/defender.collection.json` |
+| Defender XDR (MTO) | 19 | Defender session + MTO tenant/XSRF routing context | [Browse](https://nodoc.nathanmcnulty.com/defender-mto) | `postman/collections/defender-mto.collection.json` |
+| Microsoft Graph Research | 2 | Delegated Microsoft Graph bearer token | [Browse](https://nodoc.nathanmcnulty.com/microsoft-graph-research) | `postman/collections/graph-research.collection.json` |
 | M365 Admin | 213 | Portal session + custom admin headers | [Browse](https://nodoc.nathanmcnulty.com/m365-admin) | `postman/collections/m365-admin.collection.json` |
 | Exchange | 61 | Legacy portal cookie or current admin-shell bearer token | [Browse](https://nodoc.nathanmcnulty.com/exchange) | `postman/collections/exchange-beta.collection.json` |
 | SharePoint | 41 | Portal session cookie (`FedAuth`) + SharePoint form digest | [Browse](https://nodoc.nathanmcnulty.com/sharepoint-admin) | `postman/collections/sharepoint-admin.collection.json` |

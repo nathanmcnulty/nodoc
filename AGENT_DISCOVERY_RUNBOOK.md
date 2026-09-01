@@ -219,6 +219,16 @@ Retain all observed methods. Reads, POST-backed reads, mutations, GraphQL/RPC,
 streaming, and job-style transports receive separate safety and execution-state
 labels; no non-GET is discarded merely because it is not promotion-ready.
 
+For sibling portal views, retain the exact page origin and transport prefix in
+the provenance record, then classify ownership before promotion. A view such as
+Defender MTO can share native backend semantics while adding tenant selection,
+proxy routing, and a result/metadata envelope. Promote the wrapper route to the
+view-specific spec, retain the native route in its owning spec, and record an
+explicit relationship rather than creating two independent descriptions of the
+same backend behavior. Continuous portals may never reach a generic
+network-idle threshold; do not make duplicate navigation a required action when
+preflight plus mandatory navigation already establishes the target state.
+
 Also inventory automatic portal side effects separately from agent-invoked
 operations. For each passive non-GET, retain its action/checkpoint attribution,
 status, request shape, response shape, and any naturally emitted before/after

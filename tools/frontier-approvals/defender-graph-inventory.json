@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "specId": "defender-xdr",
+  "decision": "accept-bounded-frontier",
+  "workerModel": "gpt-5.6-luna",
+  "workerReasoning": "xhigh",
+  "approvedAt": "2026-08-31T23:00:00.000Z",
+  "source": {
+    "head": "1bbc0f3974defd07e96e17c9f9e2b795628bd03e",
+    "artifactPath": "tools/frontier-approvals/defender-graph-inventory-source.json",
+    "artifactSha256": "7be22917113c7204e2a92d6281a04908b5b3d2e76b9b7cd88d0b6885711464d8",
+    "frontierSetId": "offline-frontier-set-b4d00b6e23f65310a2550a68",
+    "frontierSetDigest": "b4d00b6e23f65310a2550a68f1783642686c7b969c90c6a07a9f91f84d2b1607"
+  },
+  "state": "Defender Identity Explorer",
+  "canonicalShellUrl": "https://security.microsoft.com/user",
+  "apiEvidenceScope": {
+    "hosts": ["security.microsoft.com", "mto.security.microsoft.com"],
+    "pathPrefixes": ["/apiproxy/msgraph"]
+  },
+  "safeActions": [
+    "navigate=parameterized-identity-explorer-with-aad-accountName-accountDomain-radiusUserId-upn-tab-tid",
+    "wait-ms=10000",
+    "capture=defender-identity-explorer"
+  ],
+  "reviewDisposition": "The previously selected full Identity Explorer state is approved only with runtime aad, accountName, accountDomain, radiusUserId, upn, tab, and tenantId values; no tenant identifiers are checked in.",
+  "acceptedItems": [
+    {"frontierId":"offline-frontier-a42bce0e8be7151abc8b3e80","frontierDigest":"a42bce0e8be7151abc8b3e80724fb0bc8c71d454b89556a6f3618ed7e7d0551e","canonicalKey":"mto.security.microsoft.com GET /msgraph/v1.0/users"},
+    {"frontierId":"offline-frontier-4676dcf8506f576104193dba","frontierDigest":"4676dcf8506f576104193dba301a6cce132b3f1a2c62481111bc446aa36b4f5a","canonicalKey":"mto.security.microsoft.com GET /msgraph/v1.0/users/{UserId}"}
+  ],
+  "deferredItemCount": 2689,
+  "blockedItemCount": 2689,
+  "constraints": [
+    "Passive navigation and capture only",
+    "Supply aad, accountName, accountDomain, radiusUserId, upn, tab, and tenantId only at runtime; never commit tenant identifiers",
+    "Do not edit identities, settings, graph state, or connectors",
+    "Sanitize all Graph proxy evidence before retention"
+  ]
+}

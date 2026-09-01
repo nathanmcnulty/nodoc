@@ -24,12 +24,19 @@ function uniqueOrdered(values) {
 }
 
 export const crawlMetadataByTitle = {
-  Defender: {
+  "Defender XDR": {
     portalUrl: "https://security.microsoft.com",
-    authModel: "Portal session cookies (`sccauth`, `XSRF-TOKEN`) + MTO routing context",
+    authModel: "Portal session cookies (`sccauth`, `XSRF-TOKEN`)",
     crawlPriority: "diff-first",
     nextPass: "normalized-family-diff",
     reason: "Largest surface in the repo; use capture-vs-spec diffs before another broad crawl.",
+  },
+  "Defender XDR (MTO)": {
+    portalUrl: "https://mto.security.microsoft.com",
+    authModel: "Defender portal session cookies plus MTO tenant, XSRF, and proxy routing context",
+    crawlPriority: "diff-first",
+    nextPass: "mto-view-diff",
+    reason: "Treat MTO as a distinct multi-tenant portal view and target only wrapper or workflow contracts absent from the MTO baseline.",
   },
   "Entra B2C": {
     portalUrl: "https://entra.microsoft.com",
@@ -175,18 +182,18 @@ export const crawlMetadataByTitle = {
 
 export const recorderIdAliasesBySpecId = {
   "defender-xdr": ["defender"],
+  "defender-mto": ["defender"],
   "exchange-beta": ["exchange-beta"],
   "ibiza-iam": ["entra-iam"],
 };
 
 export const coverageOverlayByTitle = {
-  Defender: {
+  "Defender XDR": {
     seedUrls: [
       "https://security.microsoft.com",
     ],
     observedHosts: [
       "security.microsoft.com",
-      "mto.security.microsoft.com",
     ],
     lastSuccessfulPassDepth: "bounded-normal-ui-diff",
     promotedDiscoveries: [
@@ -195,6 +202,9 @@ export const coverageOverlayByTitle = {
       route("GET", "/apiproxy/mcas/cas/api/v1/app_connectors/dashboard/get_app_connectors_count_by_status", "Promoted from bounded normal-UI Defender for Cloud Apps traffic."),
       route("GET", "/apiproxy/medeina/settings/datashare", "Promoted from bounded normal-UI Security Copilot settings traffic."),
       route("GET", "/apiproxy/medeina/usage/capacities", "Promoted from bounded normal-UI Security Copilot capacity traffic."),
+      route("POST", "/apiproxy/mtp/xspmatlas/attacksurface/query", "Promoted with exact request and response shapes from a passive Attack map capture."),
+      route("GET", "/apiproxy/mtp/ndr/machines/deviceTotals", "Promoted with the observed array item contract from a passive Attack map capture."),
+      route("POST", "/apiproxy/securityplatform/sentinelgraph/provisioning/checkTenant", "Promoted with empty-request and readiness-response shapes from Sentinel Graph readiness."),
     ],
     knownTelemetryExclusions: [
       route("POST", "/api/log/Put", "Telemetry and performance sink confirmed during the checked-in Defender verification recipe."),
@@ -204,17 +214,45 @@ export const coverageOverlayByTitle = {
       route("GET", "/apiproxy/mtp/userPreferences/api/mgmt/userpreferencesservice/userPreference/{preferenceKey}", "Deferred because the observed tenant-scoped suffix is not proven to be a stable wildcard preference resource."),
     ],
     openGaps: [
-      "Run the parameterized Identity Explorer recipe with a seeded user object to retain method, request, response, and Graph-contract evidence for the newly identified non-baseline proxy operations.",
-      "Capture the Attack map, App Governance inventory, and Sentinel Graph readiness recipes in dedicated immutable runs so the shared attack-surface query body shapes and the failing connector status can be attributed to exact product states.",
+      "Reopen Identity Explorer only after adding a deterministic identity-page-to-tab transition that reproduces an exact unmodeled Defender or Graph proxy operation.",
+      "Reopen Sentinel Graph catalog discovery when the tenant reaches a different provisioning state; the current readiness state did not emit the catalog route.",
     ],
     notes: [
       "The Graph-focused recipe now targets parameterized Identity Explorer state instead of replaying the exhausted graphs and machines states.",
       "Focused recipes separate Attack map, App Governance, and Sentinel Graph readiness traffic because multiple views share the opaque POST-backed attack-surface query transport.",
-      "The checked-in Defender coverage includes same-origin nav, representative entity pages, and MTO-backed proxy APIs.",
+      "The checked-in Defender XDR coverage includes same-origin navigation and representative entity pages; MTO-wrapped operations now have separate portal-view ownership.",
+      "Passive Attack map and Sentinel Graph runs promoted complete request, response, query, and readiness shapes with no deliberate mutation.",
       "A dedicated live verification pass confirmed Defender also emits POST /api/log/Put, so candidate diffs now suppress it as telemetry-only traffic.",
       "A bounded normal-UI pass promoted four read-only families and retained the recurring recording upload as a telemetry exclusion.",
       "Offline structural reconciliation is complete: 602 source declarations partition into 592 emitted, 8 intentionally filtered, 1 Sentinel transport alias, and 1 duplicate-shadowed Cloud Apps declaration, with no unresolved or orphaned identities.",
       "CloudApps.GetSettings remains an explicit duplicate-shadowed ownership disposition for the root-indexed Configuration.GetCloudAppsSettings operation; it is not an outstanding coverage gap.",
+    ],
+  },
+  "Defender XDR (MTO)": {
+    seedUrls: [
+      "https://mto.security.microsoft.com",
+    ],
+    observedHosts: [
+      "mto.security.microsoft.com",
+    ],
+    lastSuccessfulPassDepth: "passive-landing-reload",
+    promotedDiscoveries: [
+      route("GET", "/apiproxy/mtoapi/mtp/incidentDashboard/Dashboard/ActiveIncidentsSummary", "Promoted from passive MTO landing hydration with result and execution-metadata envelope shapes."),
+      route("GET", "/apiproxy/mtoapi/mtp/rbacManagementApi/rbac/machine_groups", "Promoted from passive MTO landing hydration with machine-group and wrapper contracts."),
+      route("GET", "/apiproxy/mtoapi/mtp/sccManagement/mgmt/TenantContext", "Enriched with the observed feature-group, feature-name, and tenant-keyed bootstrap shape."),
+      route("GET", "/apiproxy/mtoapi/tenantGroups/effective/", "Enriched with a sanitized current response example and exact response shape."),
+    ],
+    knownTelemetryExclusions: [
+      route("POST", "/api/log/Put", "Shared Defender shell telemetry observed during passive MTO landing hydration."),
+    ],
+    openGaps: [
+      "Use exact MTO views to capture tenant picker, recent items, tenant groups, assignments, and RBAC-group contracts that do not naturally emit from the landing page.",
+      "Classify future MTO captures as wrapper-specific, native-shared, or shared-shell before assigning specification ownership.",
+    ],
+    notes: [
+      "MTO is modeled as a distinct portal view for operators managing multiple tenants, not as a separate implementation of every Defender backend.",
+      "MTO-wrapped routes retain this spec's ownership because their tenant selection, routing context, and response envelope differ from native Defender XDR calls.",
+      "The successful landing capture completed with no required action failures, no deliberate mutation attempts, and no Graph telemetry.",
     ],
   },
   "Entra B2C": {
@@ -678,7 +716,7 @@ export const coverageOverlayByTitle = {
 };
 
 export const captureRecipesByTitle = {
-  Defender: [
+  "Defender XDR": [
     "tools/capture-recipes/defender-deep.json",
     "tools/capture-recipes/defender-attack-map-enrichment.json",
     "tools/capture-recipes/defender-app-governance-enrichment.json",
@@ -686,6 +724,9 @@ export const captureRecipesByTitle = {
     "tools/capture-recipes/defender-sentinel-graph-enrichment.json",
     "tools/capture-recipes/defender-telemetry-verification.json",
     "tools/capture-recipes/defender-entity-replay.json",
+  ],
+  "Defender XDR (MTO)": [
+    "tools/capture-recipes/defender-mto-landing-enrichment.json",
   ],
   "Entra B2C": [
     "tools/capture-recipes/entra-b2c-deep.json",

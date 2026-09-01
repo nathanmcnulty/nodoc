@@ -6,7 +6,7 @@
     "matchPathPrefixes": ["/graphs"],
     "bootstrap": {
       "matchHosts": ["security.microsoft.com"],
-      "matchPathnames": ["/"]
+      "matchPathPrefixes": ["/"]
     }
   },
   "inspectionPolicy": {
@@ -19,10 +19,62 @@
       "Purchase"
     ]
   },
-  "capturePrerequisite": {
-    "status": "blocked",
-    "reason": "This newly separated Sentinel Graph readiness/error frontier has not yet received the required exact Luna xhigh/max evidence and safety review artifact.",
-    "nextRequirement": "Have exact gpt-5.6-luna at xhigh or max approve the observe-only graph-instance, tenant-check, and connector-status frontier and bind its immutable approval artifact before live allocation."
+  "noveltyStatus": {
+    "status": "satisfied",
+    "reason": "The readiness capture promoted the graph-instance and Sentinel tenant-check response contracts; the catalog route was correctly absent while the observed tenant was not provisioned.",
+    "nextRequirement": "Reopen only when Sentinel Graph reaches a different readiness state or an exact unmodeled graph catalog, connector, query, status, or response contract is available.",
+    "approvalArtifact": "tools/frontier-approvals/defender-sentinel-graph-enrichment.json",
+    "approvalDigest": "3a7c24e9983764ce2cc13414ee7a45743cc6838fe4361b1702969fee8d1808a0",
+    "baseline": "checked-in-spec-and-coverage-ledgers",
+    "baselineSignals": {
+      "queryMetadata": [],
+      "requestShapes": [],
+      "responseMetadata": [],
+      "responseShapes": [],
+      "routes": []
+    },
+    "reopenCondition": "The Sentinel Graph readiness state emits an action-attributed graph-instance, tenant-check, catalog, or connector-status contract not represented in the checked-in Defender baseline.",
+    "targets": [
+      {
+        "id": "sentinel-graph-instance-contract",
+        "state": "Defender Sentinel Graph readiness",
+        "evidenceLevel": "confirmed",
+        "expectedHostFamilies": ["mto.security.microsoft.com", "security.microsoft.com"],
+        "expectedRoutes": ["/securityplatform/graphs/graph-instances"],
+        "expectedInformationClasses": ["response-shape", "response-metadata"],
+        "expectedDocumentationObjectives": ["response-example", "error-example"],
+        "actionIndexes": [0, 2, 4],
+        "safeAction": "Open Sentinel Graph readiness and passively capture graph-instance inventory traffic without selecting setup controls.",
+        "acceptanceKey": "sentinel-graph-instance-response-contract",
+        "rationale": "Graph instance inventory is a passive readiness read and can provide a concrete empty or populated response shape without enabling graph features."
+      },
+      {
+        "id": "sentinel-graph-tenant-check-contract",
+        "state": "Defender Sentinel Graph readiness",
+        "evidenceLevel": "confirmed",
+        "expectedHostFamilies": ["mto.security.microsoft.com", "security.microsoft.com"],
+        "expectedRoutes": ["/securityplatform/sentinelgraph/provisioning/checkTenant"],
+        "expectedInformationClasses": ["request-shape", "response-shape", "response-metadata"],
+        "expectedDocumentationObjectives": ["request-example", "response-example", "error-example"],
+        "actionIndexes": [0, 2, 4],
+        "safeAction": "Open Sentinel Graph readiness and passively capture the normal tenant eligibility check; do not invoke provisioning or connector setup.",
+        "acceptanceKey": "sentinel-graph-tenant-check-request-response-contract",
+        "rationale": "The tenant check is a body-bearing readiness probe observed during normal page load; observe-only capture can enrich it without crossing into provisioning."
+      },
+      {
+        "id": "sentinel-graph-catalog-contract",
+        "state": "Defender Sentinel Graph readiness",
+        "evidenceLevel": "confirmed",
+        "expectedHostFamilies": ["mto.security.microsoft.com", "security.microsoft.com"],
+        "expectedRoutes": ["/securityplatform/sentinelgraph/catalog/tables"],
+        "expectedInformationClasses": ["response-shape", "response-metadata"],
+        "expectedDocumentationObjectives": ["response-example", "error-example"],
+        "actionIndexes": [0, 2, 4],
+        "safeAction": "Open Sentinel Graph readiness and passively capture catalog metadata if the normal readiness state requests it.",
+        "acceptanceKey": "sentinel-graph-catalog-response-contract",
+        "rationale": "Catalog metadata is a passive read that can clarify graph table availability while remaining outside setup, connector, trial, and purchase controls."
+      }
+    ]
   },
   "matchHosts": ["security.microsoft.com"],
   "matchPathPrefixes": [

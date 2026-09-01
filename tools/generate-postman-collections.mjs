@@ -17,9 +17,19 @@ const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
 
 const collectionDefinitions = [
   {
-    name: "Defender",
+    name: "Defender XDR",
     spec: "specifications/nodoc-defender-xdr/specification/openapi.yml",
     output: "postman/collections/defender.collection.json",
+  },
+  {
+    name: "Defender XDR (MTO)",
+    spec: "specifications/nodoc-defender-mto/specification/openapi.yml",
+    output: "postman/collections/defender-mto.collection.json",
+  },
+  {
+    name: "Microsoft Graph Research",
+    spec: "specifications/nodoc-graph-research/specification/openapi.yml",
+    output: "postman/collections/graph-research.collection.json",
   },
   {
     name: "M365 Admin",

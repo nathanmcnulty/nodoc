@@ -1,0 +1,133 @@
+{
+  "portal": "Defender MTO",
+  "url": "https://mto.security.microsoft.com",
+  "pageTarget": {
+    "matchHosts": ["mto.security.microsoft.com"],
+    "matchPathPrefixes": ["/"],
+    "bootstrap": {
+      "matchHosts": ["mto.security.microsoft.com"],
+      "matchPathPrefixes": ["/"]
+    }
+  },
+  "noveltyStatus": {
+    "status": "satisfied",
+    "reason": "The passive MTO landing capture promoted two new MTO-wrapped endpoint families and enriched tenant-context and effective-group response contracts without any deliberate mutation.",
+    "nextRequirement": "Identify an exact MTO view, route, query key, status, media type, or non-empty response shape absent from the Defender XDR (MTO) baseline before another run.",
+    "approvalArtifact": "tools/frontier-approvals/defender-mto-landing-enrichment.json",
+    "approvalDigest": "ed571fc90559c3218cfbbbef7387f754a089ae0978356fd689e2a19e78e2fb82",
+    "baseline": "checked-in-spec-and-coverage-ledgers",
+    "baselineSignals": {
+      "queryMetadata": [],
+      "requestShapes": [],
+      "responseMetadata": [],
+      "responseShapes": [],
+      "routes": []
+    },
+    "reopenCondition": "The MTO landing state emits an action-attributed multi-tenant operation whose route, request, response, or query contract is not represented in the checked-in Defender baseline.",
+    "targets": [
+      {
+        "id": "mto-tenant-picker-contract",
+        "state": "Defender Multi-Tenant Management landing",
+        "evidenceLevel": "confirmed",
+        "expectedHostFamilies": ["mto.security.microsoft.com"],
+        "expectedRoutes": ["/mtoapi/tenants/TenantPicker"],
+        "expectedInformationClasses": ["response-shape", "response-metadata"],
+        "expectedDocumentationObjectives": ["response-example"],
+        "actionIndexes": [0, 1, 2, 3, 4],
+        "safeAction": "Open the MTO landing page and passively capture the tenant picker bootstrap request.",
+        "acceptanceKey": "mto-tenant-picker-response-contract",
+        "rationale": "TenantPicker is a natural MTO shell read whose response depends on user scope and should be enriched with a sanitized current example."
+      },
+      {
+        "id": "mto-recent-items-contract",
+        "state": "Defender Multi-Tenant Management landing",
+        "evidenceLevel": "confirmed",
+        "expectedHostFamilies": ["mto.security.microsoft.com"],
+        "expectedRoutes": ["/mtoapi/recentItems"],
+        "expectedInformationClasses": ["response-shape", "response-metadata"],
+        "expectedDocumentationObjectives": ["response-example"],
+        "actionIndexes": [0, 1, 2, 3, 4],
+        "safeAction": "Open the MTO landing page and passively capture the recent-items bootstrap request.",
+        "acceptanceKey": "mto-recent-items-response-contract",
+        "rationale": "The recent-items route is a user-scoped shell read with an intentionally incomplete item schema."
+      },
+      {
+        "id": "mto-tenant-groups-contract",
+        "state": "Defender Multi-Tenant Management landing",
+        "evidenceLevel": "confirmed",
+        "expectedHostFamilies": ["mto.security.microsoft.com"],
+        "expectedRoutes": ["/mtoapi/tenantGroups"],
+        "expectedInformationClasses": ["response-shape", "response-metadata"],
+        "expectedDocumentationObjectives": ["response-example"],
+        "actionIndexes": [0, 1, 2, 3, 4],
+        "safeAction": "Open the MTO landing page and passively capture tenant-group inventory traffic.",
+        "acceptanceKey": "mto-tenant-groups-response-contract",
+        "rationale": "Tenant group inventory is a list-shaped read that should provide an example of the tenant-group member contract."
+      },
+      {
+        "id": "mto-effective-tenant-group-contract",
+        "state": "Defender Multi-Tenant Management landing",
+        "evidenceLevel": "confirmed",
+        "expectedHostFamilies": ["mto.security.microsoft.com"],
+        "expectedRoutes": ["/mtoapi/tenantGroups/effective/"],
+        "expectedInformationClasses": ["response-shape", "response-metadata"],
+        "expectedDocumentationObjectives": ["response-example"],
+        "actionIndexes": [0, 1, 2, 3, 4],
+        "safeAction": "Open the MTO landing page and passively capture the effective tenant-group response.",
+        "acceptanceKey": "mto-effective-tenant-group-response-contract",
+        "rationale": "The effective group read is distinct from the collection and explains the current shell selection without switching tenants."
+      },
+      {
+        "id": "mto-assignments-contract",
+        "state": "Defender Multi-Tenant Management landing",
+        "evidenceLevel": "confirmed",
+        "expectedHostFamilies": ["mto.security.microsoft.com"],
+        "expectedRoutes": ["/mtoapi/assignments"],
+        "expectedInformationClasses": ["response-shape", "response-metadata"],
+        "expectedDocumentationObjectives": ["response-example"],
+        "actionIndexes": [0, 1, 2, 3, 4],
+        "safeAction": "Open the MTO landing page and passively capture content-distribution assignment inventory traffic.",
+        "acceptanceKey": "mto-assignments-response-contract",
+        "rationale": "Assignments are a passive inventory read and the current specification lacks a concrete example for target and sync-status fields."
+      },
+      {
+        "id": "mto-tenant-context-contract",
+        "state": "Defender Multi-Tenant Management landing",
+        "evidenceLevel": "confirmed",
+        "expectedHostFamilies": ["mto.security.microsoft.com"],
+        "expectedRoutes": ["/mtoapi/mtp/sccManagement/mgmt/TenantContext"],
+        "expectedInformationClasses": ["response-shape", "response-metadata", "query-metadata"],
+        "expectedDocumentationObjectives": ["response-example"],
+        "actionIndexes": [0, 1, 2, 3, 4],
+        "safeAction": "Open the MTO landing page and passively capture the selected-tenant context bootstrap without switching tenants or changing settings.",
+        "acceptanceKey": "mto-tenant-context-response-contract",
+        "rationale": "TenantContext is the shell's cross-tenant bootstrap and its runtime realTime query behavior should be documented from natural traffic only."
+      },
+      {
+        "id": "mto-rbac-groups-contract",
+        "state": "Defender Multi-Tenant Management landing",
+        "evidenceLevel": "confirmed",
+        "expectedHostFamilies": ["mto.security.microsoft.com"],
+        "expectedRoutes": ["/mtoapi/mtp/userExposedRbacGroups/UserExposedRbacGroups"],
+        "expectedInformationClasses": ["response-shape", "response-metadata"],
+        "expectedDocumentationObjectives": ["response-example"],
+        "actionIndexes": [0, 1, 2, 3, 4],
+        "safeAction": "Open the MTO landing page and passively capture naturally emitted RBAC-group context traffic.",
+        "acceptanceKey": "mto-rbac-groups-response-contract",
+        "rationale": "RBAC group context is a related landing operation with an incomplete response shape and no need for an interactive control."
+      }
+    ]
+  },
+  "matchHosts": ["mto.security.microsoft.com", "security.microsoft.com"],
+  "matchPathPrefixes": ["/mtoapi", "/apiproxy", "/mtp"],
+  "captureScripts": false,
+  "postActionSettleMs": 10000,
+  "settleMs": 10000,
+  "actions": [
+    "wait-ms=10000",
+    "capture=mto-landing-initial",
+    "reload=mto-landing",
+    "wait-ms=10000",
+    "capture=mto-landing-reloaded"
+  ]
+}

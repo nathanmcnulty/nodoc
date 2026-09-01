@@ -1,0 +1,438 @@
+{
+    "item": [
+        {
+            "name": "deviceManagement",
+            "description": "",
+            "item": [
+                {
+                    "name": "retrieveProjectFlightingStatuses(projectNames=null)",
+                    "description": "",
+                    "item": [
+                        {
+                            "id": "bff294fc-737c-4edb-b4cc-eadf19078de2",
+                            "name": "Retrieve Intune project flighting statuses",
+                            "request": {
+                                "name": "Retrieve Intune project flighting statuses",
+                                "description": {
+                                    "content": "Return Intune management feature projects and their currently visible feature-flight values.\nThe portal repeatedly invoked the exact `projectNames=null` function form while loading\nTenant administration, Reports, Endpoint analytics, Devices, and Apps surfaces. Only that\nexact no-filter form is modeled because no alternate parameter encoding was observed.\n",
+                                    "type": "text/plain"
+                                },
+                                "url": {
+                                    "protocol": "https",
+                                    "path": [
+                                        "beta",
+                                        "deviceManagement",
+                                        "retrieveProjectFlightingStatuses(projectNames=null)"
+                                    ],
+                                    "host": [
+                                        "graph",
+                                        "microsoft",
+                                        "com"
+                                    ],
+                                    "query": [],
+                                    "variable": []
+                                },
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "method": "GET",
+                                "body": {},
+                                "auth": null
+                            },
+                            "response": [
+                                {
+                                    "id": "f30179a6-fe1f-4563-bad3-273ef0192a4f",
+                                    "name": "Intune management feature projects and their feature-flight values.",
+                                    "originalRequest": {
+                                        "url": {
+                                            "protocol": "https",
+                                            "path": [
+                                                "beta",
+                                                "deviceManagement",
+                                                "retrieveProjectFlightingStatuses(projectNames=null)"
+                                            ],
+                                            "host": [
+                                                "graph",
+                                                "microsoft",
+                                                "com"
+                                            ],
+                                            "query": [],
+                                            "variable": []
+                                        },
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            }
+                                        ],
+                                        "method": "GET",
+                                        "body": {}
+                                    },
+                                    "status": "OK",
+                                    "code": 200,
+                                    "header": [
+                                        {
+                                            "key": "Content-Type",
+                                            "value": "application/json"
+                                        }
+                                    ],
+                                    "body": "{\n  \"@odata.context\": \"https://graph.microsoft.com/beta/$metadata#Collection(microsoft.graph.managementFeatureProjectDetail)\",\n  \"value\": [\n    {\n      \"projectName\": \"INFRA_Fundamentals2\",\n      \"featureFlights\": []\n    },\n    {\n      \"projectName\": \"INFRA_Auth\",\n      \"featureFlights\": [\n        {\n          \"flightId\": \"UseManagedIdentity\",\n          \"flightValue\": \"True\"\n        }\n      ]\n    }\n  ]\n}",
+                                    "cookie": [],
+                                    "_postman_previewlanguage": "json"
+                                },
+                                {
+                                    "id": "e8622c92-80f3-4179-abff-2c4924f7fd10",
+                                    "name": "Microsoft Graph authentication was missing or invalid.",
+                                    "originalRequest": {
+                                        "url": {
+                                            "protocol": "https",
+                                            "path": [
+                                                "beta",
+                                                "deviceManagement",
+                                                "retrieveProjectFlightingStatuses(projectNames=null)"
+                                            ],
+                                            "host": [
+                                                "graph",
+                                                "microsoft",
+                                                "com"
+                                            ],
+                                            "query": [],
+                                            "variable": []
+                                        },
+                                        "method": "GET",
+                                        "body": {}
+                                    },
+                                    "status": "Unauthorized",
+                                    "code": 401,
+                                    "header": [],
+                                    "cookie": [],
+                                    "_postman_previewlanguage": "text"
+                                },
+                                {
+                                    "id": "ae73ec3e-32a2-4fa4-a52a-918d3779e659",
+                                    "name": "The caller lacked permission to read Intune feature-project status.",
+                                    "originalRequest": {
+                                        "url": {
+                                            "protocol": "https",
+                                            "path": [
+                                                "beta",
+                                                "deviceManagement",
+                                                "retrieveProjectFlightingStatuses(projectNames=null)"
+                                            ],
+                                            "host": [
+                                                "graph",
+                                                "microsoft",
+                                                "com"
+                                            ],
+                                            "query": [],
+                                            "variable": []
+                                        },
+                                        "method": "GET",
+                                        "body": {}
+                                    },
+                                    "status": "Forbidden",
+                                    "code": 403,
+                                    "header": [],
+                                    "cookie": [],
+                                    "_postman_previewlanguage": "text"
+                                }
+                            ],
+                            "event": [],
+                            "protocolProfileBehavior": {
+                                "disableBodyPruning": true
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "roleManagement",
+            "description": "",
+            "item": [
+                {
+                    "name": "directory",
+                    "description": "",
+                    "item": [
+                        {
+                            "name": "estimateAccess",
+                            "description": "",
+                            "item": [
+                                {
+                                    "id": "d969081b-3fb4-4876-b654-be486c795ac4",
+                                    "name": "Estimate directory resource-action access",
+                                    "request": {
+                                        "name": "Estimate directory resource-action access",
+                                        "description": {
+                                            "content": "Evaluate whether the current principal has effective access to one or more Microsoft Entra\ndirectory resource actions at specified scopes. Although transported as POST because it has\na structured request body, observed portal use was read-like and returned an authorization\nestimate without changing tenant configuration.\n",
+                                            "type": "text/plain"
+                                        },
+                                        "url": {
+                                            "protocol": "https",
+                                            "path": [
+                                                "beta",
+                                                "roleManagement",
+                                                "directory",
+                                                "estimateAccess"
+                                            ],
+                                            "host": [
+                                                "graph",
+                                                "microsoft",
+                                                "com"
+                                            ],
+                                            "query": [],
+                                            "variable": []
+                                        },
+                                        "header": [
+                                            {
+                                                "key": "Content-Type",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            }
+                                        ],
+                                        "method": "POST",
+                                        "body": {
+                                            "mode": "raw",
+                                            "raw": "{\n  \"resourceActionAuthorizationChecks\": [\n    {\n      \"directoryScopeId\": \"/\",\n      \"resourceAction\": \"microsoft.directory/groups/standard/read\"\n    }\n  ]\n}",
+                                            "options": {
+                                                "raw": {
+                                                    "headerFamily": "json",
+                                                    "language": "json"
+                                                }
+                                            }
+                                        },
+                                        "auth": null
+                                    },
+                                    "response": [
+                                        {
+                                            "id": "16dc569a-5f09-462e-ae0a-975a445449fe",
+                                            "name": "Effective-access estimates for the requested resource actions and scopes.",
+                                            "originalRequest": {
+                                                "url": {
+                                                    "protocol": "https",
+                                                    "path": [
+                                                        "beta",
+                                                        "roleManagement",
+                                                        "directory",
+                                                        "estimateAccess"
+                                                    ],
+                                                    "host": [
+                                                        "graph",
+                                                        "microsoft",
+                                                        "com"
+                                                    ],
+                                                    "query": [],
+                                                    "variable": []
+                                                },
+                                                "header": [
+                                                    {
+                                                        "key": "Content-Type",
+                                                        "value": "application/json"
+                                                    },
+                                                    {
+                                                        "key": "Accept",
+                                                        "value": "application/json"
+                                                    }
+                                                ],
+                                                "method": "POST",
+                                                "body": {
+                                                    "mode": "raw",
+                                                    "raw": "{\n  \"resourceActionAuthorizationChecks\": [\n    {\n      \"directoryScopeId\": \"/\",\n      \"resourceAction\": \"microsoft.directory/groups/standard/read\"\n    }\n  ]\n}",
+                                                    "options": {
+                                                        "raw": {
+                                                            "headerFamily": "json",
+                                                            "language": "json"
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            "status": "OK",
+                                            "code": 200,
+                                            "header": [
+                                                {
+                                                    "key": "Content-Type",
+                                                    "value": "application/json"
+                                                }
+                                            ],
+                                            "body": "{\n  \"@odata.context\": \"https://graph.microsoft.com/beta/$metadata#Collection(microsoft.graph.resourceActionAuthorizationDecision)\",\n  \"value\": [\n    {\n      \"accessDecision\": \"allowed\",\n      \"directoryScopeId\": \"/\",\n      \"missingClaims\": [],\n      \"resourceAction\": \"microsoft.directory/groups/standard/read\"\n    }\n  ]\n}",
+                                            "cookie": [],
+                                            "_postman_previewlanguage": "json"
+                                        },
+                                        {
+                                            "id": "22c44d30-4879-4902-84a0-8bba0b01a40f",
+                                            "name": "The resource-action authorization check was malformed or incomplete.",
+                                            "originalRequest": {
+                                                "url": {
+                                                    "protocol": "https",
+                                                    "path": [
+                                                        "beta",
+                                                        "roleManagement",
+                                                        "directory",
+                                                        "estimateAccess"
+                                                    ],
+                                                    "host": [
+                                                        "graph",
+                                                        "microsoft",
+                                                        "com"
+                                                    ],
+                                                    "query": [],
+                                                    "variable": []
+                                                },
+                                                "header": [
+                                                    {
+                                                        "key": "Content-Type",
+                                                        "value": "application/json"
+                                                    }
+                                                ],
+                                                "method": "POST",
+                                                "body": {
+                                                    "mode": "raw",
+                                                    "raw": "{\n  \"resourceActionAuthorizationChecks\": [\n    {\n      \"directoryScopeId\": \"/\",\n      \"resourceAction\": \"microsoft.directory/groups/standard/read\"\n    }\n  ]\n}",
+                                                    "options": {
+                                                        "raw": {
+                                                            "headerFamily": "json",
+                                                            "language": "json"
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            "status": "Bad Request",
+                                            "code": 400,
+                                            "header": [],
+                                            "cookie": [],
+                                            "_postman_previewlanguage": "text"
+                                        },
+                                        {
+                                            "id": "8ff737e9-b447-4351-acb2-1b4c1a991d1c",
+                                            "name": "Microsoft Graph authentication was missing or invalid.",
+                                            "originalRequest": {
+                                                "url": {
+                                                    "protocol": "https",
+                                                    "path": [
+                                                        "beta",
+                                                        "roleManagement",
+                                                        "directory",
+                                                        "estimateAccess"
+                                                    ],
+                                                    "host": [
+                                                        "graph",
+                                                        "microsoft",
+                                                        "com"
+                                                    ],
+                                                    "query": [],
+                                                    "variable": []
+                                                },
+                                                "header": [
+                                                    {
+                                                        "key": "Content-Type",
+                                                        "value": "application/json"
+                                                    }
+                                                ],
+                                                "method": "POST",
+                                                "body": {
+                                                    "mode": "raw",
+                                                    "raw": "{\n  \"resourceActionAuthorizationChecks\": [\n    {\n      \"directoryScopeId\": \"/\",\n      \"resourceAction\": \"microsoft.directory/groups/standard/read\"\n    }\n  ]\n}",
+                                                    "options": {
+                                                        "raw": {
+                                                            "headerFamily": "json",
+                                                            "language": "json"
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            "status": "Unauthorized",
+                                            "code": 401,
+                                            "header": [],
+                                            "cookie": [],
+                                            "_postman_previewlanguage": "text"
+                                        },
+                                        {
+                                            "id": "b9c66665-ae82-43ad-8ad1-42fc9ab8be2c",
+                                            "name": "The caller lacked permission to estimate access for the requested scope.",
+                                            "originalRequest": {
+                                                "url": {
+                                                    "protocol": "https",
+                                                    "path": [
+                                                        "beta",
+                                                        "roleManagement",
+                                                        "directory",
+                                                        "estimateAccess"
+                                                    ],
+                                                    "host": [
+                                                        "graph",
+                                                        "microsoft",
+                                                        "com"
+                                                    ],
+                                                    "query": [],
+                                                    "variable": []
+                                                },
+                                                "header": [
+                                                    {
+                                                        "key": "Content-Type",
+                                                        "value": "application/json"
+                                                    }
+                                                ],
+                                                "method": "POST",
+                                                "body": {
+                                                    "mode": "raw",
+                                                    "raw": "{\n  \"resourceActionAuthorizationChecks\": [\n    {\n      \"directoryScopeId\": \"/\",\n      \"resourceAction\": \"microsoft.directory/groups/standard/read\"\n    }\n  ]\n}",
+                                                    "options": {
+                                                        "raw": {
+                                                            "headerFamily": "json",
+                                                            "language": "json"
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            "status": "Forbidden",
+                                            "code": 403,
+                                            "header": [],
+                                            "cookie": [],
+                                            "_postman_previewlanguage": "text"
+                                        }
+                                    ],
+                                    "event": [],
+                                    "protocolProfileBehavior": {
+                                        "disableBodyPruning": true
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "auth": {
+        "type": "bearer",
+        "bearer": [
+            {
+                "type": "any",
+                "value": "{{bearerToken}}",
+                "key": "token"
+            }
+        ]
+    },
+    "event": [],
+    "variable": [
+        {
+            "key": "baseUrl",
+            "value": "https://graph.microsoft.com/beta"
+        }
+    ],
+    "info": {
+        "_postman_id": "98718282-73f8-497c-bd66-47772d5bbfb4",
+        "name": "Microsoft Graph Research",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+        "description": {
+            "content": "This research specification contains only Microsoft Graph operations observed in authenticated\nMicrosoft portals that were absent from both the pinned official Microsoft Graph v1.0 and beta\nOpenAPI contracts at review time.\n\nThese operations are undocumented, unsupported, and potentially unstable. Their presence here\ndoes not imply Microsoft support or suitability for production use. Every operation is admitted\nonly after successful live evidence, structured request or response shapes, corroboration, and\ncomparison with a pinned `microsoftgraph/msgraph-metadata` snapshot. Portal proxy transports and\nthe Graph `$batch` wrapper remain evidence transports; paths in this specification are canonical\ndirect Microsoft Graph operations.\n\n\nContact Support:\n Name: nodoc",
+            "type": "text/plain"
+        }
+    }
+}

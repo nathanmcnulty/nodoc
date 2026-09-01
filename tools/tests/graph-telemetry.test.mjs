@@ -202,3 +202,29 @@ test("Graph telemetry redacts UPN and opaque entity-key path segments while reta
   assert.deepEqual(telemetry.operations[0].responseHeaderNames, ["content-type", "request-id"]);
   assert.doesNotMatch(JSON.stringify(telemetry), /person@example|AAMkAD123/iu);
 });
+
+test("Graph telemetry sanitizes attribution labels and dynamic shape-summary properties", () => {
+  const telemetry = buildGraphTelemetry({ apiRecords: [{
+    attribution: {
+      actionIndex: 0,
+      checkpoint: "01-user-aad-11111111-1111-4111-8111-111111111111-person@example.test",
+    },
+    method: "GET",
+    responseShapeFingerprint: "a".repeat(64),
+    responseShapeSummary: {
+      "11111111-1111-4111-8111-111111111111": "object",
+      account: "person@example.test",
+      value: [{ id: "string" }],
+    },
+    seenOnPages: ["user-person%40example.test-11111111-1111-4111-8111-111111111111"],
+    status: 200,
+    url: "https://security.microsoft.com/apiproxy/msgraph/v1.0/users/11111111-1111-4111-8111-111111111111",
+  }] });
+  validateGraphTelemetry(telemetry);
+  assert.deepEqual(telemetry.operations[0].responseShapeSummaries, [{
+    "{dynamicProperty}": "unknown",
+    account: "redacted",
+    value: [{ id: "string" }],
+  }]);
+  assert.doesNotMatch(JSON.stringify(telemetry), /11111111-1111-4111-8111-111111111111|person@example/iu);
+});

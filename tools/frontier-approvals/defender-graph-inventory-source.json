@@ -1,0 +1,89 @@
+{
+  "schemaVersion": 1,
+  "specId": "defender-xdr",
+  "projection": "approved-only",
+  "frontierSetId": "offline-frontier-set-b4d00b6e23f65310a2550a68",
+  "frontierSetDigest": "b4d00b6e23f65310a2550a68f1783642686c7b969c90c6a07a9f91f84d2b1607",
+  "measurements": {
+    "approvedCount": 2,
+    "candidateCount": 2689,
+    "countsByGapClass": {
+      "error-behavior": 602,
+      "operation-context": 587,
+      "ownership": 0,
+      "pagination": 88,
+      "parameter-example": 212,
+      "permissions": 0,
+      "query": 2,
+      "request-example": 132,
+      "request-shape": 61,
+      "response-example": 594,
+      "response-metadata": 23,
+      "response-shape": 390,
+      "route": 0
+    },
+    "itemCount": 2691,
+    "unresolvedOwnershipCount": 0
+  },
+  "items": [
+    {
+      "schemaVersion": 1,
+      "specId": "defender-xdr",
+      "hostFamily": "mto.security.microsoft.com",
+      "gapClass": "response-example",
+      "canonicalKey": "mto.security.microsoft.com GET /msgraph/v1.0/users",
+      "evidence": [
+        "openapi-documentation-inventory"
+      ],
+      "sourceRefs": [
+        "checked-in-openapi"
+      ],
+      "requiredActionState": {
+        "actionIndexes": [
+          0,
+          2
+        ],
+        "documentationObjectives": [
+          "response-example",
+          "error-example",
+          "pagination-observation"
+        ],
+        "state": "Defender Identity Explorer",
+        "targetId": "graph-user-inventory-contract"
+      },
+      "status": "approved",
+      "blockers": [],
+      "frontierId": "offline-frontier-a42bce0e8be7151abc8b3e80",
+      "frontierDigest": "a42bce0e8be7151abc8b3e80724fb0bc8c71d454b89556a6f3618ed7e7d0551e"
+    },
+    {
+      "schemaVersion": 1,
+      "specId": "defender-xdr",
+      "hostFamily": "mto.security.microsoft.com",
+      "gapClass": "response-example",
+      "canonicalKey": "mto.security.microsoft.com GET /msgraph/v1.0/users/{UserId}",
+      "evidence": [
+        "openapi-documentation-inventory"
+      ],
+      "sourceRefs": [
+        "checked-in-openapi"
+      ],
+      "requiredActionState": {
+        "actionIndexes": [
+          0,
+          2
+        ],
+        "documentationObjectives": [
+          "response-example",
+          "error-example"
+        ],
+        "state": "Defender Identity Explorer",
+        "targetId": "graph-user-detail-contract"
+      },
+      "status": "approved",
+      "blockers": [],
+      "frontierId": "offline-frontier-4676dcf8506f576104193dba",
+      "frontierDigest": "4676dcf8506f576104193dba301a6cce132b3f1a2c62481111bc446aa36b4f5a"
+    }
+  ]
+}

@@ -6,13 +6,52 @@
     "matchPathPrefixes": ["/cloudapps/app-governance"],
     "bootstrap": {
       "matchHosts": ["security.microsoft.com"],
-      "matchPathnames": ["/"]
+      "matchPathPrefixes": ["/"]
     }
   },
-  "capturePrerequisite": {
-    "status": "blocked",
-    "reason": "This newly separated App Governance frontier has not yet received the required exact Luna xhigh/max evidence and safety review artifact.",
-    "nextRequirement": "Have exact gpt-5.6-luna at xhigh or max approve the bounded inventory and representative application-detail frontier and bind its immutable approval artifact before live allocation."
+  "noveltyStatus": {
+    "status": "satisfied",
+    "reason": "The deterministic App Governance inventory state emitted the known connector inventory contract and no new permission contract, so rerunning the unchanged state has no expected yield.",
+    "nextRequirement": "Provide a deterministic application-detail or permission view whose expected route or response contract is absent from the Defender XDR baseline.",
+    "approvalArtifact": "tools/frontier-approvals/defender-app-governance-enrichment.json",
+    "approvalDigest": "9e81552913007cad7a989f959fcee116607d86327357b9cc4f106f37102ca274",
+    "baseline": "checked-in-spec-and-coverage-ledgers",
+    "baselineSignals": {
+      "queryMetadata": [],
+      "requestShapes": [],
+      "responseMetadata": [],
+      "responseShapes": [],
+      "routes": []
+    },
+    "reopenCondition": "The App Governance inventory state emits an action-attributed Cloud Apps operation whose request or response contract is not represented in the checked-in Defender baseline.",
+    "targets": [
+      {
+        "id": "app-governance-connector-contract",
+        "state": "Defender App Governance inventory",
+        "evidenceLevel": "confirmed",
+        "expectedHostFamilies": ["mto.security.microsoft.com", "security.microsoft.com"],
+        "expectedRoutes": ["/mcas/cas/api/v1/app_connectors"],
+        "expectedInformationClasses": ["request-shape", "response-shape", "response-metadata"],
+        "expectedDocumentationObjectives": ["request-example", "response-example", "error-example"],
+        "actionIndexes": [0, 2, 4],
+        "safeAction": "Navigate to App Governance and passively capture inventory and application-detail traffic.",
+        "acceptanceKey": "app-governance-connector-request-response-contract",
+        "rationale": "The inventory and detail views share a product-owned Cloud Apps family with body-bearing list traffic and multiple response shapes that can be captured passively."
+      },
+      {
+        "id": "app-governance-permission-contract",
+        "state": "Defender App Governance inventory",
+        "evidenceLevel": "confirmed",
+        "expectedRoutes": ["/mcas/cas/api/v1/app_permissions"],
+        "expectedHostFamilies": ["mto.security.microsoft.com", "security.microsoft.com"],
+        "expectedInformationClasses": ["request-shape", "response-shape", "response-metadata"],
+        "expectedDocumentationObjectives": ["request-example", "response-example", "error-example"],
+        "actionIndexes": [0, 2, 4],
+        "safeAction": "Navigate to the application permissions details within App Governance and passively capture the normal permission traffic.",
+        "acceptanceKey": "app-governance-permission-request-response-contract",
+        "rationale": "Application permission data is a distinct product-owned family and is central to the user-visible governance view; passive capture can enrich its request and response contract."
+      }
+    ]
   },
   "matchHosts": ["security.microsoft.com"],
   "matchPathPrefixes": [

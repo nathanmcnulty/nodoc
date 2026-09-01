@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "specId": "defender-xdr",
+  "decision": "accept-bounded-frontier",
+  "workerModel": "gpt-5.6-luna",
+  "workerReasoning": "xhigh",
+  "approvedAt": "2026-08-31T23:30:00.000Z",
+  "source": {
+    "head": "1bbc0f3974defd07e96e17c9f9e2b795628bd03e",
+    "artifactPath": "tools/frontier-approvals/defender-mto-landing-enrichment-source.json",
+    "artifactSha256": "f0090ad5f180f611adbbe3931b515db7d5ae4e60f85ccde973ec2d882c4e4d56",
+    "frontierSetId": "offline-frontier-set-26882d94a5daabd69cd60dac",
+    "frontierSetDigest": "26882d94a5daabd69cd60dac401c577dd15df3c352c4070bd574d90c1d268c07"
+  },
+  "state": "Defender Multi-Tenant Management landing",
+  "canonicalShellUrl": "https://mto.security.microsoft.com",
+  "apiEvidenceScope": {
+    "hosts": ["mto.security.microsoft.com"],
+    "pathPrefixes": ["/mtoapi", "/apiproxy", "/mtp"]
+  },
+  "safeActions": [
+    "navigate=mto-landing",
+    "wait-ms=10000",
+    "capture=mto-landing-initial",
+    "reload=mto-landing",
+    "wait-ms=10000",
+    "capture=mto-landing-reloaded"
+  ],
+  "acceptedItems": [
+    {"frontierId":"offline-frontier-f6b8f49f9440bc79a68251ae","frontierDigest":"f6b8f49f9440bc79a68251aed32f5145450c75eedd735d5e671cc0fb81aa4379","canonicalKey":"mto.security.microsoft.com GET /mtoapi/assignments"},
+    {"frontierId":"offline-frontier-fb9a0b7469090d77d98e74ff","frontierDigest":"fb9a0b7469090d77d98e74ff26977a49d5a844764a5c418e8b344a20d2bddbff","canonicalKey":"mto.security.microsoft.com GET /mtoapi/mtp/sccManagement/mgmt/TenantContext"},
+    {"frontierId":"offline-frontier-08c477b9d8d6ae7ba48a8784","frontierDigest":"08c477b9d8d6ae7ba48a8784c39e3559acfcdd211f1c16ae7d6d1a0b44b1a25e","canonicalKey":"mto.security.microsoft.com GET /mtoapi/mtp/userExposedRbacGroups/UserExposedRbacGroups"},
+    {"frontierId":"offline-frontier-b2a1e841cb0eabd8d3a27f58","frontierDigest":"b2a1e841cb0eabd8d3a27f580d355273f2def1e782f027be54ebfe465899cd87","canonicalKey":"mto.security.microsoft.com GET /mtoapi/recentItems"},
+    {"frontierId":"offline-frontier-e9618e11fe9375be06862fec","frontierDigest":"e9618e11fe9375be06862fec4839faa6b9d195ee14af5ed2d5e5b38919a18292","canonicalKey":"mto.security.microsoft.com GET /mtoapi/tenantGroups"},
+    {"frontierId":"offline-frontier-b856e57b1b79a7df187ec493","frontierDigest":"b856e57b1b79a7df187ec4935d35881d47f133d7eb5611722e19a95d177abc17","canonicalKey":"mto.security.microsoft.com GET /mtoapi/tenantGroups/effective/"},
+    {"frontierId":"offline-frontier-54eeabf6c542fc19171ec121","frontierDigest":"54eeabf6c542fc19171ec121d5becc4999fe7c6f39a5e3c70878cf7444052ef1","canonicalKey":"mto.security.microsoft.com GET /mtoapi/tenants/TenantPicker"},
+    {"frontierId":"offline-frontier-f86bb3e3f9fb2a6532588e95","frontierDigest":"f86bb3e3f9fb2a6532588e95f848733021ee8dc73fb200489302ea29b9513739","canonicalKey":"mto.security.microsoft.com GET /mtoapi/mtp/userExposedRbacGroups/UserExposedRbacGroups"},
+    {"frontierId":"offline-frontier-64791a27fd920cdea47f6572","frontierDigest":"64791a27fd920cdea47f6572b4ae18a049d7185e9c067329432853e974f69af3","canonicalKey":"mto.security.microsoft.com GET /mtoapi/recentItems"}
+  ],
+  "deferredItemCount": 2682,
+  "blockedItemCount": 2682,
+  "constraints": [
+    "Passive landing navigation and reload capture only",
+    "MTO is a separate portal/view; do not treat it as a backend alias for security.microsoft.com",
+    "No clicks, tenant switching, writes, provisioning, trials, purchases, exports, or mutations",
+    "Sanitize tenant identifiers, headers, cookies, and response bodies before retention"
+  ]
+}
