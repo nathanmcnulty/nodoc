@@ -11,8 +11,8 @@ const LazyApiReference = React.lazy(() =>
   }))
 );
 
-const ScalarDocusaurus = ({ route }) => {
-  const specification = route.configuration?.content;
+const ScalarDocusaurus = ({ configuration }) => {
+  const specification = configuration?.content;
   const description = typeof specification?.info?.description === "string"
     ? specification.info.description.replace(/\s+/gu, " ").trim()
     : undefined;
@@ -25,7 +25,7 @@ const ScalarDocusaurus = ({ route }) => {
       <BrowserOnly fallback={<div className="scalar-api-reference" />}>
         {() => (
           <Suspense fallback={<div className="scalar-api-reference" />}>
-            <LazyApiReference configuration={route.configuration} />
+            <LazyApiReference configuration={configuration} />
           </Suspense>
         )}
       </BrowserOnly>

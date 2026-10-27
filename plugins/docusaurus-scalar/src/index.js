@@ -7,6 +7,7 @@ const _ = require("lodash");
 const path = require("path");
 const logger = require("@docusaurus/logger").default;
 const fsp = require("fs/promises");
+const { docuHash } = require("@docusaurus/utils");
 
 const DEFAULT_NAV_CONFIG = {
   labelFromSpec: true,
@@ -475,23 +476,27 @@ const ScalarDocusaurus = (context, userOptions) => {
     },
 
     async contentLoaded({ content, actions }) {
-      const { addRoute } = actions;
+      const { addRoute, createData } = actions;
       const baseUrl = context.baseUrl || "/";
-      content.forEach((contentItem) => {
+      for (const contentItem of content) {
         if (contentItem.route?.route) {
           // Docusaurus expects route paths to include baseUrl
           const routePath = path.posix.join(baseUrl, contentItem.route.route);
+          const configuration = await createData(
+            `scalar-${docuHash(routePath)}.json`,
+            contentItem.scalarConfiguration
+          );
           addRoute({
             path: routePath,
             component: path.resolve(__dirname, "./ScalarDocusaurus"),
             exact: true,
-            configuration: contentItem.scalarConfiguration,
+            modules: { configuration },
           });
           if (contentItem.nav?.label) {
             addToNav(context, contentItem);
           }
         }
-      });
+      }
       collapseSingleItemDropdowns(context);
     },
   };
