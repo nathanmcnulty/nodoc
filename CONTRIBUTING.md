@@ -9,6 +9,12 @@ We welcome a range of contributions including updates to:
 - Documentation
 - CI/CD
 
+## Local development
+
+Use Node.js 24 LTS. The tested patch version is pinned in `.node-version` (currently 24.22.1), and CI uses the Node 24 release line. Select that runtime before installing dependencies with `npm ci`.
+
+Run `npm run build` and `npm run typecheck` before submitting website or dependency changes. Use `npm start` for the local development server.
+
 ## OpenAPI
 
 Unless otherwise specified, we use OpenAPI 3.0.1. Whilst we have plans to upgrade to 3.1.x, there are compatibility issues with some tools keeping us on this version for now.
