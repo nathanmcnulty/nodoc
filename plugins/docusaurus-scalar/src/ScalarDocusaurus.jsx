@@ -1,31 +1,28 @@
 import BrowserOnly from "@docusaurus/BrowserOnly";
 import Layout from "@theme/Layout";
-import React, { Suspense } from "react";
+import React, { Suspense, useMemo } from "react";
 
 import "@scalar/api-reference-react/style.css";
 import "./theme.css";
 
-const LazyApiReference = React.lazy(() =>
-  import("@scalar/api-reference-react").then(({ ApiReferenceReact }) => ({
-    default: ApiReferenceReact,
-  }))
-);
-
 const ScalarDocusaurus = ({ configuration }) => {
-  const specification = configuration?.content;
-  const description = typeof specification?.info?.description === "string"
-    ? specification.info.description.replace(/\s+/gu, " ").trim()
-    : undefined;
+  const LazyApiReference = useMemo(() => React.lazy(async () => {
+    const [{ ApiReferenceReact }, { default: loadedConfiguration }] = await Promise.all([
+      import("@scalar/api-reference-react"),
+      configuration.load(),
+    ]);
+    return { default: () => <ApiReferenceReact configuration={loadedConfiguration} /> };
+  }), [configuration]);
 
   return (
     <Layout
-      title={specification?.info?.title}
-      description={description}
+      title={configuration.title}
+      description={configuration.description}
     >
       <BrowserOnly fallback={<div className="scalar-api-reference" />}>
         {() => (
           <Suspense fallback={<div className="scalar-api-reference" />}>
-            <LazyApiReference configuration={configuration} />
+            <LazyApiReference />
           </Suspense>
         )}
       </BrowserOnly>

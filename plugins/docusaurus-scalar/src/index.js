@@ -482,9 +482,22 @@ const ScalarDocusaurus = (context, userOptions) => {
         if (contentItem.route?.route) {
           // Docusaurus expects route paths to include baseUrl
           const routePath = path.posix.join(baseUrl, contentItem.route.route);
-          const configuration = await createData(
-            `scalar-${docuHash(routePath)}.json`,
+          const dataName = `scalar-${docuHash(routePath)}.json`;
+          await createData(
+            dataName,
             contentItem.scalarConfiguration
+          );
+          const info = contentItem.scalarConfiguration.content?.info;
+          const metadata = {
+            title: info?.title,
+            description: typeof info?.description === "string"
+              ? info.description.replace(/\s+/gu, " ").trim()
+              : undefined,
+          };
+          // Keep route prefetches small: load the full spec only when rendered.
+          const configuration = await createData(
+            `scalar-${docuHash(routePath)}.js`,
+            `export default { ...${JSON.stringify(metadata)}, load: () => import(${JSON.stringify(`./${dataName}`)}) };`
           );
           addRoute({
             path: routePath,
