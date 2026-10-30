@@ -3,6 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { load } from "@scalar/openapi-parser";
+import { normalizeAutomationEvidence, normalizeBehavior } from "./operation-behavior.mjs";
 import { readFiles } from "@scalar/openapi-parser/plugins/read-files";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -1380,6 +1381,11 @@ function normalizeOperationContext(
     });
   }
 
+  if (value.behavior !== undefined) normalized.behavior = normalizeBehavior(value.behavior, `${context} behavior`);
+  if (value.automationEvidence !== undefined) normalized.automationEvidence = normalizeAutomationEvidence(value.automationEvidence, `${context} automationEvidence`);
+  const secret = findAuthProfileSecretMaterial({ behavior: normalized.behavior, automationEvidence: normalized.automationEvidence });
+  if (secret) throw new Error(`${context} contains secret material at ${secret.path}.`);
+
   if (Object.keys(normalized).length === 0) {
     throw new Error(`${context} must include at least one x-nodoc-operation-context field.`);
   }
@@ -1648,8 +1654,9 @@ export async function buildSpecInventory() {
   return inventory.sort((left, right) => left.title.localeCompare(right.title));
 }
 
-export async function buildSpecRouteInventory() {
-  const entries = await readdir(specificationsDir, { withFileTypes: true });
+export async function buildSpecRouteInventory({ specificationsRoot = specificationsDir } = {}) {
+  const { operationContract } = await import("./operation-contract.mjs");
+  const entries = await readdir(specificationsRoot, { withFileTypes: true });
   const inventory = [];
 
   for (const entry of entries) {
@@ -1659,7 +1666,7 @@ export async function buildSpecRouteInventory() {
 
     const specRelativePath = path
       .join("specifications", entry.name, "specification", "openapi.yml");
-    const specPath = path.join(repoRoot, specRelativePath);
+    const specPath = path.join(specificationsRoot, entry.name, "specification", "openapi.yml");
     const bundledSpecification = await loadBundledSpecification(specPath);
     const title = bundledSpecification.info?.title ?? entry.name;
     const {
@@ -1692,6 +1699,7 @@ export async function buildSpecRouteInventory() {
       pathPrefixes: getPathPrefixes(bundledSpecification),
       operations: getOperationEntries(bundledSpecification).map((entry) => ({
         serverUrls: entry.effectiveServerUrls,
+        contract: operationContract(entry.operation),
         method: entry.method,
         path: entry.path,
         operationId:

@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 import { validatePartitionedCandidateHandoff } from "./discovery-candidate-handoff.mjs";
 import { validateReviewAssignmentPlan } from "./discovery-review-assignments.mjs";
 import { buildSpecRouteInventory } from "./spec-quality-lib.mjs";
+import { assertPublishableEvidenceInput, compareOperationContract, mergeContractObservations } from "./operation-contract.mjs";
 
 export const promotionPlanSchemaVersion = 1;
 export const promotionResultSchemaVersion = 1;
@@ -15,7 +16,6 @@ export const promotionDigest = (value) => createHash("sha256").update(stableJson
 const clone = (value) => JSON.parse(JSON.stringify(value));
 const sorted = (values) => [...values].sort((a, b) => String(a).localeCompare(String(b)));
 const routeClasses = new Set(["confirmed-read", "successfully-probed"]);
-const unsafeWords = /tenant|bearer|cookie|authorization|password|secret|https?:\/\/|[A-Za-z]:\\/iu;
 
 function clean(value) {
   if (value === null || value === undefined) return null;
@@ -24,11 +24,6 @@ function clean(value) {
   if (Array.isArray(value)) return value.slice(0, 100).map(clean);
   if (typeof value === "object") return Object.fromEntries(Object.entries(value).sort(([a], [b]) => a.localeCompare(b)).map(([key, entry]) => [key, clean(entry)]));
   return null;
-}
-
-function assertSafe(value, label = "input") {
-  const text = JSON.stringify(value);
-  if (unsafeWords.test(text)) throw new Error(`${label} contains tenant, raw URL, auth, or absolute-path data.`);
 }
 
 function nonEmpty(value, label) {
@@ -60,19 +55,90 @@ function healthGate(metadata) {
   return null;
 }
 
-function findExisting(inventory, destinationSpec, candidate) {
+function normalizedRoute(value) {
+  return `/${String(value ?? "").replace(/^\/+|\/+$/gu, "").replace(/\/+/gu, "/")}`;
+}
+
+function canonicalTemplate(value) {
+  return normalizedRoute(value).replace(/\{[^{}]+\}/gu, "{}");
+}
+
+function operationRoutes(operation, spec) {
+  const route = normalizedRoute(operation.path);
+  const servers = operation.serverUrls ?? spec.serverUrls ?? [];
+  const routes = new Set(servers.length ? [] : [route]);
+  for (const server of servers) {
+    try {
+      const basePath = normalizedRoute(new URL(server).pathname);
+      routes.add(basePath !== "/" && route !== basePath && !route.startsWith(`${basePath}/`) ? normalizedRoute(`${basePath}/${route}`) : route);
+    } catch { /* Invalid server bindings cannot expand the route. */ }
+  }
+  return [...routes];
+}
+
+function matchesOperationHost(operation, spec, hostFamily) {
+  const servers = operation.serverUrls ?? spec.serverUrls ?? [];
+  if (!hostFamily || !servers.length) return true;
+  return servers.some((serverUrl) => {
+    try {
+      const hostname = new URL(serverUrl).hostname;
+      const pattern = hostname.split(/(\{[^{}]+\})/u).map((part) => /^\{/u.test(part) ? "[^.]+" : part.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&")).join("");
+      return new RegExp(`^${pattern}$`, "iu").test(hostFamily);
+    } catch { return false; }
+  });
+}
+
+function matchingOperations(operations, spec, route) {
+  // Parameter names are documentation vocabulary, not operation identity. Prefer
+  // equivalent templates (or concrete paths) before a broader templated match.
+  const equivalent = operations.filter((operation) => operationRoutes(operation, spec).some((item) => canonicalTemplate(item) === canonicalTemplate(route)));
+  if (equivalent.length) return equivalent;
+  return operations.filter((operation) => operationRoutes(operation, spec).some((item) => {
+    const pattern = item.split(/(\{[^{}]+\})/u).map((part) => /^\{/u.test(part) ? "[^/]+" : part.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&")).join("");
+    return new RegExp(`^${pattern}$`, "u").test(normalizedRoute(route));
+  }));
+}
+
+function verifyOriginBinding(operation, spec, originBindingId) {
+  const servers = operation.serverUrls ?? spec.serverUrls ?? [];
+  if (!servers.length) return "unknown";
+  if (!/^[a-f0-9]{64}$/u.test(originBindingId ?? "")) return "unknown";
+  let incomplete = false;
+  for (const server of servers) {
+    try {
+      const origin = new URL(server).origin;
+      if (/\{[^{}]+\}/u.test(origin)) { incomplete = true; continue; }
+      if (createHash("sha256").update(origin).digest("hex") === originBindingId) return "match";
+    } catch { incomplete = true; }
+  }
+  return incomplete ? "unknown" : "mismatch";
+}
+
+function findExisting(inventory, destinationSpec, candidate, hostFamily) {
   const spec = inventory.find((entry) => entry.specId === destinationSpec);
   if (!spec) return { kind: "ambiguous-destination", reasonCodes: ["ambiguous-destination"] };
   const method = String(candidate.method || "GET").toUpperCase();
   const route = String(candidate.normalizedPath || "");
-  const exact = (spec.operations || []).find((operation) => operation.method === method && operation.path === route);
+  const matches = matchingOperations((spec.operations || []).filter((operation) => operation.method === method), spec, route);
+  const scopedMatches = matches.filter((operation) => matchesOperationHost(operation, spec, hostFamily));
+  if (scopedMatches.length > 1) return { kind: "ambiguous-destination", reasonCodes: ["ambiguous-operation-template"] };
+  if (matches.length && !scopedMatches.length) return { kind: "conflict", reasonCodes: ["architecture-host-binding-conflict"] };
+  const exact = scopedMatches[0];
   if (exact) {
+    if ((exact.serverUrls ?? spec.serverUrls)?.length) {
+      const binding = verifyOriginBinding(exact, spec, candidate.originBindingId);
+      if (binding !== "match") return { kind: binding === "mismatch" ? "conflict" : "unverified", reasonCodes: [binding === "mismatch" ? "architecture-origin-binding-conflict" : "origin-binding-unverified"] };
+    }
+    if (candidate.contractObservations?.length) {
+      if (!exact.contract) return { kind: "unverified", reasonCodes: ["contract-inventory-missing"], observations: mergeContractObservations(candidate.contractObservations) };
+      return compareOperationContract(exact.contract, candidate.contractObservations);
+    }
     if (candidate.responseShapeFingerprint && exact.responseShapeFingerprint && candidate.responseShapeFingerprint !== exact.responseShapeFingerprint) {
       return { kind: "conflict", reasonCodes: ["architecture-schema-conflict"] };
     }
     return { kind: "exact", operation: exact, reasonCodes: ["already-documented"] };
   }
-  const samePath = (spec.operations || []).some((operation) => operation.path === route);
+  const samePath = matchingOperations(spec.operations || [], spec, route).some((operation) => matchesOperationHost(operation, spec, hostFamily));
   if (samePath) return { kind: "extension", reasonCodes: ["extend-existing"] };
   return { kind: "novel", reasonCodes: ["add-new"] };
 }
@@ -81,15 +147,14 @@ function mapCandidate(record, inventory, metadata) {
   const { candidate, partition } = record;
   const destinationSpec = partition.destination?.specId;
   const evidenceIds = candidateEvidenceIds(candidate);
-  const base = { candidateId: nonEmpty(candidate.candidateId, "candidateId"), evidenceIds, destinationSpec, hostFamily: partition.destination?.hostFamily ?? null };
+  const base = { candidateId: nonEmpty(candidate.candidateId, "candidateId"), evidenceIds, destinationSpec, hostFamily: partition.destination?.hostFamily ?? null, ...(candidate.contractObservations?.length ? { contractObservations: mergeContractObservations(candidate.contractObservations) } : {}) };
   const healthReason = healthGate(metadata);
   if (healthReason) return { ...base, outcome: "blocked", reasonCodes: [healthReason] };
   if (!routeClasses.has(partition.reviewClass) || partition.reviewClass.includes("adjacent")) return { ...base, outcome: "rejected", reasonCodes: [partition.reviewClass.includes("adjacent") ? "adjacent-scope" : `${partition.reviewClass}-candidate`] };
   if (candidate.evidence === "bundle-discovered") return { ...base, outcome: "rejected", reasonCodes: ["bundle-only-candidate"] };
-  if (candidate.documentationStatus === "documented") return { ...base, outcome: "already-documented", reasonCodes: ["already-documented"] };
   if (!destinationSpec || destinationSpec === "unassigned" || !candidate.normalizedPath?.startsWith("/")) return { ...base, outcome: "blocked", reasonCodes: ["ambiguous-destination"] };
-  const mapping = findExisting(inventory, destinationSpec, candidate);
-  return { ...base, method: String(candidate.method || "GET").toUpperCase(), normalizedPath: candidate.normalizedPath, outcome: mapping.kind === "exact" ? "already-documented" : mapping.kind === "conflict" || mapping.kind === "ambiguous-destination" ? "blocked" : "proposed", mapping: mapping.kind, reasonCodes: mapping.reasonCodes };
+  const mapping = findExisting(inventory, destinationSpec, candidate, candidate.hostFamily ?? partition.destination?.hostFamily);
+  return { ...base, method: String(candidate.method || "GET").toUpperCase(), normalizedPath: candidate.normalizedPath, outcome: mapping.kind === "exact" ? "already-documented" : ["conflict", "unverified", "ambiguous-destination"].includes(mapping.kind) ? "blocked" : "proposed", mapping: mapping.kind, reasonCodes: mapping.reasonCodes, ...(mapping.observations ? { contractObservations: mapping.observations } : {}) };
 }
 
 function assignmentFor(destinationSpec, mappings, options) {
@@ -102,6 +167,7 @@ function assignmentFor(destinationSpec, mappings, options) {
     destinationSpec,
     candidateIds,
     evidenceIds,
+    sourceHandoffDigest: options.sourceHandoffDigest,
     route,
     requiredCapabilities: route === "cheap" ? ["promotion-preparation", "scope-validation"] : ["promotion-preparation", "architecture-schema-review"],
     reasonCodes: sorted([...new Set(mappings.flatMap((mapping) => mapping.reasonCodes))]),
@@ -112,15 +178,33 @@ function assignmentFor(destinationSpec, mappings, options) {
 
 export function compilePromotionPlan({ groupedHandoff, reviewPlan = null, workerResults = [], derivativeRecommendations = [], specInventory = [], options = {}, budgets = {} } = {}) {
   if (!groupedHandoff?.manifest || !Array.isArray(groupedHandoff.partitions)) throw new Error("A grouped candidate handoff is required.");
-  assertSafe(groupedHandoff, "grouped handoff");
+  assertPublishableEvidenceInput(groupedHandoff, "grouped handoff");
   if (reviewPlan) validateReviewAssignmentPlan(reviewPlan);
   if (!Array.isArray(specInventory)) throw new Error("A checked-in spec inventory is required.");
   const records = allCandidateRecords(groupedHandoff);
+  const sourceHandoffDigest = promotionDigest(groupedHandoff);
   const metadata = groupedHandoff.manifest.sharedMetadata;
   const mappings = records.map((record) => mapCandidate(record, specInventory, metadata)).sort((a, b) => a.candidateId.localeCompare(b.candidateId));
-  const approved = new Set(workerResults.filter((result) => result?.decision === "accept" && result.status === "completed").flatMap((result) => result.candidateAccounting?.accepted ?? []));
+  const approved = new Set();
+  const approvalBlockers = new Map();
+  const approvalWarnings = [];
+  for (const result of workerResults.filter((entry) => entry?.decision === "accept" && entry.status === "completed")) {
+    const accepted = result.candidateAccounting?.accepted;
+    let reason = !result.sourceHandoffDigest ? "approval-evidence-binding-required" : result.sourceHandoffDigest !== sourceHandoffDigest ? "approval-evidence-binding-mismatch" : null;
+    if (!Array.isArray(accepted) || accepted.some((id) => typeof id !== "string")) reason = "approval-candidate-accounting-invalid";
+    if (!reason && reviewPlan) {
+      const assignment = reviewPlan.assignments.find((entry) => entry.assignmentId === result.assignmentId && entry.assignmentDigest === result.assignmentDigest);
+      const partition = assignment && groupedHandoff.partitions.find((entry) => promotionDigest(entry) === assignment.partitionDigest);
+      const members = new Set(partition?.candidates.map((entry) => entry.candidateId) ?? []);
+      if (reviewPlan.sourceHandoffDigest !== sourceHandoffDigest || !assignment || !partition || accepted.some((id) => !members.has(id))) reason = "approval-assignment-mismatch";
+    }
+    if (reason) {
+      approvalWarnings.push(reason);
+      for (const id of Array.isArray(accepted) ? accepted : []) approvalBlockers.set(id, reason);
+    } else for (const id of accepted) approved.add(id);
+  }
   const proposals = mappings.map((mapping) => {
-    if (mapping.outcome === "proposed" && !approved.has(mapping.candidateId)) return { ...mapping, outcome: "blocked", reasonCodes: ["manual-approval-required"] };
+    if (mapping.outcome === "proposed" && !approved.has(mapping.candidateId)) return { ...mapping, outcome: "blocked", reasonCodes: [...mapping.reasonCodes, "manual-approval-required", ...(approvalBlockers.has(mapping.candidateId) ? [approvalBlockers.get(mapping.candidateId)] : [])] };
     return mapping;
   });
   const maxFiles = Number.isInteger(budgets.maxFiles) ? budgets.maxFiles : null;
@@ -146,12 +230,14 @@ export function compilePromotionPlan({ groupedHandoff, reviewPlan = null, worker
   const budgetedProposals = proposals.map((proposal) => budgetBlocked.has(proposal.candidateId) ? { ...proposal, outcome: "blocked", reasonCodes: ["promotion-budget-exhausted"] } : proposal);
   const bySpec = new Map();
   for (const proposal of budgetedProposals.filter((entry) => entry.outcome === "proposed" || entry.outcome === "blocked")) bySpec.set(proposal.destinationSpec, [...(bySpec.get(proposal.destinationSpec) ?? []), proposal]);
-  const assignments = [...bySpec.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([destinationSpec, entries]) => assignmentFor(destinationSpec, entries, { budgets }));
+  const assignments = [...bySpec.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([destinationSpec, entries]) => assignmentFor(destinationSpec, entries, { budgets, sourceHandoffDigest }));
   const changes = budgetedProposals.filter((entry) => entry.outcome === "proposed");
   const planCore = {
     schemaVersion: promotionPlanSchemaVersion,
     mode: options.apply === true ? "report-only-apply-opt-in" : "report-only",
     sourceManifestDigest: promotionDigest(groupedHandoff.manifest),
+    sourceHandoffDigest,
+    approvalWarnings: sorted([...new Set(approvalWarnings)]),
     sourceReviewDigest: reviewPlan ? promotionDigest(reviewPlan) : null,
     derivativeRecommendations: clean(derivativeRecommendations),
     mappings: budgetedProposals,
@@ -180,10 +266,11 @@ export function compilePromotionPlan({ groupedHandoff, reviewPlan = null, worker
 
 export function validatePromotionPlan(plan) {
   if (!plan || plan.schemaVersion !== promotionPlanSchemaVersion || !Array.isArray(plan.mappings) || !Array.isArray(plan.assignments)) throw new Error("Unsupported or corrupt promotion plan schema.");
+  if (!/^[a-f0-9]{64}$/u.test(plan.sourceHandoffDigest ?? "")) throw new Error("Promotion plan evidence binding is missing or invalid.");
   if (plan.planDigest !== promotionDigest(Object.fromEntries(Object.entries(plan).filter(([key]) => !["planId", "planDigest"].includes(key))))) throw new Error("Promotion plan digest mismatch.");
   const ids = new Set();
   for (const assignment of plan.assignments) {
-    if (assignment.assignmentType !== "promotion-preparation" || ids.has(assignment.assignmentId) || assignment.assignmentDigest !== promotionDigest(Object.fromEntries(Object.entries(assignment).filter(([key]) => !["assignmentId", "assignmentDigest"].includes(key))))) throw new Error("Invalid promotion-preparation assignment.");
+    if (assignment.assignmentType !== "promotion-preparation" || assignment.sourceHandoffDigest !== plan.sourceHandoffDigest || ids.has(assignment.assignmentId) || assignment.assignmentDigest !== promotionDigest(Object.fromEntries(Object.entries(assignment).filter(([key]) => !["assignmentId", "assignmentDigest"].includes(key))))) throw new Error("Invalid promotion-preparation assignment.");
     ids.add(assignment.assignmentId);
   }
   return plan;
@@ -192,6 +279,7 @@ export function validatePromotionPlan(plan) {
 export function validatePromotionResult(result, plan) {
   validatePromotionPlan(plan);
   if (!result || result.schemaVersion !== promotionResultSchemaVersion) throw new Error("Unsupported promotion result schema.");
+  if (result.sourceHandoffDigest !== plan.sourceHandoffDigest) throw new Error("Promotion result evidence binding mismatch.");
   const assignment = plan.assignments.find((entry) => entry.assignmentId === result.assignmentId);
   if (!assignment || result.assignmentType !== "promotion-preparation" || result.assignmentDigest !== assignment.assignmentDigest) throw new Error("Promotion result assignment mismatch.");
   if (result.status !== "completed" || !["accept", "reject", "escalate", "block"].includes(result.decision)) throw new Error("Promotion result status or decision is invalid.");

@@ -647,7 +647,7 @@
                                     "request": {
                                         "name": "Get the current user's Exchange time zone",
                                         "description": {
-                                            "content": "Returns the caller's active time zone selection for the Exchange admin center.\n",
+                                            "content": "Returns the caller's active time zone selection for the Exchange admin center. This route\nremained live on the legacy host even though neither the current-shell nor legacy landing\nreload emitted it automatically during the August 2026 discovery pass.\n",
                                             "type": "text/plain"
                                         },
                                         "url": {
@@ -706,7 +706,7 @@
                                                     "value": "application/json"
                                                 }
                                             ],
-                                            "body": "{\n  \"key_0\": 5226.720911904913,\n  \"key_1\": 1222.5399726207809\n}",
+                                            "body": "{\n  \"@odata.context\": \"https://admin.exchange.microsoft.com/beta/$metadata#TimeZone/$entity\",\n  \"Id\": \"Alaskan Standard Time\",\n  \"Name\": \"(UTC-09:00) Alaska Time (Anchorage)\",\n  \"Offset\": -480,\n  \"IsDST\": true\n}",
                                             "cookie": [],
                                             "_postman_previewlanguage": "json"
                                         },
@@ -3431,6 +3431,162 @@
                     "name": "MailflowReportTDP",
                     "description": "",
                     "item": [
+                        {
+                            "name": "ExchangeAdminCenter.AutoForwarding(StartDate={startDate},EndDate={endDate})",
+                            "description": "",
+                            "item": [
+                                {
+                                    "id": "e71f435e-55c3-4efd-bcd6-b3577189f717",
+                                    "name": "Get TDP auto-forwarding report data",
+                                    "request": {
+                                        "name": "Get TDP auto-forwarding report data",
+                                        "description": {
+                                            "content": "Returns the auto-forwarded messages dataset used by the Exchange admin center home\ndashboard. This TDP route is distinct from the older `MailflowReport` forwarding route.\nThe August 2026 landing capture requested the trailing seven-day window and returned an\nempty OData collection.\n",
+                                            "type": "text/plain"
+                                        },
+                                        "url": {
+                                            "path": [
+                                                "beta",
+                                                "MailflowReportTDP",
+                                                "ExchangeAdminCenter.AutoForwarding(StartDate={{startDate}},EndDate={{endDate}})"
+                                            ],
+                                            "host": [
+                                                "{{baseUrl}}"
+                                            ],
+                                            "query": [],
+                                            "variable": []
+                                        },
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            }
+                                        ],
+                                        "method": "GET",
+                                        "body": {},
+                                        "auth": null
+                                    },
+                                    "response": [
+                                        {
+                                            "id": "43c3b42d-e4f1-4801-a8a3-cabce1f65540",
+                                            "name": "TDP auto-forwarding report data returned successfully.",
+                                            "originalRequest": {
+                                                "url": {
+                                                    "path": [
+                                                        "beta",
+                                                        "MailflowReportTDP",
+                                                        "ExchangeAdminCenter.AutoForwarding(StartDate={{startDate}},EndDate={{endDate}})"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [],
+                                                    "variable": []
+                                                },
+                                                "header": [
+                                                    {
+                                                        "key": "Accept",
+                                                        "value": "application/json"
+                                                    }
+                                                ],
+                                                "method": "GET",
+                                                "body": {}
+                                            },
+                                            "status": "OK",
+                                            "code": 200,
+                                            "header": [
+                                                {
+                                                    "key": "Content-Type",
+                                                    "value": "application/json"
+                                                }
+                                            ],
+                                            "body": "{\n  \"@odata.context\": \"https://exchange.admin.cloud.microsoft/beta/$metadata#Collection(ExchangeAdminCenter.MailflowForwardingModel)\",\n  \"value\": []\n}",
+                                            "cookie": [],
+                                            "_postman_previewlanguage": "json"
+                                        },
+                                        {
+                                            "id": "f38e52f0-c18f-4fb5-b782-50ccfc48b480",
+                                            "name": "The supplied route parameters or request body were invalid.",
+                                            "originalRequest": {
+                                                "url": {
+                                                    "path": [
+                                                        "beta",
+                                                        "MailflowReportTDP",
+                                                        "ExchangeAdminCenter.AutoForwarding(StartDate={{startDate}},EndDate={{endDate}})"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [],
+                                                    "variable": []
+                                                },
+                                                "method": "GET",
+                                                "body": {}
+                                            },
+                                            "status": "Bad Request",
+                                            "code": 400,
+                                            "header": [],
+                                            "cookie": [],
+                                            "_postman_previewlanguage": "text"
+                                        },
+                                        {
+                                            "id": "f2e9afca-d621-4bd4-b555-1a8803265251",
+                                            "name": "Authentication is required or the active Exchange admin center browser session is no longer valid.",
+                                            "originalRequest": {
+                                                "url": {
+                                                    "path": [
+                                                        "beta",
+                                                        "MailflowReportTDP",
+                                                        "ExchangeAdminCenter.AutoForwarding(StartDate={{startDate}},EndDate={{endDate}})"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [],
+                                                    "variable": []
+                                                },
+                                                "method": "GET",
+                                                "body": {}
+                                            },
+                                            "status": "Unauthorized",
+                                            "code": 401,
+                                            "header": [],
+                                            "cookie": [],
+                                            "_postman_previewlanguage": "text"
+                                        },
+                                        {
+                                            "id": "8a11b338-18f8-4141-86d5-5fb1552cea90",
+                                            "name": "The authenticated principal does not have access to the requested Exchange portal data.",
+                                            "originalRequest": {
+                                                "url": {
+                                                    "path": [
+                                                        "beta",
+                                                        "MailflowReportTDP",
+                                                        "ExchangeAdminCenter.AutoForwarding(StartDate={{startDate}},EndDate={{endDate}})"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [],
+                                                    "variable": []
+                                                },
+                                                "method": "GET",
+                                                "body": {}
+                                            },
+                                            "status": "Forbidden",
+                                            "code": 403,
+                                            "header": [],
+                                            "cookie": [],
+                                            "_postman_previewlanguage": "text"
+                                        }
+                                    ],
+                                    "event": [],
+                                    "protocolProfileBehavior": {
+                                        "disableBodyPruning": true
+                                    }
+                                }
+                            ]
+                        },
                         {
                             "name": "ExchangeAdminCenter.CustomerInsight(StartDate={startDate},EndDate={endDate},InsightType='{insightType}')",
                             "description": "",
@@ -8942,7 +9098,7 @@
         "name": "Exchange",
         "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
         "description": {
-            "content": "The Exchange API is used by the Exchange admin center. It has been observed directly on\n`admin.exchange.microsoft.com` and through the fixed\n`exchange.admin.cloud.microsoft` Exchange proxy\nfor same-origin shell bootstrap, user preference storage, mailbox and recipient detail\nblades, role administration, mobile device management, organization sharing, mail flow\nadministration, migration state, public folder inventory, and report widgets.\n\nThe operations below were confirmed while browsing the Exchange admin center with a real\nauthenticated Edge session. They were observed on routes including:\n\n  - Home/dashboard\n  - Accepted domains\n  - Admin roles\n  - Alert policies\n  - Connectors\n  - Contacts\n  - Groups\n  - High Volume Email\n  - Mobile device access\n  - Mobile device mailbox policy\n  - Mail flow reports\n  - Migration\n  - Organization sharing\n  - Public folders\n  - Resources\n  - Remote domains\n  - Settings\n  - Troubleshoot\n  - User roles\n\nRequests to the legacy direct host relied on the authenticated Exchange admin center browser\nsession, same-origin `fetch`/XHR traffic, and `x-requested-with: XMLHttpRequest`. The observed\ncookie set included `.AspNetCore.Cookies` plus companion chunk cookies. A 2026-08-30 capture\nconfirmed that the current portal can instead route `/beta` operations through the fixed\n`exchange.admin.cloud.microsoft` service host with bearer authorization.\n\nShared `admin.microsoft.com` support, SharePoint, and feedback calls were also present in the\nlive session, but those were not modeled here because they are either generic Microsoft 365\nadmin shell dependencies or already documented elsewhere in the repository.\n\nDocumentation and specifications have been provided on a best-efforts basis and may not be\n100% accurate.\n\n\nContact Support:\n Name: nodoc",
+            "content": "The Exchange API is used by the Exchange admin center. It has been observed directly on\n`admin.exchange.microsoft.com` and through the fixed\n`exchange.admin.cloud.microsoft` Exchange proxy\nfor same-origin shell bootstrap, user preference storage, mailbox and recipient detail\nblades, role administration, mobile device management, organization sharing, mail flow\nadministration, migration state, public folder inventory, and report widgets.\n\nThe operations below were confirmed while browsing the Exchange admin center with a real\nauthenticated Edge session. They were observed on routes including:\n\n  - Home/dashboard\n  - Accepted domains\n  - Admin roles\n  - Alert policies\n  - Connectors\n  - Contacts\n  - Groups\n  - High Volume Email\n  - Mobile device access\n  - Mobile device mailbox policy\n  - Mail flow reports\n  - Migration\n  - Organization sharing\n  - Public folders\n  - Resources\n  - Remote domains\n  - Settings\n  - Troubleshoot\n  - User roles\n\nRequests to the legacy direct host relied on the authenticated Exchange admin center browser\nsession, same-origin `fetch`/XHR traffic, and `x-requested-with: XMLHttpRequest`. The observed\ncookie set included `.AspNetCore.Cookies` plus companion chunk cookies. A 2026-08-30 capture\nconfirmed that the current portal can instead route `/beta` operations through the fixed\n`exchange.admin.cloud.microsoft` service host with bearer authorization. A 2026-08-31\nsame-origin probe reconfirmed the legacy-host current-user time-zone contract.\n\nShared `admin.microsoft.com` support, SharePoint, and feedback calls were also present in the\nlive session, but those were not modeled here because they are either generic Microsoft 365\nadmin shell dependencies or already documented elsewhere in the repository.\n\nDocumentation and specifications have been provided on a best-efforts basis and may not be\n100% accurate.\n\n\nContact Support:\n Name: nodoc",
             "type": "text/plain"
         }
     }

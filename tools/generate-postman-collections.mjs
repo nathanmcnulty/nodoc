@@ -9,6 +9,8 @@ import {
   getPreferredServerUrls,
   validatePostmanServerRouting,
 } from "./spec-quality-lib.mjs";
+import { operationContract } from "./operation-contract.mjs";
+import recorderEvidence from "./nodoc-recorder/evidence.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, "..");
@@ -213,10 +215,41 @@ function buildOperationIndex(openapi) {
         path: pathname,
         operationId: operation.operationId ?? null,
         responses: operation.responses ?? {},
+        evidence: compactObservationLedger(operation["x-nodoc-observations"]),
+        evidenceOmittedCount: Math.max(0, (operation["x-nodoc-observations"]?.length ?? 0) - 128),
         serverUrls: getPreferredServerUrls(openapi, pathItem, operation),
         serverOverride: Array.isArray(pathItem?.servers) || Array.isArray(operation?.servers),
       }))
   ));
+}
+
+// Converters discard OpenAPI extensions. Keep the publishable evidence refs,
+// variants, shapes and capture states without copying captured values or URLs.
+function compactObservationLedger(observations) {
+  if (!Array.isArray(observations)) return [];
+  const reference = value => typeof value === "string" && /^[\w.-]{1,128}$/u.test(value) ? value : null;
+  const body = value => ({
+    ...recorderEvidence.normalizeCaptureMetadata(value),
+    shape: operationContract({ responses: { 200: { content: { "application/json": { schema: value?.schema } } } } }).responses[0].shape,
+  });
+  const media = evidence => {
+    const valid = typeof evidence?.value === "string" && evidence.value.length <= 256 && /^[\w.+-]+\/[\w.+-]+$/u.test(evidence.value);
+    const observed = valid && evidence?.state === "observed";
+    return {
+      value: valid ? evidence.value.toLowerCase() : "application/octet-stream",
+      state: observed ? "observed" : "unknown",
+      ...(!observed ? { reason: ["missing-content-type", "invalid-content-type"].includes(evidence?.reason) ? evidence.reason : evidence === undefined ? "missing-content-type" : "invalid-content-type" } : {}),
+    };
+  };
+  return observations.slice(0, 128).map(observation => ({
+    observationId: reference(observation.observationId),
+    variantId: reference(observation.variantId),
+    status: /^[1-5]\d\d$/u.test(String(observation.statusCode)) ? Number(observation.statusCode) : null,
+    requestMediaType: media(observation.requestMediaType),
+    responseMediaType: media(observation.responseMediaType),
+    requestBody: body(observation.requestBody),
+    responseBody: body(observation.responseBody),
+  })).sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b)));
 }
 
 function getCollectionPath(request) {
@@ -470,7 +503,7 @@ function normalizePostmanUrl(url) {
   return normalizedUrl;
 }
 
-function getOperationForRequest(operations, request) {
+function getOperationForRequest(operations, request, { matchOrigin = false } = {}) {
   const method = request?.method?.toUpperCase();
   const pathname = getCollectionPath(request);
 
@@ -478,9 +511,27 @@ function getOperationForRequest(operations, request) {
     return undefined;
   }
 
-  return operations.find(
-    (operation) => operation.method === method && operation.pathRegex.test(pathname),
-  );
+  const candidates = operations.filter(operation => operation.method === method && operation.pathRegex.test(pathname));
+  const templatePath = pathname.replace(/(?:^|\/):([^/]+)/gu, "/{$1}");
+  const specificity = operation => operation.path.replace(/\{[^}]+\}/gu, "").length;
+  const exact = operation => operation.path === pathname || operation.path === templatePath;
+  candidates.sort((a, b) => Number(exact(b)) - Number(exact(a)) || specificity(b) - specificity(a));
+  const operation = candidates[0];
+  if (!operation) return undefined;
+  // When matching templates is ambiguous, retaining no evidence is safer than
+  // attributing an observation to an arbitrary operation.
+  if (candidates[1] && candidates[1].path !== operation.path && !exact(operation) && specificity(candidates[1]) === specificity(operation)) return undefined;
+  if (matchOrigin) {
+    const raw = request.url?.raw;
+    const origin = typeof raw === "string" && !raw.includes("{") && /^https?:\/\//u.test(raw) ? new URL(raw).origin : null;
+    if (origin && !operation.serverUrls.some(server => {
+      try {
+        const pattern = escapeRegex(new URL(server).origin).replace(/\\\{[^}]+\\\}/gu, "[^.]+");
+        return new RegExp(`^${pattern}$`, "u").test(origin);
+      } catch { return false; }
+    })) return undefined;
+  }
+  return operation;
 }
 
 function applyServerOverride(url, serverUrl) {
@@ -533,16 +584,7 @@ function applyOperationServer(request, operation) {
 
 function getSpecExampleBody(operations, itemRequest, response) {
   const request = response.originalRequest ?? itemRequest;
-  const method = request?.method?.toUpperCase();
-  const pathname = getCollectionPath(request);
-
-  if (!method || !pathname) {
-    return undefined;
-  }
-
-  const operation = operations.find(
-    (candidate) => candidate.method === method && candidate.pathRegex.test(pathname),
-  );
+  const operation = getOperationForRequest(operations, request, { matchOrigin: true });
 
   if (!operation) {
     return undefined;
@@ -564,7 +606,7 @@ function getSpecExampleBody(operations, itemRequest, response) {
 }
 
 // Preserve stable Postman metadata from the checked-in collection and normalize line endings.
-function stabilizeCollection(
+export function stabilizeCollection(
   openapiPath,
   collectionPath,
   previousCollection,
@@ -604,6 +646,12 @@ function stabilizeCollection(
         item.request,
         getOperationForRequest(operations, item.request),
       );
+    }
+
+    const evidenceOperation = getOperationForRequest(operations, item.request, { matchOrigin: true });
+    const operationEvidence = evidenceOperation?.evidence;
+    if (operationEvidence?.length) {
+      item["x-nodoc-evidence"] = { observations: operationEvidence, omittedObservationCount: evidenceOperation.evidenceOmittedCount, observedOnly: true };
     }
 
     for (const response of item.response ?? []) {
@@ -685,20 +733,7 @@ try {
       bundledJsonPath,
     ]);
 
-    run(npmCommand, [
-      "exec",
-      "--yes",
-      "--package=openapi-to-postmanv2@6.0.0",
-      "--",
-      "openapi2postmanv2",
-      "-s",
-      bundledJsonPath,
-      "-o",
-      definition.output,
-      "-p",
-      "-c",
-      "postman_to_openapi.json",
-    ]);
+    convertOpenApiToPostman(bundledJsonPath, definition.output);
 
     stabilizeCollection(
       bundledJsonPath,
@@ -710,4 +745,14 @@ try {
 } finally {
   rmSync(tempDir, { recursive: true, force: true });
 }
+}
+
+// Shared with the opt-in offline-corpus integration test. This uses the same
+// pinned converter and options as checked-in collection generation.
+export function convertOpenApiToPostman(openapiPath, collectionPath) {
+  run(npmCommand, [
+    "exec", "--yes", "--package=openapi-to-postmanv2@6.0.0", "--",
+    "openapi2postmanv2", "-s", openapiPath, "-o", collectionPath,
+    "-p", "-c", "postman_to_openapi.json",
+  ]);
 }

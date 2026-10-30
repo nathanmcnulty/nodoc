@@ -1,9 +1,10 @@
 import { createHash } from "node:crypto";
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { mergeContractObservations } from "./operation-contract.mjs";
 
-export const derivativeFamilySchemaVersion = 1;
-export const derivativeFamilyIndexSchemaVersion = 1;
+export const derivativeFamilySchemaVersion = 2;
+export const derivativeFamilyIndexSchemaVersion = 2;
 
 const stableJson = (value) => `${JSON.stringify(value)}\n`;
 const digest = (value) => createHash("sha256").update(stableJson(value), "utf8").digest("hex");
@@ -11,22 +12,53 @@ const digest = (value) => createHash("sha256").update(stableJson(value), "utf8")
 function normalized(value) {
   return typeof value === "string" ? value.trim().toLowerCase() : null;
 }
+function caseSensitive(value) {
+  return typeof value === "string" ? value.trim() : null;
+}
+
+function contractIdentity(candidate) {
+  // Observation references identify individual captures, not the contract being
+  // reviewed. All semantic evidence (including errors and completeness) remains.
+  return mergeContractObservations(candidate.contractObservations ?? []).map((contract) => ({ ...contract, observationIds: [] }));
+}
+
+function knownShape(shape) {
+  if (typeof shape === "string") return !["unknown", "null"].includes(shape);
+  if (!shape || typeof shape !== "object") return false;
+  if (Array.isArray(shape)) return shape.length > 0 && shape.every(knownShape);
+  return Object.keys(shape).length > 0 && Object.values(shape).every(knownShape);
+}
+
+function reusableContract(key) {
+  if (!/^[a-f0-9]{64}$/u.test(key.originBindingId ?? "") || !key.method || !key.contractObservations.length) return false;
+  return key.contractObservations.every((observation) => {
+    if (observation.omittedVariantCount || !observation.status) return false;
+    const bodyKnown = (side) => observation[`${side}BodyState`] === "empty"
+      || (observation[`${side}BodyState`] === "captured"
+        && observation[`${side}ShapeComplete`] === true
+        && knownShape(observation[`${side}Shape`])
+        && Boolean(observation[side === "request" ? "requestMediaType" : "mediaType"]));
+    return bodyKnown("request") && bodyKnown("response");
+  });
+}
 
 function familyKey(candidate, partition) {
   return {
     schemaVersion: derivativeFamilySchemaVersion,
     method: normalized(candidate.method),
     destinationSpec: normalized(partition.destination?.specId),
-    hostFamily: normalized(candidate.hostFamily ?? partition.hostFamily),
-    routeTemplate: normalized(candidate.routeTemplate ?? candidate.normalizedPath),
+    hostFamily: normalized(candidate.hostFamily ?? partition.destination?.hostFamily),
+    originBindingId: /^[a-f0-9]{64}$/iu.test(candidate.originBindingId ?? "") ? candidate.originBindingId.toLowerCase() : null,
+    contractObservations: contractIdentity(candidate),
+    routeTemplate: caseSensitive(candidate.routeTemplate ?? candidate.normalizedPath),
     queryKeyShape: Array.isArray(candidate.queryKeyShape)
-      ? [...new Set(candidate.queryKeyShape.map(normalized).filter(Boolean))].sort()
+      ? [...new Set(candidate.queryKeyShape.map(caseSensitive).filter(Boolean))].sort()
       : [],
     responseShapeFingerprint: normalized(candidate.responseShapeFingerprint ?? candidate.responseSchemaFingerprint),
     operation: candidate.operation && typeof candidate.operation === "object"
       ? {
         operationType: normalized(candidate.operation.operationType),
-        name: normalized(candidate.operation.name),
+        name: caseSensitive(candidate.operation.name),
         persistedQueryHash: normalized(candidate.operation.persistedQueryHash),
       }
       : null,
@@ -94,13 +126,14 @@ export function buildDerivativeFamilyIndex(grouped) {
 }
 
 function compatibleReview(previous, family, current) {
+  if (!reusableContract(family.key)) return ["incomplete-contract-evidence"];
   if (!previous || previous.outcome !== "approved") return ["changed"];
   if (previous.destinationSpec !== family.reviewContext.destinationSpec) return ["incompatible-destination"];
   if (previous.hostFamily !== family.reviewContext.hostFamily) return ["incompatible-destination"];
   if (previous.safetyClass !== family.key.safetyClass) return ["incompatible-safety"];
-  if (previous.captureHealthFingerprint !== current.captureHealthFingerprint) return ["incomplete-health"];
-  if (previous.analyzerVersion !== current.analyzerVersion || previous.schemaVersion !== current.schemaVersion) return ["version-mismatch"];
-  if (previous.provenanceFingerprint !== current.provenanceFingerprint) return ["missing-provenance"];
+  if (!normalized(current.captureHealthFingerprint) || previous.captureHealthFingerprint !== current.captureHealthFingerprint) return ["incomplete-health"];
+  if (!normalized(current.analyzerVersion) || !Number.isInteger(current.schemaVersion) || previous.analyzerVersion !== current.analyzerVersion || previous.schemaVersion !== current.schemaVersion) return ["version-mismatch"];
+  if (!normalized(current.provenanceFingerprint) || previous.provenanceFingerprint !== current.provenanceFingerprint) return ["missing-provenance"];
   if (family.key.scopeFlags.includes("adjacent")) return ["ambiguous-scope"];
   return ["reusable"];
 }
