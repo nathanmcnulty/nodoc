@@ -4,7 +4,7 @@ Owner: evidence implementation task, 2026-10-30. Baseline: `e05acb32c439f70f4197
 
 Goal: preserve what was actually observed about internal APIs and expose what automation authors still need to establish. A route's existence does not establish its contract, all supported methods, or the cause of an HTTP error.
 
-GitHub issues are disabled in this repository (verified with `gh issue list` on 2026-10-30). This committed checklist tracks the work pending draft PR publication, without changing repository settings. The unrelated [Scalar PR #223](https://github.com/nathanmcnulty/nodoc/pull/223) and the desktop owner's unpublished refresh work are outside this branch.
+GitHub issues are disabled in this repository (verified with `gh issue list` on 2026-10-30). This committed checklist and draft PR #225 track the work without changing repository settings. The unrelated [Scalar PR #223](https://github.com/nathanmcnulty/nodoc/pull/223) and the desktop owner's unpublished refresh work are outside this branch.
 
 ## Ordered milestones and acceptance
 
@@ -34,7 +34,7 @@ Validation on pinned Node 24.22.1:
 - Automation evidence generator exercised across 2,026 operations in 22 specs; undocumented dimensions remain explicitly unknown. The readiness artifact is generated on demand, separate from presentation scores.
 - Production site build passed. Scalar dynamic-import and CSS-minifier warnings were emitted; neither blocked the build.
 
-Publication status: the initial normal push was rejected before execution by automatic approval review. Nathan subsequently explicitly approved publishing this sanitized branch to public nathanmcnulty/nodoc and opening a draft PR. Final local checks are complete; the approved normal push and draft PR are next. No alternate path around the original denial was used.
+Publication status: after the initial automatic-review rejection, Nathan explicitly approved the sanitized public branch and draft PR. The normal non-force push succeeded and draft PR #225 is open: https://github.com/nathanmcnulty/nodoc/pull/225 . No raw captures or operational evidence were published, and no merge, auto-merge, deployment or release was performed. Current CI status is tracked in the PR checks.
 
 M6 remains pending: the existing discovery owner was contacted twice without taking over its session. Available UI inventory exposes only empty in-app/MCP browser surfaces, with no Chrome/Edge or authenticated portal tab. The sandbox cannot access the owner checkout. No extension was installed or reloaded, no browser lease was claimed, and no live capture ran. Next action is a coordinated manual recorder exercise and bounded passive capture in an existing approved desktop session. A new unpacked installation, if needed, would request cookies/storage/clipboardWrite/webRequest and portal-host access and needs separate installation/access authorization. Do not change roles, licenses, consent or configuration to manufacture comparisons.
 
@@ -49,3 +49,5 @@ Derivative family/index artifacts now use schema version 2. Rebuild old indexes;
 Independent checks included 23 security regressions and an exact-commit pipeline recheck including actual cached Postman conversion. Native Bash parsing could not run because Windows denied MSYS initialization; cURL quoting was verified using the standard POSIX construction and passing VM/parser regressions. No shell payload executed.
 
 All 22 public-spec Postman conversions completed. A separate unchanged-baseline control reproduced existing catalog freshness debt, notably M365 Admin 224 to 320 routes and Purview 134 to 136 routes. Those unrelated catalog refreshes were preserved outside the branch. Only Exchange and SharePoint generated artifacts changed for corrected route bindings; their inputs are existing public specs, not new operational captures. Artifact commit: 0aa6aa749c522f55a41436a1f37771566bc0d09b.
+
+Draft PR: [#225 - Preserve API evidence and behavioral contracts through tooling](https://github.com/nathanmcnulty/nodoc/pull/225). The branch targets main at e05acb32c439f70f41973f32e3b5886eca8569d1. M6 remains open; local implementation and independent-review fixes are complete.
