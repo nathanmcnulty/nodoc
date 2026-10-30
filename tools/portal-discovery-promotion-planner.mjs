@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 import { validatePartitionedCandidateHandoff } from "./discovery-candidate-handoff.mjs";
 import { validateReviewAssignmentPlan } from "./discovery-review-assignments.mjs";
 import { buildSpecRouteInventory } from "./spec-quality-lib.mjs";
+import { compareOperationContract, mergeContractObservations } from "./operation-contract.mjs";
 
 export const promotionPlanSchemaVersion = 1;
 export const promotionResultSchemaVersion = 1;
@@ -27,7 +28,9 @@ function clean(value) {
 }
 
 function assertSafe(value, label = "input") {
-  const text = JSON.stringify(value);
+  // Shape keys such as tenantId or authorization are API vocabulary, not captured
+  // values. Contract observations are separately normalized to types and hashes.
+  const text = JSON.stringify(value, (key, entry) => key === "contractObservations" ? undefined : entry);
   if (unsafeWords.test(text)) throw new Error(`${label} contains tenant, raw URL, auth, or absolute-path data.`);
 }
 
@@ -60,13 +63,24 @@ function healthGate(metadata) {
   return null;
 }
 
-function findExisting(inventory, destinationSpec, candidate) {
+function findExisting(inventory, destinationSpec, candidate, hostFamily) {
   const spec = inventory.find((entry) => entry.specId === destinationSpec);
   if (!spec) return { kind: "ambiguous-destination", reasonCodes: ["ambiguous-destination"] };
   const method = String(candidate.method || "GET").toUpperCase();
   const route = String(candidate.normalizedPath || "");
   const exact = (spec.operations || []).find((operation) => operation.method === method && operation.path === route);
   if (exact) {
+    if (hostFamily && exact.serverUrls?.length && !exact.serverUrls.some((serverUrl) => {
+      try {
+        const hostname = new URL(serverUrl).hostname;
+        const pattern = hostname.split(/(\{[^{}]+\})/u).map((part) => /^\{/u.test(part) ? "[^.]+" : part.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&")).join("");
+        return new RegExp(`^${pattern}$`, "iu").test(hostFamily);
+      } catch { return false; }
+    })) return { kind: "conflict", reasonCodes: ["architecture-host-binding-conflict"] };
+    if (candidate.contractObservations?.length) {
+      if (!exact.contract) return { kind: "unverified", reasonCodes: ["contract-inventory-missing"], observations: mergeContractObservations(candidate.contractObservations) };
+      return compareOperationContract(exact.contract, candidate.contractObservations);
+    }
     if (candidate.responseShapeFingerprint && exact.responseShapeFingerprint && candidate.responseShapeFingerprint !== exact.responseShapeFingerprint) {
       return { kind: "conflict", reasonCodes: ["architecture-schema-conflict"] };
     }
@@ -81,15 +95,14 @@ function mapCandidate(record, inventory, metadata) {
   const { candidate, partition } = record;
   const destinationSpec = partition.destination?.specId;
   const evidenceIds = candidateEvidenceIds(candidate);
-  const base = { candidateId: nonEmpty(candidate.candidateId, "candidateId"), evidenceIds, destinationSpec, hostFamily: partition.destination?.hostFamily ?? null };
+  const base = { candidateId: nonEmpty(candidate.candidateId, "candidateId"), evidenceIds, destinationSpec, hostFamily: partition.destination?.hostFamily ?? null, ...(candidate.contractObservations?.length ? { contractObservations: mergeContractObservations(candidate.contractObservations) } : {}) };
   const healthReason = healthGate(metadata);
   if (healthReason) return { ...base, outcome: "blocked", reasonCodes: [healthReason] };
   if (!routeClasses.has(partition.reviewClass) || partition.reviewClass.includes("adjacent")) return { ...base, outcome: "rejected", reasonCodes: [partition.reviewClass.includes("adjacent") ? "adjacent-scope" : `${partition.reviewClass}-candidate`] };
   if (candidate.evidence === "bundle-discovered") return { ...base, outcome: "rejected", reasonCodes: ["bundle-only-candidate"] };
-  if (candidate.documentationStatus === "documented") return { ...base, outcome: "already-documented", reasonCodes: ["already-documented"] };
   if (!destinationSpec || destinationSpec === "unassigned" || !candidate.normalizedPath?.startsWith("/")) return { ...base, outcome: "blocked", reasonCodes: ["ambiguous-destination"] };
-  const mapping = findExisting(inventory, destinationSpec, candidate);
-  return { ...base, method: String(candidate.method || "GET").toUpperCase(), normalizedPath: candidate.normalizedPath, outcome: mapping.kind === "exact" ? "already-documented" : mapping.kind === "conflict" || mapping.kind === "ambiguous-destination" ? "blocked" : "proposed", mapping: mapping.kind, reasonCodes: mapping.reasonCodes };
+  const mapping = findExisting(inventory, destinationSpec, candidate, candidate.hostFamily ?? partition.destination?.hostFamily);
+  return { ...base, method: String(candidate.method || "GET").toUpperCase(), normalizedPath: candidate.normalizedPath, outcome: mapping.kind === "exact" ? "already-documented" : ["conflict", "unverified", "ambiguous-destination"].includes(mapping.kind) ? "blocked" : "proposed", mapping: mapping.kind, reasonCodes: mapping.reasonCodes, ...(mapping.observations ? { contractObservations: mapping.observations } : {}) };
 }
 
 function assignmentFor(destinationSpec, mappings, options) {
@@ -120,7 +133,7 @@ export function compilePromotionPlan({ groupedHandoff, reviewPlan = null, worker
   const mappings = records.map((record) => mapCandidate(record, specInventory, metadata)).sort((a, b) => a.candidateId.localeCompare(b.candidateId));
   const approved = new Set(workerResults.filter((result) => result?.decision === "accept" && result.status === "completed").flatMap((result) => result.candidateAccounting?.accepted ?? []));
   const proposals = mappings.map((mapping) => {
-    if (mapping.outcome === "proposed" && !approved.has(mapping.candidateId)) return { ...mapping, outcome: "blocked", reasonCodes: ["manual-approval-required"] };
+    if (mapping.outcome === "proposed" && !approved.has(mapping.candidateId)) return { ...mapping, outcome: "blocked", reasonCodes: [...mapping.reasonCodes, "manual-approval-required"] };
     return mapping;
   });
   const maxFiles = Number.isInteger(budgets.maxFiles) ? budgets.maxFiles : null;

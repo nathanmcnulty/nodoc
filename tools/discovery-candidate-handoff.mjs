@@ -5,6 +5,7 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { portalDiscoveryModelPolicy } from "./portal-discovery-model-policy.mjs";
 import { validateOperationSummary } from "./portal-discovery-operation-safety.mjs";
+import { mergeContractObservations } from "./operation-contract.mjs";
 
 const supportedEvidence = new Set([
   "bundle-discovered",
@@ -56,6 +57,7 @@ function candidateId(candidate, reviewClass) {
   return `candidate-${digest({
     reviewClass,
     hostFamily: candidate.hostFamily ?? null,
+    originBindingId: candidate.originBindingId ?? null,
     method: candidate.method ?? null,
     normalizedPath: candidate.normalizedPath,
   }).slice(0, 24)}`;
@@ -67,6 +69,7 @@ function evidenceFamilyId(candidate) {
   }
   return `evidence-${digest({
     evidence: candidate.evidence,
+    originBindingId: candidate.originBindingId ?? null,
     featureFamily: candidate.featureFamily ?? null,
     method: candidate.method ?? null,
     normalizedPath: candidate.normalizedPath,
@@ -110,6 +113,7 @@ function compactCandidate(candidate, reviewClass) {
   return {
     candidateId: candidateId(candidate, reviewClass),
     evidenceFamilyId: evidenceFamilyId(candidate),
+    ...(candidate.originBindingId ? { originBindingId: candidate.originBindingId } : {}),
     method: candidate.method,
     normalizedPath: candidate.normalizedPath,
     documentationStatus: candidate.documentationStatus,
@@ -118,6 +122,7 @@ function compactCandidate(candidate, reviewClass) {
     confidenceScore: candidate.confidenceScore,
     provenance: candidate.provenance,
     reasons: candidate.reasons,
+    ...(candidate.contractObservations?.length ? { contractObservations: mergeContractObservations(candidate.contractObservations) } : {}),
     ...(candidate.operation ? { operation: candidate.operation } : {}),
     sourceCounts: {
       baseUrls: candidate.baseUrls?.length ?? 0,
@@ -361,6 +366,9 @@ function sanitizeCandidate(candidate, { suppressed = false } = {}) {
     method: candidate.method ? String(candidate.method).toUpperCase() : null,
     normalizedPath,
     documentationStatus,
+    ...(/^[a-f0-9]{64}$/u.test(candidate.originBindingId ?? "") ? { originBindingId: candidate.originBindingId } : {}),
+    ...(candidate.contractObservations?.length ? { contractObservations: mergeContractObservations(candidate.contractObservations) } : {}),
+    ...(candidate.hostFamily ? { hostFamily: String(candidate.hostFamily).toLowerCase() } : {}),
     evidence,
     featureFamily: candidate.featureFamily
       ? String(candidate.featureFamily)

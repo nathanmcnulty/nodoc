@@ -41,13 +41,19 @@ A Chrome/Edge DevTools extension that captures API traffic from Microsoft portal
 4. Use the **portal filter** dropdown to focus on a specific portal.
 5. Click any request to view full details (URL, headers, request/response bodies).
 
-Requests are deduplicated by method, normalized path, query-key set, status, request shape, and response shape. This preserves materially different API variants instead of replacing them with the latest response for a method/path pair.
+Every retained request has its own observation ID. A separate variant index counts repeated evidence by origin, method, path, query-key set, media types, status, conservative request/response schemas and service error/message signature. Neither repeated requests nor same-shaped errors overwrite earlier observations. Recording pauses at 5000 observations or 32 MiB retained data; export and clear to continue. Response retrieval distinguishes empty, unavailable, invalid base64/UTF-8 and bodies omitted by the 1 MiB decoded limit.
 
 ### Export Options
 
-- **Export YAML** — Generates an OpenAPI 3.0.3 spec fragment with inferred server URLs, query parameters, request/response schemas, primitive formats, and scalar examples.
-- **Export JSON** — Exports the full captured request/response data for further processing or scripting.
-- **Copy cURL** — Copies a cURL command for the selected request (sensitive headers are redacted).
+- **Export YAML** - Generates a YAML 1.2 stream with one OpenAPI 3.0.3 document per origin (JSON syntax within each document). Split on the YAML document separator before passing to tools that accept one document. Retains every observed status and media type; incompatible schemas use conservative alternatives. Unknown response types remain explicit. Query/body requiredness remains unknown.
+- **Export JSON** - Exports sanitized draft observations and the same origin-bound OpenAPI documents as an array. The format version is 2. Request/response bodies include schema, redacted value and capture state rather than raw text.
+- **Copy cURL / Copy sanitized URL** - Copies a sanitized structural request or URL. Supply real values privately before use.
+
+Exports replace all string body values, numeric example values, non-content-type header values and query values. Schemas are inferred before redaction. Unknown origins receive a stable pseudonym; only exact known service hosts remain. Unknown path segments receive redaction placeholders, with separate route bindings when redaction would otherwise collide. Raw captures remain private in memory and are never emitted by an export button. Opaque variant IDs preserve distinctions between private error signatures without publishing messages.
+
+These are **sanitized drafts requiring review**, not a guarantee of safe automatic publication. Inspect retained property/header/query names and known route words, which may themselves contain environment-specific information. Unknown route placeholders cannot establish a reusable route template. Keep original evidence private for interpretation and replace placeholders only after review. Exported traffic establishes observations, not supported-method completeness, required inputs, permissions, licensing causes or retry safety.
+
+Exports also retain capture-completeness metadata. A retention-limit refusal persists until Clear; the refusal counter only counts callbacks rejected by the bound. Traffic while recording is paused remains unobserved and is not counted.
 
 ### Controls
 
@@ -61,6 +67,7 @@ manifest.json        → Extension manifest (Manifest V3)
 background.js        → Service worker: intercepts request bodies via webRequest API
 devtools.html/js     → Registers the DevTools panel
 panel.html           → Panel UI (dark theme, split-pane layout)
+evidence.js          - Pure inference, evidence identity and sanitized export helpers
 panel.js             → Capture logic, rendering, deduplication, and export
 ```
 

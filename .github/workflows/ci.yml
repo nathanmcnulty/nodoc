@@ -3,6 +3,7 @@ name: Validate site
 on:
   pull_request:
     paths:
+      - tools/**
       - .github/workflows/ci.yml
       - AGENT_DISCOVERY_PLAYBOOK.md
       - AGENT_DISCOVERY_RUNBOOK.md
@@ -44,6 +45,7 @@ on:
     branches:
       - main
     paths:
+      - tools/**
       - .github/workflows/ci.yml
       - AGENT_DISCOVERY_PLAYBOOK.md
       - AGENT_DISCOVERY_RUNBOOK.md
@@ -102,6 +104,11 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Validate evidence pipeline including Postman conversion
+        run: npm run test:evidence
+        env:
+          NODOC_POSTMAN_PIPELINE: "1"
 
       - name: Validate spec quality
         run: npm run validate:spec-quality

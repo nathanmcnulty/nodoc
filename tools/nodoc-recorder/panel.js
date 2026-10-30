@@ -282,6 +282,8 @@ const capturedRequests = new Map();
 // Deduplication: method+path → { count, latestId }
 const deduplicationMap = new Map();
 let nextId = 0;
+let capturedBytes = 0;
+let refusedObservationCount = 0;
 
 // ── DOM refs ──────────────────────────────────────────────────────────
 const btnRecord = document.getElementById('btn-record');
@@ -342,58 +344,8 @@ function getPath(url) {
   }
 }
 
-function valueShape(value, depth = 0) {
-  if (depth >= 8) return 'max-depth';
-  if (value === null) return 'null';
-  if (Array.isArray(value)) {
-    return {
-      array: Array.from(new Set(
-        value.slice(0, 20).map(item => JSON.stringify(valueShape(item, depth + 1)))
-      )).sort()
-    };
-  }
-  if (value && typeof value === 'object') {
-    return Object.fromEntries(
-      Object.keys(value)
-        .sort()
-        .map(key => [key, valueShape(value[key], depth + 1)])
-    );
-  }
-  return typeof value;
-}
-
-function bodyShape(value) {
-  if (!value) return 'none';
-  try {
-    const parsed = typeof value === 'string' ? JSON.parse(value) : value;
-    return JSON.stringify(valueShape(parsed));
-  } catch {
-    let hash = 2166136261;
-    const normalized = String(value).replace(/\s+/g, ' ').trim();
-    for (let index = 0; index < normalized.length; index++) {
-      hash ^= normalized.charCodeAt(index);
-      hash = Math.imul(hash, 16777619);
-    }
-    return `non-json:${typeof value}:${normalized.length}:${(hash >>> 0).toString(16)}`;
-  }
-}
-
 function dedupeKey(entry) {
-  try {
-    const parsed = new URL(entry.url);
-    const path = parsed.pathname.replace(/\/+$/, '');
-    const queryKeys = Array.from(new Set(parsed.searchParams.keys())).sort().join(',');
-    return [
-      entry.method,
-      path,
-      `query=${queryKeys}`,
-      `status=${entry.statusCode ?? 'unknown'}`,
-      `request=${bodyShape(entry.requestBody)}`,
-      `response=${bodyShape(entry.responseBody)}`,
-    ].join(' ');
-  } catch {
-    return `${entry.method} ${entry.url} status=${entry.statusCode ?? 'unknown'}`;
-  }
+  return NodocRecorder.variantKey(entry);
 }
 
 function statusClass(code) {
@@ -452,231 +404,11 @@ function tryFormatJson(str) {
   }
 }
 
-function yamlIndent(level) {
-  return '  '.repeat(level);
-}
-
-function yamlKey(key) {
-  return /^[A-Za-z_][A-Za-z0-9_.-]*$/.test(key) ? key : JSON.stringify(key);
-}
-
-function yamlScalar(value) {
-  if (value === null) return 'null';
-  if (typeof value === 'number' || typeof value === 'boolean') return String(value);
-  return JSON.stringify(String(value));
-}
-
-function parseMaybeJson(value) {
-  if (value === null || typeof value === 'undefined') return null;
-  if (typeof value !== 'string') return value;
-  const trimmed = value.trim();
-  if (!trimmed) return null;
-  if (!trimmed.startsWith('{') && !trimmed.startsWith('[')) return null;
-  try {
-    return JSON.parse(trimmed);
-  } catch {
-    return null;
-  }
-}
-
-function detectStringFormat(value) {
-  if (typeof value !== 'string') return undefined;
-  if (/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value)) {
-    return 'uuid';
-  }
-  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z$/i.test(value)) {
-    return 'date-time';
-  }
-  if (/^https?:\/\//i.test(value)) {
-    return 'uri';
-  }
-  if (/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(value)) {
-    return 'email';
-  }
-  return undefined;
-}
-
-function inferPrimitiveSchema(value) {
-  if (value === null) {
-    return {
-      type: 'string',
-      nullable: true,
-      example: null,
-    };
-  }
-  if (typeof value === 'boolean') {
-    return { type: 'boolean', example: value };
-  }
-  if (typeof value === 'number') {
-    return {
-      type: Number.isInteger(value) ? 'integer' : 'number',
-      example: value,
-    };
-  }
-  if (typeof value === 'string') {
-    const schema = {
-      type: 'string',
-      example: value.length > 160 ? `${value.slice(0, 157)}...` : value,
-    };
-    const format = detectStringFormat(value);
-    if (format) {
-      schema.format = format;
-    }
-    return schema;
-  }
-  return { type: 'string' };
-}
-
-function mergeSchemas(base, next) {
-  if (!base) return next;
-  if (!next) return base;
-
-  const merged = { ...base };
-  if (base.nullable || next.nullable) {
-    merged.nullable = true;
-  }
-
-  if (base.type !== next.type) {
-    if (
-      (base.type === 'integer' && next.type === 'number') ||
-      (base.type === 'number' && next.type === 'integer')
-    ) {
-      return { ...merged, type: 'number' };
-    }
-    return merged;
-  }
-
-  if (base.type === 'object') {
-    merged.properties = { ...(base.properties || {}) };
-    for (const [key, value] of Object.entries(next.properties || {})) {
-      merged.properties[key] = mergeSchemas(merged.properties[key], value);
-    }
-    return merged;
-  }
-
-  if (base.type === 'array') {
-    return {
-      ...merged,
-      items: mergeSchemas(base.items, next.items),
-    };
-  }
-
-  if (base.type === 'string' && base.format !== next.format) {
-    delete merged.format;
-  }
-
-  return merged;
-}
-
-function inferSchema(value) {
-  if (Array.isArray(value)) {
-    let itemSchema = null;
-    for (const item of value.slice(0, 10)) {
-      itemSchema = mergeSchemas(itemSchema, inferSchema(item));
-    }
-    return {
-      type: 'array',
-      items: itemSchema || { type: 'object' },
-    };
-  }
-
-  if (value && typeof value === 'object') {
-    const properties = {};
-    for (const [key, nestedValue] of Object.entries(value)) {
-      properties[key] = inferSchema(nestedValue);
-    }
-    return {
-      type: 'object',
-      properties,
-    };
-  }
-
-  return inferPrimitiveSchema(value);
-}
-
-function appendSchemaLines(lines, indent, schema) {
-  const prefix = yamlIndent(indent);
-  if (!schema) {
-    lines.push(`${prefix}type: object`);
-    return;
-  }
-
-  if (schema.type) {
-    lines.push(`${prefix}type: ${schema.type}`);
-  }
-  if (schema.format) {
-    lines.push(`${prefix}format: ${schema.format}`);
-  }
-  if (schema.nullable) {
-    lines.push(`${prefix}nullable: true`);
-  }
-  if (
-    Object.prototype.hasOwnProperty.call(schema, 'example') &&
-    (typeof schema.example !== 'object' || schema.example === null)
-  ) {
-    lines.push(`${prefix}example: ${yamlScalar(schema.example)}`);
-  }
-  if (schema.properties && Object.keys(schema.properties).length > 0) {
-    lines.push(`${prefix}properties:`);
-    for (const [key, value] of Object.entries(schema.properties)) {
-      lines.push(`${yamlIndent(indent + 1)}${yamlKey(key)}:`);
-      appendSchemaLines(lines, indent + 2, value);
-    }
-  }
-  if (schema.items) {
-    lines.push(`${prefix}items:`);
-    appendSchemaLines(lines, indent + 1, schema.items);
-  }
-}
-
-function inferQueryParamSchema(value) {
-  if (value === 'true' || value === 'false') {
-    return { type: 'boolean', example: value === 'true' };
-  }
-  if (/^-?\d+$/.test(value)) {
-    return { type: 'integer', example: Number(value) };
-  }
-  if (/^-?\d+\.\d+$/.test(value)) {
-    return { type: 'number', example: Number(value) };
-  }
-  return inferPrimitiveSchema(value);
-}
-
-function appendQueryParameters(lines, entry, indent) {
-  try {
-    const parsed = new URL(entry.url);
-    const params = Array.from(parsed.searchParams.entries());
-    if (params.length === 0) return;
-
-    lines.push(`${yamlIndent(indent)}parameters:`);
-    for (const [name, value] of params) {
-      const schema = inferQueryParamSchema(value);
-      lines.push(`${yamlIndent(indent + 1)}- name: ${yamlScalar(name)}`);
-      lines.push(`${yamlIndent(indent + 2)}in: query`);
-      lines.push(`${yamlIndent(indent + 2)}required: false`);
-      lines.push(`${yamlIndent(indent + 2)}schema:`);
-      appendSchemaLines(lines, indent + 3, schema);
-    }
-  } catch {
-    // Ignore invalid URLs during export.
-  }
-}
-
-function getMediaType(headers, fallback) {
-  const headerValue = headers['content-type'] || headers['Content-Type'] || fallback;
-  return (headerValue || fallback || 'application/json').split(';')[0].trim();
-}
-
-function buildOperationId(entry, apiPath) {
-  const raw = `${entry.portal}_${entry.method.toLowerCase()}_${apiPath}`
-    .replace(/^\//, '')
-    .replace(/[^A-Za-z0-9]+/g, '_')
-    .replace(/^_+|_+$/g, '');
-  return raw || `${entry.portal}_${entry.method.toLowerCase()}`;
-}
 
 // ── Build cURL command ────────────────────────────────────────────────
-function buildCurl(entry) {
+function buildCurl(privateEntry) {
+  const sanitized = NodocRecorder.exportEntry(privateEntry);
+  const entry = { ...sanitized, requestBody: sanitized.requestBody.state === 'captured' ? sanitized.requestBody.value : null };
   const parts = [`curl '${entry.url}'`];
   if (entry.method !== 'GET') {
     parts.push(`  -X ${entry.method}`);
@@ -733,9 +465,7 @@ function captureRequest(request) {
 
   // Get response body
   request.getContent((content, encoding) => {
-    if (content) {
-      entry.responseBody = content;
-    }
+    Object.assign(entry, NodocRecorder.decodeCapture(content, encoding));
     finishCapture(entry);
   });
 }
@@ -750,20 +480,28 @@ function finishCapture(entry) {
     // For HAR entries, use postData if available
   }
 
-  // Deduplication
-  const dk = dedupeKey(entry);
-  if (deduplicationMap.has(dk)) {
-    const existing = deduplicationMap.get(dk);
-    existing.count++;
-    entry.occurrences = existing.count;
-    // Remove old entry from capturedRequests
-    capturedRequests.delete(existing.latestId);
-    existing.latestId = entry.id;
-  } else {
-    deduplicationMap.set(dk, { count: 1, latestId: entry.id });
+  if (entry.requestBody !== null && entry.requestBody !== undefined && new TextEncoder().encode(typeof entry.requestBody === 'string' ? entry.requestBody : JSON.stringify(entry.requestBody)).length > 1024 * 1024) {
+    entry.requestBody = null;
+    entry.requestCapture = { state: 'omitted-size' };
   }
+  const entryBytes = new TextEncoder().encode(JSON.stringify(entry)).length;
+  // Preserve observations; the variant index only counts repeated evidence.
+  // Stop explicitly at the bound instead of silently evicting earlier evidence.
+  if (capturedRequests.size >= 5000 || capturedBytes + entryBytes > 32 * 1024 * 1024) {
+    refusedObservationCount++;
+    recording = false;
+    btnRecord.classList.remove('active');
+    btnRecord.textContent = 'Paused';
+    showToast('Observation retention limit reached (5000 requests / 32 MiB). Export and clear before continuing.');
+    return;
+  }
+  const dk = dedupeKey(entry);
+  const existing = deduplicationMap.get(dk);
+  entry.occurrences = (existing?.count || 0) + 1;
+  deduplicationMap.set(dk, { count: entry.occurrences, latestId: entry.id });
 
   capturedRequests.set(entry.id, entry);
+  capturedBytes += entryBytes;
   updateCount();
   renderList();
 }
@@ -786,7 +524,7 @@ function captureRequestWithPostData(harEntry) {
   // Extract postData from HAR
   let requestBody = null;
   if (harEntry.request.postData) {
-    requestBody = harEntry.request.postData.text || null;
+    requestBody = harEntry.request.postData.text ?? null;
   }
 
   const entry = {
@@ -806,9 +544,7 @@ function captureRequestWithPostData(harEntry) {
   };
 
   harEntry.getContent((content, encoding) => {
-    if (content) {
-      entry.responseBody = content;
-    }
+    Object.assign(entry, NodocRecorder.decodeCapture(content, encoding));
     finishCapture(entry);
   });
 }
@@ -915,7 +651,7 @@ function renderDetail() {
   detailPane.innerHTML = `
     <div class="detail-actions">
       <button id="btn-copy-curl" title="Copy as cURL command">Copy cURL</button>
-      <button id="btn-copy-url" title="Copy URL">Copy URL</button>
+      <button id="btn-copy-url" title="Copy sanitized URL">Copy sanitized URL</button>
     </div>
 
     <div class="detail-section">
@@ -955,8 +691,8 @@ function renderDetail() {
     showToast('cURL copied to clipboard');
   });
   document.getElementById('btn-copy-url').addEventListener('click', () => {
-    copyToClipboard(entry.url);
-    showToast('URL copied to clipboard');
+    copyToClipboard(NodocRecorder.publicUrl(entry.url));
+    showToast('Sanitized URL copied to clipboard');
   });
 }
 
@@ -983,137 +719,32 @@ function fallbackCopy(text) {
 // ── Export: OpenAPI YAML ──────────────────────────────────────────────
 function exportOpenApiYaml() {
   const entries = getFilteredRequests();
-  if (entries.length === 0) {
-    showToast('No requests to export');
-    return;
-  }
-
-  // Group by deduplicated path
-  const pathMap = new Map();
-  const servers = new Set();
-  for (const entry of entries) {
-    let apiPath;
-    try {
-      const parsed = new URL(entry.url);
-      apiPath = parsed.pathname;
-      servers.add(`${parsed.protocol}//${parsed.host}`);
-    } catch {
-      apiPath = entry.path;
-    }
-
-    if (!pathMap.has(apiPath)) {
-      pathMap.set(apiPath, new Map());
-    }
-    const methods = pathMap.get(apiPath);
-    // Keep latest per method
-    methods.set(entry.method.toLowerCase(), entry);
-  }
-
-  const lines = [
-    'openapi: "3.0.3"',
-    'info:',
-    '  title: nodoc-recorder Captured APIs',
-    `  description: ${yamlScalar(`API traffic captured from Microsoft portals on ${new Date().toISOString().split('T')[0]}`)}`,
-    '  version: "0.0.1"',
-  ];
-
-  if (servers.size > 0) {
-    lines.push('servers:');
-    Array.from(servers).sort().forEach((server) => {
-      lines.push(`  - url: ${yamlScalar(server)}`);
-    });
-  }
-
-  lines.push('paths:');
-
-  // Sort paths alphabetically
-  const sortedPaths = Array.from(pathMap.keys()).sort();
-
-  for (const apiPath of sortedPaths) {
-    const methods = pathMap.get(apiPath);
-    lines.push(`  ${apiPath}:`);
-
-    const sortedMethods = Array.from(methods.keys()).sort();
-    for (const method of sortedMethods) {
-      const entry = methods.get(method);
-      const st = entry.statusCode;
-      const stText = statusText(st) || 'Response';
-      const responseMediaType = getMediaType(entry.responseHeaders || {}, 'application/json');
-      const requestMediaType = getMediaType(entry.requestHeaders || {}, 'application/json');
-      const parsedResponseBody = parseMaybeJson(entry.responseBody);
-      const parsedRequestBody = parseMaybeJson(entry.requestBody);
-      const responseSchema = parsedResponseBody ? inferSchema(parsedResponseBody) : { type: 'object' };
-      const requestSchema = parsedRequestBody ? inferSchema(parsedRequestBody) : { type: 'object' };
-
-      lines.push(`    ${method}:`);
-      lines.push(`      operationId: ${buildOperationId(entry, apiPath)}`);
-      lines.push(`      summary: ${yamlScalar(`${entry.method} ${apiPath}`)}`);
-      lines.push(`      description: ${yamlScalar(`Captured from ${entry.portalName}`)}`);
-
-      // Tags
-      lines.push(`      tags:`);
-      lines.push(`        - ${yamlScalar(entry.portalName)}`);
-
-      appendQueryParameters(lines, entry, 3);
-
-      lines.push(`      responses:`);
-      lines.push(`        '${st}':`);
-      lines.push(`          description: ${yamlScalar(`${st} ${stText}`)}`);
-
-      if (entry.responseBody) {
-        lines.push(`          content:`);
-        lines.push(`            ${responseMediaType}:`);
-        lines.push(`              schema:`);
-        appendSchemaLines(lines, 8, responseSchema);
-      }
-
-      if (['post', 'put', 'patch'].includes(method) && entry.requestBody) {
-        lines.push(`      requestBody:`);
-        lines.push(`        required: true`);
-        lines.push(`        content:`);
-        lines.push(`          ${requestMediaType}:`);
-        lines.push(`            schema:`);
-        appendSchemaLines(lines, 7, requestSchema);
-      }
-    }
-  }
-
-  const yaml = lines.join('\n') + '\n';
-  downloadFile('nodoc-captured-openapi.yaml', yaml, 'text/yaml');
-  showToast(`Exported ${sortedPaths.length} paths as OpenAPI YAML`);
+  if (!entries.length) return showToast('No requests to export');
+  const documents = NodocRecorder.buildOpenApiDocuments(entries, captureCompleteness());
+  downloadFile('nodoc-captured-openapi.yaml', NodocRecorder.openApiYaml(entries, captureCompleteness()), 'text/yaml');
+  showToast('Exported ' + documents.length + ' origin-bound OpenAPI documents (YAML stream)');
 }
 
-// ── Export: JSON ──────────────────────────────────────────────────────
+function captureCompleteness() {
+  return { limitReached: refusedObservationCount > 0, refusedObservationCount, observationLimit: 5000, byteLimit: 32 * 1024 * 1024 };
+}
+
+// Publishable exports are separate from private in-memory captures.
 function exportJson() {
   const entries = getFilteredRequests();
-  if (entries.length === 0) {
-    showToast('No requests to export');
-    return;
-  }
-
+  if (!entries.length) return showToast('No requests to export');
   const exportData = {
+    formatVersion: 2,
     exportedAt: new Date().toISOString(),
     portalFilter: activeFilter,
     requestCount: entries.length,
-    requests: entries.map(e => ({
-      method: e.method,
-      url: e.url,
-      path: e.path,
-      portal: e.portal,
-      portalName: e.portalName,
-      statusCode: e.statusCode,
-      timestamp: e.timestamp,
-      requestHeaders: e.requestHeaders,
-      responseHeaders: e.responseHeaders,
-      requestBody: e.requestBody,
-      responseBody: e.responseBody,
-      occurrences: e.occurrences
-    }))
+    captureCompleteness: captureCompleteness(),
+    redaction: 'String values and identifying URL segments replaced; schemas inferred before redaction. Review before publication.',
+    requests: entries.map(NodocRecorder.exportEntry),
+    openapi: NodocRecorder.buildOpenApiDocuments(entries, captureCompleteness()),
   };
-
-  const json = JSON.stringify(exportData, null, 2);
-  downloadFile('nodoc-captured-traffic.json', json, 'application/json');
-  showToast(`Exported ${entries.length} requests as JSON`);
+  downloadFile('nodoc-captured-traffic.json', JSON.stringify(exportData, null, 2), 'application/json');
+  showToast('Exported ' + entries.length + ' sanitized observations');
 }
 
 function downloadFile(filename, content, mimeType) {
@@ -1136,6 +767,8 @@ btnRecord.addEventListener('click', () => {
 
 btnClear.addEventListener('click', () => {
   capturedRequests.clear();
+  capturedBytes = 0;
+  refusedObservationCount = 0;
   deduplicationMap.clear();
   selectedId = null;
   updateCount();

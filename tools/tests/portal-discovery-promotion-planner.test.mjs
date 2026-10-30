@@ -1,5 +1,12 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { mkdtemp, mkdir, writeFile, rm } from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
+import { buildSpecRouteInventory } from "../spec-quality-lib.mjs";
+import { compareOperationContract, contractObservation, mergeContractObservations, normalizeContractShape } from "../operation-contract.mjs";
+import { buildObservation, buildSpecContext, aggregateCandidates } from "../generate-crawl-candidates.mjs";
+import { buildPartitionedCandidateHandoff } from "../discovery-candidate-handoff.mjs";
 
 import {
   compilePromotionPlan,
@@ -86,4 +93,120 @@ test("fails closed on incompatible schemas and promotion budgets", () => {
   input.groupedHandoff.manifest.totals.candidateCount += 2;
   input.groupedHandoff.manifest.totals.evidenceFamilyCount += 2;
   assert.throws(() => compilePromotionPlan(input), /candidate cardinality|evidence cardinality|digest/i);
+});
+
+test("real spec inventory compares documented response, request, status and media variants", async () => {
+  const root = await mkdtemp(path.join(os.tmpdir(), "nodoc-contract-inventory-"));
+  try {
+    const directory = path.join(root, "nodoc-alpha", "specification");
+    await mkdir(directory, { recursive: true });
+    await writeFile(path.join(directory, "openapi.yml"), JSON.stringify({
+      openapi: "3.0.1", info: { title: "alpha", version: "1" },
+      servers: [{ url: "https://alpha.example" }],
+      paths: { "/v1/exact": { get: {
+        requestBody: { content: { "application/json": { schema: { type: "object", properties: { cursor: { type: "string" } } } } } },
+        responses: { 200: { description: "ok", content: { "application/json": { schema: { type: "object", properties: { tenantId: { type: "string" }, count: { type: "integer" } } } } } } },
+      } } },
+    }));
+    const specInventory = await buildSpecRouteInventory({ specificationsRoot: root });
+    assert.deepEqual(specInventory[0].operations[0].contract.responses[0], {
+      status: "200", mediaType: "application/json", shape: { count: "number", tenantId: "string" },
+    });
+    const candidate = (observation) => handoff({ candidates: [{
+      candidateId: "observed", evidenceFamilyId: "ev-observed", evidence: "confirmed", documentationStatus: "documented", method: "GET", normalizedPath: "/v1/exact", contractObservations: [contractObservation(observation)],
+    }] });
+    const mapping = (observation, extra = {}) => compilePromotionPlan({ groupedHandoff: candidate(observation), specInventory, ...extra }).mappings[0];
+    const base = { status: 200, mimeType: "application/json", responseShapeSummary: { tenantId: "string", count: "number" }, responseShapeComplete: true, requestShapeComplete: true, observationId: "obs-one" };
+    assert.equal(mapping(base).outcome, "already-documented");
+    // Missing optional fields in one sample do not prove a contract changed.
+    assert.equal(mapping({ ...base, responseShapeSummary: { count: "number" } }).mapping, "unverified");
+    const conflict = mapping({ ...base, responseShapeSummary: { count: "string" } });
+    assert.equal(conflict.outcome, "blocked");
+    assert.ok(conflict.reasonCodes.includes("architecture-schema-conflict"));
+    assert.deepEqual(conflict.contractObservations[0].observationIds, ["obs-one"]);
+    for (const observation of [
+      { ...base, status: 404 },
+      { ...base, mimeType: "application/problem+json" },
+      { ...base, responseShapeSummary: { count: "number", newField: "boolean" } },
+      { ...base, requestMediaType: "application/json", requestShapeSummary: { cursor: "string", filter: "string" } },
+    ]) {
+      const result = mapping(observation);
+      assert.equal(result.mapping, "enrichment");
+      assert.equal(result.outcome, "blocked");
+      assert.ok(result.reasonCodes.includes("manual-approval-required"));
+      assert.equal(mapping(observation, { workerResults: [{ status: "completed", decision: "accept", candidateAccounting: { accepted: ["observed"] } }] }).outcome, "proposed");
+    }
+    assert.equal(mapping({ ...base, responseShapeSummary: null, responseBodyCapture: { state: "omitted", reason: "size-limit" } }).mapping, "unverified");
+    assert.ok(mapping({ ...base, requestMediaType: "application/json", requestShapeSummary: { cursor: "number" } }).reasonCodes.includes("architecture-schema-conflict"));
+    const wrongHost = candidate(base);
+    wrongHost.partitions[0].destination.hostFamily = "other.example";
+    assert.ok(compilePromotionPlan({ groupedHandoff: wrongHost, specInventory }).mappings[0].reasonCodes.includes("architecture-host-binding-conflict"));
+  } finally { await rm(root, { recursive: true, force: true }); }
+});
+
+test("contract observations preserve distinct semantic errors without publishing values", () => {
+  const observations = mergeContractObservations([
+    { status: 404, mimeType: "application/json", responseShapeSummary: { error: { code: "string" } }, responseErrorSignature: "a".repeat(64), observationId: "obs-a" },
+    { status: 404, mimeType: "application/json", responseShapeSummary: { error: { code: "string" } }, responseErrorSignature: "b".repeat(64), observationId: "obs-b" },
+  ]);
+  assert.equal(observations.length, 2);
+  assert.notEqual(observations[0].errorSignatures[0], observations[1].errorSignatures[0]);
+  assert.deepEqual(normalizeContractShape({ value: { array: ["null", "number", "number"] } }), { value: { array: ["null", "number"] } });
+  assert.deepEqual(contractObservation({ responseShape: { secret: "actual-secret-value", "person@example.test": "string" }, responseBody: "private" }).responseShape, { "{dynamicProperty}": "string", secret: "unknown" });
+  assert.doesNotMatch(JSON.stringify(contractObservation({ responseBody: "private", errorSignature: "https://private.example" })), /private|https/u);
+  const safe = contractObservation({ errorSignatures: ["sensitivecode", "secret_value", "a".repeat(64)], observationIds: ["obs-safe", "Bearer-private", "secret_value", "eyJhbGciOiJub25lIn0.eyJzdWIiOiJwZXJzb24ifQ.signature", "C:\\private", "https://private"] });
+  assert.deepEqual(safe.errorSignatures, ["a".repeat(64)]);
+  assert.deepEqual(safe.observationIds, ["obs-safe"]);
+});
+
+test("bounded contract retention remains explicitly incomplete", () => {
+  const observations = mergeContractObservations(Array.from({ length: 140 }, (_, index) => ({
+    status: 404, mimeType: "application/json", responseShapeSummary: { error: "string" }, responseErrorSignature: String(index).padStart(64, "0"),
+  })));
+  assert.equal(observations.length, 128);
+  assert.equal(observations.at(-1).omittedVariantCount, 13);
+  const comparison = compareOperationContract({ requests: [], responses: [] }, observations);
+  assert.equal(comparison.kind, "unverified");
+  assert.ok(comparison.reasonCodes.includes("contract-observation-retention-incomplete"));
+});
+
+test("production generator and handoff isolate origins sharing a sanitized host family", () => {
+  const context = buildSpecContext({ specId: "alpha", title: "alpha", serverUrls: ["https://{tenant}-admin.sharepoint.com"], pathPrefixes: ["/_api/"], operations: [] });
+  const candidates = aggregateCandidates(["alpha", "beta"].map((name) => buildObservation({
+    method: "GET", path: "/_api/items", url: `https://${name}-admin.sharepoint.com/_api/items`, status: 200,
+    mimeType: "application/json", responseShapeSummary: { count: "number" }, responseShapeComplete: true,
+  }, "api-records.json", "confirmed")), context, false);
+  assert.equal(candidates.length, 2);
+  assert.equal(candidates[0].hostFamily, candidates[1].hostFamily);
+  assert.notEqual(candidates[0].originBindingId, candidates[1].originBindingId);
+  const grouped = buildPartitionedCandidateHandoff({
+    schemaVersion: 1, spec: { id: "alpha" }, confirmedReadCandidates: candidates,
+    confirmedSafetyReviewCandidates: [], successfullyProbedCandidates: [], bundleOnlyCandidates: [], suppressedCandidates: [],
+    adjacentConfirmedReadCandidates: [], adjacentConfirmedSafetyReviewCandidates: [], adjacentSuccessfullyProbedCandidates: [], adjacentBundleOnlyCandidates: [],
+  });
+  const entries = grouped.partitions.flatMap((partition) => partition.candidates);
+  assert.equal(new Set(entries.map((entry) => entry.candidateId)).size, 2);
+  assert.equal(new Set(entries.map((entry) => entry.evidenceFamilyId)).size, 2);
+  assert.equal(grouped.manifest.totals.evidenceFamilyCount, 2);
+  assert.doesNotMatch(JSON.stringify(grouped), /alpha-admin|beta-admin/u);
+});
+
+test("partial or legacy shape evidence cannot be classified as an exact contract", () => {
+  const existing = { requests: [], responses: [{ status: "200", mediaType: "application/json", shape: { count: "number" } }] };
+  for (const responseShapeComplete of [false, undefined]) {
+    const result = compareOperationContract(existing, [{ status: 200, mimeType: "application/json", responseShapeSummary: { count: "number" }, responseShapeComplete }]);
+    assert.equal(result.kind, "unverified");
+    assert.ok(result.reasonCodes.includes("contract-evidence-incomplete"));
+  }
+});
+
+test("captured empty responses match declared no-content without implying populated schema evidence", () => {
+  const existing = { requests: [], responses: [{ status: "204", mediaType: null, shape: "unknown" }] };
+  const observation = { status: 204, mimeType: "application/json", responseBodyState: "empty", responseShapeComplete: false };
+  assert.equal(compareOperationContract(existing, [observation]).kind, "exact");
+  for (const responseBodyState of ["omitted", "unavailable", "unknown"]) {
+    assert.equal(compareOperationContract(existing, [{ ...observation, responseBodyState }]).kind, "unverified");
+  }
+  const populated = { requests: [], responses: [{ status: "204", mediaType: "application/json", shape: { count: "number" } }] };
+  assert.equal(compareOperationContract(populated, [observation]).kind, "unverified");
 });

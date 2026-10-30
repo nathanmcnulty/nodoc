@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 import { setTimeout as delay } from "node:timers/promises";
 
 import { mineJavascriptBundles } from "./mine-javascript-bundles.mjs";
@@ -172,29 +173,33 @@ function sha256(value) {
   return createHash("sha256").update(String(value ?? "")).digest("hex");
 }
 
-function shapeOf(value, depth = 0) {
+function shapeOf(value, depth = 0, completeness = null) {
   if (depth >= 8) {
+    if (completeness) completeness.complete = false;
     return "max-depth";
   }
   if (value === null) {
     return "null";
   }
   if (Array.isArray(value)) {
-    const shapes = uniqueSorted(value.slice(0, 20).map((item) => JSON.stringify(shapeOf(item, depth + 1))));
+    if (value.length > 20 && completeness) completeness.complete = false;
+    const shapes = uniqueSorted(value.slice(0, 20).map((item) => JSON.stringify(shapeOf(item, depth + 1, completeness))));
     return { array: shapes.map((item) => JSON.parse(item)) };
   }
   if (typeof value === "object") {
     const result = {};
     let dynamic = false;
+    if (Object.keys(value).length > 128 && completeness) completeness.complete = false;
     for (const key of Object.keys(value).sort((left, right) => left.localeCompare(right)).slice(0, 128)) {
       if (key.length > 128
           || /[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}/iu.test(key)
           || /[\w.+-]+@[\w.-]+\.[a-z]{2,}/iu.test(key)
           || /\.onmicrosoft\.com/iu.test(key)) {
         dynamic = true;
+        if (completeness) completeness.complete = false;
         continue;
       }
-      result[key] = shapeOf(value[key], depth + 1);
+      result[key] = shapeOf(value[key], depth + 1, completeness);
     }
     if (dynamic) result["{dynamicProperty}"] = "unknown";
     return result;
@@ -203,7 +208,7 @@ function shapeOf(value, depth = 0) {
 }
 
 function bodyShapeSummary(value) {
-  if (!value) return null;
+  if (value === undefined || value === null || value === "") return null;
   try {
     const parsed = typeof value === "string" ? JSON.parse(value) : value;
     return shapeOf(parsed);
@@ -212,8 +217,20 @@ function bodyShapeSummary(value) {
   }
 }
 
+function bodyShapeComplete(value) {
+  if (value === undefined || value === null || value === "") return false;
+  try {
+    const parsed = typeof value === "string" ? JSON.parse(value) : value;
+    const completeness = { complete: true };
+    shapeOf(parsed, 0, completeness);
+    return completeness.complete;
+  } catch {
+    return false;
+  }
+}
+
 function bodyShapeFingerprint(value) {
-  if (!value) {
+  if (value === undefined || value === null || value === "") {
     return null;
   }
   try {
@@ -224,7 +241,65 @@ function bodyShapeFingerprint(value) {
   }
 }
 
-function requestEvidence(request) {
+// Hash semantic values rather than publishing messages or customer identifiers.
+// This separates same-shaped failures without interpreting their cause from HTTP status.
+export function responseErrorSignature(request) {
+  if (!(Number(request.status) >= 400)) return null;
+  try {
+    const body = typeof request.responseBody === "string"
+      ? JSON.parse(request.responseBody) : request.responseBody;
+    if (body !== null && ["string", "number", "boolean"].includes(typeof body)) {
+      return sha256(JSON.stringify(["json-primitive", typeof body, String(body).slice(0, 2048)]));
+    }
+    const values = [];
+    const visit = (value, depth = 0) => {
+      if (!value || typeof value !== "object" || depth > 4) return;
+      for (const key of Object.keys(value).sort().slice(0, 128)) {
+        const nested = value[key];
+        if (/^(?:code|errorcode|error_code|message|error_description|reason)$/iu.test(key)
+            && ["string", "number"].includes(typeof nested)) {
+          values.push([key.toLowerCase(), String(nested).slice(0, 2048)]);
+        } else if (key.toLowerCase() === "error" && typeof nested === "string") {
+          values.push(["error", nested.slice(0, 2048)]);
+        } else if (nested && typeof nested === "object") visit(nested, depth + 1);
+      }
+    };
+    visit(body);
+    return values.length ? sha256(JSON.stringify(values)) : null;
+  } catch {
+    const text = typeof request.responseBody === "string" ? request.responseBody.trim() : "";
+    return text ? sha256(JSON.stringify(["non-json-text", text.slice(0, 2048)])) : null;
+  }
+}
+
+export function decodeResponseCapture(payload, encodedDataLength = null) {
+  const value = payload?.body ?? payload?.content;
+  const encoding = payload?.base64Encoded ? "base64" : "utf8";
+  if (payload?.base64Encoded && typeof value === "string"
+      && (value.length % 4 !== 0 || !/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/u.test(value))) {
+    return { body: null, capture: { state: "failed", reason: "malformed-base64", encoding, encodedDataLength, decodedBytes: null, sampleTruncated: false } };
+  }
+  const decodedBytes = typeof value === "string" ? Buffer.byteLength(value, encoding) : null;
+  const decoded = decodeBoundedCdpBody(payload);
+  const capture = {
+    state: decoded === null ? "omitted" : decoded === "" ? "empty" : "captured",
+    reason: decoded === null ? (decodedBytes > responseBodyCaptureLimit ? "decoded-size-limit" : "body-unavailable") : null,
+    encoding,
+    encodedDataLength,
+    decodedBytes,
+    sampleTruncated: false,
+  };
+  if (decoded === null) return { body: null, capture };
+  const sanitized = sanitizeCapturedBody(decoded);
+  const body = truncate(sanitized);
+  capture.sampleTruncated = body !== sanitized;
+  return { body, capture, fullBody: sanitized };
+}
+
+export function requestEvidence(request) {
+  const requestMediaType = normalizedRequestMediaType(request);
+  const requestShapeComplete = request.requestShapeComplete ?? bodyShapeComplete(request.requestBody);
+  const responseShapeComplete = request.responseShapeComplete ?? bodyShapeComplete(request.responseBody);
   try {
     const parsed = new URL(request.url);
     const queryParameterNames = uniqueSorted(Array.from(parsed.searchParams.keys()));
@@ -232,15 +307,32 @@ function requestEvidence(request) {
       request.requestShapeFingerprint ?? bodyShapeFingerprint(request.requestBody);
     const responseShapeFingerprint =
       request.responseShapeFingerprint ?? bodyShapeFingerprint(request.responseBody);
+    const errorSignature = request.responseErrorSignature ?? responseErrorSignature(request);
     return {
+      operationFingerprint: sha256(JSON.stringify({ origin: parsed.origin, method: request.method, path: parsed.pathname })),
+      requestMediaType,
+      requestContentType: requestMediaType,
+      requestShapeComplete,
+      responseShapeComplete,
+      responseErrorSignature: errorSignature,
+      responseBodyCapture: request.responseBodyCapture ?? { state: "unknown", reason: "legacy-capture" },
+      requestBodyCapture: request.requestBodyCapture ?? { state: "unknown", reason: "legacy-capture" },
       queryParameterNames,
       requestFingerprint: sha256(JSON.stringify({
+        origin: parsed.origin,
         method: request.method,
         path: parsed.pathname,
         queryParameterNames,
         requestShapeFingerprint,
         responseShapeFingerprint,
         status: request.status ?? null,
+        mediaType: request.mimeType ?? null,
+        requestMediaType,
+        requestShapeComplete,
+        responseShapeComplete,
+        errorSignature,
+        bodyCaptureState: request.responseBodyCapture?.state ?? "unknown",
+        bodyCaptureReason: request.responseBodyCapture?.reason ?? null,
       })),
       requestShapeFingerprint,
       responseShapeFingerprint,
@@ -251,6 +343,13 @@ function requestEvidence(request) {
     };
   } catch {
     return {
+      requestMediaType,
+      requestContentType: requestMediaType,
+      requestShapeComplete,
+      responseShapeComplete,
+      responseErrorSignature: request.responseErrorSignature ?? responseErrorSignature(request),
+      responseBodyCapture: request.responseBodyCapture ?? { state: "unknown", reason: "legacy-capture" },
+      requestBodyCapture: request.requestBodyCapture ?? { state: "unknown", reason: "legacy-capture" },
       queryParameterNames: [],
       requestFingerprint: sha256(`${request.method} ${request.url}`),
       requestShapeFingerprint:
@@ -273,6 +372,14 @@ function normalizeHeaderEntries(headers = {}) {
 
 function normalizeHeaderMap(headers = {}) {
   return Object.fromEntries(normalizeHeaderEntries(headers));
+}
+
+function normalizedRequestMediaType(request) {
+  const value = request.requestMediaType ?? request.requestContentType
+    ?? normalizeHeaderMap(request.headers ?? request.requestHeaders)["content-type"];
+  const mediaType = String(value ?? "").split(";", 1)[0].trim().toLowerCase();
+  // Parameters can contain tenant data; only retain the normalized media type.
+  return /^[a-z0-9!#$&^_.+-]+\/[a-z0-9!#$&^_.+-]+$/u.test(mediaType) ? mediaType : null;
 }
 
 function toHeaderValues(value) {
@@ -1366,7 +1473,7 @@ function buildSeedRouteUrl(routeTemplate, seedValue, rootOrigin) {
   return resolveMaybeRelativeUrl(interpolatedTemplate, `${rootOrigin}/`);
 }
 
-function mergeItems(existing, next) {
+export function mergeItems(existing, next) {
   const merged = { ...existing, ...next };
 
   for (const key of [
@@ -1378,14 +1485,34 @@ function mergeItems(existing, next) {
     "scriptUrls",
     "visibleTabs",
     "visibleControls",
+    "observationIds",
   ]) {
     if (Array.isArray(existing[key]) || Array.isArray(next[key])) {
       merged[key] = mergeArray(existing[key], next[key]);
     }
   }
 
-  if (existing.responseBodySample && next.responseBodySample && existing.responseBodySample !== next.responseBodySample) {
-    merged.responseBodySample = existing.responseBodySample;
+  if ("responseBodySample" in existing || "responseBodySample" in next) {
+    const samples = [existing, next].flatMap((item) => item.responseBodySamples
+      ?? (item.responseBodySample === null || item.responseBodySample === undefined ? [] : [{
+        body: item.responseBodySample,
+        responseShapeSummary: item.responseShapeSummary ?? null,
+        responseShapeComplete: item.responseShapeComplete ?? false,
+        responseErrorSignature: item.responseErrorSignature ?? null,
+        observationIds: item.observationIds ?? [],
+      }]));
+    const distinct = new Map();
+    for (const sample of samples) {
+      const key = JSON.stringify([sample.body, sample.responseShapeSummary, sample.responseShapeComplete, sample.responseErrorSignature]);
+      const previous = distinct.get(key);
+      distinct.set(key, { ...sample, observationIds: mergeArray(previous?.observationIds, sample.observationIds) });
+    }
+    const ordered = [...distinct.entries()].sort(([left], [right]) => left.localeCompare(right));
+    merged.responseBodySamples = ordered.slice(0, 8).map(([, sample]) => sample);
+    merged.responseBodySample = existing.responseBodySample ?? next.responseBodySample;
+    merged.responseBodySamplesTruncated = Boolean(existing.responseBodySamplesTruncated
+      || next.responseBodySamplesTruncated || ordered.length > 8);
+    merged.sampleLimit = 8;
   }
 
   return merged;
@@ -1926,13 +2053,14 @@ function buildProbeExpression(value) {
   })()`;
 }
 
-function toApiRecord(request, portalName) {
+export function toApiRecord(request, portalName) {
   try {
     const parsed = new URL(request.url);
     const querySample = parsed.search ? parsed.search : null;
     return {
       schemaVersion: captureArtifactSchemaVersion,
       ...requestEvidence(request),
+      observationIds: request.evidenceId ? [request.evidenceId] : [],
       abortedBeforeSend: request.abortedBeforeSend === true,
       attribution: request.attribution,
       confidence: "confirmed-traffic",
@@ -1952,6 +2080,7 @@ function toApiRecord(request, portalName) {
     return {
       schemaVersion: captureArtifactSchemaVersion,
       ...requestEvidence(request),
+      observationIds: request.evidenceId ? [request.evidenceId] : [],
       abortedBeforeSend: request.abortedBeforeSend === true,
       attribution: request.attribution,
       confidence: "confirmed-traffic",
@@ -2694,19 +2823,29 @@ async function main() {
         frameId: attribution.frameId,
         loaderId: attribution.loaderId,
         method: params.request.method,
+        requestId: params.requestId,
+        startedAt: params.timestamp,
         normalizedUrl: normalizeAttributionUrl(requestUrl),
         pageLabel: attribution.pageLabel,
         sessionId: attribution.sessionId,
         targetId: attribution.targetId,
       }),
       headers: params.request.headers ?? {},
+      requestContentType: normalizedRequestMediaType({ headers: params.request.headers }),
       method: params.request.method,
       pageLabel: attribution.pageLabel,
       probeId,
       requestBody: truncate(sanitizedRequestBody),
+      requestBodyCapture: {
+        state: params.request.postData === undefined ? "unknown" : params.request.postData === "" ? "empty" : "captured",
+        reason: params.request.postData === undefined ? (params.request.hasPostData ? "post-data-unavailable" : "no-post-data-reported") : null,
+        sampleTruncated: truncate(sanitizedRequestBody) !== sanitizedRequestBody,
+      },
+      responseBodyCapture: { state: "unknown", reason: "response-not-finished" },
       graphBatch: graphBatchRequestMetadata(requestUrl, sanitizedRequestBody),
       requestShapeFingerprint: bodyShapeFingerprint(sanitizedRequestBody),
       requestShapeSummary: bodyShapeSummary(sanitizedRequestBody),
+      requestShapeComplete: bodyShapeComplete(sanitizedRequestBody),
       resourceType,
       sessionId,
       startedAt: params.timestamp,
@@ -2773,6 +2912,7 @@ async function main() {
     }
 
     record.failureText = params.errorText ?? "loading failed";
+    record.responseBodyCapture = { state: "failed", reason: "network-loading-failed" };
     capturedRequests.push(record);
     requestMap.delete(key);
   });
@@ -2793,16 +2933,25 @@ async function main() {
             const body = await client.send("Network.getResponseBody", {
               requestId: params.requestId,
             }, metadata.sessionId);
-            const sanitizedResponseBody = sanitizeCapturedBody(decodeBoundedCdpBody(body));
-            record.graphBatch = graphBatchResponseMetadata(record.graphBatch, sanitizedResponseBody);
-            record.responseBody = truncate(sanitizedResponseBody);
-            record.responseShapeFingerprint = bodyShapeFingerprint(sanitizedResponseBody);
-            record.responseShapeSummary = bodyShapeSummary(sanitizedResponseBody);
+            const decoded = decodeResponseCapture(body, params.encodedDataLength);
+            record.responseBody = decoded.body;
+            record.responseBodyCapture = decoded.capture;
+            record.graphBatch = graphBatchResponseMetadata(record.graphBatch, decoded.fullBody ?? null);
+            record.responseShapeFingerprint = bodyShapeFingerprint(decoded.fullBody);
+            record.responseShapeSummary = bodyShapeSummary(decoded.fullBody);
+            record.responseShapeComplete = bodyShapeComplete(decoded.fullBody);
+            record.responseErrorSignature = responseErrorSignature({ ...record, responseBody: decoded.fullBody });
           } catch {
             record.responseBody = null;
+            record.responseBodyCapture = { state: "failed", reason: "cdp-body-retrieval-failed", encodedDataLength: params.encodedDataLength ?? null };
           }
         } else {
           record.responseBody = null;
+          record.responseBodyCapture = {
+            state: "omitted",
+            reason: !boundedNetworkSessions.has(sessionKey) ? "network-session-policy" : "encoded-size-limit-or-unknown",
+            encodedDataLength: params.encodedDataLength ?? null,
+          };
         }
 
         capturedRequests.push(record);
@@ -3085,6 +3234,7 @@ async function main() {
         requestBody: request.requestBody ?? null,
         graphBatch: request.graphBatch ?? null,
         responseBody: request.responseBody ?? null,
+        requestBodyCapture: request.requestBodyCapture ?? null,
         status: request.status ?? null,
         url: request.url,
         abortedBeforeSend: request.abortedBeforeSend === true,
@@ -4364,7 +4514,7 @@ async function main() {
   }
 }
 
-main().catch(async (error) => {
+if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) main().catch(async (error) => {
   try {
     const argv = process.argv.slice(2);
     const outIndex = argv.findIndex((arg) => arg === "--out");
