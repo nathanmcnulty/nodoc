@@ -406,28 +406,27 @@ function tryFormatJson(str) {
 
 
 // ── Build cURL command ────────────────────────────────────────────────
+function posixQuote(value) {
+  return "'" + String(value).replace(/'/g, "'\\''") + "'";
+}
+
 function buildCurl(privateEntry) {
   const sanitized = NodocRecorder.exportEntry(privateEntry);
   const entry = { ...sanitized, requestBody: sanitized.requestBody.state === 'captured' ? sanitized.requestBody.value : null };
-  const parts = [`curl '${entry.url}'`];
+  const parts = [`curl --url ${posixQuote(entry.url)}`];
   if (entry.method !== 'GET') {
-    parts.push(`  -X ${entry.method}`);
+    parts.push(`  -X ${posixQuote(entry.method)}`);
   }
   const reqHeaders = entry.requestHeaders || {};
   for (const [name, value] of Object.entries(reqHeaders)) {
-    const lower = name.toLowerCase();
-    if (lower === 'cookie' || lower === 'authorization') {
-      parts.push(`  -H '${name}: [REDACTED]'`);
-    } else {
-      parts.push(`  -H '${name}: ${value}'`);
-    }
+    parts.push(`  -H ${posixQuote(`${name}: ${value}`)}`);
   }
-  if (entry.requestBody) {
+  if (entry.requestBody !== null && entry.requestBody !== undefined) {
     const bodyStr = typeof entry.requestBody === 'string'
       ? entry.requestBody
       : JSON.stringify(entry.requestBody);
     if (bodyStr && bodyStr !== '{}') {
-      parts.push(`  --data-raw '${bodyStr.replace(/'/g, "'\\''")}'`);
+      parts.push(`  --data-raw ${posixQuote(bodyStr)}`);
     }
   }
   return parts.join(' \\\n');

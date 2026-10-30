@@ -46,11 +46,85 @@ test('inference preserves null uncertainty, primitives, heterogeneous types and 
   assert.equal(recorder.parseBody('0').value, 0);
   assert.equal(recorder.parseBody('null').value, null);
   assert.equal(recorder.inferSchema('person@example.com').format, 'email');
-  const [document] = recorder.buildOpenApiDocuments([observation({ method: 'POST', requestBody: '0' })]);
+  const [document] = recorder.buildOpenApiDocuments([observation({ method: 'POST', requestBody: '0', requestHeaders: { 'Content-Type': 'application/json' } })]);
   const body = document.paths['/api/v1/items'].post.requestBody;
   assert.equal(body.required, false);
   assert.equal(body['x-nodoc-requiredness'], 'unknown');
   assert.equal(body.content['application/json'].schema.type, 'integer');
+});
+
+test('semantic error identity preserves structural location and complete captured suffixes', () => {
+  const first = observation({ statusCode: 404, responseBody: JSON.stringify({ error: { code: 'A', inner: { code: 'B' } } }) });
+  const swapped = { ...first, responseBody: JSON.stringify({ error: { code: 'B', inner: { code: 'A' } } }) };
+  assert.notEqual(recorder.variantKey(first), recorder.variantKey(swapped));
+  const prefix = 'x'.repeat(200);
+  assert.notEqual(recorder.variantKey({ ...first, responseBody: JSON.stringify({ code: prefix + 'license' }) }), recorder.variantKey({ ...first, responseBody: JSON.stringify({ code: prefix + 'permission' }) }));
+  assert.deepEqual(recorder.serviceErrors({ error: { code: 'A', inner: { code: 'B' } } }).map(item => JSON.parse(item)[0]), [['error', 'code'], ['error', 'inner', 'code']]);
+});
+
+test('semantic scan depth limit retains private error distinctions behind opaque export IDs', () => {
+  function deepError(code, withShallowCode) {
+    let nested = { code };
+    for (let index = 0; index < 24; index++) nested = { nested };
+    return withShallowCode ? { code: 'same-shallow-code', nested } : nested;
+  }
+  for (const shallow of [false, true]) {
+    const first = observation({ statusCode: 500, responseBody: JSON.stringify(deepError('PRIVATE_DEEP_A', shallow)) });
+    const second = observation({ id: 'req-2', statusCode: 500, responseBody: JSON.stringify(deepError('PRIVATE_DEEP_B', shallow)) });
+    assert.deepEqual(recorder.inferSchema(JSON.parse(first.responseBody)), recorder.inferSchema(JSON.parse(second.responseBody)));
+    assert.notEqual(recorder.variantKey(first), recorder.variantKey(second));
+    const documents = recorder.buildOpenApiDocuments([first, second]);
+    assert.equal(new Set(documents[0].paths['/api/v1/items'].get['x-nodoc-observations'].map(item => item.variantId)).size, 2);
+    assert.equal(JSON.stringify(documents).includes('PRIVATE_DEEP_'), false);
+  }
+});
+
+test('missing or invalid Content-Type remains unknown instead of asserting JSON', () => {
+  for (const responseBody of ['plain text', '{"value":1}']) {
+    const entry = observation({ responseBody, responseHeaders: {} });
+    const exported = recorder.exportEntry(entry);
+    assert.deepEqual(exported.responseMediaType, { value: 'application/octet-stream', state: 'unknown', reason: 'missing-content-type' });
+    const content = recorder.buildOpenApiDocuments([entry])[0].paths['/api/v1/items'].get.responses['200'].content;
+    assert.equal(content['application/json'], undefined);
+    assert.deepEqual(content['application/octet-stream']['x-nodoc-media-type-evidence'], [exported.responseMediaType]);
+  }
+  assert.equal(recorder.exportEntry(observation({ responseHeaders: { 'Content-Type': 'not a media type' } })).responseMediaType.reason, 'invalid-content-type');
+  assert.equal(recorder.exportEntry(observation()).responseMediaType.state, 'observed');
+  assert.notEqual(recorder.variantKey(observation({ responseHeaders: {} })), recorder.variantKey(observation({ responseHeaders: { 'Content-Type': 'application/octet-stream' } })));
+});
+
+test('capture metadata normalization preserves producer enums and excludes arbitrary metadata', () => {
+  assert.deepEqual(recorder.normalizeCaptureMetadata({ state: 'omitted-size', reason: 'decoded-size-limit', encoding: 'text', sampleTruncated: true, decodedBytes: 123, encodedDataLength: 200, private: 'secret' }), { state: 'omitted-size', reason: 'decoded-size-limit', encoding: 'text', sampleTruncated: true, decodedBytes: 123, encodedDataLength: 200 });
+  assert.deepEqual(recorder.normalizeCaptureMetadata({ state: 'secret', reason: 'secret', encoding: 'secret', decodedBytes: -1 }), { state: 'unknown', reason: 'unspecified', encoding: 'unknown' });
+  assert.equal(recorder.normalizeCaptureMetadata({ state: 'failed', reason: 'invalid-utf8', encoding: 'base64' }).reason, 'invalid-utf8');
+});
+
+test('copied cURL uses POSIX quoting on complete URL, method, header and body arguments', () => {
+  const node = () => ({ appendChild() {}, addEventListener() {}, classList: { add() {}, remove() {}, toggle() {} }, dataset: {}, innerHTML: '', textContent: '', value: '' });
+  const context = vm.createContext({ NodocRecorder: recorder, URL, Map, Set, Date, TextEncoder, document: { getElementById: node, createElement: node }, chrome: { devtools: { network: { onRequestFinished: { addListener() {} } } } }, setTimeout() {} });
+  vm.runInContext(readFileSync(new URL('../nodoc-recorder/panel.js', import.meta.url), 'utf8'), context);
+  const headerName = "x-'`touch${IFS}marker`'";
+  context.entry = observation({ method: "POST'`marker`", url: "https://api.example.com/api/items?name'key=value", requestHeaders: { [headerName]: 'private' }, requestBody: JSON.stringify({ "field'`marker`": 'private' }) });
+  const command = vm.runInContext('buildCurl(entry)', context);
+  // Parse only POSIX single-quoted argument concatenation, without invoking a shell.
+  function quotedArgument(text) {
+    let output = '', index = 0;
+    while (index < text.length) {
+      if (text[index] === "'") {
+        const end = text.indexOf("'", index + 1);
+        assert.notEqual(end, -1, 'quoted argument closes');
+        output += text.slice(index + 1, end); index = end + 1;
+      } else if (text.slice(index, index + 2) === "\\'") {
+        output += "'"; index += 2;
+      } else assert.fail('unquoted shell syntax in argument: ' + text.slice(index));
+    }
+    return output;
+  }
+  const lines = command.split(' \\\n');
+  assert.equal(quotedArgument(lines[0].replace(/^curl --url /, '')), recorder.publicUrl(context.entry.url));
+  assert.equal(quotedArgument(lines[1].replace(/^  -X /, '')), context.entry.method);
+  assert.equal(quotedArgument(lines[2].replace(/^  -H /, '')), headerName + ': [REDACTED]');
+  assert.deepEqual(JSON.parse(quotedArgument(lines[3].replace(/^  --data-raw /, ''))), { "field'`marker`": '[REDACTED]' });
 });
 
 test('capture distinguishes empty, missing, oversized, malformed encoded and UTF-8 encoded bodies', () => {

@@ -5,7 +5,7 @@ import path from "node:path";
 import { createRequire } from "node:module";
 import test from "node:test";
 
-import { decodeResponseCapture, mergeItems, requestEvidence, toApiRecord } from "../cdp-deep-capture.mjs";
+import { applyResponseCapture, captureRequestBody, mergeItems, requestEvidence, toApiRecord } from "../cdp-deep-capture.mjs";
 import { buildObservation, buildSpecContext, aggregateCandidates } from "../generate-crawl-candidates.mjs";
 import { compareOperationContract } from "../operation-contract.mjs";
 import { buildSpecRouteInventory } from "../spec-quality-lib.mjs";
@@ -20,14 +20,14 @@ const marker = "fixture-only-sensitive-value";
 // Synthetic inputs, real production transformations. These tests prove offline
 // retention and conversion behavior, not that any portal supports these routes.
 function observation(id, status, body, { origin = "https://alpha.example", route = "/items", encoded = false, capture = null } = {}) {
-  const decoded = capture ? { body: null, capture } : decodeResponseCapture({ body: encoded ? Buffer.from(body).toString("base64") : body, base64Encoded: encoded });
-  return {
+  const record = {
     evidenceId: id, method: "GET", url: `${origin}${route}?access_token=${marker}`,
     status, mimeType: "application/json", headers: { Authorization: `Bearer ${marker}`, "Content-Type": "application/json" },
     responseHeaders: { "Content-Type": "application/json", "Set-Cookie": `session=${marker}` },
-    requestBody: JSON.stringify({ password: marker }), requestBodyCapture: { state: "captured" },
-    responseBody: decoded.body, responseBodyCapture: decoded.capture, pageLabel: "fixture-page",
+    ...captureRequestBody(JSON.stringify({ password: marker })), pageLabel: "fixture-page",
   };
+  return capture ? { ...record, responseBody: null, responseBodyCapture: capture }
+    : applyResponseCapture(record, { body: encoded ? Buffer.from(body).toString("base64") : body, base64Encoded: encoded });
 }
 
 function corpus() {
@@ -70,13 +70,13 @@ function operationWithObservation(document, id) {
     .find(operation => operation["x-nodoc-observations"]?.some(observation => observation.observationId === id));
 }
 
-async function inventoryFixture() {
+async function inventoryFixture(servers = ["https://alpha.example"]) {
   const directory = await mkdtemp(path.join(os.tmpdir(), "nodoc-evidence-corpus-"));
   const root = path.join(directory, "nodoc-alpha", "specification");
   await mkdir(root, { recursive: true });
   const operation = { responses: { 200: { description: "Known shape", content: { "application/json": { schema: { type: "object", properties: { count: { type: "number" } } } } } } } };
   const mediaOperation = { ...operation, requestBody: { content: { "application/json": { schema: { type: "object", properties: { password: { type: "string" } } } } } } };
-  await writeFile(path.join(root, "openapi.yml"), JSON.stringify({ openapi: "3.0.3", info: { title: "Offline alpha", version: "1" }, servers: [{ url: "https://alpha.example" }], paths: { "/items": { get: operation }, "/drift": { get: operation }, "/media": { get: mediaOperation } } }));
+  await writeFile(path.join(root, "openapi.yml"), JSON.stringify({ openapi: "3.0.3", info: { title: "Offline alpha", version: "1" }, servers: servers.map(url => ({ url })), paths: { "/items": { get: operation }, "/drift": { get: operation }, "/media": { get: mediaOperation } } }));
   return buildSpecRouteInventory({ specificationsRoot: directory });
 }
 
@@ -106,6 +106,8 @@ test("offline corpus preserves origin, conditional error, status and body-state 
   assert.equal(records.find(record => record.path === "/primitive").responseBodyCapture.encoding, "base64");
   assert.equal(records.find(record => record.path === "/empty").responseBodyCapture.state, "empty");
   assert.equal(records.find(record => record.path === "/omitted").responseBodyCapture.reason, "decoded-size-limit");
+  const privateShape = toApiRecord(observation("obs-private-shape", 200, '{"password":{"enabled":true}}'), "offline-fixture");
+  assert.deepEqual(privateShape.responseShapeSummary.password, { enabled: "boolean" }, "shape precedes private-value redaction");
   const mediaRecords = records.filter(record => record.path === "/media");
   assert.equal(new Set(mediaRecords.map(record => record.requestFingerprint)).size, 2);
   assert.deepEqual(mediaRecords.map(record => record.requestMediaType).sort(), ["application/json", "application/merge-patch+json"]);
@@ -148,6 +150,89 @@ test("benchmark distinguishes fixture self-checks from supplied execution result
   assert.equal(runOfflineBenchmark(fixture, { inputs: { one: { retained: true } } }).results[0].evidenceSource, "caller-supplied-result");
 });
 
+test("host-distinct observations retain independent handoff identities and promotion outcomes", async () => {
+  const inventory = await inventoryFixture(["https://alpha.example", "https://beta.example"]);
+  const records = aggregate([
+    observation("obs-host-alpha", 200, '{"count":42}'),
+    observation("obs-host-beta", 200, '{"count":"different-type"}', { origin: "https://beta.example" }),
+  ]);
+  const specContext = buildSpecContext(inventory[0]);
+  const candidates = aggregateCandidates(records.map(record => buildObservation(record, "api-records.json", "confirmed")), specContext, false);
+  assert.equal(candidates.length, 2);
+  const grouped = buildPartitionedCandidateHandoff(buildCandidateHandoff({
+    candidateQueue: { candidates, suppressedCandidates: [], scopeReviewCandidates: [] },
+    specId: "alpha", specTitle: "Offline alpha", metadataNextPass: null,
+    recovery: { captureComplete: true }, interactionHealthStatus: { available: true, accounting: { consistent: true } }, saturation: { eligibility: "known" },
+  }));
+  const emitted = grouped.partitions.flatMap(partition => partition.candidates);
+  assert.equal(new Set(emitted.map(candidate => candidate.candidateId)).size, 2);
+  assert.equal(new Set(emitted.map(candidate => candidate.evidenceFamilyId)).size, 2);
+  const plan = compilePromotionPlan({ groupedHandoff: grouped, specInventory: inventory });
+  const alpha = plan.mappings.find(mapping => mapping.hostFamily === "alpha.example");
+  const beta = plan.mappings.find(mapping => mapping.hostFamily === "beta.example");
+  assert.equal(alpha.mapping, "enrichment");
+  assert.equal(beta.mapping, "conflict");
+  assert.deepEqual(alpha.contractObservations.flatMap(item => item.observationIds), ["obs-host-alpha"]);
+  assert.deepEqual(beta.contractObservations.flatMap(item => item.observationIds), ["obs-host-beta"]);
+});
+
+const metadataCases = [
+  { state: "captured", encoding: "utf8", sampleTruncated: false, encodedDataLength: 2, decodedBytes: 2 },
+  { state: "empty", encoding: "utf-8" },
+  { state: "unavailable", encoding: "text" },
+  { state: "omitted-size", encoding: "text" },
+  { state: "decode-failed", encoding: "base64" },
+  ...["legacy-capture", "response-not-finished", "post-data-unavailable", "no-post-data-reported"].map(reason => ({ state: "unknown", reason })),
+  ...["network-loading-failed", "cdp-body-retrieval-failed", "malformed-base64", "invalid-utf8"].map(reason => ({ state: "failed", reason, encoding: "base64" })),
+  ...["network-session-policy", "encoded-size-limit-or-unknown", "decoded-size-limit", "body-unavailable"].map(reason => ({ state: "omitted", reason, encoding: "utf8" })),
+  { state: marker, reason: marker, encoding: marker, expected: { state: "unknown", reason: "unspecified", encoding: "unknown" } },
+];
+
+const mediaCases = [
+  { headers: { "Content-Type": "application/octet-stream" }, expected: { value: "application/octet-stream", state: "observed" } },
+  { headers: {}, expected: { value: "application/octet-stream", state: "unknown", reason: "missing-content-type" } },
+  { headers: { "Content-Type": marker }, expected: { value: "application/octet-stream", state: "unknown", reason: "invalid-content-type" } },
+  { headers: { "Content-Type": "Application/Json; charset=utf-8" }, expected: { value: "application/json", state: "observed" } },
+];
+
+function metadataDocuments() {
+  return recorder.buildOpenApiDocuments([...metadataCases.map((metadata, index) => ({
+    id: `metadata-${index}`, method: "GET", url: "https://metadata.example.com/items", statusCode: 200,
+    responseBody: metadata.state === "captured" ? "42" : null,
+    requestCapture: metadata, responseCapture: metadata,
+  })), ...mediaCases.map((media, index) => ({
+    id: `media-${index}`, method: "GET", url: "https://metadata.example.com/items", statusCode: 200,
+    requestBody: "42", responseBody: "42", requestHeaders: media.headers, responseHeaders: media.headers,
+  }))]);
+}
+
+function assertMetadataLedger(ledger) {
+  assert.equal(ledger.observations.length, metadataCases.length + mediaCases.length);
+  for (const [index, metadata] of metadataCases.entries()) {
+    const observation = ledger.observations.find(item => item.observationId === `metadata-${index}`);
+    const { expected, ...capture } = metadata;
+    for (const side of ["requestBody", "responseBody"]) {
+      const { shape, ...actual } = observation[side];
+      assert.deepEqual(actual, expected ?? capture, `producer metadata ${index}/${side}`);
+    }
+  }
+  for (const [index, media] of mediaCases.entries()) {
+    const observation = ledger.observations.find(item => item.observationId === `media-${index}`);
+    assert.deepEqual(observation.requestMediaType, media.expected, `request media evidence ${index}`);
+    assert.deepEqual(observation.responseMediaType, media.expected, `response media evidence ${index}`);
+  }
+  assert.doesNotMatch(JSON.stringify(ledger), new RegExp(marker));
+}
+
+test("final Postman artifact preserves all producer capture metadata and redacts unknown values", async () => {
+  const directory = await mkdtemp(path.join(os.tmpdir(), "nodoc-postman-metadata-"));
+  const specPath = path.join(directory, "openapi.json"), collectionPath = path.join(directory, "collection.json");
+  await writeFile(specPath, JSON.stringify(metadataDocuments()[0]));
+  await writeFile(collectionPath, JSON.stringify({ info: {}, item: [{ request: { method: "GET", url: { raw: "https://metadata.example.com/items", path: ["items"] } } }] }));
+  stabilizeCollection(specPath, collectionPath, null);
+  assertMetadataLedger(JSON.parse(await readFile(collectionPath, "utf8")).item[0]["x-nodoc-evidence"]);
+});
+
 test("Postman evidence binds to the most specific operation and its origin", async () => {
   const directory = await mkdtemp(path.join(os.tmpdir(), "nodoc-postman-binding-"));
   const specPath = path.join(directory, "openapi.json"), collectionPath = path.join(directory, "collection.json");
@@ -179,7 +264,7 @@ test("Postman evidence binds to the most specific operation and its origin", asy
 });
 
 test("offline corpus survives the actual pinned Postman converter and production stabilization", { skip: process.env.NODOC_POSTMAN_PIPELINE !== "1" ? "Set NODOC_POSTMAN_PIPELINE=1 to run the pinned npm converter; no live portal traffic." : false }, async () => {
-  const documents = recorder.buildOpenApiDocuments(corpus().map(recorderEntry));
+  const documents = [...recorder.buildOpenApiDocuments(corpus().map(recorderEntry)), ...metadataDocuments()];
   const directory = await mkdtemp(path.join(os.tmpdir(), "nodoc-postman-corpus-"));
   for (const [index, document] of documents.entries()) {
     const specPath = path.join(directory, `openapi-${index}.json`), collectionPath = path.join(directory, `collection-${index}.json`);
@@ -192,6 +277,9 @@ test("offline corpus survives the actual pinned Postman converter and production
     visit(collection.item);
     assert.ok(requests.length > 0);
     assert.doesNotMatch(JSON.stringify(collection), new RegExp(marker));
+    if (document.servers[0].url === "https://metadata.example.com") {
+      assertMetadataLedger(requests.find(item => item.request.url.path.join("/") === "items")["x-nodoc-evidence"]);
+    }
     if (operationWithObservation(document, "obs-primitive")) {
       const item = requests.find(item => item.request.url.path.join("/") === "items");
       assert.ok(item);

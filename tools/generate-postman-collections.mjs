@@ -10,6 +10,7 @@ import {
   validatePostmanServerRouting,
 } from "./spec-quality-lib.mjs";
 import { operationContract } from "./operation-contract.mjs";
+import recorderEvidence from "./nodoc-recorder/evidence.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, "..");
@@ -227,18 +228,25 @@ function buildOperationIndex(openapi) {
 function compactObservationLedger(observations) {
   if (!Array.isArray(observations)) return [];
   const reference = value => typeof value === "string" && /^[\w.-]{1,128}$/u.test(value) ? value : null;
-  const states = new Set(["captured", "empty", "omitted", "failed", "unavailable", "unknown"]);
-  const reasons = new Set(["decoded-size-limit", "body-unavailable", "capture-policy", "body-fetch-failed", "body-fetch-timeout", "decode-failed", "unspecified"]);
   const body = value => ({
-    state: states.has(value?.state) ? value.state : "unknown",
-    ...(reasons.has(value?.reason) ? { reason: value.reason } : {}),
-    ...(value?.encoding === "base64" || value?.encoding === "utf8" ? { encoding: value.encoding } : {}),
+    ...recorderEvidence.normalizeCaptureMetadata(value),
     shape: operationContract({ responses: { 200: { content: { "application/json": { schema: value?.schema } } } } }).responses[0].shape,
   });
+  const media = evidence => {
+    const valid = typeof evidence?.value === "string" && evidence.value.length <= 256 && /^[\w.+-]+\/[\w.+-]+$/u.test(evidence.value);
+    const observed = valid && evidence?.state === "observed";
+    return {
+      value: valid ? evidence.value.toLowerCase() : "application/octet-stream",
+      state: observed ? "observed" : "unknown",
+      ...(!observed ? { reason: ["missing-content-type", "invalid-content-type"].includes(evidence?.reason) ? evidence.reason : evidence === undefined ? "missing-content-type" : "invalid-content-type" } : {}),
+    };
+  };
   return observations.slice(0, 128).map(observation => ({
     observationId: reference(observation.observationId),
     variantId: reference(observation.variantId),
     status: /^[1-5]\d\d$/u.test(String(observation.statusCode)) ? Number(observation.statusCode) : null,
+    requestMediaType: media(observation.requestMediaType),
+    responseMediaType: media(observation.responseMediaType),
     requestBody: body(observation.requestBody),
     responseBody: body(observation.responseBody),
   })).sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b)));

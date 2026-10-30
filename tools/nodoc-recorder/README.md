@@ -55,6 +55,12 @@ These are **sanitized drafts requiring review**, not a guarantee of safe automat
 
 Exports also retain capture-completeness metadata. A retention-limit refusal persists until Clear; the refusal counter only counts callbacks rejected by the bound. Traffic while recording is paused remains unobserved and is not counted.
 
+### Validation boundaries
+
+Run npm run test:evidence with NODOC_POSTMAN_PIPELINE=1 to include the pinned Postman converter. The shared synthetic corpus has two branches: CDP normalization/aggregation through candidate, review and promotion planning; and recorder export through OpenAPI and Postman stabilization. It does not apply a promotion proposal to a real specification or prove live browser capture.
+
+For live acceptance, first coordinate exclusive use with the existing discovery owner and verify the extension source matches the implementation being tested. Use an already approved, read-only portal view and a bounded passive observation window. Inspect private samples locally, verify capture/omission metadata and export redaction, and keep raw data out of commits and PRs. Do not create roles, licenses, resources or permission changes to manufacture comparisons. Loading an extension that is not already installed requires separate installation/access approval; this checklist does not grant it.
+
 ### Controls
 
 - **Record / Pause** — Toggle recording on/off.

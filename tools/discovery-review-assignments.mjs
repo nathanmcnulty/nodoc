@@ -60,6 +60,7 @@ function validatePartitionShape(entry, partition) {
 export function buildReviewAssignmentPlan(grouped, { derivativeFamilyIndex = null, previousDerivativeFamilyIndex = null, derivativeReviewMetadata = {} } = {}) {
   if (!grouped?.manifest || !Array.isArray(grouped.partitions)) throw new Error("A grouped handoff is required.");
   const { manifest } = grouped;
+  const sourceHandoffDigest = digest(grouped);
   if (manifest.schemaVersion !== 1) throw new Error("Unsupported grouped handoff schema version.");
   if (!Array.isArray(manifest.partitions) || manifest.partitions.length !== grouped.partitions.length) {
     throw new Error("Grouped handoff manifest partition count is invalid.");
@@ -81,6 +82,7 @@ export function buildReviewAssignmentPlan(grouped, { derivativeFamilyIndex = nul
     const routing = routeFor(entry, blockers);
     const metadata = {
       schemaVersion: reviewAssignmentSchemaVersion,
+      sourceHandoffDigest,
       partitionId: entry.partitionId,
       partitionDigest: entry.stableDigest,
       destinationSpec: entry.destinationSpec,
@@ -121,6 +123,7 @@ export function buildReviewAssignmentPlan(grouped, { derivativeFamilyIndex = nul
   return {
     schemaVersion: reviewAssignmentSchemaVersion,
     sourceManifestDigest: digest(manifest),
+    sourceHandoffDigest,
     assignments: entries,
     totals,
     routingCounts: Object.fromEntries(["cheap", "luna", "manual", "block"].map((route) => [
@@ -133,8 +136,10 @@ export function validateReviewAssignmentPlan(plan) {
   if (plan?.schemaVersion !== reviewAssignmentSchemaVersion || !Array.isArray(plan.assignments)) {
     throw new Error("Invalid review assignment plan schema.");
   }
+  if (plan.sourceHandoffDigest !== undefined && !/^[a-f0-9]{64}$/u.test(plan.sourceHandoffDigest)) throw new Error("Review plan evidence binding is invalid.");
   const ids = new Set();
   for (const assignment of plan.assignments) {
+    if (plan.sourceHandoffDigest !== undefined && assignment.sourceHandoffDigest !== plan.sourceHandoffDigest) throw new Error("Review assignment evidence binding mismatch.");
     if (ids.has(assignment.assignmentId)) throw new Error("Review assignment IDs must be unique.");
     ids.add(assignment.assignmentId);
     if (assignment.route === "cheap" && assignment.blockers.length) throw new Error("Blocked work cannot use the cheap route.");

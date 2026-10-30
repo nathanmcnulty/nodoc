@@ -1,10 +1,10 @@
 import assert from "node:assert/strict";
-import { mkdtemp, mkdir, writeFile, rm } from "node:fs/promises";
+import { mkdtemp, mkdir, readFile, writeFile, rm } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 
-import { decodeResponseCapture, mergeItems, requestEvidence, toApiRecord } from "../cdp-deep-capture.mjs";
+import { applyResponseCapture, captureRequestBody, decodeResponseCapture, mergeItems, requestEvidence, toApiRecord } from "../cdp-deep-capture.mjs";
 import { mineJavascriptBundles } from "../mine-javascript-bundles.mjs";
 
 function request(overrides = {}) {
@@ -41,6 +41,11 @@ test("decoded empty, unavailable, omitted, captured primitive and encoded bodies
   assert.equal(oversized.body, null);
   assert.equal(oversized.capture.reason, "decoded-size-limit");
   assert.equal(decodeResponseCapture({ body: "invalid!", base64Encoded: true }).capture.reason, "malformed-base64");
+  const invalidUtf8 = decodeResponseCapture({ body: "/w==", base64Encoded: true });
+  assert.equal(invalidUtf8.body, null);
+  assert.equal(invalidUtf8.capture.state, "failed");
+  assert.equal(invalidUtf8.capture.reason, "invalid-utf8");
+  assert.equal(invalidUtf8.capture.decodedBytes, 1);
   assert.notEqual(requestEvidence(request({ responseBody: "0" })).responseShapeFingerprint, null);
   assert.notEqual(requestEvidence(request({ responseBody: "false" })).responseShapeFingerprint, null);
   assert.notEqual(requestEvidence(request({ responseBody: "null" })).responseShapeFingerprint, null);
@@ -61,6 +66,67 @@ test("text and JSON primitive errors retain distinct bounded signatures without 
   }
   assert.equal(requestEvidence(request({ responseBody: "" })).responseErrorSignature, null);
   assert.equal(requestEvidence(request({ responseBody: "text", status: 200 })).responseErrorSignature, null);
+});
+
+test("long shared error prefixes and distinct nested field paths retain unique signatures", () => {
+  const prefix = "synthetic-prefix ".repeat(400);
+  for (const format of [
+    (value) => value,
+    (value) => JSON.stringify(value),
+    (value) => JSON.stringify({ error: { code: value } }),
+    (value) => JSON.stringify({ error: { message: value } }),
+  ]) {
+    const left = requestEvidence(request({ responseBody: format(`${prefix}first`) }));
+    const right = requestEvidence(request({ responseBody: format(`${prefix}second`) }));
+    assert.notEqual(left.responseErrorSignature, right.responseErrorSignature);
+    assert.notEqual(left.requestFingerprint, right.requestFingerprint);
+    assert.doesNotMatch(JSON.stringify(left), /synthetic-prefix/u);
+  }
+  const atFirstPath = requestEvidence(request({ responseBody: '{"first":{"code":"A"},"second":{"message":"B"}}' }));
+  const atSecondPath = requestEvidence(request({ responseBody: '{"first":{"message":"B"},"second":{"code":"A"}}' }));
+  assert.notEqual(atFirstPath.responseErrorSignature, atSecondPath.responseErrorSignature);
+  const inFirstArray = requestEvidence(request({ responseBody: '{"errors":[{"code":"A"},{"code":"B"}]}' }));
+  const inSecondArray = requestEvidence(request({ responseBody: '{"errors":[{"code":"B"},{"code":"A"}]}' }));
+  assert.notEqual(inFirstArray.responseErrorSignature, inSecondArray.responseErrorSignature);
+});
+
+test("runtime request and response helpers preserve credential-key structure before redaction", async () => {
+  const privateBody = JSON.stringify({ token: { expiresIn: 3600, scopes: ["private-value"] }, secret: false });
+  const capturedRequest = captureRequestBody(privateBody, true);
+  const response = applyResponseCapture(request({ status: 200, ...capturedRequest }), { body: privateBody }, Buffer.byteLength(privateBody));
+  const record = toApiRecord(response, "synthetic");
+  const expectedShape = { secret: "boolean", token: { expiresIn: "number", scopes: { array: ["string"] } } };
+  assert.deepEqual(record.requestShapeSummary, expectedShape);
+  assert.deepEqual(record.responseShapeSummary, expectedShape);
+  assert.equal(record.requestShapeComplete, true);
+  assert.equal(record.responseShapeComplete, true);
+  assert.equal(record.requestShapeFingerprint, record.responseShapeFingerprint);
+  assert.doesNotMatch(record.requestBodySamples.join(""), /private-value/u);
+  assert.doesNotMatch(record.responseBodySample, /private-value/u);
+  const source = await readFile(new URL("../cdp-deep-capture.mjs", import.meta.url), "utf8");
+  assert.match(source, /\.\.\.captureRequestBody\(params\.request\.postData, params\.request\.hasPostData\)/u);
+  assert.match(source, /applyResponseCapture\(record, body, params\.encodedDataLength\)/u);
+  const failed = applyResponseCapture(request(), { body: "/w==", base64Encoded: true }, 1);
+  assert.equal(failed.responseBodyCapture.reason, "invalid-utf8");
+  assert.equal(failed.responseShapeComplete, false);
+  assert.equal(failed.responseShapeSummary, null);
+});
+
+test("bounded error scans retain full captured digest when service codes are deeper or beyond key limits", () => {
+  const deep = (code) => ({ error: { detail: { detail: { detail: { detail: { code } } } } } });
+  const beyondKeys = (code) => ({
+    ...Object.fromEntries(Array.from({ length: 128 }, (_, index) => [`a${String(index).padStart(3, "0")}`, true])),
+    zerror: { code },
+  });
+  for (const makeBody of [deep, beyondKeys, (code) => ({ unrecognizedField: code })]) {
+    const left = requestEvidence(request({ responseBody: JSON.stringify(makeBody("A")) }));
+    const right = requestEvidence(request({ responseBody: JSON.stringify(makeBody("B")) }));
+    assert.ok(left.responseErrorSignature);
+    assert.ok(right.responseErrorSignature);
+    assert.notEqual(left.responseErrorSignature, right.responseErrorSignature);
+    assert.notEqual(left.requestFingerprint, right.requestFingerprint);
+  }
+  assert.equal(requestEvidence(request({ responseBody: JSON.stringify(deep("A")) })).responseShapeComplete, true);
 });
 
 test("request media types survive CDP normalization and distinguish otherwise identical variants", () => {
@@ -93,6 +159,11 @@ test("bounded shapes explicitly mark omitted array items, object keys and depth 
   for (let index = 0; index < 8; index++) deep = { nested: deep };
   assert.equal(requestEvidence(request({ responseBody: JSON.stringify(deep) })).responseShapeComplete, false);
   assert.equal(requestEvidence(request({ responseBody: '{"00000000-0000-4000-8000-000000000001":42}' })).responseShapeComplete, false);
+  const uuidV7 = "abcdef01-2345-7890-abcd-ef0123456789";
+  const dynamic = requestEvidence(request({ responseBody: JSON.stringify({ [uuidV7]: 42 }) }));
+  assert.equal(dynamic.responseShapeComplete, false);
+  assert.deepEqual(dynamic.responseShapeSummary, { "{dynamicProperty}": "unknown" });
+  assert.equal(JSON.stringify(dynamic).includes(uuidV7), false);
   assert.equal(requestEvidence(request({ responseBody: "not-json" })).responseShapeComplete, false);
   assert.equal(requestEvidence(request({ responseBody: null })).responseShapeComplete, false);
   assert.equal(requestEvidence(request({ responseBody: "{}", responseShapeComplete: false })).responseShapeComplete, false);

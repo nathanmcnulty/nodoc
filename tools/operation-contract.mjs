@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { isDeepStrictEqual } from "node:util";
 
 // This representation deliberately contains shapes and opaque evidence references,
 // never captured values, messages, URLs or headers.
@@ -22,15 +23,24 @@ export function normalizeContractShape(value, depth = 0) {
   })).entries()].sort(([a], [b]) => a.localeCompare(b)).map(([, shape]) => shape) };
   if (typeof value !== "object") return "unknown";
   if (Array.isArray(value.array)) return normalizeContractShape(value.array, depth);
-  return Object.fromEntries(Object.keys(value).sort().slice(0, 128).map((key) => [
-    /^[A-Za-z_$][\w$.-]{0,127}$/u.test(key) ? key : "{dynamicProperty}",
-    normalizeContractShape(value[key], depth + 1),
-  ]));
+  const properties = {};
+  let dynamic = false;
+  for (const key of Object.keys(value).sort().slice(0, 128)) {
+    if (!/^[A-Za-z_$][\w$.-]{0,127}$/u.test(key)
+      || /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/iu.test(key)
+      || /\.onmicrosoft\.com/iu.test(key)) {
+      dynamic = true;
+      continue;
+    }
+    properties[key] = normalizeContractShape(value[key], depth + 1);
+  }
+  if (dynamic) properties["{dynamicProperty}"] = "unknown";
+  return properties;
 }
 
 function schemaShape(schema, depth = 0) {
   if (!schema || typeof schema !== "object" || depth > 12 || schema.$ref) return "unknown";
-  if (schema.oneOf || schema.anyOf) return "unknown"; // Alternatives require review, not a guessed branch.
+  if (schema.oneOf || schema.anyOf || schema.allOf) return "unknown"; // Composition requires review, not a guessed branch.
   if (schema.type === "array" || schema.items) return { array: [schemaShape(schema.items, depth + 1)] };
   if (schema.type === "object" || schema.properties) return Object.fromEntries(Object.entries(schema.properties ?? {}).sort(([a], [b]) => a.localeCompare(b)).map(([key, value]) => [key, schemaShape(value, depth + 1)]));
   return normalizeContractShape(schema.type);
@@ -87,6 +97,19 @@ export function mergeContractObservations(...groups) {
   })];
 }
 
+export function assertPublishableEvidenceInput(value, label = "input", unsafe = /tenant|bearer|cookie|authorization|password|secret|credential|https?:\/\/|[A-Za-z]:\\/iu) {
+  const serialized = JSON.stringify(value, (key, entry) => {
+    if (key !== "contractObservations") return entry;
+    if (!Array.isArray(entry) || entry.length > 128 || entry.some((observation) => !isDeepStrictEqual(observation, contractObservation(observation)))) {
+      throw new Error(`${label} contains noncanonical contract observations or prohibited sensitive data.`);
+    }
+    // API vocabulary in canonical typed shape keys is allowed. Every other field
+    // still passes through the original sensitive-data check.
+    return "[validated-contract-observations]";
+  });
+  if (unsafe.test(serialized)) throw new Error(`${label} contains prohibited sensitive data.`);
+}
+
 function compareShape(expected, observed) {
   if (expected === "unknown" || observed === "unknown" || observed === "null") return "unverified";
   if (typeof expected === "string" || typeof observed === "string") return expected === observed ? "exact" : "conflict";
@@ -99,7 +122,7 @@ function compareShape(expected, observed) {
     });
     return results.includes("conflict") ? "conflict" : results.includes("unverified") ? "unverified" : "exact";
   }
-  const results = Object.entries(observed).map(([key, value]) => Object.hasOwn(expected, key) ? compareShape(expected[key], value) : "enrichment");
+  const results = Object.entries(observed).map(([key, value]) => key === "{dynamicProperty}" ? "unverified" : Object.hasOwn(expected, key) ? compareShape(expected[key], value) : "enrichment");
   if (!Object.keys(observed).length || Object.keys(expected).some((key) => !Object.hasOwn(observed, key))) results.push("unverified");
   return results.includes("conflict") ? "conflict" : results.includes("enrichment") ? "enrichment" : results.includes("unverified") ? "unverified" : "exact";
 }

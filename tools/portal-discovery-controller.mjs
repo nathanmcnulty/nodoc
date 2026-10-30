@@ -12,6 +12,7 @@ import { compilePromotionPlan, validatePromotionPlan } from "./portal-discovery-
 import { compileRetrospective, validateRetrospective } from "./portal-discovery-retrospective.mjs";
 import { calculateUnresolvedFrontier, scheduleFrontier, validateFrontier } from "./portal-discovery-frontier.mjs";
 import { loadBenchmarkCorpus, runOfflineBenchmark, validateBenchmarkScorecard } from "./portal-discovery-benchmark.mjs";
+import { assertPublishableEvidenceInput } from "./operation-contract.mjs";
 
 export const controllerSchemaVersion = 1;
 export const controllerStates = ["planned", "blocked", "awaiting-auth", "awaiting-capture-lease", "capture-recommended", "awaiting-artifacts", "offline-ready", "review-ready", "promotion-ready", "awaiting-PR", "awaiting-CI", "awaiting-review", "merge-ready", "merged", "retrospective-ready", "saturated-complete", "failed"];
@@ -19,8 +20,6 @@ export const controllerReasonCodes = ["portfolio-invalid", "dependency-blocked",
 
 const stableJson = (value) => `${JSON.stringify(value)}\n`;
 const digest = (value) => createHash("sha256").update(stableJson(value), "utf8").digest("hex");
-const unsafe = /tenant|bearer|cookie|authorization|password|secret|credential|https?:\/\/|[A-Za-z]:\\/iu;
-function assertSafe(value, label) { if (unsafe.test(JSON.stringify(value))) throw new Error(`${label} contains prohibited sensitive data.`); }
 function clean(value) { if (value === undefined) return null; if (value === null || typeof value === "string" || typeof value === "number" || typeof value === "boolean") return value; if (Array.isArray(value)) return value.map(clean); return Object.fromEntries(Object.entries(value).sort(([a], [b]) => a.localeCompare(b)).map(([key, entry]) => [key, clean(entry)])); }
 
 const transitions = {
@@ -50,7 +49,7 @@ export function transitionControllerState(state, next, reasonCode) {
 }
 
 export function compileIntegratedController({ manifest, groupedHandoff = null, specInventory = [], discovery = {}, retrospectiveInput = null, benchmarkCorpus, options = {}, budgets = {}, stageInputs = {} } = {}) {
-  assertSafe({ groupedHandoff, discovery, retrospectiveInput, benchmarkCorpus, options, budgets, stageInputs }, "controller input");
+  assertPublishableEvidenceInput({ groupedHandoff, discovery, retrospectiveInput, benchmarkCorpus, options, budgets, stageInputs }, "controller input");
   if (!manifest || manifest.schemaVersion !== 1) throw new Error("A validated materialized portfolio manifest is required.");
   const plan = compileOrchestrationPlan(manifest, { budgets, options: { ...options, apply: false } });
   validateOrchestrationPlan(plan);

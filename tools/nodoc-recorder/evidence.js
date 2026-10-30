@@ -68,15 +68,22 @@
     }
     return { anyOf: [...grouped.values()].sort((a, b) => stable(a).localeCompare(stable(b))) };
   }
-  function serviceErrors(value, depth = 0) {
-    if (depth > 8 || !value || typeof value !== 'object') return [];
+  function serviceErrors(value, depth = 0, path = [], scan) {
+    if (depth > 20) {
+      if (scan) scan.complete = false;
+      return [];
+    }
+    if (!value || typeof value !== 'object') return [];
     return Object.entries(value).flatMap(([key, item]) => /^(code|errorCode|error_code|message|error_description)$/i.test(key) && ['string', 'number'].includes(typeof item)
-      ? [`${key}=${String(item).slice(0, 160)}`] : serviceErrors(item, depth + 1)).sort();
+      ? [stable([path.concat(key), typeof item, item])] : serviceErrors(item, depth + 1, path.concat(key), scan)).sort();
   }
-  function mediaType(headers = {}) {
-    const value = (Object.entries(headers).find(([key]) => key.toLowerCase() === 'content-type')?.[1] || 'application/json').split(';')[0].trim().toLowerCase();
-    return /^[\w.+-]+\/[\w.+-]+$/.test(value) ? value : 'application/octet-stream';
+  function mediaTypeEvidence(headers = {}) {
+    const header = Object.entries(headers).find(([key]) => key.toLowerCase() === 'content-type')?.[1];
+    if (!header) return { value: 'application/octet-stream', state: 'unknown', reason: 'missing-content-type' };
+    const value = String(header).split(';')[0].trim().toLowerCase();
+    return /^[\w.+-]+\/[\w.+-]+$/.test(value) ? { value, state: 'observed' } : { value: 'application/octet-stream', state: 'unknown', reason: 'invalid-content-type' };
   }
+  const mediaType = headers => mediaTypeEvidence(headers).value;
   function operationKey(entry) {
     try { const url = new URL(entry.url); return stable([url.origin, entry.method.toUpperCase(), url.pathname]); }
     catch { return stable(['invalid-url', entry.method, entry.path]); }
@@ -84,10 +91,16 @@
   function variantKey(entry) {
     const url = new URL(entry.url);
     const request = parseBody(entry.requestBody), response = parseBody(entry.responseBody);
+    const scan = { complete: true };
+    const errors = serviceErrors(response.value, 0, [], scan);
+    // Captured response bodies are bounded by the collector. When the semantic
+    // scan cannot classify one, preserve its private bytes in the local index;
+    // exported evidence contains only opaque variant IDs, never this key.
+    const errorDiscriminator = entry.statusCode >= 400 && (!scan.complete || !errors.length || typeof response.value === 'string') ? entry.responseBody : errors;
     return stable([operationKey(entry), [...new Set(url.searchParams.keys())].sort(), entry.statusCode,
-      mediaType(entry.requestHeaders), mediaType(entry.responseHeaders), request.state, response.state,
+      mediaTypeEvidence(entry.requestHeaders), mediaTypeEvidence(entry.responseHeaders), request.state, response.state,
       request.json ? inferSchema(request.value) : request.json, response.json ? inferSchema(response.value) : response.json,
-      entry.statusCode >= 400 && typeof response.value === 'string' ? response.value : serviceErrors(response.value), entry.responseCapture?.state]);
+      errorDiscriminator, entry.responseCapture?.state]);
   }
   // Export string values are never copied. Schemas are inferred from original private values first.
   function redactValue(value, depth = 0) {
@@ -141,13 +154,19 @@
     }
     return result;
   }
-  function publicBody(raw, capture) {
-    const parsed = parseBody(raw);
-    const allowedReasons = ['size-limit', 'body-too-large', 'policy', 'excluded-by-policy', 'decode-failed', 'retrieval-failed', 'unavailable', 'empty', 'not-json', 'legacy-capture', 'response-not-finished', 'post-data-unavailable', 'no-post-data-reported', 'network-loading-failed', 'cdp-body-retrieval-failed', 'network-session-policy', 'encoded-size-limit-or-unknown', 'decoded-size-limit', 'body-unavailable', 'malformed-base64'];
+  function normalizeCaptureMetadata(capture, fallbackState = 'unknown') {
+    const allowedReasons = ['size-limit', 'body-too-large', 'policy', 'excluded-by-policy', 'decode-failed', 'invalid-utf8', 'retrieval-failed', 'unavailable', 'empty', 'not-json', 'legacy-capture', 'response-not-finished', 'post-data-unavailable', 'no-post-data-reported', 'network-loading-failed', 'cdp-body-retrieval-failed', 'network-session-policy', 'encoded-size-limit-or-unknown', 'decoded-size-limit', 'body-unavailable', 'malformed-base64'];
     const reason = capture?.reason && allowedReasons.includes(capture.reason) ? capture.reason : capture?.reason ? 'unspecified' : undefined;
-    const state = !capture?.state ? parsed.state : ['unknown', 'captured', 'empty', 'omitted', 'failed', 'omitted-size', 'decode-failed', 'unavailable'].includes(capture.state) ? capture.state : 'unknown';
+    const allowedStates = ['unknown', 'captured', 'empty', 'omitted', 'failed', 'omitted-size', 'decode-failed', 'unavailable'];
+    const state = !capture?.state ? (allowedStates.includes(fallbackState) ? fallbackState : 'unknown') : allowedStates.includes(capture.state) ? capture.state : 'unknown';
     return { state, ...(capture?.encoding ? { encoding: ['utf8', 'base64', 'text', 'utf-8'].includes(capture.encoding) ? capture.encoding : 'unknown' } : {}),
       ...(reason ? { reason } : {}),
+      ...(typeof capture?.sampleTruncated === 'boolean' ? { sampleTruncated: capture.sampleTruncated } : {}),
+      ...Object.fromEntries(['encodedDataLength', 'decodedBytes'].filter(key => Number.isSafeInteger(capture?.[key]) && capture[key] >= 0).map(key => [key, capture[key]])) };
+  }
+  function publicBody(raw, capture) {
+    const parsed = parseBody(raw);
+    return { ...normalizeCaptureMetadata(capture, parsed.state),
       ...(parsed.state === 'captured' ? { schema: publicSchema(inferSchema(parsed.value)), value: redactValue(parsed.value), json: parsed.json } : {}) };
   }
   function exportEntry(entry) {
@@ -155,6 +174,7 @@
     return { observationId: entry.id, method: entry.method, url, path: url.startsWith('http') ? new URL(url).pathname : REDACTED,
       portal: entry.portal, statusCode: entry.statusCode, timestamp: entry.timestamp,
       requestHeaders: publicHeaders(entry.requestHeaders), responseHeaders: publicHeaders(entry.responseHeaders),
+      requestMediaType: mediaTypeEvidence(entry.requestHeaders), responseMediaType: mediaTypeEvidence(entry.responseHeaders),
       requestBody: publicBody(entry.requestBody, entry.requestCapture), responseBody: publicBody(entry.responseBody, entry.responseCapture),
       occurrences: entry.occurrences || 1, 'x-nodoc-redacted': true };
   }
@@ -196,6 +216,8 @@
         const content = container.content ||= {};
         const existing = content[media] ||= { schema: undefined };
         existing.schema = mergeSchemas(existing.schema, body.schema);
+        const mediaEvidence = mediaTypeEvidence(headers);
+        existing['x-nodoc-media-type-evidence'] = [...new Map([...(existing['x-nodoc-media-type-evidence'] || []), mediaEvidence].map(item => [stable(item), item])).values()].sort((a, b) => stable(a).localeCompare(stable(b)));
       }
     }
     if (completeness) for (const document of documents.values()) document['x-nodoc-capture-completeness'] = { limitReached: Boolean(completeness.limitReached), refusedObservationCount: Number(completeness.refusedObservationCount) || 0, observationLimit: 5000, byteLimit: 32 * 1024 * 1024, note: 'Only refused callbacks are counted; traffic while recording is paused is unobserved.' };
@@ -203,7 +225,7 @@
   }
   // JSON is valid YAML 1.2, including a stream of separate origin-bound documents.
   const openApiYaml = (entries, completeness) => buildOpenApiDocuments(entries, completeness).map(document => JSON.stringify(document, null, 2)).join('\n---\n') + '\n';
-  const api = { parseBody, decodeCapture, inferSchema, mergeSchemas, serviceErrors, operationKey, variantKey, publicUrl, exportEntry, buildOpenApiDocuments, openApiYaml };
+  const api = { parseBody, decodeCapture, normalizeCaptureMetadata, inferSchema, mergeSchemas, serviceErrors, operationKey, variantKey, publicUrl, exportEntry, buildOpenApiDocuments, openApiYaml };
   root.NodocRecorder = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(globalThis);

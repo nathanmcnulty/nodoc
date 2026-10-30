@@ -192,7 +192,7 @@ function shapeOf(value, depth = 0, completeness = null) {
     if (Object.keys(value).length > 128 && completeness) completeness.complete = false;
     for (const key of Object.keys(value).sort((left, right) => left.localeCompare(right)).slice(0, 128)) {
       if (key.length > 128
-          || /[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}/iu.test(key)
+          || /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/iu.test(key)
           || /[\w.+-]+@[\w.-]+\.[a-z]{2,}/iu.test(key)
           || /\.onmicrosoft\.com/iu.test(key)) {
         dynamic = true;
@@ -245,34 +245,48 @@ function bodyShapeFingerprint(value) {
 // This separates same-shaped failures without interpreting their cause from HTTP status.
 export function responseErrorSignature(request) {
   if (!(Number(request.status) >= 400)) return null;
+  if (request.responseBody === undefined || request.responseBody === null) return null;
   try {
     const body = typeof request.responseBody === "string"
       ? JSON.parse(request.responseBody) : request.responseBody;
     if (body !== null && ["string", "number", "boolean"].includes(typeof body)) {
-      return sha256(JSON.stringify(["json-primitive", typeof body, String(body).slice(0, 2048)]));
+      return sha256(JSON.stringify(["json-primitive", typeof body, sha256(String(body))]));
     }
     const values = [];
-    const visit = (value, depth = 0) => {
-      if (!value || typeof value !== "object" || depth > 4) return;
-      for (const key of Object.keys(value).sort().slice(0, 128)) {
+    let incomplete = false;
+    const visit = (value, depth = 0, structuralPath = []) => {
+      if (!value || typeof value !== "object") return;
+      if (depth > 4) {
+        incomplete = true;
+        return;
+      }
+      const keys = Object.keys(value).sort();
+      if (keys.length > 128) incomplete = true;
+      for (const key of keys.slice(0, 128)) {
         const nested = value[key];
+        const fieldPath = [...structuralPath, Array.isArray(value) ? Number(key) : key];
         if (/^(?:code|errorcode|error_code|message|error_description|reason)$/iu.test(key)
             && ["string", "number"].includes(typeof nested)) {
-          values.push([key.toLowerCase(), String(nested).slice(0, 2048)]);
+          values.push([fieldPath, typeof nested, sha256(String(nested))]);
         } else if (key.toLowerCase() === "error" && typeof nested === "string") {
-          values.push(["error", nested.slice(0, 2048)]);
-        } else if (nested && typeof nested === "object") visit(nested, depth + 1);
+          values.push([fieldPath, "string", sha256(nested)]);
+        } else if (nested && typeof nested === "object") visit(nested, depth + 1, fieldPath);
       }
     };
     visit(body);
-    return values.length ? sha256(JSON.stringify(values)) : null;
+    // The body is already bounded by capture policy. When the semantic scan is
+    // partial or finds no known fields, retain a digest of all captured bytes so
+    // unrecognized or deeper service errors cannot collapse into one variant.
+    const fallback = incomplete || !values.length
+      ? sha256(typeof request.responseBody === "string" ? request.responseBody : JSON.stringify(body)) : null;
+    return sha256(JSON.stringify([values, fallback]));
   } catch {
     const text = typeof request.responseBody === "string" ? request.responseBody.trim() : "";
-    return text ? sha256(JSON.stringify(["non-json-text", text.slice(0, 2048)])) : null;
+    return text ? sha256(JSON.stringify(["non-json-text", sha256(text)])) : null;
   }
 }
 
-export function decodeResponseCapture(payload, encodedDataLength = null) {
+export function decodeResponseCapture(payload, encodedDataLength = null, options = {}) {
   const value = payload?.body ?? payload?.content;
   const encoding = payload?.base64Encoded ? "base64" : "utf8";
   if (payload?.base64Encoded && typeof value === "string"
@@ -280,7 +294,16 @@ export function decodeResponseCapture(payload, encodedDataLength = null) {
     return { body: null, capture: { state: "failed", reason: "malformed-base64", encoding, encodedDataLength, decodedBytes: null, sampleTruncated: false } };
   }
   const decodedBytes = typeof value === "string" ? Buffer.byteLength(value, encoding) : null;
-  const decoded = decodeBoundedCdpBody(payload);
+  let decoded;
+  if (payload?.base64Encoded && decodedBytes <= responseBodyCaptureLimit && typeof value === "string") {
+    try {
+      decoded = new TextDecoder("utf-8", { fatal: true, ignoreBOM: true }).decode(Buffer.from(value, "base64"));
+    } catch {
+      return { body: null, capture: { state: "failed", reason: "invalid-utf8", encoding, encodedDataLength, decodedBytes, sampleTruncated: false } };
+    }
+  } else {
+    decoded = decodeBoundedCdpBody(payload);
+  }
   const capture = {
     state: decoded === null ? "omitted" : decoded === "" ? "empty" : "captured",
     reason: decoded === null ? (decodedBytes > responseBodyCaptureLimit ? "decoded-size-limit" : "body-unavailable") : null,
@@ -293,7 +316,45 @@ export function decodeResponseCapture(payload, encodedDataLength = null) {
   const sanitized = sanitizeCapturedBody(decoded);
   const body = truncate(sanitized);
   capture.sampleTruncated = body !== sanitized;
-  return { body, capture, fullBody: sanitized };
+  return {
+    body,
+    capture,
+    fullBody: sanitized,
+    responseShapeFingerprint: bodyShapeFingerprint(decoded),
+    responseShapeSummary: bodyShapeSummary(decoded),
+    responseShapeComplete: bodyShapeComplete(decoded),
+    responseErrorSignature: responseErrorSignature({ status: options.status, responseBody: decoded }),
+    graphBatch: graphBatchResponseMetadata(options.graphBatch, decoded),
+  };
+}
+
+export function applyResponseCapture(record, payload, encodedDataLength = null) {
+  const decoded = decodeResponseCapture(payload, encodedDataLength, record);
+  Object.assign(record, {
+    responseBody: decoded.body,
+    responseBodyCapture: decoded.capture,
+    responseShapeFingerprint: decoded.responseShapeFingerprint ?? null,
+    responseShapeSummary: decoded.responseShapeSummary ?? null,
+    responseShapeComplete: decoded.responseShapeComplete ?? false,
+    responseErrorSignature: decoded.responseErrorSignature ?? null,
+    graphBatch: decoded.graphBatch ?? record.graphBatch ?? null,
+  });
+  return record;
+}
+
+export function captureRequestBody(postData, hasPostData = false) {
+  const sanitized = sanitizeCapturedBody(postData ?? null);
+  return {
+    requestBody: truncate(sanitized),
+    requestBodyCapture: {
+      state: postData === undefined ? "unknown" : postData === "" ? "empty" : "captured",
+      reason: postData === undefined ? (hasPostData ? "post-data-unavailable" : "no-post-data-reported") : null,
+      sampleTruncated: truncate(sanitized) !== sanitized,
+    },
+    requestShapeFingerprint: bodyShapeFingerprint(postData),
+    requestShapeSummary: bodyShapeSummary(postData),
+    requestShapeComplete: bodyShapeComplete(postData),
+  };
 }
 
 export function requestEvidence(request) {
@@ -2813,7 +2874,6 @@ async function main() {
       return;
     }
 
-    const sanitizedRequestBody = sanitizeCapturedBody(params.request.postData ?? null);
     requestMap.set(key, {
       attribution,
       abortedBeforeSend,
@@ -2835,17 +2895,9 @@ async function main() {
       method: params.request.method,
       pageLabel: attribution.pageLabel,
       probeId,
-      requestBody: truncate(sanitizedRequestBody),
-      requestBodyCapture: {
-        state: params.request.postData === undefined ? "unknown" : params.request.postData === "" ? "empty" : "captured",
-        reason: params.request.postData === undefined ? (params.request.hasPostData ? "post-data-unavailable" : "no-post-data-reported") : null,
-        sampleTruncated: truncate(sanitizedRequestBody) !== sanitizedRequestBody,
-      },
+      ...captureRequestBody(params.request.postData, params.request.hasPostData),
       responseBodyCapture: { state: "unknown", reason: "response-not-finished" },
-      graphBatch: graphBatchRequestMetadata(requestUrl, sanitizedRequestBody),
-      requestShapeFingerprint: bodyShapeFingerprint(sanitizedRequestBody),
-      requestShapeSummary: bodyShapeSummary(sanitizedRequestBody),
-      requestShapeComplete: bodyShapeComplete(sanitizedRequestBody),
+      graphBatch: graphBatchRequestMetadata(requestUrl, params.request.postData),
       resourceType,
       sessionId,
       startedAt: params.timestamp,
@@ -2933,14 +2985,7 @@ async function main() {
             const body = await client.send("Network.getResponseBody", {
               requestId: params.requestId,
             }, metadata.sessionId);
-            const decoded = decodeResponseCapture(body, params.encodedDataLength);
-            record.responseBody = decoded.body;
-            record.responseBodyCapture = decoded.capture;
-            record.graphBatch = graphBatchResponseMetadata(record.graphBatch, decoded.fullBody ?? null);
-            record.responseShapeFingerprint = bodyShapeFingerprint(decoded.fullBody);
-            record.responseShapeSummary = bodyShapeSummary(decoded.fullBody);
-            record.responseShapeComplete = bodyShapeComplete(decoded.fullBody);
-            record.responseErrorSignature = responseErrorSignature({ ...record, responseBody: decoded.fullBody });
+            applyResponseCapture(record, body, params.encodedDataLength);
           } catch {
             record.responseBody = null;
             record.responseBodyCapture = { state: "failed", reason: "cdp-body-retrieval-failed", encodedDataLength: params.encodedDataLength ?? null };
