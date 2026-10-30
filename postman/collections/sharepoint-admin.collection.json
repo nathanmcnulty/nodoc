@@ -918,6 +918,133 @@
                     ]
                 },
                 {
+                    "name": "SPO.SPOContentSecurityPolicyConfiguration",
+                    "description": "",
+                    "item": [
+                        {
+                            "id": "882f458d-7223-46cc-a629-10566832a66a",
+                            "name": "Get allowed script sources",
+                            "request": {
+                                "name": "Get allowed script sources",
+                                "description": {
+                                    "content": "Returns the SharePoint content-security-policy script-source\nconfiguration shown under Advanced > Script sources. The targeted live\ntenant returned an empty `Items` collection. The item member names are\nadditionally corroborated by the shipped admin-center client bundle,\nbut populated values have not yet been observed.\n",
+                                    "type": "text/plain"
+                                },
+                                "url": {
+                                    "path": [
+                                        "_api",
+                                        "SPO.SPOContentSecurityPolicyConfiguration"
+                                    ],
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "query": [],
+                                    "variable": []
+                                },
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "method": "GET",
+                                "body": {},
+                                "auth": null
+                            },
+                            "response": [
+                                {
+                                    "id": "d7873d99-d828-4b04-aee4-c553727168e1",
+                                    "name": "Script-source configuration returned successfully.",
+                                    "originalRequest": {
+                                        "url": {
+                                            "path": [
+                                                "_api",
+                                                "SPO.SPOContentSecurityPolicyConfiguration"
+                                            ],
+                                            "host": [
+                                                "{{baseUrl}}"
+                                            ],
+                                            "query": [],
+                                            "variable": []
+                                        },
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            }
+                                        ],
+                                        "method": "GET",
+                                        "body": {}
+                                    },
+                                    "status": "OK",
+                                    "code": 200,
+                                    "header": [
+                                        {
+                                            "key": "Content-Type",
+                                            "value": "application/json"
+                                        }
+                                    ],
+                                    "body": "{\n  \"@odata.context\": \"https://{tenant}-admin.sharepoint.com/_api/$metadata#SPOContentSecurityPolicyConfigurations/$entity\",\n  \"@odata.type\": \"#Microsoft.Online.SharePoint.TenantAdministration.SPOContentSecurityPolicyConfiguration\",\n  \"@odata.id\": \"https://{tenant}-admin.sharepoint.com/_api/SPO.SPOContentSecurityPolicyConfiguration\",\n  \"@odata.editLink\": \"SPO.SPOContentSecurityPolicyConfiguration\",\n  \"Items\": []\n}",
+                                    "cookie": [],
+                                    "_postman_previewlanguage": "json"
+                                },
+                                {
+                                    "id": "a95b91a2-00e7-47dc-8fb0-2a8c65035cfa",
+                                    "name": "Authentication is required or the SharePoint admin browser session is no longer valid.",
+                                    "originalRequest": {
+                                        "url": {
+                                            "path": [
+                                                "_api",
+                                                "SPO.SPOContentSecurityPolicyConfiguration"
+                                            ],
+                                            "host": [
+                                                "{{baseUrl}}"
+                                            ],
+                                            "query": [],
+                                            "variable": []
+                                        },
+                                        "method": "GET",
+                                        "body": {}
+                                    },
+                                    "status": "Unauthorized",
+                                    "code": 401,
+                                    "header": [],
+                                    "cookie": [],
+                                    "_postman_previewlanguage": "text"
+                                },
+                                {
+                                    "id": "1301de96-62f9-4a55-9ecd-5dd9275b2a16",
+                                    "name": "The authenticated principal does not have access to the requested SharePoint admin data.",
+                                    "originalRequest": {
+                                        "url": {
+                                            "path": [
+                                                "_api",
+                                                "SPO.SPOContentSecurityPolicyConfiguration"
+                                            ],
+                                            "host": [
+                                                "{{baseUrl}}"
+                                            ],
+                                            "query": [],
+                                            "variable": []
+                                        },
+                                        "method": "GET",
+                                        "body": {}
+                                    },
+                                    "status": "Forbidden",
+                                    "code": 403,
+                                    "header": [],
+                                    "cookie": [],
+                                    "_postman_previewlanguage": "text"
+                                }
+                            ],
+                            "event": [],
+                            "protocolProfileBehavior": {
+                                "disableBodyPruning": true
+                            }
+                        }
+                    ]
+                },
+                {
                     "name": "SPO.Tenant",
                     "description": "",
                     "item": [
