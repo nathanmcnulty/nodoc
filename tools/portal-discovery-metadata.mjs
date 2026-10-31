@@ -758,6 +758,7 @@ export const captureRecipesByTitle = {
     "tools/capture-recipes/entra-iga-novelty.json",
     "tools/capture-recipes/entra-iga-known-refresh-20261029.json",
     "tools/capture-recipes/entra-iga-idgov-guestbilling-error-body-20261031.json",
+    "tools/capture-recipes/entra-iga-idgov-guestbilling-error-body-remaining-five-20261031.json",
   ],
   "Entra PIM": [
     "tools/capture-recipes/entra-pim-expired-assignments-enrichment.json",
@@ -849,6 +850,7 @@ export const captureRecipesByTitle = {
     "tools/capture-recipes/security-copilot-known-refresh-20261029.json",
     "tools/capture-recipes/security-copilot-viva-yammer-clients-20261030.json",
     "tools/capture-recipes/security-copilot-purview-loki-shared-client-20261031.json",
+    "tools/capture-recipes/security-copilot-purview-loki-shared-client-remaining-five-20261031.json",
   ],
   SharePoint: [
     "tools/capture-recipes/sharepoint-script-sources-known-refresh.json",
@@ -875,6 +877,7 @@ export const captureRecipesByTitle = {
   ],
   "Microsoft Graph Research": [
     "tools/capture-recipes/graph-research-intune-advancedhub-flightstatus-20261031.json",
+    "tools/capture-recipes/graph-research-intune-advancedhub-flightstatus-remaining-five-20261031.json",
   ],
 };
 
