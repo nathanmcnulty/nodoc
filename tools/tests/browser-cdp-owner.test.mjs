@@ -23,7 +23,7 @@ import {
 const root = join(tmpdir(), "nodoc-cdp-owner-tests");
 const profilePath = join(root, "profiles", "m365-admin");
 const manifestPath = join(root, "manifests", "m365-admin-9222.json");
-const binaryPath = join(tmpdir(), "nodoc-cdp-mock", "msedge.exe");
+const binaryPath = join(tmpdir(), "nodoc cdp mock", "msedge.exe");
 const localAppData = join(tmpdir(), "nodoc-cdp-owner-localappdata");
 const endpoint = "http://127.0.0.1:9222";
 const ownerToken = "12345678-1234-1234-1234-123456789abc";
