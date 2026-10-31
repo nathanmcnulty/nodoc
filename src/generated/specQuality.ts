@@ -160,7 +160,7 @@ export const generatedSpecDataByTitle = {
     "operationContextCount": 3,
     "requestExampleCount": 0,
     "successResponseExampleCount": 3,
-    "evidenceMentionCount": 13,
+    "evidenceMentionCount": 18,
     "maturity": {
       "label": "Advanced",
       "tone": "success",
@@ -259,7 +259,7 @@ export const generatedSpecDataByTitle = {
     "operationContextCount": 2,
     "requestExampleCount": 1,
     "successResponseExampleCount": 2,
-    "evidenceMentionCount": 9,
+    "evidenceMentionCount": 14,
     "maturity": {
       "label": "Growing",
       "tone": "warning",
