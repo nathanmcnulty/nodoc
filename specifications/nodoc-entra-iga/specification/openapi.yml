@@ -114,8 +114,9 @@ paths:
         Controls whether the tenant pays for guest user access to
         entitlement management resources.
 
-        **Note:** Returns 404 if the guest billing feature has not been
-        configured for the tenant.
+        **Note:** Recent native dashboard observations returned HTTP 404 with
+        an empty captured response body. Configuration, licensing and
+        permission causes are not established by that status.
       responses:
         '200':
           description: Guest billing configuration
@@ -124,7 +125,7 @@ paths:
               schema:
                 type: object
         '404':
-          description: Guest billing not configured for this tenant
+          description: Not found; an empty response body was observed. The status cause is unverified.
       x-nodoc-operation-context:
         surface: Historical portal caller / declared backend transport relationship
         provenance:
@@ -141,6 +142,16 @@ paths:
               - Original dates/actions remain historical; this is not fresh capture, current tenant validation, business or application health, standalone invocation, role/grant/minimum-permission proof, or an owning-portal workflow test.
               - GET is the recorded method, not a safety or idempotence determination. No request was authored, invoked, probed or replayed by this offline review; effects and rollback are untested.
               - Confidence applies only to the verified historical method/host/path/status metadata. Captured values, identifiers, credentials, response fingerprints, body lengths and examples are withheld.
+          - source: native-idgov-guest-billing-empty-404-reviewed-20261031
+            confidence: high
+            notes:
+              - "Exact native Identity Governance dashboard observation of GET elm.iga.azure.com/api/v1/billingConfigurations/guestBilling; declared backend owner remains entra-iga."
+              - "Observed at 2026-10-31T21:43:22.086Z; action 2 API evidence request-5f16230bc1c91469b3de. Navigation/reload action observations returned HTTP 404 with a canonically verified empty response body; bootstrap records are excluded as action witnesses."
+              - "The empty captured response is distinct from unavailable capture and from a documented guarantee of no content. No JSON error or configuration schema, fields or examples can be inferred; the existing HTTP 200 configuration schema remains unverified by these observations."
+              - "The selected authenticated Entra page and same-action attached-frame metadata establish this native caller context. They do not establish standalone invocation, minimum roles or permissions, a specific tenant identity, feature availability, or a licensing/configuration cause for HTTP 404."
+              - "The single driver completed with actual child and collector exit 2 and a blocked run classification, while capture completeness and complete response retention were verified separately. This is an error observation, not healthy application or business behavior."
+              - "Only the reviewed passive dashboard navigation/reload was authored. No direct API call, probe, replay, guest billing PUT, subscription linkage, role change or billing enablement was performed by this objective; passive effects remain unassessed."
+              - "Current observation dates do not refresh the whole specification. Response values, identifiers, credentials, body fingerprints and lengths are withheld."
     put:
       tags: [Billing]
       summary: Update guest billing configuration
