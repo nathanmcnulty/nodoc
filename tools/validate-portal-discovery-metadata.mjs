@@ -14,7 +14,11 @@ import {
   validateRecipeTargetMetadata,
 } from "./portal-discovery-recipe.mjs";
 import { buildNoveltyPlan } from "./portal-discovery-novelty.mjs";
+import { buildKnownOperationRefreshPlan, classifyKnownOperationExecutionApproval, isValidKnownOperationRefreshExpiryTimestamp } from "./portal-discovery-evidence-contract.mjs";
 import { validateActiveOperationPlan } from "./portal-discovery-operation-safety.mjs";
+
+const legacyExecutionApprovals = new Set();
+const boundExecutionApprovals = new Set();
 
 const portfolioManifestPath = path.join(repoRoot, "tools", "portal-discovery-portfolio.json");
 
@@ -187,7 +191,7 @@ function validateSeedRouteGroups(errors, recipePath, seedRouteGroups) {
   }
 }
 
-async function validateRecipeFile(errors, recipePath) {
+async function validateRecipeFile(errors, recipePath, expectedSpecId = null) {
   const absolutePath = path.join(repoRoot, recipePath);
   let recipe;
 
@@ -251,6 +255,7 @@ async function validateRecipeFile(errors, recipePath) {
     resolvePageTargetCriteria(recipe);
     validateRecipeTargetMetadata(recipe);
     buildNoveltyPlan(recipe);
+    buildKnownOperationRefreshPlan(recipe);
     if (recipe.noveltyFrontier) {
       const approvalPath = String(recipe.noveltyFrontier.approvalArtifact || "").trim();
       if (!approvalPath) {
@@ -265,7 +270,7 @@ async function validateRecipeFile(errors, recipePath) {
           const approval = JSON.parse(stripBom(approvalSource));
           const approvalDigest = createHash("sha256").update(approvalSource, "utf8").digest("hex");
           if (approvalDigest !== recipe.noveltyFrontier.approvalDigest) fail(errors, `${recipePath}: approvalArtifact digest does not match approvalDigest.`);
-          if (approval.workerModel !== "gpt-5.6-luna" || !["xhigh", "max"].includes(approval.workerReasoning) || approval.decision !== "accept-bounded-frontier" || !Array.isArray(approval.acceptedItems) || approval.acceptedItems.length === 0) fail(errors, `${recipePath}: approvalArtifact is not an exact Luna xhigh/max bounded-frontier approval.`);
+          if (approval.workerModel !== "gpt-6-luna" || !["xhigh", "max"].includes(approval.workerReasoning) || approval.decision !== "accept-bounded-frontier" || !Array.isArray(approval.acceptedItems) || approval.acceptedItems.length === 0) fail(errors, `${recipePath}: approvalArtifact is not an exact Luna xhigh/max bounded-frontier approval.`);
           const sourceArtifactPath = String(approval.source?.artifactPath || "").trim();
           if (!sourceArtifactPath) {
             fail(errors, `${recipePath}: approvalArtifact requires a checked-in source.artifactPath.`);
@@ -300,6 +305,36 @@ async function validateRecipeFile(errors, recipePath) {
           && /prior novelty frontier is satisfied/u.test(error.message);
       }
       if (!blockedBeforeBrowser) fail(errors, `${recipePath}: satisfied novelty state does not block pre-browser planning.`);
+    }
+    if (recipe.knownOperationRefresh) {
+      const approvalPath = String(recipe.knownOperationRefresh.approvalArtifact || "").trim();
+      const approvalAbsolute = path.resolve(repoRoot, approvalPath);
+      const relativeApproval = path.relative(repoRoot, approvalAbsolute);
+      if (!approvalPath || relativeApproval.startsWith("..") || path.isAbsolute(relativeApproval)) {
+        fail(errors, `${recipePath}: known-operation approvalArtifact must remain inside the repository.`);
+      } else {
+        const approvalSource = await readFile(approvalAbsolute, "utf8");
+        const approvalDigest = createHash("sha256").update(approvalSource, "utf8").digest("hex");
+        const approval = JSON.parse(stripBom(approvalSource));
+        if (approvalDigest !== recipe.knownOperationRefresh.approvalDigest) fail(errors, `${recipePath}: known-operation approval digest mismatch.`);
+        if (approval.workerModel !== "gpt-6-luna" || !["xhigh", "max"].includes(approval.workerReasoning) || approval.decision !== "accept-bounded-known-operation-refresh") fail(errors, `${recipePath}: known-operation approval requires exact Luna xhigh/max acceptance.`);
+        const plan = buildKnownOperationRefreshPlan(recipe, { required: true });
+        const hasRuntimeVariables = JSON.stringify(recipe).includes("${");
+        const executionBinding = classifyKnownOperationExecutionApproval(approval, plan, { hasRuntimeVariables });
+        (executionBinding === 'bound' ? boundExecutionApprovals : legacyExecutionApprovals).add(recipePath);
+        const refreshBindingValid = hasRuntimeVariables
+          ? /^[a-f0-9]{64}$/u.test(String(approval.refreshDigest ?? "")) && approval.sourceRefreshDigest === plan.refreshDigest
+          : approval.refreshDigest === plan.refreshDigest;
+        if (!refreshBindingValid || approval.expiresAt !== plan.approvalExpiresAt || !isValidKnownOperationRefreshExpiryTimestamp(approval.expiresAt) || (expectedSpecId && approval.specId !== expectedSpecId)) fail(errors, `${recipePath}: known-operation approval contract binding or expiry mismatch.`);
+        const sourcePath = String(approval.source?.artifactPath || "").trim();
+        const sourceAbsolute = path.resolve(repoRoot, sourcePath);
+        const sourceRelative = path.relative(repoRoot, sourceAbsolute);
+        if (!sourcePath || sourceRelative.startsWith("..") || path.isAbsolute(sourceRelative)) fail(errors, `${recipePath}: known-operation approval source must remain inside the repository.`);
+        else {
+          const source = await readFile(sourceAbsolute);
+          if (createHash("sha256").update(source).digest("hex") !== approval.source.artifactSha256) fail(errors, `${recipePath}: known-operation approval source hash mismatch.`);
+        }
+      }
     }
   } catch (error) {
     fail(errors, `${recipePath}: ${error.message}`);
@@ -338,7 +373,7 @@ async function main() {
         continue;
       }
       seenRecipePaths.add(recipePath);
-      await validateRecipeFile(errors, recipePath);
+      await validateRecipeFile(errors, recipePath, specInventory.find((record) => record.title === title)?.specId ?? null);
     }
   }
 
@@ -351,6 +386,7 @@ async function main() {
     .filter((value, index, values) => values.indexOf(value) === index)
     .length;
   console.log(`Validated portal discovery metadata for ${specTitles.length} specs and ${recipeCount} capture recipes.`);
+  console.log(`Known-operation execution approvals: ${boundExecutionApprovals.size} structurally bound; ${legacyExecutionApprovals.size} legacy non-runnable pending renewal.`);
 }
 
 main().catch((error) => {

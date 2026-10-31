@@ -1,0 +1,87 @@
+{
+  "portal": "Defender MTO",
+  "url": "https://mto.security.microsoft.com",
+  "pageTarget": {
+    "matchHosts": [
+      "mto.security.microsoft.com"
+    ],
+    "matchPathPrefixes": [
+      "/"
+    ],
+    "bootstrap": {
+      "matchHosts": [
+        "mto.security.microsoft.com"
+      ],
+      "matchPathPrefixes": [
+        "/"
+      ]
+    }
+  },
+  "inspectionPolicy": {
+    "mode": "observe-only",
+    "prohibitedControlPatterns": [
+      "Activate",
+      "Assign",
+      "Buy",
+      "Create",
+      "Onboard",
+      "Purchase",
+      "Start trial",
+      "Switch tenant"
+    ]
+  },
+  "noveltyFrontier": null,
+  "matchHosts": [
+    "mto.security.microsoft.com"
+  ],
+  "matchPathPrefixes": [
+    "/mtoapi"
+  ],
+  "captureScripts": false,
+  "maxActions": 7,
+  "postActionSettleMs": 10000,
+  "settleMs": 10000,
+  "actions": [
+    {
+      "type": "navigate",
+      "value": "https://mto.security.microsoft.com",
+      "required": true,
+      "highValue": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "10000",
+      "required": true
+    },
+    {
+      "type": "capture",
+      "value": "mto-landing-initial",
+      "required": true
+    },
+    {
+      "type": "reload",
+      "value": "mto-landing",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "10000",
+      "required": true
+    },
+    {
+      "type": "capture",
+      "value": "mto-landing-reloaded",
+      "required": true
+    }
+  ],
+  "capturePrerequisite": {
+    "status": "blocked",
+    "code": "redundant-explicit-navigation",
+    "reason": "The first fresh attempt reached the authenticated MTO homepage through the implicit seed navigation, but the duplicate required explicit navigation failed and blocked the receipt.",
+    "nextRequirement": "Use the reviewed retry recipe without the duplicate explicit navigation and require a healthy settled action-attributed TenantPicker response before promotion.",
+    "reopenCondition": "The repaired passive retry completes with a scoped action-attributed GET /mtoapi/tenants/TenantPicker response, or new immutable MTO entry/control provenance identifies a different deterministic safe state.",
+    "approvalArtifact": "tools/frontier-approvals/defender-mto-tenant-picker-response-example-frontier.json",
+    "approvalDigest": "c618947a2d977b51f65471104bd7359007da3ac7ee007e170d689e075e1df46b",
+    "evidenceArtifact": "private-artifacts/defender-mto-20261003T115029Z"
+  }
+}

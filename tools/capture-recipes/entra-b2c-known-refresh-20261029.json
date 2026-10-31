@@ -1,0 +1,83 @@
+{
+  "portal": "Entra B2C",
+  "url": "https://entra.microsoft.com/#blade/Microsoft_AAD_IAM/CompanyRelationshipsMenuBlade/menuId/ExternalIdentitiesGettingStarted",
+  "pageTarget": {
+    "matchHosts": [
+      "entra.microsoft.com"
+    ],
+    "matchPathPrefixes": [
+      "/"
+    ]
+  },
+  "matchHosts": [
+    "main.b2cadmin.ext.azure.com"
+  ],
+  "matchPathPrefixes": [
+    "/api",
+    "/graph"
+  ],
+  "inspectionPolicy": {
+    "mode": "observe-only",
+    "prohibitedControlPatterns": [
+      "Add",
+      "Create",
+      "Delete",
+      "Export",
+      "Remove",
+      "Save",
+      "Submit",
+      "Update",
+      "Purchase",
+      "Activate",
+      "Start trial"
+    ]
+  },
+  "captureScripts": false,
+  "postActionSettleMs": 6000,
+  "settleMs": 8000,
+  "maxActions": 9,
+  "actions": [
+    "navigate=https://entra.microsoft.com/#blade/Microsoft_AAD_IAM/CompanyRelationshipsMenuBlade/menuId/ExternalIdentitiesGettingStarted",
+    "wait-ms=6000",
+    "reload=external-identities",
+    "wait-ms=8000",
+    "capture=external-identities",
+    "navigate=https://entra.microsoft.com/#view/Microsoft_AAD_IAM/CompanyRelationshipsMenuBlade/~/RestApiCalls/menuId/ExternalIdentitiesGettingStarted",
+    "wait-ms=6000",
+    "capture=api-connectors"
+  ],
+  "knownOperationRefresh": {
+    "status": "active",
+    "method": "GET",
+    "host": "main.b2cadmin.ext.azure.com",
+    "routes": [
+      "/api/userAttribute/GetAvailableOutputClaimsList"
+    ],
+    "state": "Entra B2C bounded passive representative states from tools/capture-recipes/entra-b2c-deep.json",
+    "actionIndexes": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "approvalExpiresAt": "2026-10-31T08:00:00.000Z",
+    "variableBindingsDigest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "documentationObjectives": [
+      "freshness",
+      "health",
+      "schema-evidence",
+      "usage-observation",
+      "error-example"
+    ],
+    "evidenceIds": [
+      "retained-entra-b2c-primary-witness",
+      "checked-in-ui-state-entra-b2c-deep"
+    ],
+    "approvalArtifact": "tools/frontier-approvals/entra-b2c-refresh-20261029.json",
+    "approvalDigest": "687c8dc122910f2f81d779ca233ddc0395261dfd7253c7330e18db7c3a709cb2"
+  }
+}

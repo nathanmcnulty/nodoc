@@ -1,0 +1,101 @@
+{
+  "portal": "Purview",
+  "url": "https://purview.microsoft.com/home?tid=${TenantId}",
+  "pageTarget": {
+    "matchHosts": [
+      "purview.microsoft.com"
+    ],
+    "matchPathPrefixes": [
+      "/home",
+      "/datalossprevention/overview"
+    ],
+    "allowedEntryQueryParameters": [
+      "tid"
+    ]
+  },
+  "matchHosts": [
+    "purview.microsoft.com"
+  ],
+  "matchPathPrefixes": [
+    "/apiproxy/di/find/Label",
+    "/apiproxy/di/find/FeatureConfiguration",
+    "/apiproxy/purviewplatform/api/v1/insight/GetOverallProtectionStatus"
+  ],
+  "inspectionPolicy": {
+    "mode": "observe-only",
+    "prohibitedControlPatterns": [
+      "Add",
+      "Create",
+      "Delete",
+      "Export",
+      "Remove",
+      "Save",
+      "Submit",
+      "Update",
+      "Purchase",
+      "Activate",
+      "Start trial"
+    ]
+  },
+  "captureScripts": false,
+  "postActionSettleMs": 6000,
+  "settleMs": 8000,
+  "maxActions": 6,
+  "actions": [
+    {
+      "type": "navigate",
+      "value": "https://purview.microsoft.com/datalossprevention/overview",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "6000",
+      "required": true
+    },
+    {
+      "type": "reload",
+      "value": "purview-label-complete-body",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "8000",
+      "required": true
+    },
+    {
+      "type": "capture",
+      "value": "purview-label-complete-body",
+      "required": true
+    }
+  ],
+  "knownOperationRefresh": {
+    "status": "active",
+    "method": "GET",
+    "host": "purview.microsoft.com",
+    "routes": [
+      "/apiproxy/di/find/Label"
+    ],
+    "state": "Fresh owning-Purview complete-body enrichment for an exact existing Label GET previously observed only as truncated adjacent traffic on the retained DLP overview. Same selected native tenant, no trial/activation/API probe.",
+    "actionIndexes": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "approvalExpiresAt": "2026-10-31T05:32:57.717Z",
+    "variableBindingsDigest": "8b8e73b61a28c8be7ab1756d51ae796571279c94e70ffc4e8be35661de37ae65",
+    "documentationObjectives": [
+      "schema-evidence",
+      "health",
+      "usage-observation"
+    ],
+    "evidenceIds": [
+      "request-307671cd18ea9b27444d",
+      "retained-dlp-ui-provenance-20261030",
+      "owning-purview-label-adjacent-truncated-body-gap"
+    ],
+    "approvalArtifact": "tools/frontier-approvals/purview-label-body-enrichment-20261030.json",
+    "approvalDigest": "15378b964f22c9dc496c5e527f4448e7ed10444cebdc2f792d13a14d3488dd7a"
+  }
+}

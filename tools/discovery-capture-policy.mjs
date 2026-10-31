@@ -16,19 +16,29 @@ export function buildInteractionHealthStatus(capture, interactionHealth) {
 }
 
 export function decodeBoundedCdpBody(payload, limit = responseBodyCaptureLimit) {
+  const result = decodeBoundedCdpBodyResult(payload, limit);
+  return result.state === "complete" ? result.body : null;
+}
+
+export function decodeBoundedCdpBodyResult(payload, limit = responseBodyCaptureLimit) {
   const value = payload?.body ?? payload?.content;
   if (typeof value !== "string") {
-    return null;
+    return { state: "decode-failed", body: null, byteLength: 0 };
   }
-
-  const encoding = payload?.base64Encoded ? "base64" : "utf8";
-  if (Buffer.byteLength(value, encoding) > limit) {
-    return null;
+  let bytes;
+  try {
+    if (payload?.base64Encoded) {
+      if (value.length % 4 !== 0 || !/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/u.test(value)) return { state: "decode-failed", body: null, byteLength: 0 };
+      bytes = Buffer.from(value, "base64");
+    } else {
+      bytes = Buffer.from(value, "utf8");
+    }
+    if (bytes.byteLength > limit) return { state: "oversize", body: null, byteLength: bytes.byteLength };
+    const body = new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+    return { state: "complete", body, byteLength: bytes.byteLength };
+  } catch {
+    return { state: "decode-failed", body: null, byteLength: bytes?.byteLength ?? 0 };
   }
-
-  return payload?.base64Encoded
-    ? Buffer.from(value, "base64").toString("utf8")
-    : value;
 }
 
 export function shouldRequestResponseBody(encodedDataLength, limit = responseBodyCaptureLimit) {

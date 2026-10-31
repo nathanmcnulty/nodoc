@@ -17098,6 +17098,42 @@
                                     "_postman_previewlanguage": "json"
                                 },
                                 {
+                                    "id": "b9e7a259-0071-4e9c-b092-8c6c8aae3c24",
+                                    "name": "Observed HTTP 402 error in one portal session; successful authorization and entitlement states remain unverified.",
+                                    "originalRequest": {
+                                        "url": {
+                                            "path": [
+                                                "medeina",
+                                                "auth"
+                                            ],
+                                            "host": [
+                                                "{{baseUrl}}"
+                                            ],
+                                            "query": [],
+                                            "variable": []
+                                        },
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            }
+                                        ],
+                                        "method": "GET",
+                                        "body": {}
+                                    },
+                                    "status": "Payment Required",
+                                    "code": 402,
+                                    "header": [
+                                        {
+                                            "key": "Content-Type",
+                                            "value": "application/json"
+                                        }
+                                    ],
+                                    "body": "{\n  \"message\": \"string\",\n  \"code\": \"string\",\n  \"error\": {\n    \"message\": \"string\",\n    \"copilotErrorId\": \"string\",\n    \"code\": \"string\",\n    \"innerError\": {\n      \"key_0\": 7196,\n      \"key_1\": false\n    },\n    \"traceId\": \"string\"\n  }\n}",
+                                    "cookie": [],
+                                    "_postman_previewlanguage": "json"
+                                },
+                                {
                                     "id": "00197f02-910e-4903-a7de-d917a77fb388",
                                     "name": "Forbidden - The authenticated user does not have sufficient permissions.",
                                     "originalRequest": {
@@ -17323,8 +17359,8 @@
                                             "_postman_previewlanguage": "json"
                                         },
                                         {
-                                            "id": "665a699d-d0b9-4974-8f82-a6469f4116c0",
-                                            "name": "Not Found - The requested resource was not found.",
+                                            "id": "e820ee3c-c36c-4626-9f46-134f43e9dc23",
+                                            "name": "Observed Not Found error envelope; status cause is not established.",
                                             "originalRequest": {
                                                 "url": {
                                                     "path": [
@@ -17355,7 +17391,7 @@
                                                     "value": "application/json"
                                                 }
                                             ],
-                                            "body": "{\n  \"error\": {\n    \"code\": \"BadRequest\",\n    \"message\": \"The request is invalid.\"\n  }\n}",
+                                            "body": "{\n  \"error\": {\n    \"code\": \"BadRequest\",\n    \"message\": \"The request is invalid.\"\n  },\n  \"message\": \"string\",\n  \"code\": \"string\"\n}",
                                             "cookie": [],
                                             "_postman_previewlanguage": "json"
                                         }
@@ -27711,6 +27747,1086 @@
             ]
         },
         {
+            "name": "edlp",
+            "description": "",
+            "item": [
+                {
+                    "name": "dlpInternalApi",
+                    "description": "",
+                    "item": [
+                        {
+                            "name": "api",
+                            "description": "",
+                            "item": [
+                                {
+                                    "name": "cloud",
+                                    "description": "",
+                                    "item": [
+                                        {
+                                            "name": "dlp",
+                                            "description": "",
+                                            "item": [
+                                                {
+                                                    "name": "machines",
+                                                    "description": "",
+                                                    "item": [
+                                                        {
+                                                            "name": "count",
+                                                            "description": "",
+                                                            "item": [
+                                                                {
+                                                                    "id": "815ae8d1-01f7-4198-a352-4966399ce105",
+                                                                    "name": "Get endpoint DLP machine count",
+                                                                    "request": {
+                                                                        "name": "Get endpoint DLP machine count",
+                                                                        "description": {
+                                                                            "content": "Retrieve the endpoint DLP machine count for a lookback window, with optional policy-update and configuration-status filters.",
+                                                                            "type": "text/plain"
+                                                                        },
+                                                                        "url": {
+                                                                            "path": [
+                                                                                "edlp",
+                                                                                "dlpInternalApi",
+                                                                                "api",
+                                                                                "cloud",
+                                                                                "dlp",
+                                                                                "machines",
+                                                                                "count"
+                                                                            ],
+                                                                            "host": [
+                                                                                "{{baseUrl}}"
+                                                                            ],
+                                                                            "query": [
+                                                                                {
+                                                                                    "disabled": false,
+                                                                                    "description": {
+                                                                                        "content": "",
+                                                                                        "type": "text/plain"
+                                                                                    },
+                                                                                    "key": "lookingBackInDays",
+                                                                                    "value": "4945"
+                                                                                },
+                                                                                {
+                                                                                    "disabled": false,
+                                                                                    "description": {
+                                                                                        "content": "",
+                                                                                        "type": "text/plain"
+                                                                                    },
+                                                                                    "key": "lastPolicyUpdateTime",
+                                                                                    "value": "1954-04-21T18:43:15.957Z"
+                                                                                },
+                                                                                {
+                                                                                    "disabled": false,
+                                                                                    "description": {
+                                                                                        "content": "",
+                                                                                        "type": "text/plain"
+                                                                                    },
+                                                                                    "key": "configurationStatus",
+                                                                                    "value": "string"
+                                                                                }
+                                                                            ],
+                                                                            "variable": []
+                                                                        },
+                                                                        "header": [
+                                                                            {
+                                                                                "key": "Accept",
+                                                                                "value": "application/json"
+                                                                            }
+                                                                        ],
+                                                                        "method": "GET",
+                                                                        "body": {},
+                                                                        "auth": null
+                                                                    },
+                                                                    "response": [
+                                                                        {
+                                                                            "id": "44cd5241-20d8-40a3-9619-d91be2245565",
+                                                                            "name": "Endpoint DLP machine count.",
+                                                                            "originalRequest": {
+                                                                                "url": {
+                                                                                    "path": [
+                                                                                        "edlp",
+                                                                                        "dlpInternalApi",
+                                                                                        "api",
+                                                                                        "cloud",
+                                                                                        "dlp",
+                                                                                        "machines",
+                                                                                        "count"
+                                                                                    ],
+                                                                                    "host": [
+                                                                                        "{{baseUrl}}"
+                                                                                    ],
+                                                                                    "query": [
+                                                                                        {
+                                                                                            "disabled": false,
+                                                                                            "description": {
+                                                                                                "content": "",
+                                                                                                "type": "text/plain"
+                                                                                            },
+                                                                                            "key": "lookingBackInDays",
+                                                                                            "value": "4945"
+                                                                                        },
+                                                                                        {
+                                                                                            "disabled": false,
+                                                                                            "description": {
+                                                                                                "content": "",
+                                                                                                "type": "text/plain"
+                                                                                            },
+                                                                                            "key": "lastPolicyUpdateTime",
+                                                                                            "value": "1954-04-21T18:43:15.957Z"
+                                                                                        },
+                                                                                        {
+                                                                                            "disabled": false,
+                                                                                            "description": {
+                                                                                                "content": "",
+                                                                                                "type": "text/plain"
+                                                                                            },
+                                                                                            "key": "configurationStatus",
+                                                                                            "value": "string"
+                                                                                        }
+                                                                                    ],
+                                                                                    "variable": []
+                                                                                },
+                                                                                "header": [
+                                                                                    {
+                                                                                        "key": "Accept",
+                                                                                        "value": "application/json"
+                                                                                    }
+                                                                                ],
+                                                                                "method": "GET",
+                                                                                "body": {}
+                                                                            },
+                                                                            "status": "OK",
+                                                                            "code": 200,
+                                                                            "header": [
+                                                                                {
+                                                                                    "key": "Content-Type",
+                                                                                    "value": "application/json"
+                                                                                }
+                                                                            ],
+                                                                            "body": "{\n  \"Count\": 6842\n}",
+                                                                            "cookie": [],
+                                                                            "_postman_previewlanguage": "json"
+                                                                        },
+                                                                        {
+                                                                            "id": "82b5f109-d39f-4813-8414-efd4f04b195c",
+                                                                            "name": "Unauthorized - Authentication is required or has failed.",
+                                                                            "originalRequest": {
+                                                                                "url": {
+                                                                                    "path": [
+                                                                                        "edlp",
+                                                                                        "dlpInternalApi",
+                                                                                        "api",
+                                                                                        "cloud",
+                                                                                        "dlp",
+                                                                                        "machines",
+                                                                                        "count"
+                                                                                    ],
+                                                                                    "host": [
+                                                                                        "{{baseUrl}}"
+                                                                                    ],
+                                                                                    "query": [
+                                                                                        {
+                                                                                            "disabled": false,
+                                                                                            "description": {
+                                                                                                "content": "",
+                                                                                                "type": "text/plain"
+                                                                                            },
+                                                                                            "key": "lookingBackInDays",
+                                                                                            "value": "4945"
+                                                                                        },
+                                                                                        {
+                                                                                            "disabled": false,
+                                                                                            "description": {
+                                                                                                "content": "",
+                                                                                                "type": "text/plain"
+                                                                                            },
+                                                                                            "key": "lastPolicyUpdateTime",
+                                                                                            "value": "1954-04-21T18:43:15.957Z"
+                                                                                        },
+                                                                                        {
+                                                                                            "disabled": false,
+                                                                                            "description": {
+                                                                                                "content": "",
+                                                                                                "type": "text/plain"
+                                                                                            },
+                                                                                            "key": "configurationStatus",
+                                                                                            "value": "string"
+                                                                                        }
+                                                                                    ],
+                                                                                    "variable": []
+                                                                                },
+                                                                                "header": [
+                                                                                    {
+                                                                                        "key": "Accept",
+                                                                                        "value": "application/json"
+                                                                                    }
+                                                                                ],
+                                                                                "method": "GET",
+                                                                                "body": {}
+                                                                            },
+                                                                            "status": "Unauthorized",
+                                                                            "code": 401,
+                                                                            "header": [
+                                                                                {
+                                                                                    "key": "Content-Type",
+                                                                                    "value": "application/json"
+                                                                                }
+                                                                            ],
+                                                                            "body": "{\n  \"error\": {\n    \"code\": \"BadRequest\",\n    \"message\": \"The request is invalid.\"\n  }\n}",
+                                                                            "cookie": [],
+                                                                            "_postman_previewlanguage": "json"
+                                                                        },
+                                                                        {
+                                                                            "id": "e281d7dd-3246-46e1-8fed-88cf48b02ae7",
+                                                                            "name": "Forbidden - The authenticated user does not have sufficient permissions.",
+                                                                            "originalRequest": {
+                                                                                "url": {
+                                                                                    "path": [
+                                                                                        "edlp",
+                                                                                        "dlpInternalApi",
+                                                                                        "api",
+                                                                                        "cloud",
+                                                                                        "dlp",
+                                                                                        "machines",
+                                                                                        "count"
+                                                                                    ],
+                                                                                    "host": [
+                                                                                        "{{baseUrl}}"
+                                                                                    ],
+                                                                                    "query": [
+                                                                                        {
+                                                                                            "disabled": false,
+                                                                                            "description": {
+                                                                                                "content": "",
+                                                                                                "type": "text/plain"
+                                                                                            },
+                                                                                            "key": "lookingBackInDays",
+                                                                                            "value": "4945"
+                                                                                        },
+                                                                                        {
+                                                                                            "disabled": false,
+                                                                                            "description": {
+                                                                                                "content": "",
+                                                                                                "type": "text/plain"
+                                                                                            },
+                                                                                            "key": "lastPolicyUpdateTime",
+                                                                                            "value": "1954-04-21T18:43:15.957Z"
+                                                                                        },
+                                                                                        {
+                                                                                            "disabled": false,
+                                                                                            "description": {
+                                                                                                "content": "",
+                                                                                                "type": "text/plain"
+                                                                                            },
+                                                                                            "key": "configurationStatus",
+                                                                                            "value": "string"
+                                                                                        }
+                                                                                    ],
+                                                                                    "variable": []
+                                                                                },
+                                                                                "header": [
+                                                                                    {
+                                                                                        "key": "Accept",
+                                                                                        "value": "application/json"
+                                                                                    }
+                                                                                ],
+                                                                                "method": "GET",
+                                                                                "body": {}
+                                                                            },
+                                                                            "status": "Forbidden",
+                                                                            "code": 403,
+                                                                            "header": [
+                                                                                {
+                                                                                    "key": "Content-Type",
+                                                                                    "value": "application/json"
+                                                                                }
+                                                                            ],
+                                                                            "body": "{\n  \"error\": {\n    \"code\": \"BadRequest\",\n    \"message\": \"The request is invalid.\"\n  }\n}",
+                                                                            "cookie": [],
+                                                                            "_postman_previewlanguage": "json"
+                                                                        }
+                                                                    ],
+                                                                    "event": [],
+                                                                    "protocolProfileBehavior": {
+                                                                        "disableBodyPruning": true
+                                                                    }
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "name": "summaryStatus",
+                                                            "description": "",
+                                                            "item": [
+                                                                {
+                                                                    "id": "f14a628b-e3e0-489e-8775-c14330150f9d",
+                                                                    "name": "Get endpoint DLP machine status history",
+                                                                    "request": {
+                                                                        "name": "Get endpoint DLP machine status history",
+                                                                        "description": {
+                                                                            "content": "Retrieve aggregate endpoint DLP machine counts over time for a lookback window and optional policy-update cutoff.",
+                                                                            "type": "text/plain"
+                                                                        },
+                                                                        "url": {
+                                                                            "path": [
+                                                                                "edlp",
+                                                                                "dlpInternalApi",
+                                                                                "api",
+                                                                                "cloud",
+                                                                                "dlp",
+                                                                                "machines",
+                                                                                "summaryStatus"
+                                                                            ],
+                                                                            "host": [
+                                                                                "{{baseUrl}}"
+                                                                            ],
+                                                                            "query": [
+                                                                                {
+                                                                                    "disabled": false,
+                                                                                    "description": {
+                                                                                        "content": "",
+                                                                                        "type": "text/plain"
+                                                                                    },
+                                                                                    "key": "lookingBackInDays",
+                                                                                    "value": "4945"
+                                                                                },
+                                                                                {
+                                                                                    "disabled": false,
+                                                                                    "description": {
+                                                                                        "content": "",
+                                                                                        "type": "text/plain"
+                                                                                    },
+                                                                                    "key": "lastPolicyUpdateTime",
+                                                                                    "value": "1954-04-21T18:43:15.957Z"
+                                                                                }
+                                                                            ],
+                                                                            "variable": []
+                                                                        },
+                                                                        "header": [
+                                                                            {
+                                                                                "key": "Accept",
+                                                                                "value": "application/json"
+                                                                            }
+                                                                        ],
+                                                                        "method": "GET",
+                                                                        "body": {},
+                                                                        "auth": null
+                                                                    },
+                                                                    "response": [
+                                                                        {
+                                                                            "id": "bce0d41c-9aa8-4cf3-a91c-18c914193ba0",
+                                                                            "name": "Time-bucketed endpoint DLP machine counts.",
+                                                                            "originalRequest": {
+                                                                                "url": {
+                                                                                    "path": [
+                                                                                        "edlp",
+                                                                                        "dlpInternalApi",
+                                                                                        "api",
+                                                                                        "cloud",
+                                                                                        "dlp",
+                                                                                        "machines",
+                                                                                        "summaryStatus"
+                                                                                    ],
+                                                                                    "host": [
+                                                                                        "{{baseUrl}}"
+                                                                                    ],
+                                                                                    "query": [
+                                                                                        {
+                                                                                            "disabled": false,
+                                                                                            "description": {
+                                                                                                "content": "",
+                                                                                                "type": "text/plain"
+                                                                                            },
+                                                                                            "key": "lookingBackInDays",
+                                                                                            "value": "4945"
+                                                                                        },
+                                                                                        {
+                                                                                            "disabled": false,
+                                                                                            "description": {
+                                                                                                "content": "",
+                                                                                                "type": "text/plain"
+                                                                                            },
+                                                                                            "key": "lastPolicyUpdateTime",
+                                                                                            "value": "1954-04-21T18:43:15.957Z"
+                                                                                        }
+                                                                                    ],
+                                                                                    "variable": []
+                                                                                },
+                                                                                "header": [
+                                                                                    {
+                                                                                        "key": "Accept",
+                                                                                        "value": "application/json"
+                                                                                    }
+                                                                                ],
+                                                                                "method": "GET",
+                                                                                "body": {}
+                                                                            },
+                                                                            "status": "OK",
+                                                                            "code": 200,
+                                                                            "header": [
+                                                                                {
+                                                                                    "key": "Content-Type",
+                                                                                    "value": "application/json"
+                                                                                }
+                                                                            ],
+                                                                            "body": "[\n  {\n    \"TimeLabel\": \"string\",\n    \"TotalCount\": 5120\n  },\n  {\n    \"TimeLabel\": \"string\",\n    \"TotalCount\": 8281\n  }\n]",
+                                                                            "cookie": [],
+                                                                            "_postman_previewlanguage": "json"
+                                                                        },
+                                                                        {
+                                                                            "id": "c49d5bc6-590c-447f-8ee5-20d420691797",
+                                                                            "name": "Unauthorized - Authentication is required or has failed.",
+                                                                            "originalRequest": {
+                                                                                "url": {
+                                                                                    "path": [
+                                                                                        "edlp",
+                                                                                        "dlpInternalApi",
+                                                                                        "api",
+                                                                                        "cloud",
+                                                                                        "dlp",
+                                                                                        "machines",
+                                                                                        "summaryStatus"
+                                                                                    ],
+                                                                                    "host": [
+                                                                                        "{{baseUrl}}"
+                                                                                    ],
+                                                                                    "query": [
+                                                                                        {
+                                                                                            "disabled": false,
+                                                                                            "description": {
+                                                                                                "content": "",
+                                                                                                "type": "text/plain"
+                                                                                            },
+                                                                                            "key": "lookingBackInDays",
+                                                                                            "value": "4945"
+                                                                                        },
+                                                                                        {
+                                                                                            "disabled": false,
+                                                                                            "description": {
+                                                                                                "content": "",
+                                                                                                "type": "text/plain"
+                                                                                            },
+                                                                                            "key": "lastPolicyUpdateTime",
+                                                                                            "value": "1954-04-21T18:43:15.957Z"
+                                                                                        }
+                                                                                    ],
+                                                                                    "variable": []
+                                                                                },
+                                                                                "header": [
+                                                                                    {
+                                                                                        "key": "Accept",
+                                                                                        "value": "application/json"
+                                                                                    }
+                                                                                ],
+                                                                                "method": "GET",
+                                                                                "body": {}
+                                                                            },
+                                                                            "status": "Unauthorized",
+                                                                            "code": 401,
+                                                                            "header": [
+                                                                                {
+                                                                                    "key": "Content-Type",
+                                                                                    "value": "application/json"
+                                                                                }
+                                                                            ],
+                                                                            "body": "{\n  \"error\": {\n    \"code\": \"BadRequest\",\n    \"message\": \"The request is invalid.\"\n  }\n}",
+                                                                            "cookie": [],
+                                                                            "_postman_previewlanguage": "json"
+                                                                        },
+                                                                        {
+                                                                            "id": "2a5caaa5-9c27-436c-98b5-c5e6f9a06f3d",
+                                                                            "name": "Forbidden - The authenticated user does not have sufficient permissions.",
+                                                                            "originalRequest": {
+                                                                                "url": {
+                                                                                    "path": [
+                                                                                        "edlp",
+                                                                                        "dlpInternalApi",
+                                                                                        "api",
+                                                                                        "cloud",
+                                                                                        "dlp",
+                                                                                        "machines",
+                                                                                        "summaryStatus"
+                                                                                    ],
+                                                                                    "host": [
+                                                                                        "{{baseUrl}}"
+                                                                                    ],
+                                                                                    "query": [
+                                                                                        {
+                                                                                            "disabled": false,
+                                                                                            "description": {
+                                                                                                "content": "",
+                                                                                                "type": "text/plain"
+                                                                                            },
+                                                                                            "key": "lookingBackInDays",
+                                                                                            "value": "4945"
+                                                                                        },
+                                                                                        {
+                                                                                            "disabled": false,
+                                                                                            "description": {
+                                                                                                "content": "",
+                                                                                                "type": "text/plain"
+                                                                                            },
+                                                                                            "key": "lastPolicyUpdateTime",
+                                                                                            "value": "1954-04-21T18:43:15.957Z"
+                                                                                        }
+                                                                                    ],
+                                                                                    "variable": []
+                                                                                },
+                                                                                "header": [
+                                                                                    {
+                                                                                        "key": "Accept",
+                                                                                        "value": "application/json"
+                                                                                    }
+                                                                                ],
+                                                                                "method": "GET",
+                                                                                "body": {}
+                                                                            },
+                                                                            "status": "Forbidden",
+                                                                            "code": 403,
+                                                                            "header": [
+                                                                                {
+                                                                                    "key": "Content-Type",
+                                                                                    "value": "application/json"
+                                                                                }
+                                                                            ],
+                                                                            "body": "{\n  \"error\": {\n    \"code\": \"BadRequest\",\n    \"message\": \"The request is invalid.\"\n  }\n}",
+                                                                            "cookie": [],
+                                                                            "_postman_previewlanguage": "json"
+                                                                        }
+                                                                    ],
+                                                                    "event": [],
+                                                                    "protocolProfileBehavior": {
+                                                                        "disableBodyPruning": true
+                                                                    }
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "name": "logCollections",
+                                                    "description": "",
+                                                    "item": [
+                                                        {
+                                                            "id": "09716d9e-4f12-4d9a-87fa-ef2aff2d9b5c",
+                                                            "name": "List endpoint DLP log collections",
+                                                            "request": {
+                                                                "name": "List endpoint DLP log collections",
+                                                                "description": {
+                                                                    "content": "Retrieve endpoint DLP log collection status for a device details blade surfaced from Purview device settings.",
+                                                                    "type": "text/plain"
+                                                                },
+                                                                "url": {
+                                                                    "path": [
+                                                                        "edlp",
+                                                                        "dlpInternalApi",
+                                                                        "api",
+                                                                        "cloud",
+                                                                        "dlp",
+                                                                        "logCollections",
+                                                                        ""
+                                                                    ],
+                                                                    "host": [
+                                                                        "{{baseUrl}}"
+                                                                    ],
+                                                                    "query": [
+                                                                        {
+                                                                            "disabled": false,
+                                                                            "description": {
+                                                                                "content": "The machine identifier for the device whose log collections are being queried.",
+                                                                                "type": "text/plain"
+                                                                            },
+                                                                            "key": "MachineId",
+                                                                            "value": "string"
+                                                                        },
+                                                                        {
+                                                                            "disabled": false,
+                                                                            "description": {
+                                                                                "content": "Filter log collections by collection status.",
+                                                                                "type": "text/plain"
+                                                                            },
+                                                                            "key": "Status",
+                                                                            "value": "3909"
+                                                                        }
+                                                                    ],
+                                                                    "variable": []
+                                                                },
+                                                                "header": [
+                                                                    {
+                                                                        "key": "Accept",
+                                                                        "value": "application/json"
+                                                                    }
+                                                                ],
+                                                                "method": "GET",
+                                                                "body": {},
+                                                                "auth": null
+                                                            },
+                                                            "response": [
+                                                                {
+                                                                    "id": "074ca749-d493-497f-9c40-40672acdb1c0",
+                                                                    "name": "OK",
+                                                                    "originalRequest": {
+                                                                        "url": {
+                                                                            "path": [
+                                                                                "edlp",
+                                                                                "dlpInternalApi",
+                                                                                "api",
+                                                                                "cloud",
+                                                                                "dlp",
+                                                                                "logCollections",
+                                                                                ""
+                                                                            ],
+                                                                            "host": [
+                                                                                "{{baseUrl}}"
+                                                                            ],
+                                                                            "query": [
+                                                                                {
+                                                                                    "disabled": false,
+                                                                                    "description": {
+                                                                                        "content": "The machine identifier for the device whose log collections are being queried.",
+                                                                                        "type": "text/plain"
+                                                                                    },
+                                                                                    "key": "MachineId",
+                                                                                    "value": "string"
+                                                                                },
+                                                                                {
+                                                                                    "disabled": false,
+                                                                                    "description": {
+                                                                                        "content": "Filter log collections by collection status.",
+                                                                                        "type": "text/plain"
+                                                                                    },
+                                                                                    "key": "Status",
+                                                                                    "value": "3909"
+                                                                                }
+                                                                            ],
+                                                                            "variable": []
+                                                                        },
+                                                                        "header": [
+                                                                            {
+                                                                                "key": "Accept",
+                                                                                "value": "application/json"
+                                                                            }
+                                                                        ],
+                                                                        "method": "GET",
+                                                                        "body": {}
+                                                                    },
+                                                                    "status": "OK",
+                                                                    "code": 200,
+                                                                    "header": [
+                                                                        {
+                                                                            "key": "Content-Type",
+                                                                            "value": "application/json"
+                                                                        }
+                                                                    ],
+                                                                    "body": "{}",
+                                                                    "cookie": [],
+                                                                    "_postman_previewlanguage": "json"
+                                                                },
+                                                                {
+                                                                    "id": "c1f324aa-fe2e-46a1-9e27-9b24e00260ac",
+                                                                    "name": "Unauthorized - Authentication is required or has failed.",
+                                                                    "originalRequest": {
+                                                                        "url": {
+                                                                            "path": [
+                                                                                "edlp",
+                                                                                "dlpInternalApi",
+                                                                                "api",
+                                                                                "cloud",
+                                                                                "dlp",
+                                                                                "logCollections",
+                                                                                ""
+                                                                            ],
+                                                                            "host": [
+                                                                                "{{baseUrl}}"
+                                                                            ],
+                                                                            "query": [
+                                                                                {
+                                                                                    "disabled": false,
+                                                                                    "description": {
+                                                                                        "content": "The machine identifier for the device whose log collections are being queried.",
+                                                                                        "type": "text/plain"
+                                                                                    },
+                                                                                    "key": "MachineId",
+                                                                                    "value": "string"
+                                                                                },
+                                                                                {
+                                                                                    "disabled": false,
+                                                                                    "description": {
+                                                                                        "content": "Filter log collections by collection status.",
+                                                                                        "type": "text/plain"
+                                                                                    },
+                                                                                    "key": "Status",
+                                                                                    "value": "3909"
+                                                                                }
+                                                                            ],
+                                                                            "variable": []
+                                                                        },
+                                                                        "header": [
+                                                                            {
+                                                                                "key": "Accept",
+                                                                                "value": "application/json"
+                                                                            }
+                                                                        ],
+                                                                        "method": "GET",
+                                                                        "body": {}
+                                                                    },
+                                                                    "status": "Unauthorized",
+                                                                    "code": 401,
+                                                                    "header": [
+                                                                        {
+                                                                            "key": "Content-Type",
+                                                                            "value": "application/json"
+                                                                        }
+                                                                    ],
+                                                                    "body": "{\n  \"error\": {\n    \"code\": \"BadRequest\",\n    \"message\": \"The request is invalid.\"\n  }\n}",
+                                                                    "cookie": [],
+                                                                    "_postman_previewlanguage": "json"
+                                                                },
+                                                                {
+                                                                    "id": "fbe60760-a0ed-4ab6-b26b-66f032081deb",
+                                                                    "name": "Forbidden - The authenticated user does not have sufficient permissions.",
+                                                                    "originalRequest": {
+                                                                        "url": {
+                                                                            "path": [
+                                                                                "edlp",
+                                                                                "dlpInternalApi",
+                                                                                "api",
+                                                                                "cloud",
+                                                                                "dlp",
+                                                                                "logCollections",
+                                                                                ""
+                                                                            ],
+                                                                            "host": [
+                                                                                "{{baseUrl}}"
+                                                                            ],
+                                                                            "query": [
+                                                                                {
+                                                                                    "disabled": false,
+                                                                                    "description": {
+                                                                                        "content": "The machine identifier for the device whose log collections are being queried.",
+                                                                                        "type": "text/plain"
+                                                                                    },
+                                                                                    "key": "MachineId",
+                                                                                    "value": "string"
+                                                                                },
+                                                                                {
+                                                                                    "disabled": false,
+                                                                                    "description": {
+                                                                                        "content": "Filter log collections by collection status.",
+                                                                                        "type": "text/plain"
+                                                                                    },
+                                                                                    "key": "Status",
+                                                                                    "value": "3909"
+                                                                                }
+                                                                            ],
+                                                                            "variable": []
+                                                                        },
+                                                                        "header": [
+                                                                            {
+                                                                                "key": "Accept",
+                                                                                "value": "application/json"
+                                                                            }
+                                                                        ],
+                                                                        "method": "GET",
+                                                                        "body": {}
+                                                                    },
+                                                                    "status": "Forbidden",
+                                                                    "code": 403,
+                                                                    "header": [
+                                                                        {
+                                                                            "key": "Content-Type",
+                                                                            "value": "application/json"
+                                                                        }
+                                                                    ],
+                                                                    "body": "{\n  \"error\": {\n    \"code\": \"BadRequest\",\n    \"message\": \"The request is invalid.\"\n  }\n}",
+                                                                    "cookie": [],
+                                                                    "_postman_previewlanguage": "json"
+                                                                },
+                                                                {
+                                                                    "id": "c9523c88-b4ea-4334-8277-111213886249",
+                                                                    "name": "Not Found - The requested resource was not found.",
+                                                                    "originalRequest": {
+                                                                        "url": {
+                                                                            "path": [
+                                                                                "edlp",
+                                                                                "dlpInternalApi",
+                                                                                "api",
+                                                                                "cloud",
+                                                                                "dlp",
+                                                                                "logCollections",
+                                                                                ""
+                                                                            ],
+                                                                            "host": [
+                                                                                "{{baseUrl}}"
+                                                                            ],
+                                                                            "query": [
+                                                                                {
+                                                                                    "disabled": false,
+                                                                                    "description": {
+                                                                                        "content": "The machine identifier for the device whose log collections are being queried.",
+                                                                                        "type": "text/plain"
+                                                                                    },
+                                                                                    "key": "MachineId",
+                                                                                    "value": "string"
+                                                                                },
+                                                                                {
+                                                                                    "disabled": false,
+                                                                                    "description": {
+                                                                                        "content": "Filter log collections by collection status.",
+                                                                                        "type": "text/plain"
+                                                                                    },
+                                                                                    "key": "Status",
+                                                                                    "value": "3909"
+                                                                                }
+                                                                            ],
+                                                                            "variable": []
+                                                                        },
+                                                                        "header": [
+                                                                            {
+                                                                                "key": "Accept",
+                                                                                "value": "application/json"
+                                                                            }
+                                                                        ],
+                                                                        "method": "GET",
+                                                                        "body": {}
+                                                                    },
+                                                                    "status": "Not Found",
+                                                                    "code": 404,
+                                                                    "header": [
+                                                                        {
+                                                                            "key": "Content-Type",
+                                                                            "value": "application/json"
+                                                                        }
+                                                                    ],
+                                                                    "body": "{\n  \"error\": {\n    \"code\": \"BadRequest\",\n    \"message\": \"The request is invalid.\"\n  }\n}",
+                                                                    "cookie": [],
+                                                                    "_postman_previewlanguage": "json"
+                                                                }
+                                                            ],
+                                                            "event": [],
+                                                            "protocolProfileBehavior": {
+                                                                "disableBodyPruning": true
+                                                            }
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "name": "logCollectionsSetting",
+                                                    "description": "",
+                                                    "item": [
+                                                        {
+                                                            "id": "94a4d8d3-cef8-4b62-8729-4fd3f605df0d",
+                                                            "name": "Get endpoint DLP log collection settings",
+                                                            "request": {
+                                                                "name": "Get endpoint DLP log collection settings",
+                                                                "description": {
+                                                                    "content": "Retrieve endpoint DLP log collection settings used by Purview's device details blade.",
+                                                                    "type": "text/plain"
+                                                                },
+                                                                "url": {
+                                                                    "path": [
+                                                                        "edlp",
+                                                                        "dlpInternalApi",
+                                                                        "api",
+                                                                        "cloud",
+                                                                        "dlp",
+                                                                        "logCollectionsSetting"
+                                                                    ],
+                                                                    "host": [
+                                                                        "{{baseUrl}}"
+                                                                    ],
+                                                                    "query": [],
+                                                                    "variable": []
+                                                                },
+                                                                "header": [
+                                                                    {
+                                                                        "key": "Accept",
+                                                                        "value": "application/json"
+                                                                    }
+                                                                ],
+                                                                "method": "GET",
+                                                                "body": {},
+                                                                "auth": null
+                                                            },
+                                                            "response": [
+                                                                {
+                                                                    "id": "d9246cfc-78a1-4395-9539-21582cbe44d3",
+                                                                    "name": "OK",
+                                                                    "originalRequest": {
+                                                                        "url": {
+                                                                            "path": [
+                                                                                "edlp",
+                                                                                "dlpInternalApi",
+                                                                                "api",
+                                                                                "cloud",
+                                                                                "dlp",
+                                                                                "logCollectionsSetting"
+                                                                            ],
+                                                                            "host": [
+                                                                                "{{baseUrl}}"
+                                                                            ],
+                                                                            "query": [],
+                                                                            "variable": []
+                                                                        },
+                                                                        "header": [
+                                                                            {
+                                                                                "key": "Accept",
+                                                                                "value": "application/json"
+                                                                            }
+                                                                        ],
+                                                                        "method": "GET",
+                                                                        "body": {}
+                                                                    },
+                                                                    "status": "OK",
+                                                                    "code": 200,
+                                                                    "header": [
+                                                                        {
+                                                                            "key": "Content-Type",
+                                                                            "value": "application/json"
+                                                                        }
+                                                                    ],
+                                                                    "body": "{}",
+                                                                    "cookie": [],
+                                                                    "_postman_previewlanguage": "json"
+                                                                },
+                                                                {
+                                                                    "id": "cac355f4-1ab3-4135-a21b-9c0e064c5f84",
+                                                                    "name": "Unauthorized - Authentication is required or has failed.",
+                                                                    "originalRequest": {
+                                                                        "url": {
+                                                                            "path": [
+                                                                                "edlp",
+                                                                                "dlpInternalApi",
+                                                                                "api",
+                                                                                "cloud",
+                                                                                "dlp",
+                                                                                "logCollectionsSetting"
+                                                                            ],
+                                                                            "host": [
+                                                                                "{{baseUrl}}"
+                                                                            ],
+                                                                            "query": [],
+                                                                            "variable": []
+                                                                        },
+                                                                        "header": [
+                                                                            {
+                                                                                "key": "Accept",
+                                                                                "value": "application/json"
+                                                                            }
+                                                                        ],
+                                                                        "method": "GET",
+                                                                        "body": {}
+                                                                    },
+                                                                    "status": "Unauthorized",
+                                                                    "code": 401,
+                                                                    "header": [
+                                                                        {
+                                                                            "key": "Content-Type",
+                                                                            "value": "application/json"
+                                                                        }
+                                                                    ],
+                                                                    "body": "{\n  \"error\": {\n    \"code\": \"BadRequest\",\n    \"message\": \"The request is invalid.\"\n  }\n}",
+                                                                    "cookie": [],
+                                                                    "_postman_previewlanguage": "json"
+                                                                },
+                                                                {
+                                                                    "id": "e60f1493-f602-42b2-891c-7c3f0b20dd04",
+                                                                    "name": "Forbidden - The authenticated user does not have sufficient permissions.",
+                                                                    "originalRequest": {
+                                                                        "url": {
+                                                                            "path": [
+                                                                                "edlp",
+                                                                                "dlpInternalApi",
+                                                                                "api",
+                                                                                "cloud",
+                                                                                "dlp",
+                                                                                "logCollectionsSetting"
+                                                                            ],
+                                                                            "host": [
+                                                                                "{{baseUrl}}"
+                                                                            ],
+                                                                            "query": [],
+                                                                            "variable": []
+                                                                        },
+                                                                        "header": [
+                                                                            {
+                                                                                "key": "Accept",
+                                                                                "value": "application/json"
+                                                                            }
+                                                                        ],
+                                                                        "method": "GET",
+                                                                        "body": {}
+                                                                    },
+                                                                    "status": "Forbidden",
+                                                                    "code": 403,
+                                                                    "header": [
+                                                                        {
+                                                                            "key": "Content-Type",
+                                                                            "value": "application/json"
+                                                                        }
+                                                                    ],
+                                                                    "body": "{\n  \"error\": {\n    \"code\": \"BadRequest\",\n    \"message\": \"The request is invalid.\"\n  }\n}",
+                                                                    "cookie": [],
+                                                                    "_postman_previewlanguage": "json"
+                                                                },
+                                                                {
+                                                                    "id": "fedb07d3-4711-415e-ab51-d7e245b99431",
+                                                                    "name": "Not Found - The requested resource was not found.",
+                                                                    "originalRequest": {
+                                                                        "url": {
+                                                                            "path": [
+                                                                                "edlp",
+                                                                                "dlpInternalApi",
+                                                                                "api",
+                                                                                "cloud",
+                                                                                "dlp",
+                                                                                "logCollectionsSetting"
+                                                                            ],
+                                                                            "host": [
+                                                                                "{{baseUrl}}"
+                                                                            ],
+                                                                            "query": [],
+                                                                            "variable": []
+                                                                        },
+                                                                        "header": [
+                                                                            {
+                                                                                "key": "Accept",
+                                                                                "value": "application/json"
+                                                                            }
+                                                                        ],
+                                                                        "method": "GET",
+                                                                        "body": {}
+                                                                    },
+                                                                    "status": "Not Found",
+                                                                    "code": 404,
+                                                                    "header": [
+                                                                        {
+                                                                            "key": "Content-Type",
+                                                                            "value": "application/json"
+                                                                        }
+                                                                    ],
+                                                                    "body": "{\n  \"error\": {\n    \"code\": \"BadRequest\",\n    \"message\": \"The request is invalid.\"\n  }\n}",
+                                                                    "cookie": [],
+                                                                    "_postman_previewlanguage": "json"
+                                                                }
+                                                            ],
+                                                            "event": [],
+                                                            "protocolProfileBehavior": {
+                                                                "disableBodyPruning": true
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
             "name": "mtp",
             "description": "",
             "item": [
@@ -29599,550 +30715,6 @@
             ]
         },
         {
-            "name": "edlp",
-            "description": "",
-            "item": [
-                {
-                    "name": "dlpInternalApi",
-                    "description": "",
-                    "item": [
-                        {
-                            "name": "api",
-                            "description": "",
-                            "item": [
-                                {
-                                    "name": "cloud",
-                                    "description": "",
-                                    "item": [
-                                        {
-                                            "name": "dlp",
-                                            "description": "",
-                                            "item": [
-                                                {
-                                                    "name": "logCollections",
-                                                    "description": "",
-                                                    "item": [
-                                                        {
-                                                            "id": "09716d9e-4f12-4d9a-87fa-ef2aff2d9b5c",
-                                                            "name": "List endpoint DLP log collections",
-                                                            "request": {
-                                                                "name": "List endpoint DLP log collections",
-                                                                "description": {
-                                                                    "content": "Retrieve endpoint DLP log collection status for a device details blade surfaced from Purview device settings.",
-                                                                    "type": "text/plain"
-                                                                },
-                                                                "url": {
-                                                                    "path": [
-                                                                        "edlp",
-                                                                        "dlpInternalApi",
-                                                                        "api",
-                                                                        "cloud",
-                                                                        "dlp",
-                                                                        "logCollections",
-                                                                        ""
-                                                                    ],
-                                                                    "host": [
-                                                                        "{{baseUrl}}"
-                                                                    ],
-                                                                    "query": [
-                                                                        {
-                                                                            "disabled": false,
-                                                                            "description": {
-                                                                                "content": "The machine identifier for the device whose log collections are being queried.",
-                                                                                "type": "text/plain"
-                                                                            },
-                                                                            "key": "MachineId",
-                                                                            "value": "string"
-                                                                        },
-                                                                        {
-                                                                            "disabled": false,
-                                                                            "description": {
-                                                                                "content": "Filter log collections by collection status.",
-                                                                                "type": "text/plain"
-                                                                            },
-                                                                            "key": "Status",
-                                                                            "value": "3909"
-                                                                        }
-                                                                    ],
-                                                                    "variable": []
-                                                                },
-                                                                "header": [
-                                                                    {
-                                                                        "key": "Accept",
-                                                                        "value": "application/json"
-                                                                    }
-                                                                ],
-                                                                "method": "GET",
-                                                                "body": {},
-                                                                "auth": null
-                                                            },
-                                                            "response": [
-                                                                {
-                                                                    "id": "074ca749-d493-497f-9c40-40672acdb1c0",
-                                                                    "name": "OK",
-                                                                    "originalRequest": {
-                                                                        "url": {
-                                                                            "path": [
-                                                                                "edlp",
-                                                                                "dlpInternalApi",
-                                                                                "api",
-                                                                                "cloud",
-                                                                                "dlp",
-                                                                                "logCollections",
-                                                                                ""
-                                                                            ],
-                                                                            "host": [
-                                                                                "{{baseUrl}}"
-                                                                            ],
-                                                                            "query": [
-                                                                                {
-                                                                                    "disabled": false,
-                                                                                    "description": {
-                                                                                        "content": "The machine identifier for the device whose log collections are being queried.",
-                                                                                        "type": "text/plain"
-                                                                                    },
-                                                                                    "key": "MachineId",
-                                                                                    "value": "string"
-                                                                                },
-                                                                                {
-                                                                                    "disabled": false,
-                                                                                    "description": {
-                                                                                        "content": "Filter log collections by collection status.",
-                                                                                        "type": "text/plain"
-                                                                                    },
-                                                                                    "key": "Status",
-                                                                                    "value": "3909"
-                                                                                }
-                                                                            ],
-                                                                            "variable": []
-                                                                        },
-                                                                        "header": [
-                                                                            {
-                                                                                "key": "Accept",
-                                                                                "value": "application/json"
-                                                                            }
-                                                                        ],
-                                                                        "method": "GET",
-                                                                        "body": {}
-                                                                    },
-                                                                    "status": "OK",
-                                                                    "code": 200,
-                                                                    "header": [
-                                                                        {
-                                                                            "key": "Content-Type",
-                                                                            "value": "application/json"
-                                                                        }
-                                                                    ],
-                                                                    "body": "{}",
-                                                                    "cookie": [],
-                                                                    "_postman_previewlanguage": "json"
-                                                                },
-                                                                {
-                                                                    "id": "c1f324aa-fe2e-46a1-9e27-9b24e00260ac",
-                                                                    "name": "Unauthorized - Authentication is required or has failed.",
-                                                                    "originalRequest": {
-                                                                        "url": {
-                                                                            "path": [
-                                                                                "edlp",
-                                                                                "dlpInternalApi",
-                                                                                "api",
-                                                                                "cloud",
-                                                                                "dlp",
-                                                                                "logCollections",
-                                                                                ""
-                                                                            ],
-                                                                            "host": [
-                                                                                "{{baseUrl}}"
-                                                                            ],
-                                                                            "query": [
-                                                                                {
-                                                                                    "disabled": false,
-                                                                                    "description": {
-                                                                                        "content": "The machine identifier for the device whose log collections are being queried.",
-                                                                                        "type": "text/plain"
-                                                                                    },
-                                                                                    "key": "MachineId",
-                                                                                    "value": "string"
-                                                                                },
-                                                                                {
-                                                                                    "disabled": false,
-                                                                                    "description": {
-                                                                                        "content": "Filter log collections by collection status.",
-                                                                                        "type": "text/plain"
-                                                                                    },
-                                                                                    "key": "Status",
-                                                                                    "value": "3909"
-                                                                                }
-                                                                            ],
-                                                                            "variable": []
-                                                                        },
-                                                                        "header": [
-                                                                            {
-                                                                                "key": "Accept",
-                                                                                "value": "application/json"
-                                                                            }
-                                                                        ],
-                                                                        "method": "GET",
-                                                                        "body": {}
-                                                                    },
-                                                                    "status": "Unauthorized",
-                                                                    "code": 401,
-                                                                    "header": [
-                                                                        {
-                                                                            "key": "Content-Type",
-                                                                            "value": "application/json"
-                                                                        }
-                                                                    ],
-                                                                    "body": "{\n  \"error\": {\n    \"code\": \"BadRequest\",\n    \"message\": \"The request is invalid.\"\n  }\n}",
-                                                                    "cookie": [],
-                                                                    "_postman_previewlanguage": "json"
-                                                                },
-                                                                {
-                                                                    "id": "fbe60760-a0ed-4ab6-b26b-66f032081deb",
-                                                                    "name": "Forbidden - The authenticated user does not have sufficient permissions.",
-                                                                    "originalRequest": {
-                                                                        "url": {
-                                                                            "path": [
-                                                                                "edlp",
-                                                                                "dlpInternalApi",
-                                                                                "api",
-                                                                                "cloud",
-                                                                                "dlp",
-                                                                                "logCollections",
-                                                                                ""
-                                                                            ],
-                                                                            "host": [
-                                                                                "{{baseUrl}}"
-                                                                            ],
-                                                                            "query": [
-                                                                                {
-                                                                                    "disabled": false,
-                                                                                    "description": {
-                                                                                        "content": "The machine identifier for the device whose log collections are being queried.",
-                                                                                        "type": "text/plain"
-                                                                                    },
-                                                                                    "key": "MachineId",
-                                                                                    "value": "string"
-                                                                                },
-                                                                                {
-                                                                                    "disabled": false,
-                                                                                    "description": {
-                                                                                        "content": "Filter log collections by collection status.",
-                                                                                        "type": "text/plain"
-                                                                                    },
-                                                                                    "key": "Status",
-                                                                                    "value": "3909"
-                                                                                }
-                                                                            ],
-                                                                            "variable": []
-                                                                        },
-                                                                        "header": [
-                                                                            {
-                                                                                "key": "Accept",
-                                                                                "value": "application/json"
-                                                                            }
-                                                                        ],
-                                                                        "method": "GET",
-                                                                        "body": {}
-                                                                    },
-                                                                    "status": "Forbidden",
-                                                                    "code": 403,
-                                                                    "header": [
-                                                                        {
-                                                                            "key": "Content-Type",
-                                                                            "value": "application/json"
-                                                                        }
-                                                                    ],
-                                                                    "body": "{\n  \"error\": {\n    \"code\": \"BadRequest\",\n    \"message\": \"The request is invalid.\"\n  }\n}",
-                                                                    "cookie": [],
-                                                                    "_postman_previewlanguage": "json"
-                                                                },
-                                                                {
-                                                                    "id": "c9523c88-b4ea-4334-8277-111213886249",
-                                                                    "name": "Not Found - The requested resource was not found.",
-                                                                    "originalRequest": {
-                                                                        "url": {
-                                                                            "path": [
-                                                                                "edlp",
-                                                                                "dlpInternalApi",
-                                                                                "api",
-                                                                                "cloud",
-                                                                                "dlp",
-                                                                                "logCollections",
-                                                                                ""
-                                                                            ],
-                                                                            "host": [
-                                                                                "{{baseUrl}}"
-                                                                            ],
-                                                                            "query": [
-                                                                                {
-                                                                                    "disabled": false,
-                                                                                    "description": {
-                                                                                        "content": "The machine identifier for the device whose log collections are being queried.",
-                                                                                        "type": "text/plain"
-                                                                                    },
-                                                                                    "key": "MachineId",
-                                                                                    "value": "string"
-                                                                                },
-                                                                                {
-                                                                                    "disabled": false,
-                                                                                    "description": {
-                                                                                        "content": "Filter log collections by collection status.",
-                                                                                        "type": "text/plain"
-                                                                                    },
-                                                                                    "key": "Status",
-                                                                                    "value": "3909"
-                                                                                }
-                                                                            ],
-                                                                            "variable": []
-                                                                        },
-                                                                        "header": [
-                                                                            {
-                                                                                "key": "Accept",
-                                                                                "value": "application/json"
-                                                                            }
-                                                                        ],
-                                                                        "method": "GET",
-                                                                        "body": {}
-                                                                    },
-                                                                    "status": "Not Found",
-                                                                    "code": 404,
-                                                                    "header": [
-                                                                        {
-                                                                            "key": "Content-Type",
-                                                                            "value": "application/json"
-                                                                        }
-                                                                    ],
-                                                                    "body": "{\n  \"error\": {\n    \"code\": \"BadRequest\",\n    \"message\": \"The request is invalid.\"\n  }\n}",
-                                                                    "cookie": [],
-                                                                    "_postman_previewlanguage": "json"
-                                                                }
-                                                            ],
-                                                            "event": [],
-                                                            "protocolProfileBehavior": {
-                                                                "disableBodyPruning": true
-                                                            }
-                                                        }
-                                                    ]
-                                                },
-                                                {
-                                                    "name": "logCollectionsSetting",
-                                                    "description": "",
-                                                    "item": [
-                                                        {
-                                                            "id": "94a4d8d3-cef8-4b62-8729-4fd3f605df0d",
-                                                            "name": "Get endpoint DLP log collection settings",
-                                                            "request": {
-                                                                "name": "Get endpoint DLP log collection settings",
-                                                                "description": {
-                                                                    "content": "Retrieve endpoint DLP log collection settings used by Purview's device details blade.",
-                                                                    "type": "text/plain"
-                                                                },
-                                                                "url": {
-                                                                    "path": [
-                                                                        "edlp",
-                                                                        "dlpInternalApi",
-                                                                        "api",
-                                                                        "cloud",
-                                                                        "dlp",
-                                                                        "logCollectionsSetting"
-                                                                    ],
-                                                                    "host": [
-                                                                        "{{baseUrl}}"
-                                                                    ],
-                                                                    "query": [],
-                                                                    "variable": []
-                                                                },
-                                                                "header": [
-                                                                    {
-                                                                        "key": "Accept",
-                                                                        "value": "application/json"
-                                                                    }
-                                                                ],
-                                                                "method": "GET",
-                                                                "body": {},
-                                                                "auth": null
-                                                            },
-                                                            "response": [
-                                                                {
-                                                                    "id": "d9246cfc-78a1-4395-9539-21582cbe44d3",
-                                                                    "name": "OK",
-                                                                    "originalRequest": {
-                                                                        "url": {
-                                                                            "path": [
-                                                                                "edlp",
-                                                                                "dlpInternalApi",
-                                                                                "api",
-                                                                                "cloud",
-                                                                                "dlp",
-                                                                                "logCollectionsSetting"
-                                                                            ],
-                                                                            "host": [
-                                                                                "{{baseUrl}}"
-                                                                            ],
-                                                                            "query": [],
-                                                                            "variable": []
-                                                                        },
-                                                                        "header": [
-                                                                            {
-                                                                                "key": "Accept",
-                                                                                "value": "application/json"
-                                                                            }
-                                                                        ],
-                                                                        "method": "GET",
-                                                                        "body": {}
-                                                                    },
-                                                                    "status": "OK",
-                                                                    "code": 200,
-                                                                    "header": [
-                                                                        {
-                                                                            "key": "Content-Type",
-                                                                            "value": "application/json"
-                                                                        }
-                                                                    ],
-                                                                    "body": "{}",
-                                                                    "cookie": [],
-                                                                    "_postman_previewlanguage": "json"
-                                                                },
-                                                                {
-                                                                    "id": "cac355f4-1ab3-4135-a21b-9c0e064c5f84",
-                                                                    "name": "Unauthorized - Authentication is required or has failed.",
-                                                                    "originalRequest": {
-                                                                        "url": {
-                                                                            "path": [
-                                                                                "edlp",
-                                                                                "dlpInternalApi",
-                                                                                "api",
-                                                                                "cloud",
-                                                                                "dlp",
-                                                                                "logCollectionsSetting"
-                                                                            ],
-                                                                            "host": [
-                                                                                "{{baseUrl}}"
-                                                                            ],
-                                                                            "query": [],
-                                                                            "variable": []
-                                                                        },
-                                                                        "header": [
-                                                                            {
-                                                                                "key": "Accept",
-                                                                                "value": "application/json"
-                                                                            }
-                                                                        ],
-                                                                        "method": "GET",
-                                                                        "body": {}
-                                                                    },
-                                                                    "status": "Unauthorized",
-                                                                    "code": 401,
-                                                                    "header": [
-                                                                        {
-                                                                            "key": "Content-Type",
-                                                                            "value": "application/json"
-                                                                        }
-                                                                    ],
-                                                                    "body": "{\n  \"error\": {\n    \"code\": \"BadRequest\",\n    \"message\": \"The request is invalid.\"\n  }\n}",
-                                                                    "cookie": [],
-                                                                    "_postman_previewlanguage": "json"
-                                                                },
-                                                                {
-                                                                    "id": "e60f1493-f602-42b2-891c-7c3f0b20dd04",
-                                                                    "name": "Forbidden - The authenticated user does not have sufficient permissions.",
-                                                                    "originalRequest": {
-                                                                        "url": {
-                                                                            "path": [
-                                                                                "edlp",
-                                                                                "dlpInternalApi",
-                                                                                "api",
-                                                                                "cloud",
-                                                                                "dlp",
-                                                                                "logCollectionsSetting"
-                                                                            ],
-                                                                            "host": [
-                                                                                "{{baseUrl}}"
-                                                                            ],
-                                                                            "query": [],
-                                                                            "variable": []
-                                                                        },
-                                                                        "header": [
-                                                                            {
-                                                                                "key": "Accept",
-                                                                                "value": "application/json"
-                                                                            }
-                                                                        ],
-                                                                        "method": "GET",
-                                                                        "body": {}
-                                                                    },
-                                                                    "status": "Forbidden",
-                                                                    "code": 403,
-                                                                    "header": [
-                                                                        {
-                                                                            "key": "Content-Type",
-                                                                            "value": "application/json"
-                                                                        }
-                                                                    ],
-                                                                    "body": "{\n  \"error\": {\n    \"code\": \"BadRequest\",\n    \"message\": \"The request is invalid.\"\n  }\n}",
-                                                                    "cookie": [],
-                                                                    "_postman_previewlanguage": "json"
-                                                                },
-                                                                {
-                                                                    "id": "fedb07d3-4711-415e-ab51-d7e245b99431",
-                                                                    "name": "Not Found - The requested resource was not found.",
-                                                                    "originalRequest": {
-                                                                        "url": {
-                                                                            "path": [
-                                                                                "edlp",
-                                                                                "dlpInternalApi",
-                                                                                "api",
-                                                                                "cloud",
-                                                                                "dlp",
-                                                                                "logCollectionsSetting"
-                                                                            ],
-                                                                            "host": [
-                                                                                "{{baseUrl}}"
-                                                                            ],
-                                                                            "query": [],
-                                                                            "variable": []
-                                                                        },
-                                                                        "header": [
-                                                                            {
-                                                                                "key": "Accept",
-                                                                                "value": "application/json"
-                                                                            }
-                                                                        ],
-                                                                        "method": "GET",
-                                                                        "body": {}
-                                                                    },
-                                                                    "status": "Not Found",
-                                                                    "code": 404,
-                                                                    "header": [
-                                                                        {
-                                                                            "key": "Content-Type",
-                                                                            "value": "application/json"
-                                                                        }
-                                                                    ],
-                                                                    "body": "{\n  \"error\": {\n    \"code\": \"BadRequest\",\n    \"message\": \"The request is invalid.\"\n  }\n}",
-                                                                    "cookie": [],
-                                                                    "_postman_previewlanguage": "json"
-                                                                }
-                                                            ],
-                                                            "event": [],
-                                                            "protocolProfileBehavior": {
-                                                                "disableBodyPruning": true
-                                                            }
-                                                        }
-                                                    ]
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                }
-                            ]
-                        }
-                    ]
-                }
-            ]
-        },
-        {
             "name": "admin",
             "description": "",
             "item": [
@@ -30591,12 +31163,12 @@
                                                                     "header": [
                                                                         {
                                                                             "key": "Content-Type",
-                                                                            "value": "text/plain"
+                                                                            "value": "application/json"
                                                                         }
                                                                     ],
                                                                     "body": "Could not find tenant analytics insight: InsightsMetadata, query date: 2026-04-01.",
                                                                     "cookie": [],
-                                                                    "_postman_previewlanguage": "text"
+                                                                    "_postman_previewlanguage": "json"
                                                                 },
                                                                 {
                                                                     "id": "b8e2a80c-7a3a-407c-b625-5be0a9158edd",
@@ -32442,14 +33014,26 @@
                                                                                 }
                                                                             ]
                                                                         },
+                                                                        "header": [
+                                                                            {
+                                                                                "key": "Accept",
+                                                                                "value": "application/json"
+                                                                            }
+                                                                        ],
                                                                         "method": "GET",
                                                                         "body": {}
                                                                     },
                                                                     "status": "OK",
                                                                     "code": 200,
-                                                                    "header": [],
+                                                                    "header": [
+                                                                        {
+                                                                            "key": "Content-Type",
+                                                                            "value": "application/json"
+                                                                        }
+                                                                    ],
+                                                                    "body": "{\n  \"value\": \"string\"\n}",
                                                                     "cookie": [],
-                                                                    "_postman_previewlanguage": "text"
+                                                                    "_postman_previewlanguage": "json"
                                                                 },
                                                                 {
                                                                     "id": "068fed3d-c0ac-4212-8a27-c336a7b99ab8",

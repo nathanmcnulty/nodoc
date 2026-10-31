@@ -252,13 +252,15 @@ tags:
     description: Manage B2C user flows (sign-up, sign-in, profile editing, password reset templates)
   - name: User Journeys
     description: Custom policy / Identity Experience Framework user journeys
+  - name: API connectors
+    description: API connector collection routes used by External Identities
   - name: Tenant
     description: B2C tenant information, features, and configuration
   - name: Resources
     description: Azure resource and subscription management for B2C tenants
 x-tagGroups:
   - name: Identity experiences
-    tags: [User Flows, User Journeys]
+    tags: [User Flows, User Journeys, API connectors]
   - name: Tenant administration
     tags: [Tenant, Resources]
 externalDocs:
@@ -346,6 +348,24 @@ paths:
                 code: AADB2C99039
   /api/tenants/GetTenantInfo:
     get:
+      x-nodoc-live-capture:
+        source: "Observe-only partial portal refresh 2026-10-29; API connectors action 5; request-f4f012ce1d31c2a35de7; HTTP 200"
+        browsedPages: ["External Identities > API connectors"]
+      x-nodoc-operation-context:
+        surface: External Identities > API connectors
+        availability:
+          level: tenant-conditional
+          notes:
+            - Feature flags and tenant type depend on the current tenant; no flag values or tenant identifiers are copied into the new evidence notes.
+        provenance:
+          - source: authenticated-portal-capture-20261029
+            confidence: high
+            notes:
+              - "Exact GET /api/tenants/GetTenantInfo returned HTTP 200 application/json at action 5 on 2026-10-29T18:43:53.042Z; evidence request-f4f012ce1d31c2a35de7."
+              - "Complete sanitized response privately hash-verified; existing top-level response types were corroborated."
+              - "features and clientFeatures were nonempty arrays containing strings; featuresCIAM was empty and does not revalidate its historical item type. Historical response examples remain unchanged."
+              - "The overall refresh remains blocked: the planned output-claims target was absent and initial navigation action 0 failed exact accounting. These individually attributed native observations do not close that primary gap."
+              - "Authorization and tenantId query names were observed; standalone requests, minimum roles, effective permissions, tenant grants and least privilege were not tested."
       tags: [Tenant]
       summary: Get tenant info and feature flags
       description: |
@@ -463,6 +483,26 @@ paths:
                 isGoLocalEnabled: false
   /api/userAttribute/GetAvailableOutputClaimsList:
     get:
+      x-nodoc-live-capture:
+        source: "Observe-only gap remediation 2026-10-30; Custom user attributes reload action 2; HTTP 400"
+        browsedPages: ["External Identities > Custom user attributes"]
+      x-nodoc-operation-context:
+        surface: External Identities > Custom user attributes
+        availability:
+          level: feature-gated
+          notes:
+            - A current native HTTP 400 error response is established; successful output-claim retrieval and feature enablement remain unverified.
+        provenance:
+          - source: authenticated-portal-capture-20261030
+            confidence: high
+            notes:
+              - "Exact GET main.b2cadmin.ext.azure.com/api/userAttribute/GetAvailableOutputClaimsList returned HTTP 400 at action 2 on 2026-10-30T11:06:08.804Z; evidence request-ea39fdfd851345d07f27."
+              - "The complete error response was privately verified. Existing message, exceptionMessage, correlationId and code string types were corroborated; stackTrace was null and does not establish a non-null type. Historical examples and formats remain unchanged."
+              - "The new retained Custom user attributes navigation closes the prior missing-target and exact-action-accounting gaps. All required actions accounted; the evaluator remains error-observed, not healthy."
+              - "Initial same-document fragment navigation truthfully retained didLoad=false, a received Page.navigate response and root-frame fragment telemetry; the later reload supplied this action-attributed target observation."
+              - "The evaluator reports zero successful and zero successful complete-body records; the separately verified complete HTTP 400 error sidecar must not be treated as a successful response."
+              - "Observed query names $orderby and tenantId, and an authorization header, do not establish standalone requiredness, effective permissions, consent, minimum roles or least privilege. No tenant or feature setting was changed."
+              - "Only this operation is refreshed by this context. The prior 2026-10-29 partial observations and failures remain historical evidence; no whole-spec freshness or feature-availability claim follows."
       tags: [User Flows]
       summary: List available output claims for custom user attributes
       description: |
@@ -499,3 +539,60 @@ paths:
                 message: An error has occurred.
                 exceptionMessage: "The feature self service sign up is not enabled for the tenant 'contoso.onmicrosoft.com'"
                 code: AADB2C99039
+  /graph/cpimApiConnectors/:
+    get:
+      x-nodoc-live-capture:
+        source: "Observe-only partial portal refresh 2026-10-29; API connectors action 5; request-7aa703a5ca66e7e7f207; HTTP 400"
+        browsedPages: ["External Identities > API connectors"]
+      x-nodoc-operation-context:
+        surface: External Identities > API connectors
+        availability:
+          level: feature-gated
+          notes:
+            - Only a feature-gated HTTP 400 response is established; successful collection behavior and populated item schemas remain unverified.
+        provenance:
+          - source: authenticated-portal-capture-20261029
+            confidence: high
+            notes:
+              - "Exact GET /graph/cpimApiConnectors/ returned HTTP 400 application/json at action 5 on 2026-10-29T18:43:53.040Z; evidence request-7aa703a5ca66e7e7f207."
+              - "Complete sanitized response privately hash-verified; nested error.code/message and innerError.correlationId/date were strings."
+              - "This is a newly documented error-only route, despite the broad capture indicator matchesCurrentSpec=true; no prior checked-in path matched it."
+              - "The overall refresh remains blocked: the planned output-claims target was absent and initial navigation action 0 failed exact accounting. These individually attributed native observations do not close that primary gap."
+              - "Authorization and tenantId query names were observed; standalone requests, minimum roles, effective permissions, tenant grants and least privilege were not tested."
+      tags: [API connectors]
+      summary: Read the feature-gated API connector collection
+      description: |
+        API connector collection route used by the External Identities portal.
+        Only the feature-gated HTTP 400 error envelope is documented here;
+        a successful collection response and its item schema remain unverified.
+      operationId: ApiConnectors.List
+      parameters:
+        - name: tenantId
+          in: query
+          description: Tenant context supplied by the portal; standalone requiredness is unverified.
+          x-nodoc-required-status: unverified
+          schema:
+            type: string
+      responses:
+        '400':
+          description: Feature-gated API connector collection error.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        example: AADB2C99039
+                      message:
+                        type: string
+                      innerError:
+                        type: object
+                        properties:
+                          correlationId:
+                            type: string
+                          date:
+                            type: string

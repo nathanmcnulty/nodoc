@@ -3,14 +3,7 @@
 Portal: Viva Engage
 Spec: teams
 Artifacts:
-- C:\Users\NathanMcNulty\AppData\Local\Temp\nodoc-discovery-viva-engage-admin-all-0bd2c865-a2df-42b5-93f8-29521dac52f3\candidate-handoff.json
-- C:\Users\NathanMcNulty\AppData\Local\Temp\nodoc-discovery-viva-engage-admin-retry-b228923b-87c3-4c1b-97da-424b7debeb88\candidate-handoff.json
-- C:\Users\NathanMcNulty\AppData\Local\Temp\nodoc-discovery-viva-engage-extnet-all-425a90cf-fefc-4d0b-89e5-7a2b5b532abe\candidate-handoff.json
-- C:\Users\NathanMcNulty\AppData\Local\Temp\nodoc-discovery-viva-engage-fcontinue-8fe277b9-ed20-46bd-a7c7-50a4d9a55d26\candidate-handoff.json
-- C:\Users\NathanMcNulty\AppData\Local\Temp\nodoc-discovery-viva-engage-retry-4f9566c0-64f6-4249-ad1d-079ad907919c\candidate-handoff.json
-- C:\Users\NathanMcNulty\AppData\Local\Temp\nodoc-discovery-viva-engage-setup-all-d9f99a41-5d39-4f6e-8d5f-85145c89e6ad\candidate-handoff.json
-- C:\Users\NathanMcNulty\AppData\Local\Temp\nodoc-discovery-viva-engage-tenant-all-a4008d35-e5f5-46b7-867d-0acc8d2fa070\candidate-handoff.json
-- C:\Users\NathanMcNulty\AppData\Local\Temp\nodoc-viva-engage-discovery-1c319b10-f452-4be9-964a-99d91c40bc6d\candidate-handoff.json
+- Eight private candidate-handoff artifacts are retained externally; machine-local paths are omitted.
 
 ## Run completion
 - Status: completed

@@ -40,6 +40,7 @@ on:
       - tools/spec-quality-lib.mjs
       - tools/validate-portal-discovery-metadata.mjs
       - tools/validate-spec-quality.mjs
+      - tools/**
   push:
     branches:
       - main
@@ -81,6 +82,7 @@ on:
       - tools/spec-quality-lib.mjs
       - tools/validate-portal-discovery-metadata.mjs
       - tools/validate-spec-quality.mjs
+      - tools/**
   workflow_dispatch:
 
 permissions:
@@ -105,6 +107,9 @@ jobs:
 
       - name: Validate spec quality
         run: npm run validate:spec-quality
+
+      - name: Test portal discovery
+        run: npm run test:discovery
 
       - name: Validate portal discovery metadata
         run: npm run validate:portal-discovery

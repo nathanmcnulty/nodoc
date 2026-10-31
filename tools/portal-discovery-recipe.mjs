@@ -1,5 +1,10 @@
 import { classifyGetProbeUrl } from "./discovery-safety.mjs";
 import { planActionBudget } from "./portal-discovery-action-budget.mjs";
+import {
+  buildKnownOperationRefreshPlan,
+  evaluateEvidenceAxes,
+  validateRepresentativeStateMatrix,
+} from "./portal-discovery-evidence-contract.mjs";
 
 function actionTypeAndValue(action) {
   if (typeof action === "string") {
@@ -170,11 +175,18 @@ export function validateRecipeTargetMetadata(recipe) {
   )) {
     throw new Error("declared root URL does not match pageTarget.bootstrap host/path criteria.");
   }
+  const actions = (recipe?.actions ?? []).map(actionTypeAndValue);
+  const knownOperationRefreshPlan = buildKnownOperationRefreshPlan(recipe);
+  const representativeStates = validateRepresentativeStateMatrix(recipe?.representativeStates, { actions });
+  const evidenceAxes = evaluateEvidenceAxes(recipe);
   return {
     entryUrl: entryUrl.href,
     entryQueryParameterNames,
     featureCriteria,
     bootstrapCriteria,
+    knownOperationRefreshPlan,
+    representativeStates,
+    evidenceAxes,
   };
 }
 

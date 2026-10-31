@@ -1,15 +1,15 @@
 export const portalDiscoveryModelPolicy = Object.freeze({
   orchestrator: Object.freeze({
-    model: "gpt-5.6-sol",
-    reasoning: "high",
+    model: "gpt-6.1-sol",
+    reasoning: "medium",
   }),
   capture: Object.freeze({
-    model: "gpt-5.6-luna",
+    model: "gpt-6-luna",
     reasoning: "low",
   }),
   offlineReview: Object.freeze({
     allowedReasoning: Object.freeze(["xhigh", "max"]),
-    model: "gpt-5.6-luna",
+    model: "gpt-6-luna",
     reasoning: "xhigh",
   }),
 });

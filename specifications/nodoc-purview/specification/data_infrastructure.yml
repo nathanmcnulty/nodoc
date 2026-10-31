@@ -4,9 +4,8 @@ paths:
       operationId: getDlpAlertAgentPolicyInsights
       summary: Get DLP alert agent policy insights
       description: >-
-        Retrieve DLP alert agent policy insights from the Data Infrastructure service.
-        Returns policy insight data used for DLP alert analysis.
-      tags: [DataInfrastructure]
+        Retrieve DLP alert agent policy insights from the Data Infrastructure service. Returns policy insight data used for DLP alert analysis.
+      tags: [ DataInfrastructure ]
       parameters:
         - name: tenantId
           in: query
@@ -30,15 +29,36 @@ paths:
 
         '404':
           $ref: common.yml#/components/responses/NotFound
+      x-nodoc-operation-context:
+        surface: Microsoft Purview portal (retained native navigation)
+        workflows:
+          - Observe traffic emitted by the normal authenticated portal during the originally recorded native navigation; reuse retained evidence for offline documentation review.
+        requestShapes:
+          - name: retained-native-get
+            bodyKind: none
+            notes: "Observed query parameter names: tenantId. Values are withheld; presence does not test requiredness and existing parameter declarations are unchanged."
+        availability:
+          level: user-context
+          notes:
+            - Historical user-session observation only; no feature activation, tenant switch, role/grant/minimum-permission inference or standalone usage validation.
+        provenance:
+          - source: retained-native-portal-evidence-reviewed-20261030
+            confidence: high
+            notes:
+              - Exact declared GET purview.microsoft.com/apiproxy/di/find/DlpAlertAgentPolicyInsights maps to canonical /di/find/DlpAlertAgentPolicyInsights; current declared server/base/path and original request binding were checked privately.
+              - Retained purview-01 action 2 at 2026-10-29T22:13:08.062Z; evidence request-ff2fe384252c429d8dcc; HTTP 200 complete body privately verified.
+              - Retained purview-remediation-02 action 5 at 2026-10-30T12:27:09.071Z; evidence request-e69cdaa49ec6e831b67f; HTTP 200 complete body privately verified.
+              - Original capture dates and action attribution are retained. Reusing these bodies for offline review does not create a fresh native observation or clear any historical run-level accounting gaps.
+              - HTTP 200, complete body bytes and limited type checks do not establish application/business success, feature availability, entitlement, provisioning, effective permissions or minimum roles.
+              - Captured scalar values, role/feature-map keys, credentials, tenant data, response fingerprints, byte lengths and examples are withheld. No new route or requiredness, enum, format, authentication or standalone execution claim follows.
 
   /di/Find/TrialOffer:
     get:
       operationId: getTrialOffer
       summary: Get available trial offers
       description: >-
-        Retrieve available trial offers for the tenant from the Data Infrastructure service.
-        Used to determine which Purview features are available for trial.
-      tags: [DataInfrastructure]
+        Retrieve available trial offers for the tenant from the Data Infrastructure service. Used to determine which Purview features are available for trial.
+      tags: [ DataInfrastructure ]
       parameters:
         - name: tenantid
           in: query
@@ -62,15 +82,36 @@ paths:
 
         '404':
           $ref: common.yml#/components/responses/NotFound
+      x-nodoc-operation-context:
+        surface: Microsoft Purview portal (retained native navigation)
+        workflows:
+          - Observe traffic emitted by the normal authenticated portal during the originally recorded native navigation; reuse retained evidence for offline documentation review.
+        requestShapes:
+          - name: retained-native-get
+            bodyKind: none
+            notes: "Observed query parameter names: tenantid. Values are withheld; presence does not test requiredness and existing parameter declarations are unchanged."
+        availability:
+          level: user-context
+          notes:
+            - Historical user-session observation only; no feature activation, tenant switch, role/grant/minimum-permission inference or standalone usage validation.
+        provenance:
+          - source: retained-native-portal-evidence-reviewed-20261030
+            confidence: high
+            notes:
+              - Exact declared GET purview.microsoft.com/apiproxy/di/Find/TrialOffer maps to canonical /di/Find/TrialOffer; current declared server/base/path and original request binding were checked privately.
+              - Retained purview-01 action 5 at 2026-10-29T22:14:01.429Z; evidence request-d739e4babbaa9999f900; HTTP 200 complete body privately verified.
+              - Retained purview-remediation-02 action 5 at 2026-10-30T12:27:12.171Z; evidence request-f05bfc55c31673e4c8bc; HTTP 200 complete body privately verified.
+              - Original capture dates and action attribution are retained. Reusing these bodies for offline review does not create a fresh native observation or clear any historical run-level accounting gaps.
+              - HTTP 200, complete body bytes and limited type checks do not establish application/business success, feature availability, entitlement, provisioning, effective permissions or minimum roles.
+              - Captured scalar values, role/feature-map keys, credentials, tenant data, response fingerprints, byte lengths and examples are withheld. No new route or requiredness, enum, format, authentication or standalone execution claim follows.
 
   /di/find/ProtectionCompliancePolicy:
     get:
       operationId: getProtectionCompliancePolicies
       summary: Get protection compliance policies
       description: >-
-        Retrieve protection compliance policies from the Data Infrastructure service.
-        These policies govern data protection and compliance enforcement across the tenant.
-      tags: [DataInfrastructure]
+        Retrieve protection compliance policies from the Data Infrastructure service. These policies govern data protection and compliance enforcement across the tenant.
+      tags: [ DataInfrastructure ]
       parameters:
         - name: tenantid
           in: query
@@ -85,7 +126,59 @@ paths:
           content:
             application/json:
               schema:
-                $ref: common.yml#/components/schemas/InsiderRiskPolicyResponse
+                type: object
+                description: Directory query wrapper for insider risk policies.
+                properties:
+                  DataType:
+                    type: string
+                    example: InsiderRiskPolicy
+                  Database:
+                    type: string
+                    example: Directory
+                  WaterMark:
+                    type: string
+                    example: HctBC4IwGIDhvzJ2X23falPJDvot...
+                  Session:
+                    type: string
+                    example: ''
+                  LastPage:
+                    type: boolean
+                    example: true
+                  TotalResultCount:
+                    type: integer
+                    example: -1
+                  RecordCount:
+                    type: integer
+                    example: 1
+                  ErrorData:
+                    $ref: 'common.yml#/components/schemas/PurviewDirectoryErrorData'
+                  ResultCode:
+                    type: string
+                    example: Success
+                  ResultData:
+                    type: array
+                    nullable: true
+                    description: Observed as null in the reviewed Home capture; the existing non-null item declaration is retained and was not revalidated.
+                    items:
+                      type: object
+                      properties:
+                        Mode:
+                          type: string
+                          example: Enable
+                        Type:
+                          type: string
+                          example: InsiderRisk
+                        InsiderRiskScenario:
+                          type: string
+                          example: TenantSetting
+                        IndicatorVersion:
+                          type: string
+                          example: '1.1'
+                        Indicators:
+                          type: array
+                          items:
+                            type: string
+                      additionalProperties: true
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -94,15 +187,38 @@ paths:
 
         '404':
           $ref: common.yml#/components/responses/NotFound
+      x-nodoc-operation-context:
+        surface: Historical portal caller / declared backend transport relationship
+        provenance:
+          - source: retained-adjacent-portal-transport-reviewed-20261030
+            confidence: high
+            notes:
+              - Historical transport identity is exact GET purview.microsoft.com/apiproxy/di/find/ProtectionCompliancePolicy, canonical /di/find/ProtectionCompliancePolicy under the currently declared backend specification purview.
+              - "Original caller capture assignments: purview-portal. Caller page attribution and assignment labels do not by themselves establish causal execution of the backend owner's UI."
+              - Retained purview-portal-02 action 0 at 2026-10-29T22:45:11.378Z; evidence request-35fb5752dc383e4683f1; HTTP 200.
+              - Retained purview-portal-remediation-01 action 2 at 2026-10-30T12:38:59.653Z; evidence request-ade6251cc269afbb2655; HTTP 200.
+              - "Observed query parameter names: tenantid. Values and derived page-label strings are withheld; parameter presence is not requiredness testing."
+              - This review used raw transport metadata only. No qualifying complete action-attributed response body was available in the selected retained evidence; bootstrap-only complete responses are excluded as action witnesses. Response/body/schema gaps remain open.
+              - Existing response schemas are unchanged. Any newly listed status is description-only, with no inferred error body, status cause, route removal or availability conclusion.
+              - Original dates/actions remain historical; this is not fresh capture, current tenant validation, business or application health, standalone invocation, role/grant/minimum-permission proof, or an owning-portal workflow test.
+              - GET is the recorded method, not a safety or idempotence determination. No request was authored, invoked, probed or replayed by this offline review; effects and rollback are untested.
+              - Confidence applies only to the verified historical method/host/path/status metadata. Captured values, identifiers, credentials, response fingerprints, body lengths and examples are withheld.
 
+          - source: purview-home-body-enrichment-20261030-01
+            confidence: high
+            notes:
+              - "Own Purview Home capture on 2026-10-30 retained two verified complete HTTP 200 JSON bodies attributed to actions 0 and 2; evidence IDs: request-2744e0c1294637cf7370, request-6de1b054bf8d68678a18."
+              - "Observed query parameter names: tenantid. Values, response content, fingerprints and lengths are withheld; parameter presence does not establish requiredness."
+              - HTTP status and body shape do not establish business or application success; ResultCode semantics are unknown. Standalone use, minimum roles, grants, activation and replay remain untested.
+              - No active operation was authored or probed; background passive requests, including POSTs, may have effects that were not determined.
+              - ResultData was null in both qualifying bodies. Existing non-null array items and legacy examples are retained unchanged and were not revalidated as current observations.
   /di/find/MIPSavedQuery:
     get:
       operationId: getMipSavedQueries
       summary: Get MIP saved queries
       description: >-
-        Retrieve saved queries for Content Explorer from the Microsoft Information Protection service.
-        Supports pagination and filtering of saved query results.
-      tags: [DataInfrastructure]
+        Retrieve saved queries for Content Explorer from the Microsoft Information Protection service. Supports pagination and filtering of saved query results.
+      tags: [ DataInfrastructure ]
       parameters:
         - name: tenantId
           in: query
@@ -130,7 +246,30 @@ paths:
             application/json:
               schema:
                 type: object
-                description: pending
+                description: Directory-find envelope supported by privately verified retained native portal responses. Properties remain optional and unknown fields are allowed; this is historical scoped evidence, not a new capture or requiredness test.
+                additionalProperties: true
+                properties:
+                  DataType:
+                    type: string
+                  Database:
+                    type: string
+                  ErrorData:
+                    $ref: common.yml#/components/schemas/PurviewDirectoryErrorData
+                  LastPage:
+                    type: boolean
+                  RecordCount:
+                    type: integer
+                  ResultCode:
+                    type: integer
+                  Session:
+                    type: string
+                  TotalResultCount:
+                    type: integer
+                  WaterMark:
+                    type: string
+                  ResultData:
+                    nullable: true
+                    description: Only null was observed in retained evidence; the non-null type remains unknown.
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -139,15 +278,43 @@ paths:
 
         '404':
           $ref: common.yml#/components/responses/NotFound
+      x-nodoc-operation-context:
+        surface: Microsoft Purview > Data Loss Prevention > Overview
+        workflows:
+          - Observe the existing DLP overview through the normal authenticated portal; reuse retained complete responses for offline schema review.
+        authProfile: purview-portal-session
+        requestShapes:
+          - name: retained-native-directory-get
+            bodyKind: none
+            notes: "Observed query parameter names: Filter, PageSize, tenantId. Values are withheld. Presence does not establish requiredness; existing parameter declarations are unchanged."
+        availability:
+          level: user-context
+          notes:
+            - Historical authenticated portal observations only. No tenant switch, feature activation, entitlement, grant, minimum-role, least-privilege or standalone invocation was tested.
+        provenance:
+          - source: retained-authenticated-portal-evidence-reviewed-20261030
+            confidence: high
+            notes:
+              - Exact wire GET purview.microsoft.com/apiproxy/di/find/MIPSavedQuery composes from canonical /di/find/MIPSavedQuery and declared server base /apiproxy.
+              - Retained purview-01 action 8 at 2026-10-29T22:14:58.765Z; evidence request-6a598bc10084c75f0c15; HTTP 200 complete response privately verified.
+              - Retained purview-01 action 8 at 2026-10-29T22:14:58.751Z; evidence request-c00f37d4ea2e14b56842; HTTP 200 complete response privately verified.
+              - Retained purview-01 action 8 at 2026-10-29T22:14:58.749Z; evidence request-f24fa7e29129c2a67c2e; HTTP 200 complete response privately verified.
+              - Retained purview-remediation-02 action 8 at 2026-10-30T12:28:00.532Z; evidence request-09e7828bfec39130db16; HTTP 200 complete response privately verified.
+              - Retained purview-remediation-02 action 8 at 2026-10-30T12:28:00.541Z; evidence request-9998cf225650a6028a19; HTTP 200 complete response privately verified.
+              - Retained purview-remediation-02 action 8 at 2026-10-30T12:28:00.531Z; evidence request-bf248e563688bacf06dc; HTTP 200 complete response privately verified.
+              - Previously retained complete bodies were reused before considering a new capture. Their original action/time attribution is preserved and they do not become fresh observations on the review date.
+              - Conventional root ErrorData string members were empty in the selected bodies. HTTP status and those bounded checks do not establish universal business success or feature availability.
+              - Only the observed envelope is typed; null-only ResultData leaves its non-null/item structure unknown.
+              - Response scalar values, tenant data, body fingerprints, lengths and examples are withheld. No new API operation, required field, enum, format, authentication or permission claim is introduced.
+              - This is scoped historical native-observation evidence, not whole-spec freshness, API execution-tested usage or complete schema coverage.
 
   /di/find/Alert:
     get:
       operationId: getComplianceAlerts
       summary: Get compliance alerts
       description: >-
-        Retrieve compliance alerts from the Data Infrastructure service.
-        Supports filtering by alert properties and pagination.
-      tags: [DataInfrastructure]
+        Retrieve compliance alerts from the Data Infrastructure service. Supports filtering by alert properties and pagination.
+      tags: [ DataInfrastructure ]
       parameters:
         - name: tenantid
           in: query
@@ -175,7 +342,30 @@ paths:
             application/json:
               schema:
                 type: object
-                description: pending
+                description: Directory-find envelope supported by privately verified retained native portal responses. Properties remain optional and unknown fields are allowed; this is historical scoped evidence, not a new capture or requiredness test.
+                additionalProperties: true
+                properties:
+                  DataType:
+                    type: string
+                  Database:
+                    type: string
+                  ErrorData:
+                    $ref: common.yml#/components/schemas/PurviewDirectoryErrorData
+                  LastPage:
+                    type: boolean
+                  RecordCount:
+                    type: integer
+                  ResultCode:
+                    type: integer
+                  Session:
+                    type: string
+                  TotalResultCount:
+                    type: integer
+                  WaterMark:
+                    type: string
+                  ResultData:
+                    nullable: true
+                    description: Only null was observed in retained evidence; the non-null type remains unknown.
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -184,15 +374,39 @@ paths:
 
         '404':
           $ref: common.yml#/components/responses/NotFound
+      x-nodoc-operation-context:
+        surface: Microsoft Purview > Data Loss Prevention > Overview
+        workflows:
+          - Observe the existing DLP overview through the normal authenticated portal; reuse retained complete responses for offline schema review.
+        authProfile: purview-portal-session
+        requestShapes:
+          - name: retained-native-directory-get
+            bodyKind: none
+            notes: "Observed query parameter names: Filter, pagesize, tenantid. Values are withheld. Presence does not establish requiredness; existing parameter declarations are unchanged."
+        availability:
+          level: user-context
+          notes:
+            - Historical authenticated portal observations only. No tenant switch, feature activation, entitlement, grant, minimum-role, least-privilege or standalone invocation was tested.
+        provenance:
+          - source: retained-authenticated-portal-evidence-reviewed-20261030
+            confidence: high
+            notes:
+              - Exact wire GET purview.microsoft.com/apiproxy/di/find/Alert composes from canonical /di/find/Alert and declared server base /apiproxy.
+              - Retained purview-01 action 8 at 2026-10-29T22:14:58.713Z; evidence request-f373fea87cd828b8a0f7; HTTP 200 complete response privately verified.
+              - Retained purview-remediation-02 action 8 at 2026-10-30T12:28:00.509Z; evidence request-9afaabd04ca3dcf92096; HTTP 200 complete response privately verified.
+              - Previously retained complete bodies were reused before considering a new capture. Their original action/time attribution is preserved and they do not become fresh observations on the review date.
+              - Conventional root ErrorData string members were empty in the selected bodies. HTTP status and those bounded checks do not establish universal business success or feature availability.
+              - Only the observed envelope is typed; null-only ResultData leaves its non-null/item structure unknown.
+              - Response scalar values, tenant data, body fingerprints, lengths and examples are withheld. No new API operation, required field, enum, format, authentication or permission claim is introduced.
+              - This is scoped historical native-observation evidence, not whole-spec freshness, API execution-tested usage or complete schema coverage.
 
   /di/find/PolicyConfig:
     get:
       operationId: getPolicyConfig
       summary: Get policy configuration
       description: >-
-        Retrieve policy configuration from the Data Infrastructure service.
-        Returns the current policy settings for the tenant.
-      tags: [DataInfrastructure]
+        Retrieve policy configuration from the Data Infrastructure service. Returns the current policy settings for the tenant.
+      tags: [ DataInfrastructure ]
       parameters:
         - name: tenantId
           in: query
@@ -208,7 +422,188 @@ paths:
             application/json:
               schema:
                 type: object
-                description: pending
+                description: Directory-find envelope supported by privately verified retained native portal responses. Properties remain optional and unknown fields are allowed; this is historical scoped evidence, not a new capture or requiredness test.
+                additionalProperties: true
+                properties:
+                  DataType:
+                    type: string
+                  Database:
+                    type: string
+                  ErrorData:
+                    $ref: common.yml#/components/schemas/PurviewDirectoryErrorData
+                  LastPage:
+                    type: boolean
+                  RecordCount:
+                    type: integer
+                  ResultCode:
+                    type: string
+                  ResultData:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: true
+                      properties:
+                        AdminDisplayName:
+                          type: string
+                        AggregationTimeWindowForDlpAlerts:
+                          type: integer
+                        CaseHoldPolicyLimit:
+                          type: integer
+                        ClassificationMode:
+                          type: string
+                        ClassificationScheme:
+                          type: string
+                        ComplianceUrl:
+                          type: string
+                        CustomClassificationMigrationStatus:
+                          type: string
+                        DirectoryObjectVersion:
+                          type: integer
+                        DistinguishedName:
+                          type: string
+                        DlpAlertFoldingConfiguration:
+                          type: string
+                        DlpAlertSlaConfig:
+                          type: string
+                        DlpAppGroups:
+                          type: string
+                        DlpAppGroupsPsws:
+                          type: array
+                          items:
+                            type: string
+                        DlpErrorHandlingConfig:
+                          type: string
+                        DlpExtensionGroups:
+                          type: string
+                        DlpExtensionGroupsPsws:
+                          type: array
+                          items:
+                            type: string
+                        DlpNetworkShareGroups:
+                          type: string
+                        DlpNetworkShareGroupsPsws:
+                          type: array
+                          items: {}
+                        DlpPrinterGroups:
+                          type: string
+                        DlpPrinterGroupsPsws:
+                          type: array
+                          items:
+                            type: string
+                        DlpRemovableMediaGroups:
+                          type: string
+                        DlpRemovableMediaGroupsPsws:
+                          type: array
+                          items:
+                            type: string
+                        DocumentIsUnsupportedSeverity:
+                          type: string
+                        EnableAbacFeature:
+                          type: boolean
+                        EnableAdvancedRuleBuilder:
+                          type: boolean
+                        EnableLabelCoauth:
+                          type: boolean
+                        EnableSensitivityLabelingForPdf:
+                          type: boolean
+                        EnableSpoAipMigration:
+                          type: boolean
+                        EndpointDlpGlobalSettings:
+                          type: string
+                        EndpointDlpGlobalSettingsPsws:
+                          type: array
+                          items:
+                            type: string
+                        EndpointDlpGlobalSettingsV2:
+                          type: string
+                        ExchangeObjectId:
+                          type: string
+                        ExtendTeamsDlpToSpoOdbConsent:
+                          type: boolean
+                        ExtendTeamsDlpToSpoOdbConsentDetails:
+                          type: string
+                        Guid:
+                          type: string
+                        HasAdvancedRuleBuilderConfigBeenSet:
+                          type: boolean
+                        Id:
+                          type: string
+                        Identity:
+                          type: string
+                        InformationBarrierMode:
+                          type: string
+                        InformationBarrierPeopleSearchRestriction:
+                          type: string
+                        IsDefaultMlDlpPoliciesOptedOut:
+                          type: boolean
+                        IsDlpSimulationOptedIn:
+                          type: boolean
+                        IsEventFoldingOnDlpAlertsOptedOut:
+                          type: boolean
+                        IsUserBaseDlpAlertAggregationEnabled:
+                          type: boolean
+                        IsValid:
+                          type: boolean
+                        JitEnforcementSettings:
+                          type: string
+                        LabelScheme:
+                          type: string
+                        LabelSchemeMigrationConfig:
+                          type: string
+                        MaxClassificationCountLimit:
+                          type: integer
+                        MessageHeadersToRetainInOutlook:
+                          type: string
+                        Name:
+                          type: string
+                        ObjectClass:
+                          type: array
+                          items: {}
+                        OnPremisesWorkload:
+                          type: string
+                        OrganizationId:
+                          type: string
+                        ProcessingLimitExceededSeverity:
+                          type: string
+                        PurviewLabelConsent:
+                          type: boolean
+                        PurviewLabelConsentCaller:
+                          type: string
+                        PurviewLabelConsentDetails:
+                          type: string
+                        PurviewLabelConsentTime:
+                          type: string
+                        ReservedForFutureUse:
+                          type: boolean
+                        RetentionForwardCrawl:
+                          type: boolean
+                        RuleErrorAction:
+                          type: string
+                        SenderAddressLocation:
+                          type: string
+                        SiteGroups:
+                          type: string
+                        SiteGroupsPsws:
+                          type: array
+                          items: {}
+                        SpoPdfLastSyncTimestamp:
+                          type: string
+                        SpoQuarantineFileSettings:
+                          type: string
+                        TextExtractionConfig:
+                          type: string
+                        WhenChanged:
+                          type: string
+                        WhenChangedUTC:
+                          type: string
+                        WhenCreated:
+                          type: string
+                        WhenCreatedUTC:
+                          type: string
+                  Session:
+                    type: string
+                  TotalResultCount:
+                    type: integer
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -217,15 +612,39 @@ paths:
 
         '404':
           $ref: common.yml#/components/responses/NotFound
+      x-nodoc-operation-context:
+        surface: Microsoft Purview > Data Loss Prevention > Overview
+        workflows:
+          - Observe the existing DLP overview through the normal authenticated portal; reuse retained complete responses for offline schema review.
+        authProfile: purview-portal-session
+        requestShapes:
+          - name: retained-native-directory-get
+            bodyKind: none
+            notes: "Observed query parameter names: tenantId. Values are withheld. Presence does not establish requiredness; existing parameter declarations are unchanged."
+        availability:
+          level: user-context
+          notes:
+            - Historical authenticated portal observations only. No tenant switch, feature activation, entitlement, grant, minimum-role, least-privilege or standalone invocation was tested.
+        provenance:
+          - source: retained-authenticated-portal-evidence-reviewed-20261030
+            confidence: high
+            notes:
+              - Exact wire GET purview.microsoft.com/apiproxy/di/find/PolicyConfig composes from canonical /di/find/PolicyConfig and declared server base /apiproxy.
+              - Retained purview-01 action 8 at 2026-10-29T22:14:58.711Z; evidence request-4f1a9c6d13128ccc7c53; HTTP 200 complete response privately verified.
+              - Retained purview-remediation-02 action 8 at 2026-10-30T12:28:00.507Z; evidence request-3dac4debd841d206a1f4; HTTP 200 complete response privately verified.
+              - Previously retained complete bodies were reused before considering a new capture. Their original action/time attribution is preserved and they do not become fresh observations on the review date.
+              - Conventional root ErrorData string members were empty in the selected bodies. HTTP status and those bounded checks do not establish universal business success or feature availability.
+              - Populated object items support optional static field/container types. Null-only item fields are omitted; empty-array item types and object-map contents remain open.
+              - Response scalar values, tenant data, body fingerprints, lengths and examples are withheld. No new API operation, required field, enum, format, authentication or permission claim is introduced.
+              - This is scoped historical native-observation evidence, not whole-spec freshness, API execution-tested usage or complete schema coverage.
 
   /di/find/DlpComplianceRule:
     get:
       operationId: getDlpComplianceRules
       summary: Get DLP compliance rules
       description: >-
-        Retrieve DLP compliance rules from the Data Infrastructure service.
-        These rules define the conditions and actions for Data Loss Prevention enforcement.
-      tags: [DataInfrastructure]
+        Retrieve DLP compliance rules from the Data Infrastructure service. These rules define the conditions and actions for Data Loss Prevention enforcement.
+      tags: [ DataInfrastructure ]
       parameters:
         - name: tenantId
           in: query
@@ -247,7 +666,384 @@ paths:
             application/json:
               schema:
                 type: object
-                description: pending
+                description: Directory-find envelope supported by privately verified retained native portal responses. Properties remain optional and unknown fields are allowed; this is historical scoped evidence, not a new capture or requiredness test.
+                additionalProperties: true
+                properties:
+                  DataType:
+                    type: string
+                  Database:
+                    type: string
+                  ErrorData:
+                    $ref: common.yml#/components/schemas/PurviewDirectoryErrorData
+                  LastPage:
+                    type: boolean
+                  RecordCount:
+                    type: integer
+                  ResultCode:
+                    type: string
+                  ResultData:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: true
+                      properties:
+                        AccessedBy:
+                          type: array
+                          items: {}
+                        AccessedByMemberOf:
+                          type: array
+                          items: {}
+                        AdvancedRule:
+                          type: string
+                        AnyOfRecipientAddressContainsWords:
+                          type: array
+                          items: {}
+                        AnyOfRecipientAddressMatchesPatterns:
+                          type: array
+                          items: {}
+                        ApplyBrandingTemplate:
+                          type: string
+                        AttachmentIsNotLabeled:
+                          type: boolean
+                        BlockAccess:
+                          type: boolean
+                        BlockDomains:
+                          type: array
+                          items: {}
+                        BlockDomainsExcept:
+                          type: array
+                          items: {}
+                        BlockDomainsOrUsers:
+                          type: boolean
+                        BlockUsers:
+                          type: array
+                          items: {}
+                        BlockUsersExcept:
+                          type: array
+                          items: {}
+                        Comment:
+                          type: string
+                        ContentCharacterSetContainsWords:
+                          type: array
+                          items: {}
+                        ContentExtensionMatchesWords:
+                          type: array
+                          items: {}
+                        ContentFileTypeMatches:
+                          type: array
+                          items: {}
+                        ContentIsNotLabeled:
+                          type: boolean
+                        ContentIsShared:
+                          type: boolean
+                        ContentPropertyContainsWords:
+                          type: array
+                          items: {}
+                        ContextPropertiesContainWords:
+                          type: array
+                          items: {}
+                        DirectoryObjectVersion:
+                          type: integer
+                        Disabled:
+                          type: boolean
+                        DisplayName:
+                          type: string
+                        DistinguishedName:
+                          type: string
+                        DocumentContainsWords:
+                          type: array
+                          items: {}
+                        DocumentCreatedBy:
+                          type: array
+                          items: {}
+                        DocumentIsPasswordProtected:
+                          type: boolean
+                        DocumentIsUnsupported:
+                          type: boolean
+                        DocumentMatchesPatterns:
+                          type: array
+                          items: {}
+                        DocumentNameMatchesPatterns:
+                          type: array
+                          items: {}
+                        DocumentNameMatchesWords:
+                          type: array
+                          items: {}
+                        DocumentSizeOver:
+                          type: string
+                        EnforcePortalAccess:
+                          type: boolean
+                        EvaluateRulePerComponent:
+                          type: boolean
+                        ExceptIfAccessedBy:
+                          type: array
+                          items: {}
+                        ExceptIfAccessedByMemberOf:
+                          type: array
+                          items: {}
+                        ExceptIfAnyOfRecipientAddressContainsWords:
+                          type: array
+                          items: {}
+                        ExceptIfAnyOfRecipientAddressMatchesPatterns:
+                          type: array
+                          items: {}
+                        ExceptIfContentCharacterSetContainsWords:
+                          type: array
+                          items: {}
+                        ExceptIfContentExtensionMatchesWords:
+                          type: array
+                          items: {}
+                        ExceptIfContentFileTypeMatches:
+                          type: array
+                          items: {}
+                        ExceptIfContentIsShared:
+                          type: boolean
+                        ExceptIfContentPropertyContainsWords:
+                          type: array
+                          items: {}
+                        ExceptIfContextPropertiesContainWords:
+                          type: array
+                          items: {}
+                        ExceptIfDocumentContainsWords:
+                          type: array
+                          items: {}
+                        ExceptIfDocumentCreatedBy:
+                          type: array
+                          items: {}
+                        ExceptIfDocumentIsPasswordProtected:
+                          type: boolean
+                        ExceptIfDocumentIsUnsupported:
+                          type: boolean
+                        ExceptIfDocumentMatchesPatterns:
+                          type: array
+                          items: {}
+                        ExceptIfDocumentNameMatchesPatterns:
+                          type: array
+                          items: {}
+                        ExceptIfDocumentNameMatchesWords:
+                          type: array
+                          items: {}
+                        ExceptIfDocumentSizeOver:
+                          type: string
+                        ExceptIfFromAddressContainsWords:
+                          type: array
+                          items: {}
+                        ExceptIfFromAddressMatchesPatterns:
+                          type: array
+                          items: {}
+                        ExceptIfHasSenderOverride:
+                          type: boolean
+                        ExceptIfMessageSizeOver:
+                          type: string
+                        ExceptIfProcessingLimitExceeded:
+                          type: boolean
+                        ExceptIfRecipientDomainIs:
+                          type: array
+                          items: {}
+                        ExceptIfSenderDomainIs:
+                          type: array
+                          items: {}
+                        ExceptIfSenderIPRanges:
+                          type: array
+                          items: {}
+                        ExceptIfSentTo:
+                          type: array
+                          items: {}
+                        ExceptIfSharedWithDomain:
+                          type: array
+                          items: {}
+                        ExceptIfSubjectContainsWords:
+                          type: array
+                          items: {}
+                        ExceptIfSubjectMatchesPatterns:
+                          type: array
+                          items: {}
+                        ExceptIfSubjectOrBodyContainsWords:
+                          type: array
+                          items: {}
+                        ExceptIfSubjectOrBodyMatchesPatterns:
+                          type: array
+                          items: {}
+                        ExceptIfTeamsSharedWithParticipantCategory:
+                          type: array
+                          items: {}
+                        ExceptIfUnscannableDocumentExtensionIs:
+                          type: array
+                          items: {}
+                        ExceptIfUrlContainsText:
+                          type: array
+                          items: {}
+                        ExchangeObjectId:
+                          type: string
+                        ExternalIdentity:
+                          type: string
+                        FromAddressContainsWords:
+                          type: array
+                          items: {}
+                        FromAddressMatchesPatterns:
+                          type: array
+                          items: {}
+                        GenerateAlert:
+                          type: array
+                          items: {}
+                        GenerateIncidentReport:
+                          type: array
+                          items: {}
+                        Guid:
+                          type: string
+                        HasLabelDowngradedFrom:
+                          type: array
+                          items: {}
+                        HasSenderOverride:
+                          type: boolean
+                        Id:
+                          type: string
+                        Identity:
+                          type: string
+                        ImmutableId:
+                          type: string
+                        IsAdvancedRule:
+                          type: boolean
+                        IsValid:
+                          type: boolean
+                        MaximumBlobRuleLength:
+                          type: integer
+                        MessageIsNotLabeled:
+                          type: boolean
+                        MessageSizeOver:
+                          type: string
+                        Mode:
+                          type: string
+                        MoveToQuarantineLocation:
+                          type: boolean
+                        Name:
+                          type: string
+                        NotifyEmailCustomSenderDisplayName:
+                          type: string
+                        NotifyEmailCustomSubject:
+                          type: string
+                        NotifyEmailCustomText:
+                          type: string
+                        NotifyEmailExchangeIncludeAttachment:
+                          type: boolean
+                        NotifyJustificationCustomText:
+                          type: string
+                        NotifyJustificationCustomTextTranslations:
+                          type: array
+                          items: {}
+                        NotifyPolicyTipCustomDialog:
+                          type: string
+                        NotifyPolicyTipCustomText:
+                          type: string
+                        NotifyPolicyTipCustomTextTranslations:
+                          type: array
+                          items: {}
+                        NotifyPolicyTipUrl:
+                          type: string
+                        NotifyUser:
+                          type: array
+                          items: {}
+                        ObjectClass:
+                          type: array
+                          items:
+                            type: string
+                        ObjectVersion:
+                          type: string
+                        OrganizationId:
+                          type: string
+                        OrganizationalUnitRoot:
+                          type: string
+                        ParentPolicyName:
+                          type: string
+                        Policy:
+                          type: string
+                        PrependSubject:
+                          type: string
+                        Priority:
+                          type: integer
+                        ProcessingLimitExceeded:
+                          type: boolean
+                        Quarantine:
+                          type: boolean
+                        ReadOnly:
+                          type: boolean
+                        RecipientDomainIs:
+                          type: array
+                          items: {}
+                        RemoveHeader:
+                          type: array
+                          items: {}
+                        RemoveRMSTemplate:
+                          type: boolean
+                        ReportSeverityLevel:
+                          type: string
+                        RestrictBrowserAccess:
+                          type: boolean
+                        RestrictWebGrounding:
+                          type: boolean
+                        RuleXml:
+                          type: string
+                        SPMoveToQuarantineLocation:
+                          type: boolean
+                        SenderDomainIs:
+                          type: array
+                          items: {}
+                        SenderIPRanges:
+                          type: array
+                          items: {}
+                        SentTo:
+                          type: array
+                          items: {}
+                        SharedByIRMAgentRisk:
+                          type: array
+                          items: {}
+                        SharedByIRMUserRisk:
+                          type: array
+                          items: {}
+                        SharedWithDomain:
+                          type: array
+                          items: {}
+                        SourceType:
+                          type: string
+                        StopPolicyProcessing:
+                          type: boolean
+                        SubjectContainsWords:
+                          type: array
+                          items: {}
+                        SubjectMatchesPatterns:
+                          type: array
+                          items: {}
+                        SubjectOrBodyContainsWords:
+                          type: array
+                          items: {}
+                        SubjectOrBodyMatchesPatterns:
+                          type: array
+                          items: {}
+                        TeamsSharedWithParticipantCategory:
+                          type: array
+                          items: {}
+                        TriggerPowerAutomateFlow:
+                          type: string
+                        UnscannableDocumentExtensionIs:
+                          type: array
+                          items: {}
+                        UrlContainsText:
+                          type: array
+                          items: {}
+                        WhenChanged:
+                          type: string
+                        WhenChangedUTC:
+                          type: string
+                        WhenCreated:
+                          type: string
+                        WhenCreatedUTC:
+                          type: string
+                        Workload:
+                          type: string
+                  Session:
+                    type: string
+                  TotalResultCount:
+                    type: integer
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -256,15 +1052,58 @@ paths:
 
         '404':
           $ref: common.yml#/components/responses/NotFound
+      x-nodoc-operation-context:
+        surface: Microsoft Purview > Data Loss Prevention > Overview
+        workflows:
+          - Observe the existing DLP overview through the normal authenticated portal; reuse retained complete responses for offline schema review.
+        authProfile: purview-portal-session
+        requestShapes:
+          - name: retained-native-directory-get
+            bodyKind: none
+            notes: "Observed query parameter names: filter, tenantId. Values are withheld. Presence does not establish requiredness; existing parameter declarations are unchanged."
+        availability:
+          level: user-context
+          notes:
+            - Historical authenticated portal observations only. No tenant switch, feature activation, entitlement, grant, minimum-role, least-privilege or standalone invocation was tested.
+        provenance:
+          - source: retained-authenticated-portal-evidence-reviewed-20261030
+            confidence: high
+            notes:
+              - Exact wire GET purview.microsoft.com/apiproxy/di/find/DlpComplianceRule composes from canonical /di/find/DlpComplianceRule and declared server base /apiproxy.
+              - Retained purview-01 action 8 at 2026-10-29T22:15:01.103Z; evidence request-399d6d39a89eee3d5e83; HTTP 200 complete response privately verified.
+              - Retained purview-remediation-02 action 8 at 2026-10-30T12:28:02.856Z; evidence request-ff0ff2b538739117c49e; HTTP 200 complete response privately verified.
+              - Previously retained complete bodies were reused before considering a new capture. Their original action/time attribution is preserved and they do not become fresh observations on the review date.
+              - Conventional root ErrorData string members were empty in the selected bodies. HTTP status and those bounded checks do not establish universal business success or feature availability.
+              - Populated object items support optional static field/container types. Null-only item fields are omitted; empty-array item types and object-map contents remain open.
+              - Response scalar values, tenant data, body fingerprints, lengths and examples are withheld. No new API operation, required field, enum, format, authentication or permission claim is introduced.
+              - This is scoped historical native-observation evidence, not whole-spec freshness, API execution-tested usage or complete schema coverage.
 
   /di/find/DlpCompliancePolicy:
     get:
       operationId: getDlpCompliancePolicies
+      x-nodoc-live-capture:
+        source: authenticated Microsoft Purview portal passive representative states
+        browsedPages:
+          - Microsoft Purview portal
+      x-nodoc-operation-context:
+        surface: Microsoft Purview portal
+        workflows:
+          - Observe native requests during approved passive representative portal states.
+        availability:
+          level: user-context
+          notes:
+            - One authenticated portal session; standalone execution, parameter requiredness, effective grants and minimum roles are not established.
+        provenance:
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - GET purview.microsoft.com/apiproxy/di/find/DlpCompliancePolicy; HTTP 200; action 8; observed 2026-10-29T22:15:01.119Z; complete response privately hash-verified.
+              - Current response types were observed in the approved portal session; populated error text was not observed in the selected success envelopes.
+              - The broader run retains missing navigation/action checkpoints. This evidence does not establish all-operation, all-state, product activation or least-privilege coverage.
       summary: Get DLP compliance policies
       description: >-
-        Retrieve DLP compliance policies from the Data Infrastructure service.
-        These policies define the overall DLP strategy for the tenant.
-      tags: [DataInfrastructure]
+        Retrieve DLP compliance policies from the Data Infrastructure service. These policies define the overall DLP strategy for the tenant.
+      tags: [ DataInfrastructure ]
       parameters:
         - name: tenantId
           in: query
@@ -286,7 +1125,30 @@ paths:
             application/json:
               schema:
                 type: object
-                description: pending
+                description: Observed response envelope; fields remain optional and result item structures are not inferred.
+                properties:
+                  DataType:
+                    type: string
+                  Database:
+                    type: string
+                  WaterMark:
+                    type: string
+                  Session:
+                    type: string
+                  LastPage:
+                    type: boolean
+                  TotalResultCount:
+                    type: integer
+                  RecordCount:
+                    type: integer
+                  ErrorData:
+                    $ref: "#/components/schemas/InsiderRiskEntityListError"
+                  ResultCode:
+                    type: string
+                  ResultData:
+                    type: array
+                    items: {}
+                additionalProperties: true
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -299,11 +1161,29 @@ paths:
   /di/find/LabelPolicy:
     get:
       operationId: getLabelPolicies
+      x-nodoc-live-capture:
+        source: authenticated Microsoft Purview portal passive representative states
+        browsedPages:
+          - Microsoft Purview portal
+      x-nodoc-operation-context:
+        surface: Microsoft Purview portal
+        workflows:
+          - Observe native requests during approved passive representative portal states.
+        availability:
+          level: user-context
+          notes:
+            - One authenticated portal session; standalone execution, parameter requiredness, effective grants and minimum roles are not established.
+        provenance:
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - GET purview.microsoft.com/apiproxy/di/find/LabelPolicy; HTTP 200; action 8; observed 2026-10-29T22:14:58.709Z; complete response privately hash-verified.
+              - Current response types were observed in the approved portal session; populated error text was not observed in the selected success envelopes.
+              - The broader run retains missing navigation/action checkpoints. This evidence does not establish all-operation, all-state, product activation or least-privilege coverage.
       summary: Get label policies
       description: >-
-        Retrieve sensitivity label policies from the Data Infrastructure service.
-        Label policies control how sensitivity labels are published and applied to content.
-      tags: [DataInfrastructure]
+        Retrieve sensitivity label policies from the Data Infrastructure service. Label policies control how sensitivity labels are published and applied to content.
+      tags: [ DataInfrastructure ]
       parameters:
         - name: tenantId
           in: query
@@ -325,7 +1205,31 @@ paths:
             application/json:
               schema:
                 type: object
-                description: pending
+                description: Observed response envelope; fields remain optional and result item structures are not inferred.
+                properties:
+                  DataType:
+                    type: string
+                  Database:
+                    type: string
+                  WaterMark:
+                    nullable: true
+                    description: Observed null; the non-null type remains unverified.
+                  Session:
+                    type: string
+                  LastPage:
+                    type: boolean
+                  TotalResultCount:
+                    type: integer
+                  RecordCount:
+                    type: integer
+                  ErrorData:
+                    $ref: "#/components/schemas/InsiderRiskEntityListError"
+                  ResultCode:
+                    type: string
+                  ResultData:
+                    type: array
+                    items: {}
+                additionalProperties: true
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -340,9 +1244,8 @@ paths:
       operationId: getAutoSensitivityLabelPolicies
       summary: Get auto-sensitivity label policies
       description: >-
-        Retrieve auto-sensitivity label policies from the Data Infrastructure service.
-        These policies define rules for automatically applying sensitivity labels to content.
-      tags: [DataInfrastructure]
+        Retrieve auto-sensitivity label policies from the Data Infrastructure service. These policies define rules for automatically applying sensitivity labels to content.
+      tags: [ DataInfrastructure ]
       parameters:
         - name: tenantId
           in: query
@@ -358,7 +1261,238 @@ paths:
             application/json:
               schema:
                 type: object
-                description: pending
+                description: Directory-find envelope supported by privately verified retained native portal responses. Properties remain optional and unknown fields are allowed; this is historical scoped evidence, not a new capture or requiredness test.
+                additionalProperties: true
+                properties:
+                  DataType:
+                    type: string
+                  Database:
+                    type: string
+                  ErrorData:
+                    $ref: common.yml#/components/schemas/PurviewDirectoryErrorData
+                  LastPage:
+                    type: boolean
+                  RecordCount:
+                    type: integer
+                  ResultCode:
+                    type: string
+                  ResultData:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: true
+                      properties:
+                        ApplySensitivityLabel:
+                          type: string
+                        ApplySensitivityLabelOverwriteWorkloads:
+                          type: string
+                        Comment:
+                          type: string
+                        CompletedItemsCount:
+                          type: integer
+                        CompletedItemsCountInInterval:
+                          type: integer
+                        CompletedLocations:
+                          type: integer
+                        CreatedBy:
+                          type: string
+                        CreationTimeUtc:
+                          type: string
+                        DirectoryObjectVersion:
+                          type: integer
+                        DistinguishedName:
+                          type: string
+                        DistributionStatus:
+                          type: string
+                        DistributionSyncStatus:
+                          type: string
+                        Enabled:
+                          type: boolean
+                        EndpointDlpAdaptiveScopes:
+                          type: array
+                          items: {}
+                        EndpointDlpAdaptiveScopesException:
+                          type: array
+                          items: {}
+                        EndpointDlpLocation:
+                          type: array
+                          items: {}
+                        EndpointDlpLocationException:
+                          type: array
+                          items: {}
+                        EnforcementPlanes:
+                          type: array
+                          items: {}
+                        ExceptIfOneDriveSharedBy:
+                          type: array
+                          items: {}
+                        ExceptIfOneDriveSharedByMemberOf:
+                          type: array
+                          items: {}
+                        ExchangeAdaptiveScopes:
+                          type: array
+                          items: {}
+                        ExchangeAdaptiveScopesException:
+                          type: array
+                          items: {}
+                        ExchangeLocation:
+                          type: array
+                          items:
+                            type: object
+                            additionalProperties: true
+                        ExchangeLocationException:
+                          type: array
+                          items: {}
+                        ExchangeObjectId:
+                          type: string
+                        ExchangeSender:
+                          type: array
+                          items: {}
+                        ExchangeSenderException:
+                          type: array
+                          items: {}
+                        ExchangeSenderMemberOf:
+                          type: array
+                          items: {}
+                        ExchangeSenderMemberOfException:
+                          type: array
+                          items: {}
+                        ExpectedLocations:
+                          type: integer
+                        ExtendedProperties:
+                          type: string
+                        ExternalIdentity:
+                          type: string
+                        FailedItemsCount:
+                          type: integer
+                        FailedLocations:
+                          type: integer
+                        ForceValidate:
+                          type: boolean
+                        GlobalListType:
+                          type: string
+                        Guid:
+                          type: string
+                        Id:
+                          type: string
+                        Identity:
+                          type: string
+                        IncludeSimulationPolicyGrading:
+                          type: boolean
+                        IsValid:
+                          type: boolean
+                        ItemsMatchedDuringTestMode:
+                          type: integer
+                        LabelDisplayName:
+                          type: string
+                        LastModifiedBy:
+                          type: string
+                        Locations:
+                          type: string
+                        Mode:
+                          type: string
+                        ModificationTimeUtc:
+                          type: string
+                        Name:
+                          type: string
+                        ObjectClass:
+                          type: array
+                          items:
+                            type: string
+                        ObjectVersion:
+                          type: string
+                        OneDriveAdaptiveScopes:
+                          type: array
+                          items: {}
+                        OneDriveAdaptiveScopesException:
+                          type: array
+                          items: {}
+                        OneDriveLocation:
+                          type: array
+                          items:
+                            type: object
+                            additionalProperties: true
+                        OneDriveLocationException:
+                          type: array
+                          items: {}
+                        OneDriveSharedBy:
+                          type: array
+                          items: {}
+                        OneDriveSharedByMemberOf:
+                          type: array
+                          items: {}
+                        OrganizationId:
+                          type: string
+                        OrganizationalUnitRoot:
+                          type: string
+                        OverwriteLabel:
+                          type: boolean
+                        PendingItemsCount:
+                          type: integer
+                        PolicyConstraints:
+                          type: string
+                        PolicyRBACScopes:
+                          type: array
+                          items: {}
+                        PolicyRulesMetaData:
+                          type: string
+                        PowerBILocation:
+                          type: array
+                          items: {}
+                        PowerBILocationException:
+                          type: array
+                          items: {}
+                        Priority:
+                          type: integer
+                        ReadOnly:
+                          type: boolean
+                        RemoveLabel:
+                          type: boolean
+                        SharePointAdaptiveScopes:
+                          type: array
+                          items: {}
+                        SharePointAdaptiveScopesException:
+                          type: array
+                          items: {}
+                        SharePointLocation:
+                          type: array
+                          items:
+                            type: object
+                            additionalProperties: true
+                        SharePointLocationException:
+                          type: array
+                          items: {}
+                        SimulationRuleMatchBlob:
+                          type: string
+                        SpoDocLibraryDefaultLabels:
+                          type: array
+                          items: {}
+                        TeamsAdaptiveScopes:
+                          type: array
+                          items: {}
+                        TeamsAdaptiveScopesException:
+                          type: array
+                          items: {}
+                        Type:
+                          type: string
+                        WhenChanged:
+                          type: string
+                        WhenChangedUTC:
+                          type: string
+                        WhenCreated:
+                          type: string
+                        WhenCreatedUTC:
+                          type: string
+                        Workload:
+                          type: string
+                        isDefaultSPODocLibraryLabelInUse:
+                          type: boolean
+                  Session:
+                    type: string
+                  TotalResultCount:
+                    type: integer
+                  WaterMark:
+                    type: string
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -367,15 +1501,39 @@ paths:
 
         '404':
           $ref: common.yml#/components/responses/NotFound
+      x-nodoc-operation-context:
+        surface: Microsoft Purview > Data Loss Prevention > Overview
+        workflows:
+          - Observe the existing DLP overview through the normal authenticated portal; reuse retained complete responses for offline schema review.
+        authProfile: purview-portal-session
+        requestShapes:
+          - name: retained-native-directory-get
+            bodyKind: none
+            notes: "Observed query parameter names: tenantId. Values are withheld. Presence does not establish requiredness; existing parameter declarations are unchanged."
+        availability:
+          level: user-context
+          notes:
+            - Historical authenticated portal observations only. No tenant switch, feature activation, entitlement, grant, minimum-role, least-privilege or standalone invocation was tested.
+        provenance:
+          - source: retained-authenticated-portal-evidence-reviewed-20261030
+            confidence: high
+            notes:
+              - Exact wire GET purview.microsoft.com/apiproxy/di/find/AutoSensitivityLabelPolicy composes from canonical /di/find/AutoSensitivityLabelPolicy and declared server base /apiproxy.
+              - Retained purview-01 action 8 at 2026-10-29T22:14:58.763Z; evidence request-44a62aef5c89b84178c0; HTTP 200 complete response privately verified.
+              - Retained purview-remediation-02 action 8 at 2026-10-30T12:28:00.538Z; evidence request-420d45d053cf01e2f8c9; HTTP 200 complete response privately verified.
+              - Previously retained complete bodies were reused before considering a new capture. Their original action/time attribution is preserved and they do not become fresh observations on the review date.
+              - Conventional root ErrorData string members were empty in the selected bodies. HTTP status and those bounded checks do not establish universal business success or feature availability.
+              - Populated object items support optional static field/container types. Null-only item fields are omitted; empty-array item types and object-map contents remain open.
+              - Response scalar values, tenant data, body fingerprints, lengths and examples are withheld. No new API operation, required field, enum, format, authentication or permission claim is introduced.
+              - This is scoped historical native-observation evidence, not whole-spec freshness, API execution-tested usage or complete schema coverage.
 
   /di/find/DlpSensitiveInformationType:
     get:
       operationId: getDlpSensitiveInformationTypes
       summary: Get DLP sensitive information types
       description: >-
-        Retrieve DLP sensitive information type definitions from the Data Infrastructure service.
-        These define the patterns and rules used to detect sensitive data.
-      tags: [DataInfrastructure]
+        Retrieve DLP sensitive information type definitions from the Data Infrastructure service. These define the patterns and rules used to detect sensitive data.
+      tags: [ DataInfrastructure ]
       parameters:
         - name: tenantId
           in: query
@@ -400,15 +1558,33 @@ paths:
 
         '404':
           $ref: common.yml#/components/responses/NotFound
+      x-nodoc-operation-context:
+        surface: Historical portal caller / declared backend transport relationship
+        provenance:
+          - source: retained-adjacent-portal-transport-reviewed-20261030
+            confidence: high
+            notes:
+              - Historical transport identity is exact GET purview.microsoft.com/apiproxy/di/find/DlpSensitiveInformationType, canonical /di/find/DlpSensitiveInformationType under the currently declared backend specification purview.
+              - "Original caller capture assignments: purview, purview-portal. Caller page attribution and assignment labels do not by themselves establish causal execution of the backend owner's UI."
+              - Retained purview-01 action 8 at 2026-10-29T22:14:58.704Z; evidence request-b66338fbbbf1b6f5f5e4; HTTP 200.
+              - Retained purview-portal-02 action 5 at 2026-10-29T22:46:40.618Z; evidence request-94efbd0530ef3cfdd576; HTTP 200.
+              - Retained purview-portal-remediation-01 action 5 at 2026-10-30T12:39:53.010Z; evidence request-438421bfb8bdcd0e311f; HTTP 200.
+              - Retained purview-remediation-02 action 8 at 2026-10-30T12:28:00.502Z; evidence request-c946d8b73bb8d05413ca; HTTP 200.
+              - Retained purview-label-body-enrichment-01 action 0 at 2026-10-30T18:27:17.882Z; evidence request-f4766239ec7d456baafd; HTTP 200.
+              - "Observed query parameter names: tenantId. Values and derived page-label strings are withheld; parameter presence is not requiredness testing."
+              - This review used raw transport metadata only. No qualifying complete action-attributed response body was available in the selected retained evidence; bootstrap-only complete responses are excluded as action witnesses. Response/body/schema gaps remain open.
+              - Existing response schemas are unchanged. Any newly listed status is description-only, with no inferred error body, status cause, route removal or availability conclusion.
+              - Original dates/actions remain historical; this is not fresh capture, current tenant validation, business or application health, standalone invocation, role/grant/minimum-permission proof, or an owning-portal workflow test.
+              - GET is the recorded method, not a safety or idempotence determination. No request was authored, invoked, probed or replayed by this offline review; effects and rollback are untested.
+              - Confidence applies only to the verified historical method/host/path/status metadata. Captured values, identifiers, credentials, response fingerprints, body lengths and examples are withheld.
 
   /di/find/Label:
     get:
       operationId: getSensitivityLabels
       summary: Get sensitivity labels
       description: >-
-        Retrieve sensitivity labels from the Data Infrastructure service.
-        Returns the label definitions configured for the tenant.
-      tags: [DataInfrastructure]
+        Retrieve sensitivity labels from the Data Infrastructure service. Returns the label definitions configured for the tenant.
+      tags: [ DataInfrastructure ]
       parameters:
         - name: tenantId
           in: query
@@ -430,7 +1606,127 @@ paths:
             application/json:
               schema:
                 type: object
-                description: pending
+                description: Directory find response observed during the normal DLP overview. All properties remain optional; unknown fields are allowed and observed types do not establish requiredness or feature availability.
+                additionalProperties: true
+                properties:
+                  DataType:
+                    type: string
+                  Database:
+                    type: string
+                  ErrorData:
+                    $ref: common.yml#/components/schemas/PurviewDirectoryErrorData
+                  LastPage:
+                    type: boolean
+                  RecordCount:
+                    type: integer
+                  ResultCode:
+                    type: string
+                  ResultData:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: true
+                      properties:
+                        Capabilities:
+                          type: array
+                          items:
+                            type: string
+                        Comment:
+                          type: string
+                        Conditions:
+                          type: array
+                          items:
+                            type: string
+                        ContentType:
+                          type: string
+                        CreatedBy:
+                          type: string
+                        DirectoryObjectVersion:
+                          type: integer
+                        Disabled:
+                          type: boolean
+                        DisplayName:
+                          type: string
+                        DistinguishedName:
+                          type: string
+                        ExchangeObjectId:
+                          type: string
+                        ExternalIdentity:
+                          type: string
+                        Guid:
+                          type: string
+                        Id:
+                          type: string
+                        Identity:
+                          type: string
+                        ImmutableId:
+                          type: string
+                        IsLabelGroup:
+                          type: boolean
+                        IsParent:
+                          type: boolean
+                        IsValid:
+                          type: boolean
+                        LabelActions:
+                          type: array
+                          items:
+                            type: string
+                        LastModifiedBy:
+                          type: string
+                        LocaleSettings:
+                          type: array
+                          items:
+                            type: object
+                            additionalProperties: true
+                        Mode:
+                          type: string
+                        Name:
+                          type: string
+                        ObjectClass:
+                          type: array
+                          items:
+                            type: string
+                        ObjectVersion:
+                          type: string
+                        OrganizationId:
+                          type: string
+                        OrganizationalUnitRoot:
+                          type: string
+                        ParentId:
+                          type: string
+                          nullable: true
+                        ParentLabelDisplayName:
+                          type: string
+                          nullable: true
+                        Policy:
+                          type: string
+                        Priority:
+                          type: integer
+                        ReadOnly:
+                          type: boolean
+                        Settings:
+                          type: array
+                          items:
+                            type: object
+                            additionalProperties: true
+                        Tooltip:
+                          type: string
+                        WhenChanged:
+                          type: string
+                        WhenChangedUTC:
+                          type: string
+                        WhenCreated:
+                          type: string
+                        WhenCreatedUTC:
+                          type: string
+                        Workload:
+                          type: string
+                  Session:
+                    type: string
+                  TotalResultCount:
+                    type: integer
+                  WaterMark:
+                    type: string
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -439,15 +1735,38 @@ paths:
 
         '404':
           $ref: common.yml#/components/responses/NotFound
+      x-nodoc-operation-context:
+        surface: Microsoft Purview > Data Loss Prevention > Overview
+        workflows:
+          - Load the existing DLP overview; observe the directory metadata emitted by the normal portal and an explicit passive reload.
+        authProfile: purview-portal-session
+        requestShapes:
+          - name: observed-native-directory-get
+            bodyKind: none
+            notes: "Observed query parameter names: filter, tenantId. Values are withheld. Presence does not test requiredness; existing parameter declarations remain unchanged and no standalone request/auth workflow was executed."
+        availability:
+          level: user-context
+          notes:
+            - Observed under the current authenticated portal session. No feature activation, tenant switch, entitlement, grant, minimum-role or least-privilege conclusion follows.
+        provenance:
+          - source: authenticated-portal-capture-20261030
+            confidence: high
+            notes:
+              - Exact wire GET purview.microsoft.com/apiproxy/di/find/Label maps to canonical /di/find/Label relative to declared server base /apiproxy.
+              - Action 2 at 2026-10-30T18:27:54.264Z; evidence request-e376605fa3bb6572ae56; HTTP 200 complete response privately verified.
+              - One normalized API observation is distinct from two raw transport observations at actions 0 and 2. They identify one operation; duplicate response bytes do not create extra schema variants.
+              - A populated array of object items supports optional static field/container types. Null-only item fields remain omitted and empty arrays do not establish item types.
+              - The result and empty conventional root error strings were independently checked; captured values, response fingerprints, body lengths, tenant data and examples are withheld.
+              - All five recipe actions and mandatory navigation completed. The bootstrap-only overall-protection response is not part of these two curated operations.
+              - This is scoped portal-observed evidence, not whole-spec freshness, universal business-success, standalone invocation, effective permissions or execution-tested usage.
 
   /di/find/DlpEdmSchema:
     get:
       operationId: getDlpEdmSchemas
       summary: Get DLP Exact Data Match schemas
       description: >-
-        Retrieve DLP Exact Data Match (EDM) schemas from the Data Infrastructure service.
-        EDM schemas define structured data patterns for precise sensitive data detection.
-      tags: [DataInfrastructure]
+        Retrieve DLP Exact Data Match (EDM) schemas from the Data Infrastructure service. EDM schemas define structured data patterns for precise sensitive data detection.
+      tags: [ DataInfrastructure ]
       parameters:
         - name: tenantId
           in: query
@@ -463,7 +1782,28 @@ paths:
             application/json:
               schema:
                 type: object
-                description: pending
+                description: Directory-find envelope supported by privately verified retained native portal responses. Properties remain optional and unknown fields are allowed; this is historical scoped evidence, not a new capture or requiredness test.
+                additionalProperties: true
+                properties:
+                  DataType:
+                    type: string
+                  Database:
+                    type: string
+                  ErrorData:
+                    $ref: common.yml#/components/schemas/PurviewDirectoryErrorData
+                  LastPage:
+                    type: boolean
+                  RecordCount:
+                    type: integer
+                  ResultCode:
+                    type: integer
+                  Session:
+                    type: string
+                  TotalResultCount:
+                    type: integer
+                  ResultData:
+                    nullable: true
+                    description: Only null was observed in retained evidence; the non-null type remains unknown.
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -472,15 +1812,39 @@ paths:
 
         '404':
           $ref: common.yml#/components/responses/NotFound
+      x-nodoc-operation-context:
+        surface: Microsoft Purview > Data Loss Prevention > Overview
+        workflows:
+          - Observe the existing DLP overview through the normal authenticated portal; reuse retained complete responses for offline schema review.
+        authProfile: purview-portal-session
+        requestShapes:
+          - name: retained-native-directory-get
+            bodyKind: none
+            notes: "Observed query parameter names: tenantId. Values are withheld. Presence does not establish requiredness; existing parameter declarations are unchanged."
+        availability:
+          level: user-context
+          notes:
+            - Historical authenticated portal observations only. No tenant switch, feature activation, entitlement, grant, minimum-role, least-privilege or standalone invocation was tested.
+        provenance:
+          - source: retained-authenticated-portal-evidence-reviewed-20261030
+            confidence: high
+            notes:
+              - Exact wire GET purview.microsoft.com/apiproxy/di/find/DlpEdmSchema composes from canonical /di/find/DlpEdmSchema and declared server base /apiproxy.
+              - Retained purview-01 action 8 at 2026-10-29T22:14:58.735Z; evidence request-85f74b80f06736004929; HTTP 200 complete response privately verified.
+              - Retained purview-remediation-02 action 8 at 2026-10-30T12:28:00.525Z; evidence request-7a242d84337093f246a1; HTTP 200 complete response privately verified.
+              - Previously retained complete bodies were reused before considering a new capture. Their original action/time attribution is preserved and they do not become fresh observations on the review date.
+              - Conventional root ErrorData string members were empty in the selected bodies. HTTP status and those bounded checks do not establish universal business success or feature availability.
+              - Only the observed envelope is typed; null-only ResultData leaves its non-null/item structure unknown.
+              - Response scalar values, tenant data, body fingerprints, lengths and examples are withheld. No new API operation, required field, enum, format, authentication or permission claim is introduced.
+              - This is scoped historical native-observation evidence, not whole-spec freshness, API execution-tested usage or complete schema coverage.
 
   /di/find/ComplianceTag:
     get:
       operationId: getComplianceTags
       summary: Get retention/compliance tags
       description: >-
-        Retrieve retention and compliance tags from the Data Infrastructure service.
-        These tags are used for records management and data lifecycle governance.
-      tags: [DataInfrastructure]
+        Retrieve retention and compliance tags from the Data Infrastructure service. These tags are used for records management and data lifecycle governance.
+      tags: [ DataInfrastructure ]
       parameters:
         - name: tenantId
           in: query
@@ -496,7 +1860,129 @@ paths:
             application/json:
               schema:
                 type: object
-                description: pending
+                description: Directory-find envelope supported by privately verified retained native portal responses. Properties remain optional and unknown fields are allowed; this is historical scoped evidence, not a new capture or requiredness test.
+                additionalProperties: true
+                properties:
+                  DataType:
+                    type: string
+                  Database:
+                    type: string
+                  ErrorData:
+                    $ref: common.yml#/components/schemas/PurviewDirectoryErrorData
+                  LastPage:
+                    type: boolean
+                  RecordCount:
+                    type: integer
+                  ResultCode:
+                    type: string
+                  ResultData:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: true
+                      properties:
+                        ArchiveEnabled:
+                          type: boolean
+                        ArchiveTriggerBasedOn:
+                          type: string
+                        Comment:
+                          type: string
+                        ComplianceTagForNextStage:
+                          type: string
+                        ComplianceTagType:
+                          type: string
+                        CreatedBy:
+                          type: string
+                        DirectoryObjectVersion:
+                          type: integer
+                        Disabled:
+                          type: boolean
+                        DistinguishedName:
+                          type: string
+                        ExchangeObjectId:
+                          type: string
+                        ExternalIdentity:
+                          type: string
+                        FilePlanMetadata:
+                          type: string
+                        Guid:
+                          type: string
+                        HasRetentionAction:
+                          type: boolean
+                        Id:
+                          type: string
+                        Identity:
+                          type: string
+                        ImmutableId:
+                          type: string
+                        IsHardDeleteInSPOandODB:
+                          type: boolean
+                        IsPDRTag:
+                          type: boolean
+                        IsRecordLabel:
+                          type: boolean
+                        IsRecordUnlockedAsDefault:
+                          type: boolean
+                        IsReviewTag:
+                          type: boolean
+                        IsValid:
+                          type: boolean
+                        LastModifiedBy:
+                          type: string
+                        Mode:
+                          type: string
+                        MultiStageReviewerMetadata:
+                          type: string
+                        Name:
+                          type: string
+                        Notes:
+                          type: string
+                        ObjectClass:
+                          type: array
+                          items:
+                            type: string
+                        ObjectVersion:
+                          type: string
+                        OrganizationId:
+                          type: string
+                        OrganizationalUnitRoot:
+                          type: string
+                        Policy:
+                          type: string
+                        Priority:
+                          type: integer
+                        PriorityCleanup:
+                          type: boolean
+                        ReadOnly:
+                          type: boolean
+                        Regulatory:
+                          type: boolean
+                        RetentionAction:
+                          type: string
+                        RetentionDuration:
+                          type: string
+                        RetentionType:
+                          type: string
+                        VersionCleanupState:
+                          type: string
+                        WebHookUrl:
+                          type: string
+                        WhenChanged:
+                          type: string
+                        WhenChangedUTC:
+                          type: string
+                        WhenCreated:
+                          type: string
+                        WhenCreatedUTC:
+                          type: string
+                        Workload:
+                          type: string
+                  Session:
+                    type: string
+                  TotalResultCount:
+                    type: integer
+                  WaterMark:
+                    type: string
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -505,15 +1991,39 @@ paths:
 
         '404':
           $ref: common.yml#/components/responses/NotFound
+      x-nodoc-operation-context:
+        surface: Microsoft Purview > Data Loss Prevention > Overview
+        workflows:
+          - Observe the existing DLP overview through the normal authenticated portal; reuse retained complete responses for offline schema review.
+        authProfile: purview-portal-session
+        requestShapes:
+          - name: retained-native-directory-get
+            bodyKind: none
+            notes: "Observed query parameter names: tenantId. Values are withheld. Presence does not establish requiredness; existing parameter declarations are unchanged."
+        availability:
+          level: user-context
+          notes:
+            - Historical authenticated portal observations only. No tenant switch, feature activation, entitlement, grant, minimum-role, least-privilege or standalone invocation was tested.
+        provenance:
+          - source: retained-authenticated-portal-evidence-reviewed-20261030
+            confidence: high
+            notes:
+              - Exact wire GET purview.microsoft.com/apiproxy/di/find/ComplianceTag composes from canonical /di/find/ComplianceTag and declared server base /apiproxy.
+              - Retained purview-01 action 8 at 2026-10-29T22:15:01.116Z; evidence request-ae7e303d285fe193b985; HTTP 200 complete response privately verified.
+              - Retained purview-remediation-02 action 8 at 2026-10-30T12:28:02.858Z; evidence request-12a0dd722a2333f4ae9f; HTTP 200 complete response privately verified.
+              - Previously retained complete bodies were reused before considering a new capture. Their original action/time attribution is preserved and they do not become fresh observations on the review date.
+              - Conventional root ErrorData string members were empty in the selected bodies. HTTP status and those bounded checks do not establish universal business success or feature availability.
+              - Populated object items support optional static field/container types. Null-only item fields are omitted; empty-array item types and object-map contents remain open.
+              - Response scalar values, tenant data, body fingerprints, lengths and examples are withheld. No new API operation, required field, enum, format, authentication or permission claim is introduced.
+              - This is scoped historical native-observation evidence, not whole-spec freshness, API execution-tested usage or complete schema coverage.
 
   /di/find/FeatureConfiguration:
     get:
       operationId: getFeatureConfiguration
       summary: Get feature configuration flags
       description: >-
-        Retrieve feature configuration flags from the Data Infrastructure service.
-        Used to determine which features are enabled or disabled for the tenant.
-      tags: [DataInfrastructure]
+        Retrieve feature configuration flags from the Data Infrastructure service. Used to determine which features are enabled or disabled for the tenant.
+      tags: [ DataInfrastructure ]
       parameters:
         - name: tenantId
           in: query
@@ -535,7 +2045,30 @@ paths:
             application/json:
               schema:
                 type: object
-                description: pending
+                description: Directory find response observed during the normal DLP overview. All properties remain optional; unknown fields are allowed and observed types do not establish requiredness or feature availability.
+                additionalProperties: true
+                properties:
+                  DataType:
+                    type: string
+                  Database:
+                    type: string
+                  ErrorData:
+                    $ref: common.yml#/components/schemas/PurviewDirectoryErrorData
+                  LastPage:
+                    type: boolean
+                  RecordCount:
+                    type: integer
+                  ResultCode:
+                    type: string
+                  Session:
+                    type: string
+                  TotalResultCount:
+                    type: integer
+                  WaterMark:
+                    type: string
+                  ResultData:
+                    nullable: true
+                    description: Only null was observed in this scoped response. No non-null configuration or item structure is established.
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -544,15 +2077,38 @@ paths:
 
         '404':
           $ref: common.yml#/components/responses/NotFound
+      x-nodoc-operation-context:
+        surface: Microsoft Purview > Data Loss Prevention > Overview
+        workflows:
+          - Load the existing DLP overview; observe the directory metadata emitted by the normal portal and an explicit passive reload.
+        authProfile: purview-portal-session
+        requestShapes:
+          - name: observed-native-directory-get
+            bodyKind: none
+            notes: "Observed query parameter names: filter, tenantId. Values are withheld. Presence does not test requiredness; existing parameter declarations remain unchanged and no standalone request/auth workflow was executed."
+        availability:
+          level: user-context
+          notes:
+            - Observed under the current authenticated portal session. No feature activation, tenant switch, entitlement, grant, minimum-role or least-privilege conclusion follows.
+        provenance:
+          - source: authenticated-portal-capture-20261030
+            confidence: high
+            notes:
+              - Exact wire GET purview.microsoft.com/apiproxy/di/find/FeatureConfiguration maps to canonical /di/find/FeatureConfiguration relative to declared server base /apiproxy.
+              - Action 2 at 2026-10-30T18:27:54.671Z; evidence request-bbfeb0386c0ce9a60ced; HTTP 200 complete response privately verified.
+              - One normalized API observation is distinct from two raw transport observations at actions 0 and 2. They identify one operation; duplicate response bytes do not create extra schema variants.
+              - Only the directory envelope is typed. ResultData was null-only, so configuration/item/feature-map types remain unknown.
+              - The result and empty conventional root error strings were independently checked; captured values, response fingerprints, body lengths, tenant data and examples are withheld.
+              - All five recipe actions and mandatory navigation completed. The bootstrap-only overall-protection response is not part of these two curated operations.
+              - This is scoped portal-observed evidence, not whole-spec freshness, universal business-success, standalone invocation, effective permissions or execution-tested usage.
 
   /di/find/MipAnalyticsTenantSettings:
     get:
       operationId: getMipAnalyticsTenantSettings
       summary: Get MIP analytics tenant settings
       description: >-
-        Retrieve Microsoft Information Protection analytics settings for the tenant.
-        Controls how MIP analytics data is collected and reported.
-      tags: [DataInfrastructure]
+        Retrieve Microsoft Information Protection analytics settings for the tenant. Controls how MIP analytics data is collected and reported.
+      tags: [ DataInfrastructure ]
       parameters:
         - name: tenantid
           in: query
@@ -568,7 +2124,39 @@ paths:
             application/json:
               schema:
                 type: object
-                description: pending
+                additionalProperties: true
+                properties:
+                  DataType:
+                    type: string
+                  Database:
+                    type: string
+                  ErrorData:
+                    type: object
+                    additionalProperties: true
+                  LastPage:
+                    type: boolean
+                  RecordCount:
+                    type: integer
+                  ResultCode:
+                    type: string
+                  ResultData:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: true
+                      properties:
+                        ObjectState:
+                          type: string
+                        TenantSettings:
+                          type: object
+                          additionalProperties: true
+                  Session:
+                    type: string
+                  TotalResultCount:
+                    type: integer
+                  WaterMark:
+                    type: string
+                description: Optional static response field types from retained native portal traffic; dynamic map contents, null-only types, requiredness and business-state interpretation remain unverified.
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -577,15 +2165,55 @@ paths:
 
         '404':
           $ref: common.yml#/components/responses/NotFound
+      x-nodoc-operation-context:
+        surface: Microsoft Purview portal (retained native navigation)
+        workflows:
+          - Observe traffic emitted by the normal authenticated portal during the originally recorded native navigation; reuse retained evidence for offline documentation review.
+        requestShapes:
+          - name: retained-native-get
+            bodyKind: none
+            notes: "Observed query parameter names: tenantid. Values are withheld; presence does not test requiredness and existing parameter declarations are unchanged."
+        availability:
+          level: user-context
+          notes:
+            - Historical user-session observation only; no feature activation, tenant switch, role/grant/minimum-permission inference or standalone usage validation.
+        provenance:
+          - source: retained-native-portal-evidence-reviewed-20261030
+            confidence: high
+            notes:
+              - Exact declared GET purview.microsoft.com/apiproxy/di/find/MipAnalyticsTenantSettings maps to canonical /di/find/MipAnalyticsTenantSettings; current declared server/base/path and original request binding were checked privately.
+              - Retained purview-01 action 8 at 2026-10-29T22:14:59.097Z; evidence request-757827ff5167fab2b8a0; HTTP 200 complete body privately verified.
+              - Retained purview-remediation-02 action 8 at 2026-10-30T12:28:00.915Z; evidence request-f71e5436c0c296b5b078; HTTP 200 complete body privately verified.
+              - Original capture dates and action attribution are retained. Reusing these bodies for offline review does not create a fresh native observation or clear any historical run-level accounting gaps.
+              - HTTP 200, complete body bytes and limited type checks do not establish application/business success, feature availability, entitlement, provisioning, effective permissions or minimum roles.
+              - Captured scalar values, role/feature-map keys, credentials, tenant data, response fingerprints, byte lengths and examples are withheld. No new route or requiredness, enum, format, authentication or standalone execution claim follows.
 
   /di/find/InsiderRiskPolicy:
     get:
       operationId: getInsiderRiskPolicies
+      x-nodoc-live-capture:
+        source: authenticated Microsoft Purview portal passive representative states
+        browsedPages:
+          - Microsoft Purview portal
+      x-nodoc-operation-context:
+        surface: Microsoft Purview portal
+        workflows:
+          - Observe native requests during approved passive representative portal states.
+        availability:
+          level: user-context
+          notes:
+            - One authenticated portal session; standalone execution, parameter requiredness, effective grants and minimum roles are not established.
+        provenance:
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - GET purview.microsoft.com/apiproxy/di/find/InsiderRiskPolicy; HTTP 200; action 8; observed 2026-10-29T22:14:59.587Z; complete response privately hash-verified.
+              - Current response types were observed in the approved portal session; populated error text was not observed in the selected success envelopes.
+              - The broader run retains missing navigation/action checkpoints. This evidence does not establish all-operation, all-state, product activation or least-privilege coverage.
       summary: Get insider risk management policies
       description: >-
-        Retrieve insider risk management policies from the Data Infrastructure service.
-        These policies define the indicators and thresholds for insider risk detection.
-      tags: [DataInfrastructure]
+        Retrieve insider risk management policies from the Data Infrastructure service. These policies define the indicators and thresholds for insider risk detection.
+      tags: [ DataInfrastructure ]
       parameters:
         - name: tenantId
           in: query
@@ -601,7 +2229,30 @@ paths:
             application/json:
               schema:
                 type: object
-                description: pending
+                description: Observed response envelope; fields remain optional and result item structures are not inferred.
+                properties:
+                  DataType:
+                    type: string
+                  Database:
+                    type: string
+                  WaterMark:
+                    type: string
+                  Session:
+                    type: string
+                  LastPage:
+                    type: boolean
+                  TotalResultCount:
+                    type: integer
+                  RecordCount:
+                    type: integer
+                  ErrorData:
+                    $ref: "#/components/schemas/InsiderRiskEntityListError"
+                  ResultCode:
+                    type: string
+                  ResultData:
+                    type: array
+                    items: {}
+                additionalProperties: true
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -616,9 +2267,8 @@ paths:
       operationId: getRiskSpotlightingInsights
       summary: Get risk spotlighting insights
       description: >-
-        Retrieve risk spotlighting insights from the Data Infrastructure service.
-        Provides time-bounded risk insights for users and activities within the tenant.
-      tags: [DataInfrastructure]
+        Retrieve risk spotlighting insights from the Data Infrastructure service. Provides time-bounded risk insights for users and activities within the tenant.
+      tags: [ DataInfrastructure ]
       parameters:
         - name: tenantid
           in: query
@@ -654,7 +2304,28 @@ paths:
             application/json:
               schema:
                 type: object
-                description: pending
+                description: Directory-find envelope supported by privately verified retained native portal responses. Properties remain optional and unknown fields are allowed; this is historical scoped evidence, not a new capture or requiredness test.
+                additionalProperties: true
+                properties:
+                  DataType:
+                    type: string
+                  Database:
+                    type: string
+                  ErrorData:
+                    $ref: common.yml#/components/schemas/PurviewDirectoryErrorData
+                  LastPage:
+                    type: boolean
+                  RecordCount:
+                    type: integer
+                  ResultCode:
+                    type: integer
+                  Session:
+                    type: string
+                  TotalResultCount:
+                    type: integer
+                  ResultData:
+                    nullable: true
+                    description: Only null was observed in retained evidence; the non-null type remains unknown.
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -663,15 +2334,39 @@ paths:
 
         '404':
           $ref: common.yml#/components/responses/NotFound
+      x-nodoc-operation-context:
+        surface: Microsoft Purview > Data Loss Prevention > Overview
+        workflows:
+          - Observe the existing DLP overview through the normal authenticated portal; reuse retained complete responses for offline schema review.
+        authProfile: purview-portal-session
+        requestShapes:
+          - name: retained-native-directory-get
+            bodyKind: none
+            notes: "Observed query parameter names: Filter, endTime, startTime, tenantid. Values are withheld. Presence does not establish requiredness; existing parameter declarations are unchanged."
+        availability:
+          level: user-context
+          notes:
+            - Historical authenticated portal observations only. No tenant switch, feature activation, entitlement, grant, minimum-role, least-privilege or standalone invocation was tested.
+        provenance:
+          - source: retained-authenticated-portal-evidence-reviewed-20261030
+            confidence: high
+            notes:
+              - Exact wire GET purview.microsoft.com/apiproxy/di/find/RiskSpotlightingInsight composes from canonical /di/find/RiskSpotlightingInsight and declared server base /apiproxy.
+              - Retained purview-01 action 8 at 2026-10-29T22:14:59.935Z; evidence request-b926e12dfa1125cf8777; HTTP 200 complete response privately verified.
+              - Retained purview-remediation-02 action 8 at 2026-10-30T12:28:01.575Z; evidence request-bba08221cba4fe95e96f; HTTP 200 complete response privately verified.
+              - Previously retained complete bodies were reused before considering a new capture. Their original action/time attribution is preserved and they do not become fresh observations on the review date.
+              - Conventional root ErrorData string members were empty in the selected bodies. HTTP status and those bounded checks do not establish universal business success or feature availability.
+              - Only the observed envelope is typed; null-only ResultData leaves its non-null/item structure unknown.
+              - Response scalar values, tenant data, body fingerprints, lengths and examples are withheld. No new API operation, required field, enum, format, authentication or permission claim is introduced.
+              - This is scoped historical native-observation evidence, not whole-spec freshness, API execution-tested usage or complete schema coverage.
 
   /di/find/RetentionEvent:
     get:
       operationId: getRetentionEvents
       summary: Get retention events
       description: >-
-        Retrieve retention events from the Data Infrastructure service.
-        Retention events trigger the start of retention periods for event-based retention labels.
-      tags: [DataInfrastructure]
+        Retrieve retention events from the Data Infrastructure service. Retention events trigger the start of retention periods for event-based retention labels.
+      tags: [ DataInfrastructure ]
       parameters:
         - name: tenantId
           in: query
@@ -702,9 +2397,8 @@ paths:
       operationId: getCustomTags
       summary: Get custom alert tags
       description: >-
-        Retrieve custom alert tags from the Data Infrastructure service.
-        Supports filtering to include or exclude deleted tags.
-      tags: [DataInfrastructure]
+        Retrieve custom alert tags from the Data Infrastructure service. Supports filtering to include or exclude deleted tags.
+      tags: [ DataInfrastructure ]
       parameters:
         - name: tenantid
           in: query
@@ -741,9 +2435,8 @@ paths:
       operationId: getProtectionAlertDefinitions
       summary: Get protection alert definitions
       description: >-
-        Retrieve protection alert definitions from the Data Infrastructure service.
-        These define the conditions under which protection alerts are generated.
-      tags: [DataInfrastructure]
+        Retrieve protection alert definitions from the Data Infrastructure service. These define the conditions under which protection alerts are generated.
+      tags: [ DataInfrastructure ]
       parameters:
         - name: tenantId
           in: query
@@ -774,9 +2467,8 @@ paths:
       operationId: searchLabelAnalyticsActivityData
       summary: Search label analytics activity data
       description: >-
-        Search label analytics activity data from the Data Infrastructure service.
-        Returns activity data for sensitivity label usage within a time range and store type.
-      tags: [DataInfrastructure]
+        Search label analytics activity data from the Data Infrastructure service. Returns activity data for sensitivity label usage within a time range and store type.
+      tags: [ DataInfrastructure ]
       parameters:
         - name: tenantid
           in: query
@@ -818,7 +2510,33 @@ paths:
             application/json:
               schema:
                 type: object
-                description: pending
+                additionalProperties: true
+                properties:
+                  DataType:
+                    type: string
+                  Database:
+                    type: string
+                  ErrorData:
+                    type: object
+                    additionalProperties: true
+                  LastPage:
+                    type: boolean
+                  RecordCount:
+                    type: integer
+                  ResultCode:
+                    type: integer
+                  ResultData:
+                    type: array
+                    items:
+                      type: string
+                  Session:
+                    type: string
+                  TotalResultCount:
+                    type: integer
+                  WaterMark:
+                    type: string
+                    nullable: true
+                description: Optional static response field types from retained native portal traffic; dynamic map contents, null-only types, requiredness and business-state interpretation remain unverified.
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -827,15 +2545,37 @@ paths:
 
         '404':
           $ref: common.yml#/components/responses/NotFound
+      x-nodoc-operation-context:
+        surface: Microsoft Purview portal (retained native navigation)
+        workflows:
+          - Observe traffic emitted by the normal authenticated portal during the originally recorded native navigation; reuse retained evidence for offline documentation review.
+        requestShapes:
+          - name: passively-observed-post-no-replay
+            bodyKind: unknown
+            notes: "Observed query parameter names: StoreType, endTime, startTime, tenantid. Values are withheld; presence does not test requiredness and existing parameter declarations are unchanged."
+        availability:
+          level: user-context
+          notes:
+            - Historical user-session observation only; no feature activation, tenant switch, role/grant/minimum-permission inference or standalone usage validation.
+        provenance:
+          - source: retained-native-portal-evidence-reviewed-20261030
+            confidence: high
+            notes:
+              - Exact declared POST purview.microsoft.com/apiproxy/di/search/LabelAnalyticsActivityData maps to canonical /di/search/LabelAnalyticsActivityData; current declared server/base/path and original request binding were checked privately.
+              - Retained purview-01 action 8 at 2026-10-29T22:14:59.160Z; evidence request-fcf6f76a111d5d80b9b3; HTTP 200 complete body privately verified.
+              - Retained purview-remediation-02 action 8 at 2026-10-30T12:28:01.120Z; evidence request-c84a430605c341f7a6d1; HTTP 200 complete body privately verified.
+              - Original capture dates and action attribution are retained. Reusing these bodies for offline review does not create a fresh native observation or clear any historical run-level accounting gaps.
+              - HTTP 200, complete body bytes and limited type checks do not establish application/business success, feature availability, entitlement, provisioning, effective permissions or minimum roles.
+              - This POST was passively observed during the original portal capture, not authored, invoked, probed or replayed by this review. Request shape remains unknown because no complete verified request sidecar is available; replay safety, idempotence, effects and rollback are unproven.
+              - Captured scalar values, role/feature-map keys, credentials, tenant data, response fingerprints, byte lengths and examples are withheld. No new route or requiredness, enum, format, authentication or standalone execution claim follows.
 
   /di/find/AppRetentionCompliancePolicy:
     get:
       operationId: getAppRetentionCompliancePolicies
       summary: Get app retention compliance policies
       description: >-
-        Retrieve app retention compliance policies surfaced by Purview's
-        Purview for AI policies page.
-      tags: [PurviewForAI]
+        Retrieve app retention compliance policies surfaced by Purview's Purview for AI policies page.
+      tags: [ PurviewForAI ]
       parameters:
         - name: tenantId
           in: query
@@ -876,11 +2616,41 @@ paths:
   /di/find/InsiderRiskEntityList:
     get:
       operationId: getInsiderRiskEntityList
+      x-nodoc-live-capture:
+        source: Observe-only gap remediation 2026-10-30; primary HTTP 200 observation(s)
+        browsedPages:
+          - Microsoft Purview > Insider Risk Management > Overview
+      x-nodoc-operation-context:
+        surface: Microsoft Purview portal
+        workflows:
+          - Observe native requests during approved passive representative portal states.
+        availability:
+          level: user-context
+          notes:
+            - One authenticated portal session; standalone execution, parameter requiredness, effective grants and minimum roles are not established.
+        provenance:
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - GET purview.microsoft.com/apiproxy/di/find/InsiderRiskEntityList; HTTP 200; action 2; observed 2026-10-29T22:13:13.418Z; complete response privately hash-verified.
+              - Current response types were observed in the approved portal session; populated error text was not observed in the selected success envelopes.
+              - The broader run retains missing navigation/action checkpoints. This evidence does not establish all-operation, all-state, product activation or least-privilege coverage.
+          - source: authenticated-portal-capture-20261030
+            confidence: high
+            notes:
+              - Exact wire GET purview.microsoft.com/apiproxy/di/find/InsiderRiskEntityList matched the existing canonical route /di/find/InsiderRiskEntityList; concrete query values and response values are withheld.
+              - Action 2 at 2026-10-30T12:26:24.042Z; evidence request-6d5540281b08b1641b47; HTTP 200 complete response privately verified.
+              - A fresh matched-tenant neutral Home entry retained the original insider-risk, data-lifecycle, DLP and compliance navigation actions. All required action accounting now passes; the earlier incomplete navigation observations remain historical.
+              - The current response has the existing success result and empty ErrorMessage, ErrorType and ExceptionName strings in ErrorData; no populated root logical error envelope was observed. Response values and result metrics are not copied.
+              - Existing response envelope types and the populated array object-item container were corroborated. The permissive item schema does not establish typed metric fields; no schema delta, requiredness, enum, format or feature-state value is asserted by this context.
+              - One normalized primary API observation is distinct from twelve raw target transport observations. They do not represent twelve operations or establish whole-spec freshness.
+              - The fresh selected native tenant and target were checked before allocation; the same target was bound in assignment, packet command arrays and actual driver preflight. No tenant setting was switched and no API request was authored or replayed.
+              - Only this primary operation is refreshed here. The prior broader scoped Purview observations, including separate authentication errors, are not revalidated or repaired by this response.
+              - All required actions were accounted in this new reviewed remedy. This is scoped operation evidence; broader spec freshness, product health, standalone execution, effective permissions, consent, minimum roles and least privilege remain unverified.
       summary: Get insider risk entity list
       description: >-
-        Retrieve Insider Risk entity definitions used by Purview's Insider Risk
-        application settings pages.
-      tags: [InsiderRisk]
+        Retrieve Insider Risk entity definitions used by Purview's Insider Risk application settings pages.
+      tags: [ InsiderRisk ]
       parameters:
         - name: tenantId
           in: query
@@ -901,8 +2671,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                description: pending
+                $ref: '#/components/schemas/InsiderRiskEntityListResponse'
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -917,9 +2686,8 @@ paths:
       operationId: getInsiderRiskTags
       summary: Get insider risk tags
       description: >-
-        Retrieve insider risk tag definitions used by the Insider Risk
-        Management overview experience.
-      tags: [InsiderRisk]
+        Retrieve insider risk tag definitions used by the Insider Risk Management overview experience.
+      tags: [ InsiderRisk ]
       parameters:
         - name: TenantId
           in: query
@@ -951,3 +2719,145 @@ paths:
           $ref: common.yml#/components/responses/Forbidden
         '404':
           $ref: common.yml#/components/responses/NotFound
+
+components:
+  schemas:
+    InsiderRiskEntityListError:
+      type: object
+      nullable: true
+      description: Error envelope shape observed in the 2026-08-31 entity-list response.
+      properties:
+        ErrorMessage:
+          type: string
+          nullable: true
+        ErrorType:
+          type: string
+          nullable: true
+        ExceptionName:
+          type: string
+          nullable: true
+      additionalProperties: true
+    InsiderRiskEntityListItem:
+      type: object
+      nullable: true
+      description: |
+        Entity-list item shape observed in a successful read-only response captured on 2026-08-31.
+        Fields remain optional because one response does not establish requiredness.
+      properties:
+        CreatedBy:
+          type: string
+          nullable: true
+        Description:
+          type: string
+          nullable: true
+        DisplayName:
+          type: string
+          nullable: true
+        DistinguishedName:
+          type: string
+          nullable: true
+        ExchangeObjectId:
+          type: string
+          nullable: true
+        Guid:
+          type: string
+          nullable: true
+        Id:
+          type: string
+          nullable: true
+        Identity:
+          type: string
+          nullable: true
+        LastModifiedBy:
+          type: string
+          nullable: true
+        ListType:
+          type: string
+          nullable: true
+        Name:
+          type: string
+          nullable: true
+        OrganizationId:
+          type: string
+          nullable: true
+        Type:
+          type: string
+          nullable: true
+        DirectoryObjectVersion:
+          type: number
+          nullable: true
+        EntitiesCount:
+          type: number
+          nullable: true
+        Enabled:
+          type: boolean
+          nullable: true
+        IsSystemDefined:
+          type: boolean
+          nullable: true
+        IsValid:
+          type: boolean
+          nullable: true
+        Entities:
+          type: array
+          nullable: true
+          items: {}
+        ObjectClass:
+          type: array
+          nullable: true
+          items:
+            type: string
+        CreationTimeUtc:
+          nullable: true
+        ModificationTimeUtc:
+          nullable: true
+        ObjectCategory:
+          nullable: true
+        OrganizationalUnitRoot:
+          nullable: true
+        WhenChanged:
+          nullable: true
+        WhenChangedUTC:
+          nullable: true
+        WhenCreated:
+          nullable: true
+        WhenCreatedUTC:
+          nullable: true
+      additionalProperties: true
+    InsiderRiskEntityListResponse:
+      type: object
+      nullable: true
+      description: Insider Risk entity-list envelope observed in a successful read-only response on 2026-08-31.
+      properties:
+        Database:
+          type: string
+          nullable: true
+        DataType:
+          type: string
+          nullable: true
+        ResultCode:
+          type: string
+          nullable: true
+        Session:
+          type: string
+          nullable: true
+        WaterMark:
+          type: string
+          nullable: true
+        LastPage:
+          type: boolean
+          nullable: true
+        RecordCount:
+          type: number
+          nullable: true
+        TotalResultCount:
+          type: number
+          nullable: true
+        ErrorData:
+          $ref: '#/components/schemas/InsiderRiskEntityListError'
+        ResultData:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/InsiderRiskEntityListItem'
+      additionalProperties: true

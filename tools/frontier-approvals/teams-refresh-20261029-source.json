@@ -1,0 +1,184 @@
+{
+  "schemaVersion": 1,
+  "kind": "known-operation-refresh-approval-source",
+  "status": "pending-fresh-independent-review",
+  "specId": "teams",
+  "refreshDate": "2026-10-29",
+  "refreshDigest": "430826c26e332bf503059920df5f7f2e3203acd5d49d815eaacffa097a7bda4d",
+  "recipeDestination": "tools/capture-recipes/teams-known-refresh-20261029.json",
+  "proposedRecipeSha256": "081607d27bc19e87a53eb9c8b03a5b3a8d2520e02302ef24e44b0a49433b6950",
+  "sourceRecipe": {
+    "path": "tools/capture-recipes/teams-manage-users-novelty.json",
+    "sha256": "370d0b4a15831586ddb1777078f859e941ef79abe6091d369b9b3a694e649ceb"
+  },
+  "specification": {
+    "path": "specifications/nodoc-teams/specification/openapi.yml",
+    "sha256": "4febdcdd705c4f306b08aa33aea0a1e6c133bf6719c875bade5c731a958e63c2",
+    "operationCount": 100
+  },
+  "policyBindings": [
+    {
+      "path": "PORTAL_DISCOVERY_AGENT_PROMPT.md",
+      "sha256": "57b6acf49eac1afc6e51b014039a6cba694adeeb058b13fa549f0610e20ae8b5"
+    },
+    {
+      "path": "AGENT_DISCOVERY_RUNBOOK.md",
+      "sha256": "4ef12fc4e271e17094dbb5da447b6f535bf2a63b457089ce5bd7f6876126b079"
+    },
+    {
+      "path": "AGENT_DISCOVERY_PLAYBOOK.md",
+      "sha256": "c12b9cecf0a3a85e8c760a8e7b310c0d0528f41cb65c8fe2c95eb420ca3fb119"
+    },
+    {
+      "path": "tools/portal-discovery-model-policy.mjs",
+      "sha256": "5d4b65b60d21a5b7431828b41694c49e85c58fb1497a2c3fb1cf53483066c346"
+    },
+    {
+      "path": "tools/portal-discovery-operation-safety.mjs",
+      "sha256": "425a1466f41aed855a0871548ee464670c350ce9b2954eba0e220c9a38d86ca3"
+    },
+    {
+      "path": "tools/discovery-safety.mjs",
+      "sha256": "e406c0fcd3401092ab2ef8318d41c17bb72956eec84638f2a00b9535dda8c8a1"
+    }
+  ],
+  "target": {
+    "status": "active",
+    "method": "GET",
+    "host": "noneu-admin.teams.microsoft.com",
+    "routes": [
+      "/api/v1/userpreference"
+    ],
+    "state": "Teams bounded passive representative states from tools/capture-recipes/teams-manage-users-novelty.json",
+    "actionIndexes": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "approvalExpiresAt": "2026-10-31T08:00:00.000Z",
+    "variableBindingsDigest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "documentationObjectives": [
+      "freshness",
+      "health",
+      "schema-evidence",
+      "usage-observation",
+      "error-example"
+    ],
+    "evidenceIds": [
+      "retained-teams-primary-witness",
+      "checked-in-ui-state-teams-manage-users-novelty"
+    ]
+  },
+  "retainedPlanningEvidence": [
+    {
+      "artifactPath": "private-artifacts/teams-manage-users-20260831T051804483Z/api-records.json",
+      "sha256": "62c7c654c15ddee15467c540aa7e763bd9f349d4acf8f28551f2c8f3e1a0f938",
+      "recordIndex": 29,
+      "method": "GET",
+      "host": "noneu-admin.teams.microsoft.com",
+      "route": "/api/v1/userpreference",
+      "status": 200,
+      "mimeType": "application/json",
+      "seenOnPageCount": 1,
+      "observedAt": null,
+      "historicOnly": true
+    },
+    {
+      "artifactPath": "private-artifacts/teams-manage-users-20260831T051804483Z/api-records.json",
+      "sha256": "62c7c654c15ddee15467c540aa7e763bd9f349d4acf8f28551f2c8f3e1a0f938",
+      "recordIndex": 85,
+      "method": "PUT",
+      "host": "noneu-admin.teams.microsoft.com",
+      "route": "/api/v1/userpreference",
+      "status": 204,
+      "mimeType": "text/plain",
+      "seenOnPageCount": 1,
+      "observedAt": null,
+      "historicOnly": true
+    },
+    {
+      "artifactPath": "private-artifacts/teams-manage-users-20260831T052442272Z/api-records.json",
+      "sha256": "b583be67ccd236f83e339fbbc5f26c531fb6ead631cf04a175bb64487f4aea8c",
+      "recordIndex": 33,
+      "method": "GET",
+      "host": "noneu-admin.teams.microsoft.com",
+      "route": "/api/v1/userpreference",
+      "status": 200,
+      "mimeType": "application/json",
+      "seenOnPageCount": 2,
+      "observedAt": null,
+      "historicOnly": true
+    },
+    {
+      "artifactPath": "private-artifacts/teams-manage-users-20260831T052442272Z/api-records.json",
+      "sha256": "b583be67ccd236f83e339fbbc5f26c531fb6ead631cf04a175bb64487f4aea8c",
+      "recordIndex": 89,
+      "method": "PUT",
+      "host": "noneu-admin.teams.microsoft.com",
+      "route": "/api/v1/userpreference",
+      "status": 204,
+      "mimeType": "text/plain",
+      "seenOnPageCount": 1,
+      "observedAt": null,
+      "historicOnly": true
+    }
+  ],
+  "uiProvenance": {
+    "sourceRecipe": "tools/capture-recipes/teams-manage-users-novelty.json",
+    "entryUrl": "https://admin.teams.microsoft.com",
+    "actionCount": 8,
+    "usesOnlyKnownStates": true,
+    "noveltyNotRequired": true
+  },
+  "coverage": {
+    "primaryWitness": "GET /api/v1/userpreference",
+    "representativeActions": [
+      "navigate=https://admin.teams.microsoft.com",
+      "wait-ms=6000",
+      "reload=teams-landing",
+      "wait-ms=8000",
+      "capture=teams-landing",
+      "navigate=https://admin.teams.microsoft.com/users",
+      "wait-ms=6000",
+      "capture=teams-manage-users"
+    ],
+    "uncoveredFamilies": [
+      "app catalog/device/voice/policy/report detail",
+      "ID-bearing users"
+    ],
+    "requiredDisposition": "Each uncovered family must be observed, unchanged with evidence, adjacent, unreachable in approved state, blocked with precise prerequisite, or separately approved state required. One witness never closes spec."
+  },
+  "safety": {
+    "apiProbeAuthorized": false,
+    "mutationAuthorized": false,
+    "deviceCodeAuthorized": false,
+    "auth": "cached/WAM or normal browser only",
+    "passiveMethods": "all naturally emitted methods retained; no authored requests",
+    "browserLifecycle": "one global endpoint, serialized owner/preflight/worker/terminal/review/disposition/stop"
+  },
+  "caveats": [
+    "no user IDs guessed; no-target-signal if passive states omit preference operation"
+  ],
+  "preflightChecks": {
+    "metadata": "accepted",
+    "operationOwnership": "accepted",
+    "safety": {
+      "safe": true,
+      "unsafeActions": []
+    }
+  },
+  "requiredLiveProof": [
+    "terminal discovery-run.json + summary.json + candidate-handoff.json",
+    "all required action indexes accounted with canonical results",
+    "action-attributed exact wire method/host/route",
+    "complete sanitized sidecars with every referenced SHA/length/path verified",
+    "observedAt from source request",
+    "actual statuses and health/error classification",
+    "per-family coverage disposition; no fabricated full-spec freshness"
+  ]
+}

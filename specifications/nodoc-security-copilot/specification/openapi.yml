@@ -301,6 +301,23 @@ components:
     NotFound:
       description: The requested resource was not found in the current workspace or tenant context.
   schemas:
+    TenantEligibilityResponse:
+      type: object
+      nullable: true
+      description: |
+        Tenant eligibility shape observed in a successful passive trial-landing response captured
+        on 2026-10-03. Example values are type-only redaction tokens, not tenant state.
+      properties:
+        accountType:
+          type: string
+          nullable: true
+        tenantGeo:
+          type: string
+          nullable: true
+      additionalProperties: true
+      example:
+        accountType: REDACTED_STRING
+        tenantGeo: REDACTED_STRING
     GenericObject:
       type: object
       additionalProperties: true
@@ -514,6 +531,25 @@ paths:
         this returned a contextual `404 NotFound` with `capacityResourceNotFound` because no capacity
         was attached to the workspace, which still confirms the route and its error contract.
       operationId: SecurityCopilotPortal.Auth.GetExpiryDate
+      x-nodoc-live-capture:
+        source: authenticated Security Copilot passive provisioning/readiness entry surface passive representative states
+        browsedPages:
+          - Security Copilot passive provisioning/readiness entry surface
+      x-nodoc-operation-context:
+        surface: Security Copilot passive provisioning/readiness entry surface
+        workflows:
+          - Observe native requests during approved passive representative portal states.
+        availability:
+          level: user-context
+          notes:
+            - One authenticated portal session; standalone execution, parameter requiredness, effective grants and minimum roles are not established.
+        provenance:
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - GET api.securitycopilot.microsoft.com/auth/expiryDate; HTTP 404; action 3; observed 2026-10-29T23:32:01.657Z; response preview truncated; no complete-body schema evidence.
+              - This is HTTP404 transport-error-only evidence from a native passive request. The response preview is truncated; no complete payload, error schema, logical error detail or healthy-service claim is supported.
+              - The primary provisioning/checkTenant witness is a separate operation and host; its successful response does not clear this error observation.
       x-nodoc-evidence:
         record: ../evidence/security-copilot-refresh.json
         responseShapeDigest: 16aead62746687dc4d4e9cc14732e4b678414eed1e09be6299d5589752ebb023
@@ -710,6 +746,26 @@ paths:
       summary: Get Security Platform account and pod inventory
       description: Retrieves the Security Platform account record and regional pod inventory backing the current tenant.
       operationId: SecurityCopilotPortal.Provisioning.GetAccount
+      x-nodoc-live-capture:
+        source: authenticated Security Copilot passive provisioning/readiness entry surface passive representative states
+        browsedPages:
+          - Security Copilot passive provisioning/readiness entry surface
+      x-nodoc-operation-context:
+        surface: Security Copilot passive provisioning/readiness entry surface
+        workflows:
+          - Observe native requests during approved passive representative portal states.
+        availability:
+          level: user-context
+          notes:
+            - One authenticated portal session; standalone execution, parameter requiredness, effective grants and minimum roles are not established.
+        provenance:
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - GET api.securityplatform.microsoft.com/provisioning/account; HTTP 200; action 2; observed 2026-10-29T23:31:53.181Z; complete response privately hash-verified.
+              - Existing declared JSON types are compatible with this selected complete response; tenant, account, geography and configuration values are not reproduced.
+              - A successful provisioning/readiness response does not establish entitlement, feature activation, trial eligibility, available capacity, effective grants or minimum roles.
+              - No trial, purchase or provisioning activation was performed; standalone execution and parameter requiredness remain untested.
       parameters:
         - $ref: '#/components/parameters/ApiVersion20240301Preview'
       responses:
@@ -798,6 +854,26 @@ paths:
       summary: Check Security Platform tenant eligibility
       description: Retrieves the Security Platform tenant account type and tenant geo used during startup and provisioning decisions.
       operationId: SecurityCopilotPortal.Provisioning.CheckTenant
+      x-nodoc-live-capture:
+        source: authenticated Security Copilot passive provisioning/readiness entry surface passive representative states
+        browsedPages:
+          - Security Copilot passive provisioning/readiness entry surface
+      x-nodoc-operation-context:
+        surface: Security Copilot passive provisioning/readiness entry surface
+        workflows:
+          - Observe native requests during approved passive representative portal states.
+        availability:
+          level: user-context
+          notes:
+            - One authenticated portal session; standalone execution, parameter requiredness, effective grants and minimum roles are not established.
+        provenance:
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - GET api.securityplatform.microsoft.com/provisioning/checkTenant; HTTP 200; action 2; observed 2026-10-29T23:31:51.646Z; complete response privately hash-verified.
+              - Existing declared JSON types are compatible with this selected complete response; tenant, account, geography and configuration values are not reproduced.
+              - A successful provisioning/readiness response does not establish entitlement, feature activation, trial eligibility, available capacity, effective grants or minimum roles.
+              - No trial, purchase or provisioning activation was performed; standalone execution and parameter requiredness remain untested.
       parameters:
         - $ref: '#/components/parameters/ApiVersion20240301Preview'
       responses:
@@ -806,7 +882,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GenericObject'
+                $ref: '#/components/schemas/TenantEligibilityResponse'
 
   /pods/{podId}/workspaces/{workspaceName}:
     servers:
@@ -1291,6 +1367,21 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MarketplaceClientConfigResponse'
+      x-nodoc-operation-context:
+        surface: Historical portal caller / declared backend transport relationship
+        provenance:
+          - source: retained-adjacent-portal-transport-reviewed-20261030
+            confidence: high
+            notes:
+              - Historical transport identity is exact GET ecs.office.com/config/v1/LokiService/1.0.0.0, canonical /config/v1/LokiService/1.0.0.0 under the currently declared backend specification security-copilot.
+              - "Original caller capture assignments: purview. Caller page attribution and assignment labels do not by themselves establish causal execution of the backend owner's UI."
+              - Retained purview-01 action 5 at 2026-10-29T22:13:59.532Z; evidence request-948def2be2c5642dfba3; HTTP 200.
+              - "Observed query parameter names: ApEnvironment, ClientWorkload, IsGuestUser, MsSearch_Component, MsSearch_Version, TenantID, agents, ecsserviceinformation, id, ring. Values and derived page-label strings are withheld; parameter presence is not requiredness testing."
+              - This review used raw transport metadata only. No qualifying complete action-attributed response body was available in the selected retained evidence; bootstrap-only complete responses are excluded as action witnesses. Response/body/schema gaps remain open.
+              - Existing response schemas are unchanged. Any newly listed status is description-only, with no inferred error body, status cause, route removal or availability conclusion.
+              - Original dates/actions remain historical; this is not fresh capture, current tenant validation, business or application health, standalone invocation, role/grant/minimum-permission proof, or an owning-portal workflow test.
+              - GET is the recorded method, not a safety or idempotence determination. No request was authored, invoked, probed or replayed by this offline review; effects and rollback are untested.
+              - Confidence applies only to the verified historical method/host/path/status metadata. Captured values, identifiers, credentials, response fingerprints, body lengths and examples are withheld.
 
   /config/v1/YammerClients/0.0.1:
     servers:
@@ -1314,7 +1405,33 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MarketplaceClientConfigResponse'
+      x-nodoc-operation-context:
+        surface: Historical portal caller / declared backend transport relationship
+        provenance:
+          - source: retained-adjacent-portal-transport-reviewed-20261030
+            confidence: high
+            notes:
+              - Historical transport identity is exact GET ecs.office.com/config/v1/YammerClients/0.0.1, canonical /config/v1/YammerClients/0.0.1 under the currently declared backend specification security-copilot.
+              - "Original caller capture assignments: viva-engage. Caller page attribution and assignment labels do not by themselves establish causal execution of the backend owner's UI."
+              - Retained viva-engage-01 action 2 at 2026-10-29T18:04:08.581Z; evidence request-f8738cf237ee28639807; HTTP 200.
+              - "Observed query parameter names: Application, Cloud, Environment, TenantId, UserId. Values and derived page-label strings are withheld; parameter presence is not requiredness testing."
+              - This review used raw transport metadata only. No qualifying complete action-attributed response body was available in the selected retained evidence; bootstrap-only complete responses are excluded as action witnesses. Response/body/schema gaps remain open.
+              - Existing response schemas are unchanged. Any newly listed status is description-only, with no inferred error body, status cause, route removal or availability conclusion.
+              - Original dates/actions remain historical; this is not fresh capture, current tenant validation, business or application health, standalone invocation, role/grant/minimum-permission proof, or an owning-portal workflow test.
+              - GET is the recorded method, not a safety or idempotence determination. No request was authored, invoked, probed or replayed by this offline review; effects and rollback are untested.
+              - Confidence applies only to the verified historical method/host/path/status metadata. Captured values, identifiers, credentials, response fingerprints, body lengths and examples are withheld.
 
+          - source: viva-engage-yammer-shared-client-complete-body-reviewed-20261031
+            confidence: high
+            notes:
+              - "A bounded passive capture of the authenticated Viva Engage administrative page observed exact GET ecs.office.com/config/v1/YammerClients/0.0.1 under this declared backend route. This is shared-client caller evidence, not native Security Copilot usage. The cached caller session was preserved without switching; a specific tenant identity was not established."
+              - "One normalized API record at reload action 2 and two raw transport records at actions 0 and 2 had complete HTTP 200 JSON object bodies. Bootstrap-only evidence is excluded from these positive action witnesses; raw/API references are observations of one existing operation, not new API identities."
+              - "The bodies are compatible with the existing permissive MarketplaceClientConfigResponse object schema. Feature-map keys and values, property/item types, requiredness, enums, formats and examples are not inferred; the response schema is unchanged. Complete capture and object compatibility do not establish business or feature health."
+              - "Captured at 2026-10-31T09:19:47.536Z; action-attributed evidence request-f5d2c40c507207f79dc0. The earlier transport-only provenance remains historical; its missing-body statement does not describe this later bounded capture."
+              - "Observed query parameter names were Application, Cloud, Environment, TenantId, UserId. Values are withheld; presence does not test requiredness, identity, feature state, entitlement or parameter semantics."
+              - "Selected-page root-session and request-frame continuity were checked against the same-action snapshots. This supports the Viva Engage page caller, not child-iframe execution, an owning Security Copilot workflow, standalone API access, minimum roles or grants."
+              - "Discovery artifacts report completed capture and all six counted actions. The driver process exit status, stdout and stderr were not retained after the collection wrapper ended while its child continued; process exit success and standalone execution are not claimed."
+              - "No API request or probe was authored by the navigation/reload plan. Passive background effects and absence of tenant changes were not determined. Captured values, identifiers, credentials, feature-map contents, raw examples, response fingerprints and body lengths are withheld."
   /catalog/search:
     servers:
       - url: https://securitymarketplaceapi-prod.microsoft.com

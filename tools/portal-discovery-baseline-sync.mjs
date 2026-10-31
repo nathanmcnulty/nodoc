@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 
 export const baselineApprovalSchemaVersion = 1;
 export const baselineSyncSchemaVersion = 1;
-export const baselineApprovalModel = "gpt-5.6-luna";
+export const baselineApprovalModel = "gpt-6-luna";
 export const baselineApprovalReasonings = Object.freeze(["xhigh", "max"]);
 
 const signalClasses = new Map([

@@ -1,0 +1,153 @@
+{
+  "portal": "Purview",
+  "url": "https://purview.microsoft.com/insiderriskmgmt/overviewpage?tid=${TenantId}",
+  "pageTarget": {
+    "matchHosts": [
+      "purview.microsoft.com"
+    ],
+    "matchPathPrefixes": [
+      "/insiderriskmgmt"
+    ],
+    "allowedEntryQueryParameters": [
+      "tid"
+    ]
+  },
+  "matchHosts": [
+    "purview.microsoft.com"
+  ],
+  "matchPathPrefixes": [
+    "/apiproxy"
+  ],
+  "inspectionPolicy": {
+    "mode": "observe-only",
+    "prohibitedControlPatterns": [
+      "Add",
+      "Create",
+      "Delete",
+      "Export",
+      "Remove",
+      "Save",
+      "Submit",
+      "Update",
+      "Purchase",
+      "Activate",
+      "Start trial"
+    ]
+  },
+  "captureScripts": false,
+  "postActionSettleMs": 6000,
+  "settleMs": 8000,
+  "maxActions": 15,
+  "actions": [
+    {
+      "type": "navigate",
+      "value": "https://purview.microsoft.com/insiderriskmgmt/overviewpage?tid=${TenantId}",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "6000",
+      "required": true
+    },
+    {
+      "type": "reload",
+      "value": "purview-canonical-insider-risk",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "8000",
+      "required": true
+    },
+    {
+      "type": "capture",
+      "value": "purview-canonical-insider-risk",
+      "required": true
+    },
+    {
+      "type": "navigate",
+      "value": "https://purview.microsoft.com/datalifecyclemanagement/overview?tid=${TenantId}",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "6000",
+      "required": true
+    },
+    {
+      "type": "capture",
+      "value": "purview-canonical-lifecycle",
+      "required": true
+    },
+    {
+      "type": "navigate",
+      "value": "https://purview.microsoft.com/datalossprevention/overview",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "6000",
+      "required": true
+    },
+    {
+      "type": "capture",
+      "value": "purview-dlp",
+      "required": true
+    },
+    {
+      "type": "navigate",
+      "value": "https://purview.microsoft.com/compliancemanager/assessmentspage",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "6000",
+      "required": true
+    },
+    {
+      "type": "capture",
+      "value": "purview-compliance",
+      "required": true
+    }
+  ],
+  "knownOperationRefresh": {
+    "status": "active",
+    "method": "GET",
+    "host": "purview.microsoft.com",
+    "routes": [
+      "/apiproxy/di/find/InsiderRiskEntityList"
+    ],
+    "state": "Use observed insider-risk and data-lifecycle overview URLs with privately bound TenantId; retain exact DLP/compliance states.",
+    "actionIndexes": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13
+    ],
+    "approvalExpiresAt": "2026-10-31T09:57:22.444Z",
+    "variableBindingsDigest": "8b8e73b61a28c8be7ab1756d51ae796571279c94e70ffc4e8be35661de37ae65",
+    "documentationObjectives": [
+      "freshness",
+      "health",
+      "schema-evidence",
+      "usage-observation",
+      "error-example"
+    ],
+    "evidenceIds": [
+      "gap-remediation-plan-20261030:purview",
+      "retained-state-provenance-20261030:purview"
+    ],
+    "approvalArtifact": "tools/frontier-approvals/purview-gap-remediation-20261030.json",
+    "approvalDigest": "6be01d953115f0dd204a613d203de7ad57c990fdde726550d6fd61c5bcdc6546"
+  }
+}

@@ -1,0 +1,132 @@
+{
+  "portal": "Entra IDGov",
+  "url": "https://entra.microsoft.com/#view/Microsoft_AAD_ERM/DashboardBlade/~/ReviewHistory",
+  "pageTarget": {
+    "matchHosts": [
+      "entra.microsoft.com"
+    ],
+    "matchPathPrefixes": [
+      "/"
+    ]
+  },
+  "matchHosts": [
+    "api.accessreviews.identitygovernance.azure.com"
+  ],
+  "matchPathPrefixes": [
+    "/accessReviews"
+  ],
+  "inspectionPolicy": {
+    "mode": "observe-only",
+    "prohibitedControlPatterns": [
+      "Add",
+      "Create",
+      "Delete",
+      "Export",
+      "Remove",
+      "Save",
+      "Submit",
+      "Update",
+      "Purchase",
+      "Activate",
+      "Start trial"
+    ]
+  },
+  "captureScripts": false,
+  "postActionSettleMs": 6000,
+  "settleMs": 8000,
+  "maxActions": 12,
+  "actions": [
+    {
+      "type": "navigate",
+      "value": "https://entra.microsoft.com/#view/Microsoft_AAD_ERM/DashboardBlade/~/ReviewHistory",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "6000",
+      "required": true
+    },
+    {
+      "type": "reload",
+      "value": "idgov-review-history",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "8000",
+      "required": true
+    },
+    {
+      "type": "capture",
+      "value": "idgov-review-history",
+      "required": true
+    },
+    {
+      "type": "navigate",
+      "value": "https://entra.microsoft.com/#view/Microsoft_AAD_ERM/DashboardBlade/~/Controls",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "6000",
+      "required": true
+    },
+    {
+      "type": "capture",
+      "value": "idgov-access-reviews",
+      "required": true
+    },
+    {
+      "type": "navigate",
+      "value": "https://entra.microsoft.com/#view/Microsoft_AAD_ERM/DashboardBlade/~/Programs",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "6000",
+      "required": true
+    },
+    {
+      "type": "capture",
+      "value": "idgov-programs",
+      "required": true
+    }
+  ],
+  "knownOperationRefresh": {
+    "status": "active",
+    "method": "GET",
+    "host": "api.accessreviews.identitygovernance.azure.com",
+    "routes": [
+      "/accessReviews/v2.0/reports"
+    ],
+    "state": "Use exact unvisited Review History, Access reviews and Programs anchors retained in full session snapshots.",
+    "actionIndexes": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "approvalExpiresAt": "2026-10-31T09:57:22.444Z",
+    "variableBindingsDigest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "documentationObjectives": [
+      "freshness",
+      "health",
+      "schema-evidence",
+      "usage-observation",
+      "error-example"
+    ],
+    "evidenceIds": [
+      "gap-remediation-plan-20261030:entra-idgov",
+      "retained-state-provenance-20261030:entra-idgov"
+    ],
+    "approvalArtifact": "tools/frontier-approvals/entra-idgov-gap-remediation-20261030.json",
+    "approvalDigest": "d549b59a41f6a6a999f41f9ee55e9f733a975cb7efa8b196eaf96ae359dd0e5a"
+  }
+}

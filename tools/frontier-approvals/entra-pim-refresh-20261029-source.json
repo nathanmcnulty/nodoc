@@ -1,0 +1,154 @@
+{
+  "schemaVersion": 1,
+  "kind": "known-operation-refresh-approval-source",
+  "status": "pending-fresh-independent-review",
+  "specId": "entra-pim",
+  "refreshDate": "2026-10-29",
+  "refreshDigest": "200ac8f829ee98edc333a437cf9ace4f13a2d167fe607be551a248ff08b66631",
+  "recipeDestination": "tools/capture-recipes/entra-pim-known-refresh-20261029.json",
+  "proposedRecipeSha256": "4dd4e3d53d01d24bde6c044e47b4c085715fb2413e54cb3a777681b09fc99949",
+  "sourceRecipe": {
+    "path": "tools/capture-recipes/entra-iga-novelty.json",
+    "sha256": "7d037b70406b4bde12fafb0188cc97495ab07bc4a0924af8d3e30b6a2b786eed"
+  },
+  "specification": {
+    "path": "specifications/nodoc-entra-pim/specification/openapi.yml",
+    "sha256": "06ba6f4249b471bc471b4ec5d385b3f50b8bc0d2b9cd8e94e7c72628f5fd8a5d",
+    "operationCount": 16
+  },
+  "policyBindings": [
+    {
+      "path": "PORTAL_DISCOVERY_AGENT_PROMPT.md",
+      "sha256": "57b6acf49eac1afc6e51b014039a6cba694adeeb058b13fa549f0610e20ae8b5"
+    },
+    {
+      "path": "AGENT_DISCOVERY_RUNBOOK.md",
+      "sha256": "4ef12fc4e271e17094dbb5da447b6f535bf2a63b457089ce5bd7f6876126b079"
+    },
+    {
+      "path": "AGENT_DISCOVERY_PLAYBOOK.md",
+      "sha256": "c12b9cecf0a3a85e8c760a8e7b310c0d0528f41cb65c8fe2c95eb420ca3fb119"
+    },
+    {
+      "path": "tools/portal-discovery-model-policy.mjs",
+      "sha256": "5d4b65b60d21a5b7431828b41694c49e85c58fb1497a2c3fb1cf53483066c346"
+    },
+    {
+      "path": "tools/portal-discovery-operation-safety.mjs",
+      "sha256": "425a1466f41aed855a0871548ee464670c350ce9b2954eba0e220c9a38d86ca3"
+    },
+    {
+      "path": "tools/discovery-safety.mjs",
+      "sha256": "e406c0fcd3401092ab2ef8318d41c17bb72956eec84638f2a00b9535dda8c8a1"
+    }
+  ],
+  "target": {
+    "status": "active",
+    "method": "GET",
+    "host": "api.azrbac.mspim.azure.com",
+    "routes": [
+      "/api/v2/privilegedAccess/aadRoles/roleAssignments"
+    ],
+    "state": "Entra PIM bounded passive representative states from tools/capture-recipes/entra-iga-novelty.json",
+    "actionIndexes": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "approvalExpiresAt": "2026-10-31T08:00:00.000Z",
+    "variableBindingsDigest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "documentationObjectives": [
+      "freshness",
+      "health",
+      "schema-evidence",
+      "usage-observation",
+      "error-example"
+    ],
+    "evidenceIds": [
+      "retained-entra-pim-primary-witness",
+      "checked-in-ui-state-entra-iga-novelty"
+    ]
+  },
+  "retainedPlanningEvidence": [
+    {
+      "artifactPath": "private-artifacts/entra-iga-novelty-20260819T170858-60728c73/api-records.json",
+      "sha256": "853670d63201d8bcc6dffac84a8d4bc0a6cc2bb5e126519d2e6946b38c7bd7b4",
+      "recordIndex": 7,
+      "method": "GET",
+      "host": "api.azrbac.mspim.azure.com",
+      "route": "/roleAssignments",
+      "status": 200,
+      "mimeType": "application/json",
+      "seenOnPageCount": 2,
+      "observedAt": null,
+      "historicOnly": true
+    },
+    {
+      "artifactPath": "private-artifacts/entra-iga-novelty-20260819T170858-60728c73/api-records.json",
+      "sha256": "853670d63201d8bcc6dffac84a8d4bc0a6cc2bb5e126519d2e6946b38c7bd7b4",
+      "recordIndex": 8,
+      "method": "GET",
+      "host": "api.azrbac.mspim.azure.com",
+      "route": "/roleAssignments",
+      "status": 200,
+      "mimeType": "application/json",
+      "seenOnPageCount": 2,
+      "observedAt": null,
+      "historicOnly": true
+    }
+  ],
+  "uiProvenance": {
+    "sourceRecipe": "tools/capture-recipes/entra-iga-novelty.json",
+    "entryUrl": "https://entra.microsoft.com/#view/Microsoft_AAD_ERM/DashboardBlade/~/Dashboard/menuId/AccessPackages",
+    "actionCount": 5,
+    "usesOnlyKnownStates": true,
+    "noveltyNotRequired": true
+  },
+  "coverage": {
+    "primaryWitness": "GET /api/v2/privilegedAccess/aadRoles/roleAssignments",
+    "representativeActions": [
+      "navigate=https://entra.microsoft.com/#view/Microsoft_AAD_ERM/DashboardBlade/~/Dashboard/menuId/AccessPackages",
+      "wait-ms=6000",
+      "reload=pim-native-adjacent-dashboard",
+      "wait-ms=8000",
+      "capture=pim-native-adjacent-dashboard"
+    ],
+    "uncoveredFamilies": [
+      "native current PIM entry/control provenance",
+      "assignments/settings/alerts/activities detail"
+    ],
+    "requiredDisposition": "Each uncovered family must be observed, unchanged with evidence, adjacent, unreachable in approved state, blocked with precise prerequisite, or separately approved state required. One witness never closes spec."
+  },
+  "safety": {
+    "apiProbeAuthorized": false,
+    "mutationAuthorized": false,
+    "deviceCodeAuthorized": false,
+    "auth": "cached/WAM or normal browser only",
+    "passiveMethods": "all naturally emitted methods retained; no authored requests",
+    "browserLifecycle": "one global endpoint, serialized owner/preflight/worker/terminal/review/disposition/stop"
+  },
+  "caveats": [
+    "exact provider aadRoles comes from retained request, not invention",
+    "current PIM-specific UI entry absent; witness observed from IGA dashboard only",
+    "requires exact provider/template ownership review; do not replay retired PIM controls"
+  ],
+  "preflightChecks": {
+    "metadata": "accepted",
+    "operationOwnership": "accepted",
+    "safety": {
+      "safe": true,
+      "unsafeActions": []
+    }
+  },
+  "requiredLiveProof": [
+    "terminal discovery-run.json + summary.json + candidate-handoff.json",
+    "all required action indexes accounted with canonical results",
+    "action-attributed exact wire method/host/route",
+    "complete sanitized sidecars with every referenced SHA/length/path verified",
+    "observedAt from source request",
+    "actual statuses and health/error classification",
+    "per-family coverage disposition; no fabricated full-spec freshness"
+  ]
+}

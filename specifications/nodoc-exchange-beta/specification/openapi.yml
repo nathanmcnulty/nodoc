@@ -596,6 +596,25 @@ paths:
         route transitions. Confirmed live from the home, settings, migration, report, and public
         folder pages.
       operationId: ExchangeBeta.Bootstrap.GetShell
+      x-nodoc-live-capture:
+        source: authenticated Exchange admin center passive home/bootstrap capture
+        browsedPages:
+          - "Exchange admin center > Home/bootstrap"
+      x-nodoc-operation-context:
+        surface: "Exchange admin center > Home/bootstrap"
+        workflows:
+          - "Load the authenticated Exchange admin center home shell bootstrap."
+        availability:
+          level: user-context
+          notes:
+            - "Observed only in a signed-in portal session. Availability and returned profile/bootstrap state are session-dependent; this does not establish minimum roles, tenant grants, consent, or effective permissions."
+        provenance:
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - "Evidence request-6f6e53acfe5aab668e90; HTTP 200; GET admin.exchange.microsoft.com/beta/Shell; action index 2; observed 2026-10-29T19:45:39.795Z; body (privately hash-verified)."
+              - "Request header names observed: accept, client-request-id, content-type, ms-cv, referer, sec-ch-ua, sec-ch-ua-mobile, sec-ch-ua-platform, user-agent, validationkey, x-requested-with. Response header names observed: app, content-security-policy, content-type, date, mise-correlation-id, odata-version, strict-transport-security, x-azure-ref, x-cache, x-frame-options. Query parameter names observed: none; names are presence evidence only, not requiredness."
+              - "No logical error envelope was found in the Shell JSON or its parsed embedded navigation JSON."
       responses:
         '200':
           description: Exchange shell bootstrap returned successfully.
@@ -603,6 +622,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ExchangeShellBootstrap'
+              examples:
+                observedShellBootstrapRedacted:
+                  summary: Redacted Exchange shell bootstrap shape observed on 2026-10-03
+                  description: |
+                    Synthetic type-preserving placeholders derived from the action-attributed response shape.
+                    They do not reproduce tenant, user, domain, URL, token, or current-state values.
+                  value:
+                    '@odata.context': https://redacted.invalid/beta/Shell
+                    NavBarDataJson: REDACTED_JSON_STRING
+                    WorkloadId: 00000000-0000-0000-0000-000000000000
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -616,6 +645,26 @@ paths:
         Returns Exchange cmdlet and capability metadata consulted by multiple admin center blades
         during startup and page rendering.
       operationId: ExchangeBeta.Bootstrap.GetCmdletInfo
+      x-nodoc-live-capture:
+        source: authenticated Exchange admin center passive home/bootstrap capture
+        browsedPages:
+          - "Exchange admin center > Home/bootstrap"
+      x-nodoc-operation-context:
+        surface: "Exchange admin center > Home/bootstrap"
+        workflows:
+          - "Load Exchange cmdlet metadata during Exchange admin center bootstrap."
+        availability:
+          level: user-context
+          notes:
+            - "Observed only in a signed-in portal session. Availability and returned profile/bootstrap state are session-dependent; this does not establish minimum roles, tenant grants, consent, or effective permissions."
+        provenance:
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - "Evidence request-df83bb4bc7553192ab0b; HTTP 200; GET admin.exchange.microsoft.com/beta/CmdletInfo; action index 2; observed 2026-10-29T19:45:39.794Z; body (privately hash-verified)."
+              - "Request header names observed: accept, client-request-id, content-type, ms-cv, prefer, referer, sec-ch-ua, sec-ch-ua-mobile, sec-ch-ua-platform, user-agent, validationkey, x-requested-with. Response header names observed: app, content-security-policy, content-type, date, mise-correlation-id, odata-version, strict-transport-security, x-azure-ref, x-cache, x-frame-options. Query parameter names observed: none; names are presence evidence only, not requiredness."
+              - "This is metadata only; it is not proof of execution capability or health for any listed cmdlet or RPC operation."
+              - "No InvokeCommand or other native shared RPC traffic was captured."
       responses:
         '200':
           description: Cmdlet metadata returned successfully.
@@ -750,6 +799,30 @@ paths:
       description: |
         Returns the caller's Exchange admin center user profile and shell context.
       operationId: ExchangeBeta.Preferences.GetUserProfile
+      x-nodoc-live-capture:
+        source: authenticated Exchange admin center passive home/bootstrap capture
+        browsedPages:
+          - "Exchange admin center > Home/bootstrap"
+      x-nodoc-operation-context:
+        surface: "Exchange admin center > Home/bootstrap"
+        workflows:
+          - "Load user-context profile and shell metadata during Exchange admin center bootstrap."
+        availability:
+          level: user-context
+          notes:
+            - "Observed only in a signed-in portal session. Availability and returned profile/bootstrap state are session-dependent; this does not establish minimum roles, tenant grants, consent, or effective permissions."
+        provenance:
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - "Evidence request-9c6fe4a7e3d1622bb164; HTTP 200; GET admin.exchange.microsoft.com/beta/UserProfile; action index 2; observed 2026-10-29T19:45:40.538Z; body (privately hash-verified)."
+              - "Request header names observed: accept, app, client-request-id, content-type, ms-cv, referer, sec-ch-ua, sec-ch-ua-mobile, sec-ch-ua-platform, user-agent, validationkey, x-requested-with. Response header names observed: app, content-security-policy, content-type, date, mise-correlation-id, odata-version, strict-transport-security, x-azure-ref, x-cache, x-frame-options. Query parameter names observed: none; names are presence evidence only, not requiredness."
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - "Evidence request-f0a45054bbae84bbc417; HTTP 200; GET admin.exchange.microsoft.com/beta/UserProfile; action index 2; observed 2026-10-29T19:45:39.795Z; body (privately hash-verified). Duplicate same-body observation; not an independent execution."
+              - "Request header names observed: accept, client-request-id, content-type, ms-cv, referer, sec-ch-ua, sec-ch-ua-mobile, sec-ch-ua-platform, user-agent, validationkey, x-requested-with. Response header names observed: app, content-security-policy, content-type, date, mise-correlation-id, odata-version, strict-transport-security, x-azure-ref, x-cache, x-frame-options. Query parameter names observed: none; names are presence evidence only, not requiredness."
+              - "The two same-body records are duplicate observations of one operation in one capture action, not independent executions."
       responses:
         '200':
           description: User profile returned successfully.

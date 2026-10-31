@@ -1,0 +1,166 @@
+{
+  "schemaVersion": 1,
+  "kind": "known-operation-refresh-approval-source",
+  "status": "pending-fresh-independent-review",
+  "specId": "defender-xdr",
+  "refreshDate": "2026-10-29",
+  "refreshDigest": "996b0836d6f76ca0a0f993ef56e725f33ff0b967a9a4f9ac70223224465b8cc1",
+  "recipeDestination": "tools/capture-recipes/defender-xdr-known-refresh-20261029.json",
+  "proposedRecipeSha256": "2f882e0bb7ac0f6cba40fee52c959f36481366a7d4e560a34f45f85643e70743",
+  "sourceRecipe": {
+    "path": "tools/capture-recipes/defender-attack-map-enrichment.json",
+    "sha256": "50fa5247a176418e865b682406b826b952508a9b2e731a14ff6c394d026c4f75"
+  },
+  "specification": {
+    "path": "specifications/nodoc-defender-xdr/specification/openapi.yml",
+    "sha256": "29d8a6bad9a51417366062567cb2941458bd8adafc7867e453b74dde52c8f45d",
+    "operationCount": 585
+  },
+  "policyBindings": [
+    {
+      "path": "PORTAL_DISCOVERY_AGENT_PROMPT.md",
+      "sha256": "57b6acf49eac1afc6e51b014039a6cba694adeeb058b13fa549f0610e20ae8b5"
+    },
+    {
+      "path": "AGENT_DISCOVERY_RUNBOOK.md",
+      "sha256": "4ef12fc4e271e17094dbb5da447b6f535bf2a63b457089ce5bd7f6876126b079"
+    },
+    {
+      "path": "AGENT_DISCOVERY_PLAYBOOK.md",
+      "sha256": "c12b9cecf0a3a85e8c760a8e7b310c0d0528f41cb65c8fe2c95eb420ca3fb119"
+    },
+    {
+      "path": "tools/portal-discovery-model-policy.mjs",
+      "sha256": "5d4b65b60d21a5b7431828b41694c49e85c58fb1497a2c3fb1cf53483066c346"
+    },
+    {
+      "path": "tools/portal-discovery-operation-safety.mjs",
+      "sha256": "425a1466f41aed855a0871548ee464670c350ce9b2954eba0e220c9a38d86ca3"
+    },
+    {
+      "path": "tools/discovery-safety.mjs",
+      "sha256": "e406c0fcd3401092ab2ef8318d41c17bb72956eec84638f2a00b9535dda8c8a1"
+    }
+  ],
+  "target": {
+    "status": "active",
+    "method": "GET",
+    "host": "security.microsoft.com",
+    "routes": [
+      "/apiproxy/mtp/sccManagement/mgmt/TenantContext"
+    ],
+    "state": "Defender XDR bounded passive representative states from tools/capture-recipes/defender-attack-map-enrichment.json",
+    "actionIndexes": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "approvalExpiresAt": "2026-10-31T08:00:00.000Z",
+    "variableBindingsDigest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "documentationObjectives": [
+      "freshness",
+      "health",
+      "schema-evidence",
+      "usage-observation",
+      "error-example"
+    ],
+    "evidenceIds": [
+      "retained-defender-xdr-primary-witness",
+      "checked-in-ui-state-defender-attack-map-enrichment"
+    ]
+  },
+  "retainedPlanningEvidence": [
+    {
+      "artifactPath": "private-artifacts/defender-graph-inventory-20260829T203751590/api-records.json",
+      "sha256": "974dac50c0b19813b1786b6ef9c6ce898804c471279cc7d0f3b4ebfc0d1d286c",
+      "recordIndex": 9,
+      "method": "GET",
+      "host": "security.microsoft.com",
+      "route": "/mtp/sccManagement/mgmt/TenantContext",
+      "status": 200,
+      "mimeType": "application/json",
+      "seenOnPageCount": 3,
+      "observedAt": null,
+      "historicOnly": true
+    },
+    {
+      "artifactPath": "private-artifacts/defender-graph-refresh-20260831T221000Z/api-records.json",
+      "sha256": "76b3ddabde44d7616285099dbf54eb9f048c29b3f4b3fc105f54e85507f9fda7",
+      "recordIndex": 65,
+      "method": "GET",
+      "host": "security.microsoft.com",
+      "route": "/mtp/sccManagement/mgmt/TenantContext",
+      "status": 200,
+      "mimeType": "application/json",
+      "seenOnPageCount": 3,
+      "observedAt": null,
+      "historicOnly": true
+    }
+  ],
+  "uiProvenance": {
+    "sourceRecipe": "tools/capture-recipes/defender-attack-map-enrichment.json",
+    "entryUrl": "https://security.microsoft.com/security-graph",
+    "actionCount": 11,
+    "usesOnlyKnownStates": true,
+    "noveltyNotRequired": true
+  },
+  "coverage": {
+    "primaryWitness": "GET /apiproxy/mtp/sccManagement/mgmt/TenantContext",
+    "representativeActions": [
+      "navigate=https://security.microsoft.com/security-graph",
+      "wait-ms=6000",
+      "reload=defender-attack-map",
+      "wait-ms=8000",
+      "capture=defender-attack-map",
+      "navigate=https://security.microsoft.com/incidents",
+      "wait-ms=6000",
+      "capture=defender-incidents",
+      "navigate=https://security.microsoft.com/threatpolicy",
+      "wait-ms=6000",
+      "capture=defender-threat-policy"
+    ],
+    "uncoveredFamilies": [
+      "TVM/device detail",
+      "RBAC detail",
+      "tenant settings",
+      "other 585-operation families"
+    ],
+    "requiredDisposition": "Each uncovered family must be observed, unchanged with evidence, adjacent, unreachable in approved state, blocked with precise prerequisite, or separately approved state required. One witness never closes spec."
+  },
+  "safety": {
+    "apiProbeAuthorized": false,
+    "mutationAuthorized": false,
+    "deviceCodeAuthorized": false,
+    "auth": "cached/WAM or normal browser only",
+    "passiveMethods": "all naturally emitted methods retained; no authored requests",
+    "browserLifecycle": "one global endpoint, serialized owner/preflight/worker/terminal/review/disposition/stop"
+  },
+  "caveats": [
+    "requires declared server-base ownership repair before allocation"
+  ],
+  "preflightChecks": {
+    "metadata": "accepted",
+    "operationOwnership": "accepted",
+    "safety": {
+      "safe": true,
+      "unsafeActions": []
+    }
+  },
+  "requiredLiveProof": [
+    "terminal discovery-run.json + summary.json + candidate-handoff.json",
+    "all required action indexes accounted with canonical results",
+    "action-attributed exact wire method/host/route",
+    "complete sanitized sidecars with every referenced SHA/length/path verified",
+    "observedAt from source request",
+    "actual statuses and health/error classification",
+    "per-family coverage disposition; no fabricated full-spec freshness"
+  ]
+}

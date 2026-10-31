@@ -1,0 +1,77 @@
+{
+  "portal": "Defender XDR (MTO)",
+  "url": "https://mto.security.microsoft.com",
+  "pageTarget": {
+    "matchHosts": [
+      "mto.security.microsoft.com"
+    ],
+    "matchPathPrefixes": [
+      "/"
+    ]
+  },
+  "matchHosts": [
+    "mto.security.microsoft.com"
+  ],
+  "matchPathPrefixes": [
+    "/apiproxy/mtoapi",
+    "/mtoapi"
+  ],
+  "inspectionPolicy": {
+    "mode": "observe-only",
+    "prohibitedControlPatterns": [
+      "Add",
+      "Create",
+      "Delete",
+      "Export",
+      "Remove",
+      "Save",
+      "Submit",
+      "Update",
+      "Purchase",
+      "Activate",
+      "Start trial"
+    ]
+  },
+  "captureScripts": false,
+  "postActionSettleMs": 6000,
+  "settleMs": 8000,
+  "maxActions": 6,
+  "actions": [
+    "navigate=https://mto.security.microsoft.com",
+    "wait-ms=6000",
+    "reload=mto-current-landing-health",
+    "wait-ms=8000",
+    "capture=mto-current-landing-health"
+  ],
+  "knownOperationRefresh": {
+    "status": "active",
+    "method": "GET",
+    "host": "mto.security.microsoft.com",
+    "routes": [
+      "/apiproxy/mtoapi/mtp/sccManagement/mgmt/TenantContext"
+    ],
+    "state": "Defender XDR (MTO) bounded passive representative states from tools/capture-recipes/defender-mto-landing-enrichment.json",
+    "actionIndexes": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "approvalExpiresAt": "2026-10-31T08:00:00.000Z",
+    "variableBindingsDigest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "documentationObjectives": [
+      "freshness",
+      "health",
+      "schema-evidence",
+      "usage-observation",
+      "error-example"
+    ],
+    "evidenceIds": [
+      "checked-in-ui-state-defender-mto-landing-enrichment",
+      "checked-in-openapi-static-operation"
+    ],
+    "approvalArtifact": "tools/frontier-approvals/defender-mto-refresh-20261029.json",
+    "approvalDigest": "705d94ab916a650e52663a77c651814e920be50d0386ec5684e9b94ed5c10e4b"
+  }
+}

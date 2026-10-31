@@ -18,7 +18,7 @@ function approval(overrides = {}) {
     canonicalSignal: "api.example GET /items shape-a",
     signalClass: "response-shape",
     evidenceIds: ["evidence-1"],
-    workerModel: "gpt-5.6-luna",
+    workerModel: "gpt-6-luna",
     workerReasoning: "xhigh",
     decision: "accept",
     sourceArtifactDigest,

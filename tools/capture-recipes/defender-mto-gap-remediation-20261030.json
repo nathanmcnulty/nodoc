@@ -1,0 +1,100 @@
+{
+  "portal": "Defender XDR (MTO)",
+  "url": "https://mto.security.microsoft.com/incidents?tid=${TenantId}",
+  "pageTarget": {
+    "matchHosts": [
+      "mto.security.microsoft.com"
+    ],
+    "matchPathPrefixes": [
+      "/"
+    ],
+    "allowedEntryQueryParameters": [
+      "tid"
+    ]
+  },
+  "matchHosts": [
+    "mto.security.microsoft.com"
+  ],
+  "matchPathPrefixes": [
+    "/apiproxy/mtoapi",
+    "/mtoapi"
+  ],
+  "inspectionPolicy": {
+    "mode": "observe-only",
+    "prohibitedControlPatterns": [
+      "Add",
+      "Create",
+      "Delete",
+      "Export",
+      "Remove",
+      "Save",
+      "Submit",
+      "Update",
+      "Purchase",
+      "Activate",
+      "Start trial"
+    ]
+  },
+  "captureScripts": false,
+  "postActionSettleMs": 6000,
+  "settleMs": 8000,
+  "maxActions": 6,
+  "actions": [
+    {
+      "type": "navigate",
+      "value": "https://mto.security.microsoft.com/incidents?tid=${TenantId}",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "6000",
+      "required": true
+    },
+    {
+      "type": "reload",
+      "value": "mto-observed-incidents-frontier",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "8000",
+      "required": true
+    },
+    {
+      "type": "capture",
+      "value": "mto-observed-incidents-frontier",
+      "required": true
+    }
+  ],
+  "knownOperationRefresh": {
+    "status": "active",
+    "method": "GET",
+    "host": "mto.security.microsoft.com",
+    "routes": [
+      "/apiproxy/mtoapi/mtp/sccManagement/mgmt/TenantContext"
+    ],
+    "state": "The historical Incidents anchor was never visited by either landing-only plan. This is a new exact passive state frontier, not another homepage replay.",
+    "actionIndexes": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "approvalExpiresAt": "2026-10-31T09:57:22.444Z",
+    "variableBindingsDigest": "8b8e73b61a28c8be7ab1756d51ae796571279c94e70ffc4e8be35661de37ae65",
+    "documentationObjectives": [
+      "freshness",
+      "health",
+      "schema-evidence",
+      "usage-observation",
+      "error-example"
+    ],
+    "evidenceIds": [
+      "gap-remediation-plan-20261030:defender-mto",
+      "retained-state-provenance-20261030:defender-mto"
+    ],
+    "approvalArtifact": "tools/frontier-approvals/defender-mto-gap-remediation-20261030.json",
+    "approvalDigest": "03a06d6d1bda1586cce9742afc66db54ed1e35f689bead204e8a35020c432747"
+  }
+}

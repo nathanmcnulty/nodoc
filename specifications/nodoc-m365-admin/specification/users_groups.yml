@@ -4,7 +4,25 @@ paths:
       summary: List Intune-managed devices
       description: Retrieve the managed-device projection used by the Microsoft 365 admin center.
       operationId: UsersGroups.ListIntuneDevices
-      tags: [UsersGroups]
+      x-nodoc-live-capture:
+        source: authenticated Microsoft 365 admin center passive representative states
+        browsedPages:
+          - Microsoft 365 admin center
+      x-nodoc-operation-context:
+        surface: Microsoft 365 admin center
+        workflows:
+          - Observe native requests during the approved passive representative portal states.
+        availability:
+          level: user-context
+          notes:
+            - One authenticated portal session; standalone execution, parameter requiredness, effective grants and minimum roles are not established.
+        provenance:
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - "GET admin.cloud.microsoft/admin/api/Intune/devices; HTTP 200; action 9; observed 2026-10-29T20:33:26.553Z; complete response (privately hash-verified)."
+              - Current complete response shape was observed in the captured portal session; no broader operation or state coverage is implied.
+      tags: [ UsersGroups ]
       x-nodoc-operation-safety:
         class: read-only
         tenantMutationObserved: false
@@ -49,7 +67,7 @@ paths:
     get:
       summary: Get administrative-unit list customization
       operationId: UsersGroups.GetAdministrativeUnitCustomization
-      tags: [UsersGroups]
+      tags: [ UsersGroups ]
       x-nodoc-operation-safety:
         class: read-only
         tenantMutationObserved: false
@@ -63,7 +81,7 @@ paths:
             application/json:
               schema:
                 type: object
-                required: [IsCompactMode]
+                required: [ IsCompactMode ]
                 properties:
                   IsCompactMode: { type: boolean }
         '401':
@@ -75,7 +93,25 @@ paths:
     get:
       summary: Get directory-role list customization
       operationId: UsersGroups.GetDirectoryRoleCustomization
-      tags: [UsersGroups]
+      x-nodoc-live-capture:
+        source: authenticated Microsoft 365 admin center passive representative states
+        browsedPages:
+          - Microsoft 365 admin center
+      x-nodoc-operation-context:
+        surface: Microsoft 365 admin center
+        workflows:
+          - Observe native requests during the approved passive representative portal states.
+        availability:
+          level: user-context
+          notes:
+            - One authenticated portal session; standalone execution, parameter requiredness, effective grants and minimum roles are not established.
+        provenance:
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - "GET admin.cloud.microsoft/admin/api/rbac/roles/customization; HTTP 200; action 6; observed 2026-10-29T20:33:00.270Z; complete response (privately hash-verified)."
+              - Current complete response shape was observed in the captured portal session; no broader operation or state coverage is implied.
+      tags: [ UsersGroups ]
       x-nodoc-operation-safety:
         class: read-only
         tenantMutationObserved: false
@@ -115,7 +151,7 @@ paths:
       summary: Get unlicensed user count
       description: Retrieve the number of users without assigned licenses.
       operationId: UsersGroups.GetUnlicensedUsersCount
-      tags: [UsersGroups]
+      tags: [ UsersGroups ]
       x-nodoc-operation-context:
         surface: Users
         provenance:
@@ -141,10 +177,9 @@ paths:
     post:
       summary: Get user roles
       description: >-
-        Retrieve the admin roles assigned to a user. Accepts a principal ID and
-        security group memberships to resolve role assignments.
+        Retrieve the admin roles assigned to a user. Accepts a principal ID and security group memberships to resolve role assignments.
       operationId: UsersGroups.GetUserRoles
-      tags: [UsersGroups]
+      tags: [ UsersGroups ]
       requestBody:
         required: true
         content:
@@ -183,7 +218,7 @@ paths:
       description: >-
         Retrieve a paginated list of users in the tenant with sorting and filtering options.
       operationId: UsersGroups.ListUsers
-      tags: [UsersGroups]
+      tags: [ UsersGroups ]
       requestBody:
         required: true
         content:
@@ -267,7 +302,7 @@ paths:
       description: >-
         Retrieve contextual alerts for the current admin user session.
       operationId: UsersGroups.GetContextualAlerts
-      tags: [UsersGroups]
+      tags: [ UsersGroups ]
       requestBody:
         required: true
         content:
@@ -298,7 +333,7 @@ paths:
       description: >-
         Retrieve a paginated list of groups in the tenant with sorting and filtering options.
       operationId: UsersGroups.GetGroups
-      tags: [UsersGroups]
+      tags: [ UsersGroups ]
       requestBody:
         required: true
         content:
@@ -367,7 +402,25 @@ paths:
       description: >-
         Retrieve information about the currently authenticated admin user.
       operationId: UsersGroups.GetCurrentUser
-      tags: [UsersGroups]
+      x-nodoc-live-capture:
+        source: authenticated Microsoft 365 admin center passive representative states
+        browsedPages:
+          - Microsoft 365 admin center
+      x-nodoc-operation-context:
+        surface: Microsoft 365 admin center
+        workflows:
+          - Observe native requests during the approved passive representative portal states.
+        availability:
+          level: user-context
+          notes:
+            - One authenticated portal session; standalone execution, parameter requiredness, effective grants and minimum roles are not established.
+        provenance:
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - "GET admin.cloud.microsoft/admin/api/users/currentUser; HTTP 200; action 18; observed 2026-10-29T20:34:53.868Z; complete response (privately hash-verified)."
+              - Current complete response shape was observed in the captured portal session; no broader operation or state coverage is implied.
+      tags: [ UsersGroups ]
       responses:
         '200':
           description: OK
@@ -390,7 +443,7 @@ paths:
       description: >-
         Retrieve server version information for the admin portal.
       operationId: UsersGroups.GetServerVersionInfo
-      tags: [UsersGroups]
+      tags: [ UsersGroups ]
       responses:
         '200':
           description: OK
@@ -413,7 +466,7 @@ paths:
       description: >-
         Retrieve common data visualization preferences for the current user.
       operationId: UsersGroups.GetCommonDVPreferences
-      tags: [UsersGroups]
+      tags: [ UsersGroups ]
       responses:
         '200':
           description: OK
@@ -450,7 +503,7 @@ paths:
       description: >-
         Retrieve the products and licenses associated with the current user.
       operationId: UsersGroups.GetUserProducts
-      tags: [UsersGroups]
+      tags: [ UsersGroups ]
       parameters:
         - $ref: common.yml#/components/parameters/ODataFilter
         - $ref: common.yml#/components/parameters/ODataTop
@@ -507,7 +560,7 @@ paths:
       description: >-
         Retrieve the dashboard layout preferences for the current user.
       operationId: UsersGroups.GetDashboardLayout
-      tags: [UsersGroups]
+      tags: [ UsersGroups ]
       responses:
         '200':
           description: OK
@@ -532,7 +585,7 @@ paths:
       description: >-
         Retrieve an access token for the current authenticated user.
       operationId: UsersGroups.GetUserAccessToken
-      tags: [UsersGroups]
+      tags: [ UsersGroups ]
       responses:
         '200':
           description: OK
@@ -556,7 +609,7 @@ paths:
       description: >-
         Retrieve Teams settings information for the current user.
       operationId: UsersGroups.GetTeamsSettingsInfo
-      tags: [UsersGroups]
+      tags: [ UsersGroups ]
       responses:
         '200':
           description: OK
@@ -580,7 +633,7 @@ paths:
       description: >-
         Retrieve survey information for the current admin user.
       operationId: UsersGroups.GetSurveysInfo
-      tags: [UsersGroups]
+      tags: [ UsersGroups ]
       responses:
         '200':
           description: OK
@@ -604,7 +657,7 @@ paths:
       description: >-
         Save common data visualization preferences for the current user.
       operationId: UsersGroups.SaveCommonDVPreferences
-      tags: [UsersGroups]
+      tags: [ UsersGroups ]
       requestBody:
         required: true
         content:
@@ -630,7 +683,7 @@ paths:
       description: >-
         Retrieve a brokered token with expiry information for the current user.
       operationId: UsersGroups.GetTokenWithExpiry
-      tags: [UsersGroups]
+      tags: [ UsersGroups ]
       requestBody:
         required: true
         content:
@@ -638,8 +691,7 @@ paths:
             schema:
               type: string
               description: >-
-                Raw form payload posted by the portal, for example
-                `=https://management.azure.com/`.
+                Raw form payload posted by the portal, for example `=https://management.azure.com/`.
             example: =https://management.azure.com/
       x-nodoc-operation-context:
         surface: Users > Active users
@@ -704,7 +756,7 @@ paths:
       description: >-
         Retrieve the available labels for groups in the tenant.
       operationId: UsersGroups.GetGroupLabels
-      tags: [UsersGroups]
+      tags: [ UsersGroups ]
       parameters:
         - $ref: common.yml#/components/parameters/ODataFilter
         - $ref: common.yml#/components/parameters/ODataTop
@@ -731,15 +783,14 @@ paths:
       description: >-
         Retrieve the group permissions configuration for the tenant.
       operationId: UsersGroups.GetGroupPermissions
-      tags: [UsersGroups]
+      tags: [ UsersGroups ]
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                type: object
-                description: Group permissions. Exact schema pending.
+                $ref: '#/components/schemas/GroupPermissionsResponse'
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -748,6 +799,25 @@ paths:
 
         '404':
           $ref: common.yml#/components/responses/NotFound
+      x-nodoc-live-capture:
+        source: Observe-only gap remediation 2026-10-30; primary HTTP 200 observation(s)
+        browsedPages:
+          - Microsoft 365 admin center > Groups
+      x-nodoc-operation-context:
+        surface: Microsoft 365 admin center > Groups
+        availability:
+          level: tenant-conditional
+        provenance:
+          - source: authenticated-portal-capture-20261030
+            confidence: high
+            notes:
+              - Exact wire GET admin.cloud.microsoft/admin/api/groups/permissions matched the existing canonical route /admin/api/groups/permissions; concrete query values and response values are withheld.
+              - Action 2 at 2026-10-30T11:32:07.947Z; evidence request-18837421aca977ffe758; HTTP 200 complete response privately verified.
+              - A document reload of the retained Groups page supplied the exact request absent from the earlier fragment-navigation-only attempt. The prior no-target attempt remains historical; this new observation closes that scoped target gap.
+              - The complete response matched the existing GroupPermissionsResponse and GroupPermissionCapabilities types. No schema delta or root logical error envelope was observed; capability values are not copied.
+              - A session-derived group capability map does not establish independently effective permissions, tenant grants or tested mutation rights. Request-header presence does not establish standalone header requiredness; no request or mutation was authored or replayed.
+              - Only the primary group-permissions operation is refreshed here. The earlier broader 2026-10-29 native observations remain bounded historical evidence and are not revalidated by this one response.
+              - All required actions were accounted in this new reviewed remedy. This is scoped operation evidence; broader spec freshness, product health, standalone execution, effective permissions, consent, minimum roles and least privilege remain unverified.
 
   /admin/api/contact/Customization:
     get:
@@ -755,7 +825,7 @@ paths:
       description: >-
         Retrieve contact list customization settings for the admin portal (Users > Contacts).
       operationId: UsersGroups.GetContactCustomization
-      tags: [UsersGroups]
+      tags: [ UsersGroups ]
       responses:
         '200':
           description: OK
@@ -779,7 +849,7 @@ paths:
       description: >-
         Retrieve a list of contacts in the tenant (Users > Contacts).
       operationId: UsersGroups.GetContacts
-      tags: [UsersGroups]
+      tags: [ UsersGroups ]
       requestBody:
         required: true
         content:
@@ -810,7 +880,7 @@ paths:
       description: >-
         Retrieve guest user list customization settings for the admin portal (Users > Guest).
       operationId: UsersGroups.GetGuestUserListCustomization
-      tags: [UsersGroups]
+      tags: [ UsersGroups ]
       responses:
         '200':
           description: OK
@@ -834,7 +904,7 @@ paths:
       description: >-
         Retrieve a list of external guest users in the tenant (Users > Guest).
       operationId: UsersGroups.ListExternalGuestUsers
-      tags: [UsersGroups]
+      tags: [ UsersGroups ]
       x-nodoc-operation-context:
         surface: Users > Guest users
         requestShapes:
@@ -891,7 +961,7 @@ paths:
       description: >-
         Retrieve active user list customization settings for the admin portal (Users > Active).
       operationId: UsersGroups.GetUserListCustomization
-      tags: [UsersGroups]
+      tags: [ UsersGroups ]
       responses:
         '200':
           description: OK
@@ -915,7 +985,25 @@ paths:
       description: >-
         Retrieve the list of administrative units for user management (Org Settings > Services).
       operationId: UsersGroups.GetAdministrativeUnits
-      tags: [UsersGroups]
+      x-nodoc-live-capture:
+        source: authenticated Microsoft 365 admin center passive representative states
+        browsedPages:
+          - Microsoft 365 admin center
+      x-nodoc-operation-context:
+        surface: Microsoft 365 admin center
+        workflows:
+          - Observe native requests during the approved passive representative portal states.
+        availability:
+          level: user-context
+          notes:
+            - One authenticated portal session; standalone execution, parameter requiredness, effective grants and minimum roles are not established.
+        provenance:
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - "GET admin.cloud.microsoft/admin/api/users/administrativeunits; HTTP 200; action 18; observed 2026-10-29T20:34:53.868Z; complete response (privately hash-verified)."
+              - Current complete response shape was observed in the captured portal session; no broader operation or state coverage is implied.
+      tags: [ UsersGroups ]
       parameters:
         - $ref: common.yml#/components/parameters/ODataFilter
         - $ref: common.yml#/components/parameters/ODataTop
@@ -927,8 +1015,13 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                description: pending
+                oneOf:
+                  - type: object
+                    description: pending
+                  - type: array
+                    items:
+                      type: object
+                      additionalProperties: true
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -944,7 +1037,7 @@ paths:
       description: >-
         Retrieve device update channel eligibility information for users (Users > Active).
       operationId: UsersGroups.GetDeviceUpdateChannelEligibility
-      tags: [UsersGroups]
+      tags: [ UsersGroups ]
       responses:
         '200':
           description: OK
@@ -968,7 +1061,7 @@ paths:
       description: >-
         Retrieve the list of available admin roles that can be assigned to users (Users > Active).
       operationId: UsersGroups.GetAvailableRoles
-      tags: [UsersGroups]
+      tags: [ UsersGroups ]
       parameters:
         - $ref: common.yml#/components/parameters/ODataFilter
         - $ref: common.yml#/components/parameters/ODataTop
@@ -995,10 +1088,27 @@ paths:
     get:
       summary: List RBAC roles
       description: >-
-        Retrieve the RBAC role definitions exposed by the admin center role-based
-        access control experience.
+        Retrieve the RBAC role definitions exposed by the admin center role-based access control experience.
       operationId: UsersGroups.ListRbacRoles
-      tags: [UsersGroups]
+      x-nodoc-live-capture:
+        source: authenticated Microsoft 365 admin center passive representative states
+        browsedPages:
+          - Microsoft 365 admin center
+      x-nodoc-operation-context:
+        surface: Microsoft 365 admin center
+        workflows:
+          - Observe native requests during the approved passive representative portal states.
+        availability:
+          level: user-context
+          notes:
+            - One authenticated portal session; standalone execution, parameter requiredness, effective grants and minimum roles are not established.
+        provenance:
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - "GET admin.cloud.microsoft/admin/api/rbac/roles; HTTP 200; action 6; observed 2026-10-29T20:33:00.270Z; complete response (privately hash-verified)."
+              - Current complete response shape was observed in the captured portal session; no broader operation or state coverage is implied.
+      tags: [ UsersGroups ]
       responses:
         '200':
           description: OK
@@ -1022,7 +1132,7 @@ paths:
       description: >-
         Retrieve options and configuration for creating new users or contacts (Users > Contacts).
       operationId: UsersGroups.GetNewUserOptions
-      tags: [UsersGroups]
+      tags: [ UsersGroups ]
       responses:
         '200':
           description: OK
@@ -1046,7 +1156,7 @@ paths:
       description: >-
         Retrieve detailed information for a specific user by their user ID (Reports > Usage).
       operationId: UsersGroups.GetUserById
-      tags: [UsersGroups]
+      tags: [ UsersGroups ]
       parameters:
         - name: userId
           in: path
@@ -1077,7 +1187,7 @@ paths:
       description: >-
         Retrieve group list customization settings for the admin portal (Groups > Active).
       operationId: UsersGroups.GetGroupListCustomization
-      tags: [UsersGroups]
+      tags: [ UsersGroups ]
       responses:
         '200':
           description: OK
@@ -1101,7 +1211,7 @@ paths:
       description: >-
         Retrieve the total count of groups in the tenant (Groups > Active).
       operationId: UsersGroups.GetGroupCount
-      tags: [UsersGroups]
+      tags: [ UsersGroups ]
       responses:
         '200':
           description: OK
@@ -1125,7 +1235,7 @@ paths:
       description: >-
         Retrieve specific groups by their IDs, used for group lookups in settings like custom themes (Org Settings > Custom themes).
       operationId: UsersGroups.GetGroupsByIds
-      tags: [UsersGroups]
+      tags: [ UsersGroups ]
       requestBody:
         required: true
         content:
@@ -1156,7 +1266,7 @@ paths:
       description: >-
         Retrieve options and configuration for creating new groups (Groups > Active).
       operationId: UsersGroups.GetNewGroupOptions
-      tags: [UsersGroups]
+      tags: [ UsersGroups ]
       responses:
         '200':
           description: OK
@@ -1180,7 +1290,7 @@ paths:
       description: >-
         Retrieve localized help videos by feature for the specified locale (Groups > Active).
       operationId: UsersGroups.GetLocalizedVideoByFeature
-      tags: [UsersGroups]
+      tags: [ UsersGroups ]
       parameters:
         - name: locale
           in: path
@@ -1211,3 +1321,80 @@ paths:
 
         '404':
           $ref: common.yml#/components/responses/NotFound
+
+components:
+  schemas:
+    GroupPermissionCapabilities:
+      type: object
+      nullable: true
+      description: |
+        Group-management capability shape observed in a successful read-only response captured
+        on 2026-08-31. Fields remain optional because one response does not establish requiredness.
+      properties:
+        CanBeManaged:
+          type: boolean
+          nullable: true
+        CanDeleteGroup:
+          type: boolean
+          nullable: true
+        CanGetRecipientPermission:
+          type: boolean
+          nullable: true
+        CanManageDetails:
+          type: boolean
+          nullable: true
+        CanManageGroupEmails:
+          type: boolean
+          nullable: true
+        CanManageMembers:
+          type: boolean
+          nullable: true
+        CanManageO365GroupExoProps:
+          type: boolean
+          nullable: true
+        CanManageOwners:
+          type: boolean
+          nullable: true
+        CanTeamifyO365Groups:
+          type: boolean
+          nullable: true
+        IsReadOnly:
+          type: boolean
+          nullable: true
+        Code:
+          type: number
+          nullable: true
+        LocalizedMessage:
+          type: string
+          nullable: true
+        DeleteGroupLocalizedMessage:
+          nullable: true
+        ManageDetailsLocalizedMessage:
+          nullable: true
+        ManageGroupEmailsLocalizedMessage:
+          nullable: true
+        ManageMembersLocalizedMessage:
+          nullable: true
+        ManageO365GroupExoPropsLocalizedMessage:
+          nullable: true
+        ManageOwnersLocalizedMessage:
+          nullable: true
+        TeamifyO365GroupsLocalizedMessage:
+          nullable: true
+      additionalProperties: true
+    GroupPermissionsResponse:
+      type: object
+      nullable: true
+      description: Group-type capability map observed in a successful read-only response on 2026-08-31.
+      properties:
+        DistributionList:
+          $ref: '#/components/schemas/GroupPermissionCapabilities'
+        DynamicDistributionList:
+          $ref: '#/components/schemas/GroupPermissionCapabilities'
+        SecurityEnabledDistributionGroup:
+          $ref: '#/components/schemas/GroupPermissionCapabilities'
+        SharePointSecurityGroup:
+          $ref: '#/components/schemas/GroupPermissionCapabilities'
+        UnifiedGroup:
+          $ref: '#/components/schemas/GroupPermissionCapabilities'
+      additionalProperties: true

@@ -1,0 +1,94 @@
+{
+  "portal": "Office settings",
+  "url": "https://config.office.com/officeSettings",
+  "pageTarget": {
+    "matchHosts": [
+      "config.office.com"
+    ],
+    "matchPathPrefixes": [
+      "/officeSettings"
+    ]
+  },
+  "matchHosts": [
+    "query.inventory.insights.office.net"
+  ],
+  "matchPathPrefixes": [
+    "/inventory/api/Devices"
+  ],
+  "inspectionPolicy": {
+    "mode": "observe-only",
+    "prohibitedControlPatterns": [
+      "Add",
+      "Create",
+      "Delete",
+      "Export",
+      "Remove",
+      "Save",
+      "Submit",
+      "Update",
+      "Purchase",
+      "Activate",
+      "Start trial"
+    ]
+  },
+  "captureScripts": false,
+  "settleMs": 8000,
+  "postActionSettleMs": 6000,
+  "maxActions": 6,
+  "actions": [
+    {
+      "type": "navigate",
+      "value": "https://config.office.com/officeSettings",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "6000",
+      "required": true
+    },
+    {
+      "type": "reload",
+      "value": "office-settings-devices",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "8000",
+      "required": true
+    },
+    {
+      "type": "capture",
+      "value": "office-settings-devices",
+      "required": true
+    }
+  ],
+  "knownOperationRefresh": {
+    "status": "active",
+    "method": "GET",
+    "host": "query.inventory.insights.office.net",
+    "routes": [
+      "/inventory/api/Devices"
+    ],
+    "actionIndexes": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "state": "Fresh body-evidence objective for one exact existing GET passively emitted by the observed Office settings view. Canonical backend ownership and observed caller remain distinct; no direct API replay, current-tenant assertion, business-health or feature-entitlement claim.",
+    "documentationObjectives": [
+      "schema-evidence",
+      "usage-observation",
+      "error-example"
+    ],
+    "evidenceIds": [
+      "candidate:office-settings-devices:action2",
+      "assessment-sha256:08dafb4c8cc0045568eb8fb999ab66bc78b365594915c96c7794ca1e3066168d"
+    ],
+    "approvalExpiresAt": "2026-10-31T11:41:36.483Z",
+    "variableBindingsDigest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "approvalArtifact": "tools/frontier-approvals/m365-apps-inventory-office-settings-devices-20261030.json",
+    "approvalDigest": "1eed1137d324fb7b02af4303104e321fc4e514e18adeb49d2eec919e0220d95e"
+  }
+}

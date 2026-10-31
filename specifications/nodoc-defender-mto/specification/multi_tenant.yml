@@ -213,6 +213,16 @@ paths:
           level: user-context
           notes:
             - Returned tenant bootstrap state depends on the current MTO selection and the operator's allowed tenant scope.
+        provenance:
+          - source: authenticated-portal-capture-20261030
+            confidence: high
+            notes:
+              - Exact wire GET mto.security.microsoft.com/apiproxy/mtoapi/mtp/sccManagement/mgmt/TenantContext maps to the existing canonical route /mtoapi/mtp/sccManagement/mgmt/TenantContext relative to the declared /apiproxy server base.
+              - Action 2 at 2026-10-30T13:47:17.226Z; evidence request-969524921644c4b92b45; HTTP 200 transport observed, response body decode failed.
+              - One action-attributed API record and three raw transports identify one operation; bootstrap traffic is not separate operation coverage.
+              - All required actions were accounted in this fresh reviewed remedy. The prior no-target prerequisite is closed only for native transport observation.
+              - No usable primary response body was retained. Response structure, logical-error envelope, semantic health and current schema compatibility remain unverified; HTTP 200 alone is not a healthy-response claim.
+              - Existing schemas, examples, safety and authorization descriptions are unchanged. No replay, tenant switch, activation, grant, minimum-role, standalone invocation or whole-spec freshness claim follows.
       responses:
         '200':
           description: OK

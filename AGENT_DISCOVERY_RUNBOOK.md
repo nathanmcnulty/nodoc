@@ -12,10 +12,10 @@ blocker requires deeper background.
 The final controller is offline and report-only. It composes the validated portfolio plan, review assignments, promotion plan, retrospective, benchmark scorecard, and unresolved frontier without opening a browser, mutating the runtime ledger, editing specifications, or creating GitHub actions.
 
 The deterministic controller program has no model identity. The model-backed
-orchestrating session uses exact `gpt-5.6-sol` at high reasoning and owns worker
+orchestrating session uses exact `gpt-6.1-sol` at medium reasoning and owns worker
 assignment, output acceptance, and the final quality gate. Live CDP capture uses
-exact `gpt-5.6-luna` at low reasoning. Offline evidence, safety, scope, and
-promotion review uses exact `gpt-5.6-luna` at `xhigh` by default; `max` is
+exact `gpt-6-luna` at low reasoning. Offline evidence, safety, scope, and
+promotion review uses exact `gpt-6-luna` at `xhigh` by default; `max` is
 allowed when the Sol orchestrator records that the review is unusually ambiguous
 or high risk. Sol reviews the Luna result but does not replace the required Luna
 review artifact. Wrong-model or wrong-reasoning output fails closed.
@@ -250,12 +250,11 @@ documentation-only commit or generated-file refresh as proof that a spec was
 recently rediscovered.
 
 For portfolio-wide refresh work, close the loop with
-`npm run validate:spec-evaluations`. The audit accepts exactly three terminal
-dispositions: a satisfied checked-in novelty frontier, a blocked prerequisite
+`npm run validate:spec-evaluations`. The audit accepts terminal dispositions such as a satisfied checked-in novelty frontier, a blocked prerequisite
 that names the deterministic evidence needed to reopen capture, or a derived
 research surface such as Microsoft Graph Research that is refreshed through
 its owning portal captures. An active or missing frontier keeps the portfolio
-open; file modification time alone never satisfies the gate.
+open; file modification time alone never satisfies the gate. A known-refresh declaration without a novelty target is reported as `refresh-contract-present`, and does not satisfy `--require-evaluated`; a declaration alone remains pending. The checked-in `tools/recipe-evaluations.json` can supply independently reviewed scoped dispositions or explicit blocked prerequisites for each current known-refresh recipe. The audit validates recipe owner, exact publication bytes, unique entries, terminal/prerequisite references, independent-review and Sol-gate references, and stated limitations. Every known-refresh recipe for a spec must have a matching reviewed disposition before that spec can become `evaluated-with-gaps`; active novelty still keeps the gate open. This is a reviewed publication summary, not CI re-verification of private captures. It never upgrades freshness, schema, usage, health, role or execution evidence. Historical executed recipe hashes remain separate from publication-only provenance changes. The audit's recipe capability score describes available actions, not API execution coverage; iframe and seeded replay are optional capabilities rather than universal gaps.
 
 ## Required input
 
@@ -295,7 +294,7 @@ complete immutable capture artifact is accepted evidence; analyze it once and
 reconstruct the report instead of retrying the worker. An incomplete capture is
 not accepted evidence; preserve it, record its hash, and use the seeded retry in
 a new artifact directory. Only when no materialized usable capture or report
-exists after null output, retry the exact `gpt-5.6-luna` low-reasoning capture
+exists after null output, retry the exact `gpt-6-luna` low-reasoning capture
 assignment exactly once with a compact report-first request. If that retry also
 returns null, the Sol orchestrator inspects the artifacts and either issues one
 fresh bounded Luna-low assignment or records a structured blocker; Sol never
@@ -305,6 +304,52 @@ Do not launch a broad wave until a representative probe has materialized
 accepted output. A no-change result is
 not evidence of completeness.
 
+## Evidence preparation and source-review commands
+
+Use the checked-in commands below instead of copying per-run acceptance/apply scripts.
+Keep manifests, raw captures, independent reviews, Sol decisions and command outputs in a fresh external artifact directory. Never rewrite historical receipts or backdate a gate after an application.
+
+1. Resolve variables through `prepareRecipeForRun(recipe, cliVariables)`, where cliVariables is an array of `name=value` strings. The resolved recipe and actual executor action parser/observe-only allowlist must validate before review or browser allocation. Do not independently reproduce variable digests or serialize bound timestamps through PowerShell date objects.
+2. Retain host, declared server base path, canonical operation path and observed wire pathname separately. `matchesCurrentSpec` is a capture-scope indicator, not proof of canonical ownership. Match the exact declared binding and operation before admitting evidence.
+3. Use the private session snapshots and additive navigation descriptors to find actual hrefs and SPA fragment states. Retain snapshot index, frame/target/session, observed control identity and artifact binding. A label, duplicate control or missing href does not authorize an invented URL or click. Descriptors are evidence, never executable actions; observe-only still permits only navigate, reload, wait-ms and capture.
+4. Bind each proposed source change to destination, current beforeSha256 (null only for an absent file), absolute proposal path and proposalSha256. The configured independent reviewer must accept the exact manifest digest. The configured Sol coordinator then makes its own acceptance decision. Static model strings in files are not runtime identity proof.
+
+The canonical source-review CLI has three commands:
+
+~~~text
+node tools/source-review-workflow.mjs prepare MANIFEST REVIEW
+node tools/source-review-workflow.mjs accept ROOT MANIFEST REVIEW SOL BINDING GATE
+node tools/source-review-workflow.mjs apply ROOT MANIFEST REVIEW SOL BINDING GATE RESULT
+~~~
+
+The independent REVIEW must contain decision `accepted`, its configured model/reasoning, and reviewedManifestSha256. `prepare` computes hashes; it does not review or accept anything. SOL contains the coordinator decision `accept`, configured model/reasoning, and exact manifestSha256, reviewSha256 and bindingSha256 from `prepare`. Do not transcribe shortened hashes. Acceptance and application use the same validator and reject changed source/proposal/review bytes, unsafe paths, missing change triples and output collisions before source writes.
+
+Run dependent commands sequentially and stop immediately on a nonzero exit. In PowerShell, check `$LASTEXITCODE` and throw before invoking the next command; a semicolon alone does not stop execution. Application records a durable pending write before touching each source file. Filesystem writes are not a transaction: after an interruption, inspect the last valid progress receipt and current file hashes; do not claim rollback, erase partial output, or continue the browser queue on uncertainty.
+
+### Verified response facts and publication privacy
+
+Before allocating a browser, join retained owning-spec and adjacent captures by exact canonical host, server base, method and operation identity, then reuse eligible complete verified bodies with their original capture time and action attribution after independent error-envelope, schema and publication-privacy review. Request a fresh capture only for a documented state or field objective unavailable in retained evidence, and derive fact summaries from the same canonical JSON-token observations with asserted type/count parity and integer action attribution rather than default types or separate formatters.
+
+Inspect complete responses with the official sidecar loader and actual JSON token types:
+
+~~~text
+npm run evidence:response -- --artifact-dir CAPTURE --evidence-id REQUEST_ID --output EXTERNAL_FACTS_JSON
+npm run validate:response-privacy -- --capture-root CAMPAIGN_LIVE_DIR --output EXTERNAL_SCAN_JSON
+~~~
+
+Outputs are exclusive and must stay outside the repository. `inspect` verifies the raw/API descriptor binding and full sidecar hash/length before JSON.parse. Its facts remain private: even a property name can be a tenant-specific dictionary key. Integer checks use Number.isInteger, JSON date-looking strings remain strings, nullable:true is respected, and empty arrays/null-only fields do not establish populated-item/non-null types. Primitive compatibility is not full schema validation.
+
+Keep complete response-body fingerprints and per-body byte lengths private, including boolean, count and empty-array responses that are easy to guess. Publish evidence IDs, qualified observation context and accepted schema facts; retain integrity bindings in private review artifacts. GraphQL persisted/literal query identity hashes are separate operation selectors and are not removed merely because they look like response digests. Run the publication scan across current source, collections, generated data and built output before finishing; include failed/orphan sidecars in the private digest universe. An exact-fingerprint scan is not a substitute for reviewing actual added scalar values and examples.
+
+### Usage claims and gap remediation
+
+For each private usage-workbook claim, record its field, status, exact evidence references and limitation. Distinguish observed header/query presence from tested requiredness or optionality; published client/scope metadata from requested resource, observed token audience/claims and verified tenant grants; observed principal role from a tested minimum-role contrast. Never retain raw tokens/cookies in the worksheet. Static authored operation-context fields remain partial until the trusted artifact/review/category resolver verifies them; do not upgrade the generated ledger from prose alone.
+
+Report physical actions, mandatory orchestration budget, raw transport records, normalized API records, owned operations and exact action-attributed target observations separately. Compare packetCore digest with packetCore digest, not with the packet-file digest, and execute packet-provided argv exactly.
+
+After a target/accounting gap, compare requested and resolved URLs, actual navigation response, load events and within-document events. didLoad is reserved for a real load event. Keep exact URL success and canonical-redirect gates intact. A retained unvisited href or an explicit reload of a proven bootstrap can justify a newly reviewed passive plan; another unchanged replay cannot. Inspect complete GraphQL/RPC payloads for logical errors and preserve operation-name/query-hash or command-discriminator identity. A successful response for one shared-route command does not establish another command's health.
+
+Preserve every failed run and require an evidence-backed new plan before retrying in a fresh directory. Browser lifecycle remains globally serialized through terminal review/disposition and exact owner shutdown. Do not switch tenants or activate features/trials to fill a gap. Record the precise remaining prerequisite when no deterministic safe remedy is available.
 ## Orchestrator preflight
 
 Run these checks before allocating a capture worker. They are coordinator work,
@@ -346,6 +391,28 @@ not discovery work:
    frontier requires a concrete `reopenCondition`, immutable approval digest,
    and exact state/action mapping. Click-driven targets additionally require
    readiness metadata covering every targeted click.
+   A bounded known-operation refresh is a separate plan kind. Run it with
+   `--require-known-refresh` only when `knownOperationRefresh` binds a bundled
+   canonical method/host/route, resolved entry URL, exact passive action
+   indexes/state, resolved-variable digest, immutable evidence IDs, policy,
+   exact Luna xhigh/max approval digest, and approval expiry. The approval is
+   checked before preflight and browser allocation. A separate `executionDigest`
+   binds the complete resolved recipe JSON, including every action, scope,
+   required flag, target/network scope, limit and timeout; only the cyclic
+   `knownOperationRefresh.approvalDigest` and the documented internal resolver
+   marker `__resolvedVariableBindingsDigest` are excluded. The operation/evidence
+   `refreshDigest` retains its historical meaning. Variable-bearing approvals
+   also record `sourceExecutionDigest` for static raw-source validation. Legacy
+   approvals without the new execution binding remain structurally historical
+   metadata and fail closed for live planning until newly reviewed and renewed.
+   It permits observing
+   passively emitted GET, POST, or other known methods; it does not authorize an
+   API probe or mutation. A changed resolved variable, including a SharePoint
+   tenant host, invalidates the plan and approval.
+   For GraphQL, require an exact operation name, `query` kind, and a reviewed
+   persisted-query or literal-query SHA-256. The operation-definition digest
+   binds those selectors, so a same-name request with a changed hash is not a
+   match. Never treat a mutation or subscription as a read refresh.
 4. Require `npm run browser:cdp:status -- --profile-key <key>` to report the
    manifest-owned browser as healthy, then run the portal driver against that
    exact loopback endpoint. Its recipe-gated preflight verifies browser metadata,
@@ -408,6 +475,38 @@ establish a promotable response shape.
 Known localization `.resjson` resources are static portal assets and remain in
 the suppressed evidence bucket even when their path falls under an in-scope API
 prefix.
+
+Track freshness, discovery, schema, and usage as independent axes. Removing a
+frontier, missing canonical health, `blocked`, or `no-target-signal` cannot make
+another axis satisfied. Passive action-attributed traffic is usage `observed`;
+only an evidenced execution of a published request/auth workflow is
+`execution-tested`. Error statuses are useful error evidence but do not prove
+healthy usability.
+
+The capture stores a small sanitized response preview in the normal JSON record
+and a separate complete-body sidecar only when decoding, structured redaction,
+bounded write, and final atomic rename succeed. The descriptor binds the
+evidence ID, repository-independent relative path, SHA-256, length, and state.
+The loader rejects traversal, tampering, oversize bodies, invalid UTF-8, and
+descriptor mismatches before analysis. `truncated`, `oversize`,
+`decode-failed`, and `incomplete-write` remain explicit. A write failure makes
+the capture incomplete; a preview never establishes complete schema evidence.
+Complete sidecars are written only for requests inside the current spec host
+and path scope; adjacent traffic is never hydrated as current-spec evidence.
+
+`representativeStates` may describe empty, populated, detail, error, or
+pagination states, each bound to an exact action, page, target, evidence ID,
+and prerequisite. States are representative, not exhaustive. An empty result
+may support an empty example but never a populated-item schema. The generated
+operation context ledger enumerates every bundled operation and exposes
+unknown/partial/observed/execution-tested coverage for workflow, auth headers,
+audience, prerequisites, request examples, errors, and pagination. Do not infer
+least privilege.
+Static authored examples and unchecked digest annotations remain `partial`.
+`observed` requires a trusted resolver to verify the immutable artifact,
+accepted review, and exact field category. `execution-tested` additionally
+requires execution evidence for the published request and authentication
+workflow.
 
 ### Protected PR transport troubleshooting
 
@@ -608,6 +707,27 @@ healthy completed capture may be analyzed again without reopening the browser.
    differs or any listed escalation trigger occurs.
    `measurements` compares UTF-8 bytes only and intentionally does not claim an
    exact tokenizer saving.
+
+   Review packets and cached verdicts use stable keys over immutable evidence
+   hashes, effective diff hashes, scope, policy, and requested model/reasoning.
+   Reuse preserves the original assignment ID/digest, model/reasoning, worker
+   result digest, and capture provenance. A current Sol gate records why that
+   unchanged result applies; it never relabels the cached artifact as a fresh
+   execution. Changed bindings invalidate the cache. Only critical safety,
+   accounting, privacy, or schema defects block the next allocation; ordinary
+   retrospective lessons do not. Every worker result must explicitly provide
+   `processImprovementDisposition`; `not-required` is valid when no critical
+   defect requires a repair, and omission is never silently filled in.
+
+   Capture reports must expose top-level `assignmentId`, `assignmentDigest` and `workerId`, plus the actual runtime model/reasoning fields or a top-level runtime-role object; nested assignment aliases or prose alone are insufficient. Before source review, verify those fields against the assignment and exact packet/argv bindings. The independent terminal review must bind external `terminal.workerReportSha256` and `terminal.integrityReportSha256`, and identify the exact packet, assignment and capture artifacts reviewed. A report does not contain its own SHA; the persisted report hash is recorded by its collector/coordinator and independent review.
+
+   Record the observed driver OS exit code and how it was obtained, with retained stdout/stderr artifact references or hashes when available. If the exit was not observed, record `null` and a reason. Keep process exit and artifact `captureComplete`/discovery status separate: later complete artifacts never establish exit 0 or process success, and a lost collector result must remain a documented limitation.
+
+   For every staged or newly registered known-refresh recipe, run the public discovery CLI with the exact `--recipe` path, exact private `--var` argument array, `--phase plan --require-known-refresh --json` and the applicable role/ceiling flags. Retain exact argv, observed exit code, selected recipe path/hash and JSON plan output. Resolver-only `prepareRecipeForRun`/`buildKnownOperationRefreshPlan` checks are helper validation, not executable CLI-readiness proof; no verifier, driver or browser allocation follows a failed plan.
+
+   For OData keyed/function routes, a network body-capture prefix names the operation base without an opening parenthesis: the matcher supplies the exact operation boundary. Before live capture, check the resolved filters against retained native request URLs with the actual body-scope helper and a no-write sidecar stub; verify the intended URLs enter the sidecar branch and neighboring operation names stay excluded. Keep those URLs and variable values private. A successful CLI plan does not by itself prove response-body scope selection; this offline check authors no API request and supplies no body/schema evidence.
+
+   For each target, record any declared expected status set separately from the observed HTTP status, response-body presence, the actual unchanged machine `bodyCapture.state`, and whether an error envelope was inspected. Describe proven no-content only when the observed response establishes it, such as an observed 204; distinguish absent/unavailable body observations, whose schema remains unknown. These presence descriptions do not add or rename runtime capture-state values. If no expectation is declared, mark it unknown; expectations are not observed guarantees. An oversize descriptor has no body sidecar (path/hash are null), supplies no complete-body or schema evidence, and does not relax the fixed capture ceiling. Keep verified error bodies and any retained incomplete-response bytes private; incomplete-body health/schema remains unknown. Apply the same fields to any private worksheet, without adding response values, fingerprints or lengths to public output.
 
 2. Choose a unique, fresh artifact directory outside the repository for every
    execution, including reruns after authentication:
@@ -867,7 +987,7 @@ CPU reduction only and does not claim downstream token savings.
    artifact directory rather than patching a live run interactively.
 - Treat `candidate-handoff.json` and the driver's `recommendedNextAction` as the
    work queue. Do not create a second speculative mapping from raw bundle output.
-- Use exact `gpt-5.6-luna` at low reasoning for bounded live capture and exact
+- Use exact `gpt-6-luna` at low reasoning for bounded live capture and exact
   Luna at `xhigh` for offline review; the Sol orchestrator may select `max` for
   an unusually ambiguous or high-risk review. Complete captures use analyze-only
   recovery; incomplete captures use a seeded retry in a new directory. A null
@@ -1158,7 +1278,7 @@ gate. Do not increase capture-worker reasoning for routine command execution or
 artifact summarization.
 
 A review worker result is not accepted without a nested `qualityGate` record
-from exact `gpt-5.6-sol` at high reasoning. The gate binds the assignment ID and
+from exact `gpt-6.1-sol` at medium reasoning. The gate binds the assignment ID and
 digest plus the SHA-256 digest of the worker result with `qualityGate` omitted,
 records `decision: "accept"` and an ISO `reviewedAt`, and is validated by the
 control plane. A pending, rejected, wrong-model, wrong-reasoning, stale, or

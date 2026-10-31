@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 1,
+  "kind": "known-operation-refresh-approval-source",
+  "status": "pending-fresh-independent-review",
+  "specId": "viva-engage",
+  "refreshDate": "2026-10-29",
+  "refreshDigest": "dff5102dccbea0adbb02882f8a5626c277dc8975fc3c356cb6fb70ca684e99ce",
+  "recipePath": "tools/capture-recipes/viva-engage-tenant-config-known-refresh.json",
+  "proposedRecipeSha256": "67ce417b761f3524da978d5d1319ca3e121c8d6efa162174c16f912ae8472412",
+  "baselineRecipeSha256": "b90fbe32e78613a959027ad26fa72068561af09e022c2670879c35acd4475577",
+  "specification": {
+    "path": "specifications/nodoc-viva-engage/specification/openapi.yml",
+    "sha256": "fd952b16b42a96f2388305def6257855f9441d7960a9c62de802e594003c040f"
+  },
+  "retainedSource": {
+    "path": "tools/frontier-approvals/viva-engage-tenant-config-known-refresh-source.json",
+    "sha256": "8b96def6b06d3696a4c270c6c699b83f7e2f921d19300462d57e2a39e0838412"
+  },
+  "retainedPlanningEvidence": {
+    "path": "private-artifacts/viva-engage-token-helper-20260831T060742025Z/api-records.json",
+    "sha256": "0c83d7966493c6549c1b415120f7b0c11aa91e4d8231e5f8b5f00d1bd2c107ba",
+    "recordIndex": 74,
+    "historicOnly": true,
+    "notCurrentProof": true,
+    "available": true,
+    "actualSha256": "0c83d7966493c6549c1b415120f7b0c11aa91e4d8231e5f8b5f00d1bd2c107ba"
+  },
+  "target": {
+    "status": "active",
+    "method": "POST",
+    "host": "engage.cloud.microsoft",
+    "routes": [
+      "/graphql"
+    ],
+    "operationNames": [
+      "TenantConfigurationAndRoles"
+    ],
+    "operationKind": "query",
+    "persistedQuerySha256Hashes": [
+      "b39c32dbf389c23464c593006f92eac2105339b57a0827705431f28981f35378"
+    ],
+    "literalQuerySha256Hashes": [],
+    "operationDefinitionDigest": "fbfc664908df449fe97d97b8b2224cda53e318446e65bec6cb55d3389b174ff6",
+    "state": "Viva Engage admin landing after exact passive navigation and reload",
+    "actionIndexes": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "approvalExpiresAt": "2026-10-31T08:00:00.000Z",
+    "variableBindingsDigest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "documentationObjectives": [
+      "freshness",
+      "response-example",
+      "schema-evidence",
+      "usage-observation"
+    ],
+    "evidenceIds": [
+      "historic-viva-tenant-config-record-74"
+    ]
+  },
+  "policyBindings": [
+    {
+      "path": "PORTAL_DISCOVERY_AGENT_PROMPT.md",
+      "sha256": "57b6acf49eac1afc6e51b014039a6cba694adeeb058b13fa549f0610e20ae8b5"
+    },
+    {
+      "path": "AGENT_DISCOVERY_RUNBOOK.md",
+      "sha256": "4ef12fc4e271e17094dbb5da447b6f535bf2a63b457089ce5bd7f6876126b079"
+    },
+    {
+      "path": "AGENT_DISCOVERY_PLAYBOOK.md",
+      "sha256": "c12b9cecf0a3a85e8c760a8e7b310c0d0528f41cb65c8fe2c95eb420ca3fb119"
+    },
+    {
+      "path": "tools/portal-discovery-model-policy.mjs",
+      "sha256": "5d4b65b60d21a5b7431828b41694c49e85c58fb1497a2c3fb1cf53483066c346"
+    },
+    {
+      "path": "tools/portal-discovery-operation-safety.mjs",
+      "sha256": "425a1466f41aed855a0871548ee464670c350ce9b2954eba0e220c9a38d86ca3"
+    },
+    {
+      "path": "tools/discovery-safety.mjs",
+      "sha256": "e406c0fcd3401092ab2ef8318d41c17bb72956eec84638f2a00b9535dda8c8a1"
+    }
+  ],
+  "safety": {
+    "uiActions": "navigate/wait/reload/capture only",
+    "apiProbeAuthorized": false,
+    "mutationAuthorized": false,
+    "deviceCodeAuthorized": false,
+    "auth": "cached/WAM or normal browser only",
+    "graphql": "exact query operation name and persisted SHA256; HTTP200 GraphQL errors are error evidence"
+  },
+  "coverage": {
+    "primaryWitness": "POST /graphql TenantConfigurationAndRoles query b39c32dbf389c23464c593006f92eac2105339b57a0827705431f28981f35378",
+    "boundedRepresentativeStates": [
+      "Viva Engage admin landing and passive reload"
+    ],
+    "uncoveredFamilies": [
+      "other GraphQL operation hashes",
+      "admin-role states",
+      "external networks",
+      "feature management",
+      "token-helper body"
+    ],
+    "claim": "bounded known query refresh; no complete-spec claim"
+  },
+  "requiredLiveProof": [
+    "all action indexes complete",
+    "action-attributed exact method/host/route/GraphQL name/kind/hash",
+    "complete sanitized hash-bound response sidecar",
+    "HTTP 2xx and data without GraphQL errors for healthy outcome",
+    "source-request observedAt",
+    "all uncovered families dispositioned"
+  ]
+}

@@ -5,10 +5,26 @@ import { fileURLToPath } from "node:url";
 
 import {
   buildSpecQuality,
+  buildOperationContextLedger,
+  buildSpecRouteInventory,
   getNormalizedOperationContextRecords,
   loadBundledSpecification,
   validateOperationIds,
 } from "../spec-quality-lib.mjs";
+
+test("operation context ledger enumerates every bundled operation and exposes conservative usage fields", async () => {
+  const [ledger, routes] = await Promise.all([buildOperationContextLedger(), buildSpecRouteInventory()]);
+  assert.equal(ledger.schemaVersion, 2);
+  assert.equal(ledger.specifications.length, routes.length);
+  const expected = routes.reduce((sum, spec) => sum + spec.operations.length, 0);
+  assert.equal(ledger.summary.operationCount, expected);
+  assert.equal(ledger.summary.contextOperationCount + ledger.summary.missingContextOperationCount, expected);
+  const operation = ledger.specifications.flatMap((spec) => spec.operations).find(Boolean);
+  assert.deepEqual(Object.keys(operation.contextCompleteness).sort(), ["audience", "authHeaders", "errors", "overall", "pagination", "prerequisites", "requestExamples", "workflow"]);
+  assert.equal(operation.usage.leastPrivilege.status, "unknown");
+  const operations = ledger.specifications.flatMap((spec) => spec.operations);
+  assert.equal(operations.some((entry) => entry.usage.status === "observed" || Object.values(entry.contextCompleteness).includes("observed")), false);
+});
 
 test("operation context accepts agent-oriented permissions, pagination, and troubleshooting guidance", () => {
   const records = getNormalizedOperationContextRecords({
@@ -44,6 +60,16 @@ test("operation context accepts agent-oriented permissions, pagination, and trou
   assert.throws(() => getNormalizedOperationContextRecords({
     paths: { "/items": { get: { "x-nodoc-operation-context": { pagination: { style: "guess" } } } } },
   }, "fixture"), /invalid style/);
+});
+
+test("annotation provenance requires complete digest syntax but remains untrusted until resolved", () => {
+  const bound = getNormalizedOperationContextRecords({
+    paths: { "/items": { get: { "x-nodoc-operation-context": { provenance: [{ source: "capture", confidence: "high", evidenceId: "request-1", artifactSha256: "a".repeat(64), reviewDigest: "b".repeat(64) }] } } } },
+  }, "fixture");
+  assert.equal(bound.operations[0].operationContext.provenance[0].artifactSha256, "a".repeat(64));
+  assert.throws(() => getNormalizedOperationContextRecords({
+    paths: { "/items": { get: { "x-nodoc-operation-context": { provenance: [{ source: "capture", confidence: "high", evidenceId: "request-1" }] } } } },
+  }, "fixture"), /immutable observation provenance/);
 });
 
 test("Entra IAM has a stable unique operation ID for every operation", async () => {

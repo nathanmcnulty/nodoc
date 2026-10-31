@@ -627,14 +627,12 @@ paths:
 
   /_api/SPO.SPOContentSecurityPolicyConfiguration:
     get:
+      x-nodoc-live-capture:
+        source: "Observe-only portal refresh 2026-10-29; sharepoint-admin-02/capture; request-d17dc2215ed76c860c2e; HTTP 200"
+        browsedPages: ["Advanced > Script sources"]
       tags: [Settings]
       summary: Get allowed script sources
-      description: |
-        Returns the SharePoint content-security-policy script-source
-        configuration shown under Advanced > Script sources. The targeted live
-        tenant returned an empty `Items` collection. The item member names are
-        additionally corroborated by the shipped admin-center client bundle,
-        but populated values have not yet been observed.
+      description: "Returns the SharePoint content-security-policy script-source\nconfiguration shown under Advanced > Script sources. The targeted live\ntenant returned an empty `Items` collection. The item member names are\nadditionally corroborated by the shipped admin-center client bundle,\nbut populated values have not yet been observed.\nA bounded refresh on 2026-10-29 reconfirmed HTTP 200 with an empty\n`Items` array. The complete sanitized body was hash-verified.\n"
       operationId: SharePointAdmin.GetContentSecurityPolicyConfiguration
       x-nodoc-operation-context:
         surface: Advanced > Script sources
@@ -649,6 +647,12 @@ paths:
           - Treat Source, Modified, and Manual as optional until a populated live response confirms their presence and nullability.
           - The related UpdateScriptSources POST is intentionally not documented because the current evidence does not include an intercepted or reversibly verified write.
         provenance:
+          - source: authenticated-portal-capture-20261029
+            confidence: high
+            notes:
+              - "Reload action 2 returned HTTP 200 application/json at 2026-10-29T17:42:05.691Z; evidence request-d17dc2215ed76c860c2e."
+              - "Complete sanitized body privately hash-verified."
+              - "Items was empty; populated item values, standalone client execution, and least privilege remain unverified."
           - source: authenticated-portal-capture
             confidence: high
             notes:

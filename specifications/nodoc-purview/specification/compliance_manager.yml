@@ -55,6 +55,18 @@ paths:
 
         '404':
           $ref: common.yml#/components/responses/NotFound
+      x-nodoc-operation-context:
+        surface: Purview Home passive response observation
+        provenance:
+          - source: purview-home-posture-response-disposition-reviewed-20261031
+            confidence: high
+            notes:
+              - "A bounded passive Purview Home capture observed the exact declared POST operation at reload action 2. The normalized API count was 1; raw transport count was 3, with 1 bootstrap record(s) excluded as positive action witnesses. Counts are transport observations, not new API identities."
+              - "Captured at 2026-10-31T09:54:16.877Z; action-attributed evidence request-23ca8ae46cdb9b9bdfaa. Selected-page root-session/request-frame continuity and the same-action Home snapshot were verified; private native selected-tenant proof preceded the bound capture, with no tenant switching."
+              - "Discovery artifacts completed all six counted actions, while the overall run remained blocked on the primary response expectation. The independently retained driver child and collector CLI exit codes were both 0; process completion is separate from API health."
+              - "This POST was sent passively by the native page; no POST or API request was authored or replayed by the capture plan. Effects, rollback safety and absence of tenant changes were not determined, and it is not classified as read-only or replay-safe by this observation."
+              - "The HTTP 200 complete JSON response was compatible with existing declared response property/item types. Response schema and legacy examples are unchanged; request-body shape, business scores/state, availability and minimum permissions are not established."
+              - "Captured values, tenant/user identifiers, credentials, response fingerprints and body lengths are withheld. Passive background effects and absence of tenant changes remain undetermined."
 
   /cpm/v1.0/ApplicationUserContext:
     get:
@@ -110,6 +122,28 @@ paths:
 
         '404':
           $ref: common.yml#/components/responses/NotFound
+      x-nodoc-operation-context:
+        surface: Microsoft Purview portal (retained native navigation)
+        workflows:
+          - Observe traffic emitted by the normal authenticated portal during the originally recorded native navigation; reuse retained evidence for offline documentation review.
+        requestShapes:
+          - name: retained-native-get
+            bodyKind: none
+            notes: "Observed query parameter names: none recorded. Values are withheld; presence does not test requiredness and existing parameter declarations are unchanged."
+        availability:
+          level: user-context
+          notes:
+            - Historical user-session observation only; no feature activation, tenant switch, role/grant/minimum-permission inference or standalone usage validation.
+        provenance:
+          - source: retained-native-portal-evidence-reviewed-20261030
+            confidence: high
+            notes:
+              - Exact declared GET purview.microsoft.com/apiproxy/cpm/v1.0/ApplicationUserContext maps to canonical /cpm/v1.0/ApplicationUserContext; current declared server/base/path and original request binding were checked privately.
+              - Retained purview-01 action 11 at 2026-10-29T22:15:42.813Z; evidence request-3c2bd9b6b7dd19c34b46; HTTP 200 complete body privately verified.
+              - Retained purview-remediation-02 action 11 at 2026-10-30T12:28:45.790Z; evidence request-768a6075398bf61e6f75; HTTP 200 complete body privately verified.
+              - Original capture dates and action attribution are retained. Reusing these bodies for offline review does not create a fresh native observation or clear any historical run-level accounting gaps.
+              - HTTP 200, complete body bytes and limited type checks do not establish application/business success, feature availability, entitlement, provisioning, effective permissions or minimum roles.
+              - Captured scalar values, role/feature-map keys, credentials, tenant data, response fingerprints, byte lengths and examples are withheld. No new route or requiredness, enum, format, authentication or standalone execution claim follows.
 
   /cpm/v1.0/Assessments/List:
     post:

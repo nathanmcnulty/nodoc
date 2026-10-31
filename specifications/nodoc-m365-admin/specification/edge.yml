@@ -83,6 +83,24 @@ paths:
         Retrieve extension feedback metadata surfaced by the Edge enterprise
         extensions management experience.
       operationId: Edge.GetExtensionFeedback
+      x-nodoc-live-capture:
+        source: authenticated Microsoft 365 admin center passive representative states
+        browsedPages:
+          - Microsoft 365 admin center
+      x-nodoc-operation-context:
+        surface: Microsoft 365 admin center
+        workflows:
+          - Observe native requests during the approved passive representative portal states.
+        availability:
+          level: user-context
+          notes:
+            - One authenticated portal session; standalone execution, parameter requiredness, effective grants and minimum roles are not established.
+        provenance:
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - "GET admin.cloud.microsoft/fd/edgeenterpriseextensionsmanagement/api/extensions/extensionFeedback; HTTP 200; action 12; observed 2026-10-29T20:33:56.425Z; complete response (privately hash-verified)."
+              - Current complete response shape was observed in the captured portal session; no broader operation or state coverage is implied.
       tags: [Edge]
       responses:
         '200':
@@ -90,8 +108,11 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                description: Extension feedback payload. Exact schema pending.
+                oneOf:
+                  - type: object
+                    description: Extension feedback payload. Exact schema pending.
+                  - type: array
+                    items: {}
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -108,6 +129,24 @@ paths:
         Retrieve feature management profiles used by the Edge enterprise extensions
         management experience.
       operationId: Edge.ListFeatureManagementProfiles
+      x-nodoc-live-capture:
+        source: authenticated Microsoft 365 admin center passive representative states
+        browsedPages:
+          - Microsoft 365 admin center
+      x-nodoc-operation-context:
+        surface: Microsoft 365 admin center
+        workflows:
+          - Observe native requests during the approved passive representative portal states.
+        availability:
+          level: user-context
+          notes:
+            - One authenticated portal session; standalone execution, parameter requiredness, effective grants and minimum roles are not established.
+        provenance:
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - "GET admin.cloud.microsoft/fd/edgeenterpriseextensionsmanagement/api/featureManagement/profiles; HTTP 200; action 12; observed 2026-10-29T20:33:56.426Z; complete response (privately hash-verified)."
+              - Current complete response shape was observed in the captured portal session; no broader operation or state coverage is implied.
       tags: [Edge]
       responses:
         '200':
@@ -115,8 +154,13 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                description: Feature management profiles payload. Exact schema pending.
+                oneOf:
+                  - type: object
+                    description: Feature management profiles payload. Exact schema pending.
+                  - type: array
+                    items:
+                      type: object
+                      additionalProperties: true
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -212,6 +256,29 @@ paths:
       description: >-
         Retrieve release information for the requested Edge channel.
       operationId: Edge.ListReleaseVersions
+      x-nodoc-live-capture:
+        source: authenticated Microsoft 365 admin center passive representative states
+        browsedPages:
+          - Microsoft 365 admin center
+      x-nodoc-operation-context:
+        surface: Microsoft 365 admin center
+        workflows:
+          - Observe native requests during the approved passive representative portal states.
+        availability:
+          level: user-context
+          notes:
+            - One authenticated portal session; standalone execution, parameter requiredness, effective grants and minimum roles are not established.
+        provenance:
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - "GET admin.cloud.microsoft/fd/edgeenterpriseextensionsmanagement/api/version/releases; HTTP 200; action 12; observed 2026-10-29T20:33:54.317Z; complete response (privately hash-verified)."
+              - Current complete response shape was observed in the captured portal session; no broader operation or state coverage is implied.
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - "GET admin.cloud.microsoft/fd/edgeenterpriseextensionsmanagement/api/version/releases; HTTP 200; action 12; observed 2026-10-29T20:33:54.317Z; complete response (privately hash-verified)."
+              - Current complete response shape was observed in the captured portal session; no broader operation or state coverage is implied.
       tags: [Edge]
       parameters:
         - name: channel
@@ -225,8 +292,13 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                description: Edge release version payload. Exact schema pending.
+                oneOf:
+                  - type: object
+                    description: Edge release version payload. Exact schema pending.
+                  - type: array
+                    items:
+                      type: object
+                      additionalProperties: true
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -243,6 +315,24 @@ paths:
         Retrieve the current Edge update metadata used by the enterprise extensions
         management experience.
       operationId: Edge.GetVersionUpdate
+      x-nodoc-live-capture:
+        source: authenticated Microsoft 365 admin center passive representative states
+        browsedPages:
+          - Microsoft 365 admin center
+      x-nodoc-operation-context:
+        surface: Microsoft 365 admin center
+        workflows:
+          - Observe native requests during the approved passive representative portal states.
+        availability:
+          level: user-context
+          notes:
+            - One authenticated portal session; standalone execution, parameter requiredness, effective grants and minimum roles are not established.
+        provenance:
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - "GET admin.cloud.microsoft/fd/edgeenterpriseextensionsmanagement/api/version/update; HTTP 200; action 12; observed 2026-10-29T20:33:56.425Z; complete response (privately hash-verified)."
+              - Current complete response shape was observed in the captured portal session; no broader operation or state coverage is implied.
       tags: [Edge]
       responses:
         '200':
@@ -250,8 +340,13 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                description: Edge update metadata payload. Exact schema pending.
+                oneOf:
+                  - type: object
+                    description: Edge update metadata payload. Exact schema pending.
+                  - type: array
+                    items:
+                      type: object
+                      additionalProperties: true
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -293,6 +388,24 @@ paths:
         Retrieve the Microsoft Edge browser policies managed through the
         Office Policy Admin service.
       operationId: Edge.GetBrowserPolicies
+      x-nodoc-live-capture:
+        source: authenticated Microsoft 365 admin center passive representative states
+        browsedPages:
+          - Microsoft 365 admin center
+      x-nodoc-operation-context:
+        surface: Microsoft 365 admin center
+        workflows:
+          - Observe native requests during the approved passive representative portal states.
+        availability:
+          level: user-context
+          notes:
+            - One authenticated portal session; standalone execution, parameter requiredness, effective grants and minimum roles are not established.
+        provenance:
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - "GET admin.cloud.microsoft/fd/OfficePolicyAdmin/v1.0/edge/policies; HTTP 200; action 12; observed 2026-10-29T20:33:56.425Z; complete response (privately hash-verified)."
+              - Current complete response shape was observed in the captured portal session; no broader operation or state coverage is implied.
       tags: [Edge]
       responses:
         '200':
@@ -300,8 +413,13 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                description: pending - Edge browser policies
+                oneOf:
+                  - type: object
+                    description: pending - Edge browser policies
+                  - type: array
+                    items:
+                      type: object
+                      additionalProperties: true
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 

@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "kind": "known-operation-refresh-approval-source",
+  "status": "pending-exact-luna-review",
+  "specId": "viva-engage",
+  "portal": "Viva Engage",
+  "recipeCoreSha256": "34c9a1c54d466509b716920e3588b0ceed14861cc0f9d7ee0da05fe9a49204f0",
+  "liveValidationPlanSha256": "aad3092bbbbd88fea51fe8ffad51316c9eefd7d8c2e8f57e15b094f67de29d5d",
+  "implementationSolQualityGateSha256": "ed521a1636a772ac47f625c0e732a18b3b8981e066a004fb2f54a8c45efa7c32",
+  "finalImplementationManifestSha256": "faaf6e0d8aa049e055e13cbcad8677c070a1f999e4c4fba6b8c24101e01ddf33",
+  "specification": {
+    "path": "specifications/nodoc-viva-engage/specification/openapi.yml",
+    "sha256": "fd952b16b42a96f2388305def6257855f9441d7960a9c62de802e594003c040f"
+  },
+  "retainedPlanningEvidence": {
+    "path": "private-artifacts/viva-engage-token-helper-20260831T060742025Z/api-records.json",
+    "sha256": "0c83d7966493c6549c1b415120f7b0c11aa91e4d8231e5f8b5f00d1bd2c107ba",
+    "recordIndex": 74,
+    "historicOnly": true,
+    "notCurrentProof": true
+  },
+  "target": {
+    "status": "active",
+    "method": "POST",
+    "host": "engage.cloud.microsoft",
+    "routes": [
+      "/graphql"
+    ],
+    "operationNames": [
+      "TenantConfigurationAndRoles"
+    ],
+    "operationKind": "query",
+    "persistedQuerySha256Hashes": [
+      "b39c32dbf389c23464c593006f92eac2105339b57a0827705431f28981f35378"
+    ],
+    "literalQuerySha256Hashes": [],
+    "operationDefinitionDigest": "fbfc664908df449fe97d97b8b2224cda53e318446e65bec6cb55d3389b174ff6",
+    "state": "Viva Engage admin landing after exact passive navigation and reload",
+    "actionIndexes": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "approvalExpiresAt": "2026-10-04T18:00:00.000Z",
+    "variableBindingsDigest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "documentationObjectives": [
+      "freshness",
+      "response-example",
+      "schema-evidence",
+      "usage-observation"
+    ],
+    "evidenceIds": [
+      "historic-viva-tenant-config-record-74"
+    ]
+  },
+  "safety": {
+    "uiActions": "passive only",
+    "apiProbeAuthorized": false,
+    "mutationAuthorized": false,
+    "deviceCodeAuthorized": false,
+    "auth": "cached/WAM or normal browser only"
+  },
+  "requiredLiveProof": [
+    "all required action indexes completed",
+    "exact action-attributed method/host/route target",
+    "HTTP 2xx without GraphQL errors where applicable",
+    "complete sanitized hash-bound scoped sidecar",
+    "observedAt timestamp from source request"
+  ]
+}

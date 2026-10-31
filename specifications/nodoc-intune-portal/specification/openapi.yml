@@ -177,7 +177,11 @@ components:
         recentResources:
           $ref: '#/components/schemas/GenericObject'
         serviceHealthAlerts:
-          $ref: '#/components/schemas/GenericObject'
+          description: Observed as an empty array in the current capture; item structure is not established.
+          oneOf:
+            - $ref: '#/components/schemas/GenericObject'
+            - type: array
+              items: {}
       additionalProperties: true
       example:
         firstPageSubscriptions: {}
@@ -194,6 +198,14 @@ components:
     SettingsSelectResponse:
       type: object
       description: Object keyed by requested persistent storage namespace.
+      properties:
+        Microsoft_Intune_EnrollmentPersistentStorage:
+          type: object
+          nullable: true
+          description: |
+            Enrollment settings namespace observed in a successful read-only response captured
+            on 2026-08-31. Keys remain open because they are portal-state dependent.
+          additionalProperties: true
       additionalProperties:
         type: object
         additionalProperties: true
@@ -250,6 +262,21 @@ paths:
           - "https://intune.microsoft.com/#view/Microsoft_Intune_Enrollment/ReportingMenu/~/windowsQualityUpdatesReactView"
           - "https://intune.microsoft.com/#view/Microsoft_Intune_Enrollment/ReportingMenu/~/windowsFeatureUpdatesReactView"
       operationId: IntunePortal.Portal.GetEarlyUserData
+      x-nodoc-operation-context:
+        surface: "Intune admin center > Tenant administration"
+        workflows:
+          - "Observe early portal bootstrap data during passive portal reload."
+        availability:
+          level: user-context
+          notes:
+            - "Observed in the captured portal user context; this does not establish activation or broader feature availability."
+        provenance:
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - "Evidence request-c05406b1970961c31c6f; HTTP 200; POST intune.microsoft.com/api/Portal/GetEarlyUserData; action 2; observed 2026-10-29T20:20:41.994Z; complete response (privately hash-verified)."
+              - "Logical error-key scan found no error envelope; response state values were not interpreted as errors."
+              - "This POST was passively observed; it was not replayed, authored, or probed."
       requestBody:
         required: true
         content:
@@ -284,6 +311,22 @@ paths:
           - "https://intune.microsoft.com/#view/Microsoft_Intune_Enrollment/ReportingMenu/~/windowsQualityUpdatesReactView"
           - "https://intune.microsoft.com/#view/Microsoft_Intune_Enrollment/ReportingMenu/~/windowsFeatureUpdatesReactView"
       operationId: IntunePortal.Portal.GetLazyUserData
+      x-nodoc-operation-context:
+        surface: "Intune admin center > Tenant administration"
+        workflows:
+          - "Observe deferred portal bootstrap data during passive portal reload."
+        availability:
+          level: user-context
+          notes:
+            - "Observed in the captured portal user context; this does not establish activation or broader feature availability."
+        provenance:
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - "Evidence request-534048cf844956a61093; HTTP 200; POST intune.microsoft.com/api/Portal/GetLazyUserData; action 2; observed 2026-10-29T20:20:42.633Z; complete response (privately hash-verified)."
+              - "Logical error-key scan found no error envelope; response state values were not interpreted as errors."
+              - "This POST was passively observed; it was not replayed, authored, or probed."
+              - "The observed serviceHealthAlerts value was an empty array; its item type remains unspecified."
       requestBody:
         required: true
         content:
@@ -313,6 +356,32 @@ paths:
         Confirmed live for Intune enrollment, Intune devices, Azure Monitor, and PIM-related
         extensions while browsing tenant administration blades.
       operationId: IntunePortal.Experimentation.GetExtensionVariants
+      x-nodoc-live-capture:
+        source: authenticated Intune admin center passive reload
+        browsedPages:
+          - "Intune admin center > Tenant administration"
+      x-nodoc-operation-context:
+        surface: "Intune admin center > Tenant administration"
+        workflows:
+          - "Observe extension variants requested during the later passive portal reload."
+        availability:
+          level: user-context
+          notes:
+            - "Observed in the captured portal user context; this does not establish activation or broader feature availability."
+        provenance:
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - "Evidence request-21161c7605d1a86040a8; HTTP 200; GET intune.microsoft.com/api/Experimentation/GetExtensionVariants; action 2; observed 2026-10-29T20:20:43.846Z; complete response (privately hash-verified)."
+              - "Logical error-key scan found no error envelope; response state values were not interpreted as errors."
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - "Evidence request-3b9a2672e42a09b9cc50; HTTP 200; GET intune.microsoft.com/api/Experimentation/GetExtensionVariants; action 2; observed 2026-10-29T20:20:43.552Z; complete response (privately hash-verified)."
+              - "Logical error-key scan found no error envelope; response state values were not interpreted as errors."
+              - "The initial navigation did not report didLoad=true; the later reload at action index 2 is the response witness."
+              - "No exact top-level logical error key was present."
+              - "Observed query-name presence does not establish parameter requiredness."
       parameters:
         - $ref: '#/components/parameters/extension'
         - $ref: '#/components/parameters/extensionVersion'
@@ -344,6 +413,26 @@ paths:
           - "https://intune.microsoft.com/#view/Microsoft_Intune_Enrollment/ReportingMenu/~/windowsQualityUpdatesReactView"
           - "https://intune.microsoft.com/#view/Microsoft_Intune_Enrollment/ReportingMenu/~/windowsFeatureUpdatesReactView"
       operationId: IntunePortal.Settings.Select
+      x-nodoc-operation-context:
+        surface: "Intune admin center > Tenant administration"
+        workflows:
+          - "Observe persistent-settings response during passive portal reload."
+        availability:
+          level: user-context
+          notes:
+            - "Observed in the captured portal user context; this does not establish activation or broader feature availability."
+        provenance:
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - "Evidence request-0b2d44254a259f44c2bb; HTTP 200; POST intune.microsoft.com/api/Settings/Select; action 2; observed 2026-10-29T20:20:45.896Z; complete response (privately hash-verified)."
+              - "Logical error-key scan found no error envelope; response state values were not interpreted as errors."
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - "Evidence request-dc51fb79246b1cc9f2d4; HTTP 200; POST intune.microsoft.com/api/Settings/Select; action 2; observed 2026-10-29T20:20:49.304Z; complete response (privately hash-verified)."
+              - "Logical error-key scan found no error envelope; response state values were not interpreted as errors."
+              - "These are two passive response observations of one operation; neither POST was replayed, authored, or probed."
       requestBody:
         required: true
         content:

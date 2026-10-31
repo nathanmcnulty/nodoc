@@ -165,3 +165,98 @@ test("target snapshots are sorted and carry schema and relationship metadata", (
   assert.equal(registry.snapshot()[0].parentFrameId, "root-frame");
   assert.equal(registry.snapshot()[0].targetId, "a-target");
 });
+
+test("target info delivered on root transport updates the matching child target", () => {
+  const registry = new CdpAttributionRegistry(
+    { id: "root-target", title: "Root page", type: "page", url: "https://portal.example.test/home" },
+    context("01-home", "https://portal.example.test/home", 0),
+  );
+  registry.updateTarget(null, { targetId: "root-target", title: "Root page", type: "page", url: "https://portal.example.test/home" });
+  registry.registerSession("child-session", {
+    targetId: "child-target", title: "Old child", type: "iframe", url: "https://portal.example.test/old-child",
+  });
+
+  registry.updateTarget(null, {
+    targetId: "child-target", title: "Updated child", type: "iframe", url: "https://portal.example.test/child",
+  });
+
+  const snapshot = registry.snapshot();
+  const root = snapshot.find((entry) => entry.targetId === "root-target");
+  const child = snapshot.find((entry) => entry.targetId === "child-target");
+  assert.equal(root.targetTitle, "Root page");
+  assert.equal(root.targetType, "page");
+  assert.equal(root.targetUrl, "https://portal.example.test/home");
+  assert.equal(child.sessionId, "child-session");
+  assert.equal(child.targetTitle, "Updated child");
+  assert.equal(child.targetUrl, "https://portal.example.test/child");
+});
+
+test("unknown target info on root transport does not overwrite root or known children", () => {
+  const registry = new CdpAttributionRegistry(
+    { id: "root-target", title: "Root page", type: "page", url: "https://portal.example.test/home" },
+    context("01-home", "https://portal.example.test/home", 0),
+  );
+  registry.updateTarget(null, { targetId: "root-target", title: "Root page", type: "page", url: "https://portal.example.test/home" });
+  registry.registerSession("child-session", {
+    targetId: "child-target", title: "Known child", type: "iframe", url: "https://portal.example.test/child",
+  });
+
+  registry.updateTarget(null, {
+    targetId: "unknown-target", title: "Unknown child", type: "iframe", url: "https://portal.example.test/unknown",
+  });
+
+  const snapshot = registry.snapshot();
+  assert.equal(snapshot.find((entry) => entry.targetId === "root-target").targetTitle, "Root page");
+  assert.equal(snapshot.find((entry) => entry.targetId === "child-target").targetTitle, "Known child");
+});
+
+test("a normal root target update still applies by target ID", () => {
+  const registry = new CdpAttributionRegistry(
+    { id: "root-target", title: "Old root", type: "page", url: "https://portal.example.test/home" },
+    context("01-home", "https://portal.example.test/home", 0),
+  );
+
+  registry.updateTarget(null, {
+    targetId: "root-target", title: "Updated root", type: "page", url: "https://portal.example.test/settings",
+  });
+
+  const root = registry.snapshot().find((entry) => entry.targetId === "root-target");
+  assert.equal(root.targetTitle, "Updated root");
+  assert.equal(root.targetUrl, "https://portal.example.test/settings");
+});
+
+test("nested target info routes to its target instead of the parent transport", () => {
+  const registry = new CdpAttributionRegistry(
+    { id: "root-target", title: "Root page", type: "page", url: "https://portal.example.test/home" },
+    context("01-home", "https://portal.example.test/home", 0),
+  );
+  registry.registerSession("parent-session", {
+    targetId: "parent-target", title: "Parent frame", type: "iframe", url: "https://portal.example.test/parent",
+  });
+  registry.registerSession("nested-session", {
+    targetId: "nested-target", title: "Nested frame", type: "iframe", url: "https://portal.example.test/nested",
+  }, "parent-session");
+
+  registry.updateTarget("parent-session", {
+    targetId: "nested-target", title: "Updated nested frame", type: "iframe", url: "https://portal.example.test/nested-updated",
+  });
+
+  const snapshot = registry.snapshot();
+  assert.equal(snapshot.find((entry) => entry.targetId === "parent-target").targetTitle, "Parent frame");
+  assert.equal(snapshot.find((entry) => entry.targetId === "nested-target").sessionId, "nested-session");
+  assert.equal(snapshot.find((entry) => entry.targetId === "nested-target").targetTitle, "Updated nested frame");
+});
+
+test("target updates without an explicit target ID retain session-based partial updates", () => {
+  const registry = new CdpAttributionRegistry(
+    { id: "root-target", title: "Old root", type: "page", url: "https://portal.example.test/home" },
+    context("01-home", "https://portal.example.test/home", 0),
+  );
+
+  registry.updateTarget(null, { targetId: "root-target", title: "Old root", type: "page", url: "https://portal.example.test/home" });
+  registry.updateTarget(null, { title: "Partial root title" });
+
+  const root = registry.snapshot().find((entry) => entry.targetId === "root-target");
+  assert.equal(root.targetTitle, "Partial root title");
+  assert.equal(root.targetUrl, "https://portal.example.test/home");
+});

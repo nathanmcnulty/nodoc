@@ -1,0 +1,98 @@
+{
+  "portal": "M365 Admin",
+  "url": "https://admin.teams.microsoft.com/dashboardV2",
+  "pageTarget": {
+    "matchHosts": [
+      "admin.teams.microsoft.com"
+    ],
+    "matchPathPrefixes": [
+      "/dashboardV2"
+    ]
+  },
+  "matchHosts": [
+    "admin.microsoft.com"
+  ],
+  "matchPathPrefixes": [
+    "/api/concierge/DefaultMinimizeSupportWidget",
+    "/api/concierge/GetLazyLodingConfig",
+    "/api/concierge/IsInfrequentUser",
+    "/api/concierge/IsMCBubbleEnable",
+    "/api/concierge/ShowGuidedSupportJourney"
+  ],
+  "inspectionPolicy": {
+    "mode": "observe-only",
+    "prohibitedControlPatterns": [
+      "Add",
+      "Create",
+      "Delete",
+      "Export",
+      "Remove",
+      "Save",
+      "Submit",
+      "Update",
+      "Purchase",
+      "Activate",
+      "Start trial"
+    ]
+  },
+  "captureScripts": false,
+  "postActionSettleMs": 6000,
+  "settleMs": 8000,
+  "maxActions": 6,
+  "actions": [
+    {
+      "type": "navigate",
+      "value": "https://admin.teams.microsoft.com/dashboardV2",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "6000",
+      "required": true
+    },
+    {
+      "type": "reload",
+      "value": "teams-dashboard-concierge-body-objective",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "8000",
+      "required": true
+    },
+    {
+      "type": "capture",
+      "value": "teams-dashboard-concierge-body-objective",
+      "required": true
+    }
+  ],
+  "knownOperationRefresh": {
+    "status": "active",
+    "method": "GET",
+    "host": "admin.microsoft.com",
+    "routes": [
+      "/api/concierge/DefaultMinimizeSupportWidget"
+    ],
+    "actionIndexes": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "state": "Fresh complete-body objective for five exact existing M365 Admin concierge GETs passively emitted by the observed Teams dashboard. One primary and four separately accounted extras. Canonical backend ownership and Teams caller provenance remain distinct; not native M365 Admin workflow, tenant-specific identity proof, direct API replay or business-health evidence.",
+    "documentationObjectives": [
+      "schema-evidence",
+      "usage-observation",
+      "error-example"
+    ],
+    "evidenceIds": [
+      "bg-concierge-five-action2-native-dashboard",
+      "bg-ten-exact-route-reread-20261030"
+    ],
+    "approvalExpiresAt": "2026-10-31T11:29:02.214Z",
+    "variableBindingsDigest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "approvalArtifact": "tools/frontier-approvals/m365-admin-teams-concierge-body-20261030.json",
+    "approvalDigest": "b7c1202fcbc8778f86f8f708c5cd16c64c7f7da49a3e30fe8aa1303b7d447f8f"
+  }
+}

@@ -294,6 +294,9 @@ x-nodoc-headerProfiles:
 paths:
   /graphql:
     post:
+      x-nodoc-live-capture:
+        source: "Observe-only portal refresh 2026-10-29; Viva admin landing/reload; TenantConfigurationAndRoles; HTTP 200; request-59258e853d95e7568f27"
+        browsedPages: ["Admin landing"]
       tags: [AdminGraphQL]
       summary: Execute Viva Engage admin GraphQL operations
       description: |
@@ -320,10 +323,39 @@ paths:
         The same authenticated admin shell also issued `RealtimeConnectionSettingsClients`, which
         returned a tenant- and user-scoped `cometdBaseUrl` that the browser immediately used for
         transient `*.rt.yammer.com` Bayeux relay traffic.
+
+        The 2026-10-29 landing/reload refresh retained complete bodies for 28
+        persisted operation names. The approved `TenantConfigurationAndRoles`
+        query again returned HTTP 200 without GraphQL errors. The client emitted
+        a different persisted hash for the already documented
+        `UniversalCreateButtonQuery`; the historical request example is retained.
       operationId: AdminGraphQL_PostGraphql
       x-nodoc-graphqlOperationTypeNotes:
         unresolved: The current bundle set did not corroborate the GraphQL document kind; it does not mean the operation semantics are unknown or safe to invoke.
       x-nodoc-graphqlOperations:
+        - operationName: UniversalCreateButtonQuery
+          operationType: query
+          variables: [dismissablePromptKey]
+          persistedQuerySha256Hash: 00b2b2391fdaac07e8c98a07bc793a6c0ca6256518a06b8bd11747eb8f7b3f03
+          responseFields:
+            - data.viewer
+            - data.viewer.isRestrictedToViewOnlyMode
+            - data.viewer.canCreateGroup
+            - data.viewer.dismissablePrompts
+            - data.viewer.canScheduleAndCreateTeamsMeeting
+            - data.viewer.user
+            - data.viewer.user.wallFeed
+            - data.viewer.user.wallFeed.viewerCanStartThread
+            - data.viewer.user.id
+            - data.settings
+            - data.settings.article
+            - data.settings.article.viewerCanCreateArticle
+            - data.settings.campaigns
+            - data.settings.campaigns.viewerCanCreateCampaigns
+          notes:
+            - "The current loaded client bundle declares this exact name as a query; the persisted hash is observed on the wire and is not a literal in that bundle."
+            - "The operation was already documented in the historical request example. This entry fills the operation-index gap and records the current client hash; it is not a new API or proof that the historical hash has stopped working."
+            - "Passively observed HTTP 200 at 2026-10-29T18:02:04.789Z; evidence request-800275b32bb8adff6cb2; complete sanitized body privately hash-verified."
         - operationName: AdminFeatureAccessSettingsClients
           operationType: query
           variables: []
@@ -567,7 +599,7 @@ paths:
                           key: GuidedAdminNotificationsLandingPage
                           value: "true"
               universalCreateButtonPersistedQuery:
-                summary: Admin shell create-button state request
+                summary: Historical admin shell create-button state request
                 value:
                   operationName: UniversalCreateButtonQuery
                   variables:
@@ -726,6 +758,12 @@ paths:
             - The `RealtimeConnectionSettingsClients` operation returned transient `cometdBaseUrl` values that bootstrapped `*.rt.yammer.com/cometd/handshake`, `/cometd/`, and `/cometd/connect` relay calls without `Authorization` or cookie headers.
             - Navigating to `/main/admin/external-networks` updated the URL but rendered the generic admin landing state during this pass, so `external-networks-settings` should be treated as the canonical external-networks route.
         provenance:
+          - source: authenticated-portal-capture-20261029
+            confidence: high
+            notes:
+              - "TenantConfigurationAndRoles returned HTTP 200 without GraphQL errors on reload action 2 at 2026-10-29T18:04:10.851Z; evidence request-59258e853d95e7568f27."
+              - "Complete sanitized response privately hash-verified; observed role data does not establish least privilege or standalone execution."
+              - "UniversalCreateButtonQuery kind is corroborated by current client bundle SHA-256 d27fccc4759625b3c59234f7f3934ba78d2a17c09093553619a96553623fd98e; the current request hash is recorded in the operation index."
           - source: live-authenticated-capture
             confidence: high
             notes:

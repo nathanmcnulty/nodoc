@@ -1,3 +1,4 @@
+import { buildPreflightCriteria, buildBootstrapPreflightCriteria, preflightRecipeTarget, validateSelectedRecipeTarget } from "../run-portal-discovery.mjs";
 import assert from "node:assert/strict";
 import { createServer } from "node:http";
 import test from "node:test";
@@ -318,4 +319,89 @@ test("rejects active-looking SPA fragments before exact-target navigation", asyn
     restore();
     await cdp.close();
   }
+});
+
+function urlPatternRecipe(url, placement = "top") {
+  const pattern = `^${url.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&")}$`;
+  return {
+    url,
+    pageTarget: {
+      matchHosts: [new URL(url).hostname],
+      matchPathPrefixes: ["/"],
+      ...(placement === "nested" ? { matchUrlPattern: pattern } : {}),
+    },
+    matchHosts: ["graph.microsoft.com"],
+    matchPathPrefixes: ["/beta/observed-passive-route"],
+    ...(placement === "top" ? { matchUrlPattern: pattern } : {}),
+    actions: [{ type: "navigate", value: url, required: true }],
+  };
+}
+
+test("recipe root URL regex selects the exact Graph caller through production preflight", async () => {
+  const url = "https://intune.microsoft.com/#view/Microsoft_Intune_DeviceSettings/TenantAdminMenu/~/advancedHub";
+  const recipe = urlPatternRecipe(url);
+  const restore = installWebSocket({ evaluate: { title: "Intune", url, bodyText: "Windows Autopatch Advanced Hub" } });
+  const cdp = await mockCdp([
+    target({ id: "other-blade", url: "https://intune.microsoft.com/#home", title: "Intune" }),
+    target({ id: "advanced-hub", url, title: "Intune" }),
+  ]);
+  try {
+    const result = await preflightRecipeTarget({ recipe, endpoint: cdp.endpoint, expectedProduct: "Edge", stabilityMs: 1, pollMs: 1 });
+    assert.equal(result.target.id, "advanced-hub");
+    assert.equal(result.authenticationStatus, "verified");
+    assert.ok(buildPreflightCriteria(recipe).urlPattern instanceof RegExp);
+  } finally { restore(); await cdp.close(); }
+});
+
+test("nested pageTarget URL regex is enforced against same-host wrong Guest blades", async () => {
+  const url = "https://entra.microsoft.com/#blade/Microsoft_AAD_ERM/DashboardBlade";
+  const recipe = urlPatternRecipe(url, "nested");
+  let available = [
+    target({ id: "wrong-blade", url: "https://entra.microsoft.com/#blade/Microsoft_AAD_IAM/UsersManagementMenuBlade", title: "Entra" }),
+    target({ id: "identity-governance", url, title: "Entra" }),
+  ];
+  const restore = installWebSocket({ evaluate: { title: "Entra", url, bodyText: "Identity Governance Dashboard" } });
+  const cdp = await mockCdp(() => available);
+  try {
+    const result = await preflightRecipeTarget({ recipe, endpoint: cdp.endpoint, stabilityMs: 1, pollMs: 1 });
+    assert.equal(result.target.id, "identity-governance");
+    available = [available[0]];
+    await assert.rejects(preflightRecipeTarget({ recipe, endpoint: cdp.endpoint, stabilityMs: 1 }), /exactly one matching page target, found 0/);
+  } finally { restore(); await cdp.close(); }
+});
+
+test("recipe URL patterns reject malformed and conflicting declarations without broad fallback", () => {
+  const url = "https://config.office.com/officeSettings/inventory";
+  const good = urlPatternRecipe(url);
+  for (const pattern of ["[", "", "   ", null, 7]) {
+    const invalid = { ...good, matchUrlPattern: pattern };
+    assert.throws(() => buildPreflightCriteria(invalid), /recipe URL match pattern/);
+    assert.throws(() => validateSelectedRecipeTarget(invalid), error => error.code === "recipe-target-invalid" && /recipe URL match pattern/.test(error.message));
+  }
+  const conflicting = { ...good, pageTarget: { ...good.pageTarget, matchUrlPattern: "^https://different\\.example/$" } };
+  assert.throws(() => buildPreflightCriteria(conflicting), /conflicting recipe URL match patterns/);
+  const matching = { ...good, pageTarget: { ...good.pageTarget, matchUrlPattern: good.matchUrlPattern } };
+  assert.equal(buildPreflightCriteria(matching).urlPattern.source, new RegExp(good.matchUrlPattern, "iu").source);
+});
+
+test("bootstrap criteria compile declared recipe URL regex without changing host and path restrictions", () => {
+  const recipe = urlPatternRecipe("https://config.office.com/officeSettings/inventory");
+  recipe.matchUrlPattern = "^https://config\\.office\\.com/(?:home|officeSettings/inventory)$";
+  recipe.pageTarget.bootstrap = { matchHosts: ["config.office.com"], matchPathnames: ["/home"] };
+  const criteria = buildBootstrapPreflightCriteria(recipe);
+  assert.ok(criteria.urlPattern instanceof RegExp);
+  assert.equal(criteria.urlPattern.test("https://config.office.com/home"), true);
+  assert.equal(criteria.urlPattern.test("https://other.example/home"), false);
+  assert.deepEqual(criteria.matchHosts, ["config.office.com"]);
+  assert.deepEqual(criteria.matchPathnames, ["/home"]);
+});
+
+test("generic production preflight string patterns retain literal containment semantics", async () => {
+  const restore = installWebSocket();
+  const cdp = await mockCdp([target()]);
+  try {
+    const result = await runBrowserCdpPreflight({ endpoint: cdp.endpoint, urlPattern: "officeSettings/inventory", stabilityMs: 1, pollMs: 1 });
+    assert.equal(result.target.id, "page-1");
+    await assert.rejects(runBrowserCdpPreflight({ endpoint: cdp.endpoint, urlPattern: "^https://config\\.office\\.com/officeSettings/inventory$", stabilityMs: 1 }), /exactly one matching page target/);
+  } finally { restore(); await cdp.close(); }
 });

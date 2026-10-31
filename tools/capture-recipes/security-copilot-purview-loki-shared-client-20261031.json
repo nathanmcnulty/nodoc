@@ -1,0 +1,104 @@
+{
+  "portal": "Purview Data Lifecycle",
+  "url": "https://purview.microsoft.com/home",
+  "pageTarget": {
+    "matchHosts": [
+      "purview.microsoft.com"
+    ],
+    "matchPathPrefixes": [
+      "/datalifecyclemanagement/overview"
+    ],
+    "allowedEntryQueryParameters": [
+      "tid"
+    ],
+    "bootstrap": {
+      "matchHosts": [
+        "purview.microsoft.com"
+      ],
+      "matchPathnames": [
+        "/home"
+      ]
+    }
+  },
+  "matchHosts": [
+    "ecs.office.com"
+  ],
+  "matchPathPrefixes": [
+    "/config/v1/LokiService/1.0.0.0"
+  ],
+  "inspectionPolicy": {
+    "mode": "observe-only",
+    "prohibitedControlPatterns": [
+      "Add",
+      "Create",
+      "Delete",
+      "Export",
+      "Remove",
+      "Save",
+      "Submit",
+      "Update",
+      "Purchase",
+      "Activate",
+      "Start trial"
+    ]
+  },
+  "captureScripts": false,
+  "postActionSettleMs": 6000,
+  "settleMs": 8000,
+  "maxActions": 6,
+  "actions": [
+    {
+      "type": "navigate",
+      "value": "https://purview.microsoft.com/datalifecyclemanagement/overview?tid=${TenantId}",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "6000",
+      "required": true
+    },
+    {
+      "type": "reload",
+      "value": "loki-response-body",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "8000",
+      "required": true
+    },
+    {
+      "type": "capture",
+      "value": "loki-response-body",
+      "required": true
+    }
+  ],
+  "knownOperationRefresh": {
+    "status": "active",
+    "method": "GET",
+    "host": "ecs.office.com",
+    "routes": [
+      "/config/v1/LokiService/1.0.0.0"
+    ],
+    "actionIndexes": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "state": "Fresh response-body objective for the exact previously observed LokiService GET passively emitted by the Purview Data Lifecycle overview caller. Canonical owner remains Security Copilot; caller remains Purview. No Copilot workflow, entitlement, feature-health, direct API request, or current-tenant proof claim.",
+    "documentationObjectives": [
+      "schema-evidence",
+      "usage-observation",
+      "error-example"
+    ],
+    "evidenceIds": [
+      "opaque:purview-loki-action-5"
+    ],
+    "approvalExpiresAt": "2026-10-31T11:26:59.993Z",
+    "variableBindingsDigest": "8b8e73b61a28c8be7ab1756d51ae796571279c94e70ffc4e8be35661de37ae65",
+    "approvalArtifact": "tools/frontier-approvals/security-copilot-purview-loki-shared-client-20261031.json",
+    "approvalDigest": "55004544189863d50965fa0c0fc6946f86631121217660bd7cac7b38fbd4017d"
+  }
+}
