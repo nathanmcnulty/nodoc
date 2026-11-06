@@ -825,6 +825,7 @@ export const captureRecipesByTitle = {
     "tools/capture-recipes/power-platform-gap-remediation-20261030.json",
   ],
   Purview: [
+    "tools/capture-recipes/purview-proxy-loop-20261106.json",
     "tools/capture-recipes/purview-deep.json",
     "tools/capture-recipes/purview-graph-inventory.json",
     "tools/capture-recipes/purview-seeded-replay.json",
@@ -861,6 +862,7 @@ export const captureRecipesByTitle = {
     "tools/capture-recipes/security-copilot-purview-loki-remaining-three-20261105.json",
   ],
   SharePoint: [
+    "tools/capture-recipes/sharepoint-csp-loop-20261106.json",
     "tools/capture-recipes/sharepoint-script-sources-known-refresh.json",
     "tools/capture-recipes/sharepoint-script-sources-novelty.json",
     "tools/capture-recipes/sharepoint-admin-deep.json",

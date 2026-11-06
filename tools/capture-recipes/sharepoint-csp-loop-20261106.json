@@ -1,0 +1,76 @@
+{
+  "portal": "SharePoint",
+  "url": "https://${tenant}-admin.sharepoint.com/_layouts/15/online/AdminHome.aspx#/contentSecurityPolicy",
+  "pageTarget": {
+    "matchHosts": [
+      "${tenant}-admin.sharepoint.com"
+    ],
+    "matchPathPrefixes": [
+      "/_layouts/15/online/AdminHome.aspx"
+    ]
+  },
+  "matchHosts": [
+    "${tenant}-admin.sharepoint.com"
+  ],
+  "matchPathPrefixes": [
+    "/_api/SPO.SPOContentSecurityPolicyConfiguration"
+  ],
+  "inspectionPolicy": {
+    "mode": "observe-only",
+    "prohibitedControlPatterns": [
+      "Add",
+      "Create",
+      "Delete",
+      "Export",
+      "Remove",
+      "Save",
+      "Submit",
+      "Update"
+    ]
+  },
+  "postActionSettleMs": 10000,
+  "settleMs": 12000,
+  "maxActions": 6,
+  "actions": [
+    "navigate=https://${tenant}-admin.sharepoint.com/_layouts/15/online/AdminHome.aspx#/contentSecurityPolicy",
+    "wait-ms=6000",
+    "reload=script-sources-known-refresh",
+    "wait-ms=6000",
+    "capture=script-sources-known-refresh"
+  ],
+  "knownOperationRefresh": {
+    "status": "active",
+    "method": "GET",
+    "host": "${tenant}-admin.sharepoint.com",
+    "routes": [
+      "/_api/SPO.SPOContentSecurityPolicyConfiguration"
+    ],
+    "state": "Current tenant-host-bound SharePoint CSP Script sources passive native navigation and reload. Observe the existing GET without editing policy or testing enforcement.",
+    "actionIndexes": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "approvalExpiresAt": "2026-11-07T06:00:00.000Z",
+    "variableBindingsDigest": "84f43778fd7dd21c5808b6324a479bb0e8112099362fdf6e1e18356070012e24",
+    "documentationObjectives": [
+      "freshness",
+      "health",
+      "schema-evidence",
+      "error-example"
+    ],
+    "evidenceIds": [
+      "request-d17dc2215ed76c860c2e",
+      "sharepoint-csp-current-loop-user-goal-20261106"
+    ],
+    "approvalArtifact": "tools/frontier-approvals/sharepoint-csp-loop-20261106.json",
+    "approvalDigest": "2878940cb5ace93fdcadc5ffe5570c9c593780b94b96458eaa87ff36eaad6e54"
+  },
+  "captureScripts": false,
+  "responseBodyLimits": {
+    "perBodyBytes": 16777216,
+    "totalBytes": 268435456
+  }
+}
