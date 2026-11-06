@@ -2,14 +2,44 @@ import { createHash } from "node:crypto";
 import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import YAML from "yaml";
+import { isDeepStrictEqual } from "node:util";
 import { repoRoot } from "./spec-quality-lib.mjs";
 import { portalDiscoveryModelPolicy } from "./portal-discovery-model-policy.mjs";
 import { privateRefreshDirectory, assertNoRefreshLinks } from "./portal-refresh-paths.mjs";
 import { validateSourceReview } from "./source-review-receipt.mjs";
+import { loadVerifiedRefreshAnalysis, refreshAnalysisDigest } from "./portal-refresh.mjs";
+import { refreshSourceState } from "./portal-refresh-binding.mjs";
 
 const hash = bytes => createHash("sha256").update(bytes).digest("hex");
 const json = value => `${JSON.stringify(value, null, 2)}\n`;
 const pointerParts = fragment => fragment.replace(/^#\/?/u, "").split("/").filter(Boolean).map(part => decodeURIComponent(part).replaceAll("~1", "/").replaceAll("~0", "~"));
+
+function markMediaEdit(target, keys, original) {
+  const node = original.document.getIn(keys);
+  if (!node?.range || !YAML.isMap(node)) { target.fullRenderRequired = true; return; }
+  target.mediaEdits ??= new Map();
+  const start = node.range[0], end = node.range[2];
+  const lineStart = original.bytes.lastIndexOf("\n", start - 1) + 1;
+  const indent = original.bytes.slice(lineStart, start);
+  if (!/^ *$/u.test(indent)) { target.fullRenderRequired = true; return; }
+  target.mediaEdits.set(JSON.stringify(keys), { keys, start, end, indent });
+}
+
+function renderProposal(source) {
+  let bytes = source.bytes;
+  if (source.fullRenderRequired || !source.mediaEdits?.size) return source.document.toString({ lineWidth: 0 });
+  let previousStart = Infinity;
+  for (const edit of [...source.mediaEdits.values()].sort((a, b) => b.start - a.start)) {
+    if (edit.end > previousStart) throw new Error("Overlapping YAML edit ranges need manual source review.");
+    const fragment = new YAML.Document();
+    fragment.contents = source.document.getIn(edit.keys);
+    const text = fragment.toString({ lineWidth: 0 }).split("\n").map((line, index) => index && line ? edit.indent + line : line).join("\n");
+    bytes = bytes.slice(0, edit.start) + text + bytes.slice(edit.end);
+    previousStart = edit.start;
+  }
+  if (!isDeepStrictEqual(YAML.parse(bytes), source.document.toJSON())) throw new Error("Focused YAML rendering changed unrelated semantics.");
+  return bytes;
+}
 
 async function sourceNode(filename, keys, seen = new Set()) {
   filename = path.resolve(filename);
@@ -57,6 +87,7 @@ export async function prepareRefreshProposals({ analysis, selections = [], outpu
       const destination = path.relative(repoRoot, source.filename).replaceAll("\\", "/");
       let target = files.get(destination);
       if (!target) { target = source; files.set(destination, target); }
+      target.fullRenderRequired = true;
       const identity = `${destination}:${JSON.stringify(source.keys)}`;
       if (seen.has(identity) || target.document.getIn(source.keys) !== undefined) throw new Error("Discovery proposal would overwrite existing data.");
       seen.add(identity);
@@ -78,9 +109,11 @@ export async function prepareRefreshProposals({ analysis, selections = [], outpu
     if (schemaMode && new Set(variants.map(item => JSON.stringify(item.schema))).size > 1) throw new Error("Multiple observed response shapes require manual reconciliation.");
     const keys = ["paths", entry.path, entry.method.toLowerCase(), "responses", entry.status, "content", entry.mimeType];
     const source = await sourceNode(path.join(repoRoot, spec.specPath), keys);
+    if (source.keys[0] !== "paths" || source.keys[1] !== entry.path || source.keys[2] !== entry.method.toLowerCase()) throw new Error("Shared components and aliased operations require manual contract reconciliation.");
     const destination = path.relative(repoRoot, source.filename).replaceAll("\\", "/");
     let target = files.get(destination);
     if (!target) { target = source; files.set(destination, target); }
+    markMediaEdit(target, source.keys, source);
     const key = schemaMode ? [...source.keys, "schema"] : [...source.keys, "examples", "syntheticRefresh"];
     const identity = `${destination}:${JSON.stringify(key)}`;
     if (seen.has(identity)) throw new Error("Overlapping refresh proposal selection.");
@@ -89,7 +122,8 @@ export async function prepareRefreshProposals({ analysis, selections = [], outpu
     if (current !== undefined && !(schemaMode && YAML.isMap(current) && current.items.length === 0)) throw new Error("Refresh proposal would overwrite existing data.");
     const responseKeys = source.keys.slice(0, -2);
     if (target.document.getIn(responseKeys) === undefined) target.document.setIn([...responseKeys, "description"], "Observed successful response.");
-    target.document.setIn(key, schemaMode ? entry.schema : { summary: "Synthetic values illustrating an observed response shape; not a captured response.", value: entry.syntheticExample });
+    target.document.setIn(key, schemaMode ? entry.schema : { summary: "Synthetic values illustrating an observed response shape; not a captured response.",
+      description: `Based on passive portal observation ${entry.observedAt}, evidence ${entry.evidenceId}. Scalar values are synthesized; this example illustrates one observed shape.`, value: entry.syntheticExample });
     evidence.push({ destination, kind: selection.kind, specId: entry.specId, method: entry.method, path: entry.path, status: entry.status, mimeType: entry.mimeType,
       captureId: entry.captureId, evidenceId: entry.evidenceId, actionIndex: entry.actionIndex, observedAt: entry.observedAt,
       ...(entry.supportingObservations ? { supportingObservations: entry.supportingObservations } : {}) });
@@ -98,11 +132,11 @@ export async function prepareRefreshProposals({ analysis, selections = [], outpu
   for (const [destination, source] of [...files].sort(([a], [b]) => a.localeCompare(b))) {
     const proposal = path.join(outputDir, `${hash(destination).slice(0, 16)}.yml`);
     await assertNoRefreshLinks(proposal);
-    const bytes = source.document.toString({ lineWidth: 0 });
+    const bytes = renderProposal(source);
     await writeFile(proposal, bytes, { flag: "wx" });
     changes.push({ destination, beforeSha256: hash(source.bytes), beforeSource: source.bytes, proposalSha256: hash(bytes), proposal });
   }
-  const manifest = { schemaVersion: 1, visibility: "private-evidence-only", captureId: analysis.captureId, analysisDigest: hash(json(analysis)), changes, evidence,
+  const manifest = { schemaVersion: 1, visibility: "private-evidence-only", captureId: analysis.captureId, analysisDigest: refreshAnalysisDigest(analysis), changes, evidence,
     requiresIndependentPrivacyReview: true, rawResponseValuesIncluded: false, syntheticScalarExamplesOnly: true };
   await assertNoRefreshLinks(path.join(outputDir, "manifest.json"));
   await writeFile(path.join(outputDir, "manifest.json"), json(manifest), { flag: "wx" });
@@ -133,9 +167,18 @@ function syntheticValuesOnly(value) {
 }
 
 // Advisory only. Neither this function nor the controller can merge or enable merging.
-export async function reportRefreshMergeEligibility({ manifest, review = null, checks = null, sourceRevision = null, sourceReview = null, proposalRoot = null }) {
+export async function reportRefreshMergeEligibility({ manifest, review = null, checks = null, sourceRevision = null, sourceReview = null, proposalRoot = null, analysisPath = null }) {
   const manifestDigest = hash(json(manifest));
   const reasons = [];
+  const actualSource = await refreshSourceState();
+  if (sourceRevision !== actualSource.sourceRevision || checks?.sourceRevision !== actualSource.sourceRevision || checks?.sourceStateDigest !== actualSource.sourceStateDigest) reasons.push("checks-not-bound-to-actual-source-state");
+  if (!analysisPath) reasons.push("verified-current-analysis-required");
+  else {
+    try {
+      const analysis = await loadVerifiedRefreshAnalysis(analysisPath);
+      if (refreshAnalysisDigest(analysis) !== manifest.analysisDigest || analysis.captureId !== manifest.captureId) throw new Error("Analysis mismatch.");
+    } catch { reasons.push("current-analysis-or-capture-binding-invalid"); }
+  }
   if (manifest.visibility !== "private-evidence-only" || manifest.rawResponseValuesIncluded !== false || manifest.syntheticScalarExamplesOnly !== true || manifest.requiresIndependentPrivacyReview !== true) reasons.push("proposal-privacy-contract-invalid");
   if (!sourceReview) reasons.push("validated-source-review-receipt-required");
   else {
@@ -144,7 +187,7 @@ export async function reportRefreshMergeEligibility({ manifest, review = null, c
       if (hash(json(bound)) !== manifestDigest) throw new Error("Manifest mismatch.");
       const completed = [];
       for (const entry of manifest.changes ?? []) if (hash(await readFile(path.join(repoRoot, entry.destination))) === entry.proposalSha256) completed.push(entry.destination);
-      const checked = validateSourceReview({ root: repoRoot, ...sourceReview, completed });
+      const checked = validateSourceReview({ ...sourceReview, root: repoRoot, completed });
       if (checked.manifestSha256 !== manifestDigest || hash(json(review)) !== checked.reviewSha256) throw new Error("Review mismatch.");
     } catch { reasons.push("source-review-receipt-invalid-or-stale"); }
   }
@@ -190,7 +233,13 @@ export async function reportRefreshMergeEligibility({ manifest, review = null, c
     }
     const evidence = manifest.evidence?.filter(item => item.destination === entry.destination) ?? [];
     if (!evidence.length || evidence.some(item => !item.evidenceId || !item.captureId || !Number.isInteger(item.actionIndex) || item.actionIndex < 0)) blockers.push("exact-observation-traceability-incomplete");
+    if (evidence.some(item => item.method !== "GET")) blockers.push("method-requires-manual-safety-review");
     changes.push({ destination: entry.destination, evidenceCount: evidence.length, eligible: blockers.length === 0 && reasons.length === 0, reasonCodes: [...new Set([...reasons, ...blockers])].sort() });
+  }
+  const terminalSource = await refreshSourceState();
+  if (terminalSource.sourceRevision !== actualSource.sourceRevision || terminalSource.sourceStateDigest !== actualSource.sourceStateDigest) {
+    reasons.push("source-changed-during-eligibility");
+    for (const change of changes) { change.eligible = false; change.reasonCodes.push("source-changed-during-eligibility"); }
   }
   return { schemaVersion: 1, mode: "dry-run", actualAutomaticMergingEnabled: false, rulesRequireExplicitUserAuthorization: true,
     eligible: changes.length > 0 && changes.every(change => change.eligible), reasonCodes: [...new Set(reasons)].sort(), changes };

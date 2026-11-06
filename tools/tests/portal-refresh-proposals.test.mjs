@@ -6,7 +6,7 @@ import path from "node:path";
 import test from "node:test";
 import YAML from "yaml";
 import { prepareRefreshProposals, reportRefreshMergeEligibility } from "../portal-refresh-proposals.mjs";
-import { inferRefreshSchema, syntheticRefreshExample } from "../portal-refresh.mjs";
+import { inferRefreshSchema, refreshAnalysisDigest, syntheticRefreshExample } from "../portal-refresh.mjs";
 import { portalDiscoveryModelPolicy } from "../portal-discovery-model-policy.mjs";
 import { repoRoot } from "../spec-quality-lib.mjs";
 import { createSourceReviewReceipt, validateSourceReview } from "../source-review-receipt.mjs";
@@ -41,7 +41,7 @@ test("source proposals preserve exact bytes, do not apply, and satisfy source-re
   assert.equal(manifest.rawResponseValuesIncluded, false);
   assert.equal(manifest.syntheticScalarExamplesOnly, true);
   assert.equal(manifest.changes.length, 1);
-  assert.equal(manifest.analysisDigest, hash(serialized(analysis)));
+  assert.equal(manifest.analysisDigest, refreshAnalysisDigest(analysis));
   const [change] = manifest.changes;
   assert.equal(change.destination, inventory[0].specPath);
   assert.equal(change.beforeSha256, hash(before));
@@ -159,6 +159,7 @@ test("nonadditive changes and schema constraints cannot become eligible from ass
     const review = { decision: "accepted", reviewedManifestSha256: manifestDigest, sanitized: true, completeEvidence: true,
       model: portalDiscoveryModelPolicy.offlineReview.model, reasoning: portalDiscoveryModelPolicy.offlineReview.reasoning };
     const report = await reportRefreshMergeEligibility({ manifest, review, checks, sourceRevision: "fixture-revision", proposalRoot: outputDir });
+    assert.ok(report.reasonCodes.includes("checks-not-bound-to-actual-source-state"));
     assert.equal(report.eligible, false);
     assert.equal(report.actualAutomaticMergingEnabled, false);
     assert.ok(report.changes[0].reasonCodes.includes(expected));

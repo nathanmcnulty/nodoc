@@ -22,6 +22,7 @@ const canonical = value => Array.isArray(value) ? value.map(canonical) : value &
 const json = value => `${JSON.stringify(canonical(value), null, 2)}\n`;
 const hash = value => createHash("sha256").update(value).digest("hex");
 const digest = value => hash(json(value));
+export const refreshAnalysisDigest = digest;
 const readJson = async file => JSON.parse((await readFile(file, "utf8")).replace(/^\uFEFF/u, ""));
 async function hashFile(file) {
   const digest = createHash("sha256");
@@ -93,18 +94,20 @@ export function syntheticRefreshExample(value, depth = 0) {
   return Number.isInteger(value) ? 0 : 0.5;
 }
 
-function compareResponse(value, schema) {
+export function compareRefreshResponse(value, schema) {
+  const supported = new Set(["type", "nullable", "properties", "items", "additionalProperties", "required", "description", "title", "example", "examples", "deprecated", "readOnly", "writeOnly"]);
+  if (Object.keys(schema).some(key => !supported.has(key) && !key.startsWith("x-"))) return "contract-unverified";
   const compatibility = primitiveTypeCompatible(value, schema);
   if (compatibility === false) return "contract-conflict";
   if (compatibility === null || schema.enum || schema.const !== undefined || schema.format || schema.pattern || schema.minimum !== undefined || schema.maximum !== undefined) return "contract-unverified";
   if (Array.isArray(value)) {
-    const results = value.map(item => compareResponse(item, schema.items ?? {}));
+    const results = value.map(item => compareRefreshResponse(item, schema.items ?? {}));
     return results.includes("contract-conflict") ? "contract-conflict" : !value.length || results.includes("contract-unverified") ? "contract-unverified" : "compatible-observed-types";
   }
   if (value && typeof value === "object") {
     if ((schema.required ?? []).some(key => !Object.hasOwn(value, key))) return "contract-conflict";
     const results = Object.entries(value).map(([key, entry]) => schema.properties?.[key]
-      ? compareResponse(entry, schema.properties[key]) : schema.additionalProperties === false ? "contract-conflict" : "contract-unverified");
+      ? compareRefreshResponse(entry, schema.properties[key]) : schema.additionalProperties === false ? "contract-conflict" : "contract-unverified");
     return results.includes("contract-conflict") ? "contract-conflict" : results.includes("contract-unverified") ? "contract-unverified" : "compatible-observed-types";
   }
   return "compatible-observed-types";
@@ -225,7 +228,7 @@ export async function analyzeRefreshCapture({ artifacts, specId, cacheDir, inven
       const body = JSON.parse(record.responseBodyForAnalysis);
       const response = operation?.responses?.[String(record.status)] ?? operation?.responses?.[`${String(record.status)[0]}XX`] ?? operation?.responses?.default;
       const media = response?.content?.[mimeType];
-      const comparison = !media?.schema || Object.keys(media.schema).length === 0 ? "schema-missing" : compareResponse(body, media.schema);
+      const comparison = !media?.schema || Object.keys(media.schema).length === 0 ? "schema-missing" : compareRefreshResponse(body, media.schema);
       const exampleMissing = media && media.example === undefined && !Object.keys(media.examples ?? {}).length && media.schema?.example === undefined && !media.schema?.examples?.length;
       if (comparison === "compatible-observed-types" && !exampleMissing) continue;
       enrichments.push({ ...match, captureId, evidenceId: record.evidenceId, actionIndex, observedAt: record.observedAt ?? null,
@@ -275,6 +278,17 @@ export async function analyzeRefreshCapture({ artifacts, specId, cacheDir, inven
   if (await captureBinding(artifacts) !== inputDigest) throw new Error("Capture changed during refresh analysis.");
   await writeFile(cacheFile, json({ schemaVersion: 1, cacheKey, analysisDigest: digest(analysis), analysis }), { flag: "wx" });
   return { analysis, reused: false, cacheKey };
+}
+
+export async function loadVerifiedRefreshAnalysis(analysisPath) {
+  await privateRefreshDirectory(path.dirname(path.resolve(analysisPath)));
+  await assertNoRefreshLinks(analysisPath);
+  const stored = await readJson(analysisPath);
+  if (!stored.analysis || stored.analysisDigest !== digest(stored.analysis) || !/^[a-f0-9]{64}$/u.test(stored.cacheKey ?? "")
+    || path.basename(analysisPath) !== `${stored.cacheKey}.json`) throw new Error("Refresh analysis cache binding is invalid.");
+  const current = await analyzeRefreshCapture({ artifacts: stored.analysis.artifactDirectory, specId: stored.analysis.specId, cacheDir: path.dirname(path.resolve(analysisPath)) });
+  if (current.cacheKey !== stored.cacheKey || digest(current.analysis) !== stored.analysisDigest) throw new Error("Refresh analysis is stale; recompute and review current selections.");
+  return current.analysis;
 }
 
 // Existing controller entry point. Capture itself remains the existing discovery CLI.

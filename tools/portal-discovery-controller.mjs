@@ -88,14 +88,14 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   if (command === "refresh") compile = (await import("./portal-refresh.mjs")).runPortfolioRefresh;
   if (command === "refresh-proposals") compile = async input => {
     const { prepareRefreshProposals } = await import("./portal-refresh-proposals.mjs");
-    const stored = JSON.parse(await readFile(input.analysisPath, "utf8"));
-    const manifest = await prepareRefreshProposals({ ...input, analysis: stored.analysis ?? stored, inventory: await (await import("./spec-quality-lib.mjs")).buildSpecRouteInventory() });
+    const { loadVerifiedRefreshAnalysis } = await import("./portal-refresh.mjs");
+    const manifest = await prepareRefreshProposals({ ...input, analysis: await loadVerifiedRefreshAnalysis(input.analysisPath), inventory: await (await import("./spec-quality-lib.mjs")).buildSpecRouteInventory() });
     return { mode: "proposal-only", changeCount: manifest.changes.length, independentReviewRequired: true };
   };
   if (command === "refresh-eligibility") compile = async input => {
     const { reportRefreshMergeEligibility } = await import("./portal-refresh-proposals.mjs");
     const read = async file => file ? JSON.parse(await readFile(file, "utf8")) : null;
-    return reportRefreshMergeEligibility({ manifest: await read(input.manifestPath), review: await read(input.reviewPath), checks: await read(input.checksPath), sourceRevision: input.sourceRevision, sourceReview: input.sourceReview, proposalRoot: input.proposalRoot });
+    return reportRefreshMergeEligibility({ manifest: await read(input.manifestPath), review: await read(input.reviewPath), checks: await read(input.checksPath), sourceRevision: input.sourceRevision, sourceReview: input.sourceReview, proposalRoot: input.proposalRoot, analysisPath: input.analysisPath });
   };
   compile(JSON.parse(await readFile(path.resolve(inputPath), "utf8"))).then((report) => process.stdout.write(refresh ? `${JSON.stringify(report, null, 2)}\n` : stableJson(report))).catch((error) => { console.error(refresh ? "Controller failed; inspect the private inputs and retained artifacts." : error.message); process.exitCode = 1; });
 }

@@ -94,9 +94,11 @@ a non-null type; empty arrays do not supply item schemas. Examples replace
 scalar values with synthetic constants and illustrate one shape, not all states.
 Property names and dynamic dictionaries still require privacy review.
 
-The command follows local `$ref`s to the owning source and writes full private
+The command revalidates cache, capture and current analyzer bindings before
+proposing anything. It follows local `$ref`s to the owning source and writes full private
 YAML proposals plus the existing source-review manifest format. It never applies
-them. Independent review inspects the exact manifest, original observations,
+them. Shared components and aliased operations need manual reconciliation so a
+single observation cannot change other operations. Independent review inspects the exact manifest, original observations,
 variants, privacy and semantic limitations. Use the existing
 `review:source prepare`, `accept`, and `apply` gates from the runbook. A cache hit
 does not bypass the current source-review gate. Then regenerate the affected
@@ -108,19 +110,22 @@ Postman collections and site data and review the focused diff.
 npm run refresh:eligibility -- C:/private/refresh/eligibility-input.json
 ```
 
-The private input names `manifestPath`, `reviewPath`, `checksPath`,
+The private input names `analysisPath`, `manifestPath`, `reviewPath`, `checksPath`,
 `proposalRoot`, `sourceRevision`, and `sourceReview` with the existing
 `manifestPath`, `reviewPath`, `receiptPath` bindings. Check receipts must name the
-actual tested revision and exact manifest digest. `results` contains observed
+actual tested revision, `sourceStateDigest` from `refreshSourceState()` in
+`tools/portal-refresh-binding.mjs`, and exact manifest digest. The reporter derives
+the actual Git HEAD and complete nonignored source-state binding itself; a supplied
+revision string cannot establish current checks. `results` contains observed
 exit codes for `discovery`, `spec-quality`, `portal-metadata`, `evaluations`,
 `graph-research`, `site-data`, `postman-parity`, `typecheck`, `build`, and `privacy`.
 `appliedChanges` binds each final destination to its tested proposal digest.
 Use actual local/CI outcomes; declarations are not execution evidence.
 
 The advisory report validates the existing source-review receipt, exact
-before/proposal bytes and traceability. Only narrowly additive response schemas
+before/proposal bytes and traceability. Only narrowly additive GET response schemas
 without constraints/composition, and explicitly synthetic examples, can qualify.
-New operations, replacements, constraints, missing reviews, real scalar values,
+New operations, other methods needing safety review, replacements, constraints, missing reviews, real scalar values,
 untested final bytes and missing/failing checks explain why review is required.
 The private fingerprint scan is only one privacy check; independent scalar and
 property-name review remains necessary. A passing local gate does not prove

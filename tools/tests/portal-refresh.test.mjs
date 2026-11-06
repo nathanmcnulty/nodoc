@@ -3,7 +3,7 @@ import { mkdtemp, mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import os from "node:os";
 import test from "node:test";
-import { analyzeRefreshCapture, groupRefreshEnrichments, inferRefreshSchema, matchRefreshOperation, responseHealth, syntheticRefreshExample } from "../portal-refresh.mjs";
+import { analyzeRefreshCapture, compareRefreshResponse, groupRefreshEnrichments, inferRefreshSchema, loadVerifiedRefreshAnalysis, matchRefreshOperation, responseHealth, syntheticRefreshExample } from "../portal-refresh.mjs";
 import { buildSpecRouteInventory } from "../spec-quality-lib.mjs";
 import { writeResponseBodySidecar } from "../response-body-sidecars.mjs";
 import { aggregateInteractionHealth } from "../discovery-capture-policy.mjs";
@@ -52,6 +52,13 @@ test("review grouping reuses identical shapes without combining request variants
   assert.equal(groups.find(group => group.requestVariantDigest === "first").supportingObservations.length, 2);
 });
 
+test("unsupported constraints never authorize potentially invalid synthetic examples", () => {
+  assert.equal(compareRefreshResponse("abc", { type: "string", maxLength: 3 }), "contract-unverified");
+  assert.equal(compareRefreshResponse([1, 2], { type: "array", minItems: 2, items: { type: "integer" } }), "contract-unverified");
+  assert.equal(compareRefreshResponse([1, 2], { type: "array", uniqueItems: true, items: { type: "integer" } }), "contract-unverified");
+  assert.equal(compareRefreshResponse({ count: "x" }, { type: "object", properties: { count: { type: "integer" } } }), "contract-conflict");
+});
+
 test("one immutable capture feeds all axes, repeats reuse analysis, tampering fails", async () => {
   const root = await mkdtemp(path.join(os.tmpdir(), "nodoc-refresh-test-"));
   const artifacts = path.join(root, "capture"), cacheDir = path.join(root, "cache");
@@ -91,6 +98,7 @@ test("one immutable capture feeds all axes, repeats reuse analysis, tampering fa
   const cacheFile = path.join(cacheDir, `${first.cacheKey}.json`), cached = JSON.parse(await readFile(cacheFile));
   cached.analysis.captureComplete = false;
   await writeFile(cacheFile, JSON.stringify(cached));
+  await assert.rejects(loadVerifiedRefreshAnalysis(cacheFile), /cache binding/u);
   await assert.rejects(analyzeRefreshCapture({ artifacts, cacheDir, specId: spec.specId, inventory }), /integrity/u);
   await writeFile(path.join(artifacts, "response-body-sidecars/refresh-fixture.body"), "{}");
   await assert.rejects(analyzeRefreshCapture({ artifacts, cacheDir, specId: spec.specId, inventory }), /hash or length/u);
