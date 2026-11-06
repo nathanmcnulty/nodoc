@@ -795,6 +795,7 @@ export const captureRecipesByTitle = {
     "tools/capture-recipes/m365-admin-known-refresh-20261029.json",
     "tools/capture-recipes/m365-admin-gap-remediation-20261030.json",
     "tools/capture-recipes/m365-admin-teams-concierge-body-20261030.json",
+    "tools/capture-recipes/m365-admin-shell-loop-20261106.json",
   ],
   "M365 Apps Config": [
     "tools/capture-recipes/m365-apps-config-deep.json",
