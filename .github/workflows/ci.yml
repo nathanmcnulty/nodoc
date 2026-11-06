@@ -114,11 +114,17 @@ jobs:
       - name: Validate portal discovery metadata
         run: npm run validate:portal-discovery
 
+      - name: Validate Graph research
+        run: npm run validate:graph-research
+
       - name: Validate specification evaluation dispositions
         run: npm run validate:spec-evaluations
 
       - name: Validate generated site data
         run: npm run validate:site-data
+
+      - name: Validate generated Postman parity
+        run: npm run generate:postman -- --check
 
       - name: Build site
         run: npm run build

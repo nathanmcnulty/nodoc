@@ -9,6 +9,10 @@ nodoc is a project created by Dolphin Labs to enable deeper understanding and ut
 
 ## Coverage
 
+Maintainers can inventory operation freshness and reuse retained evidence with
+the [portfolio refresh workflow](REFRESH_WORKFLOW.md). See the
+[current refresh results](REFRESH_STATUS.md) for observed coverage and remaining gaps.
+
 The project currently publishes the following API definitions:
 
 | API | Ops | Access model | Site page | Checked-in Postman collection |

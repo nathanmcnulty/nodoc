@@ -3,10 +3,35 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 
 import {
+  assertCollectionParity,
   getMediaTypeExample,
   mergeCollectionVariables,
   mergeRequestExamples,
+  parseCollectionOptions,
 } from "../generate-postman-collections.mjs";
+
+test("Postman check mode selects all collections or the exact requested subset", () => {
+  const all = parseCollectionOptions(["--check"]);
+  assert.equal(all.check, true);
+  assert.equal(all.definitions.length, 22);
+  assert.deepEqual(parseCollectionOptions(["--check", "Teams"]).definitions.map(({ name }) => name), ["Teams"]);
+  assert.deepEqual(parseCollectionOptions(["--check"], "Teams,Exchange").definitions.map(({ name }) => name), ["Exchange", "Teams"]);
+  assert.equal(parseCollectionOptions(["Teams"]).check, false);
+});
+
+test("Postman selection rejects any unknown selector instead of silently checking a subset", () => {
+  assert.throws(() => parseCollectionOptions(["Teams", "typo"]), /No collections matched: typo/u);
+  assert.throws(() => parseCollectionOptions(["--check", "--unknown"]), /Unknown options/u);
+});
+
+test("Postman parity requires exact bytes and detects missing or changed collections", () => {
+  const committed = Buffer.from('{"item":[]}\n');
+  assert.equal(assertCollectionParity(committed, Buffer.from(committed)), true);
+  assert.throws(() => assertCollectionParity(committed, Buffer.from('{"item":[{}]}\n'), "Teams"), /Teams differs/u);
+  assert.throws(() => assertCollectionParity(committed, Buffer.from('{"item":[]}\r\n')), /differs/u);
+  assert.throws(() => assertCollectionParity(null, committed), /differs/u);
+  assert.equal(committed.toString(), '{"item":[]}\n');
+});
 
 test("selects inline named media-type examples before schema fallback", () => {
   assert.equal(getMediaTypeExample({

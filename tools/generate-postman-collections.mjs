@@ -133,16 +133,23 @@ function normalizeCollectionSelector(value) {
   return value.toLowerCase().replace(/[^a-z0-9]+/gu, "");
 }
 
-function getRequestedCollectionSelectors() {
+export function parseCollectionOptions(argv = [], environmentSelectors = "") {
+  const check = argv.includes("--check");
+  const unknownOptions = argv.filter((value) => value.startsWith("-") && value !== "--check");
+  if (unknownOptions.length) throw new Error(`Unknown options: ${unknownOptions.join(", ")}`);
   const selectors = [
-    ...process.argv.slice(2),
-    ...(process.env.NODOC_COLLECTIONS ?? "")
+    ...argv.filter((value) => value !== "--check"),
+    ...environmentSelectors
       .split(",")
       .map((value) => value.trim())
       .filter(Boolean),
   ];
 
-  return new Set(selectors.map(normalizeCollectionSelector));
+  const requested = new Set(selectors.map(normalizeCollectionSelector));
+  const unmatched = [...requested].filter((selector) => !collectionDefinitions.some((definition) => getDefinitionSelectors(definition).includes(selector)));
+  if (unmatched.length) throw new Error(`No collections matched: ${unmatched.join(", ")}`);
+  const definitions = requested.size === 0 ? collectionDefinitions : collectionDefinitions.filter((definition) => getDefinitionSelectors(definition).some((selector) => requested.has(selector)));
+  return { check, definitions };
 }
 
 function getDefinitionSelectors(definition) {
@@ -153,17 +160,11 @@ function getDefinitionSelectors(definition) {
   ].map(normalizeCollectionSelector);
 }
 
-const requestedCollectionSelectors = getRequestedCollectionSelectors();
-const activeCollectionDefinitions = requestedCollectionSelectors.size === 0
-  ? collectionDefinitions
-  : collectionDefinitions.filter((definition) => (
-    getDefinitionSelectors(definition).some((selector) => requestedCollectionSelectors.has(selector))
-  ));
-
-if (requestedCollectionSelectors.size > 0 && activeCollectionDefinitions.length === 0) {
-  throw new Error(
-    `No collections matched: ${Array.from(requestedCollectionSelectors).join(", ")}`,
-  );
+export function assertCollectionParity(committedBytes, generatedBytes, label = "Postman collection") {
+  if (committedBytes == null || !Buffer.from(committedBytes).equals(Buffer.from(generatedBytes))) {
+    throw new Error(`${label} differs from generated output. Run npm run generate:postman and review the collection changes.`);
+  }
+  return true;
 }
 
 function run(command, args) {
@@ -660,16 +661,17 @@ function stabilizeCollection(
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-mkdirSync(outputDir, { recursive: true });
+const options = parseCollectionOptions(process.argv.slice(2), process.env.NODOC_COLLECTIONS ?? "");
+if (!options.check) mkdirSync(outputDir, { recursive: true });
 
 const tempDir = mkdtempSync(path.join(os.tmpdir(), "nodoc-postman-"));
 
 try {
-  for (const definition of activeCollectionDefinitions) {
+  for (const definition of options.definitions) {
     const collectionPath = path.join(repoRoot, definition.output);
-    const previousCollection = existsSync(collectionPath)
-      ? JSON.parse(readFileSync(collectionPath, "utf8"))
-      : null;
+    const previousBytes = existsSync(collectionPath) ? readFileSync(collectionPath) : null;
+    const previousCollection = previousBytes ? JSON.parse(previousBytes.toString("utf8")) : null;
+    const generatedPath = options.check ? path.join(tempDir, path.basename(definition.output)) : collectionPath;
     const bundledJsonPath = path.join(
       tempDir,
       `${path.basename(definition.output, ".json")}.bundled.json`,
@@ -700,7 +702,7 @@ try {
       "-s",
       bundledJsonPath,
       "-o",
-      definition.output,
+      generatedPath,
       "-p",
       "-c",
       "postman_to_openapi.json",
@@ -708,10 +710,14 @@ try {
 
     stabilizeCollection(
       bundledJsonPath,
-      collectionPath,
+      generatedPath,
       previousCollection,
       { hostRouting: definition.hostRouting },
     );
+    if (options.check) {
+      assertCollectionParity(previousBytes, readFileSync(generatedPath), definition.output);
+      console.log(`Verified ${definition.name} collection parity`);
+    }
   }
 } finally {
   rmSync(tempDir, { recursive: true, force: true });

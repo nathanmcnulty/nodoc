@@ -1016,7 +1016,7 @@ function operationBlocker(mutationSummary, { captureFailure = null } = {}) {
   };
 }
 
-async function inspectCaptureCompleteness(artifactDir) {
+export async function inspectCaptureCompleteness(artifactDir) {
   const summaryPath = path.join(artifactDir, "summary.json");
   try {
     const summary = JSON.parse(await readFile(summaryPath, "utf8"));
