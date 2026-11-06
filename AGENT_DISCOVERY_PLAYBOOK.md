@@ -26,6 +26,32 @@ This is a living guide for researching undocumented portal APIs in a way that is
 
 The goal is to turn real portal behavior into high-quality specs and generated artifacts while preserving tenant safety and recording what did and did not work. Each engagement must search for previously unseen operations, revalidate known operations that now error or may have disappeared, and fill as much missing operation metadata as the evidence supports.
 
+### Startup readiness and process results
+
+Managed-owner startup establishes CDP endpoint readiness. Establish a loaded,
+authenticated native Home page separately. A reviewed startup controller may
+wait at most 30 seconds and repeat unchanged strict preflight only for the typed
+`target-count` error with numeric `targetCount: 0`, rechecking the same exact
+manifest-owned browser before every try. Preserve the attempts. Authentication
+failure, identity change or multiple matching targets stops the attempt; this
+wait adds no navigation and does not relax the stability interval.
+
+Collect the actual Node child's exit, signal and spawn error with file-backed
+stdout/stderr. On Windows, `Start-Process -Wait` can wait for browser descendants,
+so its wrapper timing alone does not establish the Node child's completion.
+Preserve an unavailable exit as `null` with a reason; append a dated correction
+when the actual result arrives, retaining the original unknown record. Keep
+process completion separate from capture completeness and evidence acceptance.
+
+If a pinned Import link is absent while a different native Overview link is
+visible, record a preparation/entry-metadata failure, not an API or schema
+failure. Preserve the failed preparation and inspect current native hrefs with
+a reviewed read-only check. Bind the exact observed literal entry in a fresh
+recipe, approval and registry entry, with current reviewed runtime/hash proof;
+do not guess a URL, manufacture a query, or weaken the visibility guard. Keep
+exact hrefs private. Authenticated caller readiness does not prove selected
+tenant identity, and passive operation effects remain unverified.
+
 ## Capture provenance
 
 The deep CDP capture records use additive schema version `2` metadata. Each

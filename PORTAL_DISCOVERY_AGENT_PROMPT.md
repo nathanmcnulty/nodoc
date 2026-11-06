@@ -104,6 +104,32 @@ prompt and `AGENT_DISCOVERY_RUNBOOK.md` in full before continuing.
 
 Capture reports must expose top-level `assignmentId`, `assignmentDigest` and `workerId`, plus the actual runtime model/reasoning fields or a top-level runtime-role object; nested assignment aliases or prose alone are insufficient. Before source review, verify those fields against the assignment and exact packet/argv bindings. The independent terminal review must bind external `terminal.workerReportSha256` and `terminal.integrityReportSha256`, and identify the exact packet, assignment and capture artifacts reviewed. A report does not contain its own SHA; the persisted report hash is recorded by its collector/coordinator and independent review.
 
+### Startup readiness and process results
+
+Managed-owner startup establishes CDP endpoint readiness. Establish a loaded,
+authenticated native Home page separately. A reviewed startup controller may
+wait at most 30 seconds and repeat unchanged strict preflight only for the typed
+`target-count` error with numeric `targetCount: 0`, rechecking the same exact
+manifest-owned browser before every try. Preserve the attempts. Authentication
+failure, identity change or multiple matching targets stops the attempt; this
+wait adds no navigation and does not relax the stability interval.
+
+Collect the actual Node child's exit, signal and spawn error with file-backed
+stdout/stderr. On Windows, `Start-Process -Wait` can wait for browser descendants,
+so its wrapper timing alone does not establish the Node child's completion.
+Preserve an unavailable exit as `null` with a reason; append a dated correction
+when the actual result arrives, retaining the original unknown record. Keep
+process completion separate from capture completeness and evidence acceptance.
+
+If a pinned Import link is absent while a different native Overview link is
+visible, record a preparation/entry-metadata failure, not an API or schema
+failure. Preserve the failed preparation and inspect current native hrefs with
+a reviewed read-only check. Bind the exact observed literal entry in a fresh
+recipe, approval and registry entry, with current reviewed runtime/hash proof;
+do not guess a URL, manufacture a query, or weaken the visibility guard. Keep
+exact hrefs private. Authenticated caller readiness does not prove selected
+tenant identity, and passive operation effects remain unverified.
+
 Record the observed driver OS exit code and how it was obtained, with retained stdout/stderr artifact references or hashes when available. If the exit was not observed, record `null` and a reason. Keep process exit and artifact `captureComplete`/discovery status separate: later complete artifacts never establish exit 0 or process success, and a lost collector result must remain a documented limitation.
 
 For every staged or newly registered known-refresh recipe, run the public discovery CLI with the exact `--recipe` path, exact private `--var` argument array, `--phase plan --require-known-refresh --json` and the applicable role/ceiling flags. Retain exact argv, observed exit code, selected recipe path/hash and JSON plan output. Resolver-only `prepareRecipeForRun`/`buildKnownOperationRefreshPlan` checks are helper validation, not executable CLI-readiness proof; no verifier, driver or browser allocation follows a failed plan.

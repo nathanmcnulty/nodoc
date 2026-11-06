@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "kind": "known-operation-refresh-approval-source",
+  "status": "proposal-pending-independent-review-and-separate-live-authority",
+  "specId": "security-copilot",
+  "recipeDestination": "tools/capture-recipes/security-copilot-purview-loki-overview-import-20261105.json",
+  "plannedAssignmentId": "remaining-three-20261105-loki-overview-import-01",
+  "captureRole": {
+    "model": "gpt-6-luna",
+    "reasoning": "low"
+  },
+  "reviewRequirement": {
+    "model": "gpt-6-luna",
+    "reasoning": "xhigh"
+  },
+  "primaryCanonicalOperation": {
+    "method": "GET",
+    "host": "ecs.office.com",
+    "canonicalPath": "/config/v1/LokiService/1.0.0.0",
+    "wirePath": "/config/v1/LokiService/1.0.0.0",
+    "operationId": "SecurityCopilotPortal.Store.GetLokiServiceClientConfiguration",
+    "sourceFile": "specifications/nodoc-security-copilot/specification/openapi.yml",
+    "sourceFileSha256": "4c6a5770b14fa18c391bca423b3484424cab55360cdce478501ae561ceeff346"
+  },
+  "observedCaller": "Purview Data Lifecycle",
+  "observedEntryUrlTemplate": "${NativeEntryUrl}",
+  "observedEntryPath": "/datalifecyclemanagement/overview",
+  "observedEntryQueryNames": [
+    "tid"
+  ],
+  "nativeEntryEvidence": {
+    "artifactId": "remaining-three-loki-overview-import-native-control-audit",
+    "sha256": "c1990e4d025383dd342369e6c1d9b63c96d13bfbc0d2ef4c387d93fe5e8d980b",
+    "privateEntryBindingArtifactId": "remaining-three-loki-overview-import-private-bindings",
+    "privateEntryBindingSha256": "24013a67db6f939088c572c4388775544f7c16c3757fbb2d58dd368b79aeeff2"
+  },
+  "tenantIdentityUnproved": true,
+  "reason": "A current visible enabled Import navigation control is retained at five explicit Overview checkpoints. Observe the distinct native Overview-to-Import sequence using both exact captured hrefs. The completed Overview-only run had no target signal; its history remains unchanged. Canonical backend owner is Security Copilot and caller is Purview; endpoint emission, native Copilot workflow, selected tenant identity and passive effects are unproved.",
+  "responseBodyLimits": {
+    "perBodyBytes": 16777216,
+    "totalBytes": 268435456
+  },
+  "actionBudget": {
+    "maximumDriverActions": 8,
+    "recipeActions": 7,
+    "mandatoryDriverHomeNavigation": 1,
+    "maximumOwnerStartupNavigations": 1,
+    "maximumPreflightAlignmentNavigations": 1,
+    "maximumCombinedBudgetUnits": 10,
+    "rootUrl": "https://purview.microsoft.com/home",
+    "alignmentEntry": "${NativeEntryUrl}",
+    "allNavigationLanesExplicit": true
+  },
+  "rawRefreshDigest": "f4bda0fe7a6a05b22dd8f1fe68ca4bcca5af59a8b103d8301e092fdd7e3778f6",
+  "resolvedRefreshDigest": "bf3114b11d5648c078c537a2deabfdd9f59375e92c1f9bb9ea81fc62d8e02b6c",
+  "rawExecutionDigest": "f27b7e1f86e2d6f0045c12e1274b5abe1d477194fec0cca4aeec5bef0e981016",
+  "resolvedExecutionDigest": "bd56f804132b30ea3e4681362c0537c277063b90bfc943575fefd57fd529d070",
+  "approvalExpiresAt": "2026-11-06T05:45:00.000Z",
+  "limitations": [
+    "Native entry proof does not prove endpoint emission or API health.",
+    "Planned automation authors no API replay or explicit configuration/tenant-selection control; actual passive effects remain unverified.",
+    "Private values remain external; independent body/source review follows capture."
+  ]
+}

@@ -119745,7 +119745,7 @@
           ],
           "category": "Purview",
           "operationContext": {
-            "surface": "Historical portal caller / declared backend transport relationship",
+            "surface": "Native Purview DLP response observation",
             "provenance": [
               {
                 "source": "retained-adjacent-portal-transport-reviewed-20261030",
@@ -119765,6 +119765,20 @@
                   "GET is the recorded method, not a safety or idempotence determination. No request was authored, invoked, probed or replayed by this offline review; effects and rollback are untested.",
                   "Confidence applies only to the verified historical method/host/path/status metadata. Captured values, identifiers, credentials, response fingerprints, body lengths and examples are withheld."
                 ]
+              },
+              {
+                "source": "native-dlp-response-body-reviewed-20261106",
+                "confidence": "high",
+                "notes": [
+                  "Fresh passive native Purview DLP overview navigation and reload observed the exact declared GET route. Four raw complete-response witnesses at action indices 0 and 2 reconcile with two normalized API records; bootstrap records are not used as positive witnesses.",
+                  "The verified JSON envelope is an object with populated ResultData object items. Optional properties describe observed token types only; no required fields, enum values, formats, examples, paging contract or exhaustive schema guarantee is inferred.",
+                  "Localized-name and localized-description dictionaries remain open string maps. Fields observed only as null leave their non-null shape unspecified. Native query variants remain one API operation.",
+                  "The native entry href was followed literally using the cached caller session. Tenant identity, minimum roles/scopes, standalone invocation, business health and whole-spec freshness remain unproved.",
+                  "Response values, identifiers, rule contents, response-body fingerprints and lengths are withheld. No API request, replay, probe or parameter-requiredness test was authored; unrelated passive operation effects remain unknown.",
+                  "Confidence applies only to verified transport, selected-root CDP/action attribution and observed JSON token types.",
+                  "Private evidence artifact remaining-three-sit-canonical-body-facts-v1; SHA-256 592cbbfcf9db78098b8f4685ba3eee750d1d703c7e92f572872adc0653ecf3f5.",
+                  "Private integrity artifact remaining-three-sit-artifact-integrity-v1; SHA-256 d0992f51914ed4942f4e4c83ce224b17d5cc5f91e67e652547872eba5acac6f3."
+                ]
               }
             ]
           },
@@ -119781,6 +119795,14 @@
           "evidenceStrength": [
             {
               "source": "retained-adjacent-portal-transport-reviewed-20261030",
+              "strength": "partial",
+              "reason": "checked-in-annotation-not-cross-validated-by-a-trusted-artifact-and-review-resolver",
+              "evidenceId": null,
+              "artifactSha256": null,
+              "reviewDigest": null
+            },
+            {
+              "source": "native-dlp-response-body-reviewed-20261106",
               "strength": "partial",
               "reason": "checked-in-annotation-not-cross-validated-by-a-trusted-artifact-and-review-resolver",
               "evidenceId": null,
@@ -125835,6 +125857,20 @@
                   "This is Purview-proxied Graph caller context, not direct Graph invocation, permission or standalone-access evidence. The existing schema remains unchanged.",
                   "Captured values, tenant/user identifiers, credentials, response fingerprints and body lengths are withheld. Passive background effects and absence of tenant changes remain undetermined."
                 ]
+              },
+              {
+                "source": "native-home-proxy-complete-body-reviewed-20261106",
+                "confidence": "high",
+                "notes": [
+                  "Fresh passive Purview Home navigation and reload observed two exact GET raw records at action indices 0 and 2 and one normalized API representative. Both complete JSON bodies were canonically verified; bootstrap rows are not positive witnesses.",
+                  "The artifact action log and categorized summary record all six required actions, including the reload; the single primary-match counter is not an action-execution count. Actual verifier and driver child/collector exits were 0, separately from completed artifacts and API health.",
+                  "The existing object envelope, populated message collection and nested primitive/container declarations cover the observed JSON fields and types, including observed nullable fields. No schema change is needed for these observations; requiredness, formats, pagination and unobserved response states were not tested.",
+                  "This run retained complete bodies under the reviewed response-retention and retrieval implementation. It does not retrospectively establish why the earlier body retrieval failed.",
+                  "This is native Purview-proxied caller observation, not direct Graph invocation, minimum-role, delegated-scope, standalone-access, selected-tenant or business/service-health proof. The existing cached caller session was used. No API request, probe or replay was authored. No explicit tenant-selection control was used; selected-tenant identity and passive operation effects remain unverified.",
+                  "Response content, identifiers, message text, credentials, response-body fingerprints and lengths remain private. Unrelated passive operation effects and absence of tenant changes remain undetermined; confidence covers transport, root/action attribution and observed token-type compatibility only.",
+                  "Private evidence artifact remaining-three-proxy-canonical-body-facts-v1; SHA-256 6035fe68deb41f10e639f8bfdf1f17ecac4a093bcb7bd62c5176fd6df6a8ff43.",
+                  "Private integrity artifact remaining-three-proxy-artifact-integrity-v1; SHA-256 dd98e7e925c34ff202b9312a2181be897b681e4f746450188b9e446349aedd88."
+                ]
               }
             ]
           },
@@ -125851,6 +125887,14 @@
           "evidenceStrength": [
             {
               "source": "purview-home-proxy-response-disposition-reviewed-20261031",
+              "strength": "partial",
+              "reason": "checked-in-annotation-not-cross-validated-by-a-trusted-artifact-and-review-resolver",
+              "evidenceId": null,
+              "artifactSha256": null,
+              "reviewDigest": null
+            },
+            {
+              "source": "native-home-proxy-complete-body-reviewed-20261106",
               "strength": "partial",
               "reason": "checked-in-annotation-not-cross-validated-by-a-trusted-artifact-and-review-resolver",
               "evidenceId": null,

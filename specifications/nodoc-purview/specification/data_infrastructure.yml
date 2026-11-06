@@ -1549,7 +1549,124 @@ paths:
             application/json:
               schema:
                 type: object
-                description: pending
+                properties:
+                  DataType:
+                    type: string
+                  Database:
+                    type: string
+                  WaterMark:
+                    description: Only null was observed; the non-null shape remains unverified.
+                  Session:
+                    type: string
+                  LastPage:
+                    type: boolean
+                  TotalResultCount:
+                    type: integer
+                  RecordCount:
+                    type: integer
+                  ErrorData:
+                    type: object
+                    properties:
+                      ErrorMessage:
+                        type: string
+                      ErrorType:
+                        type: string
+                      ExceptionName:
+                        type: string
+                  ResultCode:
+                    type: string
+                  ResultData:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        Identity:
+                          type: object
+                          properties:
+                            Name:
+                              type: string
+                        Name:
+                          type: string
+                        Description:
+                          type: string
+                        Id:
+                          type: string
+                        AIUpgradeStatus:
+                          description: Only null was observed; the non-null shape remains unverified.
+                        Clonable:
+                          type: string
+                        RecommendedConfidence:
+                          type: integer
+                          nullable: true
+                        RecommendedConfidenceLevel:
+                          type: string
+                        HighConfidenceLevelEntityDetails:
+                          description: Only null was observed; the non-null shape remains unverified.
+                        MediumConfidenceLevelEntityDetails:
+                          description: Only null was observed; the non-null shape remains unverified.
+                        LowConfidenceLevelEntityDetails:
+                          description: Only null was observed; the non-null shape remains unverified.
+                        PrimitiveElementDetails:
+                          description: Only null was observed; the non-null shape remains unverified.
+                        Publisher:
+                          type: string
+                        Type:
+                          type: string
+                        Classifier:
+                          type: string
+                        BaseId:
+                          type: string
+                        BaseType:
+                          type: string
+                        Guidance:
+                          description: Only null was observed; the non-null shape remains unverified.
+                        IsOutOfBox:
+                          type: boolean
+                        PrimitiveType:
+                          type: integer
+                        Fingerprints:
+                          description: Only null was observed; the non-null shape remains unverified.
+                        DlpSensitiveInformationTypeRuleCollection:
+                          type: string
+                        RulePackId:
+                          type: string
+                        WhenChanged:
+                          description: Only null was observed; the non-null shape remains unverified.
+                        FormalName:
+                          type: string
+                          nullable: true
+                        State:
+                          type: string
+                        Capability:
+                          type: string
+                        LastModifiedTime:
+                          type: string
+                          nullable: true
+                        PerfEvaluationState:
+                          type: string
+                        LocalizedName:
+                          type: string
+                        AllLocalizedNames:
+                          type: object
+                          additionalProperties:
+                            type: string
+                        AllLocalizedDescriptions:
+                          type: object
+                          additionalProperties:
+                            type: string
+                        DefaultCulture:
+                          type: string
+                        ThresholdConfig:
+                          description: Only null was observed; the non-null shape remains unverified.
+                        IsExact:
+                          type: boolean
+                        ObjectState:
+                          type: string
+                        PhysicalInstanceID:
+                          description: Only null was observed; the non-null shape remains unverified.
+                description: >-
+                  Observed optional response envelope and populated sensitive-information-type item shapes from native Purview DLP
+                  navigation and reload. No requiredness, exhaustive schema, paging or standalone execution guarantee is established.
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -1559,7 +1676,7 @@ paths:
         '404':
           $ref: common.yml#/components/responses/NotFound
       x-nodoc-operation-context:
-        surface: Historical portal caller / declared backend transport relationship
+        surface: Native Purview DLP response observation
         provenance:
           - source: retained-adjacent-portal-transport-reviewed-20261030
             confidence: high
@@ -1577,6 +1694,33 @@ paths:
               - Original dates/actions remain historical; this is not fresh capture, current tenant validation, business or application health, standalone invocation, role/grant/minimum-permission proof, or an owning-portal workflow test.
               - GET is the recorded method, not a safety or idempotence determination. No request was authored, invoked, probed or replayed by this offline review; effects and rollback are untested.
               - Confidence applies only to the verified historical method/host/path/status metadata. Captured values, identifiers, credentials, response fingerprints, body lengths and examples are withheld.
+          - source: native-dlp-response-body-reviewed-20261106
+            confidence: high
+            notes:
+              - >-
+                Fresh passive native Purview DLP overview navigation and reload observed the exact declared GET route. Four raw
+                complete-response witnesses at action indices 0 and 2 reconcile with two normalized API records; bootstrap records
+                are not used as positive witnesses.
+              - >-
+                The verified JSON envelope is an object with populated ResultData object items. Optional properties describe
+                observed token types only; no required fields, enum values, formats, examples, paging contract or exhaustive
+                schema guarantee is inferred.
+              - >-
+                Localized-name and localized-description dictionaries remain open string maps. Fields observed only as null leave
+                their non-null shape unspecified. Native query variants remain one API operation.
+              - >-
+                The native entry href was followed literally using the cached caller session. Tenant identity, minimum
+                roles/scopes, standalone invocation, business health and whole-spec freshness remain unproved.
+              - >-
+                Response values, identifiers, rule contents, response-body fingerprints and lengths are withheld. No API request,
+                replay, probe or parameter-requiredness test was authored; unrelated passive operation effects remain unknown.
+              - Confidence applies only to verified transport, selected-root CDP/action attribution and observed JSON token types.
+              - >-
+                Private evidence artifact remaining-three-sit-canonical-body-facts-v1; SHA-256
+                592cbbfcf9db78098b8f4685ba3eee750d1d703c7e92f572872adc0653ecf3f5.
+              - >-
+                Private integrity artifact remaining-three-sit-artifact-integrity-v1; SHA-256
+                d0992f51914ed4942f4e4c83ce224b17d5cc5f91e67e652547872eba5acac6f3.
 
   /di/find/Label:
     get:
