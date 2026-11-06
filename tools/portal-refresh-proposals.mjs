@@ -33,7 +33,7 @@ function hasSchemaProperties(schema) {
 
 function markMediaEdit(target, keys, original) {
   const node = original.document.getIn(keys);
-  if (!node?.range || !YAML.isMap(node)) { target.fullRenderRequired = true; return; }
+  if (!node?.range || !YAML.isMap(node) || node.anchor) { target.fullRenderRequired = true; return; }
   target.mediaEdits ??= new Map();
   const start = node.range[0], end = node.range[2];
   const lineStart = original.bytes.lastIndexOf("\n", start - 1) + 1;
@@ -150,6 +150,9 @@ export async function prepareRefreshProposals({ analysis, selections = [], outpu
     const proposal = path.join(outputDir, `${hash(destination).slice(0, 16)}.yml`);
     await assertNoRefreshLinks(proposal);
     const bytes = renderProposal(source);
+    if (!editsWithinTargets(source.bytes, bytes, evidence.filter(item => item.destination === destination).map(editTarget))) {
+      throw new Error("Shared YAML aliases or unrelated semantic edits require manual reconciliation.");
+    }
     await writeFile(proposal, bytes, { flag: "wx" });
     changes.push({ destination, beforeSha256: hash(source.bytes), beforeSource: source.bytes, proposalSha256: hash(bytes), proposal });
   }
@@ -165,6 +168,21 @@ function additionsOnly(before, after, pointer = []) {
   if (!before || !after || typeof before !== "object" || typeof after !== "object" || Array.isArray(before) || Array.isArray(after)) return [{ pointer, kind: "replacement" }];
   return [...new Set([...Object.keys(before), ...Object.keys(after)])].flatMap(key => !Object.hasOwn(after, key) ? [{ pointer: [...pointer, key], kind: "removal" }]
     : !Object.hasOwn(before, key) ? [{ pointer: [...pointer, key], kind: "addition", value: after[key] }] : additionsOnly(before[key], after[key], [...pointer, key]));
+}
+
+function editTarget(item) {
+  const operation = ["paths", item.path, item.method.toLowerCase()];
+  if (item.kind === "new-operation") return operation;
+  const media = [...operation, "responses", String(item.status), "content", item.mimeType];
+  return item.kind === "response-schema" ? [...media, "schema"] : [...media, "examples", "syntheticRefresh"];
+}
+
+function editsWithinTargets(before, proposed, targets) {
+  const prefix = (left, right) => left.length <= right.length && left.every((part, index) => part === right[index]);
+  // Check expanded semantics as well as the authored YAML target: aliases can
+  // otherwise mutate a second operation without a second observation.
+  return additionsOnly(YAML.parse(before), YAML.parse(proposed)).every(({ pointer }) =>
+    targets.some(target => prefix(target, pointer) || prefix(pointer, target)));
 }
 
 const requiredChecks = ["discovery", "spec-quality", "portal-metadata", "evaluations", "graph-research", "site-data", "postman-parity", "typecheck", "build", "privacy"];
@@ -195,7 +213,7 @@ function authoredExampleNames(value, schema) {
 }
 
 async function bindProposedEdits({ entry, before, proposed, evidence, analysis, inventory }) {
-  const blockers = [], expected = YAML.parseDocument(before), seen = new Set();
+  const blockers = [], expected = YAML.parseDocument(before), seen = new Set(), targets = [];
   if (!analysis || !evidence.length) return ["edit-evidence-binding-incomplete"];
   for (const item of evidence) {
     const observation = analysis.enrichments.find(candidate => candidate.specId === item.specId && candidate.evidenceId === item.evidenceId);
@@ -221,6 +239,7 @@ async function bindProposedEdits({ entry, before, proposed, evidence, analysis, 
       blockers.push("edit-overwrites-existing-or-duplicate-data"); continue;
     }
     seen.add(identity);
+    targets.push(keys);
     if (schemaMode && observation.comparison !== "schema-missing") blockers.push("edit-kind-or-contract-requires-review");
     if (schemaMode && new Set(analysis.enrichments.filter(candidate => ["specId", "method", "path", "status", "mimeType"].every(key => candidate[key] === observation[key])).map(candidate => json(candidate.schema))).size > 1) blockers.push("conflicting-observed-shapes-require-review");
     if (schemaMode && hasSchemaProperties(observation.schema)) blockers.push("new-schema-property-names-require-review");
@@ -238,6 +257,7 @@ async function bindProposedEdits({ entry, before, proposed, evidence, analysis, 
     expected.setIn(keys, schemaMode ? observation.schema : exampleFor(observation));
   }
   if (!isDeepStrictEqual(expected.toJSON(), YAML.parse(proposed))) blockers.push("proposed-edits-do-not-match-verified-evidence");
+  if (!editsWithinTargets(before, proposed, targets)) blockers.push("semantic-edit-outside-verified-target");
   return [...new Set(blockers)];
 }
 
