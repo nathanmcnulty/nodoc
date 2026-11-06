@@ -1003,7 +1003,7 @@ function unresolvedOperationSummary(plan, reason) {
   }]);
 }
 
-async function readVerifiedMutationSummary(
+export async function readVerifiedMutationSummary(
   artifactDir,
   { activeOperationPlan = null, captureSummary = null } = {},
 ) {

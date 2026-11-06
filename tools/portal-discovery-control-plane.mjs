@@ -13,8 +13,9 @@ import { getLedgerViewFromFile, enqueueAssignment, normalizeEndpoint } from "./p
 import { buildSpecInventory, loadBundledSpecification, repoRoot } from "./spec-quality-lib.mjs";
 import { deriveNoveltyBaseline } from "./portal-discovery-novelty.mjs";
 import { buildKnownOperationRefreshPlan, evaluateKnownOperationRefreshEvidence } from "./portal-discovery-evidence-contract.mjs";
-import { aggregateInteractionHealth, summarizeActionResults } from "./discovery-capture-policy.mjs";
+import { aggregateInteractionHealth, summarizeActionResults, actionResultSucceeded } from "./discovery-capture-policy.mjs";
 import { hydrateResponseBodySidecars, assessResponseBodySidecarCompleteness } from "./response-body-sidecars.mjs";
+import { normalizeRecipeAction } from "./portal-discovery-actions.mjs";
 import {
   portalDiscoveryModelPolicy,
   validateOfflineReviewReasoning,
@@ -541,7 +542,7 @@ export async function validateManagedCaptureResult({ result, resultPath, planPat
     || run.capture?.captureComplete !== true || run.capture?.captureStatus !== "complete" || run.knownOperationRefresh?.status !== "observed")) {
     throw new Error("Managed acceptance requires an unblocked successful terminal capture and verified observed evidence.");
   }
-  const { verifyCaptureWorkerPacket, prepareRecipeForRun, buildActionBudget, inspectCaptureCompleteness } = await import("./run-portal-discovery.mjs");
+  const { verifyCaptureWorkerPacket, prepareRecipeForRun, buildActionBudget, inspectCaptureCompleteness, readVerifiedMutationSummary } = await import("./run-portal-discovery.mjs");
   const args = verifyCaptureWorkerPacket(packet, { artifactDir: root, knownOperationRefreshPlan: run.knownOperationRefreshPlan });
   if (run.workerPacketSha256 !== packet.packetSha256 || args.phase !== "all" || !args.requireKnownRefresh
     || args.noLedger || args.seedArtifacts || args.operationApprovalDigest || args.orchestrationPlan !== run.identityLinkage?.planPath
@@ -558,10 +559,21 @@ export async function validateManagedCaptureResult({ result, resultPath, planPat
     const completeness = await inspectCaptureCompleteness(root);
     const health = aggregateInteractionHealth(actions, { reported: summary.interactionHealth ?? summary.actionValidation?.interactionHealth });
     const accounting = summarizeActionResults(actions);
-    const actionBindingsMatch = refresh.actionBindings.every(binding => {
-      const matches = actions.filter(action => (action.actionIndex ?? action.index) === binding.index);
-      return matches.length === 1 && matches[0].type === binding.type && String(matches[0].value) === String(binding.value);
-    });
+    const plannedActions = recipe.actions.map(normalizeRecipeAction);
+    const initial = actions.filter(action => (action.actionIndex ?? action.index) === -1);
+    const actionBindingsMatch = actions.length === plannedActions.length + 1 && initial.length === 1
+      && initial[0].type === "navigate" && initial[0].value === recipe.url && initial[0].required === true
+      && initial[0].allowCanonicalRedirect === true && actionResultSucceeded(initial[0])
+      && plannedActions.every((expected, index) => {
+        const matches = actions.filter(action => (action.actionIndex ?? action.index) === index);
+        return matches.length === 1 && matches[0].type === expected.type && matches[0].value === expected.value
+          && (matches[0].scope ?? "any") === expected.scope && Boolean(matches[0].required) === Boolean(expected.required);
+      });
+    const mutationSummary = await readVerifiedMutationSummary(root, { captureSummary: summary });
+    if (mutationSummary && (mutationSummary.safeToContinue !== true || mutationSummary.attemptCount !== 0)
+      || !isDeepStrictEqual(mutationSummary, run.activeOperations ?? null) || !isDeepStrictEqual(mutationSummary, attempt.activeOperations ?? null)) {
+      throw new Error("Managed observe-only mutation safety does not match summary/events/run/ledger evidence.");
+    }
     await hydrateResponseBodySidecars(api, root, recipe.responseBodyLimits);
     await hydrateResponseBodySidecars(raw, root, recipe.responseBodyLimits);
     const assessment = evaluateKnownOperationRefreshEvidence({ actionResults: actions, apiRecords: api, plan: refresh });

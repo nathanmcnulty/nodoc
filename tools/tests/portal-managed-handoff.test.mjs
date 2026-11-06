@@ -13,22 +13,23 @@ import { buildCaptureWorkerPacket, prepareRecipeForRun, buildActionBudget, inspe
 import { buildKnownOperationRefreshPlan, evaluateKnownOperationRefreshEvidence } from "../portal-discovery-evidence-contract.mjs";
 import { writeResponseBodySidecar, hydrateResponseBodySidecars } from "../response-body-sidecars.mjs";
 import { summarizeActionResults } from "../discovery-capture-policy.mjs";
+import { summarizeOperationReceipts } from "../portal-discovery-operation-safety.mjs";
 
 const execute = promisify(execFile);
 const repository = path.resolve(import.meta.dirname, "../..");
 const sha = value => createHash("sha256").update(value).digest("hex");
 const json = value => JSON.stringify(value, null, 2) + "\n";
 
-async function fixture(t) {
+async function fixture(t, { contractActionIndexes = [0, 1, 2] } = {}) {
   const root = await mkdtemp(path.join(os.tmpdir(), "nodoc-managed-handoff-"));
   t.after(() => rm(root, { recursive: true, force: true }));
   const recipePath = path.join(root, "recipe.json"), ledgerPath = path.join(root, "ledger.jsonl"), planPath = path.join(root, "plan.json");
   const recipe = { url: "https://example.test/settings", pageTarget: { matchHosts: ["example.test"], matchPathPrefixes: ["/settings"] },
     matchHosts: ["example.test"], matchPathPrefixes: ["/api/settings"], inspectionPolicy: { mode: "observe-only", prohibitedControlPatterns: ["Save"] },
     responseBodyLimits: { perBodyBytes: 4096, totalBytes: 16384 }, captureScripts: false, maxActions: 4,
-    actions: ["navigate=https://example.test/settings", "wait-ms=1", "capture=fixture"],
+    actions: [{ type: "navigate", value: "https://example.test/settings", required: true }, { type: "wait-ms", value: "1", required: true }, { type: "capture", value: "fixture", required: true }],
     knownOperationRefresh: { status: "active", method: "GET", host: "example.test", routes: ["/api/settings"], state: "Synthetic passive fixture",
-      actionIndexes: [0, 1, 2], approvalArtifact: "fixture-approval.json", approvalDigest: "0".repeat(64), approvalExpiresAt: "2099-01-01T00:00:00.000Z",
+      actionIndexes: contractActionIndexes, approvalArtifact: "fixture-approval.json", approvalDigest: "0".repeat(64), approvalExpiresAt: "2099-01-01T00:00:00.000Z",
       documentationObjectives: ["freshness"], evidenceIds: ["fixture-observation"] } };
   recipe.knownOperationRefresh.variableBindingsDigest = prepareRecipeForRun(recipe, []).__resolvedVariableBindingsDigest;
   await writeFile(recipePath, json(recipe));
@@ -54,8 +55,8 @@ async function fixture(t) {
   return { root, recipe, recipePath, ledgerPath, planPath, plan, assignment, args, input, specRecord, refreshPlan, actionBudget, enqueue, manifest };
 }
 
-async function completedCaptureFixture(t, { retainCaptureFiles = true } = {}) {
-  const f = await fixture(t);
+async function completedCaptureFixture(t, { retainCaptureFiles = true, ...options } = {}) {
+  const f = await fixture(t, options);
   await enqueueAssignment(f.enqueue);
   f.args.identityLinkage = await validateCaptureHandoff({ args: f.args, specRecord: f.specRecord, recipePath: f.recipePath,
     knownOperationRefreshPlan: f.refreshPlan, actionBudget: f.actionBudget });
@@ -66,7 +67,7 @@ async function completedCaptureFixture(t, { retainCaptureFiles = true } = {}) {
   const captureRoot = f.args.artifacts;
   await mkdir(captureRoot);
   const packetPath = path.join(f.root, "packet.json"), runPath = path.join(captureRoot, "discovery-run.json");
-  const actions = [{ actionIndex: -1, type: "navigate", value: f.recipe.url, result: { resolvedUrl: f.recipe.url, url: f.recipe.url } },
+  const actions = [{ actionIndex: -1, type: "navigate", required: true, allowCanonicalRedirect: true, value: f.recipe.url, result: { resolvedUrl: f.recipe.url, url: f.recipe.url } },
     { actionIndex: 0, type: "navigate", value: f.recipe.url, required: true, result: { resolvedUrl: f.recipe.url, url: f.recipe.url } },
     { actionIndex: 1, type: "wait-ms", value: "1", required: true, result: { waitedMs: 1 } },
     { actionIndex: 2, type: "capture", value: "fixture", required: true, result: { capturedOnly: true } }];
@@ -237,6 +238,50 @@ test("complete bodies cannot authorize blocked or inconsistent terminal evidence
   await writeFile(assessmentPath, json(f.run.knownOperationRefresh));
   await writeFile(path.join(f.captureRoot, "response-body-sidecars", "request-managed-fixture.body"), "tampered");
   await assert.rejects(f.validate(), /hash or length mismatch/);
+});
+
+test("full recipe accounting rejects missing, extra, or changed actions outside the refresh subset", async t => {
+  const f = await completedCaptureFixture(t, { contractActionIndexes: [0, 2] });
+  assert.equal((await f.validate()).sanitized, true);
+  const actionPath = path.join(f.captureRoot, "action-results.json"), original = JSON.parse(await readFile(actionPath, "utf8"));
+  for (const [name, mutate] of [
+    ["missing required action", actions => actions.splice(actions.findIndex(action => action.actionIndex === 1), 1)],
+    ["undeclared action within ceiling", actions => { actions.find(action => action.actionIndex === 1).actionIndex = 3; }],
+    ["changed scope", actions => { actions.find(action => action.actionIndex === 1).scope = "iframe"; }],
+    ["changed required flag", actions => { actions.find(action => action.actionIndex === 1).required = false; }],
+    ["duplicate recipe action", actions => { actions.find(action => action.actionIndex === 1).actionIndex = 0; }],
+    ["missing mandatory navigation", actions => actions.splice(0, 1)],
+    ["changed mandatory navigation", actions => { actions[0].value = "https://example.test/other"; }],
+  ]) {
+    const actions = structuredClone(original); mutate(actions);
+    await writeFile(actionPath, json(actions));
+    await assert.rejects(f.validate(), /incomplete, blocked or inconsistent/, name);
+  }
+});
+
+test("observe-only mutation safety must reconcile summary, events, run and ledger", async t => {
+  const f = await completedCaptureFixture(t);
+  const summaryPath = path.join(f.captureRoot, "summary.json"), summary = JSON.parse(await readFile(summaryPath, "utf8"));
+  const safe = summarizeOperationReceipts([]), receipts = [{ schemaVersion: 1, operationId: "fixture-operation", mode: "abort-only",
+    approvalDigest: "a".repeat(64), executionState: "unresolved-change", unresolvedReason: "fixture-unresolved", accounting: { artifactValidationFailed: true }, evidence: {} }];
+  const unsafe = summarizeOperationReceipts(receipts);
+  assert.equal(unsafe.safeToContinue, false);
+  await writeFile(summaryPath, json({ ...summary, mutationSummary: unsafe }));
+  await assert.rejects(f.validate(), /mutation safety/);
+  await writeFile(summaryPath, json({ ...summary, mutationSummary: safe }));
+  await writeFile(f.runPath, json({ ...f.run, activeOperations: safe }));
+  await updateAttempt({ ...f.enqueue, attemptNumber: 1, status: "completed", activeOperations: safe });
+  const eventsPath = path.join(f.captureRoot, "mutation-events.json");
+  await writeFile(eventsPath, json({ schemaVersion: 1, receipts: [], summary: safe }));
+  assert.equal((await f.validate()).sanitized, true, "A real zero-attempt observe-only summary remains valid.");
+  await writeFile(eventsPath, json({ schemaVersion: 1, receipts, summary: unsafe }));
+  await assert.rejects(f.validate(), /active-operation state does not match/);
+  await writeFile(eventsPath, json({ schemaVersion: 1, receipts: [], summary: safe }));
+  await writeFile(f.runPath, json({ ...f.run, activeOperations: null }));
+  await assert.rejects(f.validate(), /mutation safety/);
+  await writeFile(f.runPath, json({ ...f.run, activeOperations: safe }));
+  await updateAttempt({ ...f.enqueue, attemptNumber: 1, status: "completed", activeOperations: null });
+  await assert.rejects(f.validate(), /mutation safety/);
 });
 
 test("registered managed known-refresh CLI compiles and plans offline with fixture authority", { timeout: 120000 }, async t => {
