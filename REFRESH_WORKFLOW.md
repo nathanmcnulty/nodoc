@@ -125,6 +125,10 @@ Use actual local/CI outcomes; declarations are not execution evidence.
 The advisory report validates the existing source-review receipt, exact
 before/proposal bytes and traceability. Only narrowly additive GET response schemas
 without constraints/composition, and explicitly synthetic examples, can qualify.
+After application, the original analysis is verified against exact reviewed
+before bytes and the current before-to-proposal transition. The immutable capture
+and analyzer dependencies must still match; post-change reanalysis is not passed
+off as the original evidence. Unrelated source changes invalidate this binding.
 New operations, other methods needing safety review, replacements, constraints, missing reviews, real scalar values,
 untested final bytes and missing/failing checks explain why review is required.
 The private fingerprint scan is only one privacy check; independent scalar and

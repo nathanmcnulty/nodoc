@@ -144,7 +144,7 @@ async function captureBinding(artifacts) {
   return digest(bindings);
 }
 
-async function analysisBinding(inventory) {
+async function analysisBinding(inventory, { sourceOverrides = new Map() } = {}) {
   const sources = new Set();
   async function dependencies(file) {
     if (sources.has(file)) return;
@@ -155,7 +155,7 @@ async function analysisBinding(inventory) {
   await dependencies(path.join(repoRoot, "tools", "portal-refresh.mjs"));
   for (const file of [...await filesUnder(path.join(repoRoot, "specifications")), ...["package-lock.json", "AGENT_DISCOVERY_RUNBOOK.md", "AGENT_DISCOVERY_PLAYBOOK.md", "PORTAL_DISCOVERY_AGENT_PROMPT.md"].map(file => path.join(repoRoot, file))]) sources.add(file);
   const bindings = [];
-  for (const file of [...sources].sort()) bindings.push([path.relative(repoRoot, file), await hashFile(file)]);
+  for (const file of [...sources].sort()) bindings.push([path.relative(repoRoot, file), sourceOverrides.has(file) ? hash(sourceOverrides.get(file)) : await hashFile(file)]);
   return digest({ version: refreshAnalysisVersion, runtime: process.versions.node, inventory, sources: bindings });
 }
 
@@ -280,12 +280,34 @@ export async function analyzeRefreshCapture({ artifacts, specId, cacheDir, inven
   return { analysis, reused: false, cacheKey };
 }
 
-export async function loadVerifiedRefreshAnalysis(analysisPath) {
+export async function loadVerifiedRefreshAnalysis(analysisPath, { baselineChanges = [] } = {}) {
   await privateRefreshDirectory(path.dirname(path.resolve(analysisPath)));
   await assertNoRefreshLinks(analysisPath);
   const stored = await readJson(analysisPath);
   if (!stored.analysis || stored.analysisDigest !== digest(stored.analysis) || !/^[a-f0-9]{64}$/u.test(stored.cacheKey ?? "")
     || path.basename(analysisPath) !== `${stored.cacheKey}.json`) throw new Error("Refresh analysis cache binding is invalid.");
+  if (baselineChanges.length) {
+    // A reviewed source application legitimately changes the spec baseline. Verify
+    // the original analysis against its exact before bytes and the current exact
+    // before/proposal transition, rather than relabel post-change analysis as old.
+    const sourceOverrides = new Map();
+    for (const change of baselineChanges) {
+      if (!/^specifications\/nodoc-[\w-]+\/specification\/[\w.-]+\.ya?ml$/u.test(change.destination)
+        || typeof change.beforeSource !== "string" || hash(change.beforeSource) !== change.beforeSha256) throw new Error("Refresh baseline source binding is invalid.");
+      const filename = path.join(repoRoot, change.destination);
+      await assertNoRefreshLinks(filename);
+      if (![change.beforeSha256, change.proposalSha256].includes(await hashFile(filename))) throw new Error("Refresh baseline source transition has drifted.");
+      if (sourceOverrides.has(filename)) throw new Error("Duplicate refresh baseline destination.");
+      sourceOverrides.set(filename, change.beforeSource);
+    }
+    const artifacts = await privateRefreshDirectory(stored.analysis.artifactDirectory);
+    const inputDigest = await captureBinding(artifacts);
+    const analyzerDigest = await analysisBinding(await buildSpecRouteInventory(), { sourceOverrides });
+    const cacheKey = digest({ inputDigest, analyzerDigest, specId: stored.analysis.specId });
+    if (cacheKey !== stored.cacheKey || stored.analysis.inputDigest !== inputDigest || stored.analysis.analyzerDigest !== analyzerDigest) throw new Error("Refresh baseline analysis or capture binding is stale.");
+    if (await captureBinding(artifacts) !== inputDigest) throw new Error("Capture changed during refresh baseline verification.");
+    return stored.analysis;
+  }
   const current = await analyzeRefreshCapture({ artifacts: stored.analysis.artifactDirectory, specId: stored.analysis.specId, cacheDir: path.dirname(path.resolve(analysisPath)) });
   if (current.cacheKey !== stored.cacheKey || digest(current.analysis) !== stored.analysisDigest) throw new Error("Refresh analysis is stale; recompute and review current selections.");
   return current.analysis;

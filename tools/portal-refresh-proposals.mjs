@@ -175,7 +175,7 @@ export async function reportRefreshMergeEligibility({ manifest, review = null, c
   if (!analysisPath) reasons.push("verified-current-analysis-required");
   else {
     try {
-      const analysis = await loadVerifiedRefreshAnalysis(analysisPath);
+      const analysis = await loadVerifiedRefreshAnalysis(analysisPath, { baselineChanges: manifest.changes ?? [] });
       if (refreshAnalysisDigest(analysis) !== manifest.analysisDigest || analysis.captureId !== manifest.captureId) throw new Error("Analysis mismatch.");
     } catch { reasons.push("current-analysis-or-capture-binding-invalid"); }
   }
