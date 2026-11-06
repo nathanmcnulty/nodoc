@@ -13,6 +13,11 @@ variants, captured values, body fingerprints and body lengths stay private.
 The complete JSON reports are private too; publish only independently reviewed
 counts and public specification references.
 
+CI materializes the checked-in official Graph contract pin in runner temporary
+storage with `sync:graph-contract -- --pinned-spec`, then verifies its source
+hashes, operation counts and manifest before research validation. It needs no
+tenant authentication, private capture cache or floating upstream contract.
+
 ## Inventory and reuse
 
 Pass a private configuration to the existing controller:

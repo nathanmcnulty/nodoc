@@ -114,7 +114,14 @@ jobs:
       - name: Validate portal discovery metadata
         run: npm run validate:portal-discovery
 
+      - name: Materialize pinned official Graph contract
+        env:
+          LOCALAPPDATA: ${{ runner.temp }}
+        run: npm run sync:graph-contract -- --pinned-spec specifications/nodoc-graph-research/specification/openapi.yml --output-dir "$RUNNER_TEMP/nodoc-cdp/graph-contract"
+
       - name: Validate Graph research
+        env:
+          LOCALAPPDATA: ${{ runner.temp }}
         run: npm run validate:graph-research
 
       - name: Validate specification evaluation dispositions
