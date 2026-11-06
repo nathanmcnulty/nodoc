@@ -102,6 +102,11 @@ async function completedCaptureFixture(t, { retainCaptureFiles = true, ...option
 test("managed plan binds recipe, caller, profile, variables, role and explicit worker", async t => {
   const f = await fixture(t);
   assert.equal(validateManagedCaptureAssignment(f.plan, f.input).assignmentDigest, f.assignment.assignmentDigest);
+  const ceiling = structuredClone(f.manifest);
+  ceiling.portals[0].captureBudget.actionCount = 80;
+  assert.equal(compileOrchestrationPlan(ceiling).assignments.find(entry => entry.type === "capture").budgets.actionCount, f.actionBudget.countedActions);
+  ceiling.portals[0].captureBudget.actionCount = f.actionBudget.countedActions - 1;
+  assert.throws(() => compileOrchestrationPlan(ceiling), /exceeds the configured capture action budget/);
   for (const [field, value] of [["assignmentDigest", "0".repeat(64)], ["recipeSha256", "0".repeat(64)], ["recipePath", "/another.json"],
     ["endpoint", "https://different.test"], ["profile", "other"], ["workerId", "other-worker"], ["workerId", null], ["model", "other-model"]]) {
     assert.throws(() => validateManagedCaptureAssignment(f.plan, { ...f.input, [field]: value }), /does not match/, field);

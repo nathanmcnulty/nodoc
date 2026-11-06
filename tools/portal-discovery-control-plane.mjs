@@ -288,7 +288,12 @@ export function compileOrchestrationPlan(manifest, { ledger = {}, budgets = {}, 
     const route = routeForPortal(portal, summary, options);
     const captureKey = `${portal.managedCapture?.endpoint ?? portal.endpoint.leaseFamily}|${portal.auth.profile}`;
     const capture = { type: "capture", specId: portal.specId, portal: portal.title, endpointLease: captureKey, profile: portal.auth.profile, recipe: portal.recipe, route: "orchestrator", model: portalDiscoveryModelPolicy.capture.model, reasoning: portalDiscoveryModelPolicy.capture.reasoning, budgets: portal.captureBudget, preconditions: portal.enabled ? ["validated-manifest", "authenticated-profile", "fresh-artifact-directory"] : ["portal-enabled"], completionGates: ["sanitized-summary", "candidate-handoff", "operation-lifecycle-accounted"], blockers: route.reasonCodes, terminal: portal.enabled ? "capture-result-required" : "disabled", nextAction: portal.enabled ? "allocate-fresh-artifacts" : "none", serializedGroup: captureKey };
-    if (portal.managedCapture) capture.managedCapture = portal.managedCapture;
+    if (portal.managedCapture) {
+      const actionCount = portal.managedCapture.actionBudget.countedActions;
+      if (capture.budgets.actionCount < actionCount) throw new Error("Managed recipe exceeds the configured capture action budget.");
+      capture.budgets = { ...capture.budgets, actionCount };
+      capture.managedCapture = portal.managedCapture;
+    }
     capture.assignmentId = `capture-${digest(capture).slice(0, 24)}`;
     capture.assignmentDigest = assignmentDigest(capture);
     captureByLease.set(captureKey, [...(captureByLease.get(captureKey) ?? []), capture]);
@@ -333,7 +338,8 @@ export function validateOrchestrationPlan(plan) {
     if (assignment.assignmentDigest !== assignmentDigest(assignment)) throw new Error(`Assignment digest mismatch for ${assignment.assignmentId}.`);
     if (assignment.managedCapture && (assignment.type !== "capture" || assignment.model !== portalDiscoveryModelPolicy.capture.model
       || assignment.reasoning !== portalDiscoveryModelPolicy.capture.reasoning || assignment.managedCapture.kind !== "known-operation-refresh"
-      || !assignment.managedCapture.workerId || !plan.planDigest)) throw new Error("Invalid managed capture role or plan binding.");
+      || !assignment.managedCapture.workerId || !plan.planDigest
+      || assignment.budgets?.actionCount !== assignment.managedCapture.actionBudget?.countedActions)) throw new Error("Invalid managed capture role or plan binding.");
   }
   if (plan.planDigest) {
     const core = Object.fromEntries(["schemaVersion", "manifestId", "sourceManifestDigest", "modelPolicy", "options", "budgets", "assignments"].map(key => [key, plan[key]]));
