@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { mkdtemp, mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import os from "node:os";
@@ -83,6 +84,13 @@ test("one immutable capture feeds all axes, repeats reuse analysis, tampering fa
   const second = await analyzeRefreshCapture({ artifacts, cacheDir, specId: spec.specId, inventory });
   assert.equal(first.reused, false); assert.equal(second.reused, true);
   assert.deepEqual(first.analysis, second.analysis);
+  assert.deepEqual(first.analysisReference, second.analysisReference);
+  assert.equal(first.analysisReference.captureId, first.analysis.captureId);
+  assert.equal(first.analysisReference.inputDigest, first.analysis.inputDigest);
+  assert.equal(first.analysisReference.analyzerDigest, first.analysis.analyzerDigest);
+  assert.equal(first.analysisReference.analysisFileSha256, createHash("sha256").update(await readFile(first.analysisReference.analysisPath)).digest("hex"));
+  assert.deepEqual(JSON.parse(await readFile(first.analysisReference.analysisPath)).analysis, first.analysis);
+  assert.equal(first.analysisReference.analysisDigest, JSON.parse(await readFile(first.analysisReference.analysisPath)).analysisDigest);
   assert.equal(first.analysis.captureComplete, true);
   assert.equal(first.analysis.recordSource, "raw-requests.json");
   assert.ok(first.analysis.observations.some(entry => entry.path === operation.path && entry.bodyVerified && entry.attributed));

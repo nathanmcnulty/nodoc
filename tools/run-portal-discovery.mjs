@@ -804,6 +804,9 @@ export async function buildCaptureWorkerPacket({
       preserveFailedArtifacts: true,
       promotionAuthorized: false,
       reportMode: "compact-structured-output",
+      requiredWorkerReportFields: ["assignmentId", "assignmentDigest", "workerId", "runtimeRole"],
+      workerReportIdentitySource: "Use the finalized ledger assignment and actual worker runtime; nested aliases or policy defaults alone do not establish identity.",
+      requiredTerminalReviewBindings: ["workerReportSha256", "integrityReportSha256"],
     },
     execution: {
       actionBudget,

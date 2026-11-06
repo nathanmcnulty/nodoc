@@ -26,6 +26,8 @@ test("default SPA packet endpoint is an origin key while native UI URLs remain i
     assert.equal(argv[argv.indexOf("--endpoint") + 1], "admin.example.test:443");
   }
   assert.equal(packet.scope.portalUrl, input.brief.portalUrl);
+  assert.deepEqual(packet.evidenceContract.requiredWorkerReportFields, ["assignmentId", "assignmentDigest", "workerId", "runtimeRole"]);
+  assert.deepEqual(packet.evidenceContract.requiredTerminalReviewBindings, ["workerReportSha256", "integrityReportSha256"]);
 });
 
 test("known refresh ledger default follows the actual proxy caller, not canonical spec portal", async t => {

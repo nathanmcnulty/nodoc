@@ -201,7 +201,7 @@ export async function analyzeRefreshCapture({ artifacts, specId, cacheDir, inven
     const cached = await readJson(cacheFile);
     if (cached.cacheKey !== cacheKey || digest(cached.analysis) !== cached.analysisDigest) throw new Error("Refresh cache integrity mismatch.");
     if (await captureBinding(artifacts) !== inputDigest) throw new Error("Capture changed during refresh reuse.");
-    return { analysis: cached.analysis, reused: true, cacheKey };
+    return analysisResult(cached.analysis, true, cacheKey, cacheFile);
   } catch (error) { if (error.code !== "ENOENT") throw error; }
 
   const [summary, actions, apiRecords] = await Promise.all(["summary.json", "action-results.json", "api-records.json"].map(file => readJson(path.join(artifacts, file))));
@@ -304,7 +304,15 @@ export async function analyzeRefreshCapture({ artifacts, specId, cacheDir, inven
     limitations: ["Transport health is scoped to observed requests; semantic-error checks cover known envelopes only.", "No non-observation or HTTP status recommends removal.", "Private analysis is not an accepted source-review receipt."] };
   if (await captureBinding(artifacts) !== inputDigest) throw new Error("Capture changed during refresh analysis.");
   await publishRefreshAnalysisCache(cacheFile, { schemaVersion: 1, cacheKey, analysisDigest: digest(analysis), analysis });
-  return { analysis, reused: false, cacheKey };
+  return analysisResult(analysis, false, cacheKey, cacheFile);
+}
+
+async function analysisResult(analysis, reused, cacheKey, cacheFile) {
+  return { analysis, reused, cacheKey, analysisReference: {
+    visibility: "private-evidence-only", specId: analysis.specId, captureId: analysis.captureId,
+    analysisPath: cacheFile, analysisFileSha256: await hashFile(cacheFile), analysisDigest: digest(analysis),
+    inputDigest: analysis.inputDigest, analyzerDigest: analysis.analyzerDigest,
+  } };
 }
 
 export async function loadVerifiedRefreshAnalysis(analysisPath, { baselineChanges = [] } = {}) {
@@ -393,5 +401,6 @@ export async function runPortfolioRefresh({ captures = [], cacheDir, asOf, fresh
     }
   }
   return { report, execution: { captureCount: captures.length, blockedCaptureCount: blockers.length, analysesReused: results.filter(result => result.reused).length,
-    analysesComputed: results.filter(result => !result.reused).length, freshCapturesClaimed: false } };
+    analysesComputed: results.filter(result => !result.reused).length, freshCapturesClaimed: false,
+    analysisReferences: results.map(result => result.analysisReference) } };
 }
