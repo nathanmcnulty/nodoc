@@ -95,7 +95,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   if (command === "refresh-eligibility") compile = async input => {
     const { reportRefreshMergeEligibility } = await import("./portal-refresh-proposals.mjs");
     const read = async file => file ? JSON.parse(await readFile(file, "utf8")) : null;
-    return reportRefreshMergeEligibility({ manifest: await read(input.manifestPath), review: await read(input.reviewPath), checks: await read(input.checksPath), sourceRevision: input.sourceRevision, sourceReview: input.sourceReview, proposalRoot: input.proposalRoot, analysisPath: input.analysisPath });
+    return reportRefreshMergeEligibility({ manifest: await read(input.manifestPath), review: await read(input.reviewPath), checks: await read(input.checksPath), sourceRevision: input.sourceRevision, sourceReview: input.sourceReview, proposalRoot: input.proposalRoot, analysisPath: input.analysisPath, captureIdentityEvidence: input.captureIdentityEvidence });
   };
   compile(JSON.parse(await readFile(path.resolve(inputPath), "utf8"))).then((report) => process.stdout.write(refresh ? `${JSON.stringify(report, null, 2)}\n` : stableJson(report))).catch((error) => { console.error(refresh ? "Controller failed; inspect the private inputs and retained artifacts." : error.message); process.exitCode = 1; });
 }

@@ -15,12 +15,16 @@ test("applied proposals require exact edit and verified observation bindings", {
   t.after(() => rm(root, { recursive: true, force: true }));
   const source = path.join(root, "source");
   await mkdir(source);
-  for (const name of ["tools", "specifications", "package-lock.json", ".gitignore", "AGENT_DISCOVERY_RUNBOOK.md", "AGENT_DISCOVERY_PLAYBOOK.md", "PORTAL_DISCOVERY_AGENT_PROMPT.md"]) {
+  for (const name of ["tools", "package-lock.json", ".gitignore", "AGENT_DISCOVERY_RUNBOOK.md", "AGENT_DISCOVERY_PLAYBOOK.md", "PORTAL_DISCOVERY_AGENT_PROMPT.md"]) {
     await cp(path.join(repository, name), path.join(source, name), {
       recursive: true,
       filter: filename => filename !== path.join(repository, "tools", "tests"),
     });
   }
+  // These adversarial cases concern one split specification; portfolio-wide
+  // inventory coverage lives in the controller/inventory tests.
+  await mkdir(path.join(source, "specifications"));
+  await cp(path.join(repository, "specifications/nodoc-m365-admin"), path.join(source, "specifications/nodoc-m365-admin"), { recursive: true });
   // Deliberately create this gap only in the fixture, so a real public example
   // can be promoted without removing the positive test's synthetic baseline.
   const navigation = path.join(source, "specifications/nodoc-m365-admin/specification/navigation.yml");
@@ -48,11 +52,13 @@ test("applied proposals require exact edit and verified observation bindings", {
   await writeFile(driver, `
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
+import { cp, mkdir, readFile, readdir, writeFile } from "node:fs/promises";
+import { execFileSync } from "node:child_process";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 const source = process.argv[2], root = path.dirname(source);
 const module = name => import(pathToFileURL(path.join(source, "tools", name)).href);
+const { attachManagedCaptureFixture } = await import(pathToFileURL(${JSON.stringify(path.join(repository, "tools/tests/helpers/managed-capture-fixture.mjs"))}));
 const { analyzeRefreshCapture, loadVerifiedRefreshAnalysis, refreshAnalysisDigest } = await module("portal-refresh.mjs");
 const { prepareRefreshProposals, reportRefreshMergeEligibility } = await module("portal-refresh-proposals.mjs");
 const { refreshSourceState } = await module("portal-refresh-binding.mjs");
@@ -98,6 +104,7 @@ for (const [filename, value] of Object.entries({
   "action-results.json": [{ actionIndex: 0, type: "capture", required: true, result: {} }],
   "summary.json": { portal: "M365 Admin", interactionHealth: aggregateInteractionHealth([]), actionValidation: { requiredActionFailures: [] } },
 })) await writeFile(path.join(artifacts, filename), serialized(value));
+const captureIdentityEvidence = await attachManagedCaptureFixture({ sourceRoot: source, captureRoot: artifacts, specId: spec.specId, title: "M365 Admin", targetUrl: url });
 const captureBefore = await snapshot(artifacts);
 const analyzed = await analyzeRefreshCapture({ artifacts, cacheDir, specId: spec.specId, inventory });
 assert.equal(analyzed.analysis.captureComplete, true);
@@ -126,11 +133,39 @@ const checks = { ...actualSource, syntheticFixtureOnly: true, manifestDigest,
   results: Object.fromEntries(["discovery", "spec-quality", "portal-metadata", "evaluations", "graph-research", "site-data", "postman-parity", "typecheck", "build", "privacy"]
     .map(name => [name, { observed: true, exitCode: 0, syntheticFixtureOnly: true }])) };
 const report = await reportRefreshMergeEligibility({ manifest, review, checks, sourceRevision: actualSource.sourceRevision,
-  sourceReview, proposalRoot: outputDir, analysisPath });
+  sourceReview, proposalRoot: outputDir, analysisPath, captureIdentityEvidence });
 assert.equal(report.eligible, true, JSON.stringify(report));
 assert.equal(report.actualAutomaticMergingEnabled, false);
 assert.equal(report.rulesRequireExplicitUserAuthorization, true);
 assert.equal(report.changes[0].eligible, true);
+const captureGateInput = { manifest, review, checks, sourceRevision: actualSource.sourceRevision, sourceReview, proposalRoot: outputDir, analysisPath };
+const badResultPath = path.join(root, "malformed-private-result.json"), privateMarker = "fixture-private-parser-diagnostic";
+await writeFile(badResultPath, '{"sensitiveFixture":"' + privateMarker + '"');
+const blockedResultPath = path.join(root, "not-accepted-result.json");
+await writeFile(blockedResultPath, serialized({ ...JSON.parse(await readFile(captureIdentityEvidence.resultPath, "utf8")), decision: "block" }));
+const borrowedRoot = path.join(root, "borrowed-capture");
+await cp(artifacts, borrowedRoot, { recursive: true });
+const borrowedIdentity = await attachManagedCaptureFixture({ sourceRoot: source, captureRoot: borrowedRoot, specId: spec.specId, title: "M365 Admin", targetUrl: url });
+const { validateManagedCaptureResult } = await module("portal-discovery-control-plane.mjs");
+assert.equal((await validateManagedCaptureResult({ ...borrowedIdentity, runPath: path.join(borrowedRoot, "discovery-run.json") })).status, "completed", "Borrowed proof is independently valid for its own capture.");
+await Promise.all([
+  ["missing", null], ["asserted flag", { identityVerified: true }],
+  ["malformed", { ...captureIdentityEvidence, resultPath: badResultPath }],
+  ["not accepted", { ...captureIdentityEvidence, resultPath: blockedResultPath }],
+  ["different real capture", { ...borrowedIdentity, runPath: path.join(borrowedRoot, "discovery-run.json") }],
+].map(async ([name, proof]) => {
+  const rejected = await reportRefreshMergeEligibility({ ...captureGateInput, captureIdentityEvidence: proof });
+  assert.deepEqual(rejected.reasonCodes, ["capture-controller-identity-unproved"], name + ": every unrelated gate passes");
+  assert.equal(rejected.eligible, false);
+  assert.ok(!JSON.stringify(rejected).includes(privateMarker));
+  assert.ok(!JSON.stringify(rejected).includes(JSON.stringify(root).slice(1, -1)));
+}));
+const checksPath = path.join(root, "checks.json"), inputPath = path.join(root, "controller-input.json");
+await writeFile(checksPath, serialized(checks));
+await writeFile(inputPath, serialized({ manifestPath, reviewPath, checksPath, sourceRevision: actualSource.sourceRevision, sourceReview,
+  proposalRoot: outputDir, analysisPath, captureIdentityEvidence }));
+const controllerReport = JSON.parse(execFileSync(process.execPath, [path.join(source, "tools/portal-discovery-controller.mjs"), "refresh-eligibility", inputPath], { cwd: source, encoding: "utf8" }));
+assert.equal(controllerReport.eligible, true, "Existing controller input must pass the real proof references through.");
 assert.deepEqual(await snapshot(artifacts), captureBefore, "Every original capture byte must remain unchanged.");
 assert.deepEqual(await refreshSourceState(), actualSource, "Eligibility must not mutate the applied fixture source.");
 // Rebind every synthetic review/check after tampering, so these failures cannot
@@ -156,7 +191,7 @@ for (const [name, mutate] of [
   for (const change of altered.changes) await writeFile(path.join(source, change.destination), await readFile(change.proposal));
   const alteredChecks = { ...checks, ...await refreshSourceState(), manifestDigest: alteredDigest };
   const rejected = await reportRefreshMergeEligibility({ manifest: altered, review: alteredReview, checks: alteredChecks, sourceRevision: alteredChecks.sourceRevision,
-    sourceReview: alteredSourceReview, proposalRoot: outputDir, analysisPath });
+    sourceReview: alteredSourceReview, proposalRoot: outputDir, analysisPath, captureIdentityEvidence });
   assert.deepEqual(rejected.reasonCodes, [], name + ": unrelated gates must pass");
   assert.equal(rejected.eligible, false, name);
   assert.ok(rejected.changes[0].reasonCodes.includes("edit-evidence-does-not-match-verified-observation"), name + JSON.stringify(rejected));
@@ -176,7 +211,7 @@ for (const name of ["route", "method", "status", "media"]) {
   for (const change of altered.changes) await writeFile(path.join(source, change.destination), await readFile(change.proposal));
   const alteredChecks = { ...checks, ...await refreshSourceState(), manifestDigest: alteredDigest };
   const rejected = await reportRefreshMergeEligibility({ manifest: altered, review: alteredReview, checks: alteredChecks, sourceRevision: alteredChecks.sourceRevision,
-    sourceReview: alteredSourceReview, proposalRoot: outputDir, analysisPath });
+    sourceReview: alteredSourceReview, proposalRoot: outputDir, analysisPath, captureIdentityEvidence });
   assert.deepEqual(rejected.reasonCodes, [], name + ": analysis, source, review and checks are verified");
   assert.equal(rejected.eligible, false);
   assert.ok(rejected.changes[0].reasonCodes.includes("proposed-edits-do-not-match-verified-evidence"), name + JSON.stringify(rejected));

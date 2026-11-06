@@ -55,6 +55,7 @@ import {pathToFileURL} from "node:url";
 const source=process.argv[2],root=path.dirname(source),destination=${JSON.stringify(destination)};
 const YAML=createRequire(path.join(source,"package-lock.json"))("yaml");
 const mod=name=>import(pathToFileURL(path.join(source,"tools",name)));
+const {attachManagedCaptureFixture}=await import(pathToFileURL(${JSON.stringify(path.join(repository,"tools/tests/helpers/managed-capture-fixture.mjs"))}));
 const {analyzeRefreshCapture,refreshAnalysisDigest}=await mod("portal-refresh.mjs");
 const {prepareRefreshProposals,reportRefreshMergeEligibility}=await mod("portal-refresh-proposals.mjs");
 const {buildSpecRouteInventory}=await mod("spec-quality-lib.mjs");
@@ -68,6 +69,7 @@ const capture=path.join(root,"capture"),cache=path.join(root,"cache"),proposals=
 const evidenceId="request-synthetic-observed",body=await writeResponseBodySidecar({artifactDir:capture,evidenceId,sanitizedBody:'{"enabled":true}'});
 const records=[{method:"GET",url:"https://fixture.example.invalid/observed",path:"/observed",status:200,mimeType:"application/json",evidenceId,observedAt:"2026-11-06T10:00:00Z",attribution:{actionIndex:0},bodyCapture:body.bodyCapture}];
 for(const[name,value]of Object.entries({"raw-requests.json":records,"api-records.json":records,"action-results.json":[{actionIndex:0,type:"capture",required:true,result:{}}],"summary.json":{portal:"Fixture",interactionHealth:aggregateInteractionHealth([]),actionValidation:{requiredActionFailures:[]}}}))await writeFile(path.join(capture,name),json(value));
+const captureIdentityEvidence=await attachManagedCaptureFixture({sourceRoot:source,captureRoot:capture,specId:"fixture",title:"Fixture",targetUrl:records[0].url});
 const inventory=await buildSpecRouteInventory(),result=await analyzeRefreshCapture({artifacts:capture,specId:"fixture",cacheDir:cache,inventory});
 assert.equal(result.analysis.captureComplete,true);
 const entry=result.analysis.enrichments[0];assert.equal(entry.path,"/observed");assert.equal(result.analysis.enrichments.length,1);
@@ -82,7 +84,7 @@ const manifestPath=path.join(proposals,"manifest.json");await writeFile(manifest
 const review={decision:"accepted",reviewedManifestSha256:manifestDigest,sanitized:true,completeEvidence:true,model:policy.offlineReview.model,reasoning:policy.offlineReview.reasoning,syntheticFixtureOnly:true};
 const reviewPath=path.join(root,"review.json"),receiptPath=path.join(root,"receipt.json");await writeFile(reviewPath,json(review));const sourceReview={manifestPath,reviewPath,receiptPath};createSourceReviewReceipt({root:source,...sourceReview});await writeFile(path.join(source,destination),proposed);
 const state=await refreshSourceState(),checks={...state,manifestDigest,appliedChanges:{[destination]:hash(proposed)},results:Object.fromEntries(["discovery","spec-quality","portal-metadata","evaluations","graph-research","site-data","postman-parity","typecheck","build","privacy"].map(name=>[name,{observed:true,exitCode:0,syntheticFixtureOnly:true}]))};
-const report=await reportRefreshMergeEligibility({manifest,review,checks,sourceRevision:state.sourceRevision,sourceReview,proposalRoot:proposals,analysisPath:path.join(cache,result.cacheKey+".json")});
+const report=await reportRefreshMergeEligibility({manifest,review,checks,sourceRevision:state.sourceRevision,sourceReview,proposalRoot:proposals,analysisPath:path.join(cache,result.cacheKey+".json"),captureIdentityEvidence});
 assert.deepEqual(report.reasonCodes,[],"All capture/source/review/check bindings must pass.");
 assert.equal(report.eligible,false,JSON.stringify(report));
 assert.ok(report.changes[0].reasonCodes.includes("semantic-edit-outside-verified-target"),JSON.stringify(report));

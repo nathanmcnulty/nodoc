@@ -522,6 +522,9 @@ export async function compileFromFiles({ manifestPath = defaultPortfolioManifest
 // persisted packet/run and actual ledger through the same existing validator.
 export async function validateManagedCaptureResult({ result, resultPath, planPath, packetPath, runPath, ledgerPath }) {
   if (resultPath) result = await readJson(resultPath);
+  if (!result || typeof result.assignmentId !== "string" || ![planPath, packetPath, runPath, ledgerPath].every(value => typeof value === "string" && value)) {
+    throw new Error("Managed capture result and all evidence paths are required.");
+  }
   const [planBytes, packetValue, run, ledger] = await Promise.all([readFile(planPath), readJson(packetPath), readJson(runPath),
     getLedgerViewFromFile({ ledgerPath, filters: { assignmentId: result.assignmentId }, includeAttempts: true })]);
   const packet = packetValue.workerPacket ?? packetValue;

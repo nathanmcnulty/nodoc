@@ -144,6 +144,7 @@ test("automatic merge eligibility fails closed without complete checks and remai
   assert.equal(report.rulesRequireExplicitUserAuthorization, true);
   assert.equal(report.eligible, false);
   assert.ok(report.reasonCodes.includes("checks-not-bound-to-current-revision-and-proposals"));
+  assert.ok(report.reasonCodes.includes("capture-controller-identity-unproved"));
   for (const check of ["discovery", "spec-quality", "portal-metadata", "evaluations", "graph-research", "site-data", "postman-parity", "typecheck", "build", "privacy"]) assert.ok(report.reasonCodes.includes(`check-unproved:${check}`));
   assert.ok(report.reasonCodes.includes("independent-sanitization-and-evidence-review-required"));
   assert.ok(report.reasonCodes.includes("validated-source-review-receipt-required"));

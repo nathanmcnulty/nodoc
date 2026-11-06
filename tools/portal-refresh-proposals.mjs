@@ -9,6 +9,7 @@ import { privateRefreshDirectory, assertNoRefreshLinks } from "./portal-refresh-
 import { validateSourceReview } from "./source-review-receipt.mjs";
 import { loadVerifiedRefreshAnalysis, refreshAnalysisDigest } from "./portal-refresh.mjs";
 import { refreshSourceState } from "./portal-refresh-binding.mjs";
+import { validateManagedCaptureResult } from "./portal-discovery-control-plane.mjs";
 
 const hash = bytes => createHash("sha256").update(bytes).digest("hex");
 const json = value => `${JSON.stringify(value, null, 2)}\n`;
@@ -262,7 +263,7 @@ async function bindProposedEdits({ entry, before, proposed, evidence, analysis, 
 }
 
 // Advisory only. Neither this function nor the controller can merge or enable merging.
-export async function reportRefreshMergeEligibility({ manifest, review = null, checks = null, sourceRevision = null, sourceReview = null, proposalRoot = null, analysisPath = null }) {
+export async function reportRefreshMergeEligibility({ manifest, review = null, checks = null, sourceRevision = null, sourceReview = null, proposalRoot = null, analysisPath = null, captureIdentityEvidence = null }) {
   const manifestDigest = hash(json(manifest));
   const reasons = [];
   let analysis = null;
@@ -274,6 +275,18 @@ export async function reportRefreshMergeEligibility({ manifest, review = null, c
       analysis = await loadVerifiedRefreshAnalysis(analysisPath, { baselineChanges: manifest.changes ?? [] });
       if (refreshAnalysisDigest(analysis) !== manifest.analysisDigest || analysis.captureId !== manifest.captureId) throw new Error("Analysis mismatch.");
     } catch { analysis = null; reasons.push("current-analysis-or-capture-binding-invalid"); }
+  }
+  try {
+    if (!analysis || !captureIdentityEvidence) throw new Error("Managed capture evidence is required.");
+    const accepted = await validateManagedCaptureResult({
+      resultPath: captureIdentityEvidence.resultPath, planPath: captureIdentityEvidence.planPath,
+      packetPath: captureIdentityEvidence.packetPath, ledgerPath: captureIdentityEvidence.ledgerPath,
+      runPath: path.join(analysis.artifactDirectory, "discovery-run.json"),
+    });
+    if (accepted.status !== "completed" || accepted.decision !== "accept") throw new Error("Managed capture is not accepted and complete.");
+  } catch {
+    // Never expose private paths, variables, response facts or parser diagnostics.
+    reasons.push("capture-controller-identity-unproved");
   }
   if (manifest.visibility !== "private-evidence-only" || manifest.rawResponseValuesIncluded !== false || manifest.syntheticScalarExamplesOnly !== true || manifest.requiresIndependentPrivacyReview !== true) reasons.push("proposal-privacy-contract-invalid");
   if (!sourceReview) reasons.push("validated-source-review-receipt-required");
