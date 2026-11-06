@@ -29,6 +29,17 @@ async function temporary(t) {
   return root;
 }
 
+test("synthetic proposals reject private dictionary keys at every depth", async t => {
+  const root = await temporary(t), captureDirectory = await temporary(t);
+  for (const [index, key] of ["person@example.invalid", "@odata.person@example.invalid", "12345678-abcd-1234-abcd-123456789abc", "tenant.onmicrosoft.com", "tenant.example.invalid", "https://private.invalid/path", "C:\\private\\file"].entries()) {
+    const body = { items: [{ nested: { [key]: true } }] };
+    const entry = { ...splitEntry, schema: inferRefreshSchema(body), syntheticExample: syntheticRefreshExample(body) };
+    await assert.rejects(prepareRefreshProposals({ analysis: analysisFor(entry), selections: [selection(entry, "synthetic-example")],
+      outputDir: path.join(root, String(index)), inventory, captureDirectory }), /Identifier-like property names require manual/);
+    await assert.rejects(readFile(path.join(root, String(index), "manifest.json")), { code: "ENOENT" });
+  }
+});
+
 test("source proposals preserve exact bytes, do not apply, and satisfy source-review bindings", async t => {
   const outputDir = await temporary(t), captureDirectory = await temporary(t), source = path.join(repoRoot, inventory[0].specPath);
   const before = await readFile(source);

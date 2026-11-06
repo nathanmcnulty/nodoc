@@ -67,6 +67,14 @@ runtime and inventory. Changed bindings invalidate reuse. Both computed and
 cached results recheck capture immutability. Invalid evidence blocks that capture
 while independent portfolio work continues. Preserve failed artifacts.
 
+Cache publication writes and syncs a private temporary file before atomically
+publishing the final name without replacing an existing entry. Interrupted
+temporary files do not block an identical retry; preserve orphan files for
+inspection. An invalid existing final entry still fails closed: do not silently
+overwrite tampered or historical partial evidence. Hard-link publication must
+be supported by the private cache filesystem; an unsupported filesystem is a
+storage blocker, not permission to use a partial final-file write.
+
 ## Focused proposals
 
 Use the private cache entry as `analysisPath`. Select exact evidence IDs and
@@ -98,6 +106,11 @@ and conflicting shapes require reconciliation. Null-only fields do not acquire
 a non-null type; empty arrays do not supply item schemas. Examples replace
 scalar values with synthetic constants and illustrate one shape, not all states.
 Property names and dynamic dictionaries still require privacy review.
+Proposal generation rejects identifier-like keys (including nested emails,
+GUIDs, domains and filesystem/URL paths). Synthetic scalar substitution does
+not sanitize those keys. Model dictionaries manually with reviewed generic
+keys instead of publishing captured identifiers; the private analysis retains
+the original shape. This guard is conservative, not a complete privacy proof.
 
 The command revalidates cache, capture and current analyzer bindings before
 proposing anything. It follows local `$ref`s to the owning source and writes full private
@@ -130,6 +143,15 @@ Use actual local/CI outcomes; declarations are not execution evidence.
 The advisory report validates the existing source-review receipt, exact
 before/proposal bytes and traceability. Only narrowly additive GET response schemas
 without constraints/composition, and explicitly synthetic examples, can qualify.
+For every edit it resolves the owning specification file and exact operation,
+method, route, response status and media type, compares the full supporting
+observation list against verified analysis, and reconstructs the expected edit.
+The entire proposed document must equal that reconstruction. A valid capture
+or another observation in the same file cannot authorize an unrelated edit.
+Example property names must also occur at their exact nesting level in the
+original authored model; open dictionaries do not establish safe names. New
+schema property names require manual review. Independent review and passing
+checks cannot override these advisory exclusions.
 After application, the original analysis is verified against exact reviewed
 before bytes and the current before-to-proposal transition. The immutable capture
 and analyzer dependencies must still match; post-change reanalysis is not passed

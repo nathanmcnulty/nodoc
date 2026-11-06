@@ -1,7 +1,7 @@
 // Offline consumers of the existing capture pipeline. No browser, ledger or merge writes.
-import { createHash } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { createReadStream } from "node:fs";
-import { readFile, readdir, realpath, writeFile } from "node:fs/promises";
+import { link, open, readFile, readdir, realpath, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { buildCrawlCandidates, normalizeRoutePath } from "./generate-crawl-candidates.mjs";
 import { buildCandidateHandoff, buildPartitionedCandidateHandoff } from "./discovery-candidate-handoff.mjs";
@@ -24,6 +24,33 @@ const hash = value => createHash("sha256").update(value).digest("hex");
 const digest = value => hash(json(value));
 export const refreshAnalysisDigest = digest;
 const readJson = async file => JSON.parse((await readFile(file, "utf8")).replace(/^\uFEFF/u, ""));
+
+// Publish complete private entries atomically without replacing any existing
+// final entry, including a tampered entry that requires independent inspection.
+export async function publishRefreshAnalysisCache(cacheFile, entry, { write = (handle, bytes) => handle.writeFile(bytes, "utf8"), promote = link } = {}) {
+  await assertNoRefreshLinks(cacheFile);
+  const temporary = `${cacheFile}.${randomUUID()}.tmp`;
+  await assertNoRefreshLinks(temporary);
+  let handle, created = false;
+  try {
+    handle = await open(temporary, "wx", 0o600);
+    created = true;
+    await write(handle, json(entry));
+    await handle.sync();
+    await handle.close();
+    handle = null;
+    // Same-directory hard-link publication is atomic and fails on an existing
+    // destination. rename() would silently replace a valid or tampered entry.
+    await promote(temporary, cacheFile);
+  } finally {
+    try { await handle?.close(); }
+    finally {
+      if (created) try { await unlink(temporary); }
+      catch (error) { if (error.code !== "ENOENT") throw error; }
+    }
+  }
+}
+
 async function hashFile(file) {
   const digest = createHash("sha256");
   for await (const chunk of createReadStream(file)) digest.update(chunk);
@@ -276,7 +303,7 @@ export async function analyzeRefreshCapture({ artifacts, specId, cacheDir, inven
     captureComplete, recordSource, observations, enrichments: groupRefreshEnrichments(enrichments), enrichmentObservationCount: enrichments.length, discoveryDrafts, unmapped, ambiguous, candidateQueue, handoff, groupedHandoff: buildPartitionedCandidateHandoff(handoff),
     limitations: ["Transport health is scoped to observed requests; semantic-error checks cover known envelopes only.", "No non-observation or HTTP status recommends removal.", "Private analysis is not an accepted source-review receipt."] };
   if (await captureBinding(artifacts) !== inputDigest) throw new Error("Capture changed during refresh analysis.");
-  await writeFile(cacheFile, json({ schemaVersion: 1, cacheKey, analysisDigest: digest(analysis), analysis }), { flag: "wx" });
+  await publishRefreshAnalysisCache(cacheFile, { schemaVersion: 1, cacheKey, analysisDigest: digest(analysis), analysis });
   return { analysis, reused: false, cacheKey };
 }
 

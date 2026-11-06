@@ -79,3 +79,25 @@ The concise table below counts review groups, not promoted changes. Raw discover
 The scoped privacy scan covered all 190 physical bodies in the five representative evidence roots against 527 public source files with no fingerprint/length matches before application. The wider historical artifact-tree scan stopped on source-mirror symlinks and is not claimed as passed. Independent review separately checked both published examples and their property names.
 
 See [the workflow](REFRESH_WORKFLOW.md) for reproducible commands, cache invalidation, source proposals, #225 reconciliation and the proposed merge rules. Private artifacts, raw identifiers, request values, body fingerprints and body lengths are excluded from this report.
+
+## Follow-up toward fresh collection
+
+Eligibility now binds each edit to the exact verified operation, method, route,
+response status, media type and supporting observations, then reconstructs and
+compares the complete proposed document. Tests cover both forged metadata and
+real verified evidence borrowed from another operation or response variant.
+Identifier-like dictionary keys are rejected during proposal generation;
+automatic eligibility additionally requires example keys in the authored model.
+Cache entries publish atomically so interrupted temporary writes can be retried
+without replacing any existing final evidence.
+
+Earlier check/eligibility receipts belong to their recorded source revision;
+they do not certify these changed analyzer/rule bytes. New validation does not
+make the retained observations fresh. No additional live observation has yet
+been established in this follow-up. Local inspection found no running managed
+capture browser, and the latest retained execution approvals are expired.
+Normal OS/browser sign-in for the previously selected account has been
+authorized if needed; new consent, permissions, tenant switching and portal
+writes remain outside scope. Renew exact reviewed execution bindings before
+allocating a browser, and record fresh results separately from the retained
+portfolio counts above. Actual automatic merging remains disabled.

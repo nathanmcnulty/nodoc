@@ -3,7 +3,7 @@ import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import YAML from "yaml";
 import { isDeepStrictEqual } from "node:util";
-import { repoRoot } from "./spec-quality-lib.mjs";
+import { repoRoot, buildSpecRouteInventory, loadBundledSpecification } from "./spec-quality-lib.mjs";
 import { portalDiscoveryModelPolicy } from "./portal-discovery-model-policy.mjs";
 import { privateRefreshDirectory, assertNoRefreshLinks } from "./portal-refresh-paths.mjs";
 import { validateSourceReview } from "./source-review-receipt.mjs";
@@ -13,6 +13,23 @@ import { refreshSourceState } from "./portal-refresh-binding.mjs";
 const hash = bytes => createHash("sha256").update(bytes).digest("hex");
 const json = value => `${JSON.stringify(value, null, 2)}\n`;
 const pointerParts = fragment => fragment.replace(/^#\/?/u, "").split("/").filter(Boolean).map(part => decodeURIComponent(part).replaceAll("~1", "/").replaceAll("~0", "~"));
+const exampleFor = entry => ({ summary: "Synthetic values illustrating an observed response shape; not a captured response.",
+  description: `Based on passive portal observation ${entry.observedAt}, evidence ${entry.evidenceId}. Scalar values are synthesized; this example illustrates one observed shape.`, value: entry.syntheticExample });
+
+const privatePropertyName = key => !["@odata.context", "@odata.type", "@odata.id", "@odata.etag", "@odata.nextLink", "@odata.count", "@odata.deltaLink"].includes(key) && /[@\\/]|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}|(?:[a-z0-9-]+\.)+[a-z]{2,}(?:$|:)/iu.test(key)
+  || ["__proto__", "constructor", "prototype"].includes(key);
+function privateExampleNames(value) {
+  if (Array.isArray(value)) return value.some(privateExampleNames);
+  return value !== null && typeof value === "object" && Object.entries(value).some(([key, item]) => privatePropertyName(key) || privateExampleNames(item));
+}
+function privateSchemaNames(schema) {
+  if (!schema || typeof schema !== "object") return false;
+  return Object.entries(schema.properties ?? {}).some(([key, item]) => privatePropertyName(key) || privateSchemaNames(item))
+    || privateSchemaNames(schema.items) || ["anyOf", "oneOf", "allOf"].some(key => (schema[key] ?? []).some(privateSchemaNames));
+}
+function hasSchemaProperties(schema) {
+  return Boolean(schema && (Object.keys(schema.properties ?? {}).length || hasSchemaProperties(schema.items)));
+}
 
 function markMediaEdit(target, keys, original) {
   const node = original.document.getIn(keys);
@@ -76,6 +93,7 @@ export async function prepareRefreshProposals({ analysis, selections = [], outpu
     const candidates = (newOperation ? analysis.discoveryDrafts ?? [] : analysis.enrichments).filter(entry => entry.evidenceId === selection.evidenceId && entry.specId === selection.specId);
     if (candidates.length !== 1) throw new Error("Selection must identify one exact enrichment observation.");
     const entry = candidates[0];
+    if (privateExampleNames(entry.syntheticExample) || privateSchemaNames(entry.schema)) throw new Error("Identifier-like property names require manual privacy-safe dictionary modeling before proposal generation.");
     if (!newOperation && !["schema-missing", "compatible-observed-types"].includes(entry.comparison)) throw new Error("Changed or unsupported contracts need manual reconciliation.");
     if (!analysis.captureComplete || !Number.isInteger(entry.actionIndex) || entry.actionIndex < 0) throw new Error("Proposal requires complete attributed capture evidence.");
     if (!entry.evidenceId || !entry.captureId || !Number.isFinite(Date.parse(entry.observedAt))) throw new Error("Proposal requires original observation date and evidence identity.");
@@ -122,8 +140,7 @@ export async function prepareRefreshProposals({ analysis, selections = [], outpu
     if (current !== undefined && !(schemaMode && YAML.isMap(current) && current.items.length === 0)) throw new Error("Refresh proposal would overwrite existing data.");
     const responseKeys = source.keys.slice(0, -2);
     if (target.document.getIn(responseKeys) === undefined) target.document.setIn([...responseKeys, "description"], "Observed successful response.");
-    target.document.setIn(key, schemaMode ? entry.schema : { summary: "Synthetic values illustrating an observed response shape; not a captured response.",
-      description: `Based on passive portal observation ${entry.observedAt}, evidence ${entry.evidenceId}. Scalar values are synthesized; this example illustrates one observed shape.`, value: entry.syntheticExample });
+    target.document.setIn(key, schemaMode ? entry.schema : exampleFor(entry));
     evidence.push({ destination, kind: selection.kind, specId: entry.specId, method: entry.method, path: entry.path, status: entry.status, mimeType: entry.mimeType,
       captureId: entry.captureId, evidenceId: entry.evidenceId, actionIndex: entry.actionIndex, observedAt: entry.observedAt,
       ...(entry.supportingObservations ? { supportingObservations: entry.supportingObservations } : {}) });
@@ -166,18 +183,77 @@ function syntheticValuesOnly(value) {
   return value && typeof value === "object" && Object.values(value).every(syntheticValuesOnly);
 }
 
+// Synthetic scalar values do not sanitize dictionary keys. Automatic eligibility
+// requires every example key, at its exact nesting level, in the authored model.
+// additionalProperties/composition cannot establish a public property-name set.
+function authoredExampleNames(value, schema) {
+  if (Array.isArray(value)) return value.every(item => authoredExampleNames(item, schema?.items));
+  if (!value || typeof value !== "object") return true;
+  return Object.entries(value).every(([key, item]) => Object.hasOwn(schema?.properties ?? {}, key)
+    && !privatePropertyName(key)
+    && authoredExampleNames(item, schema.properties[key]));
+}
+
+async function bindProposedEdits({ entry, before, proposed, evidence, analysis, inventory }) {
+  const blockers = [], expected = YAML.parseDocument(before), seen = new Set();
+  if (!analysis || !evidence.length) return ["edit-evidence-binding-incomplete"];
+  for (const item of evidence) {
+    const observation = analysis.enrichments.find(candidate => candidate.specId === item.specId && candidate.evidenceId === item.evidenceId);
+    const fields = ["specId", "method", "path", "status", "mimeType", "captureId", "evidenceId", "actionIndex", "observedAt", "supportingObservations"];
+    if (!observation || fields.some(key => !isDeepStrictEqual(item[key], observation[key]))) {
+      blockers.push("edit-evidence-does-not-match-verified-observation"); continue;
+    }
+    if (!["synthetic-example", "response-schema"].includes(item.kind) || !["schema-missing", "compatible-observed-types"].includes(observation.comparison)) {
+      blockers.push("edit-kind-or-contract-requires-review"); continue;
+    }
+    const spec = inventory.find(candidate => candidate.specId === item.specId);
+    const mediaKeys = ["paths", item.path, item.method.toLowerCase(), "responses", item.status, "content", item.mimeType];
+    let owner;
+    try { owner = spec && await sourceNode(path.join(repoRoot, spec.specPath), mediaKeys); }
+    catch { /* Unsupported ownership cannot authorize an edit. */ }
+    if (!owner || path.relative(repoRoot, owner.filename).replaceAll("\\", "/") !== entry.destination || !isDeepStrictEqual(owner.keys, mediaKeys)) {
+      blockers.push("edit-operation-owner-does-not-match-evidence"); continue;
+    }
+    const schemaMode = item.kind === "response-schema";
+    const keys = schemaMode ? [...mediaKeys, "schema"] : [...mediaKeys, "examples", "syntheticRefresh"];
+    const identity = JSON.stringify(keys), current = expected.getIn(keys);
+    if (seen.has(identity) || current !== undefined && !(schemaMode && YAML.isMap(current) && current.items.length === 0)) {
+      blockers.push("edit-overwrites-existing-or-duplicate-data"); continue;
+    }
+    seen.add(identity);
+    if (schemaMode && observation.comparison !== "schema-missing") blockers.push("edit-kind-or-contract-requires-review");
+    if (schemaMode && new Set(analysis.enrichments.filter(candidate => ["specId", "method", "path", "status", "mimeType"].every(key => candidate[key] === observation[key])).map(candidate => json(candidate.schema))).size > 1) blockers.push("conflicting-observed-shapes-require-review");
+    if (schemaMode && hasSchemaProperties(observation.schema)) blockers.push("new-schema-property-names-require-review");
+    if (!schemaMode) {
+      const bundled = await loadBundledSpecification(path.join(repoRoot, spec.specPath));
+      // Read the original schema when the proposal adds a schema in this file.
+      // Otherwise the current bundle is safe: this edit may only add an example.
+      const authored = YAML.parse(before).paths?.[item.path]?.[item.method.toLowerCase()]?.responses?.[item.status]?.content?.[item.mimeType]?.schema;
+      const schema = authored?.$ref ? bundled.paths?.[item.path]?.[item.method.toLowerCase()]?.responses?.[item.status]?.content?.[item.mimeType]?.schema : authored;
+      if (!authoredExampleNames(observation.syntheticExample, schema)) blockers.push("example-property-names-require-review");
+    }
+    if (privateExampleNames(observation.syntheticExample) || privateSchemaNames(observation.schema)) blockers.push("identifier-like-property-names-require-review");
+    const responseKeys = mediaKeys.slice(0, -2);
+    if (expected.getIn(responseKeys) === undefined) expected.setIn([...responseKeys, "description"], "Observed successful response.");
+    expected.setIn(keys, schemaMode ? observation.schema : exampleFor(observation));
+  }
+  if (!isDeepStrictEqual(expected.toJSON(), YAML.parse(proposed))) blockers.push("proposed-edits-do-not-match-verified-evidence");
+  return [...new Set(blockers)];
+}
+
 // Advisory only. Neither this function nor the controller can merge or enable merging.
 export async function reportRefreshMergeEligibility({ manifest, review = null, checks = null, sourceRevision = null, sourceReview = null, proposalRoot = null, analysisPath = null }) {
   const manifestDigest = hash(json(manifest));
   const reasons = [];
+  let analysis = null;
   const actualSource = await refreshSourceState();
   if (sourceRevision !== actualSource.sourceRevision || checks?.sourceRevision !== actualSource.sourceRevision || checks?.sourceStateDigest !== actualSource.sourceStateDigest) reasons.push("checks-not-bound-to-actual-source-state");
   if (!analysisPath) reasons.push("verified-current-analysis-required");
   else {
     try {
-      const analysis = await loadVerifiedRefreshAnalysis(analysisPath, { baselineChanges: manifest.changes ?? [] });
+      analysis = await loadVerifiedRefreshAnalysis(analysisPath, { baselineChanges: manifest.changes ?? [] });
       if (refreshAnalysisDigest(analysis) !== manifest.analysisDigest || analysis.captureId !== manifest.captureId) throw new Error("Analysis mismatch.");
-    } catch { reasons.push("current-analysis-or-capture-binding-invalid"); }
+    } catch { analysis = null; reasons.push("current-analysis-or-capture-binding-invalid"); }
   }
   if (manifest.visibility !== "private-evidence-only" || manifest.rawResponseValuesIncluded !== false || manifest.syntheticScalarExamplesOnly !== true || manifest.requiresIndependentPrivacyReview !== true) reasons.push("proposal-privacy-contract-invalid");
   if (!sourceReview) reasons.push("validated-source-review-receipt-required");
@@ -198,6 +274,7 @@ export async function reportRefreshMergeEligibility({ manifest, review = null, c
   if (review?.decision !== "accepted" || review?.reviewedManifestSha256 !== manifestDigest || review?.sanitized !== true || review?.completeEvidence !== true
     || review.model !== portalDiscoveryModelPolicy.offlineReview.model || !portalDiscoveryModelPolicy.offlineReview.allowedReasoning.includes(review.reasoning)) reasons.push("independent-sanitization-and-evidence-review-required");
   const changes = [];
+  const inventory = analysis ? await buildSpecRouteInventory() : [];
   for (const entry of manifest.changes ?? []) {
     const blockers = [];
     if (!/^specifications\/nodoc-[\w-]+\/specification\/[\w.-]+\.ya?ml$/u.test(entry.destination)) {
@@ -233,6 +310,7 @@ export async function reportRefreshMergeEligibility({ manifest, review = null, c
       if (syntheticExample && !syntheticValuesOnly(syntheticExample.value)) blockers.push("example-values-are-not-synthetic");
     }
     const evidence = manifest.evidence?.filter(item => item.destination === entry.destination) ?? [];
+    blockers.push(...await bindProposedEdits({ entry, before, proposed, evidence, analysis, inventory }));
     if (!evidence.length || evidence.some(item => !item.evidenceId || !item.captureId || !Number.isInteger(item.actionIndex) || item.actionIndex < 0)) blockers.push("exact-observation-traceability-incomplete");
     if (evidence.some(item => item.method !== "GET")) blockers.push("method-requires-manual-safety-review");
     changes.push({ destination: entry.destination, evidenceCount: evidence.length, eligible: blockers.length === 0 && reasons.length === 0, reasonCodes: [...new Set([...reasons, ...blockers])].sort() });
