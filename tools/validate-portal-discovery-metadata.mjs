@@ -16,6 +16,7 @@ import {
 import { buildNoveltyPlan } from "./portal-discovery-novelty.mjs";
 import { buildKnownOperationRefreshPlan, classifyKnownOperationExecutionApproval, isValidKnownOperationRefreshExpiryTimestamp } from "./portal-discovery-evidence-contract.mjs";
 import { validateActiveOperationPlan } from "./portal-discovery-operation-safety.mjs";
+import { validateReviewAttribution } from "./portal-discovery-model-policy.mjs";
 
 const legacyExecutionApprovals = new Set();
 const boundExecutionApprovals = new Set();
@@ -272,7 +273,8 @@ async function validateRecipeFile(errors, recipePath, expectedSpecId = null) {
           const approval = JSON.parse(stripBom(approvalSource));
           const approvalDigest = createHash("sha256").update(approvalSource, "utf8").digest("hex");
           if (approvalDigest !== recipe.noveltyFrontier.approvalDigest) fail(errors, `${recipePath}: approvalArtifact digest does not match approvalDigest.`);
-          if (approval.workerModel !== "gpt-6-luna" || !["xhigh", "max"].includes(approval.workerReasoning) || approval.decision !== "accept-bounded-frontier" || !Array.isArray(approval.acceptedItems) || approval.acceptedItems.length === 0) fail(errors, `${recipePath}: approvalArtifact is not an exact Luna xhigh/max bounded-frontier approval.`);
+          validateReviewAttribution(approval);
+          if (approval.decision !== "accept-bounded-frontier" || !Array.isArray(approval.acceptedItems) || approval.acceptedItems.length === 0) fail(errors, `${recipePath}: approvalArtifact requires bounded-frontier acceptance with accepted items.`);
           const sourceArtifactPath = String(approval.source?.artifactPath || "").trim();
           if (!sourceArtifactPath) {
             fail(errors, `${recipePath}: approvalArtifact requires a checked-in source.artifactPath.`);
@@ -319,7 +321,8 @@ async function validateRecipeFile(errors, recipePath, expectedSpecId = null) {
         const approvalDigest = createHash("sha256").update(approvalSource, "utf8").digest("hex");
         const approval = JSON.parse(stripBom(approvalSource));
         if (approvalDigest !== recipe.knownOperationRefresh.approvalDigest) fail(errors, `${recipePath}: known-operation approval digest mismatch.`);
-        if (approval.workerModel !== "gpt-6-luna" || !["xhigh", "max"].includes(approval.workerReasoning) || approval.decision !== "accept-bounded-known-operation-refresh") fail(errors, `${recipePath}: known-operation approval requires exact Luna xhigh/max acceptance.`);
+        validateReviewAttribution(approval);
+        if (approval.decision !== "accept-bounded-known-operation-refresh") fail(errors, `${recipePath}: known-operation approval requires bounded refresh acceptance.`);
         const plan = buildKnownOperationRefreshPlan(recipe, { required: true });
         const hasRuntimeVariables = JSON.stringify(recipe).includes("${");
         const executionBinding = classifyKnownOperationExecutionApproval(approval, plan, { hasRuntimeVariables });

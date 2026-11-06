@@ -20,6 +20,17 @@ allowed when the Sol orchestrator records that the review is unusually ambiguous
 or high risk. Sol reviews the Luna result but does not replace the required Luna
 review artifact. Wrong-model or wrong-reasoning output fails closed.
 
+`tools/portal-discovery-model-policy.mjs` is the source of current assignment
+defaults; update it when available models or task needs change. Exact matching
+applies to a new worker's assigned plan, not to historical approvals. Metadata
+and baseline validation require recorded `workerModel` and `workerReasoning`,
+but do not treat a model name or effort label as proof of evidence quality.
+Keep historical attribution unchanged. Acceptance decisions, source hashes,
+scope, expiry, exact evidence accounting, complete health, privacy review, and
+the coordinator's quality gate remain required where applicable. This preserves
+PR #225's evidence provenance and conservative promotion checks without adding
+another orchestration layer.
+
 ```powershell
 node tools/portal-discovery-controller.mjs .\layer4-input.json
 ```
@@ -395,7 +406,7 @@ not discovery work:
    `--require-known-refresh` only when `knownOperationRefresh` binds a bundled
    canonical method/host/route, resolved entry URL, exact passive action
    indexes/state, resolved-variable digest, immutable evidence IDs, policy,
-   exact Luna xhigh/max approval digest, and approval expiry. The approval is
+   attributed review approval digest, and approval expiry. The approval is
    checked before preflight and browser allocation. A separate `executionDigest`
    binds the complete resolved recipe JSON, including every action, scope,
    required flag, target/network scope, limit and timeout; only the cyclic

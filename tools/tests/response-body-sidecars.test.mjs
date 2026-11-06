@@ -4,7 +4,7 @@ import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 
-import { buildRequestEvidenceId } from "../cdp-deep-capture.mjs";
+import { buildRequestEvidenceId, captureResponseBodyEvidence, sanitizeCapturedBody } from "../cdp-deep-capture.mjs";
 import { decodeBoundedCdpBodyResult } from "../discovery-capture-policy.mjs";
 import { assessResponseBodySidecarCompleteness, hydrateResponseBodySidecars, loadResponseBodySidecar, responseBodySidecarLimit, sanitizeResponseBody, writeResponseBodySidecar } from "../response-body-sidecars.mjs";
 
@@ -41,6 +41,68 @@ test("malformed structured bodies with credential values fail closed", () => {
     assert.equal(sanitizeResponseBody(raw), null);
   }
   assert.equal(sanitizeResponseBody("authorization=Bearer+private+value&safe=yes"), "authorization=%5Bredacted%5D&safe=yes");
+});
+
+const syntheticJwt = "eyJhbGciOiJub25lIn0.eyJzdWIiOiJzeW50aGV0aWMifQ.c3ludGhldGlj";
+const mixedForm = new URLSearchParams([
+  ["client_secret", "synthetic-secret"],
+  ["note", "Bearer synthetic-bearer"],
+  ["note", `JWT ${syntheticJwt}`],
+  ["note", "bearer synthetic-lowercase"],
+  ["safe", "keep + & = unicode \u2713"],
+  ["client_secret", "synthetic-second-secret"],
+]).toString();
+
+test("form sanitization checks every decoded value and preserves duplicate fields", () => {
+  for (const raw of [mixedForm, new URLSearchParams({ note: `Bearer synthetic-bearer ${syntheticJwt}` }).toString()]) {
+    const sanitized = sanitizeResponseBody(raw);
+    assert.equal(sanitizeCapturedBody(raw), sanitized);
+    assert.equal(sanitizeResponseBody(sanitized), sanitized);
+    assert.doesNotMatch(sanitized, /synthetic-bearer|synthetic-secret|synthetic-second-secret|synthetic-lowercase|eyJ/);
+    const decoded = new URLSearchParams(sanitized);
+    if (raw === mixedForm) {
+      assert.deepEqual(decoded.getAll("client_secret"), ["[redacted]", "[redacted]"]);
+      assert.deepEqual(decoded.getAll("note"), ["Bearer [redacted]", "JWT [redacted]", "bearer [redacted]"]);
+      assert.equal(decoded.get("safe"), "keep + & = unicode \u2713");
+    } else assert.equal(decoded.get("note"), "Bearer [redacted] [redacted]");
+  }
+});
+
+test("mixed form credentials are absent from retained, oversize and preview-only capture paths", async () => {
+  const dir = await mkdtemp(path.join(os.tmpdir(), "nodoc-form-sidecar-"));
+  try {
+    for (const mode of ["retained", "oversize", "preview-only"]) {
+      const result = await captureResponseBodyEvidence({
+        artifactDir: dir,
+        evidenceId: `request-form-${mode}`,
+        payload: { body: mixedForm },
+        requestUrl: "https://portal.example/api/read",
+        matchHosts: [mode === "preview-only" ? "other.example" : "portal.example"],
+        matchPathPrefixes: ["/api/read"],
+        ...(mode === "oversize" ? { limits: { perBodyBytes: 16, totalBytes: 1024 } } : {}),
+      });
+      assert.doesNotMatch(JSON.stringify(result), /synthetic-bearer|synthetic-secret|synthetic-second-secret|synthetic-lowercase|eyJ/);
+      if (mode === "retained") {
+        assert.equal(result.bodyCapture.state, "complete");
+        const loaded = await loadResponseBodySidecar({ artifactDir: dir, evidenceId: "request-form-retained", descriptor: result.bodyCapture });
+        assert.equal(loaded, sanitizeResponseBody(mixedForm));
+        assert.equal(result.responseBody, loaded);
+      } else {
+        assert.equal(result.bodyCapture.state, mode === "oversize" ? "oversize" : "truncated");
+        assert.equal(result.bodyCapture.path, null);
+      }
+    }
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
+test("JSON containers and plain text redact bearer and JWT values without credential keys", () => {
+  const raw = `bearer synthetic-lowercase ${syntheticJwt}`;
+  assert.equal(sanitizeResponseBody(raw), "bearer [redacted] [redacted]");
+  assert.deepEqual(JSON.parse(sanitizeResponseBody(JSON.stringify({ safe: [raw], password: "synthetic-secret" }))), {
+    safe: ["bearer [redacted] [redacted]"], password: "[redacted]",
+  });
 });
 
 test("loader rejects traversal, filename mismatch, tamper, length mismatch, and incomplete writes", async () => {

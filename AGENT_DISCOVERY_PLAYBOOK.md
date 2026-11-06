@@ -478,8 +478,16 @@ and after compaction, including maximum worker payload and exact preserved refer
 Roll out in report-only mode first, then allow a reviewer to act on reusable
 recommendations; invalidation is automatic on any family-key or compatibility change.
 
-Use exact role-based model policy and fail closed on a wrong model or reasoning
-level:
+Use the current role defaults in `tools/portal-discovery-model-policy.mjs` for
+new assignments and fail closed when worker output differs from its assigned
+plan. Update those defaults as models and task needs change. Retained approvals
+record the actual model and reasoning used; metadata and baseline validators
+check that attribution without requiring today's defaults. Source hashes,
+acceptance decisions, scope, expiry, health and evidence accounting remain the
+quality gates. Preserve historical approval bytes and digests when defaults
+change, consistent with PR #225's evidence provenance checks.
+
+The current assignment defaults are:
 
 1. **Preflight and queue management: orchestrator**
    - Restores locked dependencies, validates plans and recipes, checks the fork

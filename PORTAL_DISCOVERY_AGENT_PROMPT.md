@@ -16,6 +16,14 @@ especially ambiguous or high-risk review. Sol reviews Luna's structured output
 but does not replace the required Luna review artifact. A wrong model or reasoning
 level for the assigned role is rejected.
 
+Read current assignment defaults from `tools/portal-discovery-model-policy.mjs`;
+update that existing policy when models or task needs change. Retained approval
+attribution is historical: record the actual `workerModel` and `workerReasoning`
+without rewriting old approvals to today's defaults. Metadata and baseline
+validation retain acceptance, source/digest, scope, expiry, health, privacy and
+evidence-accounting gates where applicable; model names alone do not establish
+review quality. Preserve PR #225's provenance and conservative promotion checks.
+
 Before allocation, use the authoritative recipe resolver and actual executor DSL validation. Do not hand-serialize variable digests or bound dates. Preserve exact host/server-base/canonical-path/wire-path ownership independently of `matchesCurrentSpec`. Retained structured controls and SPA hrefs are private provenance, not permission to click or invent a route. Navigation load and within-document events remain distinct; never manufacture success for a redirected/missing action.
 
 For source curation, follow the canonical `source-review-workflow.mjs` prepare/accept/apply sequence in AGENT_DISCOVERY_RUNBOOK.md. The independent configured reviewer accepts the exact manifest; Sol accepts separately. Both gates use the same exact change-triple validator. Stop immediately after any failed dependent command; preserve durable partial-write markers and real chronology instead of relabeling an earlier application as pre-approved.
@@ -261,7 +269,7 @@ A bounded known-operation refresh is distinct from novelty. Use
 `--require-known-refresh` only when `knownOperationRefresh` binds a bundled
 canonical method/host/route, resolved entry URL, exact passive action
 indexes/state, resolved-variable digest, evidence inputs, inspection policy,
-exact Luna xhigh/max approval artifact/digest, and approval expiry. The driver
+attributed review approval artifact/digest, and approval expiry. The driver
 verifies those bindings before preflight or browser allocation. Passively
 observed POST and other methods may be refresh targets, but this contract never
 authorizes an API probe, control activation, or mutation. A changed resolved
@@ -367,13 +375,13 @@ unioned `seenOnPages` list so one target cannot inherit another target's query
 or shape signal. Empty JSON arrays or objects are not response-shape evidence.
 
 Accepted runtime keys enter the overlay only through a schema-validated
-`baseline-approval.json` from exact model `gpt-6-luna` at `xhigh` or `max`.
+`baseline-approval.json` recording the reviewer's actual model and reasoning.
 The approval records `workerReasoning` and binds the spec, canonical signal,
 evidence IDs, terminal canonical health, and source
 artifact digest. `npm run sync:portal-baseline -- compile <input.json>` emits an
 append-only, idempotent sync result. The input names `sourceArtifactPath`; the
 compiler hashes that file and verifies every approved evidence ID against its
-immutable `evidenceIndex`. Free-form prose, wrong-model output, stale artifact
+immutable `evidenceIndex`. Free-form prose, missing reviewer attribution, stale artifact
 hashes, missing evidence, and scope changes never mutate the baseline.
 
 Every model-backed review result also requires a machine-validated nested Sol

@@ -13,6 +13,7 @@ import {
 import { claimAssignment, enqueueAssignment, updateAttempt } from "../portal-discovery-ledger.mjs";
 import { prepareLedgerAttempt } from "../portal-discovery-dispatch.mjs";
 import { frontierReadinessSupervisionTimeout } from "../run-portal-discovery.mjs";
+import { portalDiscoveryModelPolicy } from "../portal-discovery-model-policy.mjs";
 import {
   buildPartitionedCandidateHandoff,
   validatePartitionFiles,
@@ -1815,6 +1816,12 @@ test("portal driver can emit only the compact capture worker packet", async () =
   assert.equal(result.bindings.assignmentId, "capture-packet-test");
   assert.equal(result.bindings.assignmentDigest, "f".repeat(64));
   assert.ok(result.execution.driverArgs.includes("--assignment-digest"));
+  assert.deepEqual(result.role, portalDiscoveryModelPolicy.capture);
+  for (const field of ["model", "reasoning"]) {
+    const index = result.execution.driverArgs.indexOf(`--${field}`);
+    assert.notEqual(index, -1);
+    assert.equal(result.execution.driverArgs[index + 1], portalDiscoveryModelPolicy.capture[field]);
+  }
   assert.equal(result.brief, undefined);
   assert.equal(result.noveltyPlan, undefined);
   assert.ok(Buffer.byteLength(stdout, "utf8") < result.measurements.sourcePolicyBytes / 5);

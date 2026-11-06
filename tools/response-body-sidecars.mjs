@@ -12,7 +12,7 @@ const normalizedKey = (value) => String(value ?? "").toLowerCase().replace(/[^a-
 function redactValue(value) {
   if (Array.isArray(value)) return value.map(redactValue);
   if (value && typeof value === "object") return Object.fromEntries(Object.entries(value).map(([key, entry]) => [key, sensitiveKeys.has(normalizedKey(key)) ? redacted : redactValue(entry)]));
-  if (typeof value === "string") return value.replace(/\b(Bearer)\s+[A-Za-z0-9._~+/=-]+/gu, "$1 [redacted]").replace(/\beyJ[A-Za-z0-9_-]+\.[A-Za-z0-9._-]+\.[A-Za-z0-9._-]+\b/gu, redacted);
+  if (typeof value === "string") return value.replace(/\b(Bearer)\s+[A-Za-z0-9._~+/=-]+/giu, "$1 [redacted]").replace(/\beyJ[A-Za-z0-9_-]+\.[A-Za-z0-9._-]+\.[A-Za-z0-9._-]+\b/gu, redacted);
   return value;
 }
 
@@ -26,9 +26,13 @@ export function sanitizeResponseBody(value) {
   }
   try {
     if (!trimmed.includes("=")) throw new Error("not form encoded");
-    const params = new URLSearchParams(trimmed);
     let changed = false;
-    for (const key of new Set(params.keys())) if (sensitiveKeys.has(normalizedKey(key))) { params.set(key, redacted); changed = true; }
+    const params = new URLSearchParams([...new URLSearchParams(trimmed)].map(([key, entry]) => {
+      const sensitive = sensitiveKeys.has(normalizedKey(key));
+      const sanitized = sensitive ? redacted : redactValue(entry);
+      changed ||= sensitive || sanitized !== entry;
+      return [key, sanitized];
+    }));
     if (changed) return params.toString();
   } catch { /* fall through */ }
   if (/(?:^|[^a-z0-9])(?:access[_-]?token|refresh[_-]?token|id[_-]?token|client[_-]?secret|authorization|password|secret|token)\s*[:=]/iu.test(trimmed)) return null;

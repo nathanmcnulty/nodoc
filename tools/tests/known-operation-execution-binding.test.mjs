@@ -58,6 +58,13 @@ async function approvedFixture(t, input = recipe(), cliVars = []) {
   return {root, input, cliVars, approval, rawPlan, resolvedPlan, save};
 }
 
+test('historical attribution alone does not authorize a new live execution', async t => {
+  const f = await approvedFixture(t);
+  await f.save({ ...f.approval, workerModel: 'historical-review-model', workerReasoning: 'historical-effort' });
+  const plan = buildKnownOperationRefreshPlan(prepareRecipeForRun(f.input, []));
+  await assert.rejects(verifyKnownOperationRefreshApproval(plan, { root: f.root, now: Date.parse('2026-10-31T00:00:00Z') }), /binding or expiry/);
+});
+
 const unboundChanges = [
   ['append passive navigation', r => r.actions.push('navigate=https://admin.example.com/other')],
   ['append passive capture', r => r.actions.push('capture=unreviewed')],

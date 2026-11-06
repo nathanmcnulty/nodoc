@@ -16,6 +16,7 @@ import {
 } from "./discovery-capture-policy.mjs";
 import { evaluateDiscoverySaturation } from "./discovery-saturation.mjs";
 import { classifyGetProbeUrl } from "./discovery-safety.mjs";
+import { portalDiscoveryModelPolicy } from "./portal-discovery-model-policy.mjs";
 import {
   captureRecipesByTitle,
   crawlMetadataByTitle,
@@ -752,8 +753,8 @@ export async function buildCaptureWorkerPacket({
     "--phase", "all",
     ...(args.requireNovelty ? ["--require-novelty"] : []),
     ...(args.requireKnownRefresh ? ["--require-known-refresh"] : []),
-    "--model", "gpt-6-luna",
-    "--reasoning", "low",
+    "--model", portalDiscoveryModelPolicy.capture.model,
+    "--reasoning", portalDiscoveryModelPolicy.capture.reasoning,
     "--operation-ceiling", args.operationCeiling,
     ...(args.assignmentId ? ["--assignment-id", args.assignmentId] : []),
     ...(args.assignmentDigest ? ["--assignment-digest", args.assignmentDigest] : []),
@@ -810,8 +811,8 @@ export async function buildCaptureWorkerPacket({
       verificationArgs,
     },
     role: {
-      model: "gpt-6-luna",
-      reasoning: "low",
+      model: portalDiscoveryModelPolicy.capture.model,
+      reasoning: portalDiscoveryModelPolicy.capture.reasoning,
     },
     schemaVersion: "1.0",
     scope: {
@@ -870,7 +871,7 @@ export async function verifyKnownOperationRefreshApproval(plan, { root = repoRoo
     error.code = 'response-body-policy-unbound';
     throw error;
   }
-  if (approval.decision !== "accept-bounded-known-operation-refresh" || approval.workerModel !== "gpt-6-luna" || !["xhigh", "max"].includes(approval.workerReasoning) || approval.refreshDigest !== plan.refreshDigest || approval.expiresAt !== plan.approvalExpiresAt || Date.parse(approval.expiresAt) <= Number(now)) throw new Error("known-operation approval binding or expiry is invalid before browser allocation.");
+  if (approval.decision !== "accept-bounded-known-operation-refresh" || approval.workerModel !== portalDiscoveryModelPolicy.offlineReview.model || !portalDiscoveryModelPolicy.offlineReview.allowedReasoning.includes(approval.workerReasoning) || approval.refreshDigest !== plan.refreshDigest || approval.expiresAt !== plan.approvalExpiresAt || Date.parse(approval.expiresAt) <= Number(now)) throw new Error("known-operation approval binding or expiry is invalid before browser allocation.");
   const evidencePath = path.resolve(root, String(approval.source?.artifactPath ?? ""));
   const evidenceRelative = path.relative(root, evidencePath);
   if (!approval.source?.artifactPath || evidenceRelative.startsWith("..") || path.isAbsolute(evidenceRelative)) throw new Error("known-operation approval source escapes the repository.");

@@ -20,3 +20,14 @@ export function validateOfflineReviewReasoning(reasoning) {
   }
   return reasoning;
 }
+
+// Retained approvals record what actually ran. Current assignment defaults are
+// not an allowlist for historical evidence, nor proof of evidence quality.
+export function validateReviewAttribution(approval) {
+  for (const field of ["workerModel", "workerReasoning"]) {
+    if (typeof approval?.[field] !== "string" || !approval[field].trim()) {
+      throw new Error(`Review approval requires recorded ${field}.`);
+    }
+  }
+  return approval;
+}
