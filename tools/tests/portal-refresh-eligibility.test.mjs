@@ -5,6 +5,7 @@ import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 import { promisify } from "node:util";
+import YAML from "yaml";
 
 const execute = promisify(execFile);
 const repository = path.resolve(import.meta.dirname, "../..");
@@ -20,6 +21,15 @@ test("applied additive proposal remains eligible with verified baseline evidence
       filter: filename => filename !== path.join(repository, "tools", "tests"),
     });
   }
+  // Deliberately create this gap only in the fixture, so a real public example
+  // can be promoted without removing the positive test's synthetic baseline.
+  const navigation = path.join(source, "specifications/nodoc-m365-admin/specification/navigation.yml");
+  const document = YAML.parseDocument(await readFile(navigation, "utf8"));
+  assert.equal(document.errors.length, 0);
+  const media = ["paths", "/admin/api/navigation/darkmode", "get", "responses", "200", "content", "application/json"];
+  document.deleteIn([...media, "example"]);
+  document.deleteIn([...media, "examples"]);
+  await writeFile(navigation, document.toString({ lineWidth: 0 }));
   // Reuse installed libraries without installation, network or copied credentials.
   await symlink(path.join(repository, "node_modules"), path.join(source, "node_modules"), process.platform === "win32" ? "junction" : "dir");
   const git = args => execute("git", ["-c", "core.autocrlf=false", "-c", "commit.gpgsign=false", "-c", "user.name=Nodoc Synthetic Fixture", "-c", "user.email=fixture@example.invalid", ...args], { cwd: source });
