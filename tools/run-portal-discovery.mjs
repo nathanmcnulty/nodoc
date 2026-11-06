@@ -746,6 +746,13 @@ export async function buildCaptureWorkerPacket({
     };
   }));
   const recipeContents = await readFile(recipePath);
+  let ledgerEndpoint = args.endpoint ? normalizeEndpoint(args.endpoint) : null;
+  const callerUrl = knownOperationRefreshPlan?.entryUrl ?? brief.portalUrl;
+  if (!ledgerEndpoint && callerUrl) {
+    const parsed = new URL(callerUrl);
+    if (!["http:", "https:"].includes(parsed.protocol) || parsed.username || parsed.password) throw new Error("Portal caller must be an HTTP(S) URL without credentials.");
+    ledgerEndpoint = normalizeEndpoint(parsed.origin);
+  }
   const driverArgs = [
     "--portal", brief.specId,
     "--recipe", brief.recipe,
@@ -758,7 +765,7 @@ export async function buildCaptureWorkerPacket({
     "--operation-ceiling", args.operationCeiling,
     ...(args.assignmentId ? ["--assignment-id", args.assignmentId] : []),
     ...(args.assignmentDigest ? ["--assignment-digest", args.assignmentDigest] : []),
-    ...(args.endpoint || brief.portalUrl ? ["--endpoint", args.endpoint || brief.portalUrl] : []),
+    ...(ledgerEndpoint ? ["--endpoint", ledgerEndpoint] : []),
     "--cdp-endpoint", args.cdpEndpoint,
     ...(args.workerId ? ["--worker-id", args.workerId] : []),
     ...(args.targetId ? ["--target-id", args.targetId] : []),
@@ -853,7 +860,7 @@ export async function buildCaptureWorkerPacket({
   };
 }
 
-export async function verifyKnownOperationRefreshApproval(plan, { root = repoRoot, now = Date.now() } = {}) {
+export async function verifyKnownOperationRefreshApproval(plan, { root = repoRoot, now = Date.now(), requireLiveAuthority = true } = {}) {
   if (!plan) return null;
   const approvalPath = path.resolve(root, plan.approvalArtifact);
   const relative = path.relative(root, approvalPath);
@@ -861,6 +868,11 @@ export async function verifyKnownOperationRefreshApproval(plan, { root = repoRoo
   const source = await readFile(approvalPath, "utf8");
   if (sha256(source) !== plan.approvalDigest) throw new Error("known-operation approval digest mismatch before browser allocation.");
   const approval = JSON.parse(source);
+  if (requireLiveAuthority && (approval.liveAuthorized === false || approval.reviewRequirement?.status === "not-performed" || String(approval.status ?? "").startsWith("proposal-pending"))) {
+    const error = new Error("Known-refresh approval is a proposal or explicitly lacks completed review/live authority.");
+    error.code = "known-refresh-approval-not-executable";
+    throw error;
+  }
   if (!/^[a-f0-9]{64}$/u.test(String(plan.executionDigest ?? ''))
       || !/^[a-f0-9]{64}$/u.test(String(approval.executionDigest ?? ''))
       || approval.executionDigest !== plan.executionDigest) {
@@ -1275,6 +1287,10 @@ async function main() {
   let knownOperationRefreshApproval;
   let recipeSafety;
   try {
+    if (args.endpoint) {
+      try { args.endpoint = normalizeEndpoint(args.endpoint); }
+      catch (error) { error.code = "endpoint-invalid"; throw error; }
+    }
     const sourceRecipe = JSON.parse(await readFile(recipePath, "utf8"));
     if (sourceRecipe?.capturePrerequisite?.status === "blocked") {
       const error = new Error(`capture prerequisite is not satisfied; ${sourceRecipe.capturePrerequisite.nextRequirement}`);
@@ -1301,7 +1317,7 @@ async function main() {
     const derivedBaseline = deriveNoveltyBaseline(await loadBundledSpecification(path.resolve(repoRoot, specRecord.specPath)));
     noveltyPlan = buildNoveltyPlan(selectedRecipe, { required: args.requireNovelty, derivedBaseline });
     knownOperationRefreshPlan = buildKnownOperationRefreshPlan(selectedRecipe, { required: args.requireKnownRefresh, baselineOperations: derivedBaseline.operations });
-    knownOperationRefreshApproval = await verifyKnownOperationRefreshApproval(knownOperationRefreshPlan);
+    knownOperationRefreshApproval = await verifyKnownOperationRefreshApproval(knownOperationRefreshPlan, { requireLiveAuthority: args.phase !== "analyze" });
     actionBudget = buildActionBudget(selectedRecipe);
   } catch (error) {
     const runState = {
@@ -1311,7 +1327,7 @@ async function main() {
       startedAt: new Date().toISOString(),
       status: "blocked",
       blocker: {
-        code: ["action-budget-exceeded", "capture-prerequisite-missing", "novelty-frontier-invalid", "recipe-target-invalid", "unsafe-recipe-action", "response-body-policy-unbound"].includes(error?.code)
+        code: ["action-budget-exceeded", "capture-prerequisite-missing", "novelty-frontier-invalid", "recipe-target-invalid", "unsafe-recipe-action", "response-body-policy-unbound", "endpoint-invalid", "known-refresh-approval-not-executable"].includes(error?.code)
           ? error.code
           : /operation|approval|ceiling/iu.test(error?.message ?? "")
             ? "mutation-authorization-required"

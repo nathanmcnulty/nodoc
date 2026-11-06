@@ -18,6 +18,37 @@ storage with `sync:graph-contract -- --pinned-spec`, then verifies its source
 hashes, operation counts and manifest before research validation. It needs no
 tenant authentication, private capture cache or floating upstream contract.
 
+## Fresh capture readiness and storage
+
+Use the existing reviewed recipe, owner, worker packet and ledger process in the
+runbook. Pass an exact recipe and require successful public CLI planning before
+browser allocation. A full execution binding does not override an explicit
+denial of live authority, an unperformed review, or a pending proposal.
+
+Keep setup receipts outside the driver's fresh output directory:
+
+```text
+private/run-01/receipts/  # owner, plan, command stdout/stderr and worker reports
+private/run-01/driver/    # --artifacts; absent or empty before all/capture
+```
+
+Never redirect stdout/stderr into `--artifacts` before invoking the driver.
+Preserve a blocked directory and choose a new empty driver directory; do not
+erase its receipts to make it appear fresh. A complete capture can feed offline
+analysis without collecting it again. A pre-collection failure has no response
+evidence to recover. Reuse a healthy authenticated owner only under the existing
+reviewed recovery/lifecycle rules, with identity checks and no repeated startup
+navigation or authentication. Stop on a new failure instead of changing routes
+or retrying an unavailable login or feature.
+
+`--endpoint` is the ledger origin/host key (for example
+`https://admin.cloud.microsoft`), not the full native UI URL or the CDP endpoint.
+Keep native paths, SPA fragments and approved query bindings in the recipe;
+keep the loopback debugging URL in `--cdp-endpoint`. Planning now rejects
+explicit endpoint paths/fragments/queries before browser allocation. A default
+known-refresh packet derives its ledger key from the actual portal caller's
+origin, including a proxy caller different from the canonical spec portal.
+
 ## Inventory and reuse
 
 Pass a private configuration to the existing controller:

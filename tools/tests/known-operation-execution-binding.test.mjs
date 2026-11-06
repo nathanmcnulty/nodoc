@@ -65,6 +65,29 @@ test('historical attribution alone does not authorize a new live execution', asy
   await assert.rejects(verifyKnownOperationRefreshApproval(plan, { root: f.root, now: Date.parse('2026-10-31T00:00:00Z') }), /binding or expiry/);
 });
 
+for (const [name, fields] of [
+  ['explicitly denied live authority', { liveAuthorized: false }],
+  ['review not performed', { reviewRequirement: { status: 'not-performed' } }],
+  ['proposal pending actual review', { status: 'proposal-pending-actual-independent-review-and-separate-live-authority' }],
+]) test(`complete bindings cannot authorize ${name}`, async t => {
+  const f = await approvedFixture(t);
+  await f.save({ ...f.approval, ...fields });
+  const plan = buildKnownOperationRefreshPlan(prepareRecipeForRun(f.input, []));
+  await assert.rejects(verifyKnownOperationRefreshApproval(plan, { root: f.root }), error => {
+    assert.equal(error.code, 'known-refresh-approval-not-executable');
+    return true;
+  });
+});
+
+test('read-only analysis can inspect a live-denied approval without bypassing evidence bindings', async t => {
+  const f = await approvedFixture(t);
+  await f.save({ ...f.approval, liveAuthorized: false });
+  const plan = buildKnownOperationRefreshPlan(prepareRecipeForRun(f.input, []));
+  await verifyKnownOperationRefreshApproval(plan, { root: f.root, requireLiveAuthority: false });
+  await writeFile(path.join(f.root, 'approvals/source.json'), 'tampered');
+  await assert.rejects(verifyKnownOperationRefreshApproval(plan, { root: f.root, requireLiveAuthority: false }), /source hash mismatch/);
+});
+
 const unboundChanges = [
   ['append passive navigation', r => r.actions.push('navigate=https://admin.example.com/other')],
   ['append passive capture', r => r.actions.push('capture=unreviewed')],
