@@ -7,9 +7,12 @@ import path from "node:path";
 import test from "node:test";
 import { promisify } from "node:util";
 import { compileOrchestrationPlan, validateManagedCaptureAssignment, validateManagedCaptureResult, validateWorkerResult } from "../portal-discovery-control-plane.mjs";
-import { enqueueAssignment, claimAssignment, getLedgerViewFromFile, updateAttempt } from "../portal-discovery-ledger.mjs";
+import { enqueueAssignment, claimAssignment, getLedgerViewFromFile, updateAttempt, updateAttemptFromDiscoveryRun } from "../portal-discovery-ledger.mjs";
 import { prepareLedgerAttempt, validateCaptureHandoff } from "../portal-discovery-dispatch.mjs";
-import { buildCaptureWorkerPacket } from "../run-portal-discovery.mjs";
+import { buildCaptureWorkerPacket, prepareRecipeForRun, buildActionBudget, inspectCaptureCompleteness, captureWorkerPacketDigest } from "../run-portal-discovery.mjs";
+import { buildKnownOperationRefreshPlan, evaluateKnownOperationRefreshEvidence } from "../portal-discovery-evidence-contract.mjs";
+import { writeResponseBodySidecar, hydrateResponseBodySidecars } from "../response-body-sidecars.mjs";
+import { summarizeActionResults } from "../discovery-capture-policy.mjs";
 
 const execute = promisify(execFile);
 const repository = path.resolve(import.meta.dirname, "../..");
@@ -20,10 +23,19 @@ async function fixture(t) {
   const root = await mkdtemp(path.join(os.tmpdir(), "nodoc-managed-handoff-"));
   t.after(() => rm(root, { recursive: true, force: true }));
   const recipePath = path.join(root, "recipe.json"), ledgerPath = path.join(root, "ledger.jsonl"), planPath = path.join(root, "plan.json");
-  await writeFile(recipePath, "{}\n");
-  const refreshPlan = { refreshDigest: "a".repeat(64), executionDigest: "b".repeat(64), variableBindingsDigest: "c".repeat(64) };
-  const actionBudget = { countedActions: 4, maxActions: 4 };
-  const managedCapture = { kind: "known-operation-refresh", recipeSha256: sha(await readFile(recipePath)), endpoint: "example.test:443", ...refreshPlan,
+  const recipe = { url: "https://example.test/settings", pageTarget: { matchHosts: ["example.test"], matchPathPrefixes: ["/settings"] },
+    matchHosts: ["example.test"], matchPathPrefixes: ["/api/settings"], inspectionPolicy: { mode: "observe-only", prohibitedControlPatterns: ["Save"] },
+    responseBodyLimits: { perBodyBytes: 4096, totalBytes: 16384 }, captureScripts: false, maxActions: 4,
+    actions: ["navigate=https://example.test/settings", "wait-ms=1", "capture=fixture"],
+    knownOperationRefresh: { status: "active", method: "GET", host: "example.test", routes: ["/api/settings"], state: "Synthetic passive fixture",
+      actionIndexes: [0, 1, 2], approvalArtifact: "fixture-approval.json", approvalDigest: "0".repeat(64), approvalExpiresAt: "2099-01-01T00:00:00.000Z",
+      documentationObjectives: ["freshness"], evidenceIds: ["fixture-observation"] } };
+  recipe.knownOperationRefresh.variableBindingsDigest = prepareRecipeForRun(recipe, []).__resolvedVariableBindingsDigest;
+  await writeFile(recipePath, json(recipe));
+  const refreshPlan = buildKnownOperationRefreshPlan(prepareRecipeForRun(recipe, []), { required: true });
+  const actionBudget = buildActionBudget(recipe);
+  const managedCapture = { kind: "known-operation-refresh", recipeSha256: sha(await readFile(recipePath)), endpoint: "example.test:443",
+    refreshDigest: refreshPlan.refreshDigest, executionDigest: refreshPlan.executionDigest, variableBindingsDigest: refreshPlan.variableBindingsDigest,
     operationCeiling: "observe-only", actionBudget, workerId: "fixture-worker" };
   const manifest = { schemaVersion: 1, manifestId: "synthetic", portals: [{ specId: "fixture", title: "Fixture", recipe: recipePath, enabled: true,
     endpoint: { leaseFamily: "example.test", hostFamily: "example.test" }, auth: { profile: "bounded", requiresProfile: true }, riskTier: "low",
@@ -39,7 +51,51 @@ async function fixture(t) {
   const enqueue = { ledgerPath, assignmentId: assignment.assignmentId, assignmentDigest: assignment.assignmentDigest, workerId: args.workerId,
     specId: "fixture", portal: "Fixture", recipePath, recipeDigest: managedCapture.recipeSha256, endpoint: args.endpoint, profile: args.profile,
     phase: "all", model: args.model, reasoning: args.reasoning };
-  return { root, recipePath, ledgerPath, planPath, plan, assignment, args, input, specRecord, refreshPlan, actionBudget, enqueue, manifest };
+  return { root, recipe, recipePath, ledgerPath, planPath, plan, assignment, args, input, specRecord, refreshPlan, actionBudget, enqueue, manifest };
+}
+
+async function completedCaptureFixture(t, { retainCaptureFiles = true } = {}) {
+  const f = await fixture(t);
+  await enqueueAssignment(f.enqueue);
+  f.args.identityLinkage = await validateCaptureHandoff({ args: f.args, specRecord: f.specRecord, recipePath: f.recipePath,
+    knownOperationRefreshPlan: f.refreshPlan, actionBudget: f.actionBudget });
+  await prepareLedgerAttempt({ ...f.args, phase: "all" }, f.specRecord, f.recipePath);
+  const packet = await buildCaptureWorkerPacket({ args: f.args, actionBudget: f.actionBudget, recipePath: f.recipePath, noveltyPlan: null,
+    knownOperationRefreshPlan: f.refreshPlan, brief: { specId: "fixture", portal: "Fixture", portalUrl: f.recipe.url, recipe: f.recipePath,
+      allowedEvidence: [], pathPrefixes: [], serverUrls: [], stopConditions: [] } });
+  const captureRoot = f.args.artifacts;
+  await mkdir(captureRoot);
+  const packetPath = path.join(f.root, "packet.json"), runPath = path.join(captureRoot, "discovery-run.json");
+  const actions = [{ actionIndex: -1, type: "navigate", value: f.recipe.url, result: { resolvedUrl: f.recipe.url, url: f.recipe.url } },
+    { actionIndex: 0, type: "navigate", value: f.recipe.url, required: true, result: { resolvedUrl: f.recipe.url, url: f.recipe.url } },
+    { actionIndex: 1, type: "wait-ms", value: "1", required: true, result: { waitedMs: 1 } },
+    { actionIndex: 2, type: "capture", value: "fixture", required: true, result: { capturedOnly: true } }];
+  let assessment;
+  if (retainCaptureFiles) {
+    const sidecar = await writeResponseBodySidecar({ artifactDir: captureRoot, evidenceId: "request-managed-fixture", sanitizedBody: '{"value":true}', limits: f.recipe.responseBodyLimits });
+    const records = [{ method: "GET", url: "https://example.test/api/settings", path: "/api/settings", status: 200, mimeType: "application/json",
+      evidenceId: "request-managed-fixture", observedAt: "2026-11-06T10:00:00Z", attribution: { actionIndex: 0 }, matchesCurrentSpec: true, bodyCapture: sidecar.bodyCapture }];
+    await hydrateResponseBodySidecars(records, captureRoot, f.recipe.responseBodyLimits);
+    assessment = evaluateKnownOperationRefreshEvidence({ actionResults: actions, apiRecords: records, plan: f.refreshPlan });
+    assert.equal(assessment.status, "observed");
+    for (const [name, value] of Object.entries({ "summary.json": { portal: "Fixture", finalUrl: f.recipe.url, responseBodyLimits: f.recipe.responseBodyLimits,
+      actionValidation: summarizeActionResults(actions) }, "action-results.json": actions, "api-records.json": records, "raw-requests.json": records,
+      "known-operation-refresh-assessment.json": assessment })) await writeFile(path.join(captureRoot, name), json(value));
+  }
+  const run = { status: "completed", phase: "all", artifacts: captureRoot,
+    capture: retainCaptureFiles ? await inspectCaptureCompleteness(captureRoot) : { captureComplete: true, captureStatus: "complete" },
+    assignmentId: f.assignment.assignmentId, assignmentDigest: f.assignment.assignmentDigest, workerId: f.args.workerId,
+    identityLinkage: f.args.identityLinkage, workerPacketSha256: packet.packetSha256, knownOperationRefreshPlan: f.refreshPlan,
+    knownOperationRefresh: assessment ?? { status: "observed" },
+    ledger: { assignmentId: f.assignment.assignmentId, assignmentDigest: f.assignment.assignmentDigest, workerId: f.args.workerId, attemptNumber: 1, ledgerPath: f.ledgerPath } };
+  await writeFile(packetPath, json(packet)); await writeFile(runPath, json(run));
+  await updateAttemptFromDiscoveryRun({ ...f.enqueue, artifactDir: captureRoot, attemptNumber: 1, discoveryRun: run });
+  const result = { schemaVersion: 1, assignmentId: f.assignment.assignmentId, assignmentDigest: f.assignment.assignmentDigest, assignmentType: "capture",
+    attemptNumber: 1, captureRoot, workerId: f.args.workerId, runtimeRole: { model: f.args.model, reasoning: f.args.reasoning }, model: f.args.model, reasoning: f.args.reasoning,
+    status: "completed", decision: "accept", reasonCodes: [], blockers: [], metrics: {}, recommendedNextAction: "none", lessons: [],
+    lifecycleAccounting: { terminalOwnerShutdown: true, artifactLedgerAccounting: true }, processImprovementDisposition: "not-required" };
+  const validate = (report = result, paths = {}) => validateManagedCaptureResult({ result: report, planPath: f.planPath, packetPath, runPath, ledgerPath: f.ledgerPath, ...paths });
+  return { ...f, captureRoot, packet, packetPath, run, runPath, result, validate };
 }
 
 test("managed plan binds recipe, caller, profile, variables, role and explicit worker", async t => {
@@ -108,41 +164,79 @@ test("managed handoff fails before preflight for missing plan/identity/ledger an
   assert.throws(() => validateWorkerResult({ schemaVersion: 1, assignmentId: capture.assignmentId, assignmentDigest: capture.assignmentDigest, decision: "accept" }, legacyPlan), /Legacy capture identity is unknown/);
 });
 
-test("file-backed result checks packet/run/ledger/lease identity instead of worker-supplied snapshots", async t => {
-  const f = await fixture(t);
-  await enqueueAssignment(f.enqueue);
-  f.args.identityLinkage = await validateCaptureHandoff({ args: f.args, specRecord: f.specRecord, recipePath: f.recipePath,
-    knownOperationRefreshPlan: f.refreshPlan, actionBudget: f.actionBudget });
-  await prepareLedgerAttempt({ ...f.args, phase: "all" }, f.specRecord, f.recipePath);
-  const packet = await buildCaptureWorkerPacket({ args: f.args, actionBudget: f.actionBudget, recipePath: f.recipePath, noveltyPlan: null,
-    knownOperationRefreshPlan: f.refreshPlan, brief: { specId: "fixture", recipe: f.recipePath, allowedEvidence: [], pathPrefixes: [], serverUrls: [] } });
-  const packetPath = path.join(f.root, "packet.json"), runPath = path.join(f.root, "run.json");
-  const run = { status: "completed", capture: { captureComplete: true }, assignmentId: f.assignment.assignmentId, assignmentDigest: f.assignment.assignmentDigest, workerId: f.args.workerId,
-    identityLinkage: f.args.identityLinkage, knownOperationRefreshPlan: f.refreshPlan,
-    ledger: { assignmentId: f.assignment.assignmentId, assignmentDigest: f.assignment.assignmentDigest, workerId: f.args.workerId, attemptNumber: 1 } };
-  await writeFile(packetPath, json(packet)); await writeFile(runPath, json(run));
-  await updateAttempt({ ...f.enqueue, attemptNumber: 1, status: "completed" });
-  const result = { schemaVersion: 1, assignmentId: f.assignment.assignmentId, assignmentDigest: f.assignment.assignmentDigest, assignmentType: "capture",
-    workerId: f.args.workerId, runtimeRole: { model: f.args.model, reasoning: f.args.reasoning }, model: f.args.model, reasoning: f.args.reasoning,
-    status: "completed", decision: "accept", reasonCodes: [], blockers: [], metrics: {}, recommendedNextAction: "none", lessons: [],
-    lifecycleAccounting: { terminalOwnerShutdown: true, artifactLedgerAccounting: true }, processImprovementDisposition: "not-required" };
-  const validate = report => validateManagedCaptureResult({ result: report, planPath: f.planPath, packetPath, runPath, ledgerPath: f.ledgerPath });
-  assert.equal((await validate(result)).sanitized, true);
-  await assert.rejects(validate({ ...result, workerId: "another" }), /identity linkage/);
-  await assert.rejects(validate({ ...result, runtimeRole: { model: "wrong", reasoning: "low" } }), /identity linkage/);
-  await assert.rejects(validate({ ...result, status: "failed" }), /identity linkage/, "Reported completion status must match actual run and ledger.");
-  assert.throws(() => validateWorkerResult({ ...result, identityEvidence: { packet, run } }, f.plan), /identity linkage/, "Untrusted report snapshots cannot supply the evidence.");
-  const wrongRun = structuredClone(run); wrongRun.ledger.workerId = "another";
-  await writeFile(runPath, json(wrongRun));
-  await assert.rejects(validate(result), /identity linkage/);
-  await writeFile(runPath, json(run));
-  const wrongPacket = structuredClone(packet); wrongPacket.execution.driverArgs[wrongPacket.execution.driverArgs.indexOf("--worker-id") + 1] = "another";
-  await writeFile(packetPath, json(wrongPacket));
-  await assert.rejects(validate(result), /packet argv identity/);
-  await writeFile(packetPath, json(packet));
-  const originalLedger = await readFile(f.ledgerPath, "utf8");
-  await writeFile(f.ledgerPath, originalLedger.replaceAll('"claimedBy":"fixture-worker"', '"claimedBy":"another"'));
-  await assert.rejects(validate(result), /identity linkage/, "A different persisted claimant cannot be replaced by the report's worker ID.");
+test("file-backed results require actual retained capture files and exact run/ledger roots", async t => {
+  const absent = await completedCaptureFixture(t, { retainCaptureFiles: false });
+  await assert.rejects(absent.validate(), /Unable to read JSON/, "Claims and completed ledger status cannot replace capture files.");
+  const f = await completedCaptureFixture(t);
+  assert.equal((await f.validate()).sanitized, true);
+  const other = path.join(f.root, "borrowed");
+  await cp(f.captureRoot, other, { recursive: true });
+  const otherRunPath = path.join(other, "discovery-run.json");
+  await assert.rejects(f.validate(f.result, { runPath: otherRunPath }), /capture root/, "Borrowed run in another directory is rejected.");
+  await writeFile(otherRunPath, json({ ...f.run, artifacts: other }));
+  await assert.rejects(f.validate({ ...f.result, captureRoot: other }, { runPath: otherRunPath }), /ledger artifact directory/, "Changing the run root still cannot borrow the original ledger proof.");
+  await assert.rejects(f.validate({ ...f.result, captureRoot: other }), /exact capture root and attempt/);
+  await assert.rejects(f.validate({ ...f.result, attemptNumber: 2 }), /exact capture root and attempt/);
+  for (const captureComplete of [null, false]) {
+    await updateAttempt({ ...f.enqueue, attemptNumber: 1, status: "completed", captureComplete, captureStatus: captureComplete === null ? null : "response-body-sidecar-incomplete" });
+    await assert.rejects(f.validate(), /unblocked successful terminal/, "Unknown/incomplete ledger capture status cannot be upgraded.");
+  }
+});
+
+test("managed result verifies packet digest, full executable binding and actual worker/lease identity", async t => {
+  const f = await completedCaptureFixture(t);
+  await assert.rejects(f.validate({ ...f.result, workerId: "another" }), /identity linkage/);
+  await assert.rejects(f.validate({ ...f.result, runtimeRole: { model: "wrong", reasoning: "low" } }), /identity linkage/);
+  await assert.rejects(f.validate({ ...f.result, status: "failed" }), /unblocked successful terminal/);
+  assert.throws(() => validateWorkerResult({ ...f.result, identityEvidence: { packet: f.packet, run: f.run } }, f.plan), /identity linkage/);
+  const wrongRun = structuredClone(f.run); wrongRun.ledger.workerId = "another";
+  await writeFile(f.runPath, json(wrongRun));
+  await assert.rejects(f.validate(), /identity linkage/);
+  await writeFile(f.runPath, json(f.run));
+  for (const [name, mutate] of [
+    ["recipe", argv => { argv[argv.indexOf("--recipe") + 1] = "/other-recipe.json"; }],
+    ["known flag", argv => argv.splice(argv.indexOf("--require-known-refresh"), 1)],
+    ["var", argv => argv.push("--var", "privateFixture=changed")],
+    ["phase", argv => { argv[argv.indexOf("--phase") + 1] = "plan"; }],
+    ["plan path", argv => { argv[argv.indexOf("--orchestration-plan") + 1] = "/other-plan.json"; }],
+    ["ledger path", argv => { argv[argv.indexOf("--ledger-path") + 1] = "/other-ledger.jsonl"; }],
+  ]) {
+    const tampered = structuredClone(f.packet); mutate(tampered.execution.driverArgs);
+    await writeFile(f.packetPath, json(tampered));
+    await assert.rejects(f.validate(), /packet digest/, "Unrehashed " + name);
+    // Even updating the packet's own digest cannot change the packet executed by the run.
+    tampered.packetSha256 = captureWorkerPacketDigest(tampered);
+    await writeFile(f.packetPath, json(tampered));
+    await assert.rejects(f.validate(), /argv|executed packet|does not match/, "Rehashed " + name);
+    // Repair both packet argv and the run's packet hash to exercise the actual
+    // assignment/recipe/runtime checks rather than stopping at a stale digest.
+    const fullyRebound = structuredClone(f.packet);
+    mutate(fullyRebound.execution.driverArgs); mutate(fullyRebound.execution.verificationArgs);
+    fullyRebound.packetSha256 = captureWorkerPacketDigest(fullyRebound);
+    await writeFile(f.packetPath, json(fullyRebound));
+    await writeFile(f.runPath, json({ ...f.run, workerPacketSha256: fullyRebound.packetSha256 }));
+    await assert.rejects(f.validate(), /argv|executed packet|does not match|variable.*digest/, "Consistently rehashed " + name);
+    await writeFile(f.runPath, json(f.run));
+  }
+  await writeFile(f.packetPath, json(f.packet));
+  const ledger = await readFile(f.ledgerPath, "utf8");
+  await writeFile(f.ledgerPath, ledger.replaceAll('"claimedBy":"fixture-worker"', '"claimedBy":"another"'));
+  await assert.rejects(f.validate(), /identity linkage/);
+});
+
+test("complete bodies cannot authorize blocked or inconsistent terminal evidence", async t => {
+  const f = await completedCaptureFixture(t);
+  const ledger = await readFile(f.ledgerPath, "utf8");
+  await writeFile(f.ledgerPath, ledger.replaceAll('"status":"completed"', '"status":"blocked"'));
+  await writeFile(f.runPath, json({ ...f.run, status: "blocked", blocker: { code: "no-target-signal" } }));
+  await assert.rejects(f.validate({ ...f.result, status: "blocked" }), /unblocked successful terminal/);
+  await writeFile(f.ledgerPath, ledger); await writeFile(f.runPath, json(f.run));
+  const assessmentPath = path.join(f.captureRoot, "known-operation-refresh-assessment.json");
+  await writeFile(assessmentPath, json({ ...f.run.knownOperationRefresh, status: "no-target-signal" }));
+  await assert.rejects(f.validate(), /incomplete, blocked or inconsistent/);
+  await writeFile(assessmentPath, json(f.run.knownOperationRefresh));
+  await writeFile(path.join(f.captureRoot, "response-body-sidecars", "request-managed-fixture.body"), "tampered");
+  await assert.rejects(f.validate(), /hash or length mismatch/);
 });
 
 test("registered managed known-refresh CLI compiles and plans offline with fixture authority", { timeout: 120000 }, async t => {

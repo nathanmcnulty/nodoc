@@ -3,6 +3,7 @@ import { createHash } from "node:crypto";
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { isDeepStrictEqual } from "node:util";
 
 import {
   buildCandidateHandoff,
@@ -733,23 +734,7 @@ function buildBrief(specRecord, recipePath) {
   };
 }
 
-export async function buildCaptureWorkerPacket({
-  actionBudget,
-  args,
-  brief,
-  noveltyPlan,
-  knownOperationRefreshPlan = null,
-  recipePath,
-}) {
-  const policyBindings = await Promise.all(capturePolicyFiles.map(async (relativePath) => {
-    const contents = await readFile(path.join(repoRoot, relativePath));
-    return {
-      bytes: contents.byteLength,
-      path: relativePath,
-      sha256: sha256(contents),
-    };
-  }));
-  const recipeContents = await readFile(recipePath);
+function captureWorkerDriverArgs({ args, brief, knownOperationRefreshPlan }) {
   let ledgerEndpoint = args.endpoint ? normalizeEndpoint(args.endpoint) : null;
   const callerUrl = knownOperationRefreshPlan?.entryUrl ?? brief.portalUrl;
   if (!ledgerEndpoint && callerUrl) {
@@ -757,7 +742,7 @@ export async function buildCaptureWorkerPacket({
     if (!["http:", "https:"].includes(parsed.protocol) || parsed.username || parsed.password) throw new Error("Portal caller must be an HTTP(S) URL without credentials.");
     ledgerEndpoint = normalizeEndpoint(parsed.origin);
   }
-  const driverArgs = [
+  return [
     "--portal", brief.specId,
     "--recipe", brief.recipe,
     "--profile", "bounded",
@@ -780,6 +765,38 @@ export async function buildCaptureWorkerPacket({
       : []),
     ...args.variables.flatMap((variable) => ["--var", variable]),
   ];
+}
+
+export function captureWorkerPacketDigest(packet) {
+  const { packetSha256: ignoredDigest, measurements: ignoredMeasurements, ...core } = packet;
+  // Hash exactly the JSON-persisted projection, including when an API caller
+  // omitted optional fields. Reuse the packet builder's canonical serialization.
+  return sha256(stableJson(JSON.parse(JSON.stringify(core))));
+}
+
+export function verifyCaptureWorkerPacket(packet, { artifactDir, knownOperationRefreshPlan }) {
+  if (packet.packetSha256 !== captureWorkerPacketDigest(packet)) throw new Error("Capture worker packet digest mismatch.");
+  const runtimeArgs = [...packet.execution.driverArgs];
+  const recipeIndex = runtimeArgs.indexOf("--recipe") + 1;
+  if (recipeIndex && !path.isAbsolute(runtimeArgs[recipeIndex])) runtimeArgs[recipeIndex] = path.resolve(repoRoot, runtimeArgs[recipeIndex]);
+  const args = parseArgs([...runtimeArgs, "--artifacts", artifactDir]);
+  const expected = captureWorkerDriverArgs({ args, brief: { ...packet.scope, recipe: packet.bindings.recipe }, knownOperationRefreshPlan });
+  const verification = [...expected];
+  verification[verification.indexOf("--phase") + 1] = "plan";
+  verification.push("--worker-packet", "--json");
+  if (!isDeepStrictEqual(packet.execution.driverArgs, expected) || !isDeepStrictEqual(packet.execution.verificationArgs, verification)) {
+    throw new Error("Capture packet executable argv do not match the canonical driver/verification binding.");
+  }
+  return args;
+}
+
+export async function buildCaptureWorkerPacket({ actionBudget, args, brief, noveltyPlan, knownOperationRefreshPlan = null, recipePath }) {
+  const policyBindings = await Promise.all(capturePolicyFiles.map(async (relativePath) => {
+    const contents = await readFile(path.join(repoRoot, relativePath));
+    return { bytes: contents.byteLength, path: relativePath, sha256: sha256(contents) };
+  }));
+  const recipeContents = await readFile(recipePath);
+  const driverArgs = captureWorkerDriverArgs({ args, brief, knownOperationRefreshPlan });
   const verificationArgs = [...driverArgs];
   verificationArgs[verificationArgs.indexOf("--phase") + 1] = "plan";
   verificationArgs.push("--worker-packet", "--json");
@@ -813,7 +830,7 @@ export async function buildCaptureWorkerPacket({
       preserveFailedArtifacts: true,
       promotionAuthorized: false,
       reportMode: "compact-structured-output",
-      requiredWorkerReportFields: ["assignmentId", "assignmentDigest", "workerId", "runtimeRole"],
+      requiredWorkerReportFields: ["assignmentId", "assignmentDigest", "workerId", "runtimeRole", ...(args.orchestrationPlan ? ["attemptNumber", "captureRoot"] : [])],
       workerReportIdentitySource: "Use the finalized ledger assignment and actual worker runtime; nested aliases or policy defaults alone do not establish identity.",
       requiredTerminalReviewBindings: ["workerReportSha256", "integrityReportSha256"],
     },
@@ -868,7 +885,7 @@ export async function buildCaptureWorkerPacket({
       sourcePolicyBytes,
       tokenEstimate: "not-reported-use-bytes-for-comparison",
     },
-    packetSha256: sha256(stableJson(packetCore)),
+    packetSha256: captureWorkerPacketDigest(packetCore),
   };
 }
 
@@ -1303,6 +1320,7 @@ async function main() {
   let knownOperationRefreshPlan;
   let knownOperationRefreshApproval;
   let recipeSafety;
+  let workerPacket;
   try {
     if (args.endpoint) {
       try { args.endpoint = normalizeEndpoint(args.endpoint); }
@@ -1339,6 +1357,7 @@ async function main() {
     try {
       args.identityLinkage = await validateCaptureHandoff({ args, specRecord, recipePath, knownOperationRefreshPlan, actionBudget });
     } catch (error) { error.code = "capture-handoff-invalid"; throw error; }
+    if (args.phase === "plan" || args.orchestrationPlan) workerPacket = await buildCaptureWorkerPacket({ actionBudget, args, brief, noveltyPlan, knownOperationRefreshPlan, recipePath });
   } catch (error) {
     const runState = {
       artifacts: args.artifacts,
@@ -1363,14 +1382,6 @@ async function main() {
   }
 
   if (args.phase === "plan") {
-    const workerPacket = await buildCaptureWorkerPacket({
-      actionBudget,
-      args,
-      brief,
-      noveltyPlan,
-      knownOperationRefreshPlan,
-      recipePath,
-    });
     console.log(JSON.stringify(
       args.workerPacketOnly
         ? workerPacket
@@ -1498,6 +1509,7 @@ async function main() {
     assignmentDigest: args.assignmentDigest,
     workerId: args.workerId,
     identityLinkage: args.identityLinkage,
+    workerPacketSha256: workerPacket?.packetSha256 ?? null,
     artifacts: args.artifacts,
     brief,
     phase: args.phase,

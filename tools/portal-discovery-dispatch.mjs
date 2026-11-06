@@ -26,7 +26,7 @@ export async function validateCaptureHandoff({ args, specRecord, recipePath, kno
     }
     return { status: "legacy-identity-unknown", unattendedPromotionEligible: false };
   }
-  if (args.noLedger || !["plan", "all"].includes(args.phase) || !args.assignmentId || !args.assignmentDigest || !args.workerId || !args.requireKnownRefresh) {
+  if (args.noLedger || args.seedArtifacts || args.operationApprovalDigest || !["plan", "all"].includes(args.phase) || !args.assignmentId || !args.assignmentDigest || !args.workerId || !args.requireKnownRefresh) {
     throw new Error("Managed handoff requires plan, assignment ID/digest, worker ID, ledger and known-refresh all/plan mode.");
   }
   const bytes = await readFile(args.orchestrationPlan);
@@ -37,7 +37,7 @@ export async function validateCaptureHandoff({ args, specRecord, recipePath, kno
   if (args.phase !== "plan" || view.assignments.length) {
     assertManagedLedgerAssignment(view.assignments[0], args, assignment.managedCapture.recipeSha256);
   }
-  return { status: "managed-bound", unattendedPromotionEligible: false, requiresManagedResultValidation: true, planSha256: createHash("sha256").update(bytes).digest("hex") };
+  return { status: "managed-bound", unattendedPromotionEligible: false, requiresManagedResultValidation: true, planPath: args.orchestrationPlan, planSha256: createHash("sha256").update(bytes).digest("hex") };
 }
 
 function assertManagedLedgerAssignment(assignment, args, digest) {
