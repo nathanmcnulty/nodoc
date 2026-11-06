@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { actionResultSucceeded } from "./discovery-capture-policy.mjs";
+import { actionResultSucceeded, resolveResponseBodyLimits } from "./discovery-capture-policy.mjs";
 import { routePattern } from "./portal-discovery-novelty.mjs";
 
 const sha256Pattern = /^[a-f0-9]{64}$/u;
@@ -150,7 +150,7 @@ export function buildKnownOperationRefreshPlan(recipe, { required = false, basel
     if (!owned) fail("knownOperationRefresh method/host/routes are not owned by the bundled OpenAPI operation inventory.");
   }
   const contractCore = { schemaVersion: 1, kind: "known-operation-refresh", method, host, routes: [...routes].sort(), operationNames: [...operationNames].sort(), operationKind, operationDefinitionDigest, persistedQuerySha256Hashes: [...persistedQuerySha256Hashes].sort(), literalQuerySha256Hashes: [...literalQuerySha256Hashes].sort(), state, actionIndexes: [...actionIndexes].sort((a, b) => a - b), entryUrl: parsedEntry.href, entryHost: parsedEntry.hostname.toLowerCase(), actionBindings, policy, variableBindingsDigest, approvalExpiresAt, documentationObjectives: [...objectives].sort(), evidenceIds: [...evidenceIds].sort() };
-  return { ...contractCore, approvalArtifact, approvalDigest, refreshDigest: digest(contractCore), executionDigest: buildKnownOperationExecutionDigest(recipe) };
+  return { ...contractCore, approvalArtifact, approvalDigest, responseBodyLimits: resolveResponseBodyLimits(recipe.responseBodyLimits), responseBodyLimitsExplicit: recipe.responseBodyLimits?.perBodyBytes !== undefined && recipe.responseBodyLimits?.totalBytes !== undefined, refreshDigest: digest(contractCore), executionDigest: buildKnownOperationExecutionDigest(recipe) };
 }
 
 export function evaluateKnownOperationRefreshEvidence({ actionResults = [], apiRecords = [], plan }) {

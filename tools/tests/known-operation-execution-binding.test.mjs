@@ -14,6 +14,7 @@ const emptyVariables = prepareRecipeForRun({actions: [], inspectionPolicy: {mode
 function recipe() {
   return {
     url: 'https://admin.example.com/settings',
+    responseBodyLimits: {perBodyBytes: 16777216, totalBytes: 268435456},
     pageTarget: {matchHosts: ['admin.example.com'], matchPathPrefixes: ['/settings']},
     matchHosts: ['admin.example.com'], matchPathPrefixes: ['/api/settings'],
     inspectionPolicy: {mode: 'observe-only', prohibitedControlPatterns: ['Save']},
@@ -122,6 +123,16 @@ test('missing legacy execution binding fails live closed; explicit valid binding
   await f.save(legacy);
   const missing = buildKnownOperationRefreshPlan(prepareRecipeForRun(f.input, []));
   await assert.rejects(verifyKnownOperationRefreshApproval(missing, {root: f.root}), /full execution binding/);
+});
+
+test('a valid historical execution approval without explicit budgets is non-runnable without rewriting its digests', async t => {
+  const input = recipe();
+  delete input.responseBodyLimits;
+  const f = await approvedFixture(t, input);
+  const plan = buildKnownOperationRefreshPlan(prepareRecipeForRun(f.input, []));
+  assert.equal(plan.executionDigest, f.approval.executionDigest);
+  assert.equal(plan.responseBodyLimitsExplicit, false);
+  await assert.rejects(verifyKnownOperationRefreshApproval(plan, {root: f.root}), error => error.code === 'response-body-policy-unbound' && /complete explicit responseBodyLimits/.test(error.message));
 });
 
 test('raw and resolved variable bindings are separate and the resolver marker is handled exactly', async t => {

@@ -16,17 +16,23 @@ import {
 import { planActionBudget, validateActionBudgetResult } from "./portal-discovery-action-budget.mjs";
 import {
   buildTransitionEvidence,
+  classifyResponseBodyRetrievalError,
+  configureResponseBodyNetwork,
+  createResponseBodyQueue,
+  createResponseBodySessionPool,
   decodeBoundedCdpBody,
   decodeBoundedCdpBodyResult,
   deriveActionEligibility,
   deriveControlSelectorHints,
-  responseBodyCaptureLimit,
+  responseBodyLimits,
+  responseBodyAdmission,
+  resolveResponseBodyLimits,
+  maximumResponseBodyBytes,
   shouldRequestResponseBody,
   summarizeActionResults,
 } from "./discovery-capture-policy.mjs";
 import {
   bodyCaptureWithoutSidecar,
-  responseBodySidecarLimit,
   sanitizeResponseBody,
   writeResponseBodySidecar,
 } from "./response-body-sidecars.mjs";
@@ -501,6 +507,7 @@ function normalizeSeedRouteGroups(groups = {}) {
 
 function applyRecipeConfig(args, recipeConfig, recipePath) {
   const recipeDir = path.dirname(recipePath);
+  args.responseBodyLimits = resolveResponseBodyLimits(recipeConfig.responseBodyLimits);
   if (recipeConfig.url) {
     args.url = recipeConfig.url;
   }
@@ -622,6 +629,7 @@ export async function parseArgs(argv) {
     portal: null,
     postActionSettleMs: defaultPostActionSettleMs,
     recipePath: null,
+    responseBodyLimits,
     seedArtifacts: null,
     seedLinkContains: [],
     seedLinkLimit: defaultSeedLinkLimit,
@@ -1141,8 +1149,10 @@ export async function captureResponseBodyEvidence({
   matchHosts = [],
   matchPathPrefixes = [],
   writeSidecar = writeResponseBodySidecar,
+  limits = responseBodyLimits,
 } = {}) {
-  const decoded = decodeBoundedCdpBodyResult(payload);
+  limits = resolveResponseBodyLimits(limits);
+  const decoded = decodeBoundedCdpBodyResult(payload, limits.perBodyBytes);
   if (decoded.state !== "complete") {
     return {
       sanitizedBody: null,
@@ -1166,7 +1176,7 @@ export async function captureResponseBodyEvidence({
   }
   const scoped = shouldMatchRequest(requestUrl, { matchHosts, matchPathPrefixes });
   const sidecar = scoped
-    ? await writeSidecar({ artifactDir, evidenceId, sanitizedBody })
+    ? await writeSidecar({ artifactDir, evidenceId, sanitizedBody, limits })
     : { preview: truncate(sanitizedBody), bodyCapture: bodyCaptureWithoutSidecar("truncated", Buffer.byteLength(sanitizedBody, "utf8")) };
   return {
     sanitizedBody,
@@ -1174,7 +1184,8 @@ export async function captureResponseBodyEvidence({
     bodyCapture: sidecar.bodyCapture,
     responseShapeFingerprint: bodyShapeFingerprint(sanitizedBody),
     responseShapeSummary: bodyShapeSummary(sanitizedBody),
-    ...(sidecar.bodyCapture.state === "incomplete-write" ? { bodyCaptureDiagnostic: "response-body-sidecar-incomplete" } : {}),
+    ...(sidecar.bodyCaptureDiagnostic ? { bodyCaptureDiagnostic: sidecar.bodyCaptureDiagnostic }
+      : sidecar.bodyCapture.state === "incomplete-write" ? { bodyCaptureDiagnostic: "response-body-sidecar-incomplete" } : {}),
   };
 }
 
@@ -1182,14 +1193,14 @@ export async function captureResponseBodyWithLoader({ loadPayload, ...options } 
   let payload;
   try {
     payload = await loadPayload();
-  } catch {
+  } catch (error) {
     return {
       sanitizedBody: null,
       responseBody: null,
       bodyCapture: bodyCaptureWithoutSidecar("decode-failed"),
       responseShapeFingerprint: null,
       responseShapeSummary: null,
-      bodyCaptureDiagnostic: "cdp-response-body-retrieval-failed",
+      bodyCaptureDiagnostic: classifyResponseBodyRetrievalError(error),
     };
   }
   try {
@@ -1346,7 +1357,7 @@ function hasResponseEvidence(item) {
     && /^[a-f0-9]{64}$/u.test(descriptor.sha256)
     && Number.isSafeInteger(descriptor.byteLength)
     && descriptor.byteLength >= 0
-    && descriptor.byteLength <= responseBodySidecarLimit;
+    && descriptor.byteLength <= maximumResponseBodyBytes;
 }
 
 export function mergeItems(existing, next) {
@@ -1539,7 +1550,9 @@ class CdpClient {
         this.pending.delete(key);
         clearTimeout(entry.timeout);
         if (message.error) {
-          entry.reject(new Error(message.error.message));
+          const error = new Error(message.error.message);
+          error.code = message.error.code;
+          entry.reject(error);
           return;
         }
 
@@ -2206,7 +2219,7 @@ async function main() {
   const scriptBodies = new Map();
   const inFlightRequests = new Set();
   const pendingBodyCaptures = new Set();
-  let responseBodyTail = Promise.resolve();
+  const queueResponseBody = createResponseBodyQueue(args.responseBodyLimits);
   const capturedRequests = [];
   const pageStates = [];
   const sessionSnapshots = [];
@@ -2221,6 +2234,9 @@ async function main() {
   const operationInterceptionEvents = new Map();
   const actionStartedAt = new Map([[-1, Date.now()]]);
   const boundedNetworkSessions = new Set();
+  const networkSessionPool = createResponseBodySessionPool(args.responseBodyLimits);
+  const detachedNetworkSessions = new Set();
+  const responseBodyNetwork = [];
   const configuredSessions = new Set();
   const fetchEnabledSessions = new Set();
   const fetchAbortedNetworkRequests = new Set();
@@ -2412,15 +2428,20 @@ async function main() {
       return;
     }
 
-    try {
-      await client.send("Network.enable", {
-        maxPostDataSize: 1024 * 128,
-        maxResourceBufferSize: responseBodyCaptureLimit,
-        maxTotalBufferSize: responseBodyCaptureLimit * 32,
-      }, sessionId);
-      boundedNetworkSessions.add(key);
-    } catch {
-      await client.send("Network.enable", { maxPostDataSize: 1024 * 128 }, sessionId);
+    const sessionLimits = networkSessionPool.reserve(key);
+    if (!sessionLimits) {
+      responseBodyNetwork.push({ sessionId, durable: false, diagnostic: "cdp-response-body-session-budget-exhausted" });
+    } else {
+      try {
+        const capability = await configureResponseBodyNetwork((method, params) => client.send(method, params, sessionId), sessionLimits);
+        if (!detachedNetworkSessions.has(key)) {
+          responseBodyNetwork.push({ sessionId, ...capability });
+          boundedNetworkSessions.add(key);
+        }
+      } catch {
+        networkSessionPool.release(key);
+        responseBodyNetwork.push({ sessionId, durable: false, diagnostic: "cdp-response-body-network-unavailable" });
+      }
     }
 
     for (const [method, params] of [
@@ -2628,6 +2649,9 @@ async function main() {
     const detachedSessionId = params.sessionId ?? null;
     if (detachedSessionId) {
       attributionRegistry.markDetached(detachedSessionId);
+      detachedNetworkSessions.add(detachedSessionId);
+      boundedNetworkSessions.delete(detachedSessionId);
+      networkSessionPool.release(detachedSessionId);
     }
   });
 
@@ -2801,13 +2825,17 @@ async function main() {
 
   client.on("Network.loadingFinished", (params, metadata) => {
     const key = requestKey(params.requestId, metadata.sessionId);
-    const captureResponseBody = async () => {
+    const record = requestMap.get(key);
+    const admission = responseBodyAdmission(params.encodedDataLength, boundedNetworkSessions.has(metadata.sessionId ?? "root"), args.responseBodyLimits.perBodyBytes);
+    const captureResponseBody = async (loadPayload) => {
       scriptRequestMap.delete(key);
 
-      const record = requestMap.get(key);
       if (record) {
-        const sessionKey = metadata.sessionId ?? "root";
-        if (boundedNetworkSessions.has(sessionKey) && shouldRequestResponseBody(params.encodedDataLength)) {
+        if (admission) {
+          record.responseBody = null;
+          record.bodyCapture = bodyCaptureWithoutSidecar(admission.state, params.encodedDataLength);
+          record.bodyCaptureDiagnostic = admission.diagnostic;
+        } else {
           try {
             const captured = await captureResponseBodyWithLoader({
               artifactDir: args.outDir,
@@ -2815,9 +2843,8 @@ async function main() {
               requestUrl: record.url,
               matchHosts: args.matchHosts,
               matchPathPrefixes: args.matchPathPrefixes,
-              loadPayload: () => client.send("Network.getResponseBody", {
-                requestId: params.requestId,
-              }, metadata.sessionId),
+              limits: args.responseBodyLimits,
+              loadPayload,
             });
             record.graphBatch = graphBatchResponseMetadata(record.graphBatch, captured.sanitizedBody);
             record.responseBody = captured.responseBody;
@@ -2830,22 +2857,30 @@ async function main() {
             record.bodyCapture = bodyCaptureWithoutSidecar("decode-failed");
             record.bodyCaptureDiagnostic = "response-body-capture-failed";
           }
-        } else {
-          record.responseBody = null;
-          record.bodyCapture = bodyCaptureWithoutSidecar("oversize", params.encodedDataLength);
         }
 
         capturedRequests.push(record);
-        requestMap.delete(key);
+        if (requestMap.get(key) === record) requestMap.delete(key);
       }
     };
-    const bodyCapture = responseBodyTail.then(captureResponseBody).finally(() => {
+    const eligible = record && !admission;
+    const queued = eligible ? queueResponseBody(
+      () => client.send("Network.getResponseBody", { requestId: params.requestId }, metadata.sessionId),
+      captureResponseBody,
+    ) : null;
+    // Budget exhaustion retains metadata, never a misleading complete body.
+    const work = queued ?? captureResponseBody(async () => {
+      const error = new Error("Response body queue budget exhausted.");
+      error.code = "RESPONSE_BODY_BUDGET";
+      throw error;
+    });
+    const bodyCapture = work.finally(() => {
       inFlightRequests.delete(key);
       lastNetworkActivityAt = Date.now();
       pendingBodyCaptures.delete(bodyCapture);
     });
-    responseBodyTail = bodyCapture.catch(() => {});
     pendingBodyCaptures.add(bodyCapture);
+    void bodyCapture.catch(() => {});
   });
 
   async function waitForNetworkIdle(maxWaitMs) {
@@ -3234,7 +3269,7 @@ async function main() {
           if (
             resource.type !== "Script"
             || !resource.url
-            || !shouldRequestResponseBody(resource.contentSize)
+            || !shouldRequestResponseBody(resource.contentSize, args.responseBodyLimits.perBodyBytes)
           ) {
             continue;
           }
@@ -3252,7 +3287,7 @@ async function main() {
               frameId: frameTree.frame.id,
               url: resource.url,
             }, sessionId);
-            const source = decodeBoundedCdpBody(content);
+            const source = decodeBoundedCdpBody(content, args.responseBodyLimits.perBodyBytes);
             if (source) {
               scriptBodies.set(resource.url, {
                 ...scriptRecord,
@@ -4361,6 +4396,8 @@ async function main() {
     const actionBudget = validateActionBudgetResult(actionResults, args.actionBudget);
     const summary = {
       schemaVersion: captureArtifactSchemaVersion,
+      responseBodyLimits: args.responseBodyLimits,
+      responseBodyNetwork,
       actionValidation,
       actions: actionResults.length,
       actionBudget,

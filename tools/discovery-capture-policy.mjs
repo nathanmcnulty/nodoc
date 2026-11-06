@@ -1,4 +1,94 @@
-export const responseBodyCaptureLimit = 512 * 1024;
+// Recipe fields are covered by the full execution digest. Readers accept an
+// explicit validated policy, never a larger limit asserted by a descriptor.
+export const maximumResponseBodyBytes = 256 * 1024 * 1024;
+export function resolveResponseBodyLimits(config = {}) {
+  if (!config || typeof config !== "object" || Array.isArray(config)
+      || Object.keys(config).some(key => !["perBodyBytes", "totalBytes"].includes(key))) throw new Error("Invalid response-body limits.");
+  function setting(name, fallback, maximum) {
+    const value = config[name] === undefined ? fallback : config[name];
+    if (!Number.isSafeInteger(value) || value < 1 || value > maximum) throw new Error(`${name} exceeds the bounded response-body budget.`);
+    return value;
+  }
+  const perBodyBytes = setting("perBodyBytes", 16 * 1024 * 1024, maximumResponseBodyBytes);
+  const totalBytes = setting("totalBytes", 256 * 1024 * 1024, 1024 * 1024 * 1024);
+  if (totalBytes < perBodyBytes) throw new Error("Response-body total budget must cover one complete body.");
+  return Object.freeze({ perBodyBytes, totalBytes });
+}
+
+export const responseBodyLimits = resolveResponseBodyLimits();
+export const responseBodyCaptureLimit = responseBodyLimits.perBodyBytes;
+
+export function responseBodyNetworkOptions(limits = responseBodyLimits) {
+  limits = resolveResponseBodyLimits(limits);
+  return {
+    maxPostDataSize: 128 * 1024,
+    maxResourceBufferSize: limits.perBodyBytes,
+    maxTotalBufferSize: limits.totalBytes,
+  };
+}
+
+export function createResponseBodySessionPool(limits = responseBodyLimits) {
+  limits = resolveResponseBodyLimits(limits);
+  const sessions = new Set();
+  return {
+    reserve(key) {
+      if (!sessions.has(key) && (sessions.size + 1) * limits.perBodyBytes > limits.totalBytes) return null;
+      sessions.add(key);
+      // CDP totals are per session. One full-body slot per session keeps their
+      // sum bounded; the global fetch queue and disk budget are separate.
+      return { perBodyBytes: limits.perBodyBytes, totalBytes: limits.perBodyBytes };
+    },
+    release(key) { sessions.delete(key); },
+  };
+}
+
+export async function configureResponseBodyNetwork(send, limits = responseBodyLimits) {
+  limits = resolveResponseBodyLimits(limits);
+  await send("Network.enable", responseBodyNetworkOptions(limits));
+  // The dedicated command is safe on paused auto-attached targets; the
+  // deprecated Network.enable flag can deadlock before debugger resume.
+  try {
+    await send("Network.configureDurableMessages", {
+      maxResourceBufferSize: limits.perBodyBytes,
+      maxTotalBufferSize: limits.totalBytes,
+    });
+    return { durable: true };
+  } catch (error) {
+    return { durable: false, diagnostic: [-32601, -32602].includes(error?.code)
+      ? "cdp-durable-body-buffer-unsupported" : "cdp-durable-body-buffer-unavailable" };
+  }
+}
+
+// Fetch immediately while Chrome still owns the response, but serialize
+// sanitization and writes. Reserve a full per-body slot until consumed so
+// pending payloads cannot grow without a bound.
+export function createResponseBodyQueue(limits = responseBodyLimits) {
+  limits = resolveResponseBodyLimits(limits);
+  let reserved = 0;
+  let tail = Promise.resolve();
+  return (load, consume) => {
+    if (reserved + limits.perBodyBytes > limits.totalBytes) return null;
+    reserved += limits.perBodyBytes;
+    const fetched = Promise.resolve().then(load).then(value => ({ value }), error => ({ error }));
+    const result = tail.then(async () => {
+      const outcome = await fetched;
+      return consume(() => Object.hasOwn(outcome, "error") ? Promise.reject(outcome.error) : Promise.resolve(outcome.value));
+    }).finally(() => { reserved -= limits.perBodyBytes; });
+    tail = result.catch(() => {});
+    return result;
+  };
+}
+
+export function classifyResponseBodyRetrievalError(error) {
+  // Never serialize the original CDP message: it may contain private data.
+  const message = String(error?.message ?? "");
+  if (/evicted.*(?:cache|buffer)|(?:cache|buffer).*evicted/iu.test(message)) return "cdp-response-body-evicted";
+  if (/no resource with given identifier|no data found for resource/iu.test(message)) return "cdp-response-body-unavailable";
+  if (/session.*(?:closed|not found)|target.*closed|websocket.*(?:closed|not open)/iu.test(message)) return "cdp-response-body-session-closed";
+  if (/timed?\s*out|timeout/iu.test(message)) return "cdp-response-body-timeout";
+  if (error?.code === "RESPONSE_BODY_BUDGET") return "response-body-pending-budget-exceeded";
+  return "cdp-response-body-retrieval-failed";
+}
 
 export function buildInteractionHealthStatus(capture, interactionHealth) {
   if (interactionHealth) {
@@ -28,9 +118,13 @@ export function decodeBoundedCdpBodyResult(payload, limit = responseBodyCaptureL
   let bytes;
   try {
     if (payload?.base64Encoded) {
-      if (value.length % 4 !== 0 || !/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/u.test(value)) return { state: "decode-failed", body: null, byteLength: 0 };
+      if (value.length % 4 !== 0 || !/^[A-Za-z0-9+/]*={0,2}$/u.test(value)) return { state: "decode-failed", body: null, byteLength: 0 };
+      const byteLength = value.length / 4 * 3 - (value.endsWith("==") ? 2 : value.endsWith("=") ? 1 : 0);
+      if (byteLength > limit) return { state: "oversize", body: null, byteLength };
       bytes = Buffer.from(value, "base64");
     } else {
+      const byteLength = Buffer.byteLength(value, "utf8");
+      if (byteLength > limit) return { state: "oversize", body: null, byteLength };
       bytes = Buffer.from(value, "utf8");
     }
     if (bytes.byteLength > limit) return { state: "oversize", body: null, byteLength: bytes.byteLength };
@@ -44,6 +138,12 @@ export function decodeBoundedCdpBodyResult(payload, limit = responseBodyCaptureL
 export function shouldRequestResponseBody(encodedDataLength, limit = responseBodyCaptureLimit) {
   const length = Number(encodedDataLength);
   return Number.isFinite(length) && length >= 0 && length <= limit;
+}
+
+export function responseBodyAdmission(encodedDataLength, networkReady, limit = responseBodyCaptureLimit) {
+  if (!networkReady) return { state: "truncated", diagnostic: "cdp-response-body-network-unavailable" };
+  if (!shouldRequestResponseBody(encodedDataLength, limit)) return { state: "oversize", diagnostic: null };
+  return null;
 }
 
 export function actionResultSucceeded(actionResult) {

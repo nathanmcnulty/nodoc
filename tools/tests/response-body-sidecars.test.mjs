@@ -56,7 +56,7 @@ test("loader rejects traversal, filename mismatch, tamper, length mismatch, and 
   assert.equal(failed.bodyCapture.path, null);
 });
 
-test("writer and loader independently enforce the 512 KiB retention cap", async () => {
+test("writer and loader independently enforce the shared retention cap", async () => {
   const dir = await mkdtemp(path.join(os.tmpdir(), "nodoc-sidecar-"));
   const oversized = await writeResponseBodySidecar({ artifactDir: dir, evidenceId: "request-large", sanitizedBody: "x".repeat(responseBodySidecarLimit + 1) });
   assert.equal(oversized.bodyCapture.state, "oversize");

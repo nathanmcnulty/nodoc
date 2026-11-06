@@ -11,6 +11,7 @@ import {
 import {
   aggregateInteractionHealth,
   buildInteractionHealthStatus,
+  resolveResponseBodyLimits,
   sanitizeInteractionHealth,
 } from "./discovery-capture-policy.mjs";
 import { evaluateDiscoverySaturation } from "./discovery-saturation.mjs";
@@ -583,6 +584,7 @@ export function boundTenantFromCli(sourceRecipe, cliVariables) {
 export function prepareRecipeForRun(sourceRecipe, cliVariables) {
   const variables = recipeVariables(sourceRecipe, cliVariables);
   const expanded = expandRecipeVariables(sourceRecipe, variables);
+  resolveResponseBodyLimits(expanded.responseBodyLimits);
   const actions = (expanded.actions ?? []).map(normalizeRecipeAction);
   validateInspectionActions(actions, expanded.inspectionPolicy);
   return {
@@ -862,6 +864,11 @@ export async function verifyKnownOperationRefreshApproval(plan, { root = repoRoo
       || !/^[a-f0-9]{64}$/u.test(String(approval.executionDigest ?? ''))
       || approval.executionDigest !== plan.executionDigest) {
     throw new Error('known-operation approval full execution binding is missing or invalid before browser allocation.');
+  }
+  if (plan.responseBodyLimitsExplicit !== true) {
+    const error = new Error('Declare complete explicit responseBodyLimits and rebind the recipe execution policy before live refresh.');
+    error.code = 'response-body-policy-unbound';
+    throw error;
   }
   if (approval.decision !== "accept-bounded-known-operation-refresh" || approval.workerModel !== "gpt-6-luna" || !["xhigh", "max"].includes(approval.workerReasoning) || approval.refreshDigest !== plan.refreshDigest || approval.expiresAt !== plan.approvalExpiresAt || Date.parse(approval.expiresAt) <= Number(now)) throw new Error("known-operation approval binding or expiry is invalid before browser allocation.");
   const evidencePath = path.resolve(root, String(approval.source?.artifactPath ?? ""));
@@ -1303,7 +1310,7 @@ async function main() {
       startedAt: new Date().toISOString(),
       status: "blocked",
       blocker: {
-        code: ["action-budget-exceeded", "capture-prerequisite-missing", "novelty-frontier-invalid", "recipe-target-invalid", "unsafe-recipe-action"].includes(error?.code)
+        code: ["action-budget-exceeded", "capture-prerequisite-missing", "novelty-frontier-invalid", "recipe-target-invalid", "unsafe-recipe-action", "response-body-policy-unbound"].includes(error?.code)
           ? error.code
           : /operation|approval|ceiling/iu.test(error?.message ?? "")
             ? "mutation-authorization-required"
@@ -1757,7 +1764,7 @@ async function main() {
       } catch (error) {
         if (error?.code !== "ENOENT" && !(error instanceof SyntaxError)) throw error;
       }
-      await hydrateResponseBodySidecars(analysisApiRecords, args.artifacts);
+      await hydrateResponseBodySidecars(analysisApiRecords, args.artifacts, recipe?.responseBodyLimits);
       const sidecarCompleteness = assessResponseBodySidecarCompleteness(analysisApiRecords);
       if (!sidecarCompleteness.captureComplete) {
         captureCompleteness = {

@@ -1,11 +1,12 @@
 import { createHash } from "node:crypto";
-import { lstat, mkdir, readFile, realpath, rename, stat, writeFile } from "node:fs/promises";
+import { lstat, mkdir, readFile, readdir, realpath, rename, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { responseBodyLimits, resolveResponseBodyLimits } from "./discovery-capture-policy.mjs";
 
 const sha256 = (value) => createHash("sha256").update(value).digest("hex");
 const evidencePattern = /^[a-z0-9][a-z0-9-]{0,127}$/u;
 const redacted = "[redacted]";
-export const responseBodySidecarLimit = 512 * 1024;
+export const responseBodySidecarLimit = responseBodyLimits.perBodyBytes;
 const sensitiveKeys = new Set(["accesstoken", "assertion", "authorization", "authtoken", "clientsecret", "hubtenanttoken", "idtoken", "password", "refreshtoken", "secret", "token"]);
 const normalizedKey = (value) => String(value ?? "").toLowerCase().replace(/[^a-z0-9]/gu, "");
 function redactValue(value) {
@@ -66,11 +67,21 @@ async function validateRealPathBoundary(artifactDir, absolutePath, { requireFile
   }
 }
 
-export async function writeResponseBodySidecar({ artifactDir, evidenceId, sanitizedBody, previewLimit = 5000, write = writeFile, move = rename }) {
+const pendingWrites = new Map();
+export function writeResponseBodySidecar(options) {
+  const key = path.resolve(options.artifactDir);
+  const result = (pendingWrites.get(key) ?? Promise.resolve()).then(() => writeSidecar(options));
+  const tail = result.catch(() => {}).finally(() => { if (pendingWrites.get(key) === tail) pendingWrites.delete(key); });
+  pendingWrites.set(key, tail);
+  return result;
+}
+
+async function writeSidecar({ artifactDir, evidenceId, sanitizedBody, previewLimit = 5000, write = writeFile, move = rename, limits = responseBodyLimits }) {
+  limits = resolveResponseBodyLimits(limits);
   if (!evidencePattern.test(String(evidenceId ?? ""))) throw new Error("response body evidenceId is invalid.");
   if (typeof sanitizedBody !== "string") return { preview: null, bodyCapture: { state: "decode-failed", previewState: "absent", path: null, sha256: null, byteLength: 0 } };
   const bytes = Buffer.from(sanitizedBody, "utf8");
-  if (bytes.byteLength > responseBodySidecarLimit) {
+  if (bytes.byteLength > limits.perBodyBytes) {
     return {
       preview: sanitizedBody.length > previewLimit ? `${sanitizedBody.slice(0, previewLimit)}…` : sanitizedBody,
       bodyCapture: bodyCaptureWithoutSidecar("oversize", bytes.byteLength),
@@ -85,7 +96,7 @@ export async function writeResponseBodySidecar({ artifactDir, evidenceId, saniti
     await validateRealPathBoundary(artifactDir, absolutePath);
     try {
       const existingInfo = await lstat(absolutePath);
-      if (!existingInfo.isFile() || existingInfo.size > responseBodySidecarLimit) {
+      if (!existingInfo.isFile() || existingInfo.size > limits.perBodyBytes) {
         return { preview, bodyCapture: { state: "incomplete-write", previewState: sanitizedBody.length > previewLimit ? "truncated" : "complete", path: null, sha256: null, byteLength: bytes.byteLength } };
       }
       const existing = await readFile(absolutePath);
@@ -96,6 +107,14 @@ export async function writeResponseBodySidecar({ artifactDir, evidenceId, saniti
     } catch (error) {
       if (error?.code !== "ENOENT") throw error;
     }
+    let retainedBytes = 0;
+    for (const entry of await readdir(path.dirname(absolutePath), { withFileTypes: true })) {
+      if (!entry.name.endsWith(".body")) continue;
+      const info = await lstat(path.join(path.dirname(absolutePath), entry.name));
+      if (!info.isFile() || info.isSymbolicLink()) throw new Error("Invalid sidecar budget entry.");
+      retainedBytes += info.size;
+    }
+    if (retainedBytes + bytes.byteLength > limits.totalBytes) return { preview, bodyCapture: bodyCaptureWithoutSidecar("oversize", bytes.byteLength), bodyCaptureDiagnostic: "response-body-retention-budget-exceeded" };
     await write(temporaryPath, bytes);
     await move(temporaryPath, absolutePath);
   } catch {
@@ -109,26 +128,31 @@ export function bodyCaptureWithoutSidecar(state, byteLength = 0) {
   return { state, previewState: "absent", path: null, sha256: null, byteLength: Number(byteLength) || 0 };
 }
 
-export async function loadResponseBodySidecar({ artifactDir, evidenceId, descriptor }) {
+export async function loadResponseBodySidecar({ artifactDir, evidenceId, descriptor, limits = responseBodyLimits }) {
+  limits = resolveResponseBodyLimits(limits);
   if (!descriptor || descriptor.state !== "complete" || !evidencePattern.test(String(evidenceId ?? ""))) throw new Error("response body sidecar is not complete or evidence-bound.");
   if (descriptor.path !== `response-body-sidecars/${evidenceId}.body`) throw new Error("response body sidecar filename does not match its evidence ID.");
-  if (!Number.isSafeInteger(descriptor.byteLength) || descriptor.byteLength < 0 || descriptor.byteLength > responseBodySidecarLimit) throw new Error("response body sidecar length exceeds the retention limit.");
+  if (!Number.isSafeInteger(descriptor.byteLength) || descriptor.byteLength < 0 || descriptor.byteLength > limits.perBodyBytes) throw new Error("response body sidecar length exceeds the retention limit.");
   const absolutePath = boundedPath(artifactDir, descriptor.path);
   await validateRealPathBoundary(artifactDir, absolutePath, { requireFile: true });
   const fileStats = await stat(absolutePath);
-  if (!fileStats.isFile() || fileStats.size !== descriptor.byteLength || fileStats.size > responseBodySidecarLimit) throw new Error("response body sidecar hash or length mismatch.");
+  if (!fileStats.isFile() || fileStats.size !== descriptor.byteLength || fileStats.size > limits.perBodyBytes) throw new Error("response body sidecar hash or length mismatch.");
   const bytes = await readFile(absolutePath);
   if (bytes.byteLength !== descriptor.byteLength || sha256(bytes) !== descriptor.sha256) throw new Error("response body sidecar hash or length mismatch.");
   return new TextDecoder("utf-8", { fatal: true }).decode(bytes);
 }
 
-export async function hydrateResponseBodySidecars(records, artifactDir) {
-  return Promise.all((records ?? []).map(async (record) => {
-    if (record?.bodyCapture?.state !== "complete") return record;
-    const body = await loadResponseBodySidecar({ artifactDir, evidenceId: record.evidenceId, descriptor: record.bodyCapture });
+export async function hydrateResponseBodySidecars(records, artifactDir, limits = responseBodyLimits) {
+  limits = resolveResponseBodyLimits(limits);
+  let totalBytes = 0;
+  for (const record of records ?? []) {
+    if (record?.bodyCapture?.state !== "complete") continue;
+    totalBytes += record.bodyCapture.byteLength;
+    if (!Number.isSafeInteger(totalBytes) || totalBytes > limits.totalBytes) throw new Error("Response-body analysis exceeds the aggregate budget.");
+    const body = await loadResponseBodySidecar({ artifactDir, evidenceId: record.evidenceId, descriptor: record.bodyCapture, limits });
     Object.defineProperty(record, "responseBodyForAnalysis", { configurable: false, enumerable: false, value: body, writable: false });
-    return record;
-  }));
+  }
+  return records ?? [];
 }
 
 export function assessResponseBodySidecarCompleteness(records) {

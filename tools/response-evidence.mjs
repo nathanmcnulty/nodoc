@@ -5,6 +5,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { loadResponseBodySidecar } from "./response-body-sidecars.mjs";
+import { resolveResponseBodyLimits } from "./discovery-capture-policy.mjs";
 
 const repoRoot = fileURLToPath(new URL("../", import.meta.url));
 const publicDirectories = ["specifications", "postman", "src", "static", "build", "tools"];
@@ -65,8 +66,18 @@ export function summarizeJsonTokens(value) {
   }));
 }
 
-export async function inspectVerifiedResponse(artifactDir, record) {
-  const body = await loadResponseBodySidecar({ artifactDir, evidenceId: record.evidenceId, descriptor: record.bodyCapture });
+export async function inspectVerifiedResponse(artifactDir, record, limits) {
+  limits = resolveResponseBodyLimits(limits);
+  try {
+    const summary = parsePrivateJson(await readFile(path.join(artifactDir, "summary.json"), "utf8"), "Capture summary");
+    if (summary.responseBodyLimits !== undefined) {
+      const recorded = resolveResponseBodyLimits(summary.responseBodyLimits);
+      limits = resolveResponseBodyLimits({ perBodyBytes: Math.min(limits.perBodyBytes, recorded.perBodyBytes), totalBytes: Math.min(limits.totalBytes, recorded.totalBytes) });
+    }
+  } catch (error) {
+    if (error.code !== "ENOENT") throw error;
+  }
+  const body = await loadResponseBodySidecar({ artifactDir, evidenceId: record.evidenceId, descriptor: record.bodyCapture, limits });
   return {
     schemaVersion: 1,
     visibility: "private-evidence-only",
@@ -165,7 +176,7 @@ async function main(argv) {
     if (Object.hasOwn(options, args[index])) throw new Error("Duplicate option.");
     options[args[index]] = args[index + 1];
   }
-  const allowed = command === "inspect" ? ["--output", "--artifact-dir", "--evidence-id"] : ["--output", "--capture-root"];
+  const allowed = command === "inspect" ? ["--output", "--artifact-dir", "--evidence-id", "--limits-recipe"] : ["--output", "--capture-root"];
   if (Object.keys(options).some((key) => !allowed.includes(key))) throw new Error("Unknown option.");
   if (!options["--output"]) throw new Error("An external --output is required.");
   const output = await requirePrivateOutput(options["--output"]);
@@ -187,7 +198,10 @@ async function main(argv) {
     const descriptorKey = (record) => JSON.stringify([record.bodyCapture?.state, record.bodyCapture?.path, record.bodyCapture?.sha256, record.bodyCapture?.byteLength]);
     const binding = descriptorKey(found[0]);
     if (found.some((record) => descriptorKey(record) !== binding)) throw new Error("Conflicting raw/API response descriptors.");
-    result = await inspectVerifiedResponse(artifactDir, found[0]);
+    const limits = options["--limits-recipe"]
+      ? resolveResponseBodyLimits(parsePrivateJson(await readFile(options["--limits-recipe"], "utf8"), "Limits recipe").responseBodyLimits)
+      : resolveResponseBodyLimits();
+    result = await inspectVerifiedResponse(artifactDir, found[0], limits);
   } else if (command === "scan-public") {
     if (!options["--capture-root"]) throw new Error("scan-public requires --capture-root.");
     result = await scanPublicResponseFingerprints({ captureRoot: path.resolve(options["--capture-root"]) });

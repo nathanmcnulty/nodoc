@@ -5,7 +5,7 @@ import path from "node:path";
 import test from "node:test";
 
 import { captureResponseBodyEvidence, captureResponseBodyWithLoader, mergeItems } from "../cdp-deep-capture.mjs";
-import { responseBodySidecarLimit } from '../response-body-sidecars.mjs';
+import { maximumResponseBodyBytes } from '../discovery-capture-policy.mjs';
 
 const safeCodes = new Set([
   "cdp-response-body-retrieval-failed",
@@ -126,7 +126,7 @@ test("invalid complete-descriptor path, evidence ID, or size falls through to la
   const cases = [
     { evidenceId: "request-valid-path", path: "response-body-sidecars/other.body", byteLength: 10 },
     { evidenceId: "../invalid-id", path: "response-body-sidecars/../invalid-id.body", byteLength: 10 },
-    { evidenceId: "request-oversize", path: "response-body-sidecars/request-oversize.body", byteLength: responseBodySidecarLimit + 1 },
+    { evidenceId: "request-oversize", path: "response-body-sidecars/request-oversize.body", byteLength: maximumResponseBodyBytes + 1 },
   ];
   for (const invalid of cases) {
     const merged = mergeItems({

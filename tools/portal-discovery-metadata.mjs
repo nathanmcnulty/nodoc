@@ -834,6 +834,8 @@ export const captureRecipesByTitle = {
     "tools/capture-recipes/purview-home-body-enrichment-20261030.json",
     "tools/capture-recipes/purview-home-response-diagnostic-20261031.json",
     "tools/capture-recipes/purview-home-irm-body-scope-repair-20261031.json",
+    "tools/capture-recipes/purview-dlp-sit-remaining-three-20261105.json",
+    "tools/capture-recipes/purview-home-announcements-remaining-three-20261105.json",
   ],
   "Purview Portal": [
     "tools/capture-recipes/purview-portal-deep.json",
@@ -851,6 +853,7 @@ export const captureRecipesByTitle = {
     "tools/capture-recipes/security-copilot-viva-yammer-clients-20261030.json",
     "tools/capture-recipes/security-copilot-purview-loki-shared-client-20261031.json",
     "tools/capture-recipes/security-copilot-purview-loki-shared-client-remaining-five-20261031.json",
+    "tools/capture-recipes/security-copilot-purview-loki-remaining-three-20261105.json",
   ],
   SharePoint: [
     "tools/capture-recipes/sharepoint-script-sources-known-refresh.json",

@@ -1,5 +1,23 @@
 # Agent Discovery Playbook
 
+Response retention uses a shared 16 MiB per-body default and a 256 MiB aggregate
+budget. A recipe may declare `responseBodyLimits: {perBodyBytes, totalBytes}`;
+positive integer bounds are 256 MiB per body and 1 GiB aggregate, with the total
+at least the per-body limit. Choose and adjust these within available local
+resources and the user's delegated sizing authority; routine sizing does not
+require another permission request. Bind explicit limits in the reviewed recipe
+and execution digest, and retain the effective policy in private capture output.
+Live known-refresh execution requires both explicit fields; historical approvals
+without them remain readable evidence but grant no execution under new defaults.
+Use that same explicit policy for offline loading/inspection (the inspect CLI
+accepts `--limits-recipe`). Descriptors never grant permission to raise a limit.
+Inspection also honors a tighter recorded run policy. CDP buffer shares are
+allocated across sessions, and pending payloads and retained sidecars each have
+their own aggregate budget; these bounds are not a measurement of Chrome RSS.
+Keep bodies, sizes, fingerprints and tenant evidence private, preserve exact
+observed caller provenance, and obtain independent evidence review before source
+promotion. Larger retention does not authorize new requests or tenant switching.
+
 Agents should execute the bounded workflow in
 [AGENT_DISCOVERY_RUNBOOK.md](./AGENT_DISCOVERY_RUNBOOK.md) first. This playbook
 is the deeper reference for blockers, design decisions, and research.

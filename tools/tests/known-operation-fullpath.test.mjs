@@ -105,6 +105,7 @@ test("known-operation refresh fixture binds metadata through terminal evidence w
 
   const recipe = {
     url: "https://admin.example.com/settings",
+    responseBodyLimits: {perBodyBytes: 16777216, totalBytes: 268435456},
     matchHosts: ["admin.example.com"],
     pageTarget: { matchHosts: ["admin.example.com"], matchPathPrefixes: ["/settings"] },
     inspectionPolicy: { mode: "observe-only", prohibitedControlPatterns: ["Save", "Delete"] },
@@ -257,6 +258,7 @@ test("collector serialization hydrates a scoped sidecar into terminal accounting
 function recipeForIntegration() {
   return {
     url: "https://admin.example.com/settings",
+    responseBodyLimits: {perBodyBytes: 16777216, totalBytes: 268435456},
     matchHosts: ["admin.example.com"],
     pageTarget: { matchHosts: ["admin.example.com"], matchPathPrefixes: ["/settings"] },
     inspectionPolicy: { mode: "observe-only", prohibitedControlPatterns: ["Save"] },

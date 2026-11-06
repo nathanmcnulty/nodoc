@@ -253,7 +253,9 @@ async function validateRecipeFile(errors, recipePath, expectedSpecId = null) {
 
   try {
     resolvePageTargetCriteria(recipe);
-    validateRecipeTargetMetadata(recipe);
+    // This structural projection never supplies an executable variable value.
+    // Actual execution planning requires the literal native href and rechecks it.
+    validateRecipeTargetMetadata(recipe, { metadataOnly: true });
     buildNoveltyPlan(recipe);
     buildKnownOperationRefreshPlan(recipe);
     if (recipe.noveltyFrontier) {

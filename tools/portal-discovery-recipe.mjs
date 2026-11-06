@@ -115,8 +115,18 @@ export function resolvePageTargetBootstrapCriteria(recipe) {
   };
 }
 
-export function validateRecipeTargetMetadata(recipe) {
-  const entryUrlValue = getRecipeEntryUrl(recipe);
+export function validateRecipeTargetMetadata(recipe, { metadataOnly = false } = {}) {
+  let entryUrlValue = getRecipeEntryUrl(recipe);
+  let nativeShape = null;
+  if (recipe.nativeEntryUrlShape !== undefined) {
+    try { nativeShape = new URL(recipe.nativeEntryUrlShape); } catch { throw new Error("Invalid native entry URL shape."); }
+    if (nativeShape.protocol !== "https:" || nativeShape.username || nativeShape.password || nativeShape.search || nativeShape.hash
+        || nativeShape.origin !== new URL(recipe.url).origin) throw new Error("Native entry URL shape must be a same-origin HTTPS path without query or credentials.");
+  }
+  if (entryUrlValue === "${NativeEntryUrl}") {
+    if (!metadataOnly || !nativeShape) throw new Error("Native entry URL binding must be resolved before execution planning.");
+    entryUrlValue = nativeShape.href;
+  }
   let entryUrl;
   let recipeUrl;
   try {
@@ -126,6 +136,7 @@ export function validateRecipeTargetMetadata(recipe) {
     throw new Error("recipe entry and declared root URLs must be valid URLs.");
   }
   const hasExplicitPageTarget = recipe?.pageTarget !== undefined;
+  if (nativeShape && (entryUrl.origin !== nativeShape.origin || entryUrl.pathname !== nativeShape.pathname || entryUrl.hash)) throw new Error("Resolved native entry URL does not match its declared shape.");
   if (
     entryUrl.protocol !== "https:"
     || entryUrl.username
@@ -157,7 +168,7 @@ export function validateRecipeTargetMetadata(recipe) {
     throw new Error(`recipe entry URL is not a safe same-origin GET (${classification.code}).`);
   }
   const featureCriteria = resolvePageTargetCriteria(recipe);
-  if (!recipeEntryMatchesPageTarget(recipe)) {
+  if (!recipeEntryMatchesPageTarget(recipe, entryUrl.href)) {
     throw new Error("recipe entry URL does not match pageTarget host/path criteria.");
   }
   const bootstrapCriteria = resolvePageTargetBootstrapCriteria(recipe);
@@ -190,10 +201,10 @@ export function validateRecipeTargetMetadata(recipe) {
   };
 }
 
-export function recipeEntryMatchesPageTarget(recipe) {
+export function recipeEntryMatchesPageTarget(recipe, entryUrlValue = getRecipeEntryUrl(recipe)) {
   let entryUrl;
   try {
-    entryUrl = new URL(getRecipeEntryUrl(recipe), recipe?.url);
+    entryUrl = new URL(entryUrlValue, recipe?.url);
   } catch {
     return false;
   }

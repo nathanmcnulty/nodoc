@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "kind": "known-operation-refresh-approval-source",
+  "status": "proposal-pending-independent-review-and-separate-live-authority",
+  "specId": "purview",
+  "recipeDestination": "tools/capture-recipes/purview-dlp-sit-remaining-three-20261105.json",
+  "plannedAssignmentId": "remaining-three-20261105-sit-01",
+  "captureRole": {
+    "model": "gpt-6-luna",
+    "reasoning": "low"
+  },
+  "reviewRequirement": {
+    "model": "gpt-6-luna",
+    "reasoning": "xhigh"
+  },
+  "primaryCanonicalOperation": {
+    "method": "GET",
+    "host": "purview.microsoft.com",
+    "canonicalPath": "/di/find/DlpSensitiveInformationType",
+    "wirePath": "/apiproxy/di/find/DlpSensitiveInformationType",
+    "operationId": "getDlpSensitiveInformationTypes",
+    "sourceFile": "specifications/nodoc-purview/specification/data_infrastructure.yml",
+    "sourceFileSha256": "caae63404186496d11cf09acfe8bb5075e3eefe61f73bf77928b0242bd8e7a80"
+  },
+  "observedCaller": "Purview DLP",
+  "observedEntryUrlTemplate": "${NativeEntryUrl}",
+  "observedEntryPath": "/datalossprevention/overview",
+  "observedEntryQueryNames": [
+    "tid"
+  ],
+  "nativeEntryEvidence": {
+    "artifactId": "remaining-three-native-home-inspection-v3",
+    "sha256": "f78f00b1b397dbd93040b090d1df3812de9f6316c8a7d4dfe703ca7025cea626",
+    "closureArtifactId": "remaining-three-native-home-inspection-closure",
+    "closureSha256": "e5cf68ab219e52717c11346ea7980b4ffd7640234c1e1314514bacabf9b61e0c",
+    "privateEntryBindingArtifactId": "remaining-three-native-entry-bindings",
+    "privateEntryBindingSha256": "9d906a139b41158839e58432ebbba5802456e82d04b5d9265e6ba2ffd477494d"
+  },
+  "tenantIdentityUnproved": true,
+  "reason": "Previously oversized complete-body objective reopened under a newly reviewed configurable retention budget. Only native DLP overview navigation and reload; no filters, pagination or direct API request are authored.",
+  "responseBodyLimits": {
+    "perBodyBytes": 16777216,
+    "totalBytes": 268435456
+  },
+  "actionBudget": {
+    "maximumDriverActions": 6,
+    "recipeActions": 5,
+    "mandatoryDriverHomeNavigation": 1,
+    "maximumOwnerStartupNavigations": 1,
+    "maximumPreflightAlignmentNavigations": 1,
+    "maximumCombinedBudgetUnits": 8,
+    "rootUrl": "https://purview.microsoft.com/home",
+    "alignmentEntry": "${NativeEntryUrl}",
+    "allNavigationLanesExplicit": true
+  },
+  "rawRefreshDigest": "3ac919155e922f39a46c9cf7271578a9f658d897a6f3dd92b02dab391aa38e48",
+  "resolvedRefreshDigest": "87186804e6d4592134b6c7c7f97fc67e488a90be69a93b16a0aa0ee178292d1a",
+  "rawExecutionDigest": "e5b7c100637615c02f5d4f7f69b5c5be6be40a41f340ca2c54a80b818c3a40de",
+  "resolvedExecutionDigest": "dcb4b7f299b35631924e02a7e8deeea94374d1553daa0d83807a9dd5df94eecc",
+  "approvalExpiresAt": "2026-11-06T05:45:00.000Z",
+  "limitations": [
+    "Native entry proof does not prove endpoint emission or API health.",
+    "No direct API replay, tenant change or configuration mutation.",
+    "Private values remain external; independent body/source review follows capture."
+  ]
+}
