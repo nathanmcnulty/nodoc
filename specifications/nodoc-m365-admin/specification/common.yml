@@ -342,8 +342,10 @@ components:
           example: true
         TenantUICapability:
           description: Capability level controlling tenant-specific UI behavior.
-          type: integer
           example: 0
+          oneOf:
+            - type: integer
+            - type: boolean
         ReportingEnabled:
           description: Whether reporting features are enabled for the tenant.
           type: boolean

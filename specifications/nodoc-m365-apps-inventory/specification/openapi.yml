@@ -220,11 +220,24 @@ components:
         officeArchitectureCounts:
           type: array
           items:
-            $ref: '#/components/schemas/GenericObject'
+            $ref: '#/components/schemas/OfficeArchitectureCount'
       required:
         - '@odata.context'
         - totalDevices
         - officeArchitectureCounts
+    OfficeArchitectureCount:
+      type: object
+      description: |
+        Architecture rollup item observed with this stable key and type shape in
+        six successful read-only responses captured on 2026-08-10. The retained
+        evidence does not establish stronger nullability or required-field rules.
+      properties:
+        officeArchitecture:
+          type: string
+          nullable: true
+        count:
+          type: integer
+          nullable: true
     LatestPatchDate:
       type: object
       properties:
@@ -444,8 +457,52 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/InventoryCollection'
+      x-nodoc-operation-context:
+        surface: Historical portal caller / declared backend transport relationship
+        provenance:
+          - source: retained-adjacent-portal-transport-reviewed-20261030
+            confidence: high
+            notes:
+              - Historical transport identity is exact GET query.inventory.insights.office.net/inventory/api/Devices, canonical /inventory/api/Devices under the currently declared backend specification m365-apps-inventory.
+              - "Original caller capture assignments: m365-apps-config. Caller page attribution and assignment labels do not by themselves establish causal execution of the backend owner's UI."
+              - Retained m365-apps-config-01 action 2 at 2026-10-29T21:00:00.327Z; evidence request-dea1d91e406ac8b6ffff; HTTP 200.
+              - "Observed query parameter names: $count, $filter, $top, api-version. Values and derived page-label strings are withheld; parameter presence is not requiredness testing."
+              - This review used raw transport metadata only. No qualifying complete action-attributed response body was available in the selected retained evidence; bootstrap-only complete responses are excluded as action witnesses. Response/body/schema gaps remain open.
+              - Existing response schemas are unchanged. Any newly listed status is description-only, with no inferred error body, status cause, route removal or availability conclusion.
+              - Original dates/actions remain historical; this is not fresh capture, current tenant validation, business or application health, standalone invocation, role/grant/minimum-permission proof, or an owning-portal workflow test.
+              - GET is the recorded method, not a safety or idempotence determination. No request was authored, invoked, probed or replayed by this offline review; effects and rollback are untested.
+              - Confidence applies only to the verified historical method/host/path/status metadata. Captured values, identifiers, credentials, response fingerprints, body lengths and examples are withheld.
+          - source: office-settings-devices-complete-body-reviewed-20261031
+            confidence: high
+            notes:
+              - "A bounded passive capture of the authenticated Office settings page observed exact GET query.inventory.insights.office.net/inventory/api/Devices under the declared M365 Apps Inventory backend. The cached native caller session was preserved without switching; a specific tenant identity was not established."
+              - "One normalized API record at reload action 2 and eight raw transport records across actions 0 and 2 had complete HTTP 200 JSON responses. Raw query-state variants are transport observations, not separate API operations; the empty collection bodies add no device-item shape evidence."
+              - "The observed collection envelopes contained empty value arrays. Existing InventoryCollection root types and required properties were compatible; no device-item field types, requiredness, examples, enums or formats follow from these empty arrays, and the response schema is unchanged."
+              - "Captured at 2026-10-31T07:32:37.340Z; action-attributed evidence request-414777251387074d4f7c. Earlier transport-only provenance remains historical; its missing-body statement does not describe this later bounded capture."
+              - "Observed query parameter names: $count, $filter, $top, api-version. Values are withheld; parameter presence does not establish requiredness or filter semantics."
+              - "This is caller/backend transport and collection-envelope evidence, not native backend-portal workflow, business health, entitlement, grant, minimum-role, specific-tenant or standalone-invocation proof. No authored API request or probe was used; passive background effects and absence of tenant changes were not determined."
+              - "Captured values, identifiers, credentials, raw examples, response fingerprints and body lengths are withheld. Remaining item-schema and broader usage/freshness questions remain open."
   /inventory/api/Devices/GetDeviceSummary:
     get:
+      x-nodoc-live-capture:
+        source: authenticated Microsoft 365 Apps admin center > Inventory passive representative states
+        browsedPages:
+          - Microsoft 365 Apps admin center > Inventory
+      x-nodoc-operation-context:
+        surface: Microsoft 365 Apps admin center > Inventory
+        workflows:
+          - Observe native requests during approved passive representative portal states.
+        availability:
+          level: user-context
+          notes:
+            - One authenticated portal session; standalone execution, parameter requiredness, effective grants and minimum roles are not established.
+        provenance:
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - GET query.inventory.insights.office.net/inventory/api/Devices/GetDeviceSummary; HTTP 200; action 2; observed 2026-10-29T21:12:59.633Z; complete response privately hash-verified.
+              - Current root types match the existing schema. The observed collection or architecture-count array is empty; no current populated-item shape is established.
+              - Observed request/response behavior is scoped to this portal session; standalone execution, requiredness and least privilege are not tested.
       tags: [Devices]
       summary: Get device summary
       description: Returns aggregate device totals and architecture counts used by the Inventory landing page.
@@ -460,6 +517,25 @@ paths:
                 $ref: '#/components/schemas/DeviceSummary'
   /inventory/api/DevicesWithCloudManagementInfo:
     get:
+      x-nodoc-live-capture:
+        source: authenticated Microsoft 365 Apps admin center > Inventory passive representative states
+        browsedPages:
+          - Microsoft 365 Apps admin center > Inventory
+      x-nodoc-operation-context:
+        surface: Microsoft 365 Apps admin center > Inventory
+        workflows:
+          - Observe native requests during approved passive representative portal states.
+        availability:
+          level: user-context
+          notes:
+            - One authenticated portal session; standalone execution, parameter requiredness, effective grants and minimum roles are not established.
+        provenance:
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - GET query.inventory.insights.office.net/inventory/api/DevicesWithCloudManagementInfo; HTTP 200; action 8; observed 2026-10-29T21:13:36.881Z; complete response privately hash-verified.
+              - Current root types match the existing schema. The observed collection or architecture-count array is empty; no current populated-item shape is established.
+              - Observed request/response behavior is scoped to this portal session; standalone execution, requiredness and least privilege are not tested.
       tags: [Devices]
       summary: Query devices with cloud management info
       description: Returns devices enriched with cloud management state and related metadata.
@@ -480,6 +556,25 @@ paths:
                 $ref: '#/components/schemas/InventoryCollection'
   /inventory/api/DevicesWithMetadata/GetOfficeBuildChannelSummaryWithMetadata:
     get:
+      x-nodoc-live-capture:
+        source: authenticated Microsoft 365 Apps admin center > Inventory passive representative states
+        browsedPages:
+          - Microsoft 365 Apps admin center > Inventory
+      x-nodoc-operation-context:
+        surface: Microsoft 365 Apps admin center > Inventory
+        workflows:
+          - Observe native requests during approved passive representative portal states.
+        availability:
+          level: user-context
+          notes:
+            - One authenticated portal session; standalone execution, parameter requiredness, effective grants and minimum roles are not established.
+        provenance:
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - GET query.inventory.insights.office.net/inventory/api/DevicesWithMetadata/GetOfficeBuildChannelSummaryWithMetadata; HTTP 200; action 2; observed 2026-10-29T21:12:59.632Z; complete response privately hash-verified.
+              - Current root types match the existing schema. The observed collection or architecture-count array is empty; no current populated-item shape is established.
+              - Observed request/response behavior is scoped to this portal session; standalone execution, requiredness and least privilege are not tested.
       tags: [Devices]
       summary: Get Office build channel summary with metadata
       description: Returns inventory rollups by servicing channel, including metadata for the Inventory page.
@@ -496,6 +591,25 @@ paths:
                 $ref: '#/components/schemas/InventoryCollection'
   /inventory/api/DevicesWithMetadata/GetOfficeBuildDeviceSummaryWithMetadata:
     get:
+      x-nodoc-live-capture:
+        source: authenticated Microsoft 365 Apps admin center > Inventory passive representative states
+        browsedPages:
+          - Microsoft 365 Apps admin center > Inventory
+      x-nodoc-operation-context:
+        surface: Microsoft 365 Apps admin center > Inventory
+        workflows:
+          - Observe native requests during approved passive representative portal states.
+        availability:
+          level: user-context
+          notes:
+            - One authenticated portal session; standalone execution, parameter requiredness, effective grants and minimum roles are not established.
+        provenance:
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - GET query.inventory.insights.office.net/inventory/api/DevicesWithMetadata/GetOfficeBuildDeviceSummaryWithMetadata; HTTP 200; action 2; observed 2026-10-29T21:12:59.727Z; complete response privately hash-verified.
+              - Current root types match the existing schema. The observed collection or architecture-count array is empty; no current populated-item shape is established.
+              - Observed request/response behavior is scoped to this portal session; standalone execution, requiredness and least privilege are not tested.
       tags: [Devices]
       summary: Get Office build device summary with metadata
       description: Returns inventory rollups by Office build, including metadata for display and filtering.
@@ -511,6 +625,25 @@ paths:
                 $ref: '#/components/schemas/InventoryCollection'
   /inventory/api/OfficeAddins:
     get:
+      x-nodoc-live-capture:
+        source: authenticated Microsoft 365 Apps admin center > Inventory passive representative states
+        browsedPages:
+          - Microsoft 365 Apps admin center > Inventory
+      x-nodoc-operation-context:
+        surface: Microsoft 365 Apps admin center > Inventory
+        workflows:
+          - Observe native requests during approved passive representative portal states.
+        availability:
+          level: user-context
+          notes:
+            - One authenticated portal session; standalone execution, parameter requiredness, effective grants and minimum roles are not established.
+        provenance:
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - GET query.inventory.insights.office.net/inventory/api/OfficeAddins; HTTP 200; action 5; observed 2026-10-29T21:13:19.037Z; complete response privately hash-verified.
+              - Current root types match the existing schema. The observed collection or architecture-count array is empty; no current populated-item shape is established.
+              - Observed request/response behavior is scoped to this portal session; standalone execution, requiredness and least privilege are not tested.
       tags: [Devices]
       summary: List Office add-ins
       description: Returns add-in inventory ordered by number of devices.
@@ -529,6 +662,25 @@ paths:
                 $ref: '#/components/schemas/InventoryCollection'
   /inventory/api/OfficeAddins/$Count:
     get:
+      x-nodoc-live-capture:
+        source: authenticated Microsoft 365 Apps admin center > Inventory passive representative states
+        browsedPages:
+          - Microsoft 365 Apps admin center > Inventory
+      x-nodoc-operation-context:
+        surface: Microsoft 365 Apps admin center > Inventory
+        workflows:
+          - Observe native requests during approved passive representative portal states.
+        availability:
+          level: user-context
+          notes:
+            - One authenticated portal session; standalone execution, parameter requiredness, effective grants and minimum roles are not established.
+        provenance:
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - GET query.inventory.insights.office.net/inventory/api/OfficeAddins/$Count; HTTP 200; action 5; observed 2026-10-29T21:13:19.037Z; complete response privately hash-verified.
+              - The complete text/plain response is compatible with the existing PlainInteger schema; the numeric value is not reproduced.
+              - This is a separate existing operation from the primary summary and from the safety-held export404.
       tags: [Devices]
       summary: Count Office add-ins
       description: Returns the total number of Office add-ins as plain text.

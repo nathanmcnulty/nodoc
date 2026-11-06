@@ -1,0 +1,123 @@
+{
+  "portal": "Purview Data Lifecycle",
+  "url": "https://purview.microsoft.com/home",
+  "nativeEntryUrlShape": "https://purview.microsoft.com/datalifecyclemanagement/overview",
+  "pageTarget": {
+    "matchHosts": [
+      "purview.microsoft.com"
+    ],
+    "matchPathPrefixes": [
+      "/datalifecyclemanagement/overview",
+      "/datalifecyclemanagement/import"
+    ],
+    "allowedEntryQueryParameters": [
+      "tid"
+    ],
+    "bootstrap": {
+      "matchHosts": [
+        "purview.microsoft.com"
+      ],
+      "matchPathnames": [
+        "/home"
+      ]
+    }
+  },
+  "matchHosts": [
+    "ecs.office.com"
+  ],
+  "matchPathPrefixes": [
+    "/config/v1/LokiService/1.0.0.0"
+  ],
+  "inspectionPolicy": {
+    "mode": "observe-only",
+    "prohibitedControlPatterns": [
+      "Add",
+      "Create",
+      "Delete",
+      "Export",
+      "Remove",
+      "Save",
+      "Submit",
+      "Update",
+      "Purchase",
+      "Activate",
+      "Start trial"
+    ]
+  },
+  "responseBodyLimits": {
+    "perBodyBytes": 16777216,
+    "totalBytes": 268435456
+  },
+  "captureScripts": false,
+  "settleMs": 8000,
+  "postActionSettleMs": 6000,
+  "maxActions": 8,
+  "actions": [
+    {
+      "type": "navigate",
+      "value": "${NativeEntryUrl}",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "6000",
+      "required": true
+    },
+    {
+      "type": "navigate",
+      "value": "${NativeImportUrl}",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "6000",
+      "required": true
+    },
+    {
+      "type": "reload",
+      "value": "loki-response-body",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "8000",
+      "required": true
+    },
+    {
+      "type": "capture",
+      "value": "loki-response-body",
+      "required": true
+    }
+  ],
+  "knownOperationRefresh": {
+    "status": "active",
+    "method": "GET",
+    "host": "ecs.office.com",
+    "routes": [
+      "/config/v1/LokiService/1.0.0.0"
+    ],
+    "actionIndexes": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "state": "A current visible enabled Import navigation control is retained at five explicit Overview checkpoints. Observe the distinct native Overview-to-Import sequence using both exact captured hrefs. The completed Overview-only run had no target signal; its history remains unchanged. Canonical backend owner is Security Copilot and caller is Purview; endpoint emission, native Copilot workflow, selected tenant identity and passive effects are unproved. Preserve the native cached caller session; selected tenant identity is unproved. NativeEntryUrl is copied literally from observed portal evidence without constructing tenant queries. Planned automation uses no explicit tenant-selection or configuration controls and authors no API request. Actual selected-tenant identity and passive operation effects remain unverified; no business-health or minimum-role claim.",
+    "documentationObjectives": [
+      "schema-evidence",
+      "usage-observation",
+      "error-example"
+    ],
+    "evidenceIds": [
+      "opaque:remaining-three-loki-native-entry",
+      "opaque:remaining-three-loki-historical-body-gap"
+    ],
+    "approvalExpiresAt": "2026-11-06T05:45:00.000Z",
+    "variableBindingsDigest": "c84a0930e1d82e9de82bfd98ed5f96d8df5bc12f992debbfe84e14ad44e52ab3",
+    "approvalArtifact": "tools/frontier-approvals/security-copilot-purview-loki-overview-import-20261105.json",
+    "approvalDigest": "6e63335f38a41ffa73cb5f14f2ca86da901099add913dcb1f65bc4e324f5ce2a"
+  }
+}

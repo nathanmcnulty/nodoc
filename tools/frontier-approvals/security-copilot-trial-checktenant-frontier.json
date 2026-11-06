@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "specId": "security-copilot",
+  "decision": "accept-bounded-frontier",
+  "workerModel": "gpt-5.6-luna",
+  "workerReasoning": "xhigh",
+  "approvedAt": "2026-10-03T10:05:13.1372353Z",
+  "source": {
+    "head": "d59f4460e59fe490307f3256ee7b56f608e5b7e9",
+    "artifactPath": "tools/frontier-approvals/security-copilot-trial-checktenant-frontier-source.json",
+    "artifactSha256": "e8e786ab8c333a079610bd39818db85d7eab9501fd4615a8c5683177fea0260c",
+    "frontierSetId": "offline-frontier-set-daa4a75e29508f0ff451ee76",
+    "frontierSetDigest": "daa4a75e29508f0ff451ee76060f1f4125bec384317d724ce6c89948328fc21d"
+  },
+  "state": "Security Copilot trial eligibility landing",
+  "canonicalShellUrl": "https://securitycopilot.microsoft.com/trial",
+  "apiEvidenceScope": {
+    "hosts": ["api.securityplatform.microsoft.com"],
+    "pathPrefixes": ["/provisioning"]
+  },
+  "safeActions": [
+    "navigate=https://securitycopilot.microsoft.com/trial",
+    "wait-ms=10000",
+    "reload=security-copilot-trial",
+    "wait-ms=10000",
+    "capture=checktenant-schema"
+  ],
+  "acceptedItems": [
+    {
+      "frontierId": "offline-frontier-6d4e3f645a2676ecfbec3dae",
+      "frontierDigest": "6d4e3f645a2676ecfbec3daecc81780abeb98a37ced0daa072b9a7ccd67f1bd4",
+      "canonicalKey": "api.securityplatform.microsoft.com GET /provisioning/checkTenant"
+    },
+    {
+      "frontierId": "offline-frontier-ef9234b3a05e2d1ea8c68bf6",
+      "frontierDigest": "ef9234b3a05e2d1ea8c68bf679605ce0acf21cfbf1ae7da64c17c28d955246d5",
+      "canonicalKey": "api.securityplatform.microsoft.com GET /provisioning/checkTenant"
+    }
+  ],
+  "deferredItemCount": 175,
+  "blockedItemCount": 175,
+  "constraints": [
+    "Passive navigation, same-origin reload, wait, and capture only",
+    "Do not activate a Security Copilot trial, create capacity, purchase, or use dynamic controls",
+    "Do not issue direct API probes; sanitize all retained evidence"
+  ]
+}

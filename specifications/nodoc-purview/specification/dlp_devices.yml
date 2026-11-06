@@ -45,6 +45,28 @@ paths:
           $ref: common.yml#/components/responses/Unauthorized
         '403':
           $ref: common.yml#/components/responses/Forbidden
+      x-nodoc-operation-context:
+        surface: Microsoft Purview portal (retained native navigation)
+        workflows:
+          - Observe traffic emitted by the normal authenticated portal during the originally recorded native navigation; reuse retained evidence for offline documentation review.
+        requestShapes:
+          - name: retained-native-get
+            bodyKind: none
+            notes: "Observed query parameter names: configurationStatus, lastPolicyUpdateTime, lookingBackInDays, policyStatus. Values are withheld; presence does not test requiredness and existing parameter declarations are unchanged."
+        availability:
+          level: user-context
+          notes:
+            - Historical user-session observation only; no feature activation, tenant switch, role/grant/minimum-permission inference or standalone usage validation.
+        provenance:
+          - source: retained-native-portal-evidence-reviewed-20261030
+            confidence: high
+            notes:
+              - Exact declared GET purview.microsoft.com/apiproxy/edlp/dlpInternalApi/api/cloud/dlp/machines/count maps to canonical /edlp/dlpInternalApi/api/cloud/dlp/machines/count; current declared server/base/path and original request binding were checked privately.
+              - Retained purview-01 action 8 at 2026-10-29T22:15:01.969Z; evidence request-a92a3d23cbfb93cba3f9; HTTP 200 complete body privately verified.
+              - Retained purview-remediation-02 action 8 at 2026-10-30T12:28:03.550Z; evidence request-da4a8e6e1f7c3dc3a709; HTTP 200 complete body privately verified.
+              - Original capture dates and action attribution are retained. Reusing these bodies for offline review does not create a fresh native observation or clear any historical run-level accounting gaps.
+              - HTTP 200, complete body bytes and limited type checks do not establish application/business success, feature availability, entitlement, provisioning, effective permissions or minimum roles.
+              - Captured scalar values, role/feature-map keys, credentials, tenant data, response fingerprints, byte lengths and examples are withheld. No new route or requiredness, enum, format, authentication or standalone execution claim follows.
 
   /edlp/dlpInternalApi/api/cloud/dlp/machines/summaryStatus:
     get:
@@ -91,6 +113,28 @@ paths:
           $ref: common.yml#/components/responses/Unauthorized
         '403':
           $ref: common.yml#/components/responses/Forbidden
+      x-nodoc-operation-context:
+        surface: Microsoft Purview portal (retained native navigation)
+        workflows:
+          - Observe traffic emitted by the normal authenticated portal during the originally recorded native navigation; reuse retained evidence for offline documentation review.
+        requestShapes:
+          - name: retained-native-get
+            bodyKind: none
+            notes: "Observed query parameter names: lastPolicyUpdateTime, lookingBackInDays. Values are withheld; presence does not test requiredness and existing parameter declarations are unchanged."
+        availability:
+          level: user-context
+          notes:
+            - Historical user-session observation only; no feature activation, tenant switch, role/grant/minimum-permission inference or standalone usage validation.
+        provenance:
+          - source: retained-native-portal-evidence-reviewed-20261030
+            confidence: high
+            notes:
+              - Exact declared GET purview.microsoft.com/apiproxy/edlp/dlpInternalApi/api/cloud/dlp/machines/summaryStatus maps to canonical /edlp/dlpInternalApi/api/cloud/dlp/machines/summaryStatus; current declared server/base/path and original request binding were checked privately.
+              - Retained purview-01 action 8 at 2026-10-29T22:15:01.912Z; evidence request-c200da48650bd3db368e; HTTP 200 complete body privately verified.
+              - Retained purview-remediation-02 action 8 at 2026-10-30T12:28:04.178Z; evidence request-a6191f408e1fcfa41746; HTTP 200 complete body privately verified.
+              - Original capture dates and action attribution are retained. Reusing these bodies for offline review does not create a fresh native observation or clear any historical run-level accounting gaps.
+              - HTTP 200, complete body bytes and limited type checks do not establish application/business success, feature availability, entitlement, provisioning, effective permissions or minimum roles.
+              - Captured scalar values, role/feature-map keys, credentials, tenant data, response fingerprints, byte lengths and examples are withheld. No new route or requiredness, enum, format, authentication or standalone execution claim follows.
 
   /mtp/ndr/dlpmachines/count:
     get:
@@ -127,7 +171,11 @@ paths:
             application/json:
               schema:
                 type: object
-                description: pending
+                additionalProperties: true
+                properties:
+                  Count:
+                    type: integer
+                description: Optional static response field types from retained native portal traffic; dynamic map contents, null-only types, requiredness and business-state interpretation remain unverified.
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -136,6 +184,28 @@ paths:
 
         '404':
           $ref: common.yml#/components/responses/NotFound
+      x-nodoc-operation-context:
+        surface: Microsoft Purview portal (retained native navigation)
+        workflows:
+          - Observe traffic emitted by the normal authenticated portal during the originally recorded native navigation; reuse retained evidence for offline documentation review.
+        requestShapes:
+          - name: retained-native-get
+            bodyKind: none
+            notes: "Observed query parameter names: configurationStatus, lastPolicyUpdateTime, lookingBackInDays, policyStatus, tenantId. Values are withheld; presence does not test requiredness and existing parameter declarations are unchanged."
+        availability:
+          level: user-context
+          notes:
+            - Historical user-session observation only; no feature activation, tenant switch, role/grant/minimum-permission inference or standalone usage validation.
+        provenance:
+          - source: retained-native-portal-evidence-reviewed-20261030
+            confidence: high
+            notes:
+              - Exact declared GET purview.microsoft.com/apiproxy/mtp/ndr/dlpmachines/count maps to canonical /mtp/ndr/dlpmachines/count; current declared server/base/path and original request binding were checked privately.
+              - Retained purview-01 action 8 at 2026-10-29T22:15:01.184Z; evidence request-eb7e27f4067ca527f8be; HTTP 200 complete body privately verified.
+              - Retained purview-remediation-02 action 8 at 2026-10-30T12:28:02.938Z; evidence request-c726ce8a7e629d7de8d3; HTTP 200 complete body privately verified.
+              - Original capture dates and action attribution are retained. Reusing these bodies for offline review does not create a fresh native observation or clear any historical run-level accounting gaps.
+              - HTTP 200, complete body bytes and limited type checks do not establish application/business success, feature availability, entitlement, provisioning, effective permissions or minimum roles.
+              - Captured scalar values, role/feature-map keys, credentials, tenant data, response fingerprints, byte lengths and examples are withheld. No new route or requiredness, enum, format, authentication or standalone execution claim follows.
 
   /mtp/ndr/dlpmachines:
     get:
@@ -190,8 +260,12 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                description: pending
+                oneOf:
+                  - type: object
+                    description: pending
+                  - type: array
+                    items: {}
+                description: Preserves the declared object branch and adds only the independently observed alternative container; unknown array items remain untyped.
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -200,6 +274,28 @@ paths:
 
         '404':
           $ref: common.yml#/components/responses/NotFound
+      x-nodoc-operation-context:
+        surface: Microsoft Purview portal (retained native navigation)
+        workflows:
+          - Observe traffic emitted by the normal authenticated portal during the originally recorded native navigation; reuse retained evidence for offline documentation review.
+        requestShapes:
+          - name: retained-native-get
+            bodyKind: none
+            notes: "Observed query parameter names: lastPolicyUpdateTime, lookingBackInDays, pageIndex, pageSize, policyStatus, tenantId. Values are withheld; presence does not test requiredness and existing parameter declarations are unchanged."
+        availability:
+          level: user-context
+          notes:
+            - Historical user-session observation only; no feature activation, tenant switch, role/grant/minimum-permission inference or standalone usage validation.
+        provenance:
+          - source: retained-native-portal-evidence-reviewed-20261030
+            confidence: high
+            notes:
+              - Exact declared GET purview.microsoft.com/apiproxy/mtp/ndr/dlpmachines maps to canonical /mtp/ndr/dlpmachines; current declared server/base/path and original request binding were checked privately.
+              - Retained purview-01 action 8 at 2026-10-29T22:15:01.182Z; evidence request-ae82fa24bbb71b5d7263; HTTP 200 complete body privately verified.
+              - Retained purview-remediation-02 action 8 at 2026-10-30T12:28:02.940Z; evidence request-dee5221ec38d5d5c3d66; HTTP 200 complete body privately verified.
+              - Original capture dates and action attribution are retained. Reusing these bodies for offline review does not create a fresh native observation or clear any historical run-level accounting gaps.
+              - HTTP 200, complete body bytes and limited type checks do not establish application/business success, feature availability, entitlement, provisioning, effective permissions or minimum roles.
+              - Captured scalar values, role/feature-map keys, credentials, tenant data, response fingerprints, byte lengths and examples are withheld. No new route or requiredness, enum, format, authentication or standalone execution claim follows.
 
   /mtp/ndr/dlpmachines/summaryStatus:
     get:
@@ -229,8 +325,14 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                description: pending
+                oneOf:
+                  - type: object
+                    description: pending
+                  - type: array
+                    items:
+                      type: object
+                      additionalProperties: true
+                description: Preserves the declared object branch and adds only the independently observed alternative container; unknown array items remain untyped.
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -239,6 +341,28 @@ paths:
 
         '404':
           $ref: common.yml#/components/responses/NotFound
+      x-nodoc-operation-context:
+        surface: Microsoft Purview portal (retained native navigation)
+        workflows:
+          - Observe traffic emitted by the normal authenticated portal during the originally recorded native navigation; reuse retained evidence for offline documentation review.
+        requestShapes:
+          - name: retained-native-get
+            bodyKind: none
+            notes: "Observed query parameter names: lastPolicyUpdateTime, lookingBackInDays. Values are withheld; presence does not test requiredness and existing parameter declarations are unchanged."
+        availability:
+          level: user-context
+          notes:
+            - Historical user-session observation only; no feature activation, tenant switch, role/grant/minimum-permission inference or standalone usage validation.
+        provenance:
+          - source: retained-native-portal-evidence-reviewed-20261030
+            confidence: high
+            notes:
+              - Exact declared GET purview.microsoft.com/apiproxy/mtp/ndr/dlpmachines/summaryStatus maps to canonical /mtp/ndr/dlpmachines/summaryStatus; current declared server/base/path and original request binding were checked privately.
+              - Retained purview-01 action 8 at 2026-10-29T22:15:01.177Z; evidence request-dfb66e0b80e61cca332b; HTTP 200 complete body privately verified.
+              - Retained purview-remediation-02 action 8 at 2026-10-30T12:28:02.933Z; evidence request-b3de329ba91be98a5f59; HTTP 200 complete body privately verified.
+              - Original capture dates and action attribution are retained. Reusing these bodies for offline review does not create a fresh native observation or clear any historical run-level accounting gaps.
+              - HTTP 200, complete body bytes and limited type checks do not establish application/business success, feature availability, entitlement, provisioning, effective permissions or minimum roles.
+              - Captured scalar values, role/feature-map keys, credentials, tenant data, response fingerprints, byte lengths and examples are withheld. No new route or requiredness, enum, format, authentication or standalone execution claim follows.
 
   /mtp/sccManagement/mgmt/TenantContext:
     get:
@@ -291,8 +415,12 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                description: pending
+                oneOf:
+                  - type: object
+                    description: pending
+                  - type: array
+                    items: {}
+                description: Preserves the declared object branch and adds only the independently observed alternative container; unknown array items remain untyped.
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -301,6 +429,29 @@ paths:
 
         '404':
           $ref: common.yml#/components/responses/NotFound
+      x-nodoc-operation-context:
+        surface: Microsoft Purview portal (retained native navigation)
+        workflows:
+          - Observe traffic emitted by the normal authenticated portal during the originally recorded native navigation; reuse retained evidence for offline documentation review.
+        requestShapes:
+          - name: passively-observed-post-no-replay
+            bodyKind: unknown
+            notes: "Observed query parameter names: none recorded. Values are withheld; presence does not test requiredness and existing parameter declarations are unchanged."
+        availability:
+          level: user-context
+          notes:
+            - Historical user-session observation only; no feature activation, tenant switch, role/grant/minimum-permission inference or standalone usage validation.
+        provenance:
+          - source: retained-native-portal-evidence-reviewed-20261030
+            confidence: high
+            notes:
+              - Exact declared POST purview.microsoft.com/apiproxy/mtp/incidentQueue/incidents/alerts maps to canonical /mtp/incidentQueue/incidents/alerts; current declared server/base/path and original request binding were checked privately.
+              - Retained purview-01 action 8 at 2026-10-29T22:14:59.282Z; evidence request-973ce62c89bf51b16fe9; HTTP 200 complete body privately verified.
+              - Retained purview-remediation-02 action 8 at 2026-10-30T12:28:01.021Z; evidence request-ceee637d5c402f65f8b0; HTTP 200 complete body privately verified.
+              - Original capture dates and action attribution are retained. Reusing these bodies for offline review does not create a fresh native observation or clear any historical run-level accounting gaps.
+              - HTTP 200, complete body bytes and limited type checks do not establish application/business success, feature availability, entitlement, provisioning, effective permissions or minimum roles.
+              - This POST was passively observed during the original portal capture, not authored, invoked, probed or replayed by this review. Request shape remains unknown because no complete verified request sidecar is available; replay safety, idempotence, effects and rollback are unproven.
+              - Captured scalar values, role/feature-map keys, credentials, tenant data, response fingerprints, byte lengths and examples are withheld. No new route or requiredness, enum, format, authentication or standalone execution claim follows.
 
   /mtp/ndr/dlpmachines/filters:
     get:

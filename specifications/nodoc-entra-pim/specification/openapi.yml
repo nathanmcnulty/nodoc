@@ -83,6 +83,12 @@ components:
           type: string
           format: uuid
           example: 62e90394-69f5-4237-9190-012177145e10
+        templateId:
+          type: string
+        displayName:
+          type: string
+        type:
+          type: string
       additionalProperties: true
     GovernanceSubjectSummary:
       type: object
@@ -92,6 +98,15 @@ components:
           type: string
           format: uuid
           example: ab69ffc3-e508-4f8e-af8b-8d626d6764c9
+        type:
+          type: string
+        displayName:
+          type: string
+        principalName:
+          type: string
+        email:
+          type: string
+          nullable: true
       additionalProperties: true
     GovernanceRoleAssignment:
       type: object
@@ -132,6 +147,7 @@ components:
           example: true
         startDateTime:
           type: string
+          nullable: true
           format: date-time
           example: '2023-11-13T04:42:16.297Z'
         endDateTime:
@@ -172,6 +188,11 @@ components:
           type: string
           format: uri
           example: https://api.azrbac.mspim.azure.com/api/v2/$metadata#governanceRoleAssignments(roleDefinition(),subject())
+        '@odata.count':
+          type: number
+        '@odata.nextLink':
+          type: string
+          description: Continuation link supplied by the service; following it was not tested.
         value:
           type: array
           items:
@@ -191,8 +212,14 @@ components:
       required: true
       schema:
         type: string
-        enum: [aadroles, azureResources, aadgroup]
+        enum: [aadroles, aadRoles, azureResources, aadgroup]
       description: The PIM provider type
+    $count:
+      name: $count
+      in: query
+      schema:
+        type: boolean
+      description: OData count flag supplied by the portal; requiredness outside the captured workflow is unverified.
     $filter:
       name: $filter
       in: query
@@ -255,6 +282,26 @@ externalDocs:
 paths:
   /api/v2/privilegedAccess/{provider}/roleAssignments:
     get:
+      x-nodoc-live-capture:
+        source: "Observe-only portal refresh 2026-10-29; Access Packages dashboard reload; request-2371325fd2ece391eb59 and request-b8696ea933d5dcfbbe1d; HTTP 200"
+        browsedPages: ["Identity governance > Access Packages dashboard bootstrap"]
+      x-nodoc-operation-context:
+        surface: Identity governance > Access Packages dashboard bootstrap
+        availability:
+          level: user-context
+          notes:
+            - Current assignments and effective permission flags depend on the caller and selected resource; minimum roles and least privilege are not inferred.
+        provenance:
+          - source: authenticated-portal-capture-20261029
+            confidence: high
+            notes:
+              - "Two exact GET /api/v2/privilegedAccess/aadRoles/roleAssignments records matched at reload action 2, with HTTP 200 and populated value arrays; this is one owned operation, not two operations."
+              - "request-2371325fd2ece391eb59 at 2026-10-29T19:29:33.944Z retained a complete response (privately hash-verified); query names $count/$expand/$filter/$top, count and continuation-link envelope fields. The continuation link was not followed."
+              - "request-b8696ea933d5dcfbbe1d at 2026-10-29T19:29:33.943Z retained a complete response (privately hash-verified); query names $expand/$filter. Expanded role/subject properties were strings, while subject.email and assignment.startDateTime also included null."
+              - "The actual assignment URL uses aadRoles and the resource-permissions URL uses aadroles. Both known wire spellings are retained; case equivalence for other calls was not tested."
+              - "Assignment-state query filters use assignmentState, distinct from provisioning status. Existing null-only field non-null types and historical examples are not revalidated by this capture."
+              - "These operations were emitted from the Access Packages dashboard bootstrap; this is not evidence of navigation through PIM assignments/settings blades or freshness of all 16 operations."
+              - "Authorization and client-context header presence does not establish standalone authentication, header/parameter requiredness, tenant grants, effective authorization requirements or minimum roles. No caller/assignment/role/resource values are copied."
       tags: [Role Assignments]
       summary: List role assignments
       description: |
@@ -262,14 +309,15 @@ paths:
         to query eligible, active, or specific role assignments.
 
         Common filters:
-        - `status eq 'Active'` - Active assignments only
-        - `status eq 'Eligible'` - Eligible assignments only
+        - `assignmentState eq 'Active'` - Active assignments only
+        - `assignmentState eq 'Eligible'` - Eligible assignments only
         - `roleDefinitionId eq '{id}'` - Assignments for a specific role
         - `subjectId eq '{id}'` - Assignments for a specific user
       parameters:
         - $ref: '#/components/parameters/provider'
         - $ref: '#/components/parameters/$filter'
         - $ref: '#/components/parameters/$top'
+        - $ref: '#/components/parameters/$count'
         - $ref: '#/components/parameters/$skip'
         - $ref: '#/components/parameters/$orderby'
         - $ref: '#/components/parameters/$expand'
@@ -566,6 +614,23 @@ paths:
           description: Role settings updated
   /api/v2/privilegedAccess/{provider}/resources/{resourceId}/permissions:
     get:
+      x-nodoc-live-capture:
+        source: "Observe-only portal refresh 2026-10-29; Access Packages dashboard reload; request-d4880a805c46d250f22a; HTTP 200"
+        browsedPages: ["Identity governance > Access Packages dashboard bootstrap"]
+      x-nodoc-operation-context:
+        surface: Identity governance > Access Packages dashboard bootstrap
+        availability:
+          level: user-context
+          notes:
+            - Current assignments and effective permission flags depend on the caller and selected resource; minimum roles and least privilege are not inferred.
+        provenance:
+          - source: authenticated-portal-capture-20261029
+            confidence: high
+            notes:
+              - "Exact GET /api/v2/privilegedAccess/aadroles/resources/{observed-resource}/permissions returned HTTP 200 at action 2 on 2026-10-29T19:29:33.943Z; evidence request-d4880a805c46d250f22a."
+              - "Complete response privately hash-verified; accessLevel strings and isActive/isEligible booleans corroborate the existing schema. No effective permission values or resource identifiers are copied."
+              - "These operations were emitted from the Access Packages dashboard bootstrap; this is not evidence of navigation through PIM assignments/settings blades or freshness of all 16 operations."
+              - "Authorization and client-context header presence does not establish standalone authentication, header/parameter requiredness, tenant grants, effective authorization requirements or minimum roles. No caller/assignment/role/resource values are copied."
       tags: [Permissions]
       summary: Get current user's PIM permissions for a resource
       description: |

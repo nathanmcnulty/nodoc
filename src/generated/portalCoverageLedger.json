@@ -47,7 +47,10 @@
       "tools/capture-recipes/defender-graph-inventory.json",
       "tools/capture-recipes/defender-sentinel-graph-enrichment.json",
       "tools/capture-recipes/defender-telemetry-verification.json",
-      "tools/capture-recipes/defender-entity-replay.json"
+      "tools/capture-recipes/defender-entity-replay.json",
+      "tools/capture-recipes/defender-xdr-known-refresh-20261029.json",
+      "tools/capture-recipes/defender-xdr-gap-remediation-20261030.json",
+      "tools/capture-recipes/defender-xdr-gap-remediation-20261030-neutral-retry.json"
     ],
     "promotedDiscoveries": [
       {
@@ -151,7 +154,11 @@
     "operationCount": 19,
     "lastSuccessfulPassDepth": "passive-landing-reload",
     "captureRecipes": [
-      "tools/capture-recipes/defender-mto-landing-enrichment.json"
+      "tools/capture-recipes/defender-mto-tenant-picker-response-example-retry.json",
+      "tools/capture-recipes/defender-mto-tenant-picker-response-example-frontier.json",
+      "tools/capture-recipes/defender-mto-landing-enrichment.json",
+      "tools/capture-recipes/defender-mto-known-refresh-20261029.json",
+      "tools/capture-recipes/defender-mto-gap-remediation-20261030.json"
     ],
     "promotedDiscoveries": [
       {
@@ -212,13 +219,16 @@
       "main.b2cadmin.ext.azure.com"
     ],
     "pathPrefixes": [
-      "/api/"
+      "/api/",
+      "/graph/"
     ],
-    "operationCount": 6,
+    "operationCount": 7,
     "lastSuccessfulPassDepth": "deep-clickflow",
     "captureRecipes": [
       "tools/capture-recipes/entra-b2c-deep.json",
-      "tools/capture-recipes/entra-b2c-seeded-replay.json"
+      "tools/capture-recipes/entra-b2c-seeded-replay.json",
+      "tools/capture-recipes/entra-b2c-known-refresh-20261029.json",
+      "tools/capture-recipes/entra-b2c-gap-remediation-20261030.json"
     ],
     "promotedDiscoveries": [
       {
@@ -310,9 +320,11 @@
     "operationCount": 286,
     "lastSuccessfulPassDepth": "diff-first",
     "captureRecipes": [
+      "tools/capture-recipes/entra-iam-permissions-response-example-frontier.json",
       "tools/capture-recipes/entra-iam-deep.json",
       "tools/capture-recipes/entra-graph-inventory.json",
-      "tools/capture-recipes/entra-iam-seeded-replay.json"
+      "tools/capture-recipes/entra-iam-seeded-replay.json",
+      "tools/capture-recipes/ibiza-iam-known-refresh-20261029.json"
     ],
     "promotedDiscoveries": [],
     "knownTelemetryExclusions": [],
@@ -350,7 +362,9 @@
     "lastSuccessfulPassDepth": "deep-clickflow",
     "captureRecipes": [
       "tools/capture-recipes/entra-idgov-deep.json",
-      "tools/capture-recipes/entra-idgov-seeded-replay.json"
+      "tools/capture-recipes/entra-idgov-seeded-replay.json",
+      "tools/capture-recipes/entra-idgov-known-refresh-20261029.json",
+      "tools/capture-recipes/entra-idgov-gap-remediation-20261030.json"
     ],
     "promotedDiscoveries": [
       {
@@ -391,7 +405,10 @@
     "operationCount": 13,
     "lastSuccessfulPassDepth": "scope-correction",
     "captureRecipes": [
-      "tools/capture-recipes/entra-iga-novelty.json"
+      "tools/capture-recipes/entra-iga-novelty.json",
+      "tools/capture-recipes/entra-iga-known-refresh-20261029.json",
+      "tools/capture-recipes/entra-iga-idgov-guestbilling-error-body-20261031.json",
+      "tools/capture-recipes/entra-iga-idgov-guestbilling-error-body-remaining-five-20261031.json"
     ],
     "promotedDiscoveries": [],
     "knownTelemetryExclusions": [],
@@ -431,7 +448,8 @@
       "tools/capture-recipes/entra-pim-expired-assignments-enrichment.json",
       "tools/capture-recipes/entra-pim-novelty.json",
       "tools/capture-recipes/entra-pim-deep.json",
-      "tools/capture-recipes/entra-pim-seeded-replay.json"
+      "tools/capture-recipes/entra-pim-seeded-replay.json",
+      "tools/capture-recipes/entra-pim-known-refresh-20261029.json"
     ],
     "promotedDiscoveries": [],
     "knownTelemetryExclusions": [
@@ -485,9 +503,11 @@
     "operationCount": 62,
     "lastSuccessfulPassDepth": "deep-interaction",
     "captureRecipes": [
+      "tools/capture-recipes/exchange-shell-response-example-frontier.json",
       "tools/capture-recipes/exchange-bootstrap-shape-novelty.json",
       "tools/capture-recipes/exchange-deep.json",
-      "tools/capture-recipes/exchange-seeded-replay.json"
+      "tools/capture-recipes/exchange-seeded-replay.json",
+      "tools/capture-recipes/exchange-beta-known-refresh-20261029.json"
     ],
     "promotedDiscoveries": [],
     "knownTelemetryExclusions": [],
@@ -530,7 +550,8 @@
       "tools/capture-recipes/intune-autopatch-deep.json",
       "tools/capture-recipes/intune-autopatch-support-enrichment.json",
       "tools/capture-recipes/intune-deep.json",
-      "tools/capture-recipes/intune-seeded-replay.json"
+      "tools/capture-recipes/intune-seeded-replay.json",
+      "tools/capture-recipes/intune-autopatch-known-refresh-20261029.json"
     ],
     "promotedDiscoveries": [
       {
@@ -571,7 +592,8 @@
       "tools/capture-recipes/intune-deep.json",
       "tools/capture-recipes/intune-graph-inventory.json",
       "tools/capture-recipes/intune-portal-deep.json",
-      "tools/capture-recipes/intune-seeded-replay.json"
+      "tools/capture-recipes/intune-seeded-replay.json",
+      "tools/capture-recipes/intune-portal-known-refresh-20261029.json"
     ],
     "promotedDiscoveries": [
       {
@@ -646,7 +668,10 @@
     "captureRecipes": [
       "tools/capture-recipes/m365-admin-deep.json",
       "tools/capture-recipes/m365-admin-graph-inventory.json",
-      "tools/capture-recipes/m365-admin-seeded-replay.json"
+      "tools/capture-recipes/m365-admin-seeded-replay.json",
+      "tools/capture-recipes/m365-admin-known-refresh-20261029.json",
+      "tools/capture-recipes/m365-admin-gap-remediation-20261030.json",
+      "tools/capture-recipes/m365-admin-teams-concierge-body-20261030.json"
     ],
     "promotedDiscoveries": [
       {
@@ -835,7 +860,8 @@
     "captureRecipes": [
       "tools/capture-recipes/m365-apps-config-deep.json",
       "tools/capture-recipes/m365-apps-deep.json",
-      "tools/capture-recipes/m365-apps-seeded-replay.json"
+      "tools/capture-recipes/m365-apps-seeded-replay.json",
+      "tools/capture-recipes/m365-apps-config-known-refresh-20261029.json"
     ],
     "promotedDiscoveries": [],
     "knownTelemetryExclusions": [],
@@ -871,7 +897,9 @@
     "captureRecipes": [
       "tools/capture-recipes/m365-apps-inventory-deep.json",
       "tools/capture-recipes/m365-apps-deep.json",
-      "tools/capture-recipes/m365-apps-seeded-replay.json"
+      "tools/capture-recipes/m365-apps-seeded-replay.json",
+      "tools/capture-recipes/m365-apps-inventory-known-refresh-20261029.json",
+      "tools/capture-recipes/m365-apps-inventory-office-settings-devices-20261030.json"
     ],
     "promotedDiscoveries": [],
     "knownTelemetryExclusions": [],
@@ -908,7 +936,9 @@
     "captureRecipes": [
       "tools/capture-recipes/m365-apps-services-deep.json",
       "tools/capture-recipes/m365-apps-deep.json",
-      "tools/capture-recipes/m365-apps-seeded-replay.json"
+      "tools/capture-recipes/m365-apps-seeded-replay.json",
+      "tools/capture-recipes/m365-apps-services-known-refresh-20261029.json",
+      "tools/capture-recipes/m365-apps-services-inventory-agreementdata-20261030.json"
     ],
     "promotedDiscoveries": [],
     "knownTelemetryExclusions": [],
@@ -945,7 +975,10 @@
     ],
     "operationCount": 2,
     "lastSuccessfulPassDepth": "cross-portal-contract-delta-review",
-    "captureRecipes": [],
+    "captureRecipes": [
+      "tools/capture-recipes/graph-research-intune-advancedhub-flightstatus-20261031.json",
+      "tools/capture-recipes/graph-research-intune-advancedhub-flightstatus-remaining-five-20261031.json"
+    ],
     "promotedDiscoveries": [],
     "knownTelemetryExclusions": [],
     "openGaps": [],
@@ -992,7 +1025,9 @@
     "captureRecipes": [
       "tools/capture-recipes/power-platform-environments-novelty.json",
       "tools/capture-recipes/power-platform-deep.json",
-      "tools/capture-recipes/power-platform-seeded-replay.json"
+      "tools/capture-recipes/power-platform-seeded-replay.json",
+      "tools/capture-recipes/power-platform-known-refresh-20261029.json",
+      "tools/capture-recipes/power-platform-gap-remediation-20261030.json"
     ],
     "promotedDiscoveries": [
       {
@@ -1098,7 +1133,16 @@
     "captureRecipes": [
       "tools/capture-recipes/purview-deep.json",
       "tools/capture-recipes/purview-graph-inventory.json",
-      "tools/capture-recipes/purview-seeded-replay.json"
+      "tools/capture-recipes/purview-seeded-replay.json",
+      "tools/capture-recipes/purview-known-refresh-20261029.json",
+      "tools/capture-recipes/purview-gap-remediation-20261030.json",
+      "tools/capture-recipes/purview-gap-remediation-20261030-neutral-retry.json",
+      "tools/capture-recipes/purview-label-body-enrichment-20261030.json",
+      "tools/capture-recipes/purview-home-body-enrichment-20261030.json",
+      "tools/capture-recipes/purview-home-response-diagnostic-20261031.json",
+      "tools/capture-recipes/purview-home-irm-body-scope-repair-20261031.json",
+      "tools/capture-recipes/purview-dlp-sit-remaining-three-20261105.json",
+      "tools/capture-recipes/purview-home-announcements-remaining-three-20261105.json"
     ],
     "promotedDiscoveries": [
       {
@@ -1228,7 +1272,9 @@
     "lastSuccessfulPassDepth": "deep-interaction",
     "captureRecipes": [
       "tools/capture-recipes/purview-portal-deep.json",
-      "tools/capture-recipes/purview-portal-seeded-replay.json"
+      "tools/capture-recipes/purview-portal-seeded-replay.json",
+      "tools/capture-recipes/purview-portal-known-refresh-20261029.json",
+      "tools/capture-recipes/purview-portal-gap-remediation-20261030.json"
     ],
     "promotedDiscoveries": [
       {
@@ -1308,10 +1354,19 @@
     "operationCount": 42,
     "lastSuccessfulPassDepth": "deep-interaction",
     "captureRecipes": [
+      "tools/capture-recipes/security-copilot-trial-checktenant-frontier.json",
       "tools/capture-recipes/security-copilot-deep.json",
       "tools/capture-recipes/security-copilot-builder-followup.json",
       "tools/capture-recipes/security-copilot-trial-inspection.json",
-      "tools/capture-recipes/security-copilot-seeded-replay.json"
+      "tools/capture-recipes/security-copilot-seeded-replay.json",
+      "tools/capture-recipes/security-copilot-known-refresh-20261029.json",
+      "tools/capture-recipes/security-copilot-viva-yammer-clients-20261030.json",
+      "tools/capture-recipes/security-copilot-purview-loki-shared-client-20261031.json",
+      "tools/capture-recipes/security-copilot-purview-loki-shared-client-remaining-five-20261031.json",
+      "tools/capture-recipes/security-copilot-purview-loki-overview-import-home-entry-20261105.json",
+      "tools/capture-recipes/security-copilot-purview-loki-overview-import-20261105.json",
+      "tools/capture-recipes/security-copilot-purview-loki-overview-20261105.json",
+      "tools/capture-recipes/security-copilot-purview-loki-remaining-three-20261105.json"
     ],
     "promotedDiscoveries": [
       {
@@ -1371,6 +1426,7 @@
     "operationCount": 43,
     "lastSuccessfulPassDepth": "deep-interaction",
     "captureRecipes": [
+      "tools/capture-recipes/sharepoint-script-sources-known-refresh.json",
       "tools/capture-recipes/sharepoint-script-sources-novelty.json",
       "tools/capture-recipes/sharepoint-admin-deep.json",
       "tools/capture-recipes/sharepoint-admin-seeded-replay.json"
@@ -1445,7 +1501,9 @@
     "captureRecipes": [
       "tools/capture-recipes/teams-manage-users-novelty.json",
       "tools/capture-recipes/teams-deep.json",
-      "tools/capture-recipes/teams-seeded-replay.json"
+      "tools/capture-recipes/teams-seeded-replay.json",
+      "tools/capture-recipes/teams-known-refresh-20261029.json",
+      "tools/capture-recipes/teams-gap-remediation-20261030.json"
     ],
     "promotedDiscoveries": [],
     "knownTelemetryExclusions": [
@@ -1497,6 +1555,7 @@
     "operationCount": 5,
     "lastSuccessfulPassDepth": "bounded-token-helper-frontier-and-live-graphql-correlation",
     "captureRecipes": [
+      "tools/capture-recipes/viva-engage-tenant-config-known-refresh.json",
       "tools/capture-recipes/viva-engage-token-helper-novelty.json",
       "tools/capture-recipes/viva-engage-admin-roles-deep.json",
       "tools/capture-recipes/viva-engage-admin-deep.json",

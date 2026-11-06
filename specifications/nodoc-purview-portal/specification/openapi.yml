@@ -217,7 +217,7 @@ tags:
     description: Same-origin analytics calls used by Records Management and label activity views.
 x-tagGroups:
   - name: Portal
-    tags: [Auth, Audit, Users, Analytics]
+    tags: [ Auth, Audit, Users, Analytics ]
 externalDocs:
   description: Checked-in source specification and supporting modules.
   url: https://github.com/nathanmcnulty/nodoc/tree/main/specifications/nodoc-purview-portal/specification
@@ -293,7 +293,7 @@ x-nodoc-authProfiles:
 paths:
   /api/Auth/getToken:
     get:
-      tags: [Auth]
+      tags: [ Auth ]
       summary: Mint a downstream bearer token
       description: |
         Retrieves a short-lived access token for another Purview-adjacent resource.
@@ -360,7 +360,7 @@ paths:
 
   /api/Auth/getSpaAuthCode:
     get:
-      tags: [Auth]
+      tags: [ Auth ]
       summary: Get the SPA auth helper value
       description: |
         Returns the same-origin SPA auth helper value used while bootstrapping the Purview home shell,
@@ -395,7 +395,7 @@ paths:
 
   /api/v2/auth/GetCachedRoles:
     get:
-      tags: [Auth]
+      tags: [ Auth ]
       summary: Get cached Purview roles
       description: |
         Returns the cached role, permission, service-plan, and feature-flight evaluation payload used
@@ -422,6 +422,30 @@ paths:
             confidence: high
             notes:
               - Verified during startup and solution transitions in a signed-in Purview portal session.
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - GET purview.microsoft.com/api/v2/auth/GetCachedRoles; HTTP 200; action 5; observed 2026-10-29T22:46:42.801Z; complete response privately hash-verified.
+              - The observed cached-role envelope retains its declared types; role, permission, service-plan and feature dictionary entries are not reproduced. A cache response does not prove effective grants or minimum roles.
+              - The bounded run remains incomplete at its initial navigation checkpoint; this observation does not establish whole-spec or product health.
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - GET purview.microsoft.com/api/v2/auth/GetCachedRoles; HTTP 200; action 0; observed 2026-10-29T22:45:15.959Z; complete response privately hash-verified.
+              - The observed cached-role envelope retains its declared types; role, permission, service-plan and feature dictionary entries are not reproduced. A cache response does not prove effective grants or minimum roles.
+              - The bounded run remains incomplete at its initial navigation checkpoint; this observation does not establish whole-spec or product health.
+          - source: authenticated-portal-capture-20261030
+            confidence: high
+            notes:
+              - Exact wire GET purview.microsoft.com/api/v2/auth/GetCachedRoles matched the existing canonical route /api/v2/auth/GetCachedRoles; concrete query values and response values are withheld.
+              - Action 5 at 2026-10-30T12:39:47.188Z; evidence request-946b5884e62c76cc1688; HTTP 200 complete response privately verified.
+              - The fresh reviewed neutral Home entry closes the earlier initial-navigation accounting gap. All eight recipe actions and the mandatory orchestration action completed; the two older 2026-10-29 failed/retry attempts remain unchanged historical evidence.
+              - "The current complete response matches the existing object envelope: rolesChanged is boolean, cachedRoles is an object with boolean values, and no conventional root logical error field was observed. Dictionary identifiers and boolean state values are not copied."
+              - One normalized primary API response is distinct from seven raw target transport observations; these represent one operation. No schema, requiredness, enum, format or feature-availability change is asserted.
+              - A cached role/permission/service-plan/flight response is user- and tenant-specific state, not proof of effective grants, tenant consent, minimum roles, least privilege or standalone authorization.
+              - The native selected tenant and exact page target were checked before allocation and pinned through packet commands and driver preflight. No tenant selection, cache-refresh probe, API request replay, activation or trial was performed.
+              - Only this primary operation is refreshed here; other portal operations and the earlier separate user-profile observation are not revalidated by this response.
+              - All required actions were accounted in this new reviewed remedy. This is scoped operation evidence; broader spec freshness, product health, standalone execution, effective permissions, consent, minimum roles and least privilege remain unverified.
       responses:
         '200':
           description: Cached roles returned successfully.
@@ -435,10 +459,14 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
+      x-nodoc-live-capture:
+        source: Observe-only gap remediation 2026-10-30; primary HTTP 200 observation(s)
+        browsedPages:
+          - Microsoft Purview portal > Home > Portal shell
 
   /api/auth/IsInRoles:
     post:
-      tags: [Auth]
+      tags: [ Auth ]
       summary: Evaluate role and feature membership
       description: |
         Evaluates a batch of role, permission, and feature identifiers and returns a positional boolean
@@ -481,6 +509,16 @@ paths:
             notes:
               - Verified during startup and solution transitions in a signed-in Purview portal session.
               - The optional cache query flag was observed as true and false in passive traffic; no request was replayed.
+          - source: retained-native-portal-evidence-reviewed-20261030
+            confidence: high
+            notes:
+              - Exact declared POST purview.microsoft.com/api/auth/IsInRoles maps to canonical /api/auth/IsInRoles; current declared server/base/path and original request binding were checked privately.
+              - Retained purview-portal-02 action 2 at 2026-10-29T22:45:49.408Z; evidence request-fd77447824b55c3c69c0; HTTP 200 complete body privately verified.
+              - Retained purview-portal-remediation-01 action 0 at 2026-10-30T12:38:24.484Z; evidence request-ebcf12e537daae32dc65; HTTP 200 complete body privately verified.
+              - Original capture dates and action attribution are retained. Reusing these bodies for offline review does not create a fresh native observation or clear any historical run-level accounting gaps.
+              - HTTP 200, complete body bytes and limited type checks do not establish application/business success, feature availability, entitlement, provisioning, effective permissions or minimum roles.
+              - This POST was passively observed during the original portal capture, not authored, invoked, probed or replayed by this review. Request shape remains unknown because no complete verified request sidecar is available; replay safety, idempotence, effects and rollback are unproven.
+              - Captured scalar values, role/feature-map keys, credentials, tenant data, response fingerprints, byte lengths and examples are withheld. No new route or requiredness, enum, format, authentication or standalone execution claim follows.
       responses:
         '200':
           description: Role evaluation completed successfully.
@@ -497,7 +535,7 @@ paths:
 
   /api/adminauditlogconfig/:
     get:
-      tags: [Audit]
+      tags: [ Audit ]
       summary: Get admin audit log configuration
       description: |
         Returns the tenant's Purview admin audit log ingestion status and first opt-in timestamp.
@@ -517,12 +555,31 @@ paths:
 
   /api/user/:
     get:
-      tags: [Users]
+      tags: [ Users ]
       summary: Search users for portal pickers
       description: |
         Returns user objects used by Purview pickers and assignment flows. Confirmed live from
         same-origin user lookup traffic while browsing the portal.
       operationId: PurviewPortal.Users.Search
+      x-nodoc-live-capture:
+        source: authenticated Microsoft Purview portal passive representative states
+        browsedPages:
+          - Microsoft Purview portal
+      x-nodoc-operation-context:
+        surface: Microsoft Purview portal
+        workflows:
+          - Observe native requests during approved passive representative portal states.
+        availability:
+          level: user-context
+          notes:
+            - One authenticated portal session; standalone execution, parameter requiredness, effective grants and minimum roles are not established.
+        provenance:
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - GET purview.microsoft.com/api/user/; HTTP 200; action 5; observed 2026-10-29T22:46:40.621Z; complete response privately hash-verified.
+              - The selected user-array fields retain their declared string/nullability types; identities and profile values are not reproduced.
+              - This current HTTP response is scoped evidence only; the broader initial-action accounting gap and standalone/minimum-role uncertainty remain.
       parameters:
         - name: query
           in: query
@@ -548,7 +605,7 @@ paths:
 
   /api/LabelUserActivityLog/GetChartData:
     post:
-      tags: [Analytics]
+      tags: [ Analytics ]
       summary: Get label user activity chart data
       description: |
         Retrieves Records Management label activity chart data for a requested pivot and time range.
@@ -575,7 +632,7 @@ paths:
           $ref: '#/components/responses/Forbidden'
   /api/Report/GetReportSummaryData:
     post:
-      tags: [Analytics]
+      tags: [ Analytics ]
       summary: Get report summary data
       description: |
         Retrieves summary data for Purview analytics/report experiences such as Data Loss Prevention
@@ -627,6 +684,11 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/GenericObject'
+              examples:
+                observedEmptyResult:
+                  summary: Empty report result observed on 2026-08-31
+                  description: Historical empty response; it does not establish a populated item shape.
+                  value: []
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':

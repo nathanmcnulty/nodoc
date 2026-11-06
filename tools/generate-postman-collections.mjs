@@ -237,13 +237,19 @@ function getResponseContentType(response) {
   return contentTypeHeader?.value?.split(";")[0]?.trim().toLowerCase() ?? null;
 }
 
-function getMediaTypeExample(mediaType) {
+export function getMediaTypeExample(mediaType) {
   if (!mediaType || typeof mediaType !== "object") {
     return undefined;
   }
 
   if (Object.hasOwn(mediaType, "example")) {
     return mediaType.example;
+  }
+
+  for (const example of Object.values(mediaType.examples ?? {})) {
+    if (example && typeof example === "object" && Object.hasOwn(example, "value")) {
+      return example.value;
+    }
   }
 
   if (mediaType.schema && Object.hasOwn(mediaType.schema, "example")) {

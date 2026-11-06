@@ -2,7 +2,7 @@
 
 Portal: Purview
 Spec: purview
-Artifacts directory: C:\Users\NATHAN~1\AppData\Local\Temp\nodoc-purview-discovery-1563d695-14de-41a7-a270-d837662a44c8
+Artifacts directory: Private lifecycle artifacts are retained externally; machine-local path omitted.
 
 ## Run completion
 - Status: completed

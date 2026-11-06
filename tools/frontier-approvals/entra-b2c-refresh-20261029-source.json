@@ -1,0 +1,147 @@
+{
+  "schemaVersion": 1,
+  "kind": "known-operation-refresh-approval-source",
+  "status": "pending-fresh-independent-review",
+  "specId": "entra-b2c",
+  "refreshDate": "2026-10-29",
+  "refreshDigest": "90a22980ffa370d4af7ca917860a35ff7f3372ae49e2c1bf3b1865a4ce457ac0",
+  "recipeDestination": "tools/capture-recipes/entra-b2c-known-refresh-20261029.json",
+  "proposedRecipeSha256": "7299b2f94e200ebbbd44d976bd75cb4c61a0687be28d50efbfc76d0891f696d3",
+  "sourceRecipe": {
+    "path": "tools/capture-recipes/entra-b2c-deep.json",
+    "sha256": "304802bbf0e1704418075c6ec82099c02566b3ec068758e14b8d9cab338f263e"
+  },
+  "specification": {
+    "path": "specifications/nodoc-entra-b2c/specification/openapi.yml",
+    "sha256": "afd18794da59be4c29a73705fd442fd4cdf49decd6a8eda4149f9d072c6c263f",
+    "operationCount": 6
+  },
+  "policyBindings": [
+    {
+      "path": "PORTAL_DISCOVERY_AGENT_PROMPT.md",
+      "sha256": "57b6acf49eac1afc6e51b014039a6cba694adeeb058b13fa549f0610e20ae8b5"
+    },
+    {
+      "path": "AGENT_DISCOVERY_RUNBOOK.md",
+      "sha256": "4ef12fc4e271e17094dbb5da447b6f535bf2a63b457089ce5bd7f6876126b079"
+    },
+    {
+      "path": "AGENT_DISCOVERY_PLAYBOOK.md",
+      "sha256": "c12b9cecf0a3a85e8c760a8e7b310c0d0528f41cb65c8fe2c95eb420ca3fb119"
+    },
+    {
+      "path": "tools/portal-discovery-model-policy.mjs",
+      "sha256": "5d4b65b60d21a5b7431828b41694c49e85c58fb1497a2c3fb1cf53483066c346"
+    },
+    {
+      "path": "tools/portal-discovery-operation-safety.mjs",
+      "sha256": "425a1466f41aed855a0871548ee464670c350ce9b2954eba0e220c9a38d86ca3"
+    },
+    {
+      "path": "tools/discovery-safety.mjs",
+      "sha256": "e406c0fcd3401092ab2ef8318d41c17bb72956eec84638f2a00b9535dda8c8a1"
+    }
+  ],
+  "target": {
+    "status": "active",
+    "method": "GET",
+    "host": "main.b2cadmin.ext.azure.com",
+    "routes": [
+      "/api/userAttribute/GetAvailableOutputClaimsList"
+    ],
+    "state": "Entra B2C bounded passive representative states from tools/capture-recipes/entra-b2c-deep.json",
+    "actionIndexes": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "approvalExpiresAt": "2026-10-31T08:00:00.000Z",
+    "variableBindingsDigest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "documentationObjectives": [
+      "freshness",
+      "health",
+      "schema-evidence",
+      "usage-observation",
+      "error-example"
+    ],
+    "evidenceIds": [
+      "retained-entra-b2c-primary-witness",
+      "checked-in-ui-state-entra-b2c-deep"
+    ]
+  },
+  "retainedPlanningEvidence": [
+    {
+      "artifactPath": "private-artifacts/entra-b2c-novelty-retry-20260819T182506-84a12b7b/api-records.json",
+      "sha256": "bd91881bc8477ee2fc2961ecfd01b87ec91827ff8b89afa839851c430828b523",
+      "recordIndex": 4,
+      "method": "GET",
+      "host": "main.b2cadmin.ext.azure.com",
+      "route": "/api/userAttribute/GetAvailableOutputClaimsList",
+      "status": 400,
+      "mimeType": "application/json",
+      "seenOnPageCount": 1,
+      "observedAt": null,
+      "historicOnly": true
+    }
+  ],
+  "uiProvenance": {
+    "sourceRecipe": "tools/capture-recipes/entra-b2c-deep.json",
+    "entryUrl": "https://entra.microsoft.com/#blade/Microsoft_AAD_IAM/CompanyRelationshipsMenuBlade/menuId/ExternalIdentitiesGettingStarted",
+    "actionCount": 8,
+    "usesOnlyKnownStates": true,
+    "noveltyNotRequired": true
+  },
+  "coverage": {
+    "primaryWitness": "GET /api/userAttribute/GetAvailableOutputClaimsList",
+    "representativeActions": [
+      "navigate=https://entra.microsoft.com/#blade/Microsoft_AAD_IAM/CompanyRelationshipsMenuBlade/menuId/ExternalIdentitiesGettingStarted",
+      "wait-ms=6000",
+      "reload=external-identities",
+      "wait-ms=8000",
+      "capture=external-identities",
+      "navigate=https://entra.microsoft.com/#view/Microsoft_AAD_IAM/CompanyRelationshipsMenuBlade/~/RestApiCalls/menuId/ExternalIdentitiesGettingStarted",
+      "wait-ms=6000",
+      "capture=api-connectors"
+    ],
+    "uncoveredFamilies": [
+      "user-flow detail",
+      "custom-policy detail",
+      "custom-attribute populated states"
+    ],
+    "requiredDisposition": "Each uncovered family must be observed, unchanged with evidence, adjacent, unreachable in approved state, blocked with precise prerequisite, or separately approved state required. One witness never closes spec."
+  },
+  "safety": {
+    "apiProbeAuthorized": false,
+    "mutationAuthorized": false,
+    "deviceCodeAuthorized": false,
+    "auth": "cached/WAM or normal browser only",
+    "passiveMethods": "all naturally emitted methods retained; no authored requests",
+    "browserLifecycle": "one global endpoint, serialized owner/preflight/worker/terminal/review/disposition/stop"
+  },
+  "caveats": [
+    "retained target is HTTP400 feature/error evidence; healthy response not promised",
+    "no tenant switch or invented connector ID"
+  ],
+  "preflightChecks": {
+    "metadata": "accepted",
+    "operationOwnership": "accepted",
+    "safety": {
+      "safe": true,
+      "unsafeActions": []
+    }
+  },
+  "requiredLiveProof": [
+    "terminal discovery-run.json + summary.json + candidate-handoff.json",
+    "all required action indexes accounted with canonical results",
+    "action-attributed exact wire method/host/route",
+    "complete sanitized sidecars with every referenced SHA/length/path verified",
+    "observedAt from source request",
+    "actual statuses and health/error classification",
+    "per-family coverage disposition; no fabricated full-spec freshness"
+  ]
+}

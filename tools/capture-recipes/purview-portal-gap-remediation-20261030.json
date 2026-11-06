@@ -1,0 +1,117 @@
+{
+  "portal": "Purview Portal",
+  "url": "https://purview.microsoft.com/home?tid=${TenantId}",
+  "pageTarget": {
+    "matchHosts": [
+      "purview.microsoft.com"
+    ],
+    "matchPathPrefixes": [
+      "/"
+    ],
+    "allowedEntryQueryParameters": [
+      "tid"
+    ]
+  },
+  "matchHosts": [
+    "purview.microsoft.com"
+  ],
+  "matchPathPrefixes": [
+    "/api"
+  ],
+  "inspectionPolicy": {
+    "mode": "observe-only",
+    "prohibitedControlPatterns": [
+      "Add",
+      "Create",
+      "Delete",
+      "Export",
+      "Remove",
+      "Save",
+      "Submit",
+      "Update",
+      "Purchase",
+      "Activate",
+      "Start trial"
+    ]
+  },
+  "captureScripts": false,
+  "postActionSettleMs": 6000,
+  "settleMs": 8000,
+  "maxActions": 9,
+  "actions": [
+    {
+      "type": "navigate",
+      "value": "https://purview.microsoft.com/home?tid=${TenantId}",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "6000",
+      "required": true
+    },
+    {
+      "type": "reload",
+      "value": "purview-portal-canonical-home",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "8000",
+      "required": true
+    },
+    {
+      "type": "capture",
+      "value": "purview-portal-canonical-home",
+      "required": true
+    },
+    {
+      "type": "navigate",
+      "value": "https://purview.microsoft.com/datalossprevention/overview",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "6000",
+      "required": true
+    },
+    {
+      "type": "capture",
+      "value": "purview-portal-dlp",
+      "required": true
+    }
+  ],
+  "knownOperationRefresh": {
+    "status": "active",
+    "method": "GET",
+    "host": "purview.microsoft.com",
+    "routes": [
+      "/api/v2/auth/GetCachedRoles"
+    ],
+    "state": "A new canonical-home remedy is not a third attempt of the old root-entry plan.",
+    "actionIndexes": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "approvalExpiresAt": "2026-10-31T09:57:22.444Z",
+    "variableBindingsDigest": "8b8e73b61a28c8be7ab1756d51ae796571279c94e70ffc4e8be35661de37ae65",
+    "documentationObjectives": [
+      "freshness",
+      "health",
+      "schema-evidence",
+      "usage-observation",
+      "error-example"
+    ],
+    "evidenceIds": [
+      "gap-remediation-plan-20261030:purview-portal",
+      "retained-state-provenance-20261030:purview-portal"
+    ],
+    "approvalArtifact": "tools/frontier-approvals/purview-portal-gap-remediation-20261030.json",
+    "approvalDigest": "7047434f1517014aed5e0e784cf354f99741541da02e21ca46d622fa484461a2"
+  }
+}

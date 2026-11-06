@@ -1,0 +1,88 @@
+{
+  "portal": "M365 Apps Inventory",
+  "url": "https://config.office.com/officeSettings/inventory",
+  "pageTarget": {
+    "matchHosts": [
+      "config.office.com"
+    ],
+    "matchPathPrefixes": [
+      "/officeSettings/inventory"
+    ]
+  },
+  "matchHosts": [
+    "query.inventory.insights.office.net"
+  ],
+  "matchPathPrefixes": [
+    "/inventory"
+  ],
+  "inspectionPolicy": {
+    "mode": "observe-only",
+    "prohibitedControlPatterns": [
+      "Add",
+      "Create",
+      "Delete",
+      "Export",
+      "Remove",
+      "Save",
+      "Submit",
+      "Update",
+      "Purchase",
+      "Activate",
+      "Start trial"
+    ]
+  },
+  "captureScripts": false,
+  "postActionSettleMs": 6000,
+  "settleMs": 8000,
+  "maxActions": 12,
+  "actions": [
+    "navigate=https://config.office.com/officeSettings/inventory",
+    "wait-ms=6000",
+    "reload=apps-inventory",
+    "wait-ms=8000",
+    "capture=apps-inventory",
+    "navigate=https://config.office.com/officeSettings/inventory/addins",
+    "wait-ms=6000",
+    "capture=apps-inventory-addins",
+    "navigate=https://config.office.com/officeSettings/inventory/devices",
+    "wait-ms=6000",
+    "capture=apps-inventory-devices"
+  ],
+  "knownOperationRefresh": {
+    "status": "active",
+    "method": "GET",
+    "host": "query.inventory.insights.office.net",
+    "routes": [
+      "/inventory/api/Devices/GetDeviceSummary"
+    ],
+    "state": "M365 Apps Inventory bounded passive representative states from tools/capture-recipes/m365-apps-inventory-deep.json",
+    "actionIndexes": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "approvalExpiresAt": "2026-10-31T08:00:00.000Z",
+    "variableBindingsDigest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "documentationObjectives": [
+      "freshness",
+      "health",
+      "schema-evidence",
+      "usage-observation",
+      "error-example"
+    ],
+    "evidenceIds": [
+      "retained-m365-apps-inventory-primary-witness",
+      "checked-in-ui-state-m365-apps-inventory-deep"
+    ],
+    "approvalArtifact": "tools/frontier-approvals/m365-apps-inventory-refresh-20261029.json",
+    "approvalDigest": "94df3c1b77f7649dcc56ae42bb54a5d40b5d1a1fa28735ef4f312d953acb67ab"
+  }
+}

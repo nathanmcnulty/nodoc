@@ -1,5 +1,23 @@
 # Agent Discovery Playbook
 
+Response retention uses a shared 16 MiB per-body default and a 256 MiB aggregate
+budget. A recipe may declare `responseBodyLimits: {perBodyBytes, totalBytes}`;
+positive integer bounds are 256 MiB per body and 1 GiB aggregate, with the total
+at least the per-body limit. Choose and adjust these within available local
+resources and the user's delegated sizing authority; routine sizing does not
+require another permission request. Bind explicit limits in the reviewed recipe
+and execution digest, and retain the effective policy in private capture output.
+Live known-refresh execution requires both explicit fields; historical approvals
+without them remain readable evidence but grant no execution under new defaults.
+Use that same explicit policy for offline loading/inspection (the inspect CLI
+accepts `--limits-recipe`). Descriptors never grant permission to raise a limit.
+Inspection also honors a tighter recorded run policy. CDP buffer shares are
+allocated across sessions, and pending payloads and retained sidecars each have
+their own aggregate budget; these bounds are not a measurement of Chrome RSS.
+Keep bodies, sizes, fingerprints and tenant evidence private, preserve exact
+observed caller provenance, and obtain independent evidence review before source
+promotion. Larger retention does not authorize new requests or tenant switching.
+
 Agents should execute the bounded workflow in
 [AGENT_DISCOVERY_RUNBOOK.md](./AGENT_DISCOVERY_RUNBOOK.md) first. This playbook
 is the deeper reference for blockers, design decisions, and research.
@@ -7,6 +25,32 @@ is the deeper reference for blockers, design decisions, and research.
 This is a living guide for researching undocumented portal APIs in a way that is repeatable, safe, and useful to future agents. Prefer checked-in recipes, structured artifacts, and machine-generated decisions so lower-capability workers can execute bounded runs with little interactive reasoning.
 
 The goal is to turn real portal behavior into high-quality specs and generated artifacts while preserving tenant safety and recording what did and did not work. Each engagement must search for previously unseen operations, revalidate known operations that now error or may have disappeared, and fill as much missing operation metadata as the evidence supports.
+
+### Startup readiness and process results
+
+Managed-owner startup establishes CDP endpoint readiness. Establish a loaded,
+authenticated native Home page separately. A reviewed startup controller may
+wait at most 30 seconds and repeat unchanged strict preflight only for the typed
+`target-count` error with numeric `targetCount: 0`, rechecking the same exact
+manifest-owned browser before every try. Preserve the attempts. Authentication
+failure, identity change or multiple matching targets stops the attempt; this
+wait adds no navigation and does not relax the stability interval.
+
+Collect the actual Node child's exit, signal and spawn error with file-backed
+stdout/stderr. On Windows, `Start-Process -Wait` can wait for browser descendants,
+so its wrapper timing alone does not establish the Node child's completion.
+Preserve an unavailable exit as `null` with a reason; append a dated correction
+when the actual result arrives, retaining the original unknown record. Keep
+process completion separate from capture completeness and evidence acceptance.
+
+If a pinned Import link is absent while a different native Overview link is
+visible, record a preparation/entry-metadata failure, not an API or schema
+failure. Preserve the failed preparation and inspect current native hrefs with
+a reviewed read-only check. Bind the exact observed literal entry in a fresh
+recipe, approval and registry entry, with current reviewed runtime/hash proof;
+do not guess a URL, manufacture a query, or weaken the visibility guard. Keep
+exact hrefs private. Authenticated caller readiness does not prove selected
+tenant identity, and passive operation effects remain unverified.
 
 ## Capture provenance
 
@@ -24,6 +68,16 @@ tenant-safe handoff, which continues to omit raw provenance and tenant values.
 Consumers that only understand the prior array artifacts can ignore the new
 fields.
 
+## Reusable evidence and promotion workflow
+
+The runbook section [Evidence preparation and source-review commands](./AGENT_DISCOVERY_RUNBOOK.md#evidence-preparation-and-source-review-commands) is the executable contract for variable/action preflight, private response facts, review acceptance and source application. Use its shared commands rather than rebuilding receipt formats in each campaign.
+
+- Generate exact source-review bindings from files; require independent review of the exact manifest, then separate Sol acceptance. Validate the same destination/before/proposal triples at acceptance and application. Stop dependent commands on failure and preserve true chronology and uncertain partial writes.
+- Preserve canonical host/server-base/path ownership separately from wire routes and capture-scope flags. Retain structured private navigation descriptors and actual SPA href provenance; do not guess routes from labels or broaden click permissions.
+- Classify verified JSON tokens, not PowerShell-converted dates or truncated previews. Treat nullability, integer values, empty collections, projected responses and full responses distinctly. Keep request variants and GraphQL/RPC operation identity separate.
+- Keep response-body fingerprints and lengths private. Scan source and derivatives against every retained private body, including failed-run orphans; review scalar values independently. Query identity hashes remain valid GraphQL selectors.
+- Record per-field usage evidence: observed presence, tested requiredness/optionality, published metadata, observed audience/claims, verified tenant grants, observed role and tested role contrast. Unknown evidence stays unknown; static metadata is partial.
+- Keep physical/action-budget/transport/normalized/owned-operation counts separate. Missing required action attribution cannot be repaired by pointing at unrelated raw traffic. New evidence-backed routes or reload plans may reopen a gap; exhausted plans and tenant activation do not.
 ## Outcomes to aim for
 
 - Previously unseen operations from live traffic, safe probes, and bundle analysis,
@@ -102,6 +156,49 @@ healthy no-change result supports saturation only after every frontier item is
 exhausted or structurally blocked. Prefer a small targeted detail/interaction
 matrix over replaying a broad recipe whose prior pass already produced no
 unresolved candidates.
+
+### Known-operation refresh is a separate bounded contract
+
+Freshness, discovery novelty, schema evidence, and usage evidence are four
+independent axes. A stale operation may be refreshed without claiming novelty
+when `knownOperationRefresh` binds the canonical bundled method/host/routes,
+resolved entry URL, exact passive action indexes and state, resolved-variable
+digest, policy and evidence inputs, approval expiry, and an immutable exact-Luna
+review artifact before browser allocation. Run this path with
+`--require-known-refresh`; it never authorizes an API probe or a UI mutation.
+Observed POST and other methods may be refresh targets when the portal emits
+them passively. A changed tenant/host variable invalidates the approval.
+For GraphQL, bind the exact operation name and query kind plus either the
+captured persisted-query SHA-256 or literal-query SHA-256. The reviewed
+operation-definition digest covers those selectors; a same-name request with a
+different query hash does not satisfy the contract, and mutations remain
+ineligible.
+
+The terminal known-operation assessment requires action-attributed scoped
+traffic and complete required-action accounting. A 401, 403, or 500 may improve
+error documentation but does not prove healthy usability. Passive traffic is
+`observed` usage; reserve `execution-tested` for a published request/auth
+workflow that was itself executed and evidenced. A complete response body is
+available for schema evidence only through a sanitized, evidence-ID-bound,
+hash-validated sidecar. Truncated previews, oversize or decode-failed bodies,
+and incomplete sidecar writes cannot establish complete schema evidence; a
+sidecar write failure makes the capture incomplete.
+Write a complete sidecar only after the request host and path match the current
+spec capture scope. Adjacent traffic may retain bounded metadata or a preview,
+but never a complete hydrated body.
+
+Representative states are evidence-backed and optional. Empty, populated,
+detail, error, and pagination entries bind an exact action, page, target,
+evidence ID, and prerequisite. An observed empty collection can support a useful
+empty example, but never a populated item schema. The generated operation
+context ledger enumerates every bundled OpenAPI operation, including operations
+with no context, and reports category completeness and evidence strength for
+workflow, auth headers, audience, prerequisites, request examples, errors, and
+pagination. Unknown remains visible; never infer least privilege.
+An authored example is `partial` documentation. Checked-in evidence IDs and
+digest annotations also remain `partial` until a trusted resolver verifies the
+artifact, accepted review, and exact field category. Reserve `execution-tested`
+for evidenced execution of the published request and authentication workflow.
 
 Do **not** rely on any single technique to discover the full surface area.
 
@@ -215,7 +312,7 @@ incomplete work uses Luna/manual, and disabled or missing-precondition work is
 blocked by the orchestrator. Worker results are imported only after exact scope,
 candidate/evidence cardinality, capability ceilings, digest, and legal-state
 validation. Application remains opt-in and report-only is the default. The
-model-backed coordinator is Sol at high reasoning, bounded capture is Luna at
+model-backed coordinator is Sol at medium reasoning, bounded capture is Luna at
 low reasoning, and every model-backed offline review is Luna at `xhigh` or
 `max`; legacy `cheap` and `luna` route names describe complexity, not different
 review models.
@@ -301,8 +398,8 @@ gate across every spec and host; only immutable, non-conflicting offline
 reconciliation/review work may be parallelized. Exactly one owner, preflight,
 alignment, ledger attempt, capture, finalization, and shutdown lifecycle may be
 active. The next live lifecycle waits for terminal owner shutdown, artifact/ledger
-accounting, evidence review, qualified spec/Postman PR disposition, and
-process-improvement disposition. Saturated completion is allowed only
+accounting, evidence review, qualified spec/Postman PR disposition, and any
+critical safety/accounting/privacy/schema defect disposition. Saturated completion is allowed only
 when canonical health and saturation gates pass with no unresolved critical
 frontier item.
 
@@ -313,13 +410,13 @@ research process:
    - Runs `compile-plan --summary`, then binds its exact assignment ID and
      digest into `--phase plan --worker-packet --json`, assigns one portal and
      checked-in recipe, and
-     records a unique artifact directory. This is `gpt-5.6-sol` at high
+     records a unique artifact directory. This is `gpt-6.1-sol` at medium
      reasoning and owns the final quality gate.
 2. **Capture worker**
    - Consumes the plan output's digest-bound `workerPacket` and owns one CDP
      endpoint, page target, and artifact directory for the duration of the run.
      It loads the full bound policy files only on a packet-listed escalation or
-     digest mismatch. This is exact `gpt-5.6-luna` at low reasoning.
+     digest mismatch. This is exact `gpt-6-luna` at low reasoning.
 3. **Analysis worker**
    - Runs the checked-in `analyze` phase over completed immutable capture
      artifacts and reports the generated handoff; it does not reinterpret raw
@@ -332,7 +429,17 @@ research process:
 
 The quality gate is a machine-validated receipt, not a prose convention. It
 binds the review assignment and the digest of the Luna worker result, and it
-must record exact Sol/high acceptance before the result is accepted.
+must record exact Sol/medium acceptance before the result is accepted.
+
+Review packets contain only compact immutable evidence hashes, diff hashes,
+scope, policy, and requested model/reasoning. Their stable cache key includes
+all of those bindings. Reuse is valid only while every binding is unchanged;
+the original review assignment ID, digest, model, reasoning, result digest, and
+capture provenance remain visible. A current Sol gate may accept that cached
+result for the current assignment, but it must record reuse rather than rewrite
+the old identity or claim a new worker execution. Any changed evidence, diff,
+scope, policy, or model invalidates the entry. Critical safety, accounting,
+privacy, or schema defects block reuse; ordinary lessons do not.
 
 On one machine, serialize capture workers because the deterministic driver uses
 one operator-owned CDP endpoint and one long-lived portal target. Parallelize
@@ -371,16 +478,24 @@ and after compaction, including maximum worker payload and exact preserved refer
 Roll out in report-only mode first, then allow a reviewer to act on reusable
 recommendations; invalidation is automatic on any family-key or compatibility change.
 
-Use exact role-based model policy and fail closed on a wrong model or reasoning
-level:
+Use the current role defaults in `tools/portal-discovery-model-policy.mjs` for
+new assignments and fail closed when worker output differs from its assigned
+plan. Update those defaults as models and task needs change. Retained approvals
+record the actual model and reasoning used; metadata and baseline validators
+check that attribution without requiring today's defaults. Source hashes,
+acceptance decisions, scope, expiry, health and evidence accounting remain the
+quality gates. Preserve historical approval bytes and digests when defaults
+change, consistent with PR #225's evidence provenance checks.
+
+The current assignment defaults are:
 
 1. **Preflight and queue management: orchestrator**
    - Restores locked dependencies, validates plans and recipes, checks the fork
      remote, verifies authenticated CDP targets, and assigns immutable artifact
-     directories before workers start. Use exact `gpt-5.6-sol` at high reasoning;
+     directories before workers start. Use exact `gpt-6.1-sol` at medium reasoning;
      it owns acceptance and the final quality gate.
 2. **Deterministic capture and artifact summary: bounded capture worker**
-   - Use exact `gpt-5.6-luna` at low reasoning. Give it only one portal, the
+   - Use exact `gpt-6-luna` at low reasoning. Give it only one portal, the
      execution prompt, and its artifact assignment.
 3. **Null-output recovery: orchestrator-controlled**
    - Inspect accepted artifacts first. If none exist, retry the compact Luna-low
@@ -442,7 +557,7 @@ expected kickoff SHA against the target's actual SHA and clean/dirty status, the
 reports the expected final SHA, actual final SHA, and clean/dirty status. Idle,
 completed, or success status is not acceptance: require materialized non-null
 assistant output, an explicit cross-session report, an immutable hashed artifact,
-or a commit. Every live capture assignment uses exact `gpt-5.6-luna` at low
+or a commit. Every live capture assignment uses exact `gpt-6-luna` at low
 reasoning. After null output, retry exactly once with a compact report-first
 request; if that retry remains null, return to the Sol orchestrator for a fresh
 bounded Luna-low assignment or blocker. Sol does not become the capture worker.
@@ -536,9 +651,11 @@ For each selected spec:
    fills separately, then score documentation enrichment for workflow context,
    permissions, variants, pagination, examples, errors, and troubleshooting;
 4. complete promotion/PR disposition and the Sol quality gate;
-5. record what the recipe, analyzer, prompt, or evidence schema missed; and
-6. apply and validate one accepted process improvement before allocating the
-   next spec.
+5. record critical safety, accounting, privacy, and schema defects that affect
+   later allocations; and
+6. repair and validate those critical defects before allocating the next spec.
+   Ordinary lessons and optional process improvements enter the retrospective
+   without blocking unrelated work.
 
 This produces comparable yield and error data between specs without allowing a
 later run to inherit an unreviewed safety or accounting defect.
@@ -793,7 +910,7 @@ This is the fastest way to turn one broad crawl into a repeatable detail-phase r
 A page that looks blocked or empty can still provide useful evidence.
 
 - Record the blocker message, page URL, visible tabs, visible controls, same-origin links, and script URLs even when no backend API family wakes.
-- Preserve empty-array and null-payload responses; they still confirm route existence and response envelope.
+- Preserve verified complete empty-array and null-payload bodies as exact response observations; they do not establish populated item types, route health or feature availability.
 - Separate “tenant blocked”, “feature gated”, “empty data”, and “UI loaded but backend quiet” in your notes so later agents know what kind of follow-up is actually needed.
 - Use blocker-state captures to identify the missing prerequisite: tenant permission, seed object, license, feature flag, or selected workspace.
 
@@ -948,9 +1065,9 @@ If a safe probe returns a contextual error like a portal-side `500` without page
 
 Interpret probe results carefully:
 
-- `200` / `204` with an empty array still confirms that the route exists and gives you the real response envelope.
-- `400` / `422` often means the route is live but the body or query shape is wrong; recover the exact defaults from request factories before you discard the endpoint.
-- `404` on both the canonical and trailing-slash variants is strong negative evidence that the bundle string is stale or gated away; keep it out of confirmed coverage unless newer evidence appears.
+- A complete `200` body that parses to an empty JSON array is an observed empty array; it supplies no populated-item schema. An observed `204` is no-content and supplies no response-body or JSON-schema evidence.
+- `400`, `422` and `404` are exact status observations, not standalone proof of route health, incorrect request shape, staleness, feature gating or removal. Preserve exact method/host/path and request context; do not author variants or retries without the applicable safety approval.
+- For each target, record any declared expected status set separately from the observed HTTP status, response-body presence, the actual unchanged machine `bodyCapture.state`, and whether an error envelope was inspected. Describe proven no-content only when the observed response establishes it, such as an observed 204; distinguish absent/unavailable body observations, whose schema remains unknown. These presence descriptions do not add or rename runtime capture-state values. If no expectation is declared, mark it unknown; expectations are not observed guarantees. An oversize descriptor has no body sidecar (path/hash are null), supplies no complete-body or schema evidence, and does not relax the fixed capture ceiling. Keep verified error bodies and any retained incomplete-response bytes private; incomplete-body health/schema remains unknown. Apply the same fields to any private worksheet, without adding response values, fingerprints or lengths to public output.
 
 For an operation already in a checked-in specification, record `healthy`,
 `erroring`, `not-observed`, `removed-candidate`, or `unavailable`. Use

@@ -1,0 +1,79 @@
+{
+  "portal": "Viva Engage",
+  "url": "https://engage.cloud.microsoft/main/admin",
+  "pageTarget": {
+    "matchHosts": [
+      "engage.cloud.microsoft"
+    ],
+    "matchPathPrefixes": [
+      "/main/admin"
+    ]
+  },
+  "matchHosts": [
+    "engage.cloud.microsoft"
+  ],
+  "matchPathPrefixes": [
+    "/graphql"
+  ],
+  "inspectionPolicy": {
+    "mode": "observe-only",
+    "prohibitedControlPatterns": [
+      "Add",
+      "Create",
+      "Delete",
+      "Export",
+      "Remove",
+      "Save",
+      "Submit",
+      "Update"
+    ]
+  },
+  "postActionSettleMs": 12000,
+  "settleMs": 14000,
+  "maxActions": 6,
+  "actions": [
+    "navigate=https://engage.cloud.microsoft/main/admin",
+    "wait-ms=6000",
+    "reload=known-admin-graphql",
+    "wait-ms=8000",
+    "capture=tenant-configuration-known-refresh"
+  ],
+  "knownOperationRefresh": {
+    "status": "active",
+    "method": "POST",
+    "host": "engage.cloud.microsoft",
+    "routes": [
+      "/graphql"
+    ],
+    "operationNames": [
+      "TenantConfigurationAndRoles"
+    ],
+    "operationKind": "query",
+    "persistedQuerySha256Hashes": [
+      "b39c32dbf389c23464c593006f92eac2105339b57a0827705431f28981f35378"
+    ],
+    "literalQuerySha256Hashes": [],
+    "operationDefinitionDigest": "fbfc664908df449fe97d97b8b2224cda53e318446e65bec6cb55d3389b174ff6",
+    "state": "Viva Engage admin landing after exact passive navigation and reload",
+    "actionIndexes": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "approvalExpiresAt": "2026-10-31T08:00:00.000Z",
+    "variableBindingsDigest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "documentationObjectives": [
+      "freshness",
+      "response-example",
+      "schema-evidence",
+      "usage-observation"
+    ],
+    "evidenceIds": [
+      "historic-viva-tenant-config-record-74"
+    ],
+    "approvalArtifact": "tools/frontier-approvals/viva-engage-tenant-config-refresh-20261029.json",
+    "approvalDigest": "77f72d7517786da1e530010947d073497511f22bfae6181e6fac317de796f70b"
+  }
+}

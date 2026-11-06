@@ -48,6 +48,24 @@ paths:
       description: >-
         Retrieve the list of integrated apps (add-ins) deployed in the tenant.
       operationId: IntegratedApps.GetApps
+      x-nodoc-live-capture:
+        source: authenticated Microsoft 365 admin center passive representative states
+        browsedPages:
+          - Microsoft 365 admin center
+      x-nodoc-operation-context:
+        surface: Microsoft 365 admin center
+        workflows:
+          - Observe native requests during the approved passive representative portal states.
+        availability:
+          level: user-context
+          notes:
+            - One authenticated portal session; standalone execution, parameter requiredness, effective grants and minimum roles are not established.
+        provenance:
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - "GET admin.cloud.microsoft/fd/addins/api/apps; HTTP 200; action 15; observed 2026-10-29T20:34:20.193Z; complete response (privately hash-verified)."
+              - The complete current response has errorMessage null; no populated error envelope was observed in that response.
       tags: [IntegratedApps]
       parameters:
         - name: workloads
@@ -198,6 +216,24 @@ paths:
       description: >-
         Retrieve recommended apps based on tenant usage patterns and configuration.
       operationId: IntegratedApps.GetRecommendations
+      x-nodoc-live-capture:
+        source: authenticated Microsoft 365 admin center passive representative states
+        browsedPages:
+          - Microsoft 365 admin center
+      x-nodoc-operation-context:
+        surface: Microsoft 365 admin center
+        workflows:
+          - Observe native requests during the approved passive representative portal states.
+        availability:
+          level: user-context
+          notes:
+            - One authenticated portal session; standalone execution, parameter requiredness, effective grants and minimum roles are not established.
+        provenance:
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - "GET admin.cloud.microsoft/fd/addins/api/recommendations/appRecommendations; HTTP 200; action 15; observed 2026-10-29T20:34:20.194Z; complete response (privately hash-verified)."
+              - HTTP 200 carried a nonempty errorMessage string; this is an application-level error observation, not a healthy response. The message value is not reproduced.
       tags: [IntegratedApps]
       parameters:
         - name: appRecommendationType

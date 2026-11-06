@@ -51,7 +51,7 @@ test("enqueues every model-backed offline review on Luna at xhigh or max", async
       recipePath: "tools/capture-recipes/alpha.json",
     };
     const xhigh = await enqueueReviewAssignments(buildReviewAssignmentPlan(grouped()), options);
-    assert.equal(xhigh[0].assignment.latestAttempt.model, "gpt-5.6-luna");
+    assert.equal(xhigh[0].assignment.latestAttempt.model, "gpt-6-luna");
     assert.equal(xhigh[0].assignment.latestAttempt.reasoning, "xhigh");
 
     const maxRoot = path.join(root, "max");

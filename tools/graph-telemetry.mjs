@@ -227,7 +227,7 @@ function directOperations(records) {
       status: record.status,
       mimeType: record.mimeType,
       request: parsedJson(record.requestBodySamples?.[0]),
-      response: parsedJson(record.responseBodySample),
+      response: parsedJson(record.responseBodyForAnalysis ?? record.responseBodySample),
       attribution: record.attribution,
       seenOnPages: record.seenOnPages,
       source: "direct",
@@ -249,7 +249,7 @@ function batchOperations(records) {
     const parent = parseGraphTransportUrl(record?.url);
     if (!parent || parent.path !== "/$batch") continue;
     const request = parsedJson(record.requestBodySamples?.[0]);
-    const response = parsedJson(record.responseBodySample);
+    const response = parsedJson(record.responseBodyForAnalysis ?? record.responseBodySample);
     const metadataRequests = record.graphBatch?.requests;
     const requestEntries = Array.isArray(metadataRequests) && metadataRequests.length > 0 ? metadataRequests : (request?.requests ?? []);
     const metadataResponses = record.graphBatch?.responses;
@@ -289,7 +289,7 @@ function batchDiagnostics(records) {
     const parent = parseGraphTransportUrl(record?.url);
     if (!parent || parent.path !== "/$batch") return [];
     const request = parsedJson(record.requestBodySamples?.[0]);
-    const response = parsedJson(record.responseBodySample);
+    const response = parsedJson(record.responseBodyForAnalysis ?? record.responseBodySample);
     const requests = Array.isArray(record.graphBatch?.requests) ? record.graphBatch.requests : (Array.isArray(request?.requests) ? request.requests : []);
     const responses = Array.isArray(record.graphBatch?.responses) ? record.graphBatch.responses : (Array.isArray(response?.responses) ? response.responses : []);
     const malformedMemberCount = requests.filter((entry) => {

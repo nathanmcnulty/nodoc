@@ -1,0 +1,95 @@
+{
+  "schemaVersion": 1,
+  "kind": "known-operation-refresh-approval-source",
+  "status": "proposal-pending-independent-xhigh-review-and-root-registration",
+  "specId": "graph-research",
+  "createdAt": "2026-10-31T07:27:01.138Z",
+  "plannedAssignmentId": "graph-research-intune-advancedhub-flightstatus-20261031-01",
+  "recipeDestination": "tools/capture-recipes/graph-research-intune-advancedhub-flightstatus-20261031.json",
+  "captureRole": {
+    "model": "gpt-6-luna",
+    "reasoning": "low"
+  },
+  "reviewRequirement": {
+    "model": "gpt-6-luna",
+    "reasoning": "xhigh",
+    "status": "not-performed"
+  },
+  "newCycleReason": "A fresh bounded complete-response objective is prepared for the exact previously observed Graph flighting GET from the Intune Advanced Hub caller. Historical filtered/truncated evidence does not establish a complete current body or current authentication; no direct API request is authorized.",
+  "primaryCanonicalOperation": {
+    "specId": "graph-research",
+    "method": "GET",
+    "host": "graph.microsoft.com",
+    "basePath": "/beta",
+    "canonicalPath": "/deviceManagement/retrieveProjectFlightingStatuses(projectNames=null)",
+    "wirePath": "/beta/deviceManagement/retrieveProjectFlightingStatuses(projectNames=null)",
+    "operationId": "GraphResearch.RetrieveProjectFlightingStatuses",
+    "sourceFile": "specifications/nodoc-graph-research/specification/openapi.yml",
+    "sourceFileSha256": "955ca10e62780ea83b10ca0f8470996494dc4bbdc80c9514c9cefceecece5cae",
+    "observedCaller": "Intune Autopatch Advanced Hub",
+    "opaqueEvidenceId": "opaque:intune-graph-flight-action2",
+    "actionIndex": 2
+  },
+  "additionalPassiveOperations": [],
+  "observedUiUrlTemplate": "https://intune.microsoft.com/#view/Microsoft_Intune_DeviceSettings/TenantAdminMenu/~/advancedHub",
+  "sourceCallerPortal": "intune-autopatch",
+  "canonicalBackendOwner": "graph-research",
+  "callerRelation": "Graph Research owns the canonical backend operation while the observed caller is the Intune Advanced Hub worker view. No native Graph portal workflow, direct API execution, permission, grant, or product-health claim is made.",
+  "privateEvidenceBindings": {
+    "assessmentArtifactId": "ten-candidate-prerequisites-20261030",
+    "assessmentSha256": "08dafb4c8cc0045568eb8fb999ab66bc78b365594915c96c7794ca1e3066168d",
+    "preferredLifecycle": "intune-autopatch-01",
+    "primaryOpaqueEvidenceId": "opaque:intune-graph-flight-action2",
+    "actionIndex": 2,
+    "callerPageHost": "intune.microsoft.com",
+    "callerPathPrefix": "/",
+    "callerEntryQueryNames": [],
+    "historicalOnly": true,
+    "currentAuthenticationProof": false,
+    "currentNativeTenantProof": false,
+    "historicalPrimaryStatus": null,
+    "historicalPrimaryBodyState": null,
+    "canonicalSourceFiles": [
+      {
+        "repoPath": "specifications/nodoc-graph-research/specification/openapi.yml",
+        "sha256": "955ca10e62780ea83b10ca0f8470996494dc4bbdc80c9514c9cefceecece5cae"
+      }
+    ]
+  },
+  "bodyPolicy": {
+    "maxResponseBytes": 524288,
+    "ceilingIncreased": false,
+    "exactPrimaryCount": 1,
+    "separatelyAccountedExtras": 0,
+    "perRouteDisposition": [
+      "expected",
+      "observed-or-no-signal",
+      "HTTP-status",
+      "body-complete-or-incomplete",
+      "semantic-status-qualified"
+    ]
+  },
+  "budget": {
+    "recipeActions": 5,
+    "mandatoryNavigation": 1,
+    "total": 6
+  },
+  "authenticationPreflightRequired": true,
+  "exactTargetPinRequired": true,
+  "nativeCachedSelectedTenantPreserved": true,
+  "currentTenantBindingProof": "No tenant identifier is bound or proved by this static contract. Preserve the currently selected native cached authenticated Intune session and do not switch accounts or directories.",
+  "noSyntheticTenantQuery": true,
+  "noTenantSwitch": true,
+  "noApiProbes": true,
+  "noFeatureActivation": true,
+  "noForeignOwnerReuseOrCleanup": true,
+  "liveAuthorized": false,
+  "runtimePrerequisites": "A fresh authenticated native Intune cached session and strict exact-target preflight are required. No tenant identifier is bound, so no identifier-specific tenant equality is asserted. Preserve the current selected session without switching. Graph Research owns the backend while Intune Advanced Hub is the caller; no direct Graph request may be authored. Reviewed metadata registration is required before actual CLI plan validation.",
+  "rawRefreshDigest": "60bf2546e32ffde73348e68e42593f370026ee0bab60fbf9dc9687d2b1486418",
+  "resolvedRefreshDigest": "60bf2546e32ffde73348e68e42593f370026ee0bab60fbf9dc9687d2b1486418",
+  "approvalExpiresAt": "2026-10-31T11:26:59.993Z",
+  "rawExecutionDigest": "98334096d60c868db42d59fb1aacd55340dfd3e3fb2e3d3e8721f313e9063d89",
+  "resolvedExecutionDigest": "98334096d60c868db42d59fb1aacd55340dfd3e3fb2e3d3e8721f313e9063d89",
+  "executionBindingRecordedAt": "2026-10-31T08:14:00.157Z",
+  "executionBindingScope": "Canonical full executable recipe, including every action/scope/required flag, target/network scope, policy, budgets/capture flags/timeouts and all other recipe fields. Only cyclic knownOperationRefresh.approvalDigest and exact internal resolver digest are excluded; variable bindings remain separately enforced. This records a fresh approval commitment, not a new capture or rewrite of historical execution."
+}

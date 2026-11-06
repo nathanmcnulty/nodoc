@@ -1,0 +1,95 @@
+{
+  "portal": "Identity Governance Dashboard guest-billing error response",
+  "url": "https://entra.microsoft.com/#blade/Microsoft_AAD_ERM/DashboardBlade",
+  "pageTarget": {
+    "matchHosts": [
+      "entra.microsoft.com"
+    ],
+    "matchPathPrefixes": [
+      "/"
+    ],
+    "matchUrlPattern": "^https://entra\\.microsoft\\.com/#(?:blade|view)/Microsoft_AAD_ERM/DashboardBlade(?:/.*)?$"
+  },
+  "matchHosts": [
+    "elm.iga.azure.com"
+  ],
+  "matchPathPrefixes": [
+    "/api/v1/billingConfigurations/guestBilling"
+  ],
+  "inspectionPolicy": {
+    "mode": "observe-only",
+    "prohibitedControlPatterns": [
+      "Add",
+      "Create",
+      "Delete",
+      "Export",
+      "Remove",
+      "Save",
+      "Submit",
+      "Update",
+      "Purchase",
+      "Activate",
+      "Start trial"
+    ]
+  },
+  "captureScripts": false,
+  "settleMs": 8000,
+  "postActionSettleMs": 6000,
+  "maxActions": 6,
+  "actions": [
+    {
+      "type": "navigate",
+      "value": "https://entra.microsoft.com/#blade/Microsoft_AAD_ERM/DashboardBlade",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "6000",
+      "required": true
+    },
+    {
+      "type": "reload",
+      "value": "idgov-guestbilling-error-body",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "8000",
+      "required": true
+    },
+    {
+      "type": "capture",
+      "value": "idgov-guestbilling-error-body",
+      "required": true
+    }
+  ],
+  "knownOperationRefresh": {
+    "status": "active",
+    "method": "GET",
+    "host": "elm.iga.azure.com",
+    "routes": [
+      "/api/v1/billingConfigurations/guestBilling"
+    ],
+    "actionIndexes": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "state": "Exact previously observed guest-billing GET response-retention objective from native Identity Governance dashboard navigation/reload. Prior HTTP404 previews were scope-excluded. Future verified bodies may be empty or errors; no healthy availability, feature configuration, licensing, permission cause or successful configuration-object claim. GET only is the target; the same-path PUT is not authored, triggered or authorized by this objective. No new UI interaction beyond passive navigation/reload.",
+    "documentationObjectives": [
+      "schema-evidence",
+      "usage-observation",
+      "error-example"
+    ],
+    "evidenceIds": [
+      "opaque:entra-idgov-guestBilling-action0-2",
+      "assessment-sha256:a5d8790a8880bd6162ced1823441b6a241ac14145bac367f97ca9a2d4f137079"
+    ],
+    "approvalExpiresAt": "2026-11-01T00:45:00.000Z",
+    "variableBindingsDigest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "approvalArtifact": "tools/frontier-approvals/entra-iga-idgov-guestbilling-error-body-remaining-five-20261031.json",
+    "approvalDigest": "c22a682af89e79dafc80ba57943efd753f8cead765ef01606afc588f9e11ef6b"
+  }
+}

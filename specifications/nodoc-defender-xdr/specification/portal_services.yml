@@ -5,6 +5,26 @@ paths:
       description: >-
         Retrieve the current user's preferences for the Defender XDR portal.
       operationId: PortalServices.GetUserPreferences
+      x-nodoc-live-capture:
+        source: authenticated Microsoft Defender portal representative overview states passive representative states
+        browsedPages:
+          - Microsoft Defender portal representative overview states
+      x-nodoc-operation-context:
+        surface: Microsoft Defender portal representative overview states
+        workflows:
+          - Observe native requests during approved passive representative portal states.
+        availability:
+          level: user-context
+          notes:
+            - One authenticated portal session; standalone execution, parameter requiredness, effective grants and minimum roles are not established.
+        provenance:
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - GET security.microsoft.com/apiproxy/mtp/userPreferences/api/mgmt/userpreferencesservice/userPreference; HTTP 200; action 8; observed 2026-10-29T23:07:14.253Z; complete response privately hash-verified.
+              - The selected complete response has no conventional logical error envelope; existing declared types remain compatible.
+              - One passive authenticated user context; standalone execution, requiredness, effective grants and minimum roles remain unverified.
+              - The refresh evaluator remains blocked at checkpoint5; raw target traffic does not clear that accounting gap.
       tags: [Portal Services]
       responses:
         '200':
@@ -147,21 +167,58 @@ paths:
           level: tenant-conditional
           notes:
             - Returned auth and readiness state depends on tenant enablement and the signed-in operator.
+        provenance:
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - GET security.microsoft.com/apiproxy/medeina/auth; HTTP 402; action 8; observed 2026-10-29T23:07:13.651Z; complete response privately hash-verified.
+              - This HTTP402 is application-error-only evidence; it does not establish healthy service access, entitlement or capacity.
+              - One passive authenticated user context; standalone execution, requiredness, effective grants and minimum roles remain unverified.
+              - The refresh evaluator remains blocked at checkpoint5; raw target traffic does not clear that accounting gap.
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
                 type: object
                 description: pending - Medeina authentication data
-        '401':
+        "401":
           $ref: common.yml#/components/responses/Unauthorized
-
-        '403':
+        "402":
+          description: Observed application error response; entitlement or capacity state is not established beyond this response.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  code:
+                    type: string
+                  error:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                      copilotErrorId:
+                        type: string
+                      code:
+                        type: string
+                      innerError:
+                        type: object
+                        properties:
+                          message:
+                            nullable: true
+                          date:
+                            type: string
+                          correlationId:
+                            type: string
+                      traceId:
+                        type: string
+        "403":
           $ref: common.yml#/components/responses/Forbidden
-
-        '404':
+        "404":
           $ref: common.yml#/components/responses/NotFound
 
   /medeina/settings/datashare:

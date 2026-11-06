@@ -13,6 +13,7 @@ import {
 import { claimAssignment, enqueueAssignment, updateAttempt } from "../portal-discovery-ledger.mjs";
 import { prepareLedgerAttempt } from "../portal-discovery-dispatch.mjs";
 import { frontierReadinessSupervisionTimeout } from "../run-portal-discovery.mjs";
+import { portalDiscoveryModelPolicy } from "../portal-discovery-model-policy.mjs";
 import {
   buildPartitionedCandidateHandoff,
   validatePartitionFiles,
@@ -68,7 +69,7 @@ test("partitioned handoff preserves identities, isolates adjacent evidence, and 
   assert.ok(first.partitions.some(({ reviewClass, destination }) => reviewClass === "adjacent-confirmed-read" && destination.specId === "unassigned"));
   assert.equal(first.manifest.ownershipReview.suggestedCount, 1);
   assert.equal(first.partitions.find(({ reviewClass }) => reviewClass === "adjacent-confirmed-read").candidates[0].ownershipDisposition.suggestedSpecId, "beta");
-  assert.equal(first.manifest.partitions.every(({ recommendedModel }) => recommendedModel === "gpt-5.6-luna"), true);
+  assert.equal(first.manifest.partitions.every(({ recommendedModel }) => recommendedModel === "gpt-6-luna"), true);
   assert.equal(first.manifest.partitions.every(({ recommendedReasoning }) => recommendedReasoning === "xhigh"), true);
   assert.equal(validatePartitionedCandidateHandoff(handoff, first).candidateCount, 4);
   assert.throws(() => validatePartitionedCandidateHandoff(handoff, { partitions: first.partitions.slice(1) }), /shared metadata|duplicated or dropped/u);
@@ -334,7 +335,7 @@ test("seeded retry resumes the exact terminal incomplete ledger attempt", async 
     ledgerPath,
     profile: "bounded",
     workerId: "worker",
-    model: "gpt-5.6-luna",
+    model: "gpt-6-luna",
     reasoning: "low",
     priority: "normal",
     artifacts: seedDir,
@@ -377,7 +378,7 @@ test("failed analysis can be retried against the same completed immutable captur
     ledgerPath,
     profile: "bounded",
     workerId: "worker",
-    model: "gpt-5.6-luna",
+    model: "gpt-6-luna",
     reasoning: "low",
     priority: "normal",
     artifacts: artifactDir,
@@ -1565,6 +1566,34 @@ test("portal driver prefers the bounded Defender deep recipe", async () => {
   assert.equal(result.brief.recipe, "tools/capture-recipes/defender-deep.json");
 });
 
+test("portal driver selects legacy refresh recipes but rejects their missing execution binding", async t => {
+  const temporary = await mkdtemp(path.join(os.tmpdir(), "nodoc-legacy-selection-"));
+  t.after(() => rm(temporary, {recursive: true, force: true}));
+  const ledger = path.join(temporary, "ledger.jsonl");
+  const refreshRecipe = "tools/capture-recipes/defender-xdr-known-refresh-20261029.json";
+  for (const selectionArgs of [
+    ["--require-known-refresh"],
+    ["--recipe", refreshRecipe],
+  ]) {
+    await assert.rejects(
+      execFileAsync(process.execPath, [
+        path.join(repoRoot, "tools", "run-portal-discovery.mjs"),
+        "--portal", "defender-xdr", "--phase", "plan", ...selectionArgs, "--json", "--ledger-path", ledger, "--artifacts", path.join(temporary, "artifacts"),
+      ], { cwd: repoRoot }),
+      (error) => {
+        const result = JSON.parse(error.stderr);
+        assert.equal(error.stdout, "");
+        assert.equal(result.brief.recipe, refreshRecipe);
+        assert.equal(result.status, "blocked");
+        assert.equal(result.blocker.code, "mutation-authorization-required");
+        assert.match(result.blocker.detail, /full execution binding is missing or invalid before browser allocation/);
+        assert.equal(result.workerPacket, undefined);
+        return true;
+      },
+    );
+    await assert.rejects(readFile(ledger), {code: "ENOENT"});
+  }
+});
 test("Defender Graph inventory requires runtime identity variables and then blocks its satisfied frontier", async () => {
   await assert.rejects(
     execFileAsync(process.execPath, [
@@ -1719,6 +1748,8 @@ test("Exchange blocks its completed exact-route bootstrap frontier", async () =>
       path.join(repoRoot, "tools", "run-portal-discovery.mjs"),
       "--portal",
       "exchange-beta",
+      "--recipe",
+      "tools/capture-recipes/exchange-bootstrap-shape-novelty.json",
       "--phase",
       "plan",
       "--require-novelty",
@@ -1785,6 +1816,12 @@ test("portal driver can emit only the compact capture worker packet", async () =
   assert.equal(result.bindings.assignmentId, "capture-packet-test");
   assert.equal(result.bindings.assignmentDigest, "f".repeat(64));
   assert.ok(result.execution.driverArgs.includes("--assignment-digest"));
+  assert.deepEqual(result.role, portalDiscoveryModelPolicy.capture);
+  for (const field of ["model", "reasoning"]) {
+    const index = result.execution.driverArgs.indexOf(`--${field}`);
+    assert.notEqual(index, -1);
+    assert.equal(result.execution.driverArgs[index + 1], portalDiscoveryModelPolicy.capture[field]);
+  }
   assert.equal(result.brief, undefined);
   assert.equal(result.noveltyPlan, undefined);
   assert.ok(Buffer.byteLength(stdout, "utf8") < result.measurements.sourcePolicyBytes / 5);

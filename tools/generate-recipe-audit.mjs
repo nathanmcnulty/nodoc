@@ -1,3 +1,5 @@
+import { createHash } from "node:crypto";
+import { validateRecipeEvaluationManifest } from "./recipe-evaluation-dispositions.mjs";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
@@ -10,6 +12,7 @@ import {
   readRecorderPortalIds,
 } from "./portal-discovery-metadata.mjs";
 import { buildNoveltyPlan } from "./portal-discovery-novelty.mjs";
+import { buildKnownOperationRefreshPlan, evaluateEvidenceAxes } from "./portal-discovery-evidence-contract.mjs";
 
 function stripBom(value) {
   return typeof value === "string" ? value.replace(/^\uFEFF/u, "") : value;
@@ -37,13 +40,18 @@ function toActionDescriptor(action) {
   };
 }
 
-async function readRecipeMetrics(recipePath) {
+async function readRecipeMetrics(recipePath, evaluations) {
   const absolutePath = path.join(repoRoot, recipePath);
   const source = stripBom(await readFile(absolutePath, "utf8"));
   const recipe = JSON.parse(source);
   const actions = Array.isArray(recipe.actions) ? recipe.actions : [];
   const descriptors = actions.map(toActionDescriptor);
   const noveltyPlan = buildNoveltyPlan(recipe);
+  const knownOperationRefreshPlan = buildKnownOperationRefreshPlan(recipe);
+  if (recipe.capturePrerequisite?.status === "blocked"
+      && (typeof recipe.capturePrerequisite.nextRequirement !== "string" || !recipe.capturePrerequisite.nextRequirement.trim())) {
+    throw new Error(`Blocked prerequisite in ${recipePath} must state the evidence needed to reopen capture.`);
+  }
 
   return {
     actionCount: descriptors.length,
@@ -52,6 +60,9 @@ async function readRecipeMetrics(recipePath) {
     navigateActions: descriptors.filter((entry) => entry.type === "navigate").length,
     noveltyTargetCount: noveltyPlan?.measurements.frontierTargetCount ?? 0,
     noveltyTargetedActionCount: noveltyPlan?.measurements.frontierTargetedActionCount ?? 0,
+    knownOperationRefreshCount: knownOperationRefreshPlan ? 1 : 0,
+    reviewedRefreshCount: knownOperationRefreshPlan && evaluations.has(recipePath) ? 1 : 0,
+    evidenceAxes: evaluateEvidenceAxes(recipe),
     blockedPrerequisiteCount: recipe.capturePrerequisite?.status === "blocked" ? 1 : 0,
     satisfiedNoveltyCount: recipe.noveltyStatus?.status === "satisfied" ? 1 : 0,
     rootClicks: descriptors.filter((entry) => entry.scope === "root" && entry.type.startsWith("click")).length,
@@ -63,7 +74,7 @@ async function readRecipeMetrics(recipePath) {
 }
 
 function sumRecipeMetrics(recipePaths, metricsByPath) {
-  return recipePaths.reduce((aggregate, recipePath) => {
+  const aggregate = recipePaths.reduce((aggregate, recipePath) => {
     const metrics = metricsByPath.get(recipePath) ?? {};
     for (const key of [
       "actionCount",
@@ -73,6 +84,8 @@ function sumRecipeMetrics(recipePaths, metricsByPath) {
       "navigateActions",
       "noveltyTargetCount",
       "noveltyTargetedActionCount",
+      "knownOperationRefreshCount",
+      "reviewedRefreshCount",
       "satisfiedNoveltyCount",
       "rootClicks",
       "seededLinkActions",
@@ -85,6 +98,9 @@ function sumRecipeMetrics(recipePaths, metricsByPath) {
     if (metrics.usesVariables) {
       aggregate.variableRecipes += 1;
     }
+    for (const axis of ["freshness", "discovery", "schema", "usage"]) {
+      aggregate.evidenceAxes[axis].add(metrics.evidenceAxes?.[axis]?.status ?? "unknown");
+    }
 
     return aggregate;
   }, {
@@ -95,13 +111,18 @@ function sumRecipeMetrics(recipePaths, metricsByPath) {
     navigateActions: 0,
     noveltyTargetCount: 0,
     noveltyTargetedActionCount: 0,
+    knownOperationRefreshCount: 0,
+    reviewedRefreshCount: 0,
     satisfiedNoveltyCount: 0,
     rootClicks: 0,
     seededLinkActions: 0,
     seededRouteActions: 0,
     variableRecipes: 0,
     waitActions: 0,
+    evidenceAxes: { freshness: new Set(), discovery: new Set(), schema: new Set(), usage: new Set() },
   });
+  aggregate.evidenceAxes = Object.fromEntries(Object.entries(aggregate.evidenceAxes).map(([axis, states]) => [axis, [...states].sort()]));
+  return aggregate;
 }
 
 function buildMissingAxes(summary) {
@@ -117,14 +138,6 @@ function buildMissingAxes(summary) {
 
   if (summary.recipeCount > 0 && summary.rootClicks + summary.navigateActions === 0) {
     missing.push("base-nav");
-  }
-
-  if (summary.iframeClicks === 0) {
-    missing.push("iframe");
-  }
-
-  if (summary.seededLinkActions + summary.seededRouteActions === 0) {
-    missing.push("seeded-replay");
   }
 
   if (summary.captureActions + summary.waitActions === 0) {
@@ -143,7 +156,7 @@ function buildMissingAxes(summary) {
   return missing;
 }
 
-function buildRecommendedNext(summary, specTitle, operationCount) {
+export function buildRecommendedNext(summary, specTitle, operationCount) {
   if (summary.derivedResearchSurface) {
     return "collect-through-owning-portals";
   }
@@ -152,12 +165,12 @@ function buildRecommendedNext(summary, specTitle, operationCount) {
     return "add-base-recipe";
   }
 
-  if (summary.noveltyTargetCount === 0 && summary.satisfiedNoveltyCount > 0) {
-    return "blocked-satisfied-await-new-approved-frontier";
+  if (summary.blockedPrerequisiteCount > 0) {
+    return "blocked-prerequisite-await-new-approved-frontier";
   }
 
-  if (summary.noveltyTargetCount === 0 && summary.blockedPrerequisiteCount > 0) {
-    return "blocked-prerequisite-await-new-approved-frontier";
+  if (summary.noveltyTargetCount === 0 && summary.satisfiedNoveltyCount > 0) {
+    return "blocked-satisfied-await-new-approved-frontier";
   }
 
   if (summary.noveltyTargetCount === 0) {
@@ -196,8 +209,16 @@ export function buildEvaluationStatus(summary) {
     return "blocked-prerequisite";
   }
 
+  if (summary.knownOperationRefreshCount > 0) {
+    return summary.reviewedRefreshCount === summary.knownOperationRefreshCount ? "evaluated-with-gaps" : "refresh-contract-present";
+  }
+
+  const axes = summary.evidenceAxes ?? {};
+  if ((axes.freshness ?? []).some((state) => ["gap", "unknown"].includes(state))) {
+    return "freshness-gap";
+  }
   if (summary.satisfiedNoveltyCount > 0) {
-    return "satisfied";
+    return "evaluated-with-gaps";
   }
 
   return "needs-frontier";
@@ -213,9 +234,18 @@ async function main() {
   const recipePaths = Object.values(captureRecipesByTitle)
     .flat()
     .filter((value, index, values) => values.indexOf(value) === index);
+  const currentBindings = new Map();
+  for (const specRecord of specInventory) {
+    for (const recipePath of captureRecipesByTitle[specRecord.title] ?? []) {
+      const bytes = await readFile(path.join(repoRoot, recipePath));
+      const recipe = JSON.parse(stripBom(bytes.toString("utf8")));
+      currentBindings.set(recipePath, { specId: specRecord.specId, sha256: createHash("sha256").update(bytes).digest("hex"), knownOperationRefresh: Boolean(recipe.knownOperationRefresh) });
+    }
+  }
+  const evaluations = validateRecipeEvaluationManifest(JSON.parse(stripBom(await readFile(path.join(repoRoot, "tools/recipe-evaluations.json"), "utf8"))), currentBindings);
   const metricsByPath = new Map();
   for (const recipePath of recipePaths) {
-    metricsByPath.set(recipePath, await readRecipeMetrics(recipePath));
+    metricsByPath.set(recipePath, await readRecipeMetrics(recipePath, evaluations));
   }
 
   const rows = specInventory
@@ -254,6 +284,7 @@ async function main() {
           recipeSummary.captureActions + recipeSummary.waitActions > 0,
           recipeSummary.noveltyTargetCount > 0,
         ].filter(Boolean).length,
+        scoreMeaning: "recipe-capability-inventory-not-api-execution-coverage",
         title: specRecord.title,
       };
 
@@ -261,6 +292,10 @@ async function main() {
     })
     .sort((left, right) => left.title.localeCompare(right.title));
 
+  const unevaluated = rows.filter((row) => ["active-frontier", "needs-frontier", "refresh-contract-present", "freshness-gap"].includes(row.evaluationStatus));
+  if (process.argv.includes("--require-evaluated") && unevaluated.length > 0) {
+    process.exitCode = 1;
+  }
   if (process.argv.includes("--json")) {
     console.log(JSON.stringify(rows, null, 2));
     return;
@@ -271,12 +306,16 @@ async function main() {
     ops: row.operationCount,
     recorder: row.recorderSupported ? "yes" : "no",
     recipes: row.recipeCount,
-    score: `${row.score}/6`,
+    capabilities: `${row.score}/6`,
     root: row.rootClicks,
     iframe: row.iframeClicks,
     seeded: row.seededLinkActions + row.seededRouteActions,
     checkpoints: row.captureActions + row.waitActions,
     novelty: row.noveltyTargetCount,
+    refresh: row.knownOperationRefreshCount,
+    freshness: row.evidenceAxes.freshness.join("/") || "unknown",
+    schema: row.evidenceAxes.schema.join("/") || "unknown",
+    usage: row.evidenceAxes.usage.join("/") || "unknown",
     evaluation: row.evaluationStatus,
     next: row.recommendedNext,
     missing: row.missingAxes.join(", ") || "none",
@@ -287,7 +326,6 @@ async function main() {
     .map((row) => row.title);
   console.log(`Missing checked-in recipes (${noRecipe.length}): ${noRecipe.join(", ") || "none"}`);
 
-  const unevaluated = rows.filter((row) => ["active-frontier", "needs-frontier"].includes(row.evaluationStatus));
   console.log(`Specifications awaiting evaluation (${unevaluated.length}): ${unevaluated.map((row) => row.title).join(", ") || "none"}`);
   if (process.argv.includes("--require-evaluated") && unevaluated.length > 0) {
     process.exitCode = 1;

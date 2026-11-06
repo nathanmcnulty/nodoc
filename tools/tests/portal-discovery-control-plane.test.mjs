@@ -28,10 +28,10 @@ test("materialized portfolio and plan are stable and serialize shared capture le
   assert.equal(plan.mode, "report-only");
   assert.equal(plan.completion.terminal, "plan-ready");
   assert.equal(plan.totals.serializedCaptureCount <= plan.totals.captureCount, true);
-  assert.deepEqual(plan.modelPolicy.capture, { model: "gpt-5.6-luna", reasoning: "low" });
-  assert.deepEqual(plan.modelPolicy.orchestrator, { model: "gpt-5.6-sol", reasoning: "high" });
+  assert.deepEqual(plan.modelPolicy.capture, { model: "gpt-6-luna", reasoning: "low" });
+  assert.deepEqual(plan.modelPolicy.orchestrator, { model: "gpt-6.1-sol", reasoning: "medium" });
   assert.equal(plan.assignments.find((entry) => entry.type === "review")?.reasoning, "xhigh");
-  assert.equal(plan.assignments.find((entry) => entry.type === "review")?.qualityGate.model, "gpt-5.6-sol");
+  assert.equal(plan.assignments.find((entry) => entry.type === "review")?.qualityGate.model, "gpt-6.1-sol");
   const maxReviewPlan = compileOrchestrationPlan(manifest, { budgets: { maxCaptures: 1 }, options: { offlineReviewReasoning: "max" } });
   assert.equal(maxReviewPlan.assignments.find((entry) => entry.type === "review")?.reasoning, "max");
   assert.throws(() => compileOrchestrationPlan(manifest, { options: { offlineReviewReasoning: "high" } }), /xhigh or max/);
@@ -151,9 +151,9 @@ test("controller honors only canonical portal-owned recipe pins", async () => {
 test("controller records the completed Exchange frontier as satisfied", async () => {
   const manifest = await buildPortfolioManifest();
   const exchange = manifest.portals.find((portal) => portal.specId === "exchange-beta");
-  assert.equal(exchange?.recipe, "tools/capture-recipes/exchange-bootstrap-shape-novelty.json");
+  assert.equal(exchange?.recipe, "tools/capture-recipes/exchange-shell-response-example-frontier.json");
   assert.equal(exchange?.novelty.status, "satisfied");
-  assert.equal(exchange?.novelty.evidenceDisposition, "frontier-exhausted");
+  assert.match(exchange?.novelty.nextRequirement ?? "", /Identify a different exact Exchange state/);
   const plan = compileOrchestrationPlan({ ...manifest, portals: [exchange] }, { budgets: { maxCaptures: 1 } });
   assert.equal(plan.assignments.some((entry) => entry.type === "capture"), false);
   assert.ok(plan.assignments.find((entry) => entry.type === "review")?.blockers.includes("novelty-satisfied"));
@@ -228,7 +228,7 @@ test("worker result preserves exact accounting and rejects cheap capability viol
   const manifest = await buildPortfolioManifest();
   const plan = compileOrchestrationPlan({ ...manifest, portals: [{ ...manifest.portals[0], novelty: { approvalDigest: "f".repeat(64), reopenCondition: "Exact new read-only state.", status: "active" }, riskTier: "low", outstandingGapClasses: [] }] });
   const assignment = plan.assignments.find((entry) => entry.type === "review" && entry.route === "cheap");
-  const workerResult = { schemaVersion: 1, assignmentId: assignment.assignmentId, assignmentDigest: assignment.assignmentDigest, assignmentType: "review", status: "completed", model: "gpt-5.6-luna", reasoning: "xhigh", decision: "no-action", reasonCodes: ["routine-read-only"], blockers: [], metrics: { complete: true }, recommendedNextAction: "none", lessons: ["reviewed immutable evidence"], lifecycleAccounting: { terminalOwnerShutdown: true, artifactLedgerAccounting: true }, processImprovementDisposition: "none", candidateAccounting: { accepted: [], rejected: [], escalated: [], blocked: [] }, evidenceAccounting: { accepted: [], rejected: [], escalated: [], blocked: [] } };
+  const workerResult = { schemaVersion: 1, assignmentId: assignment.assignmentId, assignmentDigest: assignment.assignmentDigest, assignmentType: "review", status: "completed", model: "gpt-6-luna", reasoning: "xhigh", decision: "no-action", reasonCodes: ["routine-read-only"], blockers: [], metrics: { complete: true }, recommendedNextAction: "none", lessons: ["reviewed immutable evidence"], lifecycleAccounting: { terminalOwnerShutdown: true, artifactLedgerAccounting: true }, processImprovementDisposition: "none", candidateAccounting: { accepted: [], rejected: [], escalated: [], blocked: [] }, evidenceAccounting: { accepted: [], rejected: [], escalated: [], blocked: [] } };
   const result = {
     ...workerResult,
     qualityGate: {
@@ -236,18 +236,23 @@ test("worker result preserves exact accounting and rejects cheap capability viol
       assignmentId: assignment.assignmentId,
       assignmentDigest: assignment.assignmentDigest,
       decision: "accept",
-      model: "gpt-5.6-sol",
-      reasoning: "high",
+      model: "gpt-6.1-sol",
+      reasoning: "medium",
       reviewedAt: "2026-08-27T00:00:00.000Z",
       workerResultDigest: workerResultSubjectDigest(workerResult),
     },
   };
   assert.equal(validateWorkerResult(result, plan).sanitized, true);
+  assert.throws(() => validateWorkerResult({ ...result, processImprovementDisposition: undefined }, plan), /requires processImprovementDisposition/);
+  for (const invalid of [null, '']) assert.throws(() => validateWorkerResult({ ...result, processImprovementDisposition: invalid }, plan), /explicit processImprovementDisposition/);
+  const ordinaryLesson = { ...workerResult, lessons: ['Ordinary retrospective lesson; no critical defect.'], processImprovementDisposition: 'not-required' };
+  const explicitlyNotRequired = { ...ordinaryLesson, qualityGate: { ...result.qualityGate, workerResultDigest: workerResultSubjectDigest(ordinaryLesson) } };
+  assert.equal(validateWorkerResult(explicitlyNotRequired, plan).processImprovementDisposition, 'not-required');
   assert.throws(() => validateWorkerResult({ ...result, model: "gpt-5.6-terra" }, plan), /exact runtime model/);
   assert.throws(() => validateWorkerResult({ ...result, reasoning: "high" }, plan), /exact reasoning/);
   assert.throws(() => validateWorkerResult({ ...result, reasonCodes: ["state-changing"] }, plan), /capability violation/);
   assert.throws(() => validateWorkerResult({ ...result, qualityGate: undefined }, plan), /requires a Sol orchestrator quality gate/);
-  assert.throws(() => validateWorkerResult({ ...result, qualityGate: { ...result.qualityGate, model: "gpt-5.6-luna" } }, plan), /exact runtime model gpt-5.6-sol/);
+  assert.throws(() => validateWorkerResult({ ...result, qualityGate: { ...result.qualityGate, model: "gpt-6-luna" } }, plan), /exact runtime model gpt-6.1-sol/);
   assert.throws(() => validateWorkerResult({ ...result, qualityGate: { ...result.qualityGate, decision: "reject" } }, plan), /did not accept/);
   assert.throws(() => validateWorkerResult({ ...result, qualityGate: { ...result.qualityGate, workerResultDigest: "0".repeat(64) } }, plan), /digest mismatch/);
   assert.deepEqual(projectPortfolioStatus(manifest).portals.length, manifest.portals.length);

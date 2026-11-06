@@ -1879,6 +1879,21 @@ paths:
         browsedPages:
           - "https://intune.microsoft.com/#view/Microsoft_Intune_Enrollment/ReportingMenu/~/windowsQualityUpdatesReactView"
       operationId: IntuneAutopatch.Platform.GetFlighting
+      x-nodoc-operation-context:
+        surface: "Intune admin center > Windows Autopatch"
+        workflows:
+          - "Observe the Autopatch feature-flag response during a passive portal reload."
+        availability:
+          level: user-context
+          notes:
+            - "Observed on one authenticated passive portal reload; this is session-context evidence, not activation or feature availability proof."
+        provenance:
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - "Evidence request-da7cf9575439679c9392; HTTP 200; GET services.autopatch.microsoft.com/api/Flighting; action index 2; observed 2026-10-29T20:05:46.907Z; complete body (privately hash-verified)."
+              - "No conventional logical error-envelope key was found. Boolean status/configuration fields, including false values, are state and are not classified as errors."
+              - "Boolean fields represent configuration state; a false value is not itself an error."
       responses:
         '200':
           description: Feature flags returned successfully.
@@ -1899,6 +1914,25 @@ paths:
         Returns Windows Autopatch tenant enrollment and plan state. Confirmed live on messages
         and help/support blades and further confirmed with a token-backed GET probe.
       operationId: IntuneAutopatch.Tenant.Resolve
+      x-nodoc-live-capture:
+        source: authenticated Intune admin center passive reload
+        browsedPages:
+          - "Intune admin center > Windows Autopatch"
+      x-nodoc-operation-context:
+        surface: "Intune admin center > Windows Autopatch"
+        workflows:
+          - "Observe tenant enrollment summary data requested during the passive portal reload."
+        availability:
+          level: user-context
+          notes:
+            - "Observed on one authenticated passive portal reload; this is session-context evidence, not activation or feature availability proof."
+        provenance:
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - "Evidence request-409b1b0fe7a3ff68144c; HTTP 200; GET services.autopatch.microsoft.com/api/v1.0/tenant/resolve; action index 2; observed 2026-10-29T20:05:46.904Z; complete body (privately hash-verified)."
+              - "No conventional logical error-envelope key was found. Boolean status/configuration fields, including false values, are state and are not classified as errors."
+              - "Boolean fields represent status/configuration state; a false value is not itself an error."
       responses:
         '200':
           description: Tenant state returned successfully.
@@ -1935,6 +1969,25 @@ paths:
         Starter plan. Confirmed live on many tenant-administration blades and validated again with
         a GET probe.
       operationId: IntuneAutopatch.Tenant.GetFeatureEnablementStatus
+      x-nodoc-live-capture:
+        source: authenticated Intune admin center passive reload
+        browsedPages:
+          - "Intune admin center > Windows Autopatch > Tenant management"
+      x-nodoc-operation-context:
+        surface: "Intune admin center > Windows Autopatch > Tenant management"
+        workflows:
+          - "Observe feature-enablement status data requested during the passive portal reload."
+        availability:
+          level: user-context
+          notes:
+            - "Observed on one authenticated passive portal reload; this is session-context evidence, not activation or feature availability proof."
+        provenance:
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - "Evidence request-47d8251e3bd59b6129a1; HTTP 200; GET services.autopatch.microsoft.com/tenant-management/v1/Enrollment/Starter/featureEnablementStatus; action index 2; observed 2026-10-29T20:05:47.530Z; complete body (privately hash-verified)."
+              - "No conventional logical error-envelope key was found. Boolean status/configuration fields, including false values, are state and are not classified as errors."
+              - "Boolean fields represent status/configuration state; a false value is not itself an error."
       responses:
         '200':
           description: Starter feature enablement status returned successfully.
@@ -2253,7 +2306,9 @@ paths:
       operationId: IntuneAutopatch.Reporting.GetManagementStatusSummaryOData
       responses:
         '200':
-          description: Autopatch management summary returned successfully.
+          description: |
+            Autopatch management summary returned successfully. The additional compliance count
+            field names were observed in a successful read-only response captured on 2026-08-31.
           content:
             application/json:
               schema:
@@ -2289,6 +2344,36 @@ paths:
                           type: integer
                         totalUpToDateDeviceCount:
                           type: integer
+                        quComplianceUnknownCount:
+                          type: integer
+                          nullable: true
+                        quComplianceUpToDateCount:
+                          type: integer
+                          nullable: true
+                        quComplianceOutOfDateCount:
+                          type: integer
+                          nullable: true
+                        quComplianceCriticallyOutOfDateCount:
+                          type: integer
+                          nullable: true
+                        quComplianceWindowsInsiderCount:
+                          type: integer
+                          nullable: true
+                        fuComplianceUnknownCount:
+                          type: integer
+                          nullable: true
+                        fuComplianceUpToDateCount:
+                          type: integer
+                          nullable: true
+                        fuComplianceOutOfDateCount:
+                          type: integer
+                          nullable: true
+                        fuComplianceCriticallyOutOfDateCount:
+                          type: integer
+                          nullable: true
+                        fuComplianceWindowsInsiderCount:
+                          type: integer
+                          nullable: true
                       additionalProperties: true
         '401':
           $ref: '#/components/responses/Unauthorized'

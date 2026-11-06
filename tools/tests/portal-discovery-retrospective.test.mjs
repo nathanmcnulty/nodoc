@@ -43,10 +43,10 @@ test("compiles stable retrospective with exact source and cardinality metrics", 
 test("distinguishes actual telemetry from estimates and computes explicit pricing", () => {
   const input = structuredClone(base);
   input.modelUsage.records = [
-    { telemetryId: "actual-1", kind: "actual", assignmentId: "review-a", assignmentDigest: "digest-a", assignmentType: "review", specId: "spec-a", modelId: "gpt-5.6-luna", provider: "provider", source: "runtime-telemetry", inputTokens: 100, outputTokens: 20, reasoningTokens: 5 },
-    { telemetryId: "estimate-1", kind: "estimate", assignmentId: "review-a", assignmentDigest: "digest-a", assignmentType: "review", specId: "spec-a", modelId: "gpt-5.6-luna", tokenizer: "synthetic", tokenizerVersion: "1", serializedPromptBytes: 1000, serializedContextBytes: 2000, estimatedInputTokens: 50, estimatedOutputTokens: 10, confidence: "low" },
+    { telemetryId: "actual-1", kind: "actual", assignmentId: "review-a", assignmentDigest: "digest-a", assignmentType: "review", specId: "spec-a", modelId: "gpt-6-luna", provider: "provider", source: "runtime-telemetry", inputTokens: 100, outputTokens: 20, reasoningTokens: 5 },
+    { telemetryId: "estimate-1", kind: "estimate", assignmentId: "review-a", assignmentDigest: "digest-a", assignmentType: "review", specId: "spec-a", modelId: "gpt-6-luna", tokenizer: "synthetic", tokenizerVersion: "1", serializedPromptBytes: 1000, serializedContextBytes: 2000, estimatedInputTokens: 50, estimatedOutputTokens: 10, confidence: "low" },
   ];
-  input.pricing = { schemaVersion: 1, version: "fixture-1", currency: "USD", rates: [{ modelId: "gpt-5.6-luna", inputPerMillion: 1, outputPerMillion: 2 }] };
+  input.pricing = { schemaVersion: 1, version: "fixture-1", currency: "USD", rates: [{ modelId: "gpt-6-luna", inputPerMillion: 1, outputPerMillion: 2 }] };
   const result = compileRetrospective(input);
   assert.deepEqual(result.metrics.actualTokens, { input: 100, output: 20, total: 120 });
   assert.deepEqual(result.metrics.estimatedTokens, { input: 50, output: 10, total: 60 });

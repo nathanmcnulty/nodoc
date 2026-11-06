@@ -1,3 +1,4 @@
+import { normalizeRecipeAction, validateInspectionActions } from "./portal-discovery-actions.mjs";
 import { createHash } from "node:crypto";
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
@@ -10,10 +11,12 @@ import {
 import {
   aggregateInteractionHealth,
   buildInteractionHealthStatus,
+  resolveResponseBodyLimits,
   sanitizeInteractionHealth,
 } from "./discovery-capture-policy.mjs";
 import { evaluateDiscoverySaturation } from "./discovery-saturation.mjs";
 import { classifyGetProbeUrl } from "./discovery-safety.mjs";
+import { portalDiscoveryModelPolicy } from "./portal-discovery-model-policy.mjs";
 import {
   captureRecipesByTitle,
   crawlMetadataByTitle,
@@ -40,6 +43,7 @@ import {
 import {
   alignBrowserCdpTarget,
   runBrowserCdpPreflight,
+  assertSelectedNativeTenant,
 } from "./browser-cdp-preflight.mjs";
 import {
   resolvePageTargetBootstrapCriteria,
@@ -58,6 +62,12 @@ import {
   deriveNoveltyBaseline,
   evaluateNoveltyEvidence,
 } from "./portal-discovery-novelty.mjs";
+import {
+  buildKnownOperationRefreshPlan,
+  evaluateKnownOperationRefreshEvidence,
+  validateRepresentativeStateMatrix,
+} from "./portal-discovery-evidence-contract.mjs";
+import { assessResponseBodySidecarCompleteness, hydrateResponseBodySidecars } from "./response-body-sidecars.mjs";
 import {
   operationStepAtActionIndex,
   validateOperationAuthorization,
@@ -92,6 +102,23 @@ function sha256(value) {
   return createHash("sha256").update(value).digest("hex");
 }
 
+function compileRecipeUrlPattern(recipe) {
+  const patterns = [recipe?.matchUrlPattern, recipe?.pageTarget?.matchUrlPattern]
+    .filter((value) => value !== undefined);
+  if (patterns.length === 0) return undefined;
+  if (patterns.some((value) => typeof value !== "string" || !value.trim())) {
+    throw new Error("recipe URL match pattern must be a non-empty regular-expression string.");
+  }
+  if (patterns.some((value) => value !== patterns[0])) {
+    throw new Error("conflicting recipe URL match patterns at root and pageTarget.");
+  }
+  try {
+    return new RegExp(patterns[0], "iu");
+  } catch {
+    throw new Error("recipe URL match pattern is not a valid regular expression.");
+  }
+}
+
 export function buildPreflightCriteria(recipe) {
   const pageTarget = resolvePageTargetCriteria(recipe);
   return {
@@ -100,7 +127,7 @@ export function buildPreflightCriteria(recipe) {
     ...(Array.isArray(recipe?.pageTarget?.allowedEntryQueryParameters)
       ? { allowedEntryQueryParameters: [...recipe.pageTarget.allowedEntryQueryParameters] }
       : {}),
-    urlPattern: recipe.matchUrlPattern,
+    urlPattern: compileRecipeUrlPattern(recipe),
     titlePattern: recipe.matchTitlePattern,
     expectedTitlePattern: recipe.expectedTitlePattern,
     rejectBodyPattern: recipe.rejectBodyPattern,
@@ -112,22 +139,32 @@ export function buildBootstrapPreflightCriteria(recipe) {
   if (!bootstrap) return null;
   return {
     ...bootstrap,
-    urlPattern: recipe.matchUrlPattern,
+    urlPattern: compileRecipeUrlPattern(recipe),
     titlePattern: recipe.matchTitlePattern,
     expectedTitlePattern: recipe.expectedTitlePattern,
     rejectBodyPattern: recipe.rejectBodyPattern,
   };
 }
 
+export function validateBoundPreflight(preflight, {targetId = null, expectedTenantId = null} = {}) {
+  if (targetId && preflight?.target?.id !== targetId) throw new Error('Selected target identity changed.');
+  if (expectedTenantId !== null) {
+    assertSelectedNativeTenant(preflight?.evaluation?.url, expectedTenantId);
+  }
+}
+
 export async function preflightRecipeTarget({
   recipe,
   endpoint,
   expectedProduct,
+  targetId = null,
+  expectedTenantId = null,
   stabilityMs,
   pollMs,
   timeoutMs,
 } = {}) {
   const metadata = validateRecipeTargetMetadata(recipe);
+  const assertPreflight = preflight => validateBoundPreflight(preflight,{targetId,expectedTenantId});
   const featureCriteria = buildPreflightCriteria(recipe);
   const bootstrapCriteria = buildBootstrapPreflightCriteria(recipe);
   if (!bootstrapCriteria) {
@@ -135,10 +172,12 @@ export async function preflightRecipeTarget({
       endpoint,
       expectedProduct,
       ...featureCriteria,
+      targetId,
       stabilityMs,
       pollMs,
       timeoutMs,
     });
+    assertPreflight(preflight);
     return {
       ...preflight,
       alignment: {
@@ -154,6 +193,8 @@ export async function preflightRecipeTarget({
     featureCriteria,
     bootstrapCriteria,
     entryUrl: metadata.entryUrl,
+    targetId,
+    assertPreflight,
     stabilityMs,
     pollMs,
     timeoutMs,
@@ -162,6 +203,7 @@ export async function preflightRecipeTarget({
 
 export function validateSelectedRecipeTarget(recipe) {
   try {
+    compileRecipeUrlPattern(recipe);
     return validateRecipeTargetMetadata(recipe);
   } catch (error) {
     error.code = "recipe-target-invalid";
@@ -185,6 +227,7 @@ function parseArgs(argv) {
     saturation: false,
     applySaturationStop: false,
     requireNovelty: false,
+    requireKnownRefresh: false,
     noLedger: false,
     json: false,
     phase: "all",
@@ -238,6 +281,8 @@ function parseArgs(argv) {
       args.applySaturationStop = true;
     } else if (argument === "--require-novelty") {
       args.requireNovelty = true;
+    } else if (argument === "--require-known-refresh") {
+      args.requireKnownRefresh = true;
     } else if (argument === "--no-ledger") {
       args.noLedger = true;
     } else if (argument === "--json") {
@@ -373,6 +418,9 @@ function parseArgs(argv) {
     throw new Error(`Invalid --capture-supervision-timeout-ms "${args.captureSupervisionTimeoutMs}".`);
   }
   if (!args.ledgerMode) {
+    if (args.requireNovelty && args.requireKnownRefresh) {
+      throw new Error("--require-novelty and --require-known-refresh are mutually exclusive.");
+    }
     if (!args.portal) {
       throw new Error("Missing required --portal <title-or-spec-id>.");
     }
@@ -445,7 +493,7 @@ function resolvePortal(specInventory, portalInput) {
   return matches[0];
 }
 
-async function selectRecipe(specRecord, explicitRecipe, { requireNovelty = false } = {}) {
+async function selectRecipe(specRecord, explicitRecipe, { requireNovelty = false, requireKnownRefresh = false } = {}) {
   const allowedRecipes = (captureRecipesByTitle[specRecord.title] ?? [])
     .map((recipePath) => path.resolve(repoRoot, recipePath));
   if (explicitRecipe) {
@@ -457,33 +505,39 @@ async function selectRecipe(specRecord, explicitRecipe, { requireNovelty = false
     }
     return resolvedRecipe;
   }
-  const matchingRecipes = [];
+  const matchingDiscoveryRecipes = [];
   const noveltyRecipes = [];
+  const knownRefreshRecipes = [];
+  const defaultRecipes = new Set(allowedRecipes);
   for (const recipePath of allowedRecipes) {
     try {
       const recipe = JSON.parse(await readFile(recipePath, "utf8"));
+      if (recipe.knownOperationRefresh) defaultRecipes.delete(recipePath);
       if (recipe.portal === specRecord.title) {
-        matchingRecipes.push(recipePath);
         if (recipe.noveltyFrontier || recipe.noveltyStatus) noveltyRecipes.push(recipePath);
+        if (recipe.knownOperationRefresh) knownRefreshRecipes.push(recipePath);
+        else matchingDiscoveryRecipes.push(recipePath);
       }
     } catch {
       // Recipe parsing is validated separately before capture.
     }
   }
   if (requireNovelty && noveltyRecipes.length > 0) return noveltyRecipes[0];
-  const matchingPreferred = matchingRecipes.find((recipePath) =>
+  if (requireKnownRefresh && knownRefreshRecipes.length > 0) return knownRefreshRecipes[0];
+  const matchingPreferred = matchingDiscoveryRecipes.find((recipePath) =>
     recipePath.includes("-deep") && !recipePath.includes("seeded-replay"));
   if (matchingPreferred) {
     return matchingPreferred;
   }
-  if (matchingRecipes.length > 0) {
-    return matchingRecipes[0];
+  if (matchingDiscoveryRecipes.length > 0) {
+    return matchingDiscoveryRecipes[0];
   }
-  const preferred = allowedRecipes.find((recipePath) =>
+  const defaultRecipeList = [...defaultRecipes];
+  const preferred = defaultRecipeList.find((recipePath) =>
     recipePath.includes("-deep") && !recipePath.includes("seeded-replay"));
   return preferred
-    ?? allowedRecipes.find((recipePath) => !recipePath.includes("seeded-replay"))
-    ?? allowedRecipes[0]
+    ?? defaultRecipeList.find((recipePath) => !recipePath.includes("seeded-replay"))
+    ?? defaultRecipeList[0]
     ?? null;
 }
 
@@ -515,14 +569,32 @@ export function recipeVariables(recipe, cliVariables) {
   return variables;
 }
 
-export function prepareRecipeForRun(sourceRecipe, cliVariables) {
-  return expandRecipeVariables(
-    sourceRecipe,
-    recipeVariables(sourceRecipe, cliVariables),
-  );
+export function boundTenantFromCli(sourceRecipe, cliVariables) {
+  const bindings = (cliVariables ?? []).filter(specification => {
+    const separator = typeof specification === 'string' ? specification.indexOf('=') : -1;
+    return separator > 0 && specification.slice(0, separator).trim() === 'TenantId';
+  });
+  if (bindings.length > 1) throw new Error('Duplicate TenantId bindings are not allowed.');
+  const variables = recipeVariables(sourceRecipe, cliVariables);
+  if (!Object.hasOwn(variables, 'TenantId')) return null;
+  const value = variables.TenantId;
+  if (typeof value !== 'string' || !value.trim()) throw new Error('TenantId binding is empty.');
+  return value;
 }
 
-async function inspectRecipeSafety(recipePath, args = {}) {
+export function prepareRecipeForRun(sourceRecipe, cliVariables) {
+  const variables = recipeVariables(sourceRecipe, cliVariables);
+  const expanded = expandRecipeVariables(sourceRecipe, variables);
+  resolveResponseBodyLimits(expanded.responseBodyLimits);
+  const actions = (expanded.actions ?? []).map(normalizeRecipeAction);
+  validateInspectionActions(actions, expanded.inspectionPolicy);
+  return {
+    ...expanded,
+    __resolvedVariableBindingsDigest: sha256(stableJson(variables)),
+  };
+}
+
+export async function inspectRecipeSafety(recipePath, args = {}) {
   const sourceRecipe = JSON.parse(await readFile(recipePath, "utf8"));
   const recipe = prepareRecipeForRun(sourceRecipe, args.variables);
   const activeOperationPlan = validateOperationAuthorization({
@@ -662,6 +734,7 @@ export async function buildCaptureWorkerPacket({
   args,
   brief,
   noveltyPlan,
+  knownOperationRefreshPlan = null,
   recipePath,
 }) {
   const policyBindings = await Promise.all(capturePolicyFiles.map(async (relativePath) => {
@@ -679,14 +752,16 @@ export async function buildCaptureWorkerPacket({
     "--profile", "bounded",
     "--phase", "all",
     ...(args.requireNovelty ? ["--require-novelty"] : []),
-    "--model", "gpt-5.6-luna",
-    "--reasoning", "low",
+    ...(args.requireKnownRefresh ? ["--require-known-refresh"] : []),
+    "--model", portalDiscoveryModelPolicy.capture.model,
+    "--reasoning", portalDiscoveryModelPolicy.capture.reasoning,
     "--operation-ceiling", args.operationCeiling,
     ...(args.assignmentId ? ["--assignment-id", args.assignmentId] : []),
     ...(args.assignmentDigest ? ["--assignment-digest", args.assignmentDigest] : []),
     ...(args.endpoint || brief.portalUrl ? ["--endpoint", args.endpoint || brief.portalUrl] : []),
     "--cdp-endpoint", args.cdpEndpoint,
     ...(args.workerId ? ["--worker-id", args.workerId] : []),
+    ...(args.targetId ? ["--target-id", args.targetId] : []),
     ...(args.operationApprovalDigest
       ? ["--operation-approval-digest", args.operationApprovalDigest]
       : []),
@@ -707,6 +782,8 @@ export async function buildCaptureWorkerPacket({
       assignmentDigest: args.assignmentDigest,
       assignmentId: args.assignmentId,
       noveltyPlanSha256: noveltyPlan ? sha256(stableJson(noveltyPlan)) : null,
+      knownOperationRefreshPlanSha256: knownOperationRefreshPlan ? sha256(stableJson(knownOperationRefreshPlan)) : null,
+      planKind: noveltyPlan ? "discovery-novelty" : knownOperationRefreshPlan ? "known-operation-refresh" : "bounded-recipe",
       policyFiles: policyBindings,
       recipe: brief.recipe,
       recipeSha256: sha256(recipeContents),
@@ -728,14 +805,14 @@ export async function buildCaptureWorkerPacket({
       liveLifecycleConcurrency: 1,
       requiredRuntimeInputs: [
         "fresh-artifact-directory",
-        ...(args.requireNovelty ? ["stable-derivative-cache-directory"] : []),
+        ...(args.requireNovelty || args.requireKnownRefresh ? ["stable-derivative-cache-directory"] : []),
       ],
-      stableDerivativeCacheRequired: args.requireNovelty,
+      stableDerivativeCacheRequired: args.requireNovelty || args.requireKnownRefresh,
       verificationArgs,
     },
     role: {
-      model: "gpt-5.6-luna",
-      reasoning: "low",
+      model: portalDiscoveryModelPolicy.capture.model,
+      reasoning: portalDiscoveryModelPolicy.capture.reasoning,
     },
     schemaVersion: "1.0",
     scope: {
@@ -774,6 +851,33 @@ export async function buildCaptureWorkerPacket({
     },
     packetSha256: sha256(stableJson(packetCore)),
   };
+}
+
+export async function verifyKnownOperationRefreshApproval(plan, { root = repoRoot, now = Date.now() } = {}) {
+  if (!plan) return null;
+  const approvalPath = path.resolve(root, plan.approvalArtifact);
+  const relative = path.relative(root, approvalPath);
+  if (relative.startsWith("..") || path.isAbsolute(relative)) throw new Error("known-operation approval escapes the repository.");
+  const source = await readFile(approvalPath, "utf8");
+  if (sha256(source) !== plan.approvalDigest) throw new Error("known-operation approval digest mismatch before browser allocation.");
+  const approval = JSON.parse(source);
+  if (!/^[a-f0-9]{64}$/u.test(String(plan.executionDigest ?? ''))
+      || !/^[a-f0-9]{64}$/u.test(String(approval.executionDigest ?? ''))
+      || approval.executionDigest !== plan.executionDigest) {
+    throw new Error('known-operation approval full execution binding is missing or invalid before browser allocation.');
+  }
+  if (plan.responseBodyLimitsExplicit !== true) {
+    const error = new Error('Declare complete explicit responseBodyLimits and rebind the recipe execution policy before live refresh.');
+    error.code = 'response-body-policy-unbound';
+    throw error;
+  }
+  if (approval.decision !== "accept-bounded-known-operation-refresh" || approval.workerModel !== portalDiscoveryModelPolicy.offlineReview.model || !portalDiscoveryModelPolicy.offlineReview.allowedReasoning.includes(approval.workerReasoning) || approval.refreshDigest !== plan.refreshDigest || approval.expiresAt !== plan.approvalExpiresAt || Date.parse(approval.expiresAt) <= Number(now)) throw new Error("known-operation approval binding or expiry is invalid before browser allocation.");
+  const evidencePath = path.resolve(root, String(approval.source?.artifactPath ?? ""));
+  const evidenceRelative = path.relative(root, evidencePath);
+  if (!approval.source?.artifactPath || evidenceRelative.startsWith("..") || path.isAbsolute(evidenceRelative)) throw new Error("known-operation approval source escapes the repository.");
+  const evidence = await readFile(evidencePath);
+  if (sha256(evidence) !== approval.source.artifactSha256) throw new Error("known-operation approval source hash mismatch before browser allocation.");
+  return { artifact: plan.approvalArtifact, digest: plan.approvalDigest, expiresAt: approval.expiresAt, refreshDigest: plan.refreshDigest, executionDigest: plan.executionDigest, sourceSha256: approval.source.artifactSha256 };
 }
 
 export function buildActionBudget(recipe) {
@@ -1104,7 +1208,7 @@ async function runLedgerMode(args) {
   if (!spec) {
     throw new Error("Could not resolve ledger assignment from --portal or --spec-id.");
   }
-  const selectedRecipe = args.recipe || await selectRecipe(spec, null);
+  const selectedRecipe = args.recipe || await selectRecipe(spec, null, { requireNovelty: args.requireNovelty, requireKnownRefresh: args.requireKnownRefresh });
   if (!selectedRecipe) {
     throw new Error(`No checked-in recipe exists for ${spec.title}.`);
   }
@@ -1142,7 +1246,7 @@ async function main() {
   }
   const specInventory = await buildSpecInventory();
   const specRecord = resolvePortal(specInventory, args.portal);
-  const recipePath = await selectRecipe(specRecord, args.recipe, { requireNovelty: args.requireNovelty });
+  const recipePath = await selectRecipe(specRecord, args.recipe, { requireNovelty: args.requireNovelty, requireKnownRefresh: args.requireKnownRefresh });
   const brief = buildBrief(specRecord, recipePath);
   if (!recipePath) {
     const runState = {
@@ -1164,8 +1268,11 @@ async function main() {
   }
 
   let selectedRecipe;
+  let boundTenantId = null;
   let actionBudget;
   let noveltyPlan;
+  let knownOperationRefreshPlan;
+  let knownOperationRefreshApproval;
   let recipeSafety;
   try {
     const sourceRecipe = JSON.parse(await readFile(recipePath, "utf8"));
@@ -1182,6 +1289,7 @@ async function main() {
       buildNoveltyPlan(sourceRecipe, { required: true });
     }
     selectedRecipe = prepareRecipeForRun(sourceRecipe, args.variables);
+    boundTenantId = boundTenantFromCli(sourceRecipe,args.variables);
     validateSelectedRecipeTarget(selectedRecipe);
     recipeSafety = await inspectRecipeSafety(recipePath, args);
     if (!recipeSafety.safe) {
@@ -1192,6 +1300,8 @@ async function main() {
     }
     const derivedBaseline = deriveNoveltyBaseline(await loadBundledSpecification(path.resolve(repoRoot, specRecord.specPath)));
     noveltyPlan = buildNoveltyPlan(selectedRecipe, { required: args.requireNovelty, derivedBaseline });
+    knownOperationRefreshPlan = buildKnownOperationRefreshPlan(selectedRecipe, { required: args.requireKnownRefresh, baselineOperations: derivedBaseline.operations });
+    knownOperationRefreshApproval = await verifyKnownOperationRefreshApproval(knownOperationRefreshPlan);
     actionBudget = buildActionBudget(selectedRecipe);
   } catch (error) {
     const runState = {
@@ -1201,7 +1311,7 @@ async function main() {
       startedAt: new Date().toISOString(),
       status: "blocked",
       blocker: {
-        code: ["action-budget-exceeded", "capture-prerequisite-missing", "novelty-frontier-invalid", "recipe-target-invalid", "unsafe-recipe-action"].includes(error?.code)
+        code: ["action-budget-exceeded", "capture-prerequisite-missing", "novelty-frontier-invalid", "recipe-target-invalid", "unsafe-recipe-action", "response-body-policy-unbound"].includes(error?.code)
           ? error.code
           : /operation|approval|ceiling/iu.test(error?.message ?? "")
             ? "mutation-authorization-required"
@@ -1222,12 +1332,13 @@ async function main() {
       args,
       brief,
       noveltyPlan,
+      knownOperationRefreshPlan,
       recipePath,
     });
     console.log(JSON.stringify(
       args.workerPacketOnly
         ? workerPacket
-        : { actionBudget, brief, noveltyPlan, status: "planned", workerPacket },
+        : { actionBudget, brief, noveltyPlan, knownOperationRefreshPlan, status: "planned", workerPacket },
       null,
       2,
     ));
@@ -1264,7 +1375,10 @@ async function main() {
         recipe: selectedRecipe,
         endpoint: args.cdpEndpoint,
         expectedProduct: args.expectedProduct,
+        targetId: args.targetId,
+        expectedTenantId: boundTenantId,
       });
+      if (args.targetId && cdp.target.id !== args.targetId) throw new Error('Assigned target identity changed.');
       args.targetId = cdp.target.id;
       args.preflightAlignment = cdp.alignment;
       if (args.requireNovelty && selectedRecipe.frontierControlReadiness) {
@@ -1348,6 +1462,8 @@ async function main() {
     brief,
     phase: args.phase,
     noveltyPlan,
+    knownOperationRefreshPlan,
+    knownOperationRefreshApproval,
     activeOperationAuthorization: {
       ceiling: args.operationCeiling,
       approvalDigest: args.operationApprovalDigest,
@@ -1384,6 +1500,8 @@ async function main() {
   let interactionHealthStatus = null;
   let captureSummary = null;
   let noveltyAssessment = null;
+  let knownOperationRefreshAssessment = null;
+  let representativeStateMatrix = null;
   let graphTelemetry = null;
   let graphResearchQueue = null;
   let graphTelemetryAssessment = null;
@@ -1647,6 +1765,28 @@ async function main() {
       } catch (error) {
         if (error?.code !== "ENOENT" && !(error instanceof SyntaxError)) throw error;
       }
+      await hydrateResponseBodySidecars(analysisApiRecords, args.artifacts, recipe?.responseBodyLimits);
+      const sidecarCompleteness = assessResponseBodySidecarCompleteness(analysisApiRecords);
+      if (!sidecarCompleteness.captureComplete) {
+        captureCompleteness = {
+          ...captureCompleteness,
+          captureComplete: false,
+          captureStatus: "response-body-sidecar-incomplete",
+          responseBodySidecars: sidecarCompleteness,
+        };
+        runState.capture = captureCompleteness;
+      }
+      const representativeStateDefinitions = validateRepresentativeStateMatrix(recipe?.representativeStates, { actions: recipe?.actions ?? [] });
+      if (representativeStateDefinitions.length > 0) {
+        representativeStateMatrix = {
+          schemaVersion: 1,
+          states: representativeStateDefinitions.map((state) => ({
+            ...state,
+            observedInCurrentCapture: analysisApiRecords.some((record) => record.evidenceId === state.evidenceId && Number(record?.attribution?.actionIndex) === state.actionIndex),
+          })),
+        };
+        await writeFile(path.join(args.artifacts, "representative-state-matrix.json"), `${JSON.stringify(representativeStateMatrix, null, 2)}\n`, "utf8");
+      }
       const graphContracts = args.graphContractDisabled ? null : await loadGraphContractCache(args.graphContractDir);
       graphTelemetry = buildGraphTelemetry({ apiRecords: analysisApiRecords, ...(graphContracts ?? {}) });
       validateGraphTelemetry(graphTelemetry);
@@ -1763,6 +1903,26 @@ async function main() {
           };
         }
       }
+      if (knownOperationRefreshPlan) {
+        knownOperationRefreshAssessment = evaluateKnownOperationRefreshEvidence({
+          actionResults,
+          apiRecords: analysisApiRecords,
+          plan: knownOperationRefreshPlan,
+        });
+        await writeFile(
+          path.join(args.artifacts, "known-operation-refresh-assessment.json"),
+          `${JSON.stringify(knownOperationRefreshAssessment, null, 2)}\n`,
+          "utf8",
+        );
+        if (knownOperationRefreshAssessment.status !== "observed") {
+          candidateHandoff.recommendedNextAction = {
+            code: `known-operation-refresh-${knownOperationRefreshAssessment.status}`,
+            summary: knownOperationRefreshAssessment.status === "no-target-signal"
+              ? "The bounded refresh completed without an action-attributed target response; preserve the freshness gap and require new reviewed state provenance before retrying."
+              : "The bounded refresh action accounting is incomplete; preserve the gap and repair the deterministic recipe before retrying.",
+          };
+        }
+      }
       await writeFile(
         candidateHandoffPath,
         `${JSON.stringify(candidateHandoff, null, 2)}\n`,
@@ -1774,6 +1934,8 @@ async function main() {
       runState.candidateCounts = candidateHandoff.counts;
       runState.recommendedNextAction = candidateHandoff.recommendedNextAction;
       runState.novelty = noveltyAssessment;
+      runState.knownOperationRefresh = knownOperationRefreshAssessment;
+      runState.representativeStates = representativeStateMatrix;
       runState.graphTelemetryAssessment = graphTelemetryAssessment;
       runState.saturation = saturation;
     }
@@ -1781,6 +1943,14 @@ async function main() {
     if (mutationBlocker) {
       runState.status = "blocked";
       runState.blocker = mutationBlocker;
+    } else if (captureCompleteness.captureStatus === "response-body-sidecar-incomplete") {
+      runState.status = "blocked";
+      runState.blocker = {
+        code: "response-body-sidecar-incomplete",
+        detail: "One or more scoped response bodies could not be written atomically; the capture cannot support schema promotion or completion.",
+        evidenceIds: captureCompleteness.responseBodySidecars?.evidenceIds ?? [],
+        remediation: "Preserve this artifact directory, repair local sidecar storage, and use a new empty directory for any reviewed retry.",
+      };
     } else if (noveltyAssessment && noveltyAssessment.status !== "productive") {
       runState.status = "blocked";
       runState.blocker = {
@@ -1791,6 +1961,13 @@ async function main() {
             ? "The capture artifacts completed, but no expected frontier route materialized; this run cannot satisfy or retire the frontier."
             : "The capture did not attempt every checked-in frontier target successfully.",
         remediation: runState.recommendedNextAction?.summary ?? "Revise the frontier before another live allocation.",
+      };
+    } else if (knownOperationRefreshAssessment && knownOperationRefreshAssessment.status !== "observed") {
+      runState.status = "blocked";
+      runState.blocker = {
+        code: knownOperationRefreshAssessment.status,
+        detail: "The known-operation refresh did not produce an action-attributed target observation and cannot satisfy freshness, schema, or usage evidence.",
+        remediation: runState.recommendedNextAction?.summary ?? "Provide new immutable state evidence before another allocation.",
       };
     } else if (graphTelemetryAssessment && graphTelemetryAssessment.status !== "productive") {
       runState.status = "blocked";
@@ -1843,6 +2020,12 @@ async function main() {
         : null,
       noveltyAssessment: noveltyPlan && ["all", "analyze"].includes(args.phase)
         ? path.join(args.artifacts, "novelty-assessment.json")
+        : null,
+      knownOperationRefreshAssessment: knownOperationRefreshPlan && ["all", "analyze"].includes(args.phase)
+        ? path.join(args.artifacts, "known-operation-refresh-assessment.json")
+        : null,
+      representativeStateMatrix: representativeStateMatrix
+        ? path.join(args.artifacts, "representative-state-matrix.json")
         : null,
       runState: path.join(args.artifacts, "discovery-run.json"),
     };

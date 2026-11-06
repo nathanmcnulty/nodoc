@@ -114,8 +114,9 @@ paths:
         Controls whether the tenant pays for guest user access to
         entitlement management resources.
 
-        **Note:** Returns 404 if the guest billing feature has not been
-        configured for the tenant.
+        **Note:** Recent native dashboard observations returned HTTP 404 with
+        an empty captured response body. Configuration, licensing and
+        permission causes are not established by that status.
       responses:
         '200':
           description: Guest billing configuration
@@ -124,7 +125,33 @@ paths:
               schema:
                 type: object
         '404':
-          description: Guest billing not configured for this tenant
+          description: Not found; an empty response body was observed. The status cause is unverified.
+      x-nodoc-operation-context:
+        surface: Historical portal caller / declared backend transport relationship
+        provenance:
+          - source: retained-adjacent-portal-transport-reviewed-20261030
+            confidence: high
+            notes:
+              - Historical transport identity is exact GET elm.iga.azure.com/api/v1/billingConfigurations/guestBilling, canonical /api/v1/billingConfigurations/guestBilling under the currently declared backend specification entra-iga.
+              - "Original caller capture assignments: entra-idgov, entra-pim. Caller page attribution and assignment labels do not by themselves establish causal execution of the backend owner's UI."
+              - Retained entra-idgov-01 action 0 at 2026-10-29T19:01:37.322Z; evidence request-fa1fc1ca307601ff499c; HTTP 404.
+              - Retained entra-pim-01 action 2 at 2026-10-29T19:29:33.830Z; evidence request-cd68a88ce34659605801; HTTP 404.
+              - "Observed query parameter names: none recorded. Values and derived page-label strings are withheld; parameter presence is not requiredness testing."
+              - This review used raw transport metadata only. No qualifying complete action-attributed response body was available in the selected retained evidence; bootstrap-only complete responses are excluded as action witnesses. Response/body/schema gaps remain open.
+              - Existing response schemas are unchanged. Any newly listed status is description-only, with no inferred error body, status cause, route removal or availability conclusion.
+              - Original dates/actions remain historical; this is not fresh capture, current tenant validation, business or application health, standalone invocation, role/grant/minimum-permission proof, or an owning-portal workflow test.
+              - GET is the recorded method, not a safety or idempotence determination. No request was authored, invoked, probed or replayed by this offline review; effects and rollback are untested.
+              - Confidence applies only to the verified historical method/host/path/status metadata. Captured values, identifiers, credentials, response fingerprints, body lengths and examples are withheld.
+          - source: native-idgov-guest-billing-empty-404-reviewed-20261031
+            confidence: high
+            notes:
+              - "Exact native Identity Governance dashboard observation of GET elm.iga.azure.com/api/v1/billingConfigurations/guestBilling; declared backend owner remains entra-iga."
+              - "Observed at 2026-10-31T21:43:22.086Z; action 2 API evidence request-5f16230bc1c91469b3de. Navigation/reload action observations returned HTTP 404 with a canonically verified empty response body; bootstrap records are excluded as action witnesses."
+              - "The empty captured response is distinct from unavailable capture and from a documented guarantee of no content. No JSON error or configuration schema, fields or examples can be inferred; the existing HTTP 200 configuration schema remains unverified by these observations."
+              - "The selected authenticated Entra page and same-action attached-frame metadata establish this native caller context. They do not establish standalone invocation, minimum roles or permissions, a specific tenant identity, feature availability, or a licensing/configuration cause for HTTP 404."
+              - "The single driver completed with actual child and collector exit 2 and a blocked run classification, while capture completeness and complete response retention were verified separately. This is an error observation, not healthy application or business behavior."
+              - "Only the reviewed passive dashboard navigation/reload was authored. No direct API call, probe, replay, guest billing PUT, subscription linkage, role change or billing enablement was performed by this objective; passive effects remain unassessed."
+              - "Current observation dates do not refresh the whole specification. Response values, identifiers, credentials, body fingerprints and lengths are withheld."
     put:
       tags: [Billing]
       summary: Update guest billing configuration
@@ -143,13 +170,32 @@ paths:
           description: Guest billing configuration updated
   /api/v1/accessPackageCatalogs:
     get:
+      x-nodoc-live-capture:
+        source: "Observe-only portal refresh 2026-10-29; Catalogs action 3; request-32f8062f4023aa4f4ab6 and request-75a2be8b894e7978d5e3; HTTP 200"
+        browsedPages: ["Identity governance > Catalogs"]
+      x-nodoc-operation-context:
+        surface: Identity governance > Catalogs
+        availability:
+          level: tenant-conditional
+          notes:
+            - Catalog contents and projection-dependent fields vary by the current tenant and query.
+        provenance:
+          - source: authenticated-portal-capture-20261029
+            confidence: high
+            notes:
+              - "Two exact GET /api/v1/accessPackageCatalogs requests returned HTTP 200 at action 3: list ordering/count and projection/expansion variants, each with a nonempty value array of objects."
+              - "List variant request-75a2be8b894e7978d5e3 at 2026-10-29T19:14:11.679Z: complete response privately hash-verified; query names $count, $orderby and $top."
+              - "Projection variant request-32f8062f4023aa4f4ab6 at 2026-10-29T19:14:12.254Z: complete response privately hash-verified; query names $expand, $filter and $select."
+              - "Full-list fields corroborate the added optional property types. uniqueName and serviceManagementReference were null-only, so their non-null types remain unverified. Projection id/additionalInfo types remain compatible."
+              - "Authorization and client-context headers were present in portal requests; header/parameter requiredness, standalone authentication, tenant grants and least privilege were not tested. No catalog, identity, action, scope or privilege values are copied."
+              - "Current observations cover these exact operations and states only; Graph-backed Lifecycle Workflows and other Graph-host traffic remain outside this legacy ELM specification."
       tags: [Entitlement Management]
       summary: List access package catalog summaries
       description: |
-        Retrieves catalog summary records used by the Access Packages portal
-        view. Each record links a catalog identifier to aggregate access-package
-        and resource counts. The portal was observed using both list-ordering
-        and projection/expansion query variants.
+        Retrieves catalog records used by the entitlement-management portal.
+        List-ordering queries can return descriptive and lifecycle fields with
+        an OData count; projection/expansion queries can return identifiers and
+        aggregate access-package/resource counts in additionalInfo.
       parameters:
         - $ref: '#/components/parameters/$count'
         - $ref: '#/components/parameters/$orderby'
@@ -167,6 +213,8 @@ paths:
                 properties:
                   '@odata.context':
                     type: string
+                  '@odata.count':
+                    type: number
                   value:
                     type: array
                     items:
@@ -174,6 +222,40 @@ paths:
                       properties:
                         id:
                           type: string
+                        displayName:
+                          type: string
+                        uniqueName:
+                          nullable: true
+                          description: Non-null value type remains unverified.
+                        description:
+                          type: string
+                        catalogType:
+                          type: string
+                        catalogStatus:
+                          type: string
+                        state:
+                          type: string
+                        isExternallyVisible:
+                          type: boolean
+                        createdBy:
+                          type: string
+                        createdByString:
+                          type: string
+                        createdDateTime:
+                          type: string
+                        modifiedBy:
+                          type: string
+                        lastModifiedByString:
+                          type: string
+                        modifiedDateTime:
+                          type: string
+                        lastModifiedDateTime:
+                          type: string
+                        privilegeLevel:
+                          type: string
+                        serviceManagementReference:
+                          nullable: true
+                          description: Non-null value type remains unverified.
                         additionalInfo:
                           type: object
                           properties:
@@ -185,6 +267,24 @@ paths:
                               type: number
   /api/v1/checkAccess:
     post:
+      x-nodoc-live-capture:
+        source: "Observe-only portal refresh 2026-10-29; Connected organizations action 6; request-c3f6c9e6cd7b6de03934; HTTP 200"
+        browsedPages: ["Identity governance > Connected organizations"]
+      x-nodoc-operation-context:
+        surface: Identity governance > Connected organizations
+        availability:
+          level: request-dependent
+          notes:
+            - Authorization results depend on the current caller and request scope; the result does not establish minimum roles.
+        provenance:
+          - source: authenticated-portal-capture-20261029
+            confidence: high
+            notes:
+              - "Exact POST /api/v1/checkAccess was emitted passively at action 6 on 2026-10-29T19:15:12.432Z; complete response privately hash-verified."
+              - "The response contained @odata.context string and value boolean; the request contained action and resourceScope strings. Caller-specific values are not copied."
+              - "No authored request, replay, mutation, side-effect validation or standalone POST safety test occurred; the existing replay prohibition remains applicable."
+              - "Authorization and client-context headers were present in portal requests; header/parameter requiredness, standalone authentication, tenant grants and least privilege were not tested. No catalog, identity, action, scope or privilege values are copied."
+              - "Current observations cover these exact operations and states only; Graph-backed Lifecycle Workflows and other Graph-host traffic remain outside this legacy ELM specification."
       tags: [Entitlement Management]
       summary: Check authorization for an entitlement-management action
       description: |

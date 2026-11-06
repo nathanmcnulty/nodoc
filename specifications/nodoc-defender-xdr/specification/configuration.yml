@@ -229,6 +229,45 @@ paths:
         Retrieve the tenant context information including tenant ID,
         region, and configured workload status. Used for portal initialization.
       operationId: Configuration.GetTenantContext
+      x-nodoc-live-capture:
+        source: authenticated Microsoft Defender portal representative overview states passive representative states
+        browsedPages:
+          - Microsoft Defender portal representative overview states
+      x-nodoc-operation-context:
+        surface: Microsoft Defender portal representative overview states
+        workflows:
+          - Observe native requests during approved passive representative portal states.
+        availability:
+          level: user-context
+          notes:
+            - One authenticated portal session; standalone execution, parameter requiredness, effective grants and minimum roles are not established.
+        provenance:
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - GET security.microsoft.com/apiproxy/mtp/sccManagement/mgmt/TenantContext; HTTP 200; action 8; observed 2026-10-29T23:07:12.171Z; complete response privately hash-verified.
+              - The selected complete response has no conventional logical error envelope; existing declared types remain compatible.
+              - One passive authenticated user context; standalone execution, requiredness, effective grants and minimum roles remain unverified.
+              - The refresh evaluator remains blocked at checkpoint5; raw target traffic does not clear that accounting gap.
+          - source: authenticated-portal-capture-20261030
+            confidence: high
+            notes:
+              - Exact wire GET security.microsoft.com/apiproxy/mtp/sccManagement/mgmt/TenantContext matched the existing canonical route /mtp/sccManagement/mgmt/TenantContext; concrete query values and response values are withheld.
+              - Action 8 at 2026-10-30T13:18:03.033Z; evidence request-4ffa8df698246b83b733; HTTP 200 complete response privately verified.
+              - The fresh current matched-tenant Homepage entry retains the original security-graph, cases-view and threat-policy actions. All eleven recipe actions and the mandatory orchestration action completed, including the previously missing case-view checkpoint; the earlier incomplete attempt remains historical.
+              - The complete parsed JSON root is an object compatible with the existing generic object response. No conventional root logical error field was observed; the permissive schema does not establish individual feature, license, workload or metric field types.
+              - Returned tenant, environment, feature and workload state values are not reproduced and do not establish product availability, activation, effective grants or minimum roles. No schema, enum, format or requiredness change is asserted here.
+              - One normalized primary API record at action 8 is distinct from five raw target transport observations across bootstrap and recipe actions. They represent one operation, not five fresh operations.
+              - The neutral-origin native selected tenant and exact target were checked before allocation and pinned through assignment, packet command arrays and actual driver preflight. No tenant switch, authored real-time/cache query, API probe or request replay occurred.
+              - The prior fresh-plan preflight abort at Homepage was stopped and its lease released under separate root authorization before this new lifecycle. Its no-assignment/no-capture evidence and all earlier scoped observations remain preserved.
+              - Only this primary operation is refreshed; the prior broader six-operation source scope, separate authentication error and other endpoint schemas are not revalidated by this response.
+              - All required actions were accounted in this new reviewed remedy. This is scoped operation evidence; broader spec freshness, product health, standalone execution, effective permissions, consent, minimum roles and least privilege remain unverified.
+          - source: offline-schema-enrichment-20261030
+            confidence: high
+            notes:
+              - Optional fixed root property types were derived offline from the complete native GET response already retained as evidence request-4ffa8df698246b83b733, action 8. No new capture was performed.
+              - Property types describe observed JSON tokens only; requiredness, formats, enums, nested dictionary keys, feature values, entitlement, effective permissions and minimum roles are not inferred.
+              - Array item schemas remain unknown; object-valued maps remain open without copied keys. Null-only root fields and dynamic feature/workload/map keys are omitted. Existing example values are unchanged.
       tags: [Configuration]
       parameters:
         - name: realTime
@@ -245,6 +284,174 @@ paths:
               schema:
                 type: object
                 description: Defender tenant bootstrap with environment, geography, workload, and feature-flight state.
+                additionalProperties: true
+                properties:
+                  EnvironmentName:
+                    type: string
+                  OrgId:
+                    type: string
+                  GeoRegion:
+                    type: string
+                  DataCenter:
+                    type: string
+                  AccountMode:
+                    type: integer
+                  AccountType:
+                    type: string
+                  IsSuspended:
+                    type: boolean
+                  IsDeleted:
+                    type: boolean
+                  IsMdatpLicenseExpired:
+                    type: boolean
+                  IsMtpEligible:
+                    type: boolean
+                  HasMachineGroups:
+                    type: boolean
+                  IsMdatpActive:
+                    type: boolean
+                  IsOatpActive:
+                    type: boolean
+                  IsItpActive:
+                    type: boolean
+                  IsAadIpActive:
+                    type: boolean
+                  IsDlpActive:
+                    type: boolean
+                  IsIrmActive:
+                    type: boolean
+                  IsMdiActive:
+                    type: boolean
+                  IsMdcActive:
+                    type: boolean
+                  IsSentinelActive:
+                    type: boolean
+                  IsSaiActive:
+                    type: boolean
+                  AuthInfoV2:
+                    type: object
+                    additionalProperties: true
+                  AuthInfo:
+                    type: object
+                    additionalProperties: true
+                  DirRoles:
+                    type: array
+                    items: {}
+                  AllowedActions:
+                    type: integer
+                  Roles:
+                    type: array
+                    items: {}
+                  MdatpMtpPermissions:
+                    type: array
+                    items: {}
+                  OatpMtpPermissions:
+                    type: array
+                    items: {}
+                  ItpMtpPermissions:
+                    type: array
+                    items: {}
+                  AadIpMtpPermissions:
+                    type: array
+                    items: {}
+                  DlpMtpPermissions:
+                    type: array
+                    items: {}
+                  MdiMtpPermissions:
+                    type: array
+                    items: {}
+                  MdcMtpPermissions:
+                    type: array
+                    items: {}
+                  SentinelMtpPermissions:
+                    type: array
+                    items: {}
+                  IrmMtpPermissions:
+                    type: array
+                    items: {}
+                  SaiMtpPermissions:
+                    type: array
+                    items: {}
+                  MtpPermissions:
+                    type: object
+                    additionalProperties: true
+                  IsExposedToAllMachineGroups:
+                    type: boolean
+                  ExposedSentinelWorkspaces:
+                    type: object
+                    additionalProperties: true
+                  IsOnboardingComplete:
+                    type: boolean
+                  IsPermittedOnboarding:
+                    type: boolean
+                  MtpConsent:
+                    type: boolean
+                  OnboardingTileDismissed:
+                    type: boolean
+                  ServiceUrls:
+                    type: object
+                    additionalProperties: true
+                  KustoHotStorageInDays:
+                    type: integer
+                  IsTvmEnabled:
+                    type: boolean
+                  IsBilbaoTenant:
+                    type: boolean
+                  IsAutomatedIrEnabled:
+                    type: boolean
+                  AutomatedIrLiveResponse:
+                    type: boolean
+                  IsEvaluationEnabled:
+                    type: boolean
+                  MdeFlavor:
+                    type: string
+                  TvmLicenses:
+                    type: object
+                    additionalProperties: true
+                  IsTvmPremiumDfsP2Enabled:
+                    type: boolean
+                  IsTvmOnboardingComplete:
+                    type: boolean
+                  IsTvmEligible:
+                    type: boolean
+                  IsSiemEnabled:
+                    type: boolean
+                  MagellanOptOut:
+                    type: boolean
+                  IsDeceptionEnabled:
+                    type: boolean
+                  AdIotIntegrationStatus:
+                    type: string
+                  HasFinishedPostOnboardingForSmb:
+                    type: boolean
+                  UserAuthEnforcementMode:
+                    type: string
+                  AatpIntegrationEnabled:
+                    type: boolean
+                  AatpWorkspaceExists:
+                    type: boolean
+                  IsDexLicense:
+                    type: boolean
+                  RedirectAlertsToAttackStory:
+                    type: boolean
+                  IsEnhancedTelemetryEnabled:
+                    type: boolean
+                  ExcludeSentinelAlertsFromXDRCorrelation:
+                    type: boolean
+                  IotFlavor:
+                    type: string
+                  OtFlavor:
+                    type: string
+                  MdIotM365IntegrationStatus:
+                    type: string
+                  IsSecurityCopilotHasLicense:
+                    type: boolean
+                  IsE5:
+                    type: boolean
+                  SecurityCopilotLicenseStatus:
+                    type: integer
+                  IsIsolationExclusionOptIn:
+                    type: boolean
               example:
                 EnvironmentName: Production
                 OrgId: 00000000-0000-0000-0000-000000000000

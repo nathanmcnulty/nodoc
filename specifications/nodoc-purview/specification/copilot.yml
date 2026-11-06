@@ -2,26 +2,70 @@ paths:
   /medeina/auth:
     get:
       operationId: checkCopilotAuth
+      x-nodoc-live-capture:
+        source: authenticated Microsoft Purview portal passive representative states
+        browsedPages:
+          - Microsoft Purview portal
+      x-nodoc-operation-context:
+        surface: Microsoft Purview portal
+        workflows:
+          - Observe native requests during approved passive representative portal states.
+        availability:
+          level: user-context
+          notes:
+            - One authenticated portal session; standalone execution, parameter requiredness, effective grants and minimum roles are not established.
+        provenance:
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - GET purview.microsoft.com/apiproxy/medeina/auth; HTTP 402; action 8; observed 2026-10-29T22:14:59.749Z; complete response privately hash-verified.
+              - This is an observed HTTP 402 application error, not a successful authorization or feature-availability result. Error text, codes and identifiers are not reproduced.
+              - The broader bounded run retains navigation/accounting gaps; no standalone execution or minimum-role claim is made.
       summary: Check Copilot authentication status
       description: >-
         Check the authentication status for Security Copilot (Medeina).
         Returns whether the current user has a valid authentication session.
       tags: [Copilot]
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
                 type: object
                 description: pending
-        '401':
+        "401":
           $ref: common.yml#/components/responses/Unauthorized
-
-        '403':
+        "402":
+          description: Observed HTTP 402 error in one portal session; successful authorization and entitlement states remain unverified.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  code:
+                    type: string
+                  error:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                      copilotErrorId:
+                        type: string
+                      code:
+                        type: string
+                      innerError:
+                        type: object
+                        additionalProperties: true
+                      traceId:
+                        type: string
+                    additionalProperties: true
+                additionalProperties: true
+        "403":
           $ref: common.yml#/components/responses/Forbidden
-
-        '404':
+        "404":
           $ref: common.yml#/components/responses/NotFound
 
   /medeina/auth/expiryDate:
@@ -47,7 +91,30 @@ paths:
           $ref: common.yml#/components/responses/Forbidden
 
         '404':
-          $ref: common.yml#/components/responses/NotFound
+          description: Observed Not Found error envelope; status cause is not established.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: common.yml#/components/schemas/ErrorResponse
+                  - type: object
+                    properties:
+                      message:
+                        type: string
+                      code:
+                        type: string
+      x-nodoc-operation-context:
+        surface: Purview Home passive response observation
+        provenance:
+          - source: purview-home-expiry-response-disposition-reviewed-20261031
+            confidence: high
+            notes:
+              - "A bounded passive Purview Home capture observed the exact declared GET operation at reload action 2. The normalized API count was 1; raw transport count was 3, with 1 bootstrap record(s) excluded as positive action witnesses. Counts are transport observations, not new API identities."
+              - "Captured at 2026-10-31T09:54:16.801Z; action-attributed evidence request-17213b8aed52e1b7e005. Selected-page root-session/request-frame continuity and the same-action Home snapshot were verified; private native selected-tenant proof preceded the bound capture, with no tenant switching."
+              - "Discovery artifacts completed all six counted actions, while the overall run remained blocked on the primary response expectation. The independently retained driver child and collector CLI exit codes were both 0; process completion is separate from API health."
+              - "The primary GET returned HTTP 404 with a complete JSON error envelope, including root message/code strings and the existing nested error object. The declared successful-body counter remains zero; complete error evidence is not a successful 200 response or application-health claim."
+              - "The 404 response keeps the shared ErrorResponse constraints and adds only optional root message/code string types observed in the complete bodies. No captured values, enums, formats, requiredness, error causes, token-expiry state, capacity/licensing diagnosis, route removal or raw examples are inferred."
+              - "Captured values, tenant/user identifiers, credentials, response fingerprints and body lengths are withheld. Passive background effects and absence of tenant changes remain undetermined."
 
   /medeina/settings/datashare:
     get:
@@ -64,7 +131,43 @@ paths:
             application/json:
               schema:
                 type: object
-                description: pending
+                additionalProperties: true
+                properties:
+                  allowAuditLogging:
+                    type: boolean
+                  allowSubmitFeedback:
+                    type: boolean
+                  allowTenantPluginUpload:
+                    type: boolean
+                  allowedRestrictedFeatureFlags:
+                    type: array
+                    items: {}
+                  complianceRequirements:
+                    type: object
+                    additionalProperties: true
+                  enabled:
+                    type: boolean
+                  featureFlags:
+                    type: array
+                    items: {}
+                  freRequirements:
+                    type: object
+                    additionalProperties: true
+                  mandatoryFeatureFlags:
+                    type: array
+                    items: {}
+                  migrationInfo:
+                    type: object
+                    additionalProperties: true
+                  name:
+                    type: string
+                  partnerWorkspaces:
+                    type: object
+                    additionalProperties: true
+                  trials:
+                    type: array
+                    items: {}
+                description: Optional static response field types from retained native portal traffic; dynamic map contents, null-only types, requiredness and business-state interpretation remain unverified.
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -73,6 +176,28 @@ paths:
 
         '404':
           $ref: common.yml#/components/responses/NotFound
+      x-nodoc-operation-context:
+        surface: Microsoft Purview portal (retained native navigation)
+        workflows:
+          - Observe traffic emitted by the normal authenticated portal during the originally recorded native navigation; reuse retained evidence for offline documentation review.
+        requestShapes:
+          - name: retained-native-get
+            bodyKind: none
+            notes: "Observed query parameter names: none recorded. Values are withheld; presence does not test requiredness and existing parameter declarations are unchanged."
+        availability:
+          level: user-context
+          notes:
+            - Historical user-session observation only; no feature activation, tenant switch, role/grant/minimum-permission inference or standalone usage validation.
+        provenance:
+          - source: retained-native-portal-evidence-reviewed-20261030
+            confidence: high
+            notes:
+              - Exact declared GET purview.microsoft.com/apiproxy/medeina/settings/datashare maps to canonical /medeina/settings/datashare; current declared server/base/path and original request binding were checked privately.
+              - Retained purview-01 action 0 at 2026-10-29T22:12:25.756Z; evidence request-d83d11bbf83d988075c8; HTTP 200 complete body privately verified.
+              - Retained purview-remediation-02 action 2 at 2026-10-30T12:26:21.310Z; evidence request-d34b2cee266d95ac9ff8; HTTP 200 complete body privately verified.
+              - Original capture dates and action attribution are retained. Reusing these bodies for offline review does not create a fresh native observation or clear any historical run-level accounting gaps.
+              - HTTP 200, complete body bytes and limited type checks do not establish application/business success, feature availability, entitlement, provisioning, effective permissions or minimum roles.
+              - Captured scalar values, role/feature-map keys, credentials, tenant data, response fingerprints, byte lengths and examples are withheld. No new route or requiredness, enum, format, authentication or standalone execution claim follows.
 
   /medeina/agents:
     get:
@@ -108,7 +233,12 @@ paths:
             application/json:
               schema:
                 type: object
-                description: pending
+                additionalProperties: true
+                properties:
+                  values:
+                    type: array
+                    items: {}
+                description: Optional static response field types from retained native portal traffic; dynamic map contents, null-only types, requiredness and business-state interpretation remain unverified.
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -117,6 +247,28 @@ paths:
 
         '404':
           $ref: common.yml#/components/responses/NotFound
+      x-nodoc-operation-context:
+        surface: Microsoft Purview portal (retained native navigation)
+        workflows:
+          - Observe traffic emitted by the normal authenticated portal during the originally recorded native navigation; reuse retained evidence for offline documentation review.
+        requestShapes:
+          - name: retained-native-get
+            bodyKind: none
+            notes: "Observed query parameter names: agentDefinitionName, expand, scope. Values are withheld; presence does not test requiredness and existing parameter declarations are unchanged."
+        availability:
+          level: user-context
+          notes:
+            - Historical user-session observation only; no feature activation, tenant switch, role/grant/minimum-permission inference or standalone usage validation.
+        provenance:
+          - source: retained-native-portal-evidence-reviewed-20261030
+            confidence: high
+            notes:
+              - Exact declared GET purview.microsoft.com/apiproxy/medeina/agents maps to canonical /medeina/agents; current declared server/base/path and original request binding were checked privately.
+              - Retained purview-01 action 2 at 2026-10-29T22:13:13.412Z; evidence request-f6e12ca3e4edad76860b; HTTP 200 complete body privately verified.
+              - Retained purview-remediation-02 action 2 at 2026-10-30T12:26:21.100Z; evidence request-f0ee119e5283018fd85a; HTTP 200 complete body privately verified.
+              - Original capture dates and action attribution are retained. Reusing these bodies for offline review does not create a fresh native observation or clear any historical run-level accounting gaps.
+              - HTTP 200, complete body bytes and limited type checks do not establish application/business success, feature availability, entitlement, provisioning, effective permissions or minimum roles.
+              - Captured scalar values, role/feature-map keys, credentials, tenant data, response fingerprints, byte lengths and examples are withheld. No new route or requiredness, enum, format, authentication or standalone execution claim follows.
 
   /cdssecuritycopilot/trial:
     get:
@@ -132,8 +284,15 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                description: pending
+                oneOf:
+                  - type: object
+                    description: pending
+                  - type: array
+                    items:
+                      type: object
+                      additionalProperties: true
+                    description: Retained response container only; no trial eligibility, activation, provisioning, purchase, entitlement or business-state conclusion is established.
+                description: Preserves the declared object branch and adds only the independently observed alternative container; unknown array items remain untyped.
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -142,6 +301,29 @@ paths:
 
         '404':
           $ref: common.yml#/components/responses/NotFound
+      x-nodoc-operation-context:
+        surface: Microsoft Purview portal (retained native navigation)
+        workflows:
+          - Observe traffic emitted by the normal authenticated portal during the originally recorded native navigation; reuse retained evidence for offline documentation review.
+        requestShapes:
+          - name: retained-native-get
+            bodyKind: none
+            notes: "Observed query parameter names: none recorded. Values are withheld; presence does not test requiredness and existing parameter declarations are unchanged."
+        availability:
+          level: user-context
+          notes:
+            - Historical user-session observation only; no feature activation, tenant switch, role/grant/minimum-permission inference or standalone usage validation.
+        provenance:
+          - source: retained-native-portal-evidence-reviewed-20261030
+            confidence: high
+            notes:
+              - Exact declared GET purview.microsoft.com/apiproxy/cdssecuritycopilot/trial maps to canonical /cdssecuritycopilot/trial; current declared server/base/path and original request binding were checked privately.
+              - Retained purview-01 action 0 at 2026-10-29T22:12:25.638Z; evidence request-c6f2d31eb58e5281c5ee; HTTP 200 complete body privately verified.
+              - Retained purview-remediation-02 action 0 at 2026-10-30T12:25:45.089Z; evidence request-ad7f14a9808d20063d2d; HTTP 200 complete body privately verified.
+              - Original capture dates and action attribution are retained. Reusing these bodies for offline review does not create a fresh native observation or clear any historical run-level accounting gaps.
+              - HTTP 200, complete body bytes and limited type checks do not establish application/business success, feature availability, entitlement, provisioning, effective permissions or minimum roles.
+              - This is neutral historical response-shape evidence only; no trial, activation, purchase or provisioning action was performed for this review.
+              - Captured scalar values, role/feature-map keys, credentials, tenant data, response fingerprints, byte lengths and examples are withheld. No new route or requiredness, enum, format, authentication or standalone execution claim follows.
 
   /securityplatform/provisioning/account:
     get:

@@ -1,0 +1,100 @@
+{
+  "schemaVersion": 1,
+  "kind": "known-operation-refresh-approval-source",
+  "status": "proposal-pending-actual-independent-review-and-root-registration",
+  "specId": "purview",
+  "createdAt": "2026-10-31T10:09:14.104Z",
+  "plannedAssignmentId": "purview-home-irm-body-scope-repair-20261031-01",
+  "recipeDestination": "tools/capture-recipes/purview-home-irm-body-scope-repair-20261031.json",
+  "captureRole": {
+    "model": "gpt-6-luna",
+    "reasoning": "low"
+  },
+  "reviewRequirement": {
+    "model": "gpt-6-luna",
+    "reasoning": "xhigh",
+    "status": "not-performed"
+  },
+  "newCycleReason": "Verified prior scope-selection defect, not blind retry: old prefixes ended opening parenthesis; the actual matcher adds its own operation boundary. Remove only that final character and retain exactly the same two native tenant-bound operation bases. No code, action or body-limit expansion.",
+  "primaryCanonicalOperation": {
+    "method": "GET",
+    "host": "purview.microsoft.com",
+    "basePath": "/apiproxy",
+    "canonicalPath": "/insiderrisk/insiderrisk/api/v1.0/{tenantId}/InsiderRiskAnalyticsInsightMetadata('{date}')",
+    "operationId": "getInsiderRiskAnalyticsInsightMetadata",
+    "sourceFile": "specifications/nodoc-purview/specification/insider_risk.yml",
+    "observedCaller": "Purview Home",
+    "opaqueEvidenceId": "opaque:purview-home-irm-insight-action2-scope-excluded",
+    "actionIndex": 2
+  },
+  "additionalPassiveOperations": [
+    {
+      "method": "GET",
+      "host": "purview.microsoft.com",
+      "canonicalPath": "/insiderrisk/insiderrisk/api/v1.0/{tenantId}/InsiderRiskTenantPolicyAnalytics('{policyAnalyticsType}')",
+      "operationId": "getInsiderRiskTenantPolicyAnalytics",
+      "opaqueEvidenceId": "opaque:purview-home-irm-policy-action2-scope-excluded",
+      "actionIndexes": [
+        0,
+        2
+      ]
+    }
+  ],
+  "privateEvidenceBindings": {
+    "artifactId": "home-irm-scope-boundary-diagnosis-20261031",
+    "artifactSha256": "3fe88d4cd8975eb57515942aeb09d05538ffeee70949fa093fd8477c5066a82f",
+    "captureArtifactId": "purview-home-response-diagnostic-20261031-01",
+    "workerArtifactSha256": "47054585a12ff5da068bd04f12a08c6579ab4a090c6b334d91c9714319fa7588",
+    "historicalOnly": true,
+    "currentNativeTenantProof": false,
+    "exactRequestSelector": "InsightDate is privately copied from the actual retained normalized primary request; it is not a UI control, authored request, route guess or freshness claim."
+  },
+  "canonicalSourceAtPreparation": {
+    "path": "specifications/nodoc-purview/specification/insider_risk.yml",
+    "sha256": "205bf024fe35818b087b8da1488d44c4569d611444a0b518b0c92a0e89d2000f",
+    "qualification": "Preparation snapshot binds the current post-Home canonical Purview source and current discovery policy documents after accepted application index 20. It is a source/provenance binding only; the candidate remains non-runnable until independent review and Root registration, and future allocation still requires fresh native selected-tenant proof before any tid-bound navigation.",
+    "policyDocumentation": {
+      "applicationIndex": {
+        "path": "integration/application-index-20.json",
+        "sha256": "833fc2b7303387cc8551f7411984f4cc21be9f5ea201150fc7690e1a2f1454e6"
+      },
+      "documents": [
+        {
+          "path": "AGENT_DISCOVERY_PLAYBOOK.md",
+          "sha256": "1a0fb2ba5efacd80e1e5f66c6c6ab481473a99c07f51bc1b95f9aee64d150082"
+        },
+        {
+          "path": "AGENT_DISCOVERY_RUNBOOK.md",
+          "sha256": "73394a039e11eb224b2d3b44e30a7faf20625c3fc36f493daaf7c22f46212639"
+        },
+        {
+          "path": "PORTAL_DISCOVERY_AGENT_PROMPT.md",
+          "sha256": "2b7c2b7a22693e5cfb49ce654aad027006a2734d4822d1da37857f61320d7f79"
+        }
+      ]
+    }
+  },
+  "bodyPolicy": {
+    "maxResponseBytes": 524288,
+    "ceilingIncreased": false,
+    "exactPrimaryCount": 1,
+    "separatelyAccountedGetExtras": 1,
+    "perOperationDispositionsRequired": true
+  },
+  "budget": {
+    "recipeActions": 5,
+    "mandatoryNavigation": 1,
+    "total": 6,
+    "additionalPreflightAlignment": 0
+  },
+  "rawRefreshDigest": "f992da99bd0d58c8815b1369ec1d646d776009f71726787f21c52293df25a02b",
+  "resolvedRefreshDigest": "b3b3b292dff94ce7de04177fc7524a7446ba5287c5cae00f1f4ec9eb6f3bd41c",
+  "rawExecutionDigest": "0d9d69f9ed10cdae4671b8a74f2c2e2de9c8912adf722bf307dace9d1838e619",
+  "resolvedExecutionDigest": "c69475bb6177e032478f4dc132e43f4b12e96a18a82b57ed2aee232e9ed66d52",
+  "approvalExpiresAt": "2026-10-31T11:26:59.993Z",
+  "nativeTenantProofBeforeBoundNavigation": true,
+  "noTenantSwitch": true,
+  "noApiProbes": true,
+  "noFeatureActivation": true,
+  "liveAuthorized": false
+}

@@ -33,7 +33,7 @@ const interactiveActionTypes = new Set([
 const stableJson = (value) => `${JSON.stringify(value)}\n`;
 const noveltyDigest = (value) => createHash("sha256").update(stableJson(value), "utf8").digest("hex");
 
-function routePattern(pathname) {
+export function routePattern(pathname) {
   const escaped = String(pathname).replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
   return new RegExp(`^${escaped.replace(/\\\{[^/{}]+\\\}/gu, "[^/]+")}/?$`, "u");
 }
@@ -535,8 +535,10 @@ function recordBelongsToTarget(record, target, targetPages) {
 }
 
 function hasInformativeResponseShape(record) {
-  if (!record?.responseShapeFingerprint || typeof record?.responseBodySample !== "string") return false;
-  const sample = record.responseBodySample.trim();
+  if (record?.bodyCapture && record.bodyCapture.state !== "complete") return false;
+  const responseBody = record?.responseBodyForAnalysis ?? record?.responseBodySample;
+  if (!record?.responseShapeFingerprint || typeof responseBody !== "string") return false;
+  const sample = responseBody.trim();
   if (!sample) return false;
   try {
     const parsed = JSON.parse(sample);
@@ -618,9 +620,11 @@ function hasInformativeRequestExample(record) {
 }
 
 function responseHasPaginationFields(record) {
-  if (typeof record?.responseBodySample !== "string") return false;
+  if (record?.bodyCapture && record.bodyCapture.state !== "complete") return false;
+  const responseBody = record?.responseBodyForAnalysis ?? record?.responseBodySample;
+  if (typeof responseBody !== "string") return false;
   try {
-    const parsed = JSON.parse(record.responseBodySample);
+    const parsed = JSON.parse(responseBody);
     if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return false;
     return Object.keys(parsed).some((key) => /^(?:@odata\.nextLink|next(?:Link|Cursor|PageToken)|continuationToken)$/iu.test(key));
   } catch {

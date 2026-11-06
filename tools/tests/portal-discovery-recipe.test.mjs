@@ -3,6 +3,31 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import test from "node:test";
 
+test("native whole-URL metadata shape is non-executing and the resolved literal remains strict", () => {
+  const recipe = {
+    url:'https://portal.example/home',
+    nativeEntryUrlShape:'https://portal.example/feature',
+    pageTarget:{matchHosts:['portal.example'],matchPathPrefixes:['/feature'],allowedEntryQueryParameters:['tid'],bootstrap:{matchHosts:['portal.example'],matchPathnames:['/home']}},
+    inspectionPolicy:{mode:'observe-only'},
+    actions:[{type:'navigate',value:'${NativeEntryUrl}',required:true},{type:'capture',value:'native',required:true}],
+  };
+  const original = JSON.stringify(recipe);
+  assert.equal(validateRecipeTargetMetadata(recipe,{metadataOnly:true}).entryUrl,'https://portal.example/feature');
+  assert.equal(JSON.stringify(recipe),original);
+  assert.throws(()=>validateRecipeTargetMetadata(recipe),/must be resolved/);
+  assert.equal(validateRecipeTargetMetadata(prepareRecipeForRun(recipe,['NativeEntryUrl=https://portal.example/feature?tid=private-test'])).entryQueryParameterNames[0],'tid');
+  for (const url of ['https://other.example/feature?tid=private-test','https://portal.example/elsewhere?tid=private-test','https://portal.example/feature?code=private-test','https://user:password@portal.example/feature','https://portal.example/feature?tid=private-test#unreviewed']) {
+    assert.throws(()=>validateRecipeTargetMetadata(prepareRecipeForRun(recipe,[`NativeEntryUrl=${url}`])));
+  }
+  for (const shape of ['https://other.example/feature','https://user:password@portal.example/feature','https://portal.example/feature?tid=private-test','https://portal.example/feature#fragment']) {
+    assert.throws(()=>validateRecipeTargetMetadata({...recipe,nativeEntryUrlShape:shape},{metadataOnly:true}));
+  }
+  const legacy = structuredClone(recipe);
+  delete legacy.nativeEntryUrlShape;
+  legacy.actions[0].value = 'https://portal.example/feature#reviewed-spa';
+  assert.equal(validateRecipeTargetMetadata(legacy).entryUrl, legacy.actions[0].value);
+});
+
 import {
   getRecipeEntryUrl,
   recipeEntryMatchesPageTarget,

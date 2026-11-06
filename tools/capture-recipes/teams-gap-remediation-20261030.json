@@ -1,0 +1,116 @@
+{
+  "portal": "Teams",
+  "url": "https://admin.teams.microsoft.com/dashboardV2",
+  "pageTarget": {
+    "matchHosts": [
+      "admin.teams.microsoft.com"
+    ],
+    "matchPathPrefixes": [
+      "/"
+    ]
+  },
+  "matchHosts": [
+    "noneu-admin.teams.microsoft.com",
+    "api.interfaces.records.teams.microsoft.com"
+  ],
+  "matchPathPrefixes": [
+    "/api",
+    "/Teams.User"
+  ],
+  "inspectionPolicy": {
+    "mode": "observe-only",
+    "prohibitedControlPatterns": [
+      "Add",
+      "Create",
+      "Delete",
+      "Export",
+      "Remove",
+      "Save",
+      "Submit",
+      "Update",
+      "Purchase",
+      "Activate",
+      "Start trial"
+    ]
+  },
+  "captureScripts": false,
+  "postActionSettleMs": 6000,
+  "settleMs": 8000,
+  "maxActions": 9,
+  "actions": [
+    {
+      "type": "navigate",
+      "value": "https://admin.teams.microsoft.com/dashboardV2",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "6000",
+      "required": true
+    },
+    {
+      "type": "reload",
+      "value": "teams-canonical-dashboard",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "8000",
+      "required": true
+    },
+    {
+      "type": "capture",
+      "value": "teams-canonical-dashboard",
+      "required": true
+    },
+    {
+      "type": "navigate",
+      "value": "https://admin.teams.microsoft.com/users",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "6000",
+      "required": true
+    },
+    {
+      "type": "capture",
+      "value": "teams-users",
+      "required": true
+    }
+  ],
+  "knownOperationRefresh": {
+    "status": "active",
+    "method": "GET",
+    "host": "noneu-admin.teams.microsoft.com",
+    "routes": [
+      "/api/v1/userpreference"
+    ],
+    "state": "Use observed /dashboardV2 entry, retaining the exact /users state.",
+    "actionIndexes": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "approvalExpiresAt": "2026-10-31T09:57:22.444Z",
+    "variableBindingsDigest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "documentationObjectives": [
+      "freshness",
+      "health",
+      "schema-evidence",
+      "usage-observation",
+      "error-example"
+    ],
+    "evidenceIds": [
+      "gap-remediation-plan-20261030:teams",
+      "retained-state-provenance-20261030:teams"
+    ],
+    "approvalArtifact": "tools/frontier-approvals/teams-gap-remediation-20261030.json",
+    "approvalDigest": "7857fb9f84cb520903d4fa91cdfc23485bc3cb944ac23f0267c35fe19cd143f3"
+  }
+}

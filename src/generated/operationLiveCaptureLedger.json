@@ -1,11 +1,305 @@
 [
   {
+    "title": "Defender XDR",
+    "specId": "defender-xdr",
+    "specPath": "specifications/nodoc-defender-xdr/specification/openapi.yml",
+    "nodocRoute": "defender",
+    "nodocCategory": "Defender",
+    "operations": [
+      {
+        "operationId": "Incidents.GetDisruptionSummary",
+        "summary": "Get disruption summary",
+        "method": "GET",
+        "path": "/mtp/phoenixValueReflectionApi/disrupt",
+        "source": "authenticated Microsoft Defender portal representative overview states passive representative states",
+        "browsedPages": [
+          "Microsoft Defender portal representative overview states"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "Incidents.GetSummaryTotals",
+        "summary": "Get incident summary totals",
+        "method": "GET",
+        "path": "/mtp/phoenixValueReflectionApi/summary/total",
+        "source": "authenticated Microsoft Defender portal representative overview states passive representative states",
+        "browsedPages": [
+          "Microsoft Defender portal representative overview states"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "EndpointDevices.GetDeviceTotals",
+        "summary": "Get device totals",
+        "method": "GET",
+        "path": "/mtp/ndr/machines/deviceTotals",
+        "source": "authenticated Microsoft Defender portal representative overview states passive representative states",
+        "browsedPages": [
+          "Microsoft Defender portal representative overview states"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "Configuration.GetTenantContext",
+        "summary": "Get tenant context",
+        "method": "GET",
+        "path": "/mtp/sccManagement/mgmt/TenantContext",
+        "source": "authenticated Microsoft Defender portal representative overview states passive representative states",
+        "browsedPages": [
+          "Microsoft Defender portal representative overview states"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "PortalServices.GetUserPreferences",
+        "summary": "Get user preferences",
+        "method": "GET",
+        "path": "/mtp/userPreferences/api/mgmt/userpreferencesservice/userPreference",
+        "source": "authenticated Microsoft Defender portal representative overview states passive representative states",
+        "browsedPages": [
+          "Microsoft Defender portal representative overview states"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      }
+    ]
+  },
+  {
+    "title": "Entra B2C",
+    "specId": "entra-b2c",
+    "specPath": "specifications/nodoc-entra-b2c/specification/openapi.yml",
+    "nodocRoute": null,
+    "nodocCategory": "Entra",
+    "operations": [
+      {
+        "operationId": "Tenants.GetTenantInfo",
+        "summary": "Get tenant info and feature flags",
+        "method": "GET",
+        "path": "/api/tenants/GetTenantInfo",
+        "source": "Observe-only partial portal refresh 2026-10-29; API connectors action 5; request-f4f012ce1d31c2a35de7; HTTP 200",
+        "browsedPages": [
+          "External Identities > API connectors"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "UserAttributes.ListAvailableOutputClaims",
+        "summary": "List available output claims for custom user attributes",
+        "method": "GET",
+        "path": "/api/userAttribute/GetAvailableOutputClaimsList",
+        "source": "Observe-only gap remediation 2026-10-30; Custom user attributes reload action 2; HTTP 400",
+        "browsedPages": [
+          "External Identities > Custom user attributes"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "ApiConnectors.List",
+        "summary": "Read the feature-gated API connector collection",
+        "method": "GET",
+        "path": "/graph/cpimApiConnectors/",
+        "source": "Observe-only partial portal refresh 2026-10-29; API connectors action 5; request-7aa703a5ca66e7e7f207; HTTP 400",
+        "browsedPages": [
+          "External Identities > API connectors"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      }
+    ]
+  },
+  {
+    "title": "Entra IAM",
+    "specId": "ibiza-iam",
+    "specPath": "specifications/nodoc-ibiza-iam/specification/openapi.yml",
+    "nodocRoute": null,
+    "nodocCategory": "Entra",
+    "operations": [
+      {
+        "operationId": "Permissions.Get",
+        "summary": "Get current permissions",
+        "method": "GET",
+        "path": "/Permissions",
+        "source": "Observe-only portal refresh 2026-10-29; All users/reload; request-0adec0070e3efad4ee87; HTTP 200",
+        "browsedPages": [
+          "Users > All users"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      }
+    ]
+  },
+  {
+    "title": "Entra IDGov",
+    "specId": "entra-idgov",
+    "specPath": "specifications/nodoc-entra-idgov/specification/openapi.yml",
+    "nodocRoute": null,
+    "nodocCategory": "Entra",
+    "operations": [
+      {
+        "operationId": "AccessReviews.GetProviderFeatureFlags",
+        "summary": "Get feature flags for a provider",
+        "method": "GET",
+        "path": "/accessReviews/v2.0/approvalWorkflowProviders/{providerId}/featureFlags",
+        "source": "Observe-only gap remediation 2026-10-30; 1 complete native HTTP 200 observation(s)",
+        "browsedPages": [
+          "Entra Identity Governance > Access reviews > Controls"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "AccessReviews.ListBusinessFlows",
+        "summary": "List business flows for a provider",
+        "method": "GET",
+        "path": "/accessReviews/v2.0/approvalWorkflowProviders/{providerId}/businessFlows",
+        "source": "Observe-only gap remediation 2026-10-30; 1 complete native HTTP 200 observation(s)",
+        "browsedPages": [
+          "Entra Identity Governance > Access reviews > Programs"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "AccessReviews.ListRequests",
+        "summary": "List access review requests",
+        "method": "GET",
+        "path": "/accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests",
+        "source": "Observe-only gap remediation 2026-10-30; 1 complete native HTTP 200 observation(s)",
+        "browsedPages": [
+          "Entra Identity Governance > Access reviews > Controls"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "AccessReviews.ListReports",
+        "summary": "List access review reports",
+        "method": "GET",
+        "path": "/accessReviews/v2.0/reports",
+        "source": "Observe-only gap remediation 2026-10-30; 1 complete native HTTP 200 observation(s)",
+        "browsedPages": [
+          "Entra Identity Governance > Access reviews > Review History"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "AccessReviews.ListRequestInstances",
+        "summary": "List instances of an access review",
+        "method": "GET",
+        "path": "/accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests/{requestId}/instances",
+        "source": "Observe-only gap remediation 2026-10-30; 5 complete native HTTP 200 observation(s)",
+        "browsedPages": [
+          "Entra Identity Governance > Access reviews > Controls"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      }
+    ]
+  },
+  {
+    "title": "Entra IGA",
+    "specId": "entra-iga",
+    "specPath": "specifications/nodoc-entra-iga/specification/openapi.yml",
+    "nodocRoute": null,
+    "nodocCategory": "Entra",
+    "operations": [
+      {
+        "operationId": null,
+        "summary": "List access package catalog summaries",
+        "method": "GET",
+        "path": "/api/v1/accessPackageCatalogs",
+        "source": "Observe-only portal refresh 2026-10-29; Catalogs action 3; request-32f8062f4023aa4f4ab6 and request-75a2be8b894e7978d5e3; HTTP 200",
+        "browsedPages": [
+          "Identity governance > Catalogs"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": null,
+        "summary": "Check authorization for an entitlement-management action",
+        "method": "POST",
+        "path": "/api/v1/checkAccess",
+        "source": "Observe-only portal refresh 2026-10-29; Connected organizations action 6; request-c3f6c9e6cd7b6de03934; HTTP 200",
+        "browsedPages": [
+          "Identity governance > Connected organizations"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      }
+    ]
+  },
+  {
+    "title": "Entra PIM",
+    "specId": "entra-pim",
+    "specPath": "specifications/nodoc-entra-pim/specification/openapi.yml",
+    "nodocRoute": null,
+    "nodocCategory": "Entra",
+    "operations": [
+      {
+        "operationId": null,
+        "summary": "List role assignments",
+        "method": "GET",
+        "path": "/api/v2/privilegedAccess/{provider}/roleAssignments",
+        "source": "Observe-only portal refresh 2026-10-29; Access Packages dashboard reload; request-2371325fd2ece391eb59 and request-b8696ea933d5dcfbbe1d; HTTP 200",
+        "browsedPages": [
+          "Identity governance > Access Packages dashboard bootstrap"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": null,
+        "summary": "Get current user's PIM permissions for a resource",
+        "method": "GET",
+        "path": "/api/v2/privilegedAccess/{provider}/resources/{resourceId}/permissions",
+        "source": "Observe-only portal refresh 2026-10-29; Access Packages dashboard reload; request-d4880a805c46d250f22a; HTTP 200",
+        "browsedPages": [
+          "Identity governance > Access Packages dashboard bootstrap"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      }
+    ]
+  },
+  {
     "title": "Exchange",
     "specId": "exchange-beta",
     "specPath": "specifications/nodoc-exchange-beta/specification/openapi.yml",
     "nodocRoute": null,
     "nodocCategory": null,
     "operations": [
+      {
+        "operationId": "ExchangeBeta.Bootstrap.GetShell",
+        "summary": "Get Exchange shell bootstrap",
+        "method": "GET",
+        "path": "/beta/Shell",
+        "source": "authenticated Exchange admin center passive home/bootstrap capture",
+        "browsedPages": [
+          "Exchange admin center > Home/bootstrap"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "ExchangeBeta.Bootstrap.GetCmdletInfo",
+        "summary": "Get cmdlet metadata",
+        "method": "GET",
+        "path": "/beta/CmdletInfo",
+        "source": "authenticated Exchange admin center passive home/bootstrap capture",
+        "browsedPages": [
+          "Exchange admin center > Home/bootstrap"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
       {
         "operationId": "ExchangeBeta.Bootstrap.GetMyTimeZone",
         "summary": "Get the current user's Exchange time zone",
@@ -14,6 +308,18 @@
         "source": "authenticated Exchange admin center exact same-origin GET",
         "browsedPages": [
           "https://admin.exchange.microsoft.com/#/"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "ExchangeBeta.Preferences.GetUserProfile",
+        "summary": "Get the Exchange portal user profile",
+        "method": "GET",
+        "path": "/beta/UserProfile",
+        "source": "authenticated Exchange admin center passive home/bootstrap capture",
+        "browsedPages": [
+          "Exchange admin center > Home/bootstrap"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -47,6 +353,30 @@
         "source": "authenticated Intune admin center",
         "browsedPages": [
           "https://intune.microsoft.com/#view/Microsoft_Intune_Enrollment/ReportingMenu/~/windowsQualityUpdatesReactView"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "IntuneAutopatch.Tenant.Resolve",
+        "summary": "Resolve tenant enrollment state",
+        "method": "GET",
+        "path": "/api/v1.0/tenant/resolve",
+        "source": "authenticated Intune admin center passive reload",
+        "browsedPages": [
+          "Intune admin center > Windows Autopatch"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "IntuneAutopatch.Tenant.GetFeatureEnablementStatus",
+        "summary": "Get starter feature enablement status",
+        "method": "GET",
+        "path": "/tenant-management/v1/Enrollment/Starter/featureEnablementStatus",
+        "source": "authenticated Intune admin center passive reload",
+        "browsedPages": [
+          "Intune admin center > Windows Autopatch > Tenant management"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -123,6 +453,18 @@
         "pageCount": 2
       },
       {
+        "operationId": "IntunePortal.Experimentation.GetExtensionVariants",
+        "summary": "Get extension variants",
+        "method": "GET",
+        "path": "/api/Experimentation/GetExtensionVariants",
+        "source": "authenticated Intune admin center passive reload",
+        "browsedPages": [
+          "Intune admin center > Tenant administration"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
         "operationId": "IntunePortal.Settings.Select",
         "summary": "Read portal persistent settings",
         "method": "POST",
@@ -138,6 +480,369 @@
     ]
   },
   {
+    "title": "M365 Admin",
+    "specId": "m365-admin",
+    "specPath": "specifications/nodoc-m365-admin/specification/openapi.yml",
+    "nodocRoute": "m365-admin",
+    "nodocCategory": null,
+    "operations": [
+      {
+        "operationId": "UsersGroups.ListIntuneDevices",
+        "summary": "List Intune-managed devices",
+        "method": "GET",
+        "path": "/admin/api/Intune/devices",
+        "source": "authenticated Microsoft 365 admin center passive representative states",
+        "browsedPages": [
+          "Microsoft 365 admin center"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "UsersGroups.GetDirectoryRoleCustomization",
+        "summary": "Get directory-role list customization",
+        "method": "GET",
+        "path": "/admin/api/rbac/roles/customization",
+        "source": "authenticated Microsoft 365 admin center passive representative states",
+        "browsedPages": [
+          "Microsoft 365 admin center"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "UsersGroups.GetCurrentUser",
+        "summary": "Get current user info",
+        "method": "GET",
+        "path": "/admin/api/users/currentUser",
+        "source": "authenticated Microsoft 365 admin center passive representative states",
+        "browsedPages": [
+          "Microsoft 365 admin center"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "UsersGroups.GetGroupPermissions",
+        "summary": "Get group permissions",
+        "method": "GET",
+        "path": "/admin/api/groups/permissions",
+        "source": "Observe-only gap remediation 2026-10-30; primary HTTP 200 observation(s)",
+        "browsedPages": [
+          "Microsoft 365 admin center > Groups"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "Tenant.GetBillingAccounts",
+        "summary": "Get billing accounts",
+        "method": "GET",
+        "path": "/admin/api/tenant/billingAccountsWithShell",
+        "source": "authenticated Microsoft 365 admin center passive representative states",
+        "browsedPages": [
+          "Microsoft 365 admin center"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "Edge.GetExtensionFeedback",
+        "summary": "Get Edge extension feedback",
+        "method": "GET",
+        "path": "/fd/edgeenterpriseextensionsmanagement/api/extensions/extensionFeedback",
+        "source": "authenticated Microsoft 365 admin center passive representative states",
+        "browsedPages": [
+          "Microsoft 365 admin center"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "Edge.ListFeatureManagementProfiles",
+        "summary": "List Edge feature management profiles",
+        "method": "GET",
+        "path": "/fd/edgeenterpriseextensionsmanagement/api/featureManagement/profiles",
+        "source": "authenticated Microsoft 365 admin center passive representative states",
+        "browsedPages": [
+          "Microsoft 365 admin center"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "Edge.ListReleaseVersions",
+        "summary": "List Edge release versions",
+        "method": "GET",
+        "path": "/fd/edgeenterpriseextensionsmanagement/api/version/releases",
+        "source": "authenticated Microsoft 365 admin center passive representative states",
+        "browsedPages": [
+          "Microsoft 365 admin center"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "Edge.GetVersionUpdate",
+        "summary": "Get Edge update information",
+        "method": "GET",
+        "path": "/fd/edgeenterpriseextensionsmanagement/api/version/update",
+        "source": "authenticated Microsoft 365 admin center passive representative states",
+        "browsedPages": [
+          "Microsoft 365 admin center"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "Edge.GetBrowserPolicies",
+        "summary": "Get Edge browser policies",
+        "method": "GET",
+        "path": "/fd/OfficePolicyAdmin/v1.0/edge/policies",
+        "source": "authenticated Microsoft 365 admin center passive representative states",
+        "browsedPages": [
+          "Microsoft 365 admin center"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "IntegratedApps.GetApps",
+        "summary": "Get integrated apps",
+        "method": "GET",
+        "path": "/fd/addins/api/apps",
+        "source": "authenticated Microsoft 365 admin center passive representative states",
+        "browsedPages": [
+          "Microsoft 365 admin center"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "IntegratedApps.GetRecommendations",
+        "summary": "Get app recommendations",
+        "method": "GET",
+        "path": "/fd/addins/api/recommendations/appRecommendations",
+        "source": "authenticated Microsoft 365 admin center passive representative states",
+        "browsedPages": [
+          "Microsoft 365 admin center"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "Billing.ListSoftwareKeys",
+        "summary": "List software keys",
+        "method": "GET",
+        "path": "/fd/KeyFulfillment/v3.0/softwareKeys",
+        "source": "authenticated Microsoft 365 admin center passive representative states",
+        "browsedPages": [
+          "Microsoft 365 admin center"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "UsersGroups.GetAdministrativeUnits",
+        "summary": "Get administrative units",
+        "method": "GET",
+        "path": "/admin/api/users/administrativeunits",
+        "source": "authenticated Microsoft 365 admin center passive representative states",
+        "browsedPages": [
+          "Microsoft 365 admin center"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "UsersGroups.ListRbacRoles",
+        "summary": "List RBAC roles",
+        "method": "GET",
+        "path": "/admin/api/rbac/roles",
+        "source": "authenticated Microsoft 365 admin center passive representative states",
+        "browsedPages": [
+          "Microsoft 365 admin center"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "Billing.ListBillingSubscriptions",
+        "summary": "List billing subscriptions",
+        "method": "GET",
+        "path": "/fd/arm/providers/Microsoft.Billing/billingAccounts/{billingAccountId}/billingSubscriptions",
+        "source": "authenticated Microsoft 365 admin center passive representative states",
+        "browsedPages": [
+          "Microsoft 365 admin center"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      }
+    ]
+  },
+  {
+    "title": "M365 Apps Config",
+    "specId": "m365-apps-config",
+    "specPath": "specifications/nodoc-m365-apps-config/specification/openapi.yml",
+    "nodocRoute": null,
+    "nodocCategory": "M365 Apps",
+    "operations": [
+      {
+        "operationId": null,
+        "summary": "Get service health bootstrap data",
+        "method": "GET",
+        "path": "/appConfig/v1.0/ServiceHealth",
+        "source": "authenticated Microsoft 365 Apps admin center passive representative states",
+        "browsedPages": [
+          "Microsoft 365 Apps admin center"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": null,
+        "summary": "Get portal shell metadata",
+        "method": "GET",
+        "path": "/appConfig/v1.0/ShellService/GetShellInfo",
+        "source": "authenticated Microsoft 365 Apps admin center passive representative states",
+        "browsedPages": [
+          "Microsoft 365 Apps admin center"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": null,
+        "summary": "Get portal feature flights",
+        "method": "GET",
+        "path": "/appConfig/v1.0/userflights",
+        "source": "authenticated Microsoft 365 Apps admin center passive representative states",
+        "browsedPages": [
+          "Microsoft 365 Apps admin center"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": null,
+        "summary": "Check DBS licensing",
+        "method": "GET",
+        "path": "/policyadmin/v1.0/DbsLicensing/HasDbsLicense",
+        "source": "authenticated Microsoft 365 Apps admin center passive representative states",
+        "browsedPages": [
+          "Microsoft 365 Apps admin center"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": null,
+        "summary": "Get tenant residency metadata",
+        "method": "GET",
+        "path": "/rollout/v1.0/residency",
+        "source": "authenticated Microsoft 365 Apps admin center passive representative states",
+        "browsedPages": [
+          "Microsoft 365 Apps admin center"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": null,
+        "summary": "List servicing profiles",
+        "method": "GET",
+        "path": "/ServiceProfile/v1.0/Profiles",
+        "source": "authenticated Microsoft 365 Apps admin center passive representative states",
+        "browsedPages": [
+          "Microsoft 365 Apps admin center"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      }
+    ]
+  },
+  {
+    "title": "M365 Apps Inventory",
+    "specId": "m365-apps-inventory",
+    "specPath": "specifications/nodoc-m365-apps-inventory/specification/openapi.yml",
+    "nodocRoute": null,
+    "nodocCategory": "M365 Apps",
+    "operations": [
+      {
+        "operationId": null,
+        "summary": "Get device summary",
+        "method": "GET",
+        "path": "/inventory/api/Devices/GetDeviceSummary",
+        "source": "authenticated Microsoft 365 Apps admin center > Inventory passive representative states",
+        "browsedPages": [
+          "Microsoft 365 Apps admin center > Inventory"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": null,
+        "summary": "Query devices with cloud management info",
+        "method": "GET",
+        "path": "/inventory/api/DevicesWithCloudManagementInfo",
+        "source": "authenticated Microsoft 365 Apps admin center > Inventory passive representative states",
+        "browsedPages": [
+          "Microsoft 365 Apps admin center > Inventory"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": null,
+        "summary": "Get Office build channel summary with metadata",
+        "method": "GET",
+        "path": "/inventory/api/DevicesWithMetadata/GetOfficeBuildChannelSummaryWithMetadata",
+        "source": "authenticated Microsoft 365 Apps admin center > Inventory passive representative states",
+        "browsedPages": [
+          "Microsoft 365 Apps admin center > Inventory"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": null,
+        "summary": "Get Office build device summary with metadata",
+        "method": "GET",
+        "path": "/inventory/api/DevicesWithMetadata/GetOfficeBuildDeviceSummaryWithMetadata",
+        "source": "authenticated Microsoft 365 Apps admin center > Inventory passive representative states",
+        "browsedPages": [
+          "Microsoft 365 Apps admin center > Inventory"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": null,
+        "summary": "List Office add-ins",
+        "method": "GET",
+        "path": "/inventory/api/OfficeAddins",
+        "source": "authenticated Microsoft 365 Apps admin center > Inventory passive representative states",
+        "browsedPages": [
+          "Microsoft 365 Apps admin center > Inventory"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": null,
+        "summary": "Count Office add-ins",
+        "method": "GET",
+        "path": "/inventory/api/OfficeAddins/$Count",
+        "source": "authenticated Microsoft 365 Apps admin center > Inventory passive representative states",
+        "browsedPages": [
+          "Microsoft 365 Apps admin center > Inventory"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      }
+    ]
+  },
+  {
     "title": "Power Platform",
     "specId": "power-platform",
     "specPath": "specifications/nodoc-power-platform/specification/openapi.yml",
@@ -149,14 +854,12 @@
         "summary": "GET /providers/Microsoft.BusinessAppPlatform/environmentGroups",
         "method": "GET",
         "path": "/providers/Microsoft.BusinessAppPlatform/environmentGroups",
-        "source": "authenticated Power Platform admin center",
+        "source": "Observe-only gap remediation 2026-10-30; primary HTTP 200 observation(s)",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/deployment/overview",
-          "https://admin.powerplatform.microsoft.com/deployment/pipelines",
-          "https://admin.powerplatform.microsoft.com/deployment/settings"
+          "Power Platform admin center > Home > Environments"
         ],
         "additionalPageCount": 0,
-        "pageCount": 3
+        "pageCount": 1
       },
       {
         "operationId": "BusinessAppPlatform_get_providers_Microsoft_BusinessAppPlatform_environmentLocations",
@@ -3318,6 +4021,252 @@
         ],
         "additionalPageCount": 0,
         "pageCount": 2
+      }
+    ]
+  },
+  {
+    "title": "Purview",
+    "specId": "purview",
+    "specPath": "specifications/nodoc-purview/specification/openapi.yml",
+    "nodocRoute": null,
+    "nodocCategory": "Purview",
+    "operations": [
+      {
+        "operationId": "getDlpCompliancePolicies",
+        "summary": "Get DLP compliance policies",
+        "method": "GET",
+        "path": "/di/find/DlpCompliancePolicy",
+        "source": "authenticated Microsoft Purview portal passive representative states",
+        "browsedPages": [
+          "Microsoft Purview portal"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "getLabelPolicies",
+        "summary": "Get label policies",
+        "method": "GET",
+        "path": "/di/find/LabelPolicy",
+        "source": "authenticated Microsoft Purview portal passive representative states",
+        "browsedPages": [
+          "Microsoft Purview portal"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "getInsiderRiskEntityList",
+        "summary": "Get insider risk entity list",
+        "method": "GET",
+        "path": "/di/find/InsiderRiskEntityList",
+        "source": "Observe-only gap remediation 2026-10-30; primary HTTP 200 observation(s)",
+        "browsedPages": [
+          "Microsoft Purview > Insider Risk Management > Overview"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "getInsiderRiskPolicies",
+        "summary": "Get insider risk management policies",
+        "method": "GET",
+        "path": "/di/find/InsiderRiskPolicy",
+        "source": "authenticated Microsoft Purview portal passive representative states",
+        "browsedPages": [
+          "Microsoft Purview portal"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "getDataGovernanceTypeAggregates",
+        "summary": "Get type aggregates",
+        "method": "GET",
+        "path": "/dgs/aggregate/GetTypeAggregates",
+        "source": "authenticated Microsoft Purview portal passive representative states",
+        "browsedPages": [
+          "Microsoft Purview portal"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "checkCopilotAuth",
+        "summary": "Check Copilot authentication status",
+        "method": "GET",
+        "path": "/medeina/auth",
+        "source": "authenticated Microsoft Purview portal passive representative states",
+        "browsedPages": [
+          "Microsoft Purview portal"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      }
+    ]
+  },
+  {
+    "title": "Purview Portal",
+    "specId": "purview-portal",
+    "specPath": "specifications/nodoc-purview-portal/specification/openapi.yml",
+    "nodocRoute": null,
+    "nodocCategory": "Purview",
+    "operations": [
+      {
+        "operationId": "PurviewPortal.Auth.GetCachedRoles",
+        "summary": "Get cached Purview roles",
+        "method": "GET",
+        "path": "/api/v2/auth/GetCachedRoles",
+        "source": "Observe-only gap remediation 2026-10-30; primary HTTP 200 observation(s)",
+        "browsedPages": [
+          "Microsoft Purview portal > Home > Portal shell"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "PurviewPortal.Users.Search",
+        "summary": "Search users for portal pickers",
+        "method": "GET",
+        "path": "/api/user/",
+        "source": "authenticated Microsoft Purview portal passive representative states",
+        "browsedPages": [
+          "Microsoft Purview portal"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      }
+    ]
+  },
+  {
+    "title": "Security Copilot",
+    "specId": "security-copilot",
+    "specPath": "specifications/nodoc-security-copilot/specification/openapi.yml",
+    "nodocRoute": "security-copilot",
+    "nodocCategory": null,
+    "operations": [
+      {
+        "operationId": "SecurityCopilotPortal.Auth.GetExpiryDate",
+        "summary": "Get workspace capacity auth expiry state",
+        "method": "GET",
+        "path": "/auth/expiryDate",
+        "source": "authenticated Security Copilot passive provisioning/readiness entry surface passive representative states",
+        "browsedPages": [
+          "Security Copilot passive provisioning/readiness entry surface"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "SecurityCopilotPortal.Provisioning.GetAccount",
+        "summary": "Get Security Platform account and pod inventory",
+        "method": "GET",
+        "path": "/provisioning/account",
+        "source": "authenticated Security Copilot passive provisioning/readiness entry surface passive representative states",
+        "browsedPages": [
+          "Security Copilot passive provisioning/readiness entry surface"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "SecurityCopilotPortal.Provisioning.CheckTenant",
+        "summary": "Check Security Platform tenant eligibility",
+        "method": "GET",
+        "path": "/provisioning/checkTenant",
+        "source": "authenticated Security Copilot passive provisioning/readiness entry surface passive representative states",
+        "browsedPages": [
+          "Security Copilot passive provisioning/readiness entry surface"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      }
+    ]
+  },
+  {
+    "title": "SharePoint",
+    "specId": "sharepoint-admin",
+    "specPath": "specifications/nodoc-sharepoint-admin/specification/openapi.yml",
+    "nodocRoute": "sharepoint-admin",
+    "nodocCategory": "SharePoint",
+    "operations": [
+      {
+        "operationId": "SharePointAdmin.GetContentSecurityPolicyConfiguration",
+        "summary": "Get allowed script sources",
+        "method": "GET",
+        "path": "/_api/SPO.SPOContentSecurityPolicyConfiguration",
+        "source": "Observe-only portal refresh 2026-10-29; sharepoint-admin-02/capture; request-d17dc2215ed76c860c2e; HTTP 200",
+        "browsedPages": [
+          "Advanced > Script sources"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      }
+    ]
+  },
+  {
+    "title": "Teams",
+    "specId": "teams",
+    "specPath": "specifications/nodoc-teams/specification/openapi.yml",
+    "nodocRoute": null,
+    "nodocCategory": "Teams",
+    "operations": [
+      {
+        "operationId": null,
+        "summary": "Get saved Teams admin grid settings",
+        "method": "GET",
+        "path": "/api/v1/usersettings",
+        "source": "authenticated Teams admin center representative user-management states passive representative states",
+        "browsedPages": [
+          "Teams admin center representative user-management states"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": null,
+        "summary": "Get Teams admin dashboard preferences",
+        "method": "GET",
+        "path": "/api/v1/userpreference",
+        "source": "authenticated Teams admin center representative user-management states passive representative states",
+        "browsedPages": [
+          "Teams admin center representative user-management states"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": null,
+        "summary": "Get a Teams user record",
+        "method": "GET",
+        "path": "/Teams.User/users/{userId}",
+        "source": "authenticated Teams admin center representative user-management states passive representative states",
+        "browsedPages": [
+          "Teams admin center representative user-management states"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      }
+    ]
+  },
+  {
+    "title": "Viva Engage",
+    "specId": "viva-engage",
+    "specPath": "specifications/nodoc-viva-engage/specification/openapi.yml",
+    "nodocRoute": null,
+    "nodocCategory": "Viva",
+    "operations": [
+      {
+        "operationId": "AdminGraphQL_PostGraphql",
+        "summary": "Execute Viva Engage admin GraphQL operations",
+        "method": "POST",
+        "path": "/graphql",
+        "source": "Observe-only portal refresh 2026-10-29; Viva admin landing/reload; TenantConfigurationAndRoles; HTTP 200; request-59258e853d95e7568f27",
+        "browsedPages": [
+          "Admin landing"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
       }
     ]
   }

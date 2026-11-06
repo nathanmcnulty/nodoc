@@ -1,0 +1,88 @@
+{
+  "portal": "Defender XDR",
+  "url": "https://security.microsoft.com/security-graph",
+  "pageTarget": {
+    "matchHosts": [
+      "security.microsoft.com"
+    ],
+    "matchPathPrefixes": [
+      "/security-graph"
+    ]
+  },
+  "matchHosts": [
+    "security.microsoft.com"
+  ],
+  "matchPathPrefixes": [
+    "/apiproxy"
+  ],
+  "inspectionPolicy": {
+    "mode": "observe-only",
+    "prohibitedControlPatterns": [
+      "Add",
+      "Create",
+      "Delete",
+      "Export",
+      "Remove",
+      "Save",
+      "Submit",
+      "Update",
+      "Purchase",
+      "Activate",
+      "Start trial"
+    ]
+  },
+  "captureScripts": false,
+  "postActionSettleMs": 6000,
+  "settleMs": 8000,
+  "maxActions": 12,
+  "actions": [
+    "navigate=https://security.microsoft.com/security-graph",
+    "wait-ms=6000",
+    "reload=defender-attack-map",
+    "wait-ms=8000",
+    "capture=defender-attack-map",
+    "navigate=https://security.microsoft.com/incidents",
+    "wait-ms=6000",
+    "capture=defender-incidents",
+    "navigate=https://security.microsoft.com/threatpolicy",
+    "wait-ms=6000",
+    "capture=defender-threat-policy"
+  ],
+  "knownOperationRefresh": {
+    "status": "active",
+    "method": "GET",
+    "host": "security.microsoft.com",
+    "routes": [
+      "/apiproxy/mtp/sccManagement/mgmt/TenantContext"
+    ],
+    "state": "Defender XDR bounded passive representative states from tools/capture-recipes/defender-attack-map-enrichment.json",
+    "actionIndexes": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "approvalExpiresAt": "2026-10-31T08:00:00.000Z",
+    "variableBindingsDigest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "documentationObjectives": [
+      "freshness",
+      "health",
+      "schema-evidence",
+      "usage-observation",
+      "error-example"
+    ],
+    "evidenceIds": [
+      "retained-defender-xdr-primary-witness",
+      "checked-in-ui-state-defender-attack-map-enrichment"
+    ],
+    "approvalArtifact": "tools/frontier-approvals/defender-xdr-refresh-20261029.json",
+    "approvalDigest": "34f69ec0620e9de6dd980e1385d9c0be65cbc1714d8811f397427310f43f6852"
+  }
+}

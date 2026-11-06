@@ -14,6 +14,7 @@ import {
   portalDiscoveryModelPolicy,
   validateOfflineReviewReasoning,
 } from "./portal-discovery-model-policy.mjs";
+import { loadReviewCache, writeReviewCache } from "./portal-discovery-review-cache.mjs";
 
 export const portfolioManifestSchemaVersion = 1;
 export const orchestrationPlanSchemaVersion = 1;
@@ -336,6 +337,7 @@ export function validateWorkerResult(result, plan) {
   if (assignment.type === "review" && !terminalReviewDecisions.has(result.decision)) throw new Error("Review result must have a terminal disposition.");
   if (!Array.isArray(result.reasonCodes) || result.reasonCodes.some((code) => typeof code !== "string")) throw new Error("Worker result reasonCodes are required.");
   for (const key of ["blockers", "metrics", "recommendedNextAction", "lessons", "lifecycleAccounting", "processImprovementDisposition"]) if (result[key] === undefined) throw new Error(`Worker result requires ${key}.`);
+  if (typeof result.processImprovementDisposition !== 'string' || !result.processImprovementDisposition.trim()) throw new Error('Worker result requires an explicit processImprovementDisposition.');
   if (!Array.isArray(result.lessons)) throw new Error("Worker result lessons must be an array.");
   if (result.lifecycleAccounting?.terminalOwnerShutdown !== true || result.lifecycleAccounting?.artifactLedgerAccounting !== true) throw new Error("Worker result must account for terminal owner shutdown and artifact/ledger accounting.");
   const candidateIds = new Set(assignment.scope?.candidateIds ?? []);
@@ -359,6 +361,46 @@ export function validateWorkerResult(result, plan) {
     if (!/^\d{4}-\d{2}-\d{2}T/u.test(String(gate.reviewedAt || ""))) throw new Error("Quality gate reviewedAt must be an ISO timestamp.");
   }
   return { ...clone(result), sanitized: true, assignmentType: assignment.type };
+}
+
+export async function cacheValidatedReviewResult({ cacheDir, packet, result, plan }) {
+  const validated = validateWorkerResult(result, plan);
+  if (validated.assignmentType !== "review") throw new Error("Only validated review results may enter the review cache.");
+  const assignment = plan.assignments.find((entry) => entry.assignmentId === validated.assignmentId);
+  if (packet?.bindings?.model !== validated.model || packet?.bindings?.reasoning !== validated.reasoning || digest(packet?.bindings?.scope) !== digest(assignment.scope ?? {})) throw new Error("Review packet model, reasoning, or scope does not match the validated assignment.");
+  const entry = await writeReviewCache({ cacheDir, packet, workerResult: validated });
+  return {
+    schemaVersion: 1,
+    status: "cached",
+    cacheKey: entry.cacheKey,
+    packetDigest: entry.packetDigest,
+    originalAssignmentId: validated.assignmentId,
+    originalAssignmentDigest: validated.assignmentDigest,
+    originalReviewDigest: entry.originalReviewDigest,
+  };
+}
+
+export async function validateCachedReviewReuse({ cacheDir, packet, plan, assignmentId, qualityGate }) {
+  validateOrchestrationPlan(plan);
+  const assignment = plan.assignments.find((entry) => entry.assignmentId === assignmentId);
+  if (!assignment || assignment.type !== "review") throw new Error("Cached review reuse requires a current review assignment.");
+  const cached = await loadReviewCache({ cacheDir, packet, currentAssignment: assignment });
+  if (packet?.bindings?.model !== assignment.model || packet?.bindings?.reasoning !== assignment.reasoning || digest(packet?.bindings?.scope) !== digest(assignment.scope ?? {})) throw new Error("Cached review packet model, reasoning, or scope does not match the current assignment.");
+  if (!cached.reusable) throw new Error(`Cached review is not reusable${cached.criticalBlockers.length ? `: ${cached.criticalBlockers.join(", ")}` : "."}`);
+  if (!qualityGate || qualityGate.schemaVersion !== 1 || qualityGate.model !== requiredOrchestratorModel || qualityGate.model !== assignment.qualityGate?.model || qualityGate.reasoning !== assignment.qualityGate?.reasoning || qualityGate.decision !== "accept-cache-reuse") throw new Error("Cached review reuse requires a current exact Sol quality gate.");
+  if (qualityGate.assignmentId !== assignment.assignmentId || qualityGate.assignmentDigest !== assignment.assignmentDigest || qualityGate.cacheKey !== packet.cacheKey || qualityGate.packetDigest !== packet.packetDigest || qualityGate.originalReviewDigest !== cached.originalReview.artifactDigest) throw new Error("Cached review reuse quality-gate binding mismatch.");
+  if (!/^\d{4}-\d{2}-\d{2}T/u.test(String(qualityGate.reviewedAt ?? ""))) throw new Error("Cached review reuse quality gate reviewedAt must be an ISO timestamp.");
+  return {
+    schemaVersion: 1,
+    kind: "cached-review-reuse",
+    status: "accepted",
+    originalWorkerResult: clone(cached.originalWorkerResult),
+    originalReview: cached.originalReview,
+    applicability: cached.applicability,
+    currentQualityGate: clone(qualityGate),
+    freshWorkerExecutionClaimed: false,
+    freshCaptureClaimed: false,
+  };
 }
 
 export async function writeAtomicJson(filePath, value) {
@@ -445,7 +487,9 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
       };
     }
     if (command === "status") { const manifest = await buildPortfolioManifest(value("--manifest", defaultPortfolioManifestPath)); const ledger = value("--ledger") ? await getLedgerViewFromFile({ ledgerPath: value("--ledger"), view: "all" }) : { assignments: [] }; return projectPortfolioStatus(manifest, ledger); }
-    throw new Error("Use validate-portfolio, compile-plan, or status.");
+    if (command === "cache-review") return cacheValidatedReviewResult({ cacheDir: requiredString(value("--cache-dir"), "--cache-dir"), packet: await readJson(requiredString(value("--packet"), "--packet")), result: await readJson(requiredString(value("--result"), "--result")), plan: await readJson(requiredString(value("--plan"), "--plan")) });
+    if (command === "reuse-review") return validateCachedReviewReuse({ cacheDir: requiredString(value("--cache-dir"), "--cache-dir"), packet: await readJson(requiredString(value("--packet"), "--packet")), plan: await readJson(requiredString(value("--plan"), "--plan")), assignmentId: requiredString(value("--assignment-id"), "--assignment-id"), qualityGate: await readJson(requiredString(value("--quality-gate"), "--quality-gate")) });
+    throw new Error("Use validate-portfolio, compile-plan, status, cache-review, or reuse-review.");
   };
   json().then((result) => console.log(stableJson(result))).catch((error) => { console.error(error.message); process.exitCode = 1; });
 }

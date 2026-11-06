@@ -1,0 +1,98 @@
+{
+  "portal": "Exchange",
+  "url": "https://admin.exchange.microsoft.com/#/",
+  "pageTarget": {
+    "matchHosts": [
+      "admin.exchange.microsoft.com"
+    ],
+    "matchPathPrefixes": [
+      "/"
+    ]
+  },
+  "matchHosts": [
+    "admin.exchange.microsoft.com",
+    "exchange.admin.cloud.microsoft"
+  ],
+  "matchPathPrefixes": [
+    "/beta"
+  ],
+  "inspectionPolicy": {
+    "mode": "observe-only",
+    "prohibitedControlPatterns": [
+      "Add",
+      "Create",
+      "Delete",
+      "Export",
+      "Remove",
+      "Save",
+      "Submit",
+      "Update",
+      "Purchase",
+      "Activate",
+      "Start trial"
+    ]
+  },
+  "captureScripts": false,
+  "postActionSettleMs": 6000,
+  "settleMs": 8000,
+  "maxActions": 6,
+  "actions": [
+    {
+      "type": "navigate",
+      "value": "https://admin.exchange.microsoft.com/#/",
+      "required": true,
+      "highValue": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "3000",
+      "required": true
+    },
+    {
+      "type": "reload",
+      "value": "exchange-legacy-host-bootstrap",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "6000",
+      "required": true
+    },
+    {
+      "type": "capture",
+      "value": "exchange-shell-response-example",
+      "required": true
+    }
+  ],
+  "knownOperationRefresh": {
+    "status": "active",
+    "method": "GET",
+    "host": "admin.exchange.microsoft.com",
+    "routes": [
+      "/beta/Shell"
+    ],
+    "state": "Exchange bounded passive representative states from tools/capture-recipes/exchange-shell-response-example-frontier.json",
+    "actionIndexes": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "approvalExpiresAt": "2026-10-31T08:00:00.000Z",
+    "variableBindingsDigest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "documentationObjectives": [
+      "freshness",
+      "health",
+      "schema-evidence",
+      "usage-observation",
+      "error-example"
+    ],
+    "evidenceIds": [
+      "retained-exchange-beta-primary-witness",
+      "checked-in-ui-state-exchange-shell-response-example-frontier"
+    ],
+    "approvalArtifact": "tools/frontier-approvals/exchange-beta-refresh-20261029.json",
+    "approvalDigest": "cd7c5eb5a7259991257fc0822459c1a10eaedfbfc87008157b41b2ff18669a18"
+  }
+}

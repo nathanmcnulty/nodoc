@@ -1,0 +1,114 @@
+{
+  "portal": "Power Platform",
+  "url": "https://admin.powerplatform.microsoft.com/home",
+  "pageTarget": {
+    "matchHosts": [
+      "admin.powerplatform.microsoft.com"
+    ],
+    "matchPathPrefixes": [
+      "/"
+    ]
+  },
+  "matchHosts": [
+    "api.bap.microsoft.com"
+  ],
+  "matchPathPrefixes": [
+    "/providers/Microsoft.BusinessAppPlatform"
+  ],
+  "inspectionPolicy": {
+    "mode": "observe-only",
+    "prohibitedControlPatterns": [
+      "Add",
+      "Create",
+      "Delete",
+      "Export",
+      "Remove",
+      "Save",
+      "Submit",
+      "Update",
+      "Purchase",
+      "Activate",
+      "Start trial"
+    ]
+  },
+  "captureScripts": false,
+  "postActionSettleMs": 6000,
+  "settleMs": 8000,
+  "maxActions": 9,
+  "actions": [
+    {
+      "type": "navigate",
+      "value": "https://admin.powerplatform.microsoft.com/home",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "6000",
+      "required": true
+    },
+    {
+      "type": "reload",
+      "value": "power-platform-canonical-home",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "8000",
+      "required": true
+    },
+    {
+      "type": "capture",
+      "value": "power-platform-canonical-home",
+      "required": true
+    },
+    {
+      "type": "navigate",
+      "value": "https://admin.powerplatform.microsoft.com/manage/environments",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "6000",
+      "required": true
+    },
+    {
+      "type": "capture",
+      "value": "power-platform-environments",
+      "required": true
+    }
+  ],
+  "knownOperationRefresh": {
+    "status": "active",
+    "method": "GET",
+    "host": "api.bap.microsoft.com",
+    "routes": [
+      "/providers/Microsoft.BusinessAppPlatform/environmentGroups"
+    ],
+    "state": "Use observed /home entry and retain exact /manage/environments state that produced two primary200s.",
+    "actionIndexes": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "approvalExpiresAt": "2026-10-31T09:57:22.444Z",
+    "variableBindingsDigest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "documentationObjectives": [
+      "freshness",
+      "health",
+      "schema-evidence",
+      "usage-observation",
+      "error-example"
+    ],
+    "evidenceIds": [
+      "gap-remediation-plan-20261030:power-platform",
+      "retained-state-provenance-20261030:power-platform"
+    ],
+    "approvalArtifact": "tools/frontier-approvals/power-platform-gap-remediation-20261030.json",
+    "approvalDigest": "c992e6f802391ca1e8b70b91df5808eaa52430a6d6a6b5908e10c949d3c0ad55"
+  }
+}

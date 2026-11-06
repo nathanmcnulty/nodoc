@@ -115,6 +115,19 @@ components:
       required:
         - '@odata.context'
         - value
+      x-nodoc-example-note: >-
+        Type-only redacted representative from the completed 2026-08-10 capture.
+        Each REDACTED_STRING token preserves an observed string field and is
+        neither a literal tenant or service value nor an enum claim.
+      example:
+        '@odata.context': REDACTED_STRING
+        value:
+          - featureName: REDACTED_STRING
+            featureRing: REDACTED_STRING
+            featureRingAgreementVersion: REDACTED_STRING
+            learningConsent: REDACTED_STRING
+            learningConsentAgreementVersion: REDACTED_STRING
+            eligibilityRequirement: REDACTED_STRING
     FeatureProvisionRecord:
       type: object
       properties:
@@ -252,6 +265,15 @@ paths:
         provenance:
           - source: authenticated-portal-capture
             confidence: high
+          - source: retained-native-portal-evidence-reviewed-20261030
+            confidence: high
+            notes:
+              - Exact declared POST clients.config.office.net/intents/v1.0/ComponentGroupIntentShard maps to canonical /intents/v1.0/ComponentGroupIntentShard; current declared server/base/path and original request binding were checked privately.
+              - Retained m365-apps-services-01 action 0 at 2026-10-29T21:45:26.897Z; evidence request-fd32220d510996b31614; HTTP 200 complete body privately verified.
+              - Original capture dates and action attribution are retained. Reusing these bodies for offline review does not create a fresh native observation or clear any historical run-level accounting gaps.
+              - HTTP 200, complete body bytes and limited type checks do not establish application/business success, feature availability, entitlement, provisioning, effective permissions or minimum roles.
+              - This POST was passively observed during the original portal capture, not authored, invoked, probed or replayed by this review. Request shape remains unknown because no complete verified request sidecar is available; replay safety, idempotence, effects and rollback are unproven.
+              - Captured scalar values, role/feature-map keys, credentials, tenant data, response fingerprints, byte lengths and examples are withheld. No new route or requiredness, enum, format, authentication or standalone execution claim follows.
       responses:
         '200':
           description: Shard resolution succeeded
@@ -326,6 +348,12 @@ paths:
         provenance:
           - source: authenticated-portal-capture
             confidence: high
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - GET clients.config.office.net/odbhealth/v1.0/synchealth/reports/versioncount; HTTP 200; action 3; observed 2026-10-29T21:45:45.458Z; complete response privately hash-verified.
+              - Current declared root and populated-item field types match the existing schema; feature names, eligibility identifiers and state values are not reproduced.
+              - Observed HTTP and response behavior does not establish product activation, feature entitlement, tenant grants, minimum roles or standalone execution.
       responses:
         '200':
           description: Version distribution
@@ -356,6 +384,12 @@ paths:
         provenance:
           - source: authenticated-portal-capture
             confidence: high
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - GET clients.config.office.net/onboarding/odata/v1.0/EligibilityRecord; HTTP 200; action 12; observed 2026-10-29T21:46:37.970Z; complete response privately hash-verified.
+              - Current declared root and populated-item field types match the existing schema; feature names, eligibility identifiers and state values are not reproduced.
+              - Observed HTTP and response behavior does not establish product activation, feature entitlement, tenant grants, minimum roles or standalone execution.
       responses:
         '200':
           description: Eligibility record
@@ -400,6 +434,28 @@ paths:
         provenance:
           - source: authenticated-portal-capture
             confidence: high
+          - source: retained-adjacent-portal-transport-reviewed-20261030
+            confidence: high
+            notes:
+              - Historical transport identity is exact GET clients.config.office.net/onboarding/odata/v1.0/Agreementdata, canonical /onboarding/odata/v1.0/Agreementdata under the currently declared backend specification m365-apps-services.
+              - "Original caller capture assignments: m365-apps-inventory. Caller page attribution and assignment labels do not by themselves establish causal execution of the backend owner's UI."
+              - Retained m365-apps-inventory-01 action 2 at 2026-10-29T21:12:57.452Z; evidence request-ee8def61f4da8c584534; HTTP 200.
+              - "Observed query parameter names: $filter. Values and derived page-label strings are withheld; parameter presence is not requiredness testing."
+              - This review used raw transport metadata only. No qualifying complete action-attributed response body was available in the selected retained evidence; bootstrap-only complete responses are excluded as action witnesses. Response/body/schema gaps remain open.
+              - Existing response schemas are unchanged. Any newly listed status is description-only, with no inferred error body, status cause, route removal or availability conclusion.
+              - Original dates/actions remain historical; this is not fresh capture, current tenant validation, business or application health, standalone invocation, role/grant/minimum-permission proof, or an owning-portal workflow test.
+              - GET is the recorded method, not a safety or idempotence determination. No request was authored, invoked, probed or replayed by this offline review; effects and rollback are untested.
+              - Confidence applies only to the verified historical method/host/path/status metadata. Captured values, identifiers, credentials, response fingerprints, body lengths and examples are withheld.
+          - source: inventory-overview-agreementdata-complete-body-reviewed-20261031
+            confidence: high
+            notes:
+              - "A bounded passive capture of the authenticated Microsoft 365 Apps Inventory overview page observed exact GET clients.config.office.net/onboarding/odata/v1.0/Agreementdata under the declared M365 Apps Services backend. The native cached caller session was preserved without switching; a specific tenant identity was not established."
+              - "One normalized API record at reload action 2 and two raw transport records at actions 0 and 2 had complete HTTP 200 JSON collection envelopes. Raw/API references are transport observations of the same existing operation, not new API identities."
+              - "The captured value arrays were empty. Existing AgreementResponse root types and required properties were compatible; no agreement-item field types, requiredness, enums, formats or examples follow from these empty arrays, and the response schema is unchanged."
+              - "Captured at 2026-10-31T07:52:01.837Z; action-attributed evidence request-a64ebb610e2dfd599c9a. The earlier transport-only provenance remains historical; its missing-body statement does not describe this later bounded capture. Bootstrap-only evidence is excluded from the positive action witnesses."
+              - "The observed query parameter name was $filter. Its value is withheld; presence does not establish requiredness, filter semantics, feature eligibility or any agreement state."
+              - "Selected-page root-session and request-frame continuity were checked against the same-action snapshots. This supports the Inventory overview page caller, not child-iframe execution, a native backend workflow, business health, entitlement, minimum roles, grants or standalone API invocation."
+              - "No agreement acceptance or API request/probe was authored by this navigation/reload plan. Passive background effects and absence of tenant changes were not determined. Captured values, identifiers, credentials, raw examples, response fingerprints and body lengths are withheld."
       parameters:
         - $ref: '#/components/parameters/featureFilter'
       responses:
@@ -434,6 +490,12 @@ paths:
         provenance:
           - source: authenticated-portal-capture
             confidence: high
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - GET clients.config.office.net/onboarding/odata/v1.0/FeatureData; HTTP 200; action 12; observed 2026-10-29T21:46:37.970Z; complete response privately hash-verified.
+              - Current declared root and populated-item field types match the existing schema; feature names, eligibility identifiers and state values are not reproduced.
+              - Observed HTTP and response behavior does not establish product activation, feature entitlement, tenant grants, minimum roles or standalone execution.
       responses:
         '200':
           description: Feature definitions
@@ -466,6 +528,12 @@ paths:
         provenance:
           - source: authenticated-portal-capture
             confidence: high
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - GET clients.config.office.net/onboarding/odata/v1.0/FeatureProvisiondata; HTTP 200; action 12; observed 2026-10-29T21:46:37.970Z; complete response privately hash-verified.
+              - Current declared root and populated-item field types match the existing schema; feature names, eligibility identifiers and state values are not reproduced.
+              - Observed HTTP and response behavior does not establish product activation, feature entitlement, tenant grants, minimum roles or standalone execution.
       parameters:
         - $ref: '#/components/parameters/featureFilter'
       responses:

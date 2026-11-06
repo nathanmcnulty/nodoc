@@ -3,9 +3,43 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 
 import {
+  getMediaTypeExample,
   mergeCollectionVariables,
   mergeRequestExamples,
 } from "../generate-postman-collections.mjs";
+
+test("selects inline named media-type examples before schema fallback", () => {
+  assert.equal(getMediaTypeExample({
+    examples: {
+      external: { externalValue: "https://example.invalid/example.json" },
+      observed: { value: false },
+    },
+    schema: { example: "fallback" },
+  }), false);
+
+  assert.deepEqual(getMediaTypeExample({
+    examples: { observedEmpty: { value: [] } },
+    schema: { example: ["fallback"] },
+  }), []);
+
+  assert.equal(getMediaTypeExample({
+    examples: { observedNull: { value: null } },
+    schema: { example: "fallback" },
+  }), null);
+});
+
+test("preserves single media-type example priority and ignores externalValue", () => {
+  assert.equal(getMediaTypeExample({
+    example: "single",
+    examples: { named: { value: "named" } },
+    schema: { example: "schema" },
+  }), "single");
+
+  assert.equal(getMediaTypeExample({
+    examples: { external: { externalValue: "https://example.invalid/example.json" } },
+    schema: { example: "schema" },
+  }), "schema");
+});
 
 test("preserves matching collection variable values while retaining current-only values", () => {
   const current = [

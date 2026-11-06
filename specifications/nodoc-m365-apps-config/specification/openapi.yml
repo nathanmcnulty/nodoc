@@ -117,10 +117,88 @@ components:
               format: uri
               example: https://contoso-my.sharepoint.com/person.aspx
           additionalProperties: true
+        AdminLink:
+          type: object
+          additionalProperties: true
+        AppsLinks:
+          type: array
+          items: {}
+        ClientData:
+          type: string
+        CommunityLink:
+          type: object
+          additionalProperties: true
+        CompanyDisplayName:
+          type: string
+        ConsumerHealthPrivacyLink:
+          type: object
+          additionalProperties: true
+        CorrelationID:
+          type: string
+        CultureName:
+          type: string
+        CurrentMainLinkElementID:
+          type: string
+        Dimensions:
+          type: object
+          additionalProperties: true
+        FeedbackLink:
+          type: object
+          additionalProperties: true
+        FirstName:
+          type: string
+        FlexPaneDimensions:
+          type: object
+          additionalProperties: true
+        FlightName:
+          type: string
+        FlipHelpIcon:
+          type: boolean
+        HasTenantBranding:
+          type: boolean
+        HelpLink:
+          type: object
+          additionalProperties: true
+        IsAuthenticated:
+          type: boolean
+        LastName:
+          type: string
+        LegalLink:
+          type: object
+          additionalProperties: true
+        LogoIconID:
+          type: string
+        LogoNavigationUrl:
+          type: string
+        MyProfileUrl:
+          type: string
+        O365SettingsLink:
+          type: object
+          additionalProperties: true
+        PoweredByText:
+          type: string
+        PrivacyLink:
+          type: object
+          additionalProperties: true
+        SessionID:
+          type: string
+        SignOutLink:
+          type: object
+          additionalProperties: true
+        UserDisplayName:
+          type: string
+        UseSPOBehaviors:
+          type: boolean
+        WorkloadLinks:
+          type: array
+          items: {}
       additionalProperties: true
     UserFlights:
       type: object
-      description: Feature flags and rollout switches used by the portal shell.
+      description: |
+        Feature flags and rollout switches used by the portal shell. A historical action-bound
+        response observed on 2026-08-10 also contained integer, string, and array metadata fields.
+        This documents response shape only and does not assert current tenant or feature state.
       properties:
         enableShell:
           type: boolean
@@ -140,6 +218,16 @@ components:
           type: boolean
         enableDBSLicensing:
           type: boolean
+        inventoryExportPageSize:
+          type: integer
+          nullable: true
+        enableComponentsInModernAppsExperience:
+          type: array
+          nullable: true
+          items: {}
+        inventoryCacheOverviewCardsTTL:
+          type: integer
+          nullable: true
       additionalProperties: true
     TenantAssociation:
       type: object
@@ -556,6 +644,24 @@ externalDocs:
 paths:
   /appConfig/v1.0/ServiceHealth:
     get:
+      x-nodoc-live-capture:
+        source: authenticated Microsoft 365 Apps admin center passive representative states
+        browsedPages:
+          - Microsoft 365 Apps admin center
+      x-nodoc-operation-context:
+        surface: Microsoft 365 Apps admin center
+        workflows:
+          - Observe native requests during approved passive representative portal states.
+        availability:
+          level: user-context
+          notes:
+            - One authenticated portal session; standalone execution, parameter requiredness, effective grants and minimum roles are not established.
+        provenance:
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - "GET config.office.com/appConfig/v1.0/ServiceHealth; HTTP 200; action 2; observed 2026-10-29T20:59:59.183Z; complete response (privately hash-verified)."
+              - Complete current response observed during one passive reload; no all-operation or feature-availability claim.
       tags: [Bootstrap]
       summary: Get service health bootstrap data
       description: Returns service-health bootstrap data used by the portal shell. Observed responses can be an empty array.
@@ -571,6 +677,24 @@ paths:
               example: []
   /appConfig/v1.0/ShellService/GetShellInfo:
     get:
+      x-nodoc-live-capture:
+        source: authenticated Microsoft 365 Apps admin center passive representative states
+        browsedPages:
+          - Microsoft 365 Apps admin center
+      x-nodoc-operation-context:
+        surface: Microsoft 365 Apps admin center
+        workflows:
+          - Observe native requests during approved passive representative portal states.
+        availability:
+          level: user-context
+          notes:
+            - One authenticated portal session; standalone execution, parameter requiredness, effective grants and minimum roles are not established.
+        provenance:
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - "GET config.office.com/appConfig/v1.0/ShellService/GetShellInfo; HTTP 200; action 2; observed 2026-10-29T20:59:59.180Z; complete response (privately hash-verified)."
+              - Complete current response observed during one passive reload; no all-operation or feature-availability claim.
       tags: [Bootstrap]
       summary: Get portal shell metadata
       description: Returns shell metadata, menu links, and environment-specific UX configuration.
@@ -583,6 +707,25 @@ paths:
                 $ref: '#/components/schemas/ShellInfo'
   /appConfig/v1.0/userflights:
     get:
+      x-nodoc-live-capture:
+        source: authenticated Microsoft 365 Apps admin center passive representative states
+        browsedPages:
+          - Microsoft 365 Apps admin center
+      x-nodoc-operation-context:
+        surface: Microsoft 365 Apps admin center
+        workflows:
+          - Observe native requests during approved passive representative portal states.
+        availability:
+          level: user-context
+          notes:
+            - One authenticated portal session; standalone execution, parameter requiredness, effective grants and minimum roles are not established.
+        provenance:
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - "GET config.office.com/appConfig/v1.0/userflights; HTTP 200; action 2; observed 2026-10-29T20:59:58.953Z; complete response (privately hash-verified)."
+              - Complete current response observed during one passive reload; no all-operation or feature-availability claim.
+              - Dynamic flight-map keys and values are not copied; no feature entitlement or rollout state is asserted.
       tags: [Bootstrap]
       summary: Get portal feature flights
       description: Returns client-side feature flags that light up or suppress M365 Apps admin center experiences.
@@ -667,6 +810,25 @@ paths:
                 $ref: '#/components/schemas/GenericObject'
   /policyadmin/v1.0/DbsLicensing/HasDbsLicense:
     get:
+      x-nodoc-live-capture:
+        source: authenticated Microsoft 365 Apps admin center passive representative states
+        browsedPages:
+          - Microsoft 365 Apps admin center
+      x-nodoc-operation-context:
+        surface: Microsoft 365 Apps admin center
+        workflows:
+          - Observe native requests during approved passive representative portal states.
+        availability:
+          level: user-context
+          notes:
+            - One authenticated portal session; standalone execution, parameter requiredness, effective grants and minimum roles are not established.
+        provenance:
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - "GET config.office.com/policyadmin/v1.0/DbsLicensing/HasDbsLicense; HTTP 200; action 2; observed 2026-10-29T20:59:59.180Z; complete response (privately hash-verified)."
+              - Complete current response observed during one passive reload; no all-operation or feature-availability claim.
+              - A Boolean license-state response is state data, not an API error or activation test.
       tags: [Policy Management]
       summary: Check DBS licensing
       description: Indicates whether the tenant has the database-backed settings licensing required by some policy management features.
@@ -734,6 +896,24 @@ paths:
                 $ref: '#/components/schemas/NextReleaseVersion'
   /rollout/v1.0/residency:
     get:
+      x-nodoc-live-capture:
+        source: authenticated Microsoft 365 Apps admin center passive representative states
+        browsedPages:
+          - Microsoft 365 Apps admin center
+      x-nodoc-operation-context:
+        surface: Microsoft 365 Apps admin center
+        workflows:
+          - Observe native requests during approved passive representative portal states.
+        availability:
+          level: user-context
+          notes:
+            - One authenticated portal session; standalone execution, parameter requiredness, effective grants and minimum roles are not established.
+        provenance:
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - "GET config.office.com/rollout/v1.0/residency; HTTP 200; action 2; observed 2026-10-29T20:59:58.754Z; complete response (privately hash-verified)."
+              - Complete current response observed during one passive reload; no all-operation or feature-availability claim.
       tags: [Rollout]
       summary: Get tenant residency metadata
       description: Returns mailbox and data-boundary residency metadata used by rollout and regional feature logic.
@@ -760,6 +940,24 @@ paths:
                 $ref: '#/components/schemas/ServiceProfileRules'
   /ServiceProfile/v1.0/Profiles:
     get:
+      x-nodoc-live-capture:
+        source: authenticated Microsoft 365 Apps admin center passive representative states
+        browsedPages:
+          - Microsoft 365 Apps admin center
+      x-nodoc-operation-context:
+        surface: Microsoft 365 Apps admin center
+        workflows:
+          - Observe native requests during approved passive representative portal states.
+        availability:
+          level: user-context
+          notes:
+            - One authenticated portal session; standalone execution, parameter requiredness, effective grants and minimum roles are not established.
+        provenance:
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - "GET config.office.com/ServiceProfile/v1.0/Profiles; HTTP 200; action 2; observed 2026-10-29T21:00:00.102Z; complete response (privately hash-verified)."
+              - Complete current response observed during one passive reload; no all-operation or feature-availability claim.
       tags: [Servicing Profiles]
       summary: List servicing profiles
       description: Returns the servicing profiles shown in Cloud Update.
