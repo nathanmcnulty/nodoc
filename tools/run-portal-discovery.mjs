@@ -33,7 +33,7 @@ import {
   updateAttempt,
   updateAttemptFromDiscoveryRun,
 } from "./portal-discovery-ledger.mjs";
-import { prepareLedgerAttempt } from "./portal-discovery-dispatch.mjs";
+import { prepareLedgerAttempt, validateCaptureHandoff } from "./portal-discovery-dispatch.mjs";
 import {
   ProcessSupervisionTimeoutError,
   runNode,
@@ -235,6 +235,7 @@ function parseArgs(argv) {
     ledgerPath: defaultLedgerPath,
     assignmentId: null,
     assignmentDigest: null,
+    orchestrationPlan: null,
     attemptNumber: null,
     endpoint: null,
     cdpEndpoint: "http://127.0.0.1:9222",
@@ -312,6 +313,9 @@ function parseArgs(argv) {
       index += 1;
     } else if (argument === "--ledger-path" && next) {
       args.ledgerPath = path.resolve(next);
+      index += 1;
+    } else if (argument === "--orchestration-plan" && next) {
+      args.orchestrationPlan = path.resolve(next);
       index += 1;
     } else if (argument === "--assignment-id" && next) {
       args.assignmentId = next;
@@ -765,6 +769,8 @@ export async function buildCaptureWorkerPacket({
     "--operation-ceiling", args.operationCeiling,
     ...(args.assignmentId ? ["--assignment-id", args.assignmentId] : []),
     ...(args.assignmentDigest ? ["--assignment-digest", args.assignmentDigest] : []),
+    ...(args.orchestrationPlan ? ["--orchestration-plan", args.orchestrationPlan] : []),
+    ...(args.orchestrationPlan ? ["--ledger-path", args.ledgerPath] : []),
     ...(ledgerEndpoint ? ["--endpoint", ledgerEndpoint] : []),
     "--cdp-endpoint", args.cdpEndpoint,
     ...(args.workerId ? ["--worker-id", args.workerId] : []),
@@ -788,6 +794,9 @@ export async function buildCaptureWorkerPacket({
     bindings: {
       assignmentDigest: args.assignmentDigest,
       assignmentId: args.assignmentId,
+      workerId: args.workerId ?? null,
+      orchestrationPlanSha256: args.identityLinkage?.planSha256 ?? null,
+      identityLinkage: args.identityLinkage ?? { status: "legacy-identity-unknown", unattendedPromotionEligible: false },
       noveltyPlanSha256: noveltyPlan ? sha256(stableJson(noveltyPlan)) : null,
       knownOperationRefreshPlanSha256: knownOperationRefreshPlan ? sha256(stableJson(knownOperationRefreshPlan)) : null,
       planKind: noveltyPlan ? "discovery-novelty" : knownOperationRefreshPlan ? "known-operation-refresh" : "bounded-recipe",
@@ -929,6 +938,7 @@ async function persistTerminalRun(args, runState) {
     model: args.model,
     reasoning: args.reasoning,
     workerId: args.workerId,
+    assignmentDigest: args.assignmentDigest,
     discoveryRun: runState,
   });
 }
@@ -1163,6 +1173,7 @@ async function runLedgerMode(args) {
     console.log(JSON.stringify(await claimAssignment({
       ledgerPath: args.ledgerPath,
       assignmentId: args.assignmentId,
+      assignmentDigest: args.assignmentDigest,
       endpoint: args.endpoint,
       phase: args.phase,
       profile: args.profile,
@@ -1177,6 +1188,7 @@ async function runLedgerMode(args) {
     console.log(JSON.stringify(await resumeAttempt({
       ledgerPath: args.ledgerPath,
       assignmentId: args.assignmentId,
+      assignmentDigest: args.assignmentDigest,
       artifactDir: args.artifacts,
       phase: args.phase,
       workerId: args.workerId,
@@ -1195,6 +1207,8 @@ async function runLedgerMode(args) {
     const common = {
       ledgerPath: args.ledgerPath,
       assignmentId: args.assignmentId,
+      assignmentDigest: args.assignmentDigest,
+      workerId: args.workerId,
       attemptNumber,
       artifactDir: args.artifacts || undefined,
       model: args.model,
@@ -1322,6 +1336,9 @@ async function main() {
     knownOperationRefreshPlan = buildKnownOperationRefreshPlan(selectedRecipe, { required: args.requireKnownRefresh, baselineOperations: derivedBaseline.operations });
     knownOperationRefreshApproval = await verifyKnownOperationRefreshApproval(knownOperationRefreshPlan, { requireLiveAuthority: args.phase !== "analyze" });
     actionBudget = buildActionBudget(selectedRecipe);
+    try {
+      args.identityLinkage = await validateCaptureHandoff({ args, specRecord, recipePath, knownOperationRefreshPlan, actionBudget });
+    } catch (error) { error.code = "capture-handoff-invalid"; throw error; }
   } catch (error) {
     const runState = {
       artifacts: args.artifacts,
@@ -1330,7 +1347,7 @@ async function main() {
       startedAt: new Date().toISOString(),
       status: "blocked",
       blocker: {
-        code: ["action-budget-exceeded", "capture-prerequisite-missing", "novelty-frontier-invalid", "recipe-target-invalid", "unsafe-recipe-action", "response-body-policy-unbound", "endpoint-invalid", "known-refresh-approval-not-executable"].includes(error?.code)
+        code: ["action-budget-exceeded", "capture-prerequisite-missing", "novelty-frontier-invalid", "recipe-target-invalid", "unsafe-recipe-action", "response-body-policy-unbound", "endpoint-invalid", "known-refresh-approval-not-executable", "capture-handoff-invalid"].includes(error?.code)
           ? error.code
           : /operation|approval|ceiling/iu.test(error?.message ?? "")
             ? "mutation-authorization-required"
@@ -1477,6 +1494,10 @@ async function main() {
   }
 
   const runState = {
+    assignmentId: args.assignmentId,
+    assignmentDigest: args.assignmentDigest,
+    workerId: args.workerId,
+    identityLinkage: args.identityLinkage,
     artifacts: args.artifacts,
     brief,
     phase: args.phase,
@@ -1505,6 +1526,7 @@ async function main() {
       ? {
           assignmentId: args.assignmentId,
           assignmentDigest: args.assignmentDigest,
+          workerId: args.workerId,
           attemptNumber: args.attemptNumber,
           ledgerPath: args.ledgerPath,
         }

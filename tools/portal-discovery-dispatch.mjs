@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
+import { validateManagedCaptureAssignment } from "./portal-discovery-control-plane.mjs";
 
 import {
   claimAssignment,
@@ -14,6 +15,39 @@ import {
 
 async function recipeDigest(recipePath) {
   return createHash("sha256").update(await readFile(recipePath, "utf8")).digest("hex");
+}
+
+export async function validateCaptureHandoff({ args, specRecord, recipePath, knownOperationRefreshPlan, actionBudget }) {
+  if (!args.orchestrationPlan) {
+    if (args.assignmentDigest) throw new Error("An assignment digest requires its persisted orchestration plan; legacy direct identity remains unknown.");
+    if (args.assignmentId && !args.noLedger) {
+      const view = await getLedgerViewFromFile({ ledgerPath: args.ledgerPath, filters: { assignmentId: args.assignmentId } });
+      if (view.assignments[0]?.assignmentDigest) throw new Error("Managed ledger assignment requires its persisted orchestration plan.");
+    }
+    return { status: "legacy-identity-unknown", unattendedPromotionEligible: false };
+  }
+  if (args.noLedger || !["plan", "all"].includes(args.phase) || !args.assignmentId || !args.assignmentDigest || !args.workerId || !args.requireKnownRefresh) {
+    throw new Error("Managed handoff requires plan, assignment ID/digest, worker ID, ledger and known-refresh all/plan mode.");
+  }
+  const bytes = await readFile(args.orchestrationPlan);
+  const plan = JSON.parse(bytes);
+  const assignment = validateManagedCaptureAssignment(plan, { ...args, specId: specRecord.specId, recipePath,
+    recipeSha256: await recipeDigest(recipePath), refreshPlan: knownOperationRefreshPlan, actionBudget });
+  const view = await getLedgerViewFromFile({ ledgerPath: args.ledgerPath, filters: { assignmentId: args.assignmentId } });
+  if (args.phase !== "plan" || view.assignments.length) {
+    assertManagedLedgerAssignment(view.assignments[0], args, assignment.managedCapture.recipeSha256);
+  }
+  return { status: "managed-bound", unattendedPromotionEligible: false, requiresManagedResultValidation: true, planSha256: createHash("sha256").update(bytes).digest("hex") };
+}
+
+function assertManagedLedgerAssignment(assignment, args, digest) {
+  if (!assignment || assignment.assignmentDigest !== args.assignmentDigest || assignment.workerId !== args.workerId
+    || assignment.recipeDigest !== digest || assignment.endpoint !== normalizeEndpoint(args.endpoint) || assignment.profile !== args.profile
+    || assignment.latestAttempt.model !== args.model || assignment.latestAttempt.reasoning !== args.reasoning
+    || assignment.phase !== "all" || !["queued", "running"].includes(assignment.latestAttempt.status)
+    || (assignment.latestAttempt.status === "running" && assignment.latestAttempt.lease?.owner !== args.workerId)) {
+    throw new Error("Managed ledger assignment/worker/lease does not match the planned handoff.");
+  }
 }
 
 export async function prepareLedgerAttempt(args, specRecord, recipePath) {
@@ -45,9 +79,15 @@ export async function prepareLedgerAttempt(args, specRecord, recipePath) {
     });
   }
   args.assignmentId = assignmentId;
+  if (args.orchestrationPlan) {
+    if (createHash("sha256").update(await readFile(args.orchestrationPlan)).digest("hex") !== args.identityLinkage?.planSha256) throw new Error("Orchestration plan changed after preflight validation.");
+    const view = await getLedgerViewFromFile({ ledgerPath: args.ledgerPath, filters: { assignmentId } });
+    assertManagedLedgerAssignment(view.assignments[0], args, digest);
+  }
   const claimInput = {
     ledgerPath: args.ledgerPath,
     assignmentId,
+    assignmentDigest: args.assignmentDigest,
     endpoint,
     phase: args.phase,
     profile: args.profile,
@@ -103,6 +143,7 @@ export async function prepareLedgerAttempt(args, specRecord, recipePath) {
       await resumeAttempt({
         ledgerPath: args.ledgerPath,
         assignmentId,
+        assignmentDigest: args.assignmentDigest,
         artifactDir: args.artifacts,
         phase: args.phase,
         workerId: args.workerId,
