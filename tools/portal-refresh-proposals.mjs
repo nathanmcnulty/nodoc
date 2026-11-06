@@ -188,7 +188,8 @@ export async function reportRefreshMergeEligibility({ manifest, review = null, c
       const completed = [];
       for (const entry of manifest.changes ?? []) if (hash(await readFile(path.join(repoRoot, entry.destination))) === entry.proposalSha256) completed.push(entry.destination);
       const checked = validateSourceReview({ ...sourceReview, root: repoRoot, completed });
-      if (checked.manifestSha256 !== manifestDigest || hash(json(review)) !== checked.reviewSha256) throw new Error("Review mismatch.");
+      const boundReview = JSON.parse(await readFile(sourceReview.reviewPath, "utf8"));
+      if (checked.manifestSha256 !== manifestDigest || !isDeepStrictEqual(review, boundReview)) throw new Error("Review mismatch.");
     } catch { reasons.push("source-review-receipt-invalid-or-stale"); }
   }
   if (!manifest.changes?.length) reasons.push("no-proposed-source-changes");

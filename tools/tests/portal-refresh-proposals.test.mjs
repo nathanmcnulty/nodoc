@@ -205,7 +205,9 @@ test("a synthetic flag cannot make captured scalar values eligible despite bound
     const review = { decision: "accepted", reviewedManifestSha256: manifestDigest, sanitized: true, completeEvidence: true,
       model: portalDiscoveryModelPolicy.offlineReview.model, reasoning: portalDiscoveryModelPolicy.offlineReview.reasoning };
     const sourceReview = { manifestPath: path.join(outputDir, "manifest.json"), reviewPath: path.join(outputDir, "fixture-review.json"), receiptPath: path.join(outputDir, "fixture-receipt.json") };
-    await writeFile(sourceReview.reviewPath, serialized(review));
+    // The existing receipt binds exact bytes; valid review JSON need not use
+    // the proposal writer's indentation, key order or newline convention.
+    await writeFile(sourceReview.reviewPath, JSON.stringify(review, null, 4).replaceAll("\n", "\r\n") + "\r\n");
     createSourceReviewReceipt({ root: repoRoot, ...sourceReview });
     const checks = { sourceRevision: "fixture-revision", manifestDigest,
       appliedChanges: Object.fromEntries(manifest.changes.map(change => [change.destination, change.proposalSha256])),
