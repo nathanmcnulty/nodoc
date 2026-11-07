@@ -5,7 +5,7 @@ import path from "node:path";
 import os from "node:os";
 import test from "node:test";
 import { analyzeRefreshCapture, compareRefreshResponse, groupRefreshEnrichments, inferRefreshSchema, loadVerifiedRefreshAnalysis, matchRefreshOperation, responseHealth, syntheticRefreshExample } from "../portal-refresh.mjs";
-import { buildSpecRouteInventory } from "../spec-quality-lib.mjs";
+import { buildSpecRouteInventory, loadBundledSpecification, repoRoot } from "../spec-quality-lib.mjs";
 import { writeResponseBodySidecar } from "../response-body-sidecars.mjs";
 import { aggregateInteractionHealth } from "../discovery-capture-policy.mjs";
 
@@ -65,8 +65,8 @@ test("one immutable capture feeds all axes, repeats reuse analysis, tampering fa
   const artifacts = path.join(root, "capture"), cacheDir = path.join(root, "cache");
   await mkdir(artifacts);
   const inventory = await buildSpecRouteInventory();
-  const spec = inventory.find(entry => entry.specId === "purview");
-  const operation = spec.operations.find(entry => entry.method === "GET" && !entry.path.includes("{"));
+  const spec = inventory.find(entry => entry.specId === "power-platform");
+  const operation = spec.operations.find(entry => entry.method === "GET" && entry.path === "/providers/Microsoft.BusinessAppPlatform/t2tmigrationapprovals");
   assert.ok(operation);
   const url = `${operation.serverUrls[0].replace(/\/$/u, "")}${operation.path}`;
   const sidecar = await writeResponseBodySidecar({ artifactDir: artifacts, evidenceId: "refresh-fixture", sanitizedBody: '{"count":4,"items":[]}' });
@@ -75,7 +75,7 @@ test("one immutable capture feeds all axes, repeats reuse analysis, tampering fa
   const files = {
     "api-records.json": [{ ...records[0], url: "https://other.example/aggregated-loss" }],
     "raw-requests.json": records,
-    "summary.json": { portal: "Purview", interactionHealth: aggregateInteractionHealth([]), actionValidation: { requiredActionFailures: [] } },
+    "summary.json": { portal: spec.title, interactionHealth: aggregateInteractionHealth([]), actionValidation: { requiredActionFailures: [] } },
     "action-results.json": [{ actionIndex: 0, type: "capture", required: true, result: {} }],
   };
   for (const [filename, data] of Object.entries(files)) await writeFile(path.join(artifacts, filename), JSON.stringify(data));
@@ -94,6 +94,16 @@ test("one immutable capture feeds all axes, repeats reuse analysis, tampering fa
   assert.equal(first.analysis.captureComplete, true);
   assert.equal(first.analysis.recordSource, "raw-requests.json");
   assert.ok(first.analysis.observations.some(entry => entry.path === operation.path && entry.bodyVerified && entry.attributed));
+  // Keep the absent-media regression independent of real schema/example additions.
+  const fixtureSpec = await loadBundledSpecification(path.join(repoRoot, spec.specPath));
+  delete fixtureSpec.paths[operation.path].get.responses["200"].content;
+  const fixturePath = path.join(root, "missing-media.yml");
+  await writeFile(fixturePath, JSON.stringify(fixtureSpec));
+  const fixtureInventory = structuredClone(inventory);
+  fixtureInventory.find(entry => entry.specId === spec.specId).specPath = path.relative(repoRoot, fixturePath);
+  const missingMedia = await analyzeRefreshCapture({ artifacts, cacheDir, specId: spec.specId, inventory: fixtureInventory });
+  assert.equal(missingMedia.analysis.enrichments.find(entry => entry.path === operation.path).comparison, "schema-missing");
+  assert.equal(missingMedia.analysis.enrichments.find(entry => entry.path === operation.path).exampleMissing, true, "An absent media definition is an example gap, not a supplied example.");
   assert.ok(first.analysis.candidateQueue.candidates.some(entry => entry.documentationStatus === "documented"));
   assert.ok(first.analysis.groupedHandoff.manifest);
   for (const [filename, bytes] of before) assert.equal(await readFile(path.join(artifacts, filename), "utf8"), bytes);
@@ -103,6 +113,16 @@ test("one immutable capture feeds all axes, repeats reuse analysis, tampering fa
   const changed = await analyzeRefreshCapture({ artifacts, cacheDir, specId: spec.specId, inventory: changedInventory });
   assert.equal(changed.reused, false);
   assert.notEqual(changed.cacheKey, first.cacheKey);
+  const rawPath = path.join(artifacts, "raw-requests.json"), originalRaw = await readFile(rawPath, "utf8");
+  await writeFile(rawPath, JSON.stringify([{...records[0], status: 404}]));
+  const changedEvidence = await analyzeRefreshCapture({artifacts, cacheDir, specId: spec.specId, inventory});
+  assert.equal(changedEvidence.reused, false);
+  assert.notEqual(changedEvidence.cacheKey, first.cacheKey);
+  assert.equal(changedEvidence.analysis.observations[0].health, "http-error-observed");
+  assert.equal(changedEvidence.analysis.observations[0].removalRecommended, false);
+  assert.equal(changedEvidence.analysis.observations[0].observedAt, records[0].observedAt);
+  await assert.rejects(loadVerifiedRefreshAnalysis(first.analysisReference.analysisPath), /stale/u);
+  await writeFile(rawPath, originalRaw);
   const cacheFile = path.join(cacheDir, `${first.cacheKey}.json`), cached = JSON.parse(await readFile(cacheFile));
   cached.analysis.captureComplete = false;
   await writeFile(cacheFile, JSON.stringify(cached));
