@@ -321,6 +321,76 @@ Actual automatic merging is always disabled. There is no merge action or
 GitHub credential in this path. Review these proposed rules and explicitly
 authorize any future automation scope before implementing merge behavior.
 
+### Proposed first lane: known GET synthetic examples
+
+This lane is a proposal, not enabled automation. Its first concrete candidate is
+the missing endpoint-DLP count example for Purview's existing
+`GET /edlp/dlpInternalApi/api/cloud/dlp/machines/count` response. The retained
+complete count observations support manual review, but lack the full managed
+identity chain required for unattended promotion. The private proposal stays
+held and unapplied. Do not reconstruct historical identities or add duplicate
+examples to manufacture an eligible change.
+
+The initial allowlist is only that Purview operation, through the existing
+`https://purview.microsoft.com/apiproxy` caller/base and exact canonical path
+above. It does not include direct Graph access or another host/operation;
+expanding the allowlist would need a new scope approval.
+
+The initial scope would be one existing GET operation per PR, one existing
+HTTP 200 `application/json` representation, and only a new
+`examples.syntheticRefresh` entry. Its values must be synthesized, and every
+property name must already occur at the same authored model location. No new
+routes, schemas, parameters, servers, replacements, constraints, composition,
+dynamic dictionaries, error responses or incomplete bodies belong in this lane.
+The matching generated Postman collection and necessary generated data must
+validate against the exact final source; other source changes require review.
+
+Before any future merge, require all existing per-edit promotion checks and:
+
+- One accepted, file-backed managed capture: exact plan, runtime packet,
+  worker/claim, recipe actions, safety accounting, ledger and immutable complete
+  sidecars. Approval must have authorized that actual execution. Current access,
+  minimum roles and tenant state are not inferred from historical observations.
+- A current Node 24 analysis bound to exact capture and source bytes, with
+  successful semantic health, exact owner/method/route/status/media, original
+  observation times, no alias side effects, and no unrelated edits.
+- Actual independent evidence/privacy review plus the separate coordinator
+  source-acceptance gate. Existing protected-branch and required human-review
+  rules remain in force. Fingerprint scanning alone cannot establish scalar
+  privacy or credential absence.
+- Passing discovery, Windows argument-safety, spec, metadata/evaluation, pinned
+  Graph, generated-data, all-collection Postman, build, typecheck and privacy
+  checks on the exact final head/tree; CodeQL findings must be resolved or
+  independently dispositioned without weakening protections.
+- A private audit record binding before/proposal hashes, analysis/input/analyzer
+  digests, capture/controller proofs, actual review hashes, final CI run/job
+  outcomes and the dry-run decision. Public summaries expose only safe trace
+  references and original observation times.
+- Separate explicit user approval of this versioned scope before implementing
+  merge execution. Any future enable record must be rechecked immediately before
+  merging and be revocable. Disable on revocation, expired execution authority,
+  source/head drift, unknown or failing checks, missing proof, privacy findings
+  or any out-of-scope diff. No recurring collection, expanded credentials or
+  portal writes follow from lane approval.
+
+If a future current-state verification of the pending Purview count objective
+is authorized, use one bounded managed capture with a newly reviewed exact
+approval; stop if cached access is unusable. That would create new evidence,
+not repair the old identities. The current milestone needs no new collection.
+
+### Repeating and recovering proposal publication
+
+Prepare against a verified analysis and a frozen source. Repeating identical
+inputs in the same private output directory reuses exact manifest/proposal
+bytes without modifying them or creating duplicates. Publication uses the
+existing private atomic no-replace mechanism, with the manifest written last.
+If interrupted before that commit point, an identical retry can reuse complete
+orphaned proposal files. Differing bytes, changed evidence/source, or a completed
+manifest with a missing file fail closed and require inspection; nothing is
+silently overwritten or repaired. Source application changes analysis bindings:
+reanalyse afterward, preserve the old receipts, and do not report a new capture
+or renew observation dates merely because analysis ran again.
+
 ## Reconciliation with #225
 
 Public recipe evaluation summaries retain opaque artifact references and exact

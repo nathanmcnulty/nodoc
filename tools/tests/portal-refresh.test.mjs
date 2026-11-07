@@ -105,6 +105,16 @@ test("one immutable capture feeds all axes, repeats reuse analysis, tampering fa
   const changed = await analyzeRefreshCapture({ artifacts, cacheDir, specId: spec.specId, inventory: changedInventory });
   assert.equal(changed.reused, false);
   assert.notEqual(changed.cacheKey, first.cacheKey);
+  const rawPath = path.join(artifacts, "raw-requests.json"), originalRaw = await readFile(rawPath, "utf8");
+  await writeFile(rawPath, JSON.stringify([{...records[0], status: 404}]));
+  const changedEvidence = await analyzeRefreshCapture({artifacts, cacheDir, specId: spec.specId, inventory});
+  assert.equal(changedEvidence.reused, false);
+  assert.notEqual(changedEvidence.cacheKey, first.cacheKey);
+  assert.equal(changedEvidence.analysis.observations[0].health, "http-error-observed");
+  assert.equal(changedEvidence.analysis.observations[0].removalRecommended, false);
+  assert.equal(changedEvidence.analysis.observations[0].observedAt, records[0].observedAt);
+  await assert.rejects(loadVerifiedRefreshAnalysis(first.analysisReference.analysisPath), /stale/u);
+  await writeFile(rawPath, originalRaw);
   const cacheFile = path.join(cacheDir, `${first.cacheKey}.json`), cached = JSON.parse(await readFile(cacheFile));
   cached.analysis.captureComplete = false;
   await writeFile(cacheFile, JSON.stringify(cached));
