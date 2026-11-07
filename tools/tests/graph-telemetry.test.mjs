@@ -16,11 +16,11 @@ test("Graph telemetry expands batch members, parameterizes identifiers, and comp
       mimeType: "application/json",
       path: "/beta/$batch",
       requestBodySamples: [JSON.stringify({ requests: [
-        { id: "1", method: "GET", url: "/deviceManagement/managedDevices/847b5907-ca15-40f4-b171-eb18619dbfab?$select=id,userPrincipalName" },
+        { id: "1", method: "GET", url: "/deviceManagement/managedDevices/11111111-1111-4111-8111-111111111111?$select=id,userPrincipalName" },
         { id: "2", method: "GET", url: "/deviceManagement/undocumentedFunction(scope='all')" },
       ] })],
       responseBodySample: JSON.stringify({ responses: [
-        { id: "1", status: 200, headers: { "Content-Type": "application/json" }, body: { id: "847b5907-ca15-40f4-b171-eb18619dbfab", userPrincipalName: "person@example.test" } },
+        { id: "1", status: 200, headers: { "Content-Type": "application/json" }, body: { id: "11111111-1111-4111-8111-111111111111", userPrincipalName: "person@example.test" } },
         { id: "2", status: 403, body: { error: { code: "Forbidden", message: "tenant-specific text" } } },
       ] }),
       status: 200,
@@ -98,7 +98,7 @@ test("Graph telemetry recognizes portal and OpenAPI spellings of Graph functions
   const telemetry = buildGraphTelemetry({
     apiRecords: [
       { method: "GET", url: "https://graph.microsoft.com/beta/deviceManagement/getEffectivePermissions" },
-      { method: "GET", url: "https://graph.microsoft.com/beta/organization('847b5907-ca15-40f4-b171-eb18619dbfab')" },
+      { method: "GET", url: "https://graph.microsoft.com/beta/organization('11111111-1111-4111-8111-111111111111')" },
     ],
     betaContract: { paths: {
       "/deviceManagement/getEffectivePermissions()": { get: {} },

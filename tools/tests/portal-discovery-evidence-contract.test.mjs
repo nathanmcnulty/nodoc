@@ -213,12 +213,12 @@ test("a portal UI may refresh an operation on a different owned capture host", (
 
 test("resolved hosts match bundled server-variable ownership suffixes", () => {
   const value = recipe();
-  value.knownOperationRefresh.host = "sharemylabs-admin.sharepoint.com";
-  value.matchHosts = ["sharemylabs-admin.sharepoint.com"];
+  value.knownOperationRefresh.host = "examplefixture-admin.sharepoint.com";
+  value.matchHosts = ["examplefixture-admin.sharepoint.com"];
   const plan = buildKnownOperationRefreshPlan(value, {
     baselineOperations: [{ method: "GET", path: "/api/settings", hosts: ["server-variable-admin.sharepoint.com"] }],
   });
-  assert.equal(plan.host, "sharemylabs-admin.sharepoint.com");
+  assert.equal(plan.host, "examplefixture-admin.sharepoint.com");
 });
 
 test("known-operation evidence requires action attribution and verified complete sidecars for schema evidence", () => {

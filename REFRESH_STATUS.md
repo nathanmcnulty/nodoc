@@ -81,6 +81,18 @@ Actual collection exposed and recovered from nonempty output storage and endpoin
 
 The final privacy scan covers each available declared capture root individually, including orphan/failed physical bodies within those roots: 28 roots passed, 3 were unavailable, and 0 failed. It checked 1,066 physical bodies against 668 public source/build text files, with no exact response-fingerprint or explicit response-length matches. The two missing initial roots and Entra IDGov's root without retained bodies are excluded from the pass claim; the wider historical source-mirror tree is also unqualified. A physical-body privacy pass does not make an incomplete capture admissible. Independent review separately checks property names and scalar sanitization. New public summaries omit runtime identifiers while retaining immutable evidence references.
 
+Independent raw review inspected all five fresh request files and 35 physical
+response bodies. Private tenant, principal and resource data is retained. No
+recognized credential-value candidates were detected; heuristic scanning does
+not certify credential absence. Four confirmed raw-derived values already
+present at the PR base were removed from current public text: tenant,
+subscription and principal identifiers, plus a tenant-specific test host.
+Related user-profile examples now use synthetic values. Historical native-page
+examples touched by this cleanup are visibly sanitized URL templates, not exact
+private URLs. Original raw evidence and source-review receipts remain intact.
+Existing Git history still contains the earlier public values; it was not
+rewritten. The reviewed scope does not certify all historical scalar examples.
+
 The existing controller, recipes, ledger and source-review process remain the orchestration path. Dry-run merge eligibility requires exact per-edit evidence, sanitized additive changes, current managed identity and passing final checks. Actual automatic merging is disabled. Next steps are review of those rules and explicit future automation scope, current approvals for missing-state objectives, live authentication-expiry/interruption qualification, and manual resolution of unsupported contracts. Reuse valid captures before collecting again.
 
 See [the workflow](REFRESH_WORKFLOW.md) for commands, checkpoints, storage, evidence handoffs, promotion and #225 reconciliation. Private raw bodies, runtime identifiers, tenant hosts and local evidence paths are excluded from this report.

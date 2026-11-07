@@ -51,7 +51,7 @@ components:
         information and user-flow routes, use the tenant object ID (GUID) or
         tenant domain name. Policy and Azure resource routes use the tenant
         domain value in this same query parameter.
-      example: 847b5907-ca15-40f4-b171-eb18619dbfab
+      example: 11111111-1111-4111-8111-111111111111
     tenantDomain:
       name: tenantId
       in: query
@@ -176,7 +176,7 @@ components:
           description: The Azure AD tenant object ID.
           type: string
           format: uuid
-          example: 847b5907-ca15-40f4-b171-eb18619dbfab
+          example: 11111111-1111-4111-8111-111111111111
         tenantCountryCode:
           description: Two-letter country code for the tenant's data residency.
           type: string
@@ -191,7 +191,7 @@ components:
           description: The linked Azure subscription ID.
           type: string
           format: uuid
-          example: 43babb60-9e73-4dc8-b769-4401c01aad73
+          example: 22222222-2222-4222-8222-222222222222
         resourceGroupName:
           description: The Azure resource group containing the B2C resource.
           type: string
@@ -204,7 +204,7 @@ components:
           description: The tenant ID that owns the Azure subscription (may differ from B2C tenant).
           type: string
           format: uuid
-          example: 847b5907-ca15-40f4-b171-eb18619dbfab
+          example: 11111111-1111-4111-8111-111111111111
         billingType:
           description: |
             Billing model for the B2C tenant.
@@ -471,13 +471,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/TenantResource'
               example:
-                tenantObjectId: 847b5907-ca15-40f4-b171-eb18619dbfab
+                tenantObjectId: 11111111-1111-4111-8111-111111111111
                 tenantCountryCode: US
                 subscriptionState: 0
-                subscriptionId: 43babb60-9e73-4dc8-b769-4401c01aad73
+                subscriptionId: 22222222-2222-4222-8222-222222222222
                 resourceGroupName: rg-contoso-b2c
                 resourceName: contoso.onmicrosoft.com
-                subscriptionTenantId: 847b5907-ca15-40f4-b171-eb18619dbfab
+                subscriptionTenantId: 11111111-1111-4111-8111-111111111111
                 billingType: MAU
                 location: United States
                 isGoLocalEnabled: false

@@ -330,6 +330,15 @@ The private controller still requires the full assignment, worker, plan, packet
 and ledger identity; omitting an ID from a publication summary never satisfies
 that controller gate.
 
+Treat raw request/response content as sensitive even after a fingerprint scan
+passes. Exact body hashes and response-length checks do not detect arbitrary
+scalar copies or unknown credentials. Independent review must inspect scalar
+context and the public boundary. Sanitized historical native-page URLs are
+templates; exact originals remain private. Privacy replacements are synthetic
+examples and do not establish a changed contract, fresh authentication or new
+operation coverage. Keep original evidence and application receipts rather than
+rewriting their hashes to fit a later sanitization.
+
 The starting point is main after merged #226 (`db6c17f`). #225 (`f145adb`) has
 real capture and generated-collection conflicts; it is not merged wholesale.
 Its useful private error-variant approach is adapted into current capture
