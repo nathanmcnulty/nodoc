@@ -489,12 +489,12 @@ export const generatedSpecDataByTitle = {
     "headerProfileCount": 0,
     "operationContextCount": 9,
     "requestExampleCount": 0,
-    "successResponseExampleCount": 2,
-    "evidenceMentionCount": 32,
+    "successResponseExampleCount": 3,
+    "evidenceMentionCount": 33,
     "maturity": {
-      "label": "Growing",
-      "tone": "warning",
-      "description": "Solid structure with examples, but still meaningful debt to reduce."
+      "label": "Advanced",
+      "tone": "success",
+      "description": "Low placeholder debt with multiple response examples."
     }
   },
   "Power Platform": {
@@ -522,12 +522,12 @@ export const generatedSpecDataByTitle = {
     "headerProfileCount": 2,
     "operationContextCount": 16,
     "requestExampleCount": 1,
-    "successResponseExampleCount": 2,
-    "evidenceMentionCount": 681,
+    "successResponseExampleCount": 3,
+    "evidenceMentionCount": 682,
     "maturity": {
-      "label": "Growing",
-      "tone": "warning",
-      "description": "Solid structure with examples, but still meaningful debt to reduce."
+      "label": "Advanced",
+      "tone": "success",
+      "description": "Low placeholder debt with multiple response examples."
     }
   },
   "Purview": {

@@ -331,6 +331,11 @@ identity chain required for unattended promotion. The private proposal stays
 held and unapplied. Do not reconstruct historical identities or add duplicate
 examples to manufacture an eligible change.
 
+That historical Purview run is also blocked by missing action accounting at
+indexes 0 and 5. The selected count observations at action 8 are independently
+verified; they do not make the entire run successful. A future lane proof needs
+a completed managed lifecycle with complete action accounting as well as identity.
+
 The initial allowlist is only that Purview operation, through the existing
 `https://purview.microsoft.com/apiproxy` caller/base and exact canonical path
 above. It does not include direct Graph access or another host/operation;
