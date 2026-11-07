@@ -31,7 +31,9 @@ export function validateRecipeEvaluationManifest(manifest, currentBindings) {
     } else {
       if (!Array.isArray(entry.terminals) || !entry.terminals.length) fail("reviewed disposition lacks terminal evidence");
       for (const terminal of entry.terminals) {
-        if (!idPattern.test(terminal.assignmentId ?? "") || typeof terminal.captureComplete !== "boolean"
+        // Public summaries can omit private runtime identifiers; the immutable
+        // artifact reference remains mandatory. Runtime handoffs require IDs.
+        if ((Object.hasOwn(terminal, "assignmentId") && !idPattern.test(terminal.assignmentId ?? "")) || typeof terminal.captureComplete !== "boolean"
             || !["completed", "blocked", "failed"].includes(terminal.status)) fail("invalid terminal outcome");
         artifact(terminal.artifact, "terminal");
       }

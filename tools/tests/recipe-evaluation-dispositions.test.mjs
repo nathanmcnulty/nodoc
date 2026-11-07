@@ -42,3 +42,14 @@ test("an unexecuted recipe needs an explicit evidence-bound blocked prerequisite
   input.capturePrerequisite.nextRequirement = "different requirement";
   assert.throws(() => validate(input), /prerequisite/u);
 });
+
+test("public terminal summaries can omit runtime IDs but must retain immutable evidence", () => {
+  const input = entry();
+  delete input.terminals[0].assignmentId;
+  assert.equal(validate(input).size, 1);
+  for (const assignmentId of [null, "", "C:/private/path"]) {
+    assert.throws(() => validate({...input, terminals: [{...input.terminals[0], assignmentId}]}), /terminal/u);
+  }
+  delete input.terminals[0].artifact;
+  assert.throws(() => validate(input), /terminal reference/u);
+});

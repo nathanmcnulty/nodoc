@@ -20,10 +20,51 @@ tenant authentication, private capture cache or floating upstream contract.
 
 ## Fresh capture readiness and storage
 
-Use the existing reviewed recipe, owner, worker packet and ledger process in the
-runbook. Pass an exact recipe and require successful public CLI planning before
-browser allocation. A full execution binding does not override an explicit
-denial of live authority, an unperformed review, or a pending proposal.
+Use the existing controller's managed known-refresh path, then the reviewed
+owner/worker process in the runbook. Set `$node24` to the installed Node 24
+binary and use that same binary for collection and analysis. This campaign used
+24.22.1; the exact runtime is part of the analysis cache binding.
+
+Compile, persist and explicitly enqueue one reviewed recipe without allocating
+a browser. Use a fresh private plan filename and ledger outside the repository:
+
+```powershell
+& $node24 tools/portal-discovery-control-plane.mjs compile-plan `
+  --managed-known-refresh --manifest tools/portal-discovery-portfolio.json `
+  --portal m365-admin --recipe tools/capture-recipes/m365-admin-shell-loop-20261106.json `
+  --worker-id ACTUAL-WORKER-ID --endpoint https://admin.cloud.microsoft `
+  --output C:/private/refresh/plan.json --ledger C:/private/refresh/ledger.jsonl --apply
+```
+
+Read the capture assignment's full ID and digest from that persisted plan.
+Pass those exact values, worker ID, plan and ledger to public CLI planning:
+
+```powershell
+& $node24 tools/run-portal-discovery.mjs --portal m365-admin `
+  --recipe tools/capture-recipes/m365-admin-shell-loop-20261106.json `
+  --profile bounded --phase plan --require-known-refresh `
+  --orchestration-plan C:/private/refresh/plan.json `
+  --assignment-id CAPTURE-ASSIGNMENT-ID --assignment-digest CAPTURE-ASSIGNMENT-DIGEST `
+  --worker-id ACTUAL-WORKER-ID --ledger-path C:/private/refresh/ledger.jsonl `
+  --endpoint https://admin.cloud.microsoft --model gpt-6-luna --reasoning low `
+  --operation-ceiling observe-only --artifacts C:/private/refresh/run-01/driver --json
+```
+
+The existing compiler resolves the recipe and approval, binds the actual caller
+origin, variables, execution, role and driver budget, and persists the digest
+and explicit worker in the ledger. The driver checks these before browser
+preflight. A full execution binding does not override an explicit denial of live
+authority, an unperformed review, a pending proposal or an expired approval.
+The managed path is opt-in for known-refresh recipes; it does not invent a
+novelty frontier or authorize a new native action.
+
+Follow the existing independent plan review and separate coordinator gate before
+owner allocation. The browser owner profile and the capture action profile
+(`bounded`) are different fields. Use the existing packet verifier and preflight;
+do not add competing URL, variable or budget checks. If the reviewed gate permits
+binding the real target ID after owned preflight, regenerate and retain that
+runtime packet through public planning before executing its exact driver argv.
+Its canonical packet digest must match `discovery-run.json.workerPacketSha256`.
 
 Keep setup receipts outside the driver's fresh output directory:
 
@@ -41,6 +82,40 @@ reviewed recovery/lifecycle rules, with identity checks and no repeated startup
 navigation or authentication. Stop on a new failure instead of changing routes
 or retrying an unavailable login or feature.
 
+After the driver is terminal, safely stop the exact manifest-owned browser and
+retain before/stop/after receipts. Offline review does not require an idle open
+browser. Cleanup alone does not accept the data; the next live lifecycle still
+requires terminal review, disposition and accounting. Keep the cached profile.
+
+Produce the existing typed worker-result envelope, including top-level
+`assignmentId`, `assignmentDigest`, `workerId`, `runtimeRole`, `model`,
+`reasoning`, `attemptNumber`, `captureRoot`, status/decision, accounting,
+lessons and process-improvement disposition. Runtime flags or policy defaults
+alone do not prove the actual delegated model. After actual closure, validate
+the retained files through the existing control plane:
+
+```powershell
+& $node24 tools/portal-discovery-control-plane.mjs validate-capture-result `
+  --result C:/private/refresh/run-01/receipts/worker-result.json `
+  --plan C:/private/refresh/plan.json `
+  --packet C:/private/refresh/run-01/receipts/runtime-packet.json `
+  --run C:/private/refresh/run-01/driver/discovery-run.json `
+  --ledger C:/private/refresh/ledger.jsonl
+```
+
+Retain the full plan, actual runtime packet, typed result, integrity/review and
+closure receipts, and a full ledger snapshot with claim and terminal events.
+The validator checks retained capture files and sidecars, healthy known-refresh
+evidence, every recipe action, mutation safety and the exact worker/claim.
+Closed leases retain `claimedBy`. A completed assignment cannot be silently
+replayed; use the result validator for retrospective checks, and a distinct
+reviewed plan/assignment for a newly justified capture.
+
+Direct/older driver runs can still provide qualified observations. Missing
+orchestration digests and worker links remain unknown and cannot pass managed
+acceptance or unattended eligibility. Preserve those gaps; never manufacture
+historical identities or collect again merely to repair their metadata.
+
 `--endpoint` is the ledger origin/host key (for example
 `https://admin.cloud.microsoft`), not the full native UI URL or the CDP endpoint.
 Keep native paths, SPA fragments and approved query bindings in the recipe;
@@ -48,6 +123,9 @@ keep the loopback debugging URL in `--cdp-endpoint`. Planning now rejects
 explicit endpoint paths/fragments/queries before browser allocation. A default
 known-refresh packet derives its ledger key from the actual portal caller's
 origin, including a proxy caller different from the canonical spec portal.
+The ledger emits canonical `hostname:port`; use `normalizeEndpoint()` rather
+than raw string equality with an HTTP(S) origin. Native `pageTarget` constraints
+and API `matchPathPrefixes` describe different surfaces.
 
 ## Inventory and reuse
 
@@ -97,6 +175,19 @@ capture bytes, physical sidecars, analyzer dependencies, specifications, policy,
 runtime and inventory. Changed bindings invalidate reuse. Both computed and
 cached results recheck capture immutability. Invalid evidence blocks that capture
 while independent portfolio work continues. Preserve failed artifacts.
+
+`execution.analysisReferences` returns one exact private cache path and file SHA,
+analysis-content digest, analyzer digest, input digest, spec ID and capture ID.
+Use this reference rather than choosing the first/newest cache file or copying
+digest labels manually. These references stay outside the stable counts report
+and must remain private. The offline consumer always reports
+`freshCapturesClaimed: false`; actual driver/owner/exit receipts establish whether
+an input was newly collected.
+
+Use the existing `captureWorkerPacketDigest()` / `verifyCaptureWorkerPacket()`
+helpers for packet checks. The canonical packet digest excludes its own digest
+and nonauthoritative measurements. A hash of the entire JSON file is a separate
+integrity commitment, not that canonical digest.
 
 Cache publication writes and syncs a private temporary file before atomically
 publishing the final name without replacing an existing entry. Interrupted
@@ -171,13 +262,23 @@ exit codes for `discovery`, `spec-quality`, `portal-metadata`, `evaluations`,
 `appliedChanges` binds each final destination to its tested proposal digest.
 Use actual local/CI outcomes; declarations are not execution evidence.
 
+Also supply `captureIdentityEvidence` with `resultPath`, `planPath`, `packetPath`
+and `ledgerPath` for the accepted managed capture. The reporter derives
+`discovery-run.json` exclusively from the verified analysis's capture directory
+and uses the same file-backed controller validator. Missing, malformed,
+unaccepted or borrowed proof yields `capture-controller-identity-unproved`.
+An identity flag or a valid managed result from another capture is insufficient.
+Legacy observations can support manual review while remaining ineligible here.
+
 The advisory report validates the existing source-review receipt, exact
 before/proposal bytes and traceability. Only narrowly additive GET response schemas
 without constraints/composition, and explicitly synthetic examples, can qualify.
 For every edit it resolves the owning specification file and exact operation,
 method, route, response status and media type, compares the full supporting
 observation list against verified analysis, and reconstructs the expected edit.
-The entire proposed document must equal that reconstruction. A valid capture
+The entire proposed document must equal that reconstruction. Expanded YAML
+semantics must also stay inside verified targets: a shared response alias cannot
+silently change an unobserved operation. A valid capture
 or another observation in the same file cannot authorize an unrelated edit.
 Example property names must also occur at their exact nesting level in the
 original authored model; open dictionaries do not establish safe names. New
@@ -198,6 +299,13 @@ GitHub credential in this path. Review these proposed rules and explicitly
 authorize any future automation scope before implementing merge behavior.
 
 ## Reconciliation with #225
+
+Public recipe evaluation summaries retain opaque artifact references and exact
+file hashes for the capture and independent/coordinator reviews. New summaries
+omit runtime assignment identifiers, which can encode private execution scope.
+The private controller still requires the full assignment, worker, plan, packet
+and ledger identity; omitting an ID from a publication summary never satisfies
+that controller gate.
 
 The starting point is main after merged #226 (`db6c17f`). #225 (`f145adb`) has
 real capture and generated-collection conflicts; it is not merged wholesale.
