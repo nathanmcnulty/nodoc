@@ -3,6 +3,12 @@
 Use this runbook for execution. Use `AGENT_DISCOVERY_PLAYBOOK.md` only when a
 blocker requires deeper background.
 
+For operation-level portfolio inventory, reuse of one immutable capture across
+discovery/verification/enrichment, private source proposals, and advisory merge
+eligibility, use [the repeatable refresh workflow](REFRESH_WORKFLOW.md).
+It extends this controller and keeps the capture, review, and source-application
+gates below; it does not allocate browsers or enable merging.
+
 ## Agent handoff
 
 ### Layer 1 controller commands

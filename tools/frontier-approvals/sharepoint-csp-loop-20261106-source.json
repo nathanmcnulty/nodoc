@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "kind": "known-operation-refresh-approval-source",
+  "status": "pending-actual-independent-review",
+  "specId": "sharepoint-admin",
+  "recipeDestination": "tools/capture-recipes/sharepoint-csp-loop-20261106.json",
+  "sourceRecipe": {
+    "path": "tools/capture-recipes/sharepoint-script-sources-known-refresh.json",
+    "sha256": "dab05c50635a62b9b26fede8f8aca6958fcd4464910c6413a75e97dd61a2203b"
+  },
+  "target": {
+    "method": "GET",
+    "hostTemplate": "${tenant}-admin.sharepoint.com",
+    "canonicalPath": "/_api/SPO.SPOContentSecurityPolicyConfiguration",
+    "operationId": "SharePointAdmin.GetContentSecurityPolicyConfiguration"
+  },
+  "retainedEvidence": {
+    "evidenceId": "request-d17dc2215ed76c860c2e",
+    "observedAt": "2026-10-29T17:42:05.691Z",
+    "actionIndex": 2,
+    "causalAction": {
+      "type": "reload",
+      "value": "script-sources-known-refresh"
+    },
+    "nativeEntryActionTemplate": "navigate=https://${tenant}-admin.sharepoint.com/_layouts/15/online/AdminHome.aspx#/contentSecurityPolicy",
+    "bodyState": "complete",
+    "health": "successful-body-observed",
+    "privateVariableBinding": "private-runtime-inputs.json",
+    "limitations": "Exact native entry and host were matched privately; selected tenant identity, minimum roles, CSP enforcement and current response state remain unproved."
+  },
+  "freshObjective": "Current tenant-host authentication and CSP response-shape drift cannot be established from retained October evidence. One passive navigation/reload through the existing portal surface; no tenant switch, settings edit or enforcement test.",
+  "authority": {
+    "operationCeiling": "observe-only",
+    "userGoal": "Representative fresh read-only collection; normal OS/browser sign-in for same previously selected account if needed.",
+    "noNewConsent": true,
+    "noPermissionChanges": true,
+    "noTenantSwitching": true,
+    "noPortalWrites": true
+  },
+  "actionBudget": {
+    "recipeActions": 5,
+    "mandatoryDriverNavigation": 1,
+    "maximumDriverActions": 6,
+    "ownerStartupNavigations": 1,
+    "preflightAlignmentNavigations": 0,
+    "maximumCombinedBudgetUnits": 7
+  },
+  "captureRole": {
+    "model": "gpt-6-luna",
+    "reasoning": "low"
+  },
+  "reviewRequirement": {
+    "model": "gpt-6-luna",
+    "reasoning": "xhigh"
+  },
+  "responseBodyLimits": {
+    "perBodyBytes": 16777216,
+    "totalBytes": 268435456
+  },
+  "sourceRefreshDigest": "833d2f59f277afaf76ec5517e03acc4981d1d66ca05c293179daf62cb7e5f767",
+  "refreshDigest": "e0a599d7cd121acbd92a389afd1707bd94ea4916e5e9740b52950eb2acab26e5",
+  "sourceExecutionDigest": "e1272498a54d7890dbdbae8c2e36a52c30e76099a4e946f6e659c2f5e99f434e",
+  "executionDigest": "fc7679375abbfb4c0360530d1c881c21a4f073e57db50a85a7eb349d2c41341d",
+  "expiresAt": "2026-11-07T06:00:00.000Z",
+  "authenticationRecovery": "Reuse dedicated cached SharePoint profile and same unambiguous prior account; stop before consent/new permissions/tenant switching, or unavailable login/feature. Never device-code authentication.",
+  "failureRecovery": "Preserve checkpoints and all failed/incomplete artifacts; no unchanged failure retry or endpoint-removal inference. Require a distinct observed remedy and newly reviewed plan before any subsequent attempt."
+}

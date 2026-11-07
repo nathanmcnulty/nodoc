@@ -69,8 +69,8 @@ paths:
         source: "authenticated Power Platform admin center"
         browsedPages:
           - "https://admin.powerplatform.microsoft.com/billing/licenses/powerPages/overview"
-          - "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/Share%20My%20Labs%20(default)/portals"
-          - "https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub"
+          - "https://admin.powerplatform.microsoft.com/environments/{id}/{label}/portals"
+          - "https://admin.powerplatform.microsoft.com/environments/environment/Default-{id}/hub"
       tags:
         - BusinessAppPlatform
       parameters:
@@ -128,9 +128,9 @@ paths:
       x-nodoc-live-capture:
         source: "authenticated Power Platform admin center"
         browsedPages:
-          - "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/applications"
-          - "https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub"
-          - "https://admin.powerplatform.microsoft.com/manage/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/applications"
+          - "https://admin.powerplatform.microsoft.com/environments/{id}/applications"
+          - "https://admin.powerplatform.microsoft.com/environments/environment/Default-{id}/hub"
+          - "https://admin.powerplatform.microsoft.com/manage/environments/{id}/applications"
       tags:
         - BusinessAppPlatform
       parameters:
@@ -139,7 +139,7 @@ paths:
           required: true
           schema:
             type: string
-            example: "Default-847b5907-ca15-40f4-b171-eb18619dbfab"
+            example: "Default-11111111-1111-4111-8111-111111111111"
         - name: "api-version"
           in: query
           required: false
@@ -287,7 +287,7 @@ paths:
       x-nodoc-live-capture:
         source: "authenticated Power Platform admin center"
         browsedPages:
-          - "https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub"
+          - "https://admin.powerplatform.microsoft.com/environments/environment/Default-{id}/hub"
       tags:
         - BusinessAppPlatform
       parameters:
@@ -296,7 +296,7 @@ paths:
           required: false
           schema:
             type: string
-            example: "environment eq 'Default-847b5907-ca15-40f4-b171-eb18619dbfab'"
+            example: "environment eq 'Default-11111111-1111-4111-8111-111111111111'"
         - name: "api-version"
           in: query
           required: false
@@ -399,7 +399,7 @@ paths:
       x-nodoc-live-capture:
         source: "authenticated Power Platform admin center"
         browsedPages:
-          - "https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub"
+          - "https://admin.powerplatform.microsoft.com/environments/environment/Default-{id}/hub"
       tags:
         - BusinessAppPlatform
       parameters:
@@ -428,7 +428,7 @@ paths:
       x-nodoc-live-capture:
         source: "authenticated Power Platform admin center"
         browsedPages:
-          - "https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub"
+          - "https://admin.powerplatform.microsoft.com/environments/environment/Default-{id}/hub"
       tags:
         - BusinessAppPlatform
       parameters:
@@ -457,7 +457,7 @@ paths:
       x-nodoc-live-capture:
         source: "authenticated Power Platform admin center"
         browsedPages:
-          - "https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub"
+          - "https://admin.powerplatform.microsoft.com/environments/environment/Default-{id}/hub"
       tags:
         - BusinessAppPlatform
       parameters:
@@ -866,10 +866,10 @@ paths:
       x-nodoc-live-capture:
         source: "authenticated Power Platform admin center"
         browsedPages:
-          - "https://admin.powerplatform.microsoft.com/environments/default-847b5907-ca15-40f4-b171-eb18619dbfab/flows"
-          - "https://admin.powerplatform.microsoft.com/environments/default-847b5907-ca15-40f4-b171-eb18619dbfab/powerapps"
-          - "https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub"
-          - "https://admin.powerplatform.microsoft.com/manage/environments/default-847b5907-ca15-40f4-b171-eb18619dbfab/flows"
+          - "https://admin.powerplatform.microsoft.com/environments/default-{id}/flows"
+          - "https://admin.powerplatform.microsoft.com/environments/default-{id}/powerapps"
+          - "https://admin.powerplatform.microsoft.com/environments/environment/Default-{id}/hub"
+          - "https://admin.powerplatform.microsoft.com/manage/environments/default-{id}/flows"
         additionalPageCount: 1
       tags:
         - BusinessAppPlatform
@@ -879,7 +879,7 @@ paths:
           required: true
           schema:
             type: string
-            example: "Default-847b5907-ca15-40f4-b171-eb18619dbfab"
+            example: "Default-11111111-1111-4111-8111-111111111111"
         - name: "$expand"
           in: query
           required: false
@@ -911,7 +911,7 @@ paths:
       x-nodoc-live-capture:
         source: "authenticated Power Platform admin center"
         browsedPages:
-          - "https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub"
+          - "https://admin.powerplatform.microsoft.com/environments/environment/Default-{id}/hub"
       tags:
         - BusinessAppPlatform
       parameters:
@@ -920,7 +920,7 @@ paths:
           required: true
           schema:
             type: string
-            example: "Default-847b5907-ca15-40f4-b171-eb18619dbfab"
+            example: "Default-11111111-1111-4111-8111-111111111111"
         - name: "api-version"
           in: query
           required: false
@@ -940,7 +940,7 @@ paths:
       x-nodoc-live-capture:
         source: "authenticated Power Platform admin center"
         browsedPages:
-          - "https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub"
+          - "https://admin.powerplatform.microsoft.com/environments/environment/Default-{id}/hub"
       tags:
         - BusinessAppPlatform
       parameters:
@@ -978,7 +978,7 @@ paths:
       x-nodoc-live-capture:
         source: "authenticated Power Platform admin center"
         browsedPages:
-          - "https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub"
+          - "https://admin.powerplatform.microsoft.com/environments/environment/Default-{id}/hub"
       tags:
         - BusinessAppPlatform
       parameters:

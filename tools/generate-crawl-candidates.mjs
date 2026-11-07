@@ -1,5 +1,6 @@
 import { access, readFile, realpath, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 import fg from "fast-glob";
 
@@ -270,7 +271,7 @@ function normalizeSegment(segment) {
   return normalized;
 }
 
-function normalizeRoutePath(pathValue) {
+export function normalizeRoutePath(pathValue) {
   if (!pathValue) {
     return null;
   }
@@ -1562,9 +1563,8 @@ async function maybeWriteOutput(outputPath, payload) {
   console.log(`Wrote ${outputPath}`);
 }
 
-async function main() {
-  const args = parseArgs(process.argv.slice(2));
-  const routeInventory = await buildSpecRouteInventory();
+export async function buildCrawlCandidates(args, routeInventory = null) {
+  routeInventory ??= await buildSpecRouteInventory();
   const specRecord = resolveSpec(routeInventory, args.spec);
   const specContext = buildSpecContext(specRecord);
   const specContexts = routeInventory.map((record) => buildSpecContext(record));
@@ -1575,7 +1575,7 @@ async function main() {
     ]),
   );
   const [
-    apiRecords,
+    capturedApiRecords,
     pageStates,
     probeResults,
     scriptUrlsData,
@@ -1589,6 +1589,7 @@ async function main() {
     readJsonIfExists(artifactPaths.bundleCandidates),
     readJsonIfExists(artifactPaths.bundleDownloads),
   ]);
+  const apiRecords = args.apiRecords ?? capturedApiRecords;
 
   if (!apiRecords && !pageStates && !probeResults && !scriptUrlsData && !bundleCandidates && !bundleDownloads) {
     throw new Error(`No supported crawl artifacts found under "${args.artifacts}".`);
@@ -1680,6 +1681,13 @@ async function main() {
   summary.liveGraphqlMutationCount = liveGraphqlOperations.filter(({ operationType }) => operationType === "mutation").length;
   summary.liveGraphqlWriteLikeCount = liveGraphqlOperations.filter(({ writeLike }) => writeLike).length;
 
+  return payload;
+}
+
+async function main() {
+  const args = parseArgs(process.argv.slice(2));
+  const payload = await buildCrawlCandidates(args);
+  const { summary, candidates } = payload;
   await maybeWriteOutput(args.output, payload);
 
   if (args.json) {
@@ -1690,4 +1698,4 @@ async function main() {
   printHumanSummary(summary, candidates);
 }
 
-await main();
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) await main();

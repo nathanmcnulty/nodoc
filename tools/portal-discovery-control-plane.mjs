@@ -1,7 +1,8 @@
 import { createHash } from "node:crypto";
-import { readFile, writeFile, rename, mkdir } from "node:fs/promises";
+import { readFile, writeFile, rename, mkdir, realpath } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { isDeepStrictEqual } from "node:util";
 
 import {
   crawlMetadataByTitle,
@@ -9,12 +10,18 @@ import {
   getCoverageOverlay,
 } from "./portal-discovery-metadata.mjs";
 import { getLedgerViewFromFile, enqueueAssignment, normalizeEndpoint } from "./portal-discovery-ledger.mjs";
-import { buildSpecInventory, repoRoot } from "./spec-quality-lib.mjs";
+import { buildSpecInventory, loadBundledSpecification, repoRoot } from "./spec-quality-lib.mjs";
+import { deriveNoveltyBaseline } from "./portal-discovery-novelty.mjs";
+import { buildKnownOperationRefreshPlan, evaluateKnownOperationRefreshEvidence } from "./portal-discovery-evidence-contract.mjs";
+import { aggregateInteractionHealth, summarizeActionResults, actionResultSucceeded } from "./discovery-capture-policy.mjs";
+import { hydrateResponseBodySidecars, assessResponseBodySidecarCompleteness } from "./response-body-sidecars.mjs";
+import { normalizeRecipeAction } from "./portal-discovery-actions.mjs";
 import {
   portalDiscoveryModelPolicy,
   validateOfflineReviewReasoning,
 } from "./portal-discovery-model-policy.mjs";
 import { loadReviewCache, writeReviewCache } from "./portal-discovery-review-cache.mjs";
+import { privateRefreshDirectory, assertNoRefreshLinks } from "./portal-refresh-paths.mjs";
 
 export const portfolioManifestSchemaVersion = 1;
 export const orchestrationPlanSchemaVersion = 1;
@@ -60,6 +67,48 @@ function positiveInteger(value, label) {
 }
 function assignmentDigest(value) {
   return digest(Object.fromEntries(Object.entries(value).filter(([key]) => key !== "assignmentId" && key !== "assignmentDigest")));
+}
+
+// Reuse the driver's recipe/approval validators. This remains part of the existing
+// control plane, and performs no browser, authentication or ledger operation.
+export async function prepareManagedKnownRefresh(manifest, { specId, recipe, variables = [], endpoint, workerId }) {
+  const portal = manifest.portals.find(entry => entry.specId === specId);
+  if (!portal || !portal.enabled || portal.auth.profile !== "bounded") throw new Error("Managed capture requires an enabled bounded-profile portal.");
+  const recipePath = getCaptureRecipes(portal.title).find(file => path.resolve(repoRoot, file) === path.resolve(repoRoot, recipe));
+  if (!recipePath) throw new Error("Managed capture recipe is not registered to this portal.");
+  if (requiredString(workerId, "Managed workerId") !== workerId || /\s|\u007f/u.test(workerId) || workerId.length > 200) throw new Error("Managed workerId must be explicit and unchanged by ledger sanitization.");
+  const { prepareRecipeForRun, validateSelectedRecipeTarget, inspectRecipeSafety, verifyKnownOperationRefreshApproval, buildActionBudget } = await import("./run-portal-discovery.mjs");
+  const raw = await readJson(path.join(repoRoot, recipePath));
+  if (raw.capturePrerequisite?.status === "blocked") throw new Error("Managed capture recipe has an unmet capture prerequisite.");
+  const resolved = prepareRecipeForRun(raw, variables);
+  validateSelectedRecipeTarget(resolved);
+  const safety = await inspectRecipeSafety(path.join(repoRoot, recipePath), { variables, operationCeiling: "observe-only" });
+  if (!safety.safe || resolved.inspectionPolicy?.mode !== "observe-only") throw new Error("Managed known refresh must be observe-only.");
+  const baseline = deriveNoveltyBaseline(await loadBundledSpecification(path.join(repoRoot, portal.source.specPath)));
+  const refresh = buildKnownOperationRefreshPlan(resolved, { required: true, baselineOperations: baseline.operations });
+  await verifyKnownOperationRefreshApproval(refresh);
+  const callerEndpoint = normalizeEndpoint(new URL(refresh.entryUrl).origin);
+  if (endpoint && normalizeEndpoint(endpoint) !== callerEndpoint) throw new Error("Managed endpoint must match the native caller origin.");
+  const managedCapture = { kind: "known-operation-refresh", recipeSha256: await checkedInRecipeDigest(recipePath), endpoint: callerEndpoint,
+    refreshDigest: refresh.refreshDigest, executionDigest: refresh.executionDigest, variableBindingsDigest: refresh.variableBindingsDigest,
+    operationCeiling: "observe-only", actionBudget: buildActionBudget(resolved), workerId };
+  return { ...manifest, portals: [{ ...portal, recipe: recipePath, managedCapture }] };
+}
+
+export function validateManagedCaptureAssignment(plan, input) {
+  validateOrchestrationPlan(plan);
+  const assignment = plan.assignments.find(entry => entry.assignmentId === input.assignmentId);
+  const bound = assignment?.managedCapture;
+  if (!bound || assignment.type !== "capture" || assignment.assignmentDigest !== input.assignmentDigest || !input.workerId
+    || bound.workerId !== input.workerId || assignment.specId !== input.specId || assignment.profile !== input.profile
+    || path.resolve(repoRoot, assignment.recipe) !== path.resolve(input.recipePath) || bound.recipeSha256 !== input.recipeSha256
+    || bound.endpoint !== normalizeEndpoint(input.endpoint) || bound.operationCeiling !== input.operationCeiling
+    || assignment.model !== input.model || assignment.reasoning !== input.reasoning
+    || bound.refreshDigest !== input.refreshPlan?.refreshDigest || bound.executionDigest !== input.refreshPlan?.executionDigest
+    || bound.variableBindingsDigest !== input.refreshPlan?.variableBindingsDigest || digest(bound.actionBudget) !== digest(input.actionBudget)) {
+    throw new Error("Managed capture assignment does not match the validated plan and exact runtime inputs.");
+  }
+  return assignment;
 }
 export function workerResultSubjectDigest(value) {
   return digest(Object.fromEntries(Object.entries(value ?? {}).filter(([key]) => key !== "qualityGate")));
@@ -204,12 +253,12 @@ function routeForPortal(portal, summary, options = {}) {
   if (!portal.enabled) return { route: "orchestrator", reasonCodes: ["disabled"] };
   if (portal.auth.requiresProfile && !portal.auth.profile) return { route: "orchestrator", reasonCodes: ["missing-auth-profile"] };
   if (!portal.recipe) return { route: "orchestrator", reasonCodes: ["missing-recipe"] };
-  if (portal.novelty?.status === "satisfied") return {
+  if (!portal.managedCapture && portal.novelty?.status === "satisfied") return {
     route: "orchestrator",
     reasonCodes: ["novelty-satisfied", portal.novelty.evidenceDisposition].filter(Boolean),
   };
-  if (portal.novelty?.status !== "active") return { route: "orchestrator", reasonCodes: ["novelty-frontier-missing"] };
-  if (!/^[a-f0-9]{64}$/u.test(String(portal.novelty.approvalDigest || "")) || !portal.novelty.reopenCondition) {
+  if (!portal.managedCapture && portal.novelty?.status !== "active") return { route: "orchestrator", reasonCodes: ["novelty-frontier-missing"] };
+  if (!portal.managedCapture && (!/^[a-f0-9]{64}$/u.test(String(portal.novelty.approvalDigest || "")) || !portal.novelty.reopenCondition)) {
     return { route: "orchestrator", reasonCodes: ["novelty-frontier-unapproved"] };
   }
   const unresolvedAdjacent = options.adjacentOwnership ?? [];
@@ -237,8 +286,14 @@ export function compileOrchestrationPlan(manifest, { ledger = {}, budgets = {}, 
   const captureByLease = new Map();
   for (const portal of manifest.portals) {
     const route = routeForPortal(portal, summary, options);
-    const captureKey = `${portal.endpoint.leaseFamily}|${portal.auth.profile}`;
+    const captureKey = `${portal.managedCapture?.endpoint ?? portal.endpoint.leaseFamily}|${portal.auth.profile}`;
     const capture = { type: "capture", specId: portal.specId, portal: portal.title, endpointLease: captureKey, profile: portal.auth.profile, recipe: portal.recipe, route: "orchestrator", model: portalDiscoveryModelPolicy.capture.model, reasoning: portalDiscoveryModelPolicy.capture.reasoning, budgets: portal.captureBudget, preconditions: portal.enabled ? ["validated-manifest", "authenticated-profile", "fresh-artifact-directory"] : ["portal-enabled"], completionGates: ["sanitized-summary", "candidate-handoff", "operation-lifecycle-accounted"], blockers: route.reasonCodes, terminal: portal.enabled ? "capture-result-required" : "disabled", nextAction: portal.enabled ? "allocate-fresh-artifacts" : "none", serializedGroup: captureKey };
+    if (portal.managedCapture) {
+      const actionCount = portal.managedCapture.actionBudget.countedActions;
+      if (capture.budgets.actionCount < actionCount) throw new Error("Managed recipe exceeds the configured capture action budget.");
+      capture.budgets = { ...capture.budgets, actionCount };
+      capture.managedCapture = portal.managedCapture;
+    }
     capture.assignmentId = `capture-${digest(capture).slice(0, 24)}`;
     capture.assignmentDigest = assignmentDigest(capture);
     captureByLease.set(captureKey, [...(captureByLease.get(captureKey) ?? []), capture]);
@@ -281,6 +336,14 @@ export function validateOrchestrationPlan(plan) {
     if (!assignmentTypes.has(assignment.type) || ids.has(assignment.assignmentId)) throw new Error("Plan assignment types and IDs must be unique and known.");
     ids.add(assignment.assignmentId);
     if (assignment.assignmentDigest !== assignmentDigest(assignment)) throw new Error(`Assignment digest mismatch for ${assignment.assignmentId}.`);
+    if (assignment.managedCapture && (assignment.type !== "capture" || assignment.model !== portalDiscoveryModelPolicy.capture.model
+      || assignment.reasoning !== portalDiscoveryModelPolicy.capture.reasoning || assignment.managedCapture.kind !== "known-operation-refresh"
+      || !assignment.managedCapture.workerId || !plan.planDigest
+      || assignment.budgets?.actionCount !== assignment.managedCapture.actionBudget?.countedActions)) throw new Error("Invalid managed capture role or plan binding.");
+  }
+  if (plan.planDigest) {
+    const core = Object.fromEntries(["schemaVersion", "manifestId", "sourceManifestDigest", "modelPolicy", "options", "budgets", "assignments"].map(key => [key, plan[key]]));
+    if (digest(core) !== plan.planDigest) throw new Error("Orchestration plan digest mismatch.");
   }
   return plan;
 }
@@ -324,11 +387,54 @@ function capabilityViolation(result, assignment) {
 }
 
 export function validateWorkerResult(result, plan) {
+  return validateWorkerResultAgainstPlan(result, plan);
+}
+
+function validateWorkerResultAgainstPlan(result, plan, identityEvidence) {
   validateOrchestrationPlan(plan);
   if (!result || result.schemaVersion !== workerResultSchemaVersion) throw new Error("Unsupported or corrupt worker-result schema.");
   const assignment = plan.assignments.find((entry) => entry.assignmentId === result.assignmentId);
   if (!assignment) throw new Error(`Unknown worker assignment ${result.assignmentId}.`);
   if (result.assignmentDigest !== assignment.assignmentDigest) throw new Error("Worker assignment digest mismatch.");
+  if (assignment.type === "capture" && assignment.managedCapture) {
+    const { packet, run, ledgerAssignment, planSha256 } = identityEvidence ?? {};
+    const attempt = ledgerAssignment?.attempts?.find(entry => entry.attemptNumber === run?.ledger?.attemptNumber);
+    const workerId = assignment.managedCapture.workerId;
+    if (result.workerId !== workerId || result.model !== assignment.model || result.reasoning !== assignment.reasoning
+      || result.runtimeRole?.model !== assignment.model || result.runtimeRole?.reasoning !== assignment.reasoning
+      || packet?.bindings?.assignmentId !== assignment.assignmentId || packet?.bindings?.assignmentDigest !== assignment.assignmentDigest
+      || packet?.bindings?.workerId !== workerId || packet?.bindings?.recipeSha256 !== assignment.managedCapture.recipeSha256
+      || !planSha256 || packet?.bindings?.orchestrationPlanSha256 !== planSha256 || run?.identityLinkage?.planSha256 !== planSha256
+      || run?.assignmentId !== assignment.assignmentId || run?.assignmentDigest !== assignment.assignmentDigest || run?.workerId !== workerId
+      || run?.identityLinkage?.status !== "managed-bound" || run?.ledger?.assignmentId !== assignment.assignmentId
+      || run?.ledger?.assignmentDigest !== assignment.assignmentDigest || run?.ledger?.workerId !== workerId
+      || ledgerAssignment?.assignmentId !== assignment.assignmentId || ledgerAssignment?.assignmentDigest !== assignment.assignmentDigest
+      || ledgerAssignment?.workerId !== workerId || attempt?.claimedBy !== workerId || attempt?.lease && attempt.lease.owner !== workerId
+      || ledgerAssignment?.profile !== assignment.profile || attempt?.phase !== "all" || attempt?.model !== assignment.model || attempt?.reasoning !== assignment.reasoning
+      || run?.status !== result.status || attempt?.status !== result.status || result.decision === "accept" && run?.capture?.captureComplete !== true
+      || run?.knownOperationRefreshPlan?.executionDigest !== assignment.managedCapture.executionDigest
+      || run?.knownOperationRefreshPlan?.refreshDigest !== assignment.managedCapture.refreshDigest
+      || run?.knownOperationRefreshPlan?.variableBindingsDigest !== assignment.managedCapture.variableBindingsDigest
+      || ledgerAssignment?.recipeDigest !== assignment.managedCapture.recipeSha256 || ledgerAssignment?.endpoint !== assignment.managedCapture.endpoint) {
+      throw new Error("Managed capture result lacks exact packet/run/ledger/worker identity linkage.");
+    }
+    if (result.decision === "accept" && (result.status !== "completed" || run.blocker || attempt.blocker
+      || attempt.captureComplete !== true || attempt.captureStatus !== "complete" || run.capture.captureStatus !== "complete"
+      || run.knownOperationRefresh?.status !== "observed" || identityEvidence.captureVerified !== true)) {
+      throw new Error("Managed acceptance requires an unblocked successful terminal capture and verified observed evidence.");
+    }
+    for (const argv of [packet.execution?.driverArgs, packet.execution?.verificationArgs]) {
+      const arg = flag => Array.isArray(argv) && argv.filter(value => value === flag).length === 1 ? argv[argv.indexOf(flag) + 1] : null;
+      if (arg("--assignment-id") !== assignment.assignmentId || arg("--assignment-digest") !== assignment.assignmentDigest
+        || arg("--worker-id") !== workerId || arg("--endpoint") !== assignment.managedCapture.endpoint
+        || arg("--model") !== assignment.model || arg("--reasoning") !== assignment.reasoning || arg("--operation-ceiling") !== "observe-only") {
+        throw new Error("Managed packet argv identity does not match the assignment.");
+      }
+    }
+  }
+  if (assignment.type === "capture" && !assignment.managedCapture && result.decision === "accept") {
+    throw new Error("Legacy capture identity is unknown; unattended acceptance requires a managed assignment.");
+  }
   if (!assignmentTypes.has(result.assignmentType) || result.assignmentType !== assignment.type) throw new Error("Worker assignment type is outside the assigned scope.");
   if (!statuses.has(result.status) || !transitions["running"].has(result.status) && result.status !== "completed") throw new Error(`Illegal worker result status ${result.status}.`);
   if (!decisions.has(result.decision)) throw new Error("Worker result decision is invalid.");
@@ -411,10 +517,89 @@ export async function writeAtomicJson(filePath, value) {
   await rename(temporary, absolute);
 }
 
-export async function compileFromFiles({ manifestPath = defaultPortfolioManifestPath, ledgerPath, budgets, options } = {}) {
-  const manifest = await buildPortfolioManifest(manifestPath);
+export async function compileFromFiles({ manifestPath = defaultPortfolioManifestPath, ledgerPath, budgets, options, managedKnownRefresh } = {}) {
+  let manifest = await buildPortfolioManifest(manifestPath);
+  if (managedKnownRefresh) manifest = await prepareManagedKnownRefresh(manifest, managedKnownRefresh);
   const ledger = ledgerPath ? await getLedgerViewFromFile({ ledgerPath, view: "all" }) : { assignments: [] };
   return compileOrchestrationPlan(manifest, { ledger, budgets, options });
+}
+
+// Do not trust identity snapshots supplied in a worker's own report. Load the
+// persisted packet/run and actual ledger through the same existing validator.
+export async function validateManagedCaptureResult({ result, resultPath, planPath, packetPath, runPath, ledgerPath }) {
+  if (resultPath) result = await readJson(resultPath);
+  if (!result || typeof result.assignmentId !== "string" || ![planPath, packetPath, runPath, ledgerPath].every(value => typeof value === "string" && value)) {
+    throw new Error("Managed capture result and all evidence paths are required.");
+  }
+  const [planBytes, packetValue, run, ledger] = await Promise.all([readFile(planPath), readJson(packetPath), readJson(runPath),
+    getLedgerViewFromFile({ ledgerPath, filters: { assignmentId: result.assignmentId }, includeAttempts: true })]);
+  const packet = packetValue.workerPacket ?? packetValue;
+  const plan = JSON.parse(planBytes), ledgerAssignment = ledger.assignments[0];
+  await assertNoRefreshLinks(runPath);
+  if (path.basename(runPath) !== "discovery-run.json" || !path.isAbsolute(run.artifacts ?? "")) throw new Error("Managed result requires the canonical capture-root discovery-run.json.");
+  const root = await realpath(path.dirname(path.resolve(runPath)));
+  await assertNoRefreshLinks(run.artifacts);
+  const attempt = ledgerAssignment?.attempts?.find(entry => entry.attemptNumber === run.ledger?.attemptNumber);
+  if (root !== await realpath(run.artifacts) || attempt?.artifactHashes?.artifactDir !== createHash("sha256").update(path.resolve(run.artifacts)).digest("hex")) {
+    throw new Error("Managed run capture root does not match the recorded ledger artifact directory.");
+  }
+  if (result.decision === "accept" && (result.attemptNumber !== run.ledger.attemptNumber || !result.captureRoot || root !== await realpath(result.captureRoot))) {
+    throw new Error("Managed worker result does not identify this exact capture root and attempt.");
+  }
+  if (result.decision === "accept" && (result.status !== "completed" || run.status !== "completed" || attempt.status !== "completed"
+    || run.blocker || attempt.blocker || attempt.captureComplete !== true || attempt.captureStatus !== "complete"
+    || run.capture?.captureComplete !== true || run.capture?.captureStatus !== "complete" || run.knownOperationRefresh?.status !== "observed")) {
+    throw new Error("Managed acceptance requires an unblocked successful terminal capture and verified observed evidence.");
+  }
+  const { verifyCaptureWorkerPacket, prepareRecipeForRun, buildActionBudget, inspectCaptureCompleteness, readVerifiedMutationSummary } = await import("./run-portal-discovery.mjs");
+  const args = verifyCaptureWorkerPacket(packet, { artifactDir: root, knownOperationRefreshPlan: run.knownOperationRefreshPlan });
+  if (run.workerPacketSha256 !== packet.packetSha256 || args.phase !== "all" || !args.requireKnownRefresh
+    || args.noLedger || args.seedArtifacts || args.operationApprovalDigest || args.orchestrationPlan !== run.identityLinkage?.planPath
+    || args.ledgerPath !== run.ledger?.ledgerPath) throw new Error("Managed packet does not match the executed packet/plan/ledger binding.");
+  const recipe = prepareRecipeForRun(await readJson(args.recipe), args.variables);
+  const refresh = buildKnownOperationRefreshPlan(recipe, { required: true });
+  validateManagedCaptureAssignment(plan, { ...args, specId: packet.scope.specId, recipePath: args.recipe, recipeSha256: await recipeDigestForResult(args.recipe),
+    refreshPlan: refresh, actionBudget: buildActionBudget(recipe) });
+  if (!isDeepStrictEqual(refresh, run.knownOperationRefreshPlan)) throw new Error("Managed run resolved execution binding changed.");
+  let captureVerified = false;
+  if (result.decision === "accept") {
+    const [summary, actions, api, raw, storedAssessment] = await Promise.all(["summary.json", "action-results.json", "api-records.json", "raw-requests.json", "known-operation-refresh-assessment.json"].map(file => readJson(path.join(root, file))));
+    if (![actions, api, raw].every(Array.isArray)) throw new Error("Managed capture artifacts must contain recorder arrays.");
+    const completeness = await inspectCaptureCompleteness(root);
+    const health = aggregateInteractionHealth(actions, { reported: summary.interactionHealth ?? summary.actionValidation?.interactionHealth });
+    const accounting = summarizeActionResults(actions);
+    const plannedActions = recipe.actions.map(normalizeRecipeAction);
+    const initial = actions.filter(action => (action.actionIndex ?? action.index) === -1);
+    const actionBindingsMatch = actions.length === plannedActions.length + 1 && initial.length === 1
+      && initial[0].type === "navigate" && initial[0].value === recipe.url && initial[0].required === true
+      && initial[0].allowCanonicalRedirect === true && actionResultSucceeded(initial[0])
+      && plannedActions.every((expected, index) => {
+        const matches = actions.filter(action => (action.actionIndex ?? action.index) === index);
+        return matches.length === 1 && matches[0].type === expected.type && matches[0].value === expected.value
+          && (matches[0].scope ?? "any") === expected.scope && Boolean(matches[0].required) === Boolean(expected.required);
+      });
+    const mutationSummary = await readVerifiedMutationSummary(root, { captureSummary: summary });
+    if (mutationSummary && (mutationSummary.safeToContinue !== true || mutationSummary.attemptCount !== 0)
+      || !isDeepStrictEqual(mutationSummary, run.activeOperations ?? null) || !isDeepStrictEqual(mutationSummary, attempt.activeOperations ?? null)) {
+      throw new Error("Managed observe-only mutation safety does not match summary/events/run/ledger evidence.");
+    }
+    await hydrateResponseBodySidecars(api, root, recipe.responseBodyLimits);
+    await hydrateResponseBodySidecars(raw, root, recipe.responseBodyLimits);
+    const assessment = evaluateKnownOperationRefreshEvidence({ actionResults: actions, apiRecords: api, plan: refresh });
+    const rawAssessment = evaluateKnownOperationRefreshEvidence({ actionResults: actions, apiRecords: raw, plan: refresh });
+    if (!completeness.captureComplete || !assessResponseBodySidecarCompleteness(api).captureComplete || !assessResponseBodySidecarCompleteness(raw).captureComplete
+      || !actionBindingsMatch || health?.accounting?.consistent !== true || health.recommendation?.recommended === true || accounting.requiredActionFailureCount !== 0
+      || accounting.countedActionCount > buildActionBudget(recipe).maxActions || (summary.actionValidation?.requiredActionFailures ?? []).length
+      || assessment.status !== "observed" || rawAssessment.status !== "observed" || !isDeepStrictEqual(assessment, storedAssessment)
+      || !isDeepStrictEqual(assessment, run.knownOperationRefresh)) throw new Error("Managed retained capture evidence is incomplete, blocked or inconsistent.");
+    captureVerified = true;
+  }
+  return validateWorkerResultAgainstPlan(result, plan, { packet, run, ledgerAssignment, captureVerified, planSha256: createHash("sha256").update(planBytes).digest("hex") });
+}
+
+async function recipeDigestForResult(recipePath) {
+  await assertNoRefreshLinks(recipePath);
+  return createHash("sha256").update(await readFile(recipePath)).digest("hex");
 }
 
 export async function enqueueOrchestrationPlan(plan, { ledgerPath, apply = false } = {}) {
@@ -423,7 +608,8 @@ export async function enqueueOrchestrationPlan(plan, { ledgerPath, apply = false
   if (!ledgerPath) throw new Error("Applying an orchestration plan requires --ledger.");
   const results = [];
   for (const assignment of plan.assignments.filter((entry) => entry.type === "capture" && entry.route === "orchestrator")) {
-    results.push(await enqueueAssignment({ ledgerPath, assignmentId: assignment.assignmentId, specId: assignment.specId, portal: assignment.portal, recipePath: assignment.recipe, recipeDigest: await checkedInRecipeDigest(assignment.recipe), endpoint: assignment.endpointLease.split("|")[0], profile: assignment.profile, phase: "all", model: portalDiscoveryModelPolicy.capture.model, reasoning: portalDiscoveryModelPolicy.capture.reasoning, priority: 20 }));
+    if (assignment.managedCapture && await checkedInRecipeDigest(assignment.recipe) !== assignment.managedCapture.recipeSha256) throw new Error("Managed recipe changed after planning.");
+    results.push(await enqueueAssignment({ ledgerPath, assignmentId: assignment.assignmentId, assignmentDigest: assignment.managedCapture ? assignment.assignmentDigest : null, workerId: assignment.managedCapture?.workerId, specId: assignment.specId, portal: assignment.portal, recipePath: assignment.recipe, recipeDigest: await checkedInRecipeDigest(assignment.recipe), endpoint: assignment.endpointLease.split("|")[0], profile: assignment.profile, phase: "all", model: portalDiscoveryModelPolicy.capture.model, reasoning: portalDiscoveryModelPolicy.capture.reasoning, priority: 20 }));
   }
   return results;
 }
@@ -467,7 +653,17 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     if (command === "compile-plan") {
       const ledgerPath = value("--ledger");
       const apply = args.includes("--apply");
-      const plan = await compileFromFiles({ manifestPath: value("--manifest", defaultPortfolioManifestPath), ledgerPath, budgets: {}, options: { apply } });
+      const managedKnownRefresh = args.includes("--managed-known-refresh") ? {
+        specId: requiredString(value("--portal"), "--portal"), recipe: requiredString(value("--recipe"), "--recipe"),
+        workerId: requiredString(value("--worker-id"), "--worker-id"), endpoint: value("--endpoint"),
+        variables: args.flatMap((argument, index) => argument === "--var" ? [requiredString(args[index + 1], "--var")] : []),
+      } : null;
+      const plan = await compileFromFiles({ manifestPath: value("--manifest", defaultPortfolioManifestPath), ledgerPath, budgets: {}, options: { apply }, managedKnownRefresh });
+      if (managedKnownRefresh) {
+        const output = path.resolve(requiredString(value("--output"), "Managed plan --output"));
+        await privateRefreshDirectory(path.dirname(output), { create: true });
+        await writeFile(output, stableJson(plan), { flag: "wx" });
+      }
       const projection = args.includes("--summary") ? projectOrchestrationPlanSummary(plan) : plan;
       if (!apply) return projection;
       const enqueued = await enqueueOrchestrationPlan(plan, { ledgerPath, apply: true });
@@ -486,10 +682,11 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
         },
       };
     }
+    if (command === "validate-capture-result") return validateManagedCaptureResult({ resultPath: requiredString(value("--result"), "--result"), planPath: requiredString(value("--plan"), "--plan"), packetPath: requiredString(value("--packet"), "--packet"), runPath: requiredString(value("--run"), "--run"), ledgerPath: requiredString(value("--ledger"), "--ledger") });
     if (command === "status") { const manifest = await buildPortfolioManifest(value("--manifest", defaultPortfolioManifestPath)); const ledger = value("--ledger") ? await getLedgerViewFromFile({ ledgerPath: value("--ledger"), view: "all" }) : { assignments: [] }; return projectPortfolioStatus(manifest, ledger); }
     if (command === "cache-review") return cacheValidatedReviewResult({ cacheDir: requiredString(value("--cache-dir"), "--cache-dir"), packet: await readJson(requiredString(value("--packet"), "--packet")), result: await readJson(requiredString(value("--result"), "--result")), plan: await readJson(requiredString(value("--plan"), "--plan")) });
     if (command === "reuse-review") return validateCachedReviewReuse({ cacheDir: requiredString(value("--cache-dir"), "--cache-dir"), packet: await readJson(requiredString(value("--packet"), "--packet")), plan: await readJson(requiredString(value("--plan"), "--plan")), assignmentId: requiredString(value("--assignment-id"), "--assignment-id"), qualityGate: await readJson(requiredString(value("--quality-gate"), "--quality-gate")) });
-    throw new Error("Use validate-portfolio, compile-plan, status, cache-review, or reuse-review.");
+    throw new Error("Use validate-portfolio, compile-plan, validate-capture-result, status, cache-review, or reuse-review.");
   };
   json().then((result) => console.log(stableJson(result))).catch((error) => { console.error(error.message); process.exitCode = 1; });
 }

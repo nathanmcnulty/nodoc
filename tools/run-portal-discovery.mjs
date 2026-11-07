@@ -3,6 +3,7 @@ import { createHash } from "node:crypto";
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { isDeepStrictEqual } from "node:util";
 
 import {
   buildCandidateHandoff,
@@ -33,7 +34,7 @@ import {
   updateAttempt,
   updateAttemptFromDiscoveryRun,
 } from "./portal-discovery-ledger.mjs";
-import { prepareLedgerAttempt } from "./portal-discovery-dispatch.mjs";
+import { prepareLedgerAttempt, validateCaptureHandoff } from "./portal-discovery-dispatch.mjs";
 import {
   ProcessSupervisionTimeoutError,
   runNode,
@@ -64,6 +65,7 @@ import {
 } from "./portal-discovery-novelty.mjs";
 import {
   buildKnownOperationRefreshPlan,
+  hasUnmaterializedKnownOperationApproval,
   evaluateKnownOperationRefreshEvidence,
   validateRepresentativeStateMatrix,
 } from "./portal-discovery-evidence-contract.mjs";
@@ -235,6 +237,7 @@ function parseArgs(argv) {
     ledgerPath: defaultLedgerPath,
     assignmentId: null,
     assignmentDigest: null,
+    orchestrationPlan: null,
     attemptNumber: null,
     endpoint: null,
     cdpEndpoint: "http://127.0.0.1:9222",
@@ -312,6 +315,9 @@ function parseArgs(argv) {
       index += 1;
     } else if (argument === "--ledger-path" && next) {
       args.ledgerPath = path.resolve(next);
+      index += 1;
+    } else if (argument === "--orchestration-plan" && next) {
+      args.orchestrationPlan = path.resolve(next);
       index += 1;
     } else if (argument === "--assignment-id" && next) {
       args.assignmentId = next;
@@ -729,24 +735,15 @@ function buildBrief(specRecord, recipePath) {
   };
 }
 
-export async function buildCaptureWorkerPacket({
-  actionBudget,
-  args,
-  brief,
-  noveltyPlan,
-  knownOperationRefreshPlan = null,
-  recipePath,
-}) {
-  const policyBindings = await Promise.all(capturePolicyFiles.map(async (relativePath) => {
-    const contents = await readFile(path.join(repoRoot, relativePath));
-    return {
-      bytes: contents.byteLength,
-      path: relativePath,
-      sha256: sha256(contents),
-    };
-  }));
-  const recipeContents = await readFile(recipePath);
-  const driverArgs = [
+function captureWorkerDriverArgs({ args, brief, knownOperationRefreshPlan }) {
+  let ledgerEndpoint = args.endpoint ? normalizeEndpoint(args.endpoint) : null;
+  const callerUrl = knownOperationRefreshPlan?.entryUrl ?? brief.portalUrl;
+  if (!ledgerEndpoint && callerUrl) {
+    const parsed = new URL(callerUrl);
+    if (!["http:", "https:"].includes(parsed.protocol) || parsed.username || parsed.password) throw new Error("Portal caller must be an HTTP(S) URL without credentials.");
+    ledgerEndpoint = normalizeEndpoint(parsed.origin);
+  }
+  return [
     "--portal", brief.specId,
     "--recipe", brief.recipe,
     "--profile", "bounded",
@@ -758,7 +755,9 @@ export async function buildCaptureWorkerPacket({
     "--operation-ceiling", args.operationCeiling,
     ...(args.assignmentId ? ["--assignment-id", args.assignmentId] : []),
     ...(args.assignmentDigest ? ["--assignment-digest", args.assignmentDigest] : []),
-    ...(args.endpoint || brief.portalUrl ? ["--endpoint", args.endpoint || brief.portalUrl] : []),
+    ...(args.orchestrationPlan ? ["--orchestration-plan", args.orchestrationPlan] : []),
+    ...(args.orchestrationPlan ? ["--ledger-path", args.ledgerPath] : []),
+    ...(ledgerEndpoint ? ["--endpoint", ledgerEndpoint] : []),
     "--cdp-endpoint", args.cdpEndpoint,
     ...(args.workerId ? ["--worker-id", args.workerId] : []),
     ...(args.targetId ? ["--target-id", args.targetId] : []),
@@ -767,6 +766,38 @@ export async function buildCaptureWorkerPacket({
       : []),
     ...args.variables.flatMap((variable) => ["--var", variable]),
   ];
+}
+
+export function captureWorkerPacketDigest(packet) {
+  const { packetSha256: ignoredDigest, measurements: ignoredMeasurements, ...core } = packet;
+  // Hash exactly the JSON-persisted projection, including when an API caller
+  // omitted optional fields. Reuse the packet builder's canonical serialization.
+  return sha256(stableJson(JSON.parse(JSON.stringify(core))));
+}
+
+export function verifyCaptureWorkerPacket(packet, { artifactDir, knownOperationRefreshPlan }) {
+  if (packet.packetSha256 !== captureWorkerPacketDigest(packet)) throw new Error("Capture worker packet digest mismatch.");
+  const runtimeArgs = [...packet.execution.driverArgs];
+  const recipeIndex = runtimeArgs.indexOf("--recipe") + 1;
+  if (recipeIndex && !path.isAbsolute(runtimeArgs[recipeIndex])) runtimeArgs[recipeIndex] = path.resolve(repoRoot, runtimeArgs[recipeIndex]);
+  const args = parseArgs([...runtimeArgs, "--artifacts", artifactDir]);
+  const expected = captureWorkerDriverArgs({ args, brief: { ...packet.scope, recipe: packet.bindings.recipe }, knownOperationRefreshPlan });
+  const verification = [...expected];
+  verification[verification.indexOf("--phase") + 1] = "plan";
+  verification.push("--worker-packet", "--json");
+  if (!isDeepStrictEqual(packet.execution.driverArgs, expected) || !isDeepStrictEqual(packet.execution.verificationArgs, verification)) {
+    throw new Error("Capture packet executable argv do not match the canonical driver/verification binding.");
+  }
+  return args;
+}
+
+export async function buildCaptureWorkerPacket({ actionBudget, args, brief, noveltyPlan, knownOperationRefreshPlan = null, recipePath }) {
+  const policyBindings = await Promise.all(capturePolicyFiles.map(async (relativePath) => {
+    const contents = await readFile(path.join(repoRoot, relativePath));
+    return { bytes: contents.byteLength, path: relativePath, sha256: sha256(contents) };
+  }));
+  const recipeContents = await readFile(recipePath);
+  const driverArgs = captureWorkerDriverArgs({ args, brief, knownOperationRefreshPlan });
   const verificationArgs = [...driverArgs];
   verificationArgs[verificationArgs.indexOf("--phase") + 1] = "plan";
   verificationArgs.push("--worker-packet", "--json");
@@ -781,6 +812,9 @@ export async function buildCaptureWorkerPacket({
     bindings: {
       assignmentDigest: args.assignmentDigest,
       assignmentId: args.assignmentId,
+      workerId: args.workerId ?? null,
+      orchestrationPlanSha256: args.identityLinkage?.planSha256 ?? null,
+      identityLinkage: args.identityLinkage ?? { status: "legacy-identity-unknown", unattendedPromotionEligible: false },
       noveltyPlanSha256: noveltyPlan ? sha256(stableJson(noveltyPlan)) : null,
       knownOperationRefreshPlanSha256: knownOperationRefreshPlan ? sha256(stableJson(knownOperationRefreshPlan)) : null,
       planKind: noveltyPlan ? "discovery-novelty" : knownOperationRefreshPlan ? "known-operation-refresh" : "bounded-recipe",
@@ -797,6 +831,9 @@ export async function buildCaptureWorkerPacket({
       preserveFailedArtifacts: true,
       promotionAuthorized: false,
       reportMode: "compact-structured-output",
+      requiredWorkerReportFields: ["assignmentId", "assignmentDigest", "workerId", "runtimeRole", ...(args.orchestrationPlan ? ["attemptNumber", "captureRoot"] : [])],
+      workerReportIdentitySource: "Use the finalized ledger assignment and actual worker runtime; nested aliases or policy defaults alone do not establish identity.",
+      requiredTerminalReviewBindings: ["workerReportSha256", "integrityReportSha256"],
     },
     execution: {
       actionBudget,
@@ -849,11 +886,11 @@ export async function buildCaptureWorkerPacket({
       sourcePolicyBytes,
       tokenEstimate: "not-reported-use-bytes-for-comparison",
     },
-    packetSha256: sha256(stableJson(packetCore)),
+    packetSha256: captureWorkerPacketDigest(packetCore),
   };
 }
 
-export async function verifyKnownOperationRefreshApproval(plan, { root = repoRoot, now = Date.now() } = {}) {
+export async function verifyKnownOperationRefreshApproval(plan, { root = repoRoot, now = Date.now(), requireLiveAuthority = true } = {}) {
   if (!plan) return null;
   const approvalPath = path.resolve(root, plan.approvalArtifact);
   const relative = path.relative(root, approvalPath);
@@ -861,6 +898,16 @@ export async function verifyKnownOperationRefreshApproval(plan, { root = repoRoo
   const source = await readFile(approvalPath, "utf8");
   if (sha256(source) !== plan.approvalDigest) throw new Error("known-operation approval digest mismatch before browser allocation.");
   const approval = JSON.parse(source);
+  if (requireLiveAuthority && hasUnmaterializedKnownOperationApproval(approval)) {
+    const error = new Error("Known-refresh approval is explicitly unmaterialized; retain its history but do not execute it.");
+    error.code = "known-refresh-approval-not-materialized";
+    throw error;
+  }
+  if (requireLiveAuthority && (approval.liveAuthorized === false || approval.reviewRequirement?.status === "not-performed" || String(approval.status ?? "").startsWith("proposal-pending"))) {
+    const error = new Error("Known-refresh approval is a proposal or explicitly lacks completed review/live authority.");
+    error.code = "known-refresh-approval-not-executable";
+    throw error;
+  }
   if (!/^[a-f0-9]{64}$/u.test(String(plan.executionDigest ?? ''))
       || !/^[a-f0-9]{64}$/u.test(String(approval.executionDigest ?? ''))
       || approval.executionDigest !== plan.executionDigest) {
@@ -914,6 +961,7 @@ async function persistTerminalRun(args, runState) {
     model: args.model,
     reasoning: args.reasoning,
     workerId: args.workerId,
+    assignmentDigest: args.assignmentDigest,
     discoveryRun: runState,
   });
 }
@@ -961,7 +1009,7 @@ function unresolvedOperationSummary(plan, reason) {
   }]);
 }
 
-async function readVerifiedMutationSummary(
+export async function readVerifiedMutationSummary(
   artifactDir,
   { activeOperationPlan = null, captureSummary = null } = {},
 ) {
@@ -1016,7 +1064,7 @@ function operationBlocker(mutationSummary, { captureFailure = null } = {}) {
   };
 }
 
-async function inspectCaptureCompleteness(artifactDir) {
+export async function inspectCaptureCompleteness(artifactDir) {
   const summaryPath = path.join(artifactDir, "summary.json");
   try {
     const summary = JSON.parse(await readFile(summaryPath, "utf8"));
@@ -1148,6 +1196,7 @@ async function runLedgerMode(args) {
     console.log(JSON.stringify(await claimAssignment({
       ledgerPath: args.ledgerPath,
       assignmentId: args.assignmentId,
+      assignmentDigest: args.assignmentDigest,
       endpoint: args.endpoint,
       phase: args.phase,
       profile: args.profile,
@@ -1162,6 +1211,7 @@ async function runLedgerMode(args) {
     console.log(JSON.stringify(await resumeAttempt({
       ledgerPath: args.ledgerPath,
       assignmentId: args.assignmentId,
+      assignmentDigest: args.assignmentDigest,
       artifactDir: args.artifacts,
       phase: args.phase,
       workerId: args.workerId,
@@ -1180,6 +1230,8 @@ async function runLedgerMode(args) {
     const common = {
       ledgerPath: args.ledgerPath,
       assignmentId: args.assignmentId,
+      assignmentDigest: args.assignmentDigest,
+      workerId: args.workerId,
       attemptNumber,
       artifactDir: args.artifacts || undefined,
       model: args.model,
@@ -1274,7 +1326,12 @@ async function main() {
   let knownOperationRefreshPlan;
   let knownOperationRefreshApproval;
   let recipeSafety;
+  let workerPacket;
   try {
+    if (args.endpoint) {
+      try { args.endpoint = normalizeEndpoint(args.endpoint); }
+      catch (error) { error.code = "endpoint-invalid"; throw error; }
+    }
     const sourceRecipe = JSON.parse(await readFile(recipePath, "utf8"));
     if (sourceRecipe?.capturePrerequisite?.status === "blocked") {
       const error = new Error(`capture prerequisite is not satisfied; ${sourceRecipe.capturePrerequisite.nextRequirement}`);
@@ -1301,8 +1358,12 @@ async function main() {
     const derivedBaseline = deriveNoveltyBaseline(await loadBundledSpecification(path.resolve(repoRoot, specRecord.specPath)));
     noveltyPlan = buildNoveltyPlan(selectedRecipe, { required: args.requireNovelty, derivedBaseline });
     knownOperationRefreshPlan = buildKnownOperationRefreshPlan(selectedRecipe, { required: args.requireKnownRefresh, baselineOperations: derivedBaseline.operations });
-    knownOperationRefreshApproval = await verifyKnownOperationRefreshApproval(knownOperationRefreshPlan);
+    knownOperationRefreshApproval = await verifyKnownOperationRefreshApproval(knownOperationRefreshPlan, { requireLiveAuthority: args.phase !== "analyze" });
     actionBudget = buildActionBudget(selectedRecipe);
+    try {
+      args.identityLinkage = await validateCaptureHandoff({ args, specRecord, recipePath, knownOperationRefreshPlan, actionBudget });
+    } catch (error) { error.code = "capture-handoff-invalid"; throw error; }
+    if (args.phase === "plan" || args.orchestrationPlan) workerPacket = await buildCaptureWorkerPacket({ actionBudget, args, brief, noveltyPlan, knownOperationRefreshPlan, recipePath });
   } catch (error) {
     const runState = {
       artifacts: args.artifacts,
@@ -1311,7 +1372,7 @@ async function main() {
       startedAt: new Date().toISOString(),
       status: "blocked",
       blocker: {
-        code: ["action-budget-exceeded", "capture-prerequisite-missing", "novelty-frontier-invalid", "recipe-target-invalid", "unsafe-recipe-action", "response-body-policy-unbound"].includes(error?.code)
+        code: ["action-budget-exceeded", "capture-prerequisite-missing", "novelty-frontier-invalid", "recipe-target-invalid", "unsafe-recipe-action", "response-body-policy-unbound", "endpoint-invalid", "known-refresh-approval-not-executable", "known-refresh-approval-not-materialized", "capture-handoff-invalid"].includes(error?.code)
           ? error.code
           : /operation|approval|ceiling/iu.test(error?.message ?? "")
             ? "mutation-authorization-required"
@@ -1327,14 +1388,6 @@ async function main() {
   }
 
   if (args.phase === "plan") {
-    const workerPacket = await buildCaptureWorkerPacket({
-      actionBudget,
-      args,
-      brief,
-      noveltyPlan,
-      knownOperationRefreshPlan,
-      recipePath,
-    });
     console.log(JSON.stringify(
       args.workerPacketOnly
         ? workerPacket
@@ -1458,6 +1511,11 @@ async function main() {
   }
 
   const runState = {
+    assignmentId: args.assignmentId,
+    assignmentDigest: args.assignmentDigest,
+    workerId: args.workerId,
+    identityLinkage: args.identityLinkage,
+    workerPacketSha256: workerPacket?.packetSha256 ?? null,
     artifacts: args.artifacts,
     brief,
     phase: args.phase,
@@ -1486,6 +1544,7 @@ async function main() {
       ? {
           assignmentId: args.assignmentId,
           assignmentDigest: args.assignmentDigest,
+          workerId: args.workerId,
           attemptNumber: args.attemptNumber,
           ledgerPath: args.ledgerPath,
         }

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
 import {spawnSync} from 'node:child_process';
-import {mkdtemp, mkdir, writeFile, rm, readFile} from 'node:fs/promises';
+import {cp, mkdtemp, mkdir, writeFile, rm, readFile, symlink} from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
@@ -63,6 +63,73 @@ test('historical attribution alone does not authorize a new live execution', asy
   await f.save({ ...f.approval, workerModel: 'historical-review-model', workerReasoning: 'historical-effort' });
   const plan = buildKnownOperationRefreshPlan(prepareRecipeForRun(f.input, []));
   await assert.rejects(verifyKnownOperationRefreshApproval(plan, { root: f.root, now: Date.parse('2026-10-31T00:00:00Z') }), /binding or expiry/);
+});
+
+for (const [name, fields] of [
+  ['explicitly denied live authority', { liveAuthorized: false }],
+  ['review not performed', { reviewRequirement: { status: 'not-performed' } }],
+  ['proposal pending actual review', { status: 'proposal-pending-actual-independent-review-and-separate-live-authority' }],
+]) test(`complete bindings cannot authorize ${name}`, async t => {
+  const f = await approvedFixture(t);
+  await f.save({ ...f.approval, ...fields });
+  const plan = buildKnownOperationRefreshPlan(prepareRecipeForRun(f.input, []));
+  await assert.rejects(verifyKnownOperationRefreshApproval(plan, { root: f.root }), error => {
+    assert.equal(error.code, 'known-refresh-approval-not-executable');
+    return true;
+  });
+});
+
+test('read-only analysis can inspect a live-denied approval without bypassing evidence bindings', async t => {
+  const f = await approvedFixture(t);
+  await f.save({ ...f.approval, liveAuthorized: false });
+  const plan = buildKnownOperationRefreshPlan(prepareRecipeForRun(f.input, []));
+  await verifyKnownOperationRefreshApproval(plan, { root: f.root, requireLiveAuthority: false });
+  await writeFile(path.join(f.root, 'approvals/source.json'), 'tampered');
+  await assert.rejects(verifyKnownOperationRefreshApproval(plan, { root: f.root, requireLiveAuthority: false }), /source hash mismatch/);
+});
+
+for (const materialized of [false, null, "false", "true"]) test(`unmaterialized approval ${JSON.stringify(materialized)} cannot authorize live capture`, async t => {
+  const f = await approvedFixture(t);
+  await f.save({ ...f.approval, materialized });
+  const plan = buildKnownOperationRefreshPlan(prepareRecipeForRun(f.input, []));
+  assert.equal(classifyKnownOperationExecutionApproval({ ...f.approval, materialized }, f.rawPlan), 'unmaterialized-non-runnable');
+  await assert.rejects(verifyKnownOperationRefreshApproval(plan, {root: f.root}), error => error.code === 'known-refresh-approval-not-materialized');
+  // Historical evidence can be inspected offline; this never grants live authority.
+  await verifyKnownOperationRefreshApproval(plan, {root: f.root, requireLiveAuthority: false});
+});
+
+test('materialization does not replace full approval binding', async t => {
+  const f = await approvedFixture(t);
+  await f.save({...f.approval, materialized: true});
+  const plan = buildKnownOperationRefreshPlan(prepareRecipeForRun(f.input, []));
+  assert.equal(classifyKnownOperationExecutionApproval({...f.approval, materialized: true}, f.rawPlan), 'bound');
+  await verifyKnownOperationRefreshApproval(plan, {root: f.root});
+  assert.throws(() => classifyKnownOperationExecutionApproval({...f.approval, materialized: true, executionDigest: 'bad'}, f.rawPlan), /full execution approval binding/u);
+});
+
+test('public planning preserves the unmaterialized blocker before allocating a ledger or browser', async t => {
+  const input = JSON.parse(await readFile(path.join(repoRoot, 'tools/capture-recipes/m365-admin-shell-loop-20261106.json'), 'utf8'));
+  input.knownOperationRefresh.approvalArtifact = 'approvals/known.json';
+  input.knownOperationRefresh.approvalExpiresAt = '2099-01-01T00:00:00.000Z';
+  const f = await approvedFixture(t, input);
+  await f.save({...f.approval, materialized: false});
+  await cp(path.join(repoRoot, 'tools'), path.join(f.root, 'tools'), {recursive: true, filter: filename => filename !== path.join(repoRoot, 'tools/tests')});
+  await mkdir(path.join(f.root, 'specifications'));
+  await cp(path.join(repoRoot, 'specifications/nodoc-m365-admin'), path.join(f.root, 'specifications/nodoc-m365-admin'), {recursive: true});
+  await symlink(path.join(repoRoot, 'node_modules'), path.join(f.root, 'node_modules'), process.platform === 'win32' ? 'junction' : 'dir');
+  const recipePath = path.join(f.root, 'tools/capture-recipes/m365-admin-shell-loop-20261106.json');
+  await writeFile(recipePath, JSON.stringify(f.input));
+  const artifacts = path.join(f.root, 'artifacts'), ledger = path.join(f.root, 'ledger.jsonl');
+  const result = spawnSync(process.execPath, [path.join(f.root, 'tools/run-portal-discovery.mjs'), '--portal', 'm365-admin',
+    '--recipe', recipePath, '--phase', 'plan', '--require-known-refresh', '--json', '--operation-ceiling', 'observe-only',
+    '--model', 'gpt-6-luna', '--reasoning', 'low', '--artifacts', artifacts, '--ledger-path', ledger,
+  ], {cwd: f.root, encoding: 'utf8', maxBuffer: 4 * 1024 * 1024});
+  assert.equal(result.status, 2, result.stderr);
+  assert.equal(JSON.parse(result.stderr).blocker.code, 'known-refresh-approval-not-materialized');
+  const state = JSON.parse(await readFile(path.join(artifacts, 'discovery-run.json'), 'utf8'));
+  assert.equal(state.blocker.code, 'known-refresh-approval-not-materialized');
+  assert.equal(state.browserPreflight, undefined);
+  await assert.rejects(readFile(ledger), {code: 'ENOENT'});
 });
 
 const unboundChanges = [

@@ -126,27 +126,27 @@ test("CLI variables are expanded before recipe-gated target preflight", () => {
   };
   const recipe = expandRecipeVariables(
     sourceRecipe,
-    recipeVariables(sourceRecipe, ["tenant=sharemylabs"]),
+    recipeVariables(sourceRecipe, ["tenant=examplefixture"]),
   );
   assert.deepEqual(buildPreflightCriteria(recipe), {
-    matchHosts: ["sharemylabs-admin.sharepoint.com"],
+    matchHosts: ["examplefixture-admin.sharepoint.com"],
     matchPathPrefixes: ["/_layouts/15/online/AdminHome.aspx"],
     urlPattern: undefined,
     titlePattern: undefined,
     expectedTitlePattern: undefined,
     rejectBodyPattern: undefined,
   });
-  assert.equal(recipe.url, "https://sharemylabs-admin.sharepoint.com/_layouts/15/online/AdminHome.aspx#/home");
+  assert.equal(recipe.url, "https://examplefixture-admin.sharepoint.com/_layouts/15/online/AdminHome.aspx#/home");
 });
 
 test("the same expanded recipe is used by capture analysis", () => {
   const recipe = prepareRecipeForRun({
     url: "https://${tenant}-admin.sharepoint.com/",
     actions: ["navigate=https://${tenant}-admin.sharepoint.com/#/contentSecurityPolicy"],
-  }, ["tenant=sharemylabs"]);
-  assert.equal(recipe.url, "https://sharemylabs-admin.sharepoint.com/");
+  }, ["tenant=examplefixture"]);
+  assert.equal(recipe.url, "https://examplefixture-admin.sharepoint.com/");
   assert.deepEqual(recipe.actions, [
-    "navigate=https://sharemylabs-admin.sharepoint.com/#/contentSecurityPolicy",
+    "navigate=https://examplefixture-admin.sharepoint.com/#/contentSecurityPolicy",
   ]);
 });
 

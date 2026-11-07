@@ -80,7 +80,22 @@ export async function compileIntegratedControllerFromFiles({ manifestPath, bench
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  const inputPath = process.argv[2];
+  const command = process.argv[2];
+  const refresh = ["refresh", "refresh-proposals", "refresh-eligibility"].includes(command);
+  const inputPath = process.argv[refresh ? 3 : 2];
   if (!inputPath) throw new Error("Use node tools/portal-discovery-controller.mjs <stage-input.json>.");
-  compileIntegratedControllerFromFiles(JSON.parse(await readFile(path.resolve(inputPath), "utf8"))).then((report) => process.stdout.write(stableJson(report))).catch((error) => { console.error(error.message); process.exitCode = 1; });
+  let compile = compileIntegratedControllerFromFiles;
+  if (command === "refresh") compile = (await import("./portal-refresh.mjs")).runPortfolioRefresh;
+  if (command === "refresh-proposals") compile = async input => {
+    const { prepareRefreshProposals } = await import("./portal-refresh-proposals.mjs");
+    const { loadVerifiedRefreshAnalysis } = await import("./portal-refresh.mjs");
+    const manifest = await prepareRefreshProposals({ ...input, analysis: await loadVerifiedRefreshAnalysis(input.analysisPath), inventory: await (await import("./spec-quality-lib.mjs")).buildSpecRouteInventory() });
+    return { mode: "proposal-only", changeCount: manifest.changes.length, independentReviewRequired: true };
+  };
+  if (command === "refresh-eligibility") compile = async input => {
+    const { reportRefreshMergeEligibility } = await import("./portal-refresh-proposals.mjs");
+    const read = async file => file ? JSON.parse(await readFile(file, "utf8")) : null;
+    return reportRefreshMergeEligibility({ manifest: await read(input.manifestPath), review: await read(input.reviewPath), checks: await read(input.checksPath), sourceRevision: input.sourceRevision, sourceReview: input.sourceReview, proposalRoot: input.proposalRoot, analysisPath: input.analysisPath, captureIdentityEvidence: input.captureIdentityEvidence });
+  };
+  compile(JSON.parse(await readFile(path.resolve(inputPath), "utf8"))).then((report) => process.stdout.write(refresh ? `${JSON.stringify(report, null, 2)}\n` : stableJson(report))).catch((error) => { console.error(refresh ? "Controller failed; inspect the private inputs and retained artifacts." : error.message); process.exitCode = 1; });
 }

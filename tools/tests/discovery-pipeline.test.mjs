@@ -1804,8 +1804,6 @@ test("portal driver can emit only the compact capture worker packet", async () =
     "--json",
     "--assignment-id",
     "capture-packet-test",
-    "--assignment-digest",
-    "f".repeat(64),
   ];
   const { stdout } = await execFileAsync(process.execPath, command, { cwd: repoRoot });
   const repeated = await execFileAsync(process.execPath, command, { cwd: repoRoot });
@@ -1814,8 +1812,12 @@ test("portal driver can emit only the compact capture worker packet", async () =
   assert.equal(result.schemaVersion, "1.0");
   assert.equal(result.assignmentType, "capture");
   assert.equal(result.bindings.assignmentId, "capture-packet-test");
-  assert.equal(result.bindings.assignmentDigest, "f".repeat(64));
-  assert.ok(result.execution.driverArgs.includes("--assignment-digest"));
+  assert.equal(result.bindings.assignmentDigest, null);
+  assert.equal(result.execution.driverArgs.includes("--assignment-digest"), false);
+  await assert.rejects(execFileAsync(process.execPath, [...command, "--assignment-digest", "f".repeat(64)], { cwd: repoRoot }), error => {
+    assert.equal(JSON.parse(error.stderr).blocker.code, "capture-handoff-invalid");
+    return true;
+  });
   assert.deepEqual(result.role, portalDiscoveryModelPolicy.capture);
   for (const field of ["model", "reasoning"]) {
     const index = result.execution.driverArgs.indexOf(`--${field}`);

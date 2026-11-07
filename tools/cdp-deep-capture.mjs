@@ -199,7 +199,69 @@ function bodyShapeFingerprint(value) {
   }
 }
 
-function requestEvidence(request) {
+// PRIVATE variant identity only. Never export these value-derived digests in a
+// candidate handoff, public spec or collection. A complete decoded/verified body
+// takes precedence over its preview, which may stop before the error envelope.
+export function responseErrorSignature(request) {
+  const fullBody = typeof request.responseBodyForAnalysis === "string";
+  const source = fullBody ? request.responseBodyForAnalysis : request.responseBody ?? request.responseBodySample;
+  if (source === undefined || source === null || source === "") return null;
+  const httpError = Number(request.status) >= 400;
+  const state = fullBody ? "full-body" : `preview:${request.bodyCapture?.state ?? "unknown"}`;
+  let text;
+  try { text = typeof source === "string" ? source : JSON.stringify(source); } catch { return null; }
+  if (typeof text !== "string" || Buffer.byteLength(text, "utf8") > maximumResponseBodyBytes) return null;
+  let body;
+  try { body = JSON.parse(text); } catch {
+    // Malformed or partial text is opaque evidence, never a semantic-error claim.
+    return httpError && text.trim() ? sha256(JSON.stringify([state, "unparsed-http-error", sha256(text)])) : null;
+  }
+  const populated = value => value != null && value !== false && value !== ""
+    && (typeof value !== "object" || Object.keys(value).length > 0);
+  const errorRoots = body && typeof body === "object" && !Array.isArray(body)
+    ? Object.entries(body).filter(([key, value]) => (/^(?:error|errors|errorMessage)$/iu.test(key) && populated(value))
+      || (/^errorData$/iu.test(key) && value && typeof value === "object"
+        && Object.entries(value).some(([field, entry]) => /^(?:errorMessage|errorType|exceptionName)$/iu.test(field) && populated(entry)))
+      || (/^success$/iu.test(key) && value === false)) : [];
+  if (!httpError && !errorRoots.length) return null;
+  const values = [];
+  let incomplete = false;
+  const visit = (value, depth = 0, structuralPath = []) => {
+    if (!value || typeof value !== "object") return;
+    if (depth > 4) { incomplete = true; return; }
+    const keys = Object.keys(value).sort();
+    if (keys.length > 128) incomplete = true;
+    for (const key of keys.slice(0, 128)) {
+      const nested = value[key];
+      const fieldPath = [...structuralPath, Array.isArray(value) ? Number(key) : key];
+      if (/^(?:code|errorcode|error_code|message|errormessage|error_description|reason|errortype|exceptionname)$/iu.test(key)
+          && ["string", "number"].includes(typeof nested)) {
+        values.push([fieldPath, typeof nested, sha256(String(nested))]);
+      } else if (/^error$/iu.test(key) && typeof nested === "string") {
+        values.push([fieldPath, "string", sha256(nested)]);
+      } else if (nested && typeof nested === "object") visit(nested, depth + 1, fieldPath);
+    }
+  };
+  // HTTP 200 partial GraphQL errors are identified independently of changing data.
+  const errorBody = httpError ? body : Object.fromEntries(errorRoots);
+  visit(errorBody);
+  const fallback = incomplete || !values.length
+    ? sha256(httpError ? text : JSON.stringify(errorBody)) : null;
+  return sha256(JSON.stringify([state, values, fallback]));
+}
+
+export function requestEvidence(request) {
+  const errorSignature = typeof request.responseBodyForAnalysis === "string"
+    ? responseErrorSignature(request) : request.responseErrorSignature ?? responseErrorSignature(request);
+  const graphQlSelectors = graphQlOperationMetadata(request);
+  const hasRequestBody = typeof request.requestBody === "string";
+  const requestBodyCaptureState = request.requestBodyCaptureState ?? (hasRequestBody ? "legacy-unknown" : "not-observed");
+  // Values distinguish RPC commands without guessing which field is a command.
+  // An unverified retained prefix has per-observation identity, not full-body identity.
+  const requestBodyVariant = hasRequestBody || requestBodyCaptureState === "unavailable" || requestBodyCaptureState === "size-limit"
+    ? { state: requestBodyCaptureState,
+      digest: request.requestBodyValueFingerprint ?? (hasRequestBody ? sha256(request.requestBody) : null),
+      ...(!request.requestBodyValueFingerprint && requestBodyCaptureState !== "captured" ? { observation: request.evidenceId ?? null } : {}) } : null;
   try {
     const parsed = new URL(request.url);
     const queryParameterNames = uniqueSorted(Array.from(parsed.searchParams.keys()));
@@ -210,13 +272,20 @@ function requestEvidence(request) {
     return {
       queryParameterNames,
       requestFingerprint: sha256(JSON.stringify({
+        origin: parsed.origin,
         method: request.method,
         path: parsed.pathname,
         queryParameterNames,
         requestShapeFingerprint,
         responseShapeFingerprint,
         status: request.status ?? null,
+        mediaType: request.mimeType ?? null,
+        graphQlSelectors,
+        requestBodyVariant,
+        ...(errorSignature ? { errorSignature } : {}),
       })),
+      responseErrorSignature: errorSignature,
+      requestBodyCaptureState,
       requestShapeFingerprint,
       responseShapeFingerprint,
       requestShapeSummary: request.requestShapeSummary ?? bodyShapeSummary(request.requestBody),
@@ -227,7 +296,9 @@ function requestEvidence(request) {
   } catch {
     return {
       queryParameterNames: [],
-      requestFingerprint: sha256(`${request.method} ${request.url}`),
+      requestFingerprint: sha256(JSON.stringify([request.method, request.url, errorSignature, graphQlSelectors, requestBodyVariant])),
+      responseErrorSignature: errorSignature,
+      requestBodyCaptureState,
       requestShapeFingerprint:
         request.requestShapeFingerprint ?? bodyShapeFingerprint(request.requestBody),
       responseShapeFingerprint:
@@ -243,7 +314,17 @@ function requestEvidence(request) {
 export function graphQlOperationMetadata(request) {
   try {
     const parsedUrl = new URL(request.url);
-    if (!/\/(?:graphql|gql)\/?$/iu.test(parsedUrl.pathname) || typeof request.requestBody !== "string") return { kind: null, name: null, persistedQuerySha256Hash: null, literalQuerySha256Hash: null };
+    if (!/\/(?:graphql|gql)\/?$/iu.test(parsedUrl.pathname)) return { kind: null, name: null, persistedQuerySha256Hash: null, literalQuerySha256Hash: null };
+    if (request.graphQlOperationSelectors) {
+      const selectors = request.graphQlOperationSelectors;
+      return {
+        kind: ["query", "mutation", "subscription"].includes(selectors.kind) ? selectors.kind : null,
+        name: typeof selectors.name === "string" && /^[A-Za-z_][A-Za-z0-9_]{0,127}$/u.test(selectors.name) ? selectors.name : null,
+        persistedQuerySha256Hash: /^[a-f0-9]{64}$/u.test(selectors.persistedQuerySha256Hash) ? selectors.persistedQuerySha256Hash : null,
+        literalQuerySha256Hash: /^[a-f0-9]{64}$/u.test(selectors.literalQuerySha256Hash) ? selectors.literalQuerySha256Hash : null,
+      };
+    }
+    if (typeof request.requestBody !== "string") return { kind: null, name: null, persistedQuerySha256Hash: null, literalQuerySha256Hash: null };
     const parsedBody = JSON.parse(request.requestBody);
     const value = String(parsedBody?.operationName ?? "").trim();
     const query = String(parsedBody?.query ?? "").trim();
@@ -258,6 +339,18 @@ export function graphQlOperationMetadata(request) {
   } catch {
     return { kind: null, name: null, persistedQuerySha256Hash: null, literalQuerySha256Hash: null };
   }
+}
+
+// PRIVATE capture-text identity. A digest of returned postData is not proof that
+// CDP supplied every on-wire byte (for example uploaded multipart file bytes).
+export function privateRequestBodyEvidence({ url, sanitizedBody, hasPostData = false }) {
+  if (typeof sanitizedBody !== "string") return { requestBodyCaptureState: hasPostData ? "unavailable" : "not-observed" };
+  if (Buffer.byteLength(sanitizedBody, "utf8") > maximumResponseBodyBytes) return { requestBodyCaptureState: "size-limit" };
+  return {
+    requestBodyCaptureState: sanitizedBody.length > 5000 ? "truncated" : "captured",
+    requestBodyValueFingerprint: sha256(sanitizedBody),
+    graphQlOperationSelectors: graphQlOperationMetadata({ url, requestBody: sanitizedBody }),
+  };
 }
 
 function normalizeHeaderEntries(headers = {}) {
@@ -1148,6 +1241,7 @@ export async function captureResponseBodyEvidence({
   requestUrl,
   matchHosts = [],
   matchPathPrefixes = [],
+  status = null,
   writeSidecar = writeResponseBodySidecar,
   limits = responseBodyLimits,
 } = {}) {
@@ -1184,6 +1278,7 @@ export async function captureResponseBodyEvidence({
     bodyCapture: sidecar.bodyCapture,
     responseShapeFingerprint: bodyShapeFingerprint(sanitizedBody),
     responseShapeSummary: bodyShapeSummary(sanitizedBody),
+    responseErrorSignature: responseErrorSignature({ status, responseBodyForAnalysis: sanitizedBody }),
     ...(sidecar.bodyCaptureDiagnostic ? { bodyCaptureDiagnostic: sidecar.bodyCaptureDiagnostic }
       : sidecar.bodyCapture.state === "incomplete-write" ? { bodyCaptureDiagnostic: "response-body-sidecar-incomplete" } : {}),
   };
@@ -1347,6 +1442,10 @@ function buildSeedRouteUrl(routeTemplate, seedValue, rootOrigin) {
 
 function hasResponseEvidence(item) {
   if (typeof item?.responseBodySample === "string") return true;
+  return hasCompleteResponseEvidence(item);
+}
+
+function hasCompleteResponseEvidence(item) {
   const descriptor = item?.bodyCapture;
   const evidenceId = item?.evidenceId;
   return descriptor?.state === "complete"
@@ -1361,7 +1460,8 @@ function hasResponseEvidence(item) {
 }
 
 export function mergeItems(existing, next) {
-  const preserveExistingResponse = hasResponseEvidence(existing) && !hasResponseEvidence(next);
+  const preserveExistingResponse = (hasCompleteResponseEvidence(existing) && !hasCompleteResponseEvidence(next))
+    || (hasResponseEvidence(existing) && !hasResponseEvidence(next));
   const selectedResponse = preserveExistingResponse ? existing : next;
   const merged = { ...existing, ...next };
 
@@ -1389,10 +1489,14 @@ export function mergeItems(existing, next) {
     "bodyCaptureDiagnostic",
     "evidenceId",
     "graphBatch",
+    "mimeType",
+    "observedAt",
     "responseBodySample",
+    "responseErrorSignature",
     "responseShapeFingerprint",
     "responseShapeSummary",
     "status",
+    "url",
   ]) {
     if (Object.hasOwn(selectedResponse, key)) merged[key] = selectedResponse[key];
     else delete merged[key];
@@ -2467,6 +2571,7 @@ async function main() {
     const context = activeAbortContext;
     const sessionId = metadata.sessionId ?? null;
     const requestSessionId = sessionId ?? "root";
+    const sanitizedRequestBody = sanitizeCapturedBody(params.request?.postData ?? null);
     const request = {
       attribution: resolveEventAttribution("Fetch.requestPaused", sessionId, params),
       evidenceId: buildStableEvidenceId("mutation", {
@@ -2478,7 +2583,8 @@ async function main() {
       }),
       headers: params.request?.headers ?? {},
       method: params.request?.method ?? null,
-      requestBody: truncate(sanitizeCapturedBody(params.request?.postData ?? null)),
+      requestBody: truncate(sanitizedRequestBody),
+      ...privateRequestBodyEvidence({ url: params.request?.url, sanitizedBody: sanitizedRequestBody, hasPostData: params.request?.hasPostData }),
       requestShapeFingerprint: bodyShapeFingerprint(params.request?.postData ?? null),
       responseBody: null,
       sessionId: requestSessionId,
@@ -2749,6 +2855,7 @@ async function main() {
       pageLabel: attribution.pageLabel,
       probeId,
       requestBody: truncate(sanitizedRequestBody),
+      ...privateRequestBodyEvidence({ url: requestUrl, sanitizedBody: sanitizedRequestBody, hasPostData: params.request.hasPostData }),
       graphBatch: graphBatchRequestMetadata(requestUrl, sanitizedRequestBody),
       requestShapeFingerprint: bodyShapeFingerprint(sanitizedRequestBody),
       requestShapeSummary: bodyShapeSummary(sanitizedRequestBody),
@@ -2844,6 +2951,7 @@ async function main() {
               matchHosts: args.matchHosts,
               matchPathPrefixes: args.matchPathPrefixes,
               limits: args.responseBodyLimits,
+              status: record.status,
               loadPayload,
             });
             record.graphBatch = graphBatchResponseMetadata(record.graphBatch, captured.sanitizedBody);
@@ -2852,6 +2960,7 @@ async function main() {
             record.bodyCaptureDiagnostic = captured.bodyCaptureDiagnostic ?? null;
             record.responseShapeFingerprint = captured.responseShapeFingerprint;
             record.responseShapeSummary = captured.responseShapeSummary;
+            record.responseErrorSignature = captured.responseErrorSignature ?? null;
           } catch {
             record.responseBody = null;
             record.bodyCapture = bodyCaptureWithoutSidecar("decode-failed");

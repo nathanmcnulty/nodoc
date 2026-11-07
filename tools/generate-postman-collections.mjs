@@ -13,7 +13,10 @@ import {
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, "..");
 const outputDir = path.join(repoRoot, "postman", "collections");
-const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
+// Invoke pinned JavaScript entrypoints directly. npm exec and .cmd wrappers
+// introduce a shell on Windows, where repository/TEMP paths are not commands.
+const redoclyCli = path.join(repoRoot, "node_modules/@redocly/cli/bin/cli.js");
+const postmanCli = path.join(repoRoot, "node_modules/openapi-to-postmanv2/bin/openapi2postmanv2.js");
 
 const collectionDefinitions = [
   {
@@ -133,16 +136,23 @@ function normalizeCollectionSelector(value) {
   return value.toLowerCase().replace(/[^a-z0-9]+/gu, "");
 }
 
-function getRequestedCollectionSelectors() {
+export function parseCollectionOptions(argv = [], environmentSelectors = "") {
+  const check = argv.includes("--check");
+  const unknownOptions = argv.filter((value) => value.startsWith("-") && value !== "--check");
+  if (unknownOptions.length) throw new Error(`Unknown options: ${unknownOptions.join(", ")}`);
   const selectors = [
-    ...process.argv.slice(2),
-    ...(process.env.NODOC_COLLECTIONS ?? "")
+    ...argv.filter((value) => value !== "--check"),
+    ...environmentSelectors
       .split(",")
       .map((value) => value.trim())
       .filter(Boolean),
   ];
 
-  return new Set(selectors.map(normalizeCollectionSelector));
+  const requested = new Set(selectors.map(normalizeCollectionSelector));
+  const unmatched = [...requested].filter((selector) => !collectionDefinitions.some((definition) => getDefinitionSelectors(definition).includes(selector)));
+  if (unmatched.length) throw new Error(`No collections matched: ${unmatched.join(", ")}`);
+  const definitions = requested.size === 0 ? collectionDefinitions : collectionDefinitions.filter((definition) => getDefinitionSelectors(definition).some((selector) => requested.has(selector)));
+  return { check, definitions };
 }
 
 function getDefinitionSelectors(definition) {
@@ -153,30 +163,18 @@ function getDefinitionSelectors(definition) {
   ].map(normalizeCollectionSelector);
 }
 
-const requestedCollectionSelectors = getRequestedCollectionSelectors();
-const activeCollectionDefinitions = requestedCollectionSelectors.size === 0
-  ? collectionDefinitions
-  : collectionDefinitions.filter((definition) => (
-    getDefinitionSelectors(definition).some((selector) => requestedCollectionSelectors.has(selector))
-  ));
-
-if (requestedCollectionSelectors.size > 0 && activeCollectionDefinitions.length === 0) {
-  throw new Error(
-    `No collections matched: ${Array.from(requestedCollectionSelectors).join(", ")}`,
-  );
+export function assertCollectionParity(committedBytes, generatedBytes, label = "Postman collection") {
+  if (committedBytes == null || !Buffer.from(committedBytes).equals(Buffer.from(generatedBytes))) {
+    throw new Error(`${label} differs from generated output. Run npm run generate:postman and review the collection changes.`);
+  }
+  return true;
 }
 
-function run(command, args) {
-  const resolvedCommand = process.platform === "win32" && command === npmCommand
-    ? "cmd.exe"
-    : command;
-  const resolvedArgs = process.platform === "win32" && command === npmCommand
-    ? ["/d", "/s", "/c", "npm", ...args]
-    : args;
-
-  const result = spawnSync(resolvedCommand, resolvedArgs, {
-    cwd: repoRoot,
-    stdio: "inherit",
+export function runPostmanTool(entrypoint, args, { cwd = repoRoot, stdio = "inherit" } = {}) {
+  const result = spawnSync(process.execPath, [entrypoint, ...args], {
+    cwd,
+    stdio,
+    shell: false,
   });
 
   if (result.error) {
@@ -184,8 +182,9 @@ function run(command, args) {
   }
 
   if (result.status !== 0) {
-    throw new Error(`${resolvedCommand} ${resolvedArgs.join(" ")} failed with exit code ${result.status ?? "unknown"}`);
+    throw new Error(`Postman tool failed with exit code ${result.status ?? "unknown"}`);
   }
+  return result;
 }
 
 function normalizePath(pathValue) {
@@ -660,16 +659,17 @@ function stabilizeCollection(
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-mkdirSync(outputDir, { recursive: true });
+const options = parseCollectionOptions(process.argv.slice(2), process.env.NODOC_COLLECTIONS ?? "");
+if (!options.check) mkdirSync(outputDir, { recursive: true });
 
 const tempDir = mkdtempSync(path.join(os.tmpdir(), "nodoc-postman-"));
 
 try {
-  for (const definition of activeCollectionDefinitions) {
+  for (const definition of options.definitions) {
     const collectionPath = path.join(repoRoot, definition.output);
-    const previousCollection = existsSync(collectionPath)
-      ? JSON.parse(readFileSync(collectionPath, "utf8"))
-      : null;
+    const previousBytes = existsSync(collectionPath) ? readFileSync(collectionPath) : null;
+    const previousCollection = previousBytes ? JSON.parse(previousBytes.toString("utf8")) : null;
+    const generatedPath = options.check ? path.join(tempDir, path.basename(definition.output)) : collectionPath;
     const bundledJsonPath = path.join(
       tempDir,
       `${path.basename(definition.output, ".json")}.bundled.json`,
@@ -677,12 +677,7 @@ try {
 
     console.log(`\n==> Generating ${definition.name}`);
 
-    run(npmCommand, [
-      "exec",
-      "--yes",
-      "--package=@redocly/cli@2.46.0",
-      "--",
-      "redocly",
+    runPostmanTool(redoclyCli, [
       "bundle",
       definition.spec,
       "--ext",
@@ -691,16 +686,11 @@ try {
       bundledJsonPath,
     ]);
 
-    run(npmCommand, [
-      "exec",
-      "--yes",
-      "--package=openapi-to-postmanv2@6.0.0",
-      "--",
-      "openapi2postmanv2",
+    runPostmanTool(postmanCli, [
       "-s",
       bundledJsonPath,
       "-o",
-      definition.output,
+      generatedPath,
       "-p",
       "-c",
       "postman_to_openapi.json",
@@ -708,10 +698,14 @@ try {
 
     stabilizeCollection(
       bundledJsonPath,
-      collectionPath,
+      generatedPath,
       previousCollection,
       { hostRouting: definition.hostRouting },
     );
+    if (options.check) {
+      assertCollectionParity(previousBytes, readFileSync(generatedPath), definition.output);
+      console.log(`Verified ${definition.name} collection parity`);
+    }
   }
 } finally {
   rmSync(tempDir, { recursive: true, force: true });

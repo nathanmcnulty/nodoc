@@ -3,6 +3,7 @@ name: Validate site
 on:
   pull_request:
     paths:
+      - .gitattributes
       - .github/workflows/ci.yml
       - AGENT_DISCOVERY_PLAYBOOK.md
       - AGENT_DISCOVERY_RUNBOOK.md
@@ -45,6 +46,7 @@ on:
     branches:
       - main
     paths:
+      - .gitattributes
       - .github/workflows/ci.yml
       - AGENT_DISCOVERY_PLAYBOOK.md
       - AGENT_DISCOVERY_RUNBOOK.md
@@ -89,6 +91,21 @@ permissions:
   contents: read
 
 jobs:
+  windows-postman:
+    name: Windows Postman argument safety
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "24"
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Test Windows Postman argument handling and check mode
+        run: node --test tools/tests/generate-postman-collections.test.mjs
   validate:
     name: site
     runs-on: ubuntu-latest
@@ -114,11 +131,24 @@ jobs:
       - name: Validate portal discovery metadata
         run: npm run validate:portal-discovery
 
+      - name: Materialize pinned official Graph contract
+        env:
+          LOCALAPPDATA: ${{ runner.temp }}
+        run: npm run sync:graph-contract -- --pinned-spec specifications/nodoc-graph-research/specification/openapi.yml --output-dir "$RUNNER_TEMP/nodoc-cdp/graph-contract"
+
+      - name: Validate Graph research
+        env:
+          LOCALAPPDATA: ${{ runner.temp }}
+        run: npm run validate:graph-research
+
       - name: Validate specification evaluation dispositions
         run: npm run validate:spec-evaluations
 
       - name: Validate generated site data
         run: npm run validate:site-data
+
+      - name: Validate generated Postman parity
+        run: npm run generate:postman -- --check
 
       - name: Build site
         run: npm run build

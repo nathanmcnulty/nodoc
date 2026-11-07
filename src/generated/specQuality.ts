@@ -390,8 +390,8 @@ export const generatedSpecDataByTitle = {
     "headerProfileCount": 7,
     "operationContextCount": 92,
     "requestExampleCount": 1,
-    "successResponseExampleCount": 9,
-    "evidenceMentionCount": 190,
+    "successResponseExampleCount": 11,
+    "evidenceMentionCount": 192,
     "maturity": {
       "label": "Foundational",
       "tone": "neutral",

@@ -494,6 +494,8 @@ export function buildLedgerState(records, now = Date.now()) {
       });
       const assignment = {
         assignmentId: record.assignmentId,
+        assignmentDigest: payload.assignmentDigest ?? null,
+        workerId: payload.assignmentDigest ? payload.workerId : null,
         createdAt: record.createdAt || record.recordedAt,
         updatedAt: record.createdAt || record.recordedAt,
         specId: sanitizeText(payload.specId, 200),
@@ -587,6 +589,8 @@ function assignmentView(assignment, includeAttempts = true) {
   const latest = structuredClone(assignment.latestAttempt);
   return {
     assignmentId: assignment.assignmentId,
+    assignmentDigest: assignment.assignmentDigest,
+    workerId: assignment.workerId,
     state: assignment.state,
     specId: assignment.specId,
     portal: assignment.portal,
@@ -614,8 +618,17 @@ export function assertValidAssignmentId(value) {
   return normalized;
 }
 
+function assertManagedIdentity(assignment, input) {
+  if (assignment.assignmentDigest && (input.assignmentDigest !== assignment.assignmentDigest || input.workerId !== assignment.workerId
+    || input.model !== assignment.latestAttempt.model || input.reasoning !== assignment.latestAttempt.reasoning)) {
+    throw new Error("Managed assignment digest, worker or runtime role does not match the ledger.");
+  }
+}
+
 function sameAssignment(assignment, input) {
   return assignment.specId === sanitizeText(input.specId, 200)
+    && assignment.assignmentDigest === (input.assignmentDigest ?? null)
+    && assignment.workerId === (input.assignmentDigest ? input.workerId : null)
     && assignment.portal === sanitizeText(input.portal, 500)
     && assignment.recipePath === portablePath(input.recipePath)
     && assignment.recipeDigest === sanitizeText(input.recipeDigest, 128)
@@ -625,6 +638,9 @@ function sameAssignment(assignment, input) {
 }
 
 export async function enqueueAssignment(input) {
+  if (input.assignmentDigest != null && (!/^[a-f0-9]{64}$/u.test(input.assignmentDigest) || !input.workerId?.trim() || input.workerId !== sanitizeText(input.workerId, 200))) {
+    throw new Error("Managed assignment requires a SHA-256 assignmentDigest and explicit workerId.");
+  }
   const ledgerPath = input.ledgerPath || defaultLedgerPath;
   return withLedgerLock(ledgerPath, async () => {
     const assignmentId = assertValidAssignmentId(
@@ -651,6 +667,8 @@ export async function enqueueAssignment(input) {
       actor: sanitizeText(input.workerId || "orchestrator", 200),
       createdAt,
       payload: {
+        assignmentDigest: input.assignmentDigest ?? null,
+        workerId: input.assignmentDigest ? input.workerId : null,
         specId: sanitizeText(input.specId, 200),
         portal: sanitizeText(input.portal, 500),
         recipePath: portablePath(input.recipePath),
@@ -712,9 +730,11 @@ export async function claimAssignment(input) {
     if (!chosen) {
       return null;
     }
+    assertManagedIdentity(chosen, input);
     const attempt = chosen.latestAttempt;
     const next = applyPatch(attempt, {
       status: "running",
+      claimedBy: sanitizeText(input.workerId || "worker", 200),
       model: input.model ?? attempt.model,
       reasoning: input.reasoning ?? attempt.reasoning,
       lease: {
@@ -752,6 +772,7 @@ export async function renewAttemptLease(input) {
     const assignment = state.assignments.get(assertValidAssignmentId(input.assignmentId));
     const attempt = assignment?.attempts.find((entry) => entry.attemptNumber === Number(input.attemptNumber));
     if (!attempt) throw new Error("Unknown attempt for lease renewal.");
+    assertManagedIdentity(assignment, input);
     if (attempt.status !== "running" || attempt.lease?.owner !== sanitizeText(input.workerId || "worker", 200)) {
       throw new Error("Cannot renew a lease not owned by this worker.");
     }
@@ -785,6 +806,7 @@ export async function resumeAttempt(input) {
     if (!assignment) {
       throw new Error(`Unknown assignment ${assignmentId}.`);
     }
+    assertManagedIdentity(assignment, input);
     if (
       input.expectedAttemptNumber !== undefined
       && assignment.latestAttempt?.attemptNumber !== Number(input.expectedAttemptNumber)
@@ -860,6 +882,8 @@ export async function updateAttempt(input) {
     if (!attempt) {
       throw new Error(`Unknown attempt ${attemptNumber} for assignment ${assignmentId}.`);
     }
+    assertManagedIdentity(assignment, input);
+    if (assignment.assignmentDigest && (attempt.claimedBy !== input.workerId || attempt.lease && attempt.lease.owner !== input.workerId)) throw new Error("Managed attempt is not owned by this worker.");
     if (attempt.status === "stale" && terminalStatuses.has(input.status)) {
       return { assignment: assignmentView(assignment), event: null, noop: true };
     }

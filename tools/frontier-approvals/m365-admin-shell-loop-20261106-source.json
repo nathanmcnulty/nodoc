@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "kind": "known-operation-refresh-approval-source",
+  "status": "pending-actual-independent-review",
+  "specId": "m365-admin",
+  "recipeDestination": "tools/capture-recipes/m365-admin-shell-loop-20261106.json",
+  "sourceRecipe": {
+    "path": "tools/capture-recipes/m365-admin-known-refresh-20261029.json",
+    "sha256": "71732d48dab3cc0dd636ed43a49da0b1138456935d0d02cdec6200b9413b1e83"
+  },
+  "target": {
+    "method": "GET",
+    "host": "admin.cloud.microsoft",
+    "routes": [
+      "/admin/api/navigation/darkmode"
+    ]
+  },
+  "retainedEvidence": {
+    "evidenceId": "request-133e72682b371feb6b32",
+    "observedAt": "2026-10-29T20:32:33.546Z",
+    "actionIndex": 3,
+    "nativeAction": {
+      "type": "navigate",
+      "value": "https://admin.cloud.microsoft/#/adminunits"
+    },
+    "bodyState": "complete",
+    "health": "successful-body-observed",
+    "limitations": "Historical evidence; no current authentication, role, or response-shape claim."
+  },
+  "freshObjective": "Current-session authentication and current-date shape/error drift cannot be established from retained October evidence. Run one bounded passive capture and, only after terminal review/disposition and owner shutdown, one separately owned repeat when feasible. Each has independent artifacts; unchanged output is allowed.",
+  "authority": {
+    "userGoal": "Finish PR230 and exercise representative read-only fresh collection; normal sign-in for the previously selected account explicitly allowed.",
+    "operationCeiling": "observe-only",
+    "noNewConsent": true,
+    "noPermissionChanges": true,
+    "noTenantSwitching": true,
+    "noPortalWrites": true
+  },
+  "actionBudget": {
+    "recipeActions": 3,
+    "mandatoryDriverNavigation": 1,
+    "maximumDriverActions": 4,
+    "ownerStartupNavigations": 1,
+    "preflightAlignmentNavigations": 0,
+    "maximumCombinedBudgetUnits": 5
+  },
+  "authenticationRecovery": "Use cached account first; normal OS/browser sign-in only for the previously selected account. Stop on new consent, account ambiguity, role/feature absence, or unavailable login. No device-code flow.",
+  "failureRecovery": "Preserve all artifacts/checkpoints. No unchanged retry after an unavailable route or failed authentication. Incomplete bodies require a distinct observed retention/state remedy and a new reviewed plan. Never infer removal.",
+  "captureRole": {
+    "model": "gpt-6-luna",
+    "reasoning": "low"
+  },
+  "reviewRequirement": {
+    "model": "gpt-6-luna",
+    "reasoning": "xhigh"
+  },
+  "responseBodyLimits": {
+    "perBodyBytes": 4194304,
+    "totalBytes": 67108864
+  },
+  "expiresAt": "2026-11-07T06:00:00.000Z",
+  "refreshDigest": "3a1292c82b514d56d368a2843bf725c65d6d906c172c2d2789c0b0d4fed231ae",
+  "executionDigest": "bbacac5914078521deb4326cf9566ddbda1e542c5b00a996457d309cab826f8e"
+}
