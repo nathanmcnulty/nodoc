@@ -5,7 +5,7 @@ import path from "node:path";
 import os from "node:os";
 import test from "node:test";
 import { analyzeRefreshCapture, compareRefreshResponse, groupRefreshEnrichments, inferRefreshSchema, loadVerifiedRefreshAnalysis, matchRefreshOperation, responseHealth, syntheticRefreshExample } from "../portal-refresh.mjs";
-import { buildSpecRouteInventory } from "../spec-quality-lib.mjs";
+import { buildSpecRouteInventory, loadBundledSpecification, repoRoot } from "../spec-quality-lib.mjs";
 import { writeResponseBodySidecar } from "../response-body-sidecars.mjs";
 import { aggregateInteractionHealth } from "../discovery-capture-policy.mjs";
 
@@ -94,8 +94,16 @@ test("one immutable capture feeds all axes, repeats reuse analysis, tampering fa
   assert.equal(first.analysis.captureComplete, true);
   assert.equal(first.analysis.recordSource, "raw-requests.json");
   assert.ok(first.analysis.observations.some(entry => entry.path === operation.path && entry.bodyVerified && entry.attributed));
-  assert.equal(first.analysis.enrichments.find(entry => entry.path === operation.path).comparison, "schema-missing");
-  assert.equal(first.analysis.enrichments.find(entry => entry.path === operation.path).exampleMissing, true, "An absent media definition is an example gap, not a supplied example.");
+  // Keep the absent-media regression independent of real schema/example additions.
+  const fixtureSpec = await loadBundledSpecification(path.join(repoRoot, spec.specPath));
+  delete fixtureSpec.paths[operation.path].get.responses["200"].content;
+  const fixturePath = path.join(root, "missing-media.yml");
+  await writeFile(fixturePath, JSON.stringify(fixtureSpec));
+  const fixtureInventory = structuredClone(inventory);
+  fixtureInventory.find(entry => entry.specId === spec.specId).specPath = path.relative(repoRoot, fixturePath);
+  const missingMedia = await analyzeRefreshCapture({ artifacts, cacheDir, specId: spec.specId, inventory: fixtureInventory });
+  assert.equal(missingMedia.analysis.enrichments.find(entry => entry.path === operation.path).comparison, "schema-missing");
+  assert.equal(missingMedia.analysis.enrichments.find(entry => entry.path === operation.path).exampleMissing, true, "An absent media definition is an example gap, not a supplied example.");
   assert.ok(first.analysis.candidateQueue.candidates.some(entry => entry.documentationStatus === "documented"));
   assert.ok(first.analysis.groupedHandoff.manifest);
   for (const [filename, bytes] of before) assert.equal(await readFile(path.join(artifacts, filename), "utf8"), bytes);
