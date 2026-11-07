@@ -68,8 +68,13 @@ export function buildKnownOperationExecutionDigest(recipe) {
 // Static metadata can retain legacy history without granting live permission.
 // Variable-bearing source recipes bind their raw projection separately from
 // the resolved execution digest, whose syntax is all static validation knows.
+export function hasUnmaterializedKnownOperationApproval(approval) {
+  return Object.hasOwn(approval, "materialized") && approval.materialized !== true;
+}
+
 export function classifyKnownOperationExecutionApproval(approval, rawPlan, { hasRuntimeVariables = false } = {}) {
-  if (approval.executionDigest === undefined && approval.sourceExecutionDigest === undefined) return 'legacy-non-runnable';
+  const unmaterialized = hasUnmaterializedKnownOperationApproval(approval);
+  if (approval.executionDigest === undefined && approval.sourceExecutionDigest === undefined) return unmaterialized ? 'unmaterialized-non-runnable' : 'legacy-non-runnable';
   const valid = sha256Pattern.test(String(rawPlan.executionDigest ?? ''))
     && sha256Pattern.test(String(approval.executionDigest ?? ''))
     && (hasRuntimeVariables
@@ -77,7 +82,7 @@ export function classifyKnownOperationExecutionApproval(approval, rawPlan, { has
       : approval.executionDigest === rawPlan.executionDigest
         && (approval.sourceExecutionDigest === undefined || approval.sourceExecutionDigest === rawPlan.executionDigest));
   if (!valid) fail('knownOperationRefresh full execution approval binding is invalid.');
-  return 'bound';
+  return unmaterialized ? 'unmaterialized-non-runnable' : 'bound';
 }
 
 export function buildKnownOperationRefreshPlan(recipe, { required = false, baselineOperations = null } = {}) {

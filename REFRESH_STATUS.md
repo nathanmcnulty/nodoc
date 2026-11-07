@@ -68,6 +68,15 @@ Two retained M365 GET examples were independently reviewed and applied through e
 
 ## Recovery, privacy and remaining gates
 
+SharePoint approval reconciliation: the retained launch gate binds the exact
+approval and recipe used, but proposal-stage `materialized: false` metadata was
+copied unchanged into the referenced approval. Those immutable bytes remain
+historical evidence. Current execution and inventory treat that approval as
+explicitly unmaterialized and non-runnable; no new authority or retrospective
+identity was inferred. Metadata now distinguishes 17 structurally bound, 37
+legacy non-runnable and one explicitly unmaterialized approval. Structural
+binding alone still does not authorize a live run.
+
 Actual collection exposed and recovered from nonempty output storage and endpoint/dispatch mismatches before capture. Failed artifacts and original observations were preserved. Controlled tests cover expired/authentication barriers, incomplete bodies, interruptions, atomic cache publication, semantic errors, changed contracts and safe replay. No live logout, forced authentication expiry or deliberate mid-capture termination was performed. Those live recovery cases remain qualification work.
 
 The final privacy scan covers each available declared capture root individually, including orphan/failed physical bodies within those roots: 28 roots passed, 3 were unavailable, and 0 failed. It checked 1,066 physical bodies against 668 public source/build text files, with no exact response-fingerprint or explicit response-length matches. The two missing initial roots and Entra IDGov's root without retained bodies are excluded from the pass claim; the wider historical source-mirror tree is also unqualified. A physical-body privacy pass does not make an incomplete capture admissible. Independent review separately checks property names and scalar sanitization. New public summaries omit runtime identifiers while retaining immutable evidence references.

@@ -20,6 +20,7 @@ import { validateReviewAttribution } from "./portal-discovery-model-policy.mjs";
 
 const legacyExecutionApprovals = new Set();
 const boundExecutionApprovals = new Set();
+const unmaterializedExecutionApprovals = new Set();
 
 const portfolioManifestPath = path.join(repoRoot, "tools", "portal-discovery-portfolio.json");
 
@@ -326,7 +327,7 @@ async function validateRecipeFile(errors, recipePath, expectedSpecId = null) {
         const plan = buildKnownOperationRefreshPlan(recipe, { required: true });
         const hasRuntimeVariables = JSON.stringify(recipe).includes("${");
         const executionBinding = classifyKnownOperationExecutionApproval(approval, plan, { hasRuntimeVariables });
-        (executionBinding === 'bound' ? boundExecutionApprovals : legacyExecutionApprovals).add(recipePath);
+        (executionBinding === 'bound' ? boundExecutionApprovals : executionBinding === 'unmaterialized-non-runnable' ? unmaterializedExecutionApprovals : legacyExecutionApprovals).add(recipePath);
         const refreshBindingValid = hasRuntimeVariables
           ? /^[a-f0-9]{64}$/u.test(String(approval.refreshDigest ?? "")) && approval.sourceRefreshDigest === plan.refreshDigest
           : approval.refreshDigest === plan.refreshDigest;
@@ -391,7 +392,7 @@ async function main() {
     .filter((value, index, values) => values.indexOf(value) === index)
     .length;
   console.log(`Validated portal discovery metadata for ${specTitles.length} specs and ${recipeCount} capture recipes.`);
-  console.log(`Known-operation execution approvals: ${boundExecutionApprovals.size} structurally bound; ${legacyExecutionApprovals.size} legacy non-runnable pending renewal.`);
+  console.log(`Known-operation execution approvals: ${boundExecutionApprovals.size} structurally bound; ${legacyExecutionApprovals.size} legacy non-runnable pending renewal; ${unmaterializedExecutionApprovals.size} explicitly unmaterialized non-runnable.`);
 }
 
 main().catch((error) => {

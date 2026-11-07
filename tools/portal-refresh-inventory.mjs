@@ -3,6 +3,7 @@ import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 import { buildSpecInventory, getEffectiveServerUrls, loadBundledSpecification, repoRoot } from "./spec-quality-lib.mjs";
 import { crawlMetadataByTitle, getCaptureRecipes } from "./portal-discovery-metadata.mjs";
+import { hasUnmaterializedKnownOperationApproval } from "./portal-discovery-evidence-contract.mjs";
 
 const methods = new Set(["get", "put", "post", "patch", "delete", "head", "options", "trace"]);
 const day = 86400000;
@@ -148,6 +149,16 @@ export async function buildRefreshInventory({ asOf = new Date().toISOString().sl
       if (recipe.capturePrerequisite?.status === "blocked") blockers.push("capture-prerequisite-blocked");
       if (bindingValid && evaluation.disposition === "blocked-prerequisite") blockers.push("reviewed-prerequisite-blocked");
       if (recipe.knownOperationRefresh && (expires === null || expires < asOfTime(asOf))) blockers.push("refresh-approval-expired-or-invalid");
+      if (recipe.knownOperationRefresh) {
+        try {
+          const approvalPath = path.resolve(repoRoot, recipe.knownOperationRefresh.approvalArtifact);
+          const relative = path.relative(repoRoot, approvalPath);
+          if (relative.startsWith("..") || path.isAbsolute(relative)) throw new Error("Refresh approval escapes the repository.");
+          const approvalSource = await readFile(approvalPath, "utf8");
+          if (hasUnmaterializedKnownOperationApproval(json(approvalSource))) blockers.push("refresh-approval-unmaterialized");
+          if (createHash("sha256").update(approvalSource).digest("hex") !== recipe.knownOperationRefresh.approvalDigest) blockers.push("refresh-approval-binding-invalid");
+        } catch { blockers.push("refresh-approval-unavailable-or-invalid"); }
+      }
       if (evaluation && !bindingValid) blockers.push("evaluation-recipe-binding-stale");
       recipes.push({ recipePath, knownRefresh: Boolean(recipe.knownOperationRefresh),
         discoveryFrontier: Boolean(recipe.noveltyFrontier),

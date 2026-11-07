@@ -88,6 +88,25 @@ test('read-only analysis can inspect a live-denied approval without bypassing ev
   await assert.rejects(verifyKnownOperationRefreshApproval(plan, { root: f.root, requireLiveAuthority: false }), /source hash mismatch/);
 });
 
+for (const materialized of [false, null, "false", "true"]) test(`unmaterialized approval ${JSON.stringify(materialized)} cannot authorize live capture`, async t => {
+  const f = await approvedFixture(t);
+  await f.save({ ...f.approval, materialized });
+  const plan = buildKnownOperationRefreshPlan(prepareRecipeForRun(f.input, []));
+  assert.equal(classifyKnownOperationExecutionApproval({ ...f.approval, materialized }, f.rawPlan), 'unmaterialized-non-runnable');
+  await assert.rejects(verifyKnownOperationRefreshApproval(plan, {root: f.root}), error => error.code === 'known-refresh-approval-not-materialized');
+  // Historical evidence can be inspected offline; this never grants live authority.
+  await verifyKnownOperationRefreshApproval(plan, {root: f.root, requireLiveAuthority: false});
+});
+
+test('materialization does not replace full approval binding', async t => {
+  const f = await approvedFixture(t);
+  await f.save({...f.approval, materialized: true});
+  const plan = buildKnownOperationRefreshPlan(prepareRecipeForRun(f.input, []));
+  assert.equal(classifyKnownOperationExecutionApproval({...f.approval, materialized: true}, f.rawPlan), 'bound');
+  await verifyKnownOperationRefreshApproval(plan, {root: f.root});
+  assert.throws(() => classifyKnownOperationExecutionApproval({...f.approval, materialized: true, executionDigest: 'bad'}, f.rawPlan), /full execution approval binding/u);
+});
+
 const unboundChanges = [
   ['append passive navigation', r => r.actions.push('navigate=https://admin.example.com/other')],
   ['append passive capture', r => r.actions.push('capture=unreviewed')],

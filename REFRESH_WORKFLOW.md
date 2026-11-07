@@ -58,6 +58,21 @@ authority, an unperformed review, a pending proposal or an expired approval.
 The managed path is opt-in for known-refresh recipes; it does not invent a
 novelty frontier or authorize a new native action.
 
+An explicit `materialized` field must be Boolean `true` for live execution.
+`false`, null and string values are non-runnable even with matching execution
+digests. Static metadata and inventory expose that hold separately from legacy
+bindings. Offline analysis may inspect the hash-bound historical evidence; it
+does not turn an unmaterialized approval into current authority.
+
+The SharePoint CSP approval intentionally retains its historical bytes. Its
+`materialized: false` marker and final-digest instruction were copied unchanged
+from the proposal. A separate retained coordinator launch gate binds exactly
+those approval and recipe bytes, explaining historical authorization; it does
+not repair the missing controller identity or grant another run. Current
+execution rejects this marker. Replace and rebind the approval only through a
+new explicit review and separately authorized execution, never by flipping the
+flag to make a retained capture look complete.
+
 Follow the existing independent plan review and separate coordinator gate before
 owner allocation. The browser owner profile and the capture action profile
 (`bounded`) are different fields. Use the existing packet verifier and preflight;
@@ -243,6 +258,14 @@ variants, privacy and semantic limitations. Use the existing
 `review:source prepare`, `accept`, and `apply` gates from the runbook. A cache hit
 does not bypass the current source-review gate. Then regenerate the affected
 Postman collections and site data and review the focused diff.
+
+Postman generation and `--check` invoke the exact lockfile-installed Redocly and
+OpenAPI-to-Postman JavaScript entrypoints with the current Node executable and
+`shell: false`. Run `npm ci` first. There is no `cmd.exe`, `.cmd` wrapper or
+`npm exec` in this path; repository, bundled-input and temporary check-output
+paths stay individual arguments. Windows CI checks literal spaces, percent/bang
+expansion text, quotes and shell metacharacters, plus a real collection check
+under a TEMP directory containing those legal filename characters.
 
 ## Dry-run merge eligibility
 

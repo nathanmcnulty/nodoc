@@ -65,6 +65,7 @@ import {
 } from "./portal-discovery-novelty.mjs";
 import {
   buildKnownOperationRefreshPlan,
+  hasUnmaterializedKnownOperationApproval,
   evaluateKnownOperationRefreshEvidence,
   validateRepresentativeStateMatrix,
 } from "./portal-discovery-evidence-contract.mjs";
@@ -897,6 +898,11 @@ export async function verifyKnownOperationRefreshApproval(plan, { root = repoRoo
   const source = await readFile(approvalPath, "utf8");
   if (sha256(source) !== plan.approvalDigest) throw new Error("known-operation approval digest mismatch before browser allocation.");
   const approval = JSON.parse(source);
+  if (requireLiveAuthority && hasUnmaterializedKnownOperationApproval(approval)) {
+    const error = new Error("Known-refresh approval is explicitly unmaterialized; retain its history but do not execute it.");
+    error.code = "known-refresh-approval-not-materialized";
+    throw error;
+  }
   if (requireLiveAuthority && (approval.liveAuthorized === false || approval.reviewRequirement?.status === "not-performed" || String(approval.status ?? "").startsWith("proposal-pending"))) {
     const error = new Error("Known-refresh approval is a proposal or explicitly lacks completed review/live authority.");
     error.code = "known-refresh-approval-not-executable";

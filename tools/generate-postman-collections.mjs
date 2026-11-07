@@ -13,7 +13,10 @@ import {
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, "..");
 const outputDir = path.join(repoRoot, "postman", "collections");
-const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
+// Invoke pinned JavaScript entrypoints directly. npm exec and .cmd wrappers
+// introduce a shell on Windows, where repository/TEMP paths are not commands.
+const redoclyCli = path.join(repoRoot, "node_modules/@redocly/cli/bin/cli.js");
+const postmanCli = path.join(repoRoot, "node_modules/openapi-to-postmanv2/bin/openapi2postmanv2.js");
 
 const collectionDefinitions = [
   {
@@ -167,17 +170,11 @@ export function assertCollectionParity(committedBytes, generatedBytes, label = "
   return true;
 }
 
-function run(command, args) {
-  const resolvedCommand = process.platform === "win32" && command === npmCommand
-    ? "cmd.exe"
-    : command;
-  const resolvedArgs = process.platform === "win32" && command === npmCommand
-    ? ["/d", "/s", "/c", "npm", ...args]
-    : args;
-
-  const result = spawnSync(resolvedCommand, resolvedArgs, {
-    cwd: repoRoot,
-    stdio: "inherit",
+export function runPostmanTool(entrypoint, args, { cwd = repoRoot, stdio = "inherit" } = {}) {
+  const result = spawnSync(process.execPath, [entrypoint, ...args], {
+    cwd,
+    stdio,
+    shell: false,
   });
 
   if (result.error) {
@@ -185,8 +182,9 @@ function run(command, args) {
   }
 
   if (result.status !== 0) {
-    throw new Error(`${resolvedCommand} ${resolvedArgs.join(" ")} failed with exit code ${result.status ?? "unknown"}`);
+    throw new Error(`Postman tool failed with exit code ${result.status ?? "unknown"}`);
   }
+  return result;
 }
 
 function normalizePath(pathValue) {
@@ -679,12 +677,7 @@ try {
 
     console.log(`\n==> Generating ${definition.name}`);
 
-    run(npmCommand, [
-      "exec",
-      "--yes",
-      "--package=@redocly/cli@2.46.0",
-      "--",
-      "redocly",
+    runPostmanTool(redoclyCli, [
       "bundle",
       definition.spec,
       "--ext",
@@ -693,12 +686,7 @@ try {
       bundledJsonPath,
     ]);
 
-    run(npmCommand, [
-      "exec",
-      "--yes",
-      "--package=openapi-to-postmanv2@6.0.0",
-      "--",
-      "openapi2postmanv2",
+    runPostmanTool(postmanCli, [
       "-s",
       bundledJsonPath,
       "-o",

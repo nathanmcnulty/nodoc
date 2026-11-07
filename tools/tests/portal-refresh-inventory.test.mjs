@@ -113,6 +113,8 @@ test("portfolio inventory includes every specification and partitions every oper
   assert.equal(inventory.summary.currentObservations, 0);
   assert.equal(inventory.specs.every(spec => spec.freshness.wholeSpecCurrent === false), true);
   assert.ok(inventory.specs.some(spec => spec.blockers.includes("refresh-approval-expired-or-invalid")));
+  const sharepoint = inventory.specs.find(spec => spec.specId === "sharepoint-admin");
+  assert.ok(sharepoint.recipes.find(recipe => recipe.recipePath.endsWith("sharepoint-csp-loop-20261106.json")).blockers.includes("refresh-approval-unmaterialized"));
   assert.ok(inventory.specs.some(spec => spec.evidenceFiles.length > 0));
   assert.ok(inventory.specs.flatMap(spec => spec.recipes).some(recipe => recipe.disposition === "evaluated-with-gaps"));
   assert.doesNotMatch(JSON.stringify(inventory), /recipeSha256|byteLength|proposalSha256|artifactSha256/);
