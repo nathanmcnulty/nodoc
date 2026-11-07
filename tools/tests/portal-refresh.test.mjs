@@ -65,8 +65,8 @@ test("one immutable capture feeds all axes, repeats reuse analysis, tampering fa
   const artifacts = path.join(root, "capture"), cacheDir = path.join(root, "cache");
   await mkdir(artifacts);
   const inventory = await buildSpecRouteInventory();
-  const spec = inventory.find(entry => entry.specId === "purview");
-  const operation = spec.operations.find(entry => entry.method === "GET" && !entry.path.includes("{"));
+  const spec = inventory.find(entry => entry.specId === "power-platform");
+  const operation = spec.operations.find(entry => entry.method === "GET" && entry.path === "/providers/Microsoft.BusinessAppPlatform/t2tmigrationapprovals");
   assert.ok(operation);
   const url = `${operation.serverUrls[0].replace(/\/$/u, "")}${operation.path}`;
   const sidecar = await writeResponseBodySidecar({ artifactDir: artifacts, evidenceId: "refresh-fixture", sanitizedBody: '{"count":4,"items":[]}' });
@@ -75,7 +75,7 @@ test("one immutable capture feeds all axes, repeats reuse analysis, tampering fa
   const files = {
     "api-records.json": [{ ...records[0], url: "https://other.example/aggregated-loss" }],
     "raw-requests.json": records,
-    "summary.json": { portal: "Purview", interactionHealth: aggregateInteractionHealth([]), actionValidation: { requiredActionFailures: [] } },
+    "summary.json": { portal: spec.title, interactionHealth: aggregateInteractionHealth([]), actionValidation: { requiredActionFailures: [] } },
     "action-results.json": [{ actionIndex: 0, type: "capture", required: true, result: {} }],
   };
   for (const [filename, data] of Object.entries(files)) await writeFile(path.join(artifacts, filename), JSON.stringify(data));
@@ -94,6 +94,8 @@ test("one immutable capture feeds all axes, repeats reuse analysis, tampering fa
   assert.equal(first.analysis.captureComplete, true);
   assert.equal(first.analysis.recordSource, "raw-requests.json");
   assert.ok(first.analysis.observations.some(entry => entry.path === operation.path && entry.bodyVerified && entry.attributed));
+  assert.equal(first.analysis.enrichments.find(entry => entry.path === operation.path).comparison, "schema-missing");
+  assert.equal(first.analysis.enrichments.find(entry => entry.path === operation.path).exampleMissing, true, "An absent media definition is an example gap, not a supplied example.");
   assert.ok(first.analysis.candidateQueue.candidates.some(entry => entry.documentationStatus === "documented"));
   assert.ok(first.analysis.groupedHandoff.manifest);
   for (const [filename, bytes] of before) assert.equal(await readFile(path.join(artifacts, filename), "utf8"), bytes);

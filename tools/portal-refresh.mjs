@@ -27,7 +27,7 @@ const readJson = async file => JSON.parse((await readFile(file, "utf8")).replace
 
 // Publish complete private entries atomically without replacing any existing
 // final entry, including a tampered entry that requires independent inspection.
-export async function publishRefreshAnalysisCache(cacheFile, entry, { write = (handle, bytes) => handle.writeFile(bytes, "utf8"), promote = link } = {}) {
+export async function publishPrivateRefreshFile(cacheFile, bytes, { write = (handle, content) => handle.writeFile(content, "utf8"), promote = link } = {}) {
   await assertNoRefreshLinks(cacheFile);
   const temporary = `${cacheFile}.${randomUUID()}.tmp`;
   await assertNoRefreshLinks(temporary);
@@ -35,7 +35,7 @@ export async function publishRefreshAnalysisCache(cacheFile, entry, { write = (h
   try {
     handle = await open(temporary, "wx", 0o600);
     created = true;
-    await write(handle, json(entry));
+    await write(handle, bytes);
     await handle.sync();
     await handle.close();
     handle = null;
@@ -49,6 +49,10 @@ export async function publishRefreshAnalysisCache(cacheFile, entry, { write = (h
       catch (error) { if (error.code !== "ENOENT") throw error; }
     }
   }
+}
+
+export async function publishRefreshAnalysisCache(cacheFile, entry, options) {
+  return publishPrivateRefreshFile(cacheFile, json(entry), options);
 }
 
 async function hashFile(file) {
@@ -256,7 +260,7 @@ export async function analyzeRefreshCapture({ artifacts, specId, cacheDir, inven
       const response = operation?.responses?.[String(record.status)] ?? operation?.responses?.[`${String(record.status)[0]}XX`] ?? operation?.responses?.default;
       const media = response?.content?.[mimeType];
       const comparison = !media?.schema || Object.keys(media.schema).length === 0 ? "schema-missing" : compareRefreshResponse(body, media.schema);
-      const exampleMissing = media && media.example === undefined && !Object.keys(media.examples ?? {}).length && media.schema?.example === undefined && !media.schema?.examples?.length;
+      const exampleMissing = !media || (media.example === undefined && !Object.keys(media.examples ?? {}).length && media.schema?.example === undefined && !media.schema?.examples?.length);
       if (comparison === "compatible-observed-types" && !exampleMissing) continue;
       enrichments.push({ ...match, captureId, evidenceId: record.evidenceId, actionIndex, observedAt: record.observedAt ?? null,
         requestVariantDigest: digest({ fingerprint: requestEvidence(record).requestFingerprint, query: new URL(record.url).search }),
