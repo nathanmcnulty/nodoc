@@ -61,6 +61,16 @@ test("Postman check mode selects all collections or the exact requested subset",
   assert.equal(parseCollectionOptions(["Teams"]).check, false);
 });
 
+test("Windows Git checkout preserves canonical collection bytes with autocrlf enabled", () => {
+  const cwd = path.resolve(import.meta.dirname, "../..");
+  const collection = "postman/collections/m365-admin.collection.json";
+  const original = spawnSync("git", ["show", `HEAD:${collection}`], {cwd, maxBuffer: 20 * 1024 * 1024});
+  const checkout = spawnSync("git", ["-c", "core.autocrlf=true", "cat-file", "--filters", `--path=${collection}`, `HEAD:${collection}`], {cwd, maxBuffer: 20 * 1024 * 1024});
+  assert.equal(original.status, 0);
+  assert.equal(checkout.status, 0);
+  assert.deepEqual(checkout.stdout, original.stdout);
+});
+
 test("Postman selection rejects any unknown selector instead of silently checking a subset", () => {
   assert.throws(() => parseCollectionOptions(["Teams", "typo"]), /No collections matched: typo/u);
   assert.throws(() => parseCollectionOptions(["--check", "--unknown"]), /Unknown options/u);
