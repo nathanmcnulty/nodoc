@@ -953,6 +953,20 @@ paths:
       responses:
         '200':
           description: "200 captured response"
+          content:
+            application/json:
+              schema:
+                properties:
+                  value:
+                    items: {}
+                    type: array
+                type: object
+              examples:
+                syntheticRefresh:
+                  summary: Synthetic values illustrating an observed response shape; not a captured response.
+                  description: Based on passive portal observation 2026-10-29T21:57:55.932Z, evidence request-d01154603b965104e057. Scalar values are synthesized; this example illustrates one observed shape.
+                  value:
+                    value: []
   /providers/Microsoft.BusinessAppPlatform/t2tmigrations:
     servers:
       - url: "https://api.bap.microsoft.com"
