@@ -96,3 +96,55 @@ rewritten. The reviewed scope does not certify all historical scalar examples.
 The existing controller, recipes, ledger and source-review process remain the orchestration path. Dry-run merge eligibility requires exact per-edit evidence, sanitized additive changes, current managed identity and passing final checks. Actual automatic merging is disabled. Next steps are review of those rules and explicit future automation scope, current approvals for missing-state objectives, live authentication-expiry/interruption qualification, and manual resolution of unsupported contracts. Reuse valid captures before collecting again.
 
 See [the workflow](REFRESH_WORKFLOW.md) for commands, checkpoints, storage, evidence handoffs, promotion and #225 reconciliation. Private raw bodies, runtime identifiers, tenant hosts and local evidence paths are excluded from this report.
+
+## Retained-evidence follow-up after #230
+
+This bounded pass reuses four retained capture inputs: Apps Services, Power
+Platform, Purview and the fully managed M365 run. The portfolio table above
+describes the earlier campaign; this pass does not recertify that campaign or
+mark any whole specification current. No new portal requests or sign-in were
+performed.
+
+Two useful manual changes passed separate raw-evidence/privacy review and
+source acceptance through the existing workflow:
+
+| Operation | Accepted change | Evidence and limits |
+| --- | --- | --- |
+| Power Platform `GET /providers/Microsoft.BusinessAppPlatform/t2tmigrationapprovals` | Optional response schema and synthetic empty-array example for JSON 200 | One complete observation, `request-d01154603b965104e057`, 2026-10-29. Empty items establish no populated item schema. Selected action 4 is accounted for; the historical run remains blocked because action 0 is missing. |
+| Apps Services `GET /onboarding/odata/v1.0/FeatureProvisiondata` | Synthetic JSON 200 example using existing authored properties | Five distinct supporting observations, including `request-508b29b942f29519efb0`, 2026-10-29. Existing schema and requiredness are preserved. The completed legacy capture lacks current managed identity. |
+
+Both collections were regenerated and checked against their specifications.
+Generated maturity labels reflect authored schema/example coverage, not endpoint
+freshness, role sufficiency or backend state. No new route, method, status,
+permission or availability claim was applied.
+
+Purview's count example was manually reviewed and published in #233 on
+2026-11-16, together with four other synthetic examples and matching generated
+outputs. The count example is no longer a missing-source objective. Its three
+retained observations support the narrow synthetic shape, but the legacy run
+still lacks managed identity and remains blocked with actions 0 and 5 missing;
+selected action 8 is accounted for. Manual source acceptance does not qualify
+that historical run for unattended promotion. A separate discovered machines GET remains a draft requiring ownership,
+request-contract and schema review. Unmapped and ambiguous records are not new
+endpoint claims.
+
+No useful real candidate qualifies for unattended promotion under the existing
+rules. The managed M365 run supplies genuine identity, but its remaining billing
+response uses an unresolved composed contract; already-covered Boolean examples
+were not duplicated. The historical candidates cannot inherit that run's proof.
+The previously proposed Count-first lane is retired because #233 filled that
+source gap. [The workflow](REFRESH_WORKFLOW.md) retains the proposed safeguards,
+not a new candidate or allowlist. Do not duplicate the published example or
+recapture merely to repair historical identity. A future genuinely missing-state
+objective and its exact scope require separate review and authorization. This
+report grants no collection or authentication authority. Automatic merging and
+recurring work remain disabled.
+
+The initial analysis computed four entries, and the unchanged repeat reused all
+four with byte-identical inventory and reports. Repeated proposal generation
+preserved manifest/proposal bytes without duplicate files. Applying the two
+source changes invalidated all four old analysis references; the new analysis
+retains the same raw input identities and original observation times. Subsequent
+unchanged passes again reused all four. Offline tests exercise evidence/status
+changes, atomic interruption recovery, exact approval expiry and authentication
+barriers. These tests do not qualify live interruption or live token expiry.

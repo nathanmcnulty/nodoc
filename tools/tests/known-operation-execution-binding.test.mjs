@@ -65,6 +65,13 @@ test('historical attribution alone does not authorize a new live execution', asy
   await assert.rejects(verifyKnownOperationRefreshApproval(plan, { root: f.root, now: Date.parse('2026-10-31T00:00:00Z') }), /binding or expiry/);
 });
 
+test('an expired exact approval cannot authorize a new execution', async t => {
+  const f = await approvedFixture(t);
+  const plan = buildKnownOperationRefreshPlan(prepareRecipeForRun(f.input, []));
+  await verifyKnownOperationRefreshApproval(plan, {root: f.root, now: Date.parse(f.approval.expiresAt) - 1});
+  await assert.rejects(verifyKnownOperationRefreshApproval(plan, {root: f.root, now: Date.parse(f.approval.expiresAt) + 1}), /binding or expiry/u);
+});
+
 for (const [name, fields] of [
   ['explicitly denied live authority', { liveAuthorized: false }],
   ['review not performed', { reviewRequirement: { status: 'not-performed' } }],

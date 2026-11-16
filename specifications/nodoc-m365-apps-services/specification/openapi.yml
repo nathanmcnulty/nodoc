@@ -543,6 +543,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/FeatureProvisionResponse'
+              examples:
+                syntheticRefresh:
+                  summary: Synthetic values illustrating an observed response shape; not a captured response.
+                  description: Based on passive portal observation 2026-10-29T21:46:20.274Z, evidence request-508b29b942f29519efb0. Scalar values are synthesized; this example illustrates one observed shape.
+                  value:
+                    "@odata.context": example
+                    value:
+                      - featureMigrationStatus: example
+                        featureName: example
+                        featureProvisionStatus: example
     post:
       operationId: M365AppsServices.ProvisionFeature
       tags: [Onboarding]

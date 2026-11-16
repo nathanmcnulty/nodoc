@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { readFile, writeFile } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
 import path from "node:path";
 import YAML from "yaml";
 import { isDeepStrictEqual } from "node:util";
@@ -7,7 +7,7 @@ import { repoRoot, buildSpecRouteInventory, loadBundledSpecification } from "./s
 import { portalDiscoveryModelPolicy } from "./portal-discovery-model-policy.mjs";
 import { privateRefreshDirectory, assertNoRefreshLinks } from "./portal-refresh-paths.mjs";
 import { validateSourceReview } from "./source-review-receipt.mjs";
-import { loadVerifiedRefreshAnalysis, refreshAnalysisDigest } from "./portal-refresh.mjs";
+import { loadVerifiedRefreshAnalysis, publishPrivateRefreshFile, refreshAnalysisDigest } from "./portal-refresh.mjs";
 import { refreshSourceState } from "./portal-refresh-binding.mjs";
 import { validateManagedCaptureResult } from "./portal-discovery-control-plane.mjs";
 
@@ -154,13 +154,30 @@ export async function prepareRefreshProposals({ analysis, selections = [], outpu
     if (!editsWithinTargets(source.bytes, bytes, evidence.filter(item => item.destination === destination).map(editTarget))) {
       throw new Error("Shared YAML aliases or unrelated semantic edits require manual reconciliation.");
     }
-    await writeFile(proposal, bytes, { flag: "wx" });
     changes.push({ destination, beforeSha256: hash(source.bytes), beforeSource: source.bytes, proposalSha256: hash(bytes), proposal });
   }
   const manifest = { schemaVersion: 1, visibility: "private-evidence-only", captureId: analysis.captureId, analysisDigest: refreshAnalysisDigest(analysis), changes, evidence,
     requiresIndependentPrivacyReview: true, rawResponseValuesIncluded: false, syntheticScalarExamplesOnly: true };
-  await assertNoRefreshLinks(path.join(outputDir, "manifest.json"));
-  await writeFile(path.join(outputDir, "manifest.json"), json(manifest), { flag: "wx" });
+  const manifestPath = path.join(outputDir, "manifest.json");
+  await assertNoRefreshLinks(manifestPath);
+  let existing = null;
+  try { existing = await readFile(manifestPath, "utf8"); }
+  catch (error) { if (error.code !== "ENOENT") throw error; }
+  if (existing !== null && existing !== json(manifest)) throw new Error("Existing proposal manifest differs from current evidence, selections or source; preserve it and use a new output directory.");
+  for (const change of changes) {
+    await assertNoRefreshLinks(change.proposal);
+    const bytes = renderProposal(files.get(change.destination));
+    try {
+      if (await readFile(change.proposal, "utf8") !== bytes) throw new Error("Existing proposal bytes differ; preserve them for review.");
+    } catch (error) {
+      if (error.code !== "ENOENT") throw error;
+      if (existing !== null) throw new Error("Completed proposal manifest has a missing file; independent inspection is required.");
+      await publishPrivateRefreshFile(change.proposal, bytes);
+    }
+  }
+  // The manifest is the commit point. A retry may reuse identical orphaned
+  // files from an interrupted publication; complete or changed data is never repaired.
+  if (existing === null) await publishPrivateRefreshFile(manifestPath, json(manifest));
   return manifest;
 }
 

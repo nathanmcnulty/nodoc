@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { lstat, mkdtemp, readFile, rm, symlink, writeFile } from "node:fs/promises";
+import { lstat, mkdtemp, readFile, readdir, rm, symlink, unlink, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -91,6 +91,40 @@ test("split-spec references resolve to owning file and examples use synthetic sc
   assert.doesNotMatch(serialized(manifest), /private-person-986|91327/);
   assert.deepEqual(await readFile(path.join(repoRoot, inventory[1].specPath)), rootBefore);
   assert.deepEqual(await readFile(path.join(repoRoot, splitPath)), ownerBefore);
+});
+
+test("unchanged proposal preparation reuses exact files and rejects changed evidence or tampering", async t => {
+  const outputDir = await temporary(t), captureDirectory = await temporary(t);
+  const input = {analysis: analysisFor(baseEntry), selections: [selection(baseEntry)], outputDir, inventory, captureDirectory};
+  const first = await prepareRefreshProposals(input);
+  const names = await readdir(outputDir), manifestBytes = await readFile(path.join(outputDir, "manifest.json"));
+  const before = await Promise.all(names.map(async name => [name, await readFile(path.join(outputDir, name)), (await lstat(path.join(outputDir, name))).mtimeMs]));
+  assert.deepEqual(await prepareRefreshProposals(input), first);
+  assert.deepEqual(await readdir(outputDir), names);
+  for (const [name, bytes, modified] of before) {
+    assert.deepEqual(await readFile(path.join(outputDir, name)), bytes);
+    assert.equal((await lstat(path.join(outputDir, name))).mtimeMs, modified);
+  }
+  await assert.rejects(prepareRefreshProposals({...input, analysis: analysisFor({...baseEntry, observedAt: "2026-11-06T11:00:00Z"})}), /manifest differs/u);
+  assert.deepEqual(await readFile(path.join(outputDir, "manifest.json")), manifestBytes);
+  await writeFile(first.changes[0].proposal, "partial or tampered bytes");
+  await assert.rejects(prepareRefreshProposals(input), /proposal bytes differ/u);
+  assert.equal(await readFile(first.changes[0].proposal, "utf8"), "partial or tampered bytes");
+});
+
+test("proposal publication resumes identical orphan files but never repairs a completed manifest", async t => {
+  const outputDir = await temporary(t), captureDirectory = await temporary(t);
+  const input = {analysis: analysisFor(baseEntry), selections: [selection(baseEntry)], outputDir, inventory, captureDirectory};
+  const first = await prepareRefreshProposals(input), manifestPath = path.join(outputDir, "manifest.json");
+  const proposalBytes = await readFile(first.changes[0].proposal), modified = (await lstat(first.changes[0].proposal)).mtimeMs;
+  await unlink(manifestPath); // A complete orphan, as after interruption before commit.
+  await writeFile(path.join(outputDir, "unpublished.tmp"), "incomplete temporary output");
+  assert.deepEqual(await prepareRefreshProposals(input), first);
+  assert.deepEqual(await readFile(first.changes[0].proposal), proposalBytes);
+  assert.equal((await lstat(first.changes[0].proposal)).mtimeMs, modified);
+  await unlink(first.changes[0].proposal);
+  await assert.rejects(prepareRefreshProposals(input), /missing file/u);
+  await assert.rejects(readFile(first.changes[0].proposal), {code: "ENOENT"});
 });
 
 test("selection is explicit and missing-schema inference never overwrites declared schemas", async t => {
