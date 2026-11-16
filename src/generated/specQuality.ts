@@ -522,12 +522,12 @@ export const generatedSpecDataByTitle = {
     "headerProfileCount": 2,
     "operationContextCount": 16,
     "requestExampleCount": 1,
-    "successResponseExampleCount": 2,
-    "evidenceMentionCount": 681,
+    "successResponseExampleCount": 4,
+    "evidenceMentionCount": 683,
     "maturity": {
-      "label": "Growing",
-      "tone": "warning",
-      "description": "Solid structure with examples, but still meaningful debt to reduce."
+      "label": "Advanced",
+      "tone": "success",
+      "description": "Low placeholder debt with multiple response examples."
     }
   },
   "Purview": {
@@ -555,8 +555,8 @@ export const generatedSpecDataByTitle = {
     "headerProfileCount": 0,
     "operationContextCount": 59,
     "requestExampleCount": 0,
-    "successResponseExampleCount": 4,
-    "evidenceMentionCount": 224,
+    "successResponseExampleCount": 7,
+    "evidenceMentionCount": 226,
     "maturity": {
       "label": "Foundational",
       "tone": "neutral",

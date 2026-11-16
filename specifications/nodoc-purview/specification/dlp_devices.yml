@@ -41,6 +41,8 @@ paths:
                 properties:
                   Count:
                     type: integer
+              example:
+                Count: 123456789
         '401':
           $ref: common.yml#/components/responses/Unauthorized
         '403':
@@ -103,12 +105,19 @@ paths:
                 type: array
                 items:
                   type: object
-                  required: [TimeLabel, TotalCount]
+                  required: [ TimeLabel, TotalCount ]
                   properties:
                     TimeLabel:
                       type: string
                     TotalCount:
                       type: integer
+              examples:
+                syntheticRefresh:
+                  summary: Synthetic values illustrating an observed response shape; not a captured response.
+                  description: Based on passive portal observation 2026-10-29T22:15:02.121Z, evidence request-96b919049076f2785d5b. Scalar values are synthesized; this example illustrates one observed shape.
+                  value:
+                    - TimeLabel: example
+                      TotalCount: 0
         '401':
           $ref: common.yml#/components/responses/Unauthorized
         '403':
@@ -176,6 +185,12 @@ paths:
                   Count:
                     type: integer
                 description: Optional static response field types from retained native portal traffic; dynamic map contents, null-only types, requiredness and business-state interpretation remain unverified.
+              examples:
+                syntheticRefresh:
+                  summary: Synthetic values illustrating an observed response shape; not a captured response.
+                  description: Based on passive portal observation 2026-10-29T22:15:01.181Z, evidence request-0493f232b34fa6336ffa. Scalar values are synthesized; this example illustrates one observed shape.
+                  value:
+                    Count: 0
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
