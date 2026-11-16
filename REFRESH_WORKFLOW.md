@@ -321,27 +321,31 @@ Actual automatic merging is always disabled. There is no merge action or
 GitHub credential in this path. Review these proposed rules and explicitly
 authorize any future automation scope before implementing merge behavior.
 
-### Proposed first lane: known GET synthetic examples
+### Unattended promotion remains disabled
 
-This lane is a proposal, not enabled automation. Its first concrete candidate is
-the missing endpoint-DLP count example for Purview's existing
-`GET /edlp/dlpInternalApi/api/cloud/dlp/machines/count` response. The retained
-complete count observations support manual review, but lack the full managed
-identity chain required for unattended promotion. The private proposal stays
-held and unapplied. Do not reconstruct historical identities or add duplicate
-examples to manufacture an eligible change.
+The earlier first-candidate proposal for Purview's existing
+`GET /edlp/dlpInternalApi/api/cloud/dlp/machines/count` is retired. Its synthetic
+example was manually reviewed and published in #233 on 2026-11-16; it is no
+longer missing or awaiting source application. The retained count observations
+still lack the full managed identity chain required for unattended promotion.
+Do not reconstruct historical identities or add duplicate examples to
+manufacture an eligible change.
 
-That historical Purview run is also blocked by missing action accounting at
+That historical Purview run remains blocked by missing action accounting at
 indexes 0 and 5. The selected count observations at action 8 are independently
-verified; they do not make the entire run successful. A future lane proof needs
-a completed managed lifecycle with complete action accounting as well as identity.
+verified; manual source acceptance does not make the entire run successful.
+A future lane proof would need a completed managed lifecycle with complete
+action accounting as well as identity.
 
-The initial allowlist is only that Purview operation, through the existing
-`https://purview.microsoft.com/apiproxy` caller/base and exact canonical path
-above. It does not include direct Graph access or another host/operation;
-expanding the allowlist would need a new scope approval.
+No replacement candidate or enabled allowlist is established here. The earlier
+proposal was limited to that exact operation through the existing
+`https://purview.microsoft.com/apiproxy` caller/base, not direct Graph access or
+another host/operation. Any future candidate and versioned scope require
+separate review and explicit approval; the safeguards below remain proposed
+requirements, not authority to collect or merge.
 
-The initial scope would be one existing GET operation per PR, one existing
+Any separately approved lane would remain limited to one existing GET
+operation per PR, one existing
 HTTP 200 `application/json` representation, and only a new
 `examples.syntheticRefresh` entry. Its values must be synthesized, and every
 property name must already occur at the same authored model location. No new
@@ -350,7 +354,8 @@ dynamic dictionaries, error responses or incomplete bodies belong in this lane.
 The matching generated Postman collection and necessary generated data must
 validate against the exact final source; other source changes require review.
 
-Before any future merge, require all existing per-edit promotion checks and:
+Before any future unattended merge, require all existing per-edit promotion
+checks and:
 
 - One accepted, file-backed managed capture: exact plan, runtime packet,
   worker/claim, recipe actions, safety accounting, ledger and immutable complete
@@ -378,10 +383,11 @@ Before any future merge, require all existing per-edit promotion checks and:
   or any out-of-scope diff. No recurring collection, expanded credentials or
   portal writes follow from lane approval.
 
-If a future current-state verification of the pending Purview count objective
-is authorized, use one bounded managed capture with a newly reviewed exact
-approval; stop if cached access is unusable. That would create new evidence,
-not repair the old identities. The current milestone needs no new collection.
+Do not recapture the completed Count example merely to qualify this retired
+candidate. If a separate current-state objective is later authorized, use its
+newly reviewed exact approval and stop if cached access is unusable. That would
+create new evidence, not repair old identities. This milestone needs no new
+collection.
 
 ### Repeating and recovering proposal publication
 

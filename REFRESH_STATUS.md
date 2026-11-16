@@ -118,10 +118,13 @@ Generated maturity labels reflect authored schema/example coverage, not endpoint
 freshness, role sufficiency or backend state. No new route, method, status,
 permission or availability claim was applied.
 
-Purview's count example remains private and unapplied. Its three observations
-support the narrow synthetic shape, but the legacy run lacks managed identity
-and remains blocked with actions 0 and 5 missing; selected action 8 is accounted
-for. A separate discovered machines GET remains a draft requiring ownership,
+Purview's count example was manually reviewed and published in #233 on
+2026-11-16, together with four other synthetic examples and matching generated
+outputs. The count example is no longer a missing-source objective. Its three
+retained observations support the narrow synthetic shape, but the legacy run
+still lacks managed identity and remains blocked with actions 0 and 5 missing;
+selected action 8 is accounted for. Manual source acceptance does not qualify
+that historical run for unattended promotion. A separate discovered machines GET remains a draft requiring ownership,
 request-contract and schema review. Unmapped and ambiguous records are not new
 endpoint claims.
 
@@ -129,11 +132,13 @@ No useful real candidate qualifies for unattended promotion under the existing
 rules. The managed M365 run supplies genuine identity, but its remaining billing
 response uses an unresolved composed contract; already-covered Boolean examples
 were not duplicated. The historical candidates cannot inherit that run's proof.
-The proposed first lane is the single Purview count example described in
-[the workflow](REFRESH_WORKFLOW.md). The smallest future evidence step would be
-one explicitly authorized, fully managed count observation with current exact
-approval and complete action accounting. This report grants no collection or
-authentication authority. Automatic merging and recurring work remain disabled.
+The previously proposed Count-first lane is retired because #233 filled that
+source gap. [The workflow](REFRESH_WORKFLOW.md) retains the proposed safeguards,
+not a new candidate or allowlist. Do not duplicate the published example or
+recapture merely to repair historical identity. A future genuinely missing-state
+objective and its exact scope require separate review and authorization. This
+report grants no collection or authentication authority. Automatic merging and
+recurring work remain disabled.
 
 The initial analysis computed four entries, and the unchanged repeat reused all
 four with byte-identical inventory and reports. Repeated proposal generation
