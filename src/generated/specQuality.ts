@@ -522,8 +522,8 @@ export const generatedSpecDataByTitle = {
     "headerProfileCount": 2,
     "operationContextCount": 16,
     "requestExampleCount": 1,
-    "successResponseExampleCount": 3,
-    "evidenceMentionCount": 682,
+    "successResponseExampleCount": 5,
+    "evidenceMentionCount": 684,
     "maturity": {
       "label": "Advanced",
       "tone": "success",
@@ -555,8 +555,8 @@ export const generatedSpecDataByTitle = {
     "headerProfileCount": 0,
     "operationContextCount": 59,
     "requestExampleCount": 0,
-    "successResponseExampleCount": 4,
-    "evidenceMentionCount": 224,
+    "successResponseExampleCount": 7,
+    "evidenceMentionCount": 226,
     "maturity": {
       "label": "Foundational",
       "tone": "neutral",
