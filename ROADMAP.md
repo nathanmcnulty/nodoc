@@ -131,16 +131,16 @@ was updated on November 25, 2026.
   1. [#235](https://github.com/nathanmcnulty/nodoc/pull/235) recovers the
      operation contract and behavior modules, automation evidence ledger,
      inventory integration and offline tests. It targets `main`.
-  2. Recorder evidence and export privacy (`tools/nodoc-recorder/*` and its
-     tests), including downstream export compatibility. These still need the
-     live recorder acceptance listed as M6 in its plan.
+  2. [#236](https://github.com/nathanmcnulty/nodoc/pull/236) adds recorder
+     redaction and binds Postman examples to the matching operation and
+     origin. Regenerating Exchange and SharePoint from current public specs
+     produced no tracked changes. Live recorder acceptance (M6) remains open.
   3. CDP capture, crawl-candidate and promotion-planner changes, rebased onto
      the #230 capture pipeline with fresh review, plus remaining review/evidence
      integration and end-to-end tests.
   Preserve the original PR until the replacement layers account for its entire
   source diff; splitting does not establish live acceptance.
-  Regenerate Postman collections rather than merging the conflicting JSON. Its
-  benchmark change, labeling each result's evidence source, is already covered
+  Its benchmark change, labeling each result's evidence source, is already covered
   by measured mode using the same `evidenceSource` vocabulary.
 
 ## Next increments

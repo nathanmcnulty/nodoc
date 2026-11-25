@@ -29,7 +29,7 @@ const assessedDate = new Date(latest.assessedAt).toLocaleDateString("en-US", {
   month: "long",
   day: "numeric",
 });
-const snapshotUrl = `${gitHubRepositoryUrl}/blob/main/src/data/coverageSnapshots/${latest.snapshotId}.json`;
+const snapshotUrl = `${gitHubRepositoryUrl}/raw/refs/heads/main/src/data/coverageSnapshots/${latest.snapshotId}.json`;
 const reportUrl = `${gitHubRepositoryUrl}/blob/main/${latest.source.report}`;
 const workflowUrl = `${gitHubRepositoryUrl}/blob/main/REFRESH_WORKFLOW.md`;
 
