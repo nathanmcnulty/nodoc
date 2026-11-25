@@ -43,7 +43,7 @@ and is published on the site's [coverage page](https://nodoc.nathanmcnulty.com/c
 | --- | --- | --- | --- |
 | 1 | **Recover the drafts.** Reconcile each open draft with current main, its checks and its review threads. Recover source and private evidence independently. | A keep, split or supersede recommendation tied to the exact head. No historical receipt is reconstructed. | Done for #223 and #225; see [Draft recovery](#draft-recovery). |
 | 2 | **Define the portfolio.** Extend the portfolio, coverage ledger and frontier to include unpublished portals, native workflows, UI states and distinct API owners. Record role, license and feature limits as observed or unknown. | Every in-scope portal has a spec/recipe mapping or an explicit gap. Unassessed or unavailable never counts as complete. | Not started. |
-| 3 | **Measure lower-cost review.** Reuse exact inputs and cached analyses; give the worker a bounded evidence packet only where judgment is needed. Separate fixture self-checks from real worker answers. | Identical inputs produce identical plans. A missing answer cannot pass a measured benchmark. Report accepted operations and enrichments, review time, rejections and actual usage; unavailable cost stays unknown. | Measured benchmark mode delivered. Worker trials need an approved model run. |
+| 3 | **Measure lower-cost review.** Reuse exact inputs and cached analyses; give the worker a bounded evidence packet only where judgment is needed. Separate fixture self-checks from real worker answers. | Identical inputs produce identical plans. A missing answer cannot pass a measured benchmark. Report accepted operations and enrichments, review time, rejections and actual usage; unavailable cost stays unknown. | Measured benchmark mode delivered. Real-data Luna trials and usage accounting approved on November 25; first pilot in preparation. |
 | 4 | **Make contracts usable.** Start from a real client workflow. Document observed parameters, body variants, auth context, status and media types, errors, pagination, concurrency and asynchronous steps. | A developer can implement a representative read-only task from the published contract and synthetic examples. Unobserved variants stay explicit. | Partly covered by #225's contract and behavior modules, which need to be split out. |
 | 5 | **Make the site useful to people and tools.** Show dated coverage next to authored quality, then add cross-portal operation search, stable operation links, machine-readable context and versioned bundled OpenAPI downloads. | Readers can find an operation by task and see what is documented versus observed. Building the site never renews observation dates. | Coverage page delivered. Search, links and downloads are next. |
 | 6 | **Qualify recurrence.** Pilot on separately authorized representative surfaces. Exercise a lost runner, unavailable auth, rate limiting, an exhausted budget and interrupted output. Test restoration from access-controlled backups. | Two cycles finish with a reviewed change, no-change result or blocker per item. Recovery does not duplicate work. | Not started; needs signed-in capture sessions. |
@@ -77,31 +77,68 @@ Each step reuses existing tooling. Steps marked *owner* need a person.
 6. `npm run project:coverage -- --input <private inventory.json> --base-revision <sha>`,
    commit the new snapshot and update `REFRESH_STATUS.md`.
 
+### Proposed monthly scheduling
+
+Start with one local Copilot automation, not separate schedules for every
+portal. Each run starts a fresh worktree from main and reuses explicitly
+configured private evidence, ledger and browser-profile storage outside that
+disposable worktree. A local schedule requires the computer and app to be
+available; it does not provide an always-on hosted runner or guarantee catch-up
+after downtime.
+
+Keep the existing model policy: a Sol coordinator assigns bounded capture and
+offline-review packets to actual Luna workers. Inventory all supported portals,
+reuse qualified evidence first, and serialize live capture through the existing
+owner/lease lifecycle. Missing evidence, expired approvals and sign-in/MFA
+requirements produce explicit blockers, not synthetic observations or bypasses.
+The owner completes sign-in when needed.
+
+Each run should return the per-portal outcomes, reviewed proposals, coverage
+counts and private usage accounting. Preserve actual worker identities, token
+or credit measurements and their provenance. App billing multipliers are not
+USD; dollar costs remain unknown unless authoritative pricing/accounting is
+available. Raw captures and tenant data are never committed or published.
+Proposals and public snapshots still require review; scheduling does not
+authorize automatic merging, new portal mutations or expanded access.
+
+The owner has expressed interest in monthly scheduling, but no schedule is
+saved or enabled yet. Confirm the execution host and cadence, establish the
+private storage configuration, and exercise the pilot before enabling live
+recurrence. An always-on runner is a separate design with its own approved
+authentication, retention and recovery setup.
+
 ## Draft recovery
 
-Verified against `origin/main` at `4b298c5` (#232).
+Initial assessment was against `origin/main` at `4b298c5` (#232); recovery status
+was updated on November 25, 2026.
 
-- **#223, Scalar route data** (`perf/scalar-route-data`). Moves Scalar
+- **[#223, Scalar route data](https://github.com/nathanmcnulty/nodoc/pull/223)** (`perf/scalar-route-data`). Moves Scalar
   configuration into per-route data modules with a recoverable error boundary.
   It was behind main and had an open CodeQL alert about interpolating metadata
   into generated JavaScript. Updated to current main with the metadata emitted
-  as data instead of code. Still a draft because it trades a smaller transfer
-  for slower first navigation from the home page to large specifications; that
-  tradeoff needs an owner decision.
+  as data instead of code. The owner authorized merging after review and
+  verification. Reviewed head `505eeb5` passed its checks, the CodeQL thread was
+  resolved, and it merged as `67d5b2c` on November 25. It trades a smaller transfer
+  for slower first navigation from the home page to large specifications; the
+  historical measurements remain in the PR rather than claiming universal
+  latency improvement.
 - **#225, evidence and behavioral contracts**
   (`feat/evidence-behavior-contracts-20261030`, `f145adb`). None of its new
   modules are on main. It conflicts in seven files, mostly
-  `tools/cdp-deep-capture.mjs`, which #226 and #230 reworked. Recommend
-  splitting rather than rebasing in one piece:
-  1. Recorder evidence and export privacy (`tools/nodoc-recorder/*` and its
-     tests). These are mostly new files with no conflicts, but still need the
-     live recorder acceptance listed as M6 in its plan.
-  2. Operation contract and behavior modules plus the automation evidence
+  `tools/cdp-deep-capture.mjs`, which #226 and #230 reworked. The owner approved
+  splitting it on November 25. Recovery is proceeding in dependency order:
+  1. Operation contract and behavior modules plus the automation evidence
      ledger (`operation-contract.mjs`, `operation-behavior.mjs`,
      `generate-automation-evidence-ledger.mjs`). These are new files and feed
      stage 4.
+  2. Recorder evidence and export privacy (`tools/nodoc-recorder/*` and its
+     tests), including downstream export compatibility. These still need the
+     live recorder acceptance listed as M6 in its plan.
   3. CDP capture, crawl-candidate and promotion-planner changes, rebased onto
-     the #230 capture pipeline with fresh review.
+     the #230 capture pipeline with fresh review, plus remaining review/evidence
+     integration and end-to-end tests.
+  Preserve the original PR until the replacement layers account for its entire
+  source diff; splitting does not establish live acceptance.
   Regenerate Postman collections rather than merging the conflicting JSON. Its
   benchmark change, labeling each result's evidence source, is already covered
   by measured mode using the same `evidenceSource` vocabulary.
@@ -122,9 +159,11 @@ Verified against `origin/main` at `4b298c5` (#232).
 6. Website acceptance on Viva Engage, where all five operations were observed
    but all five had schema gaps; the page must convey both.
 
-## Needs an owner
+## Owner decisions and remaining prerequisites
 
-- Signed-in portal sessions for any new capture.
-- Approval to run a lower-cost model on real packets and to record its usage.
-- The #223 navigation-versus-bandwidth decision.
-- Whether and when to enable any recurring schedule.
+- Real-data Luna runs and cost recording were approved on November 25.
+- #223 was authorized and merged after review; splitting #225 was approved.
+- The owner can sign in when a specific capture needs an authenticated session.
+  Sign-in alone does not repair missing or expired capture approvals.
+- The monthly automation's execution host, cadence and enablement remain to be
+  confirmed. No recurring schedule or automatic merging is enabled.
