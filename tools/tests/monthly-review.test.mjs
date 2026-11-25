@@ -92,6 +92,10 @@ test("private usage upload is Azure-only, create-only, nonredirecting and redact
     assert.ok(!error.message.includes("sig"));
     return /upload failed/u.test(error.message);
   });
+  await assert.rejects(storeUsage("private-corrupted-data", sas), error => {
+    assert.equal(error.message, "Invalid private usage receipt JSON.");
+    return true;
+  });
 });
 
 test("workflow isolates the writer and never publishes usage or runs on pull requests", async () => {

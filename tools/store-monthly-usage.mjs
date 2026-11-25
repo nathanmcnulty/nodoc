@@ -17,7 +17,7 @@ export function usageBlobUrl(containerSas, id) {
 }
 
 export async function storeUsage(bytes, containerSas, { request = fetch, id = randomUUID() } = {}) {
-  JSON.parse(bytes);
+  try { JSON.parse(bytes); } catch { throw new Error("Invalid private usage receipt JSON."); }
   const url = usageBlobUrl(containerSas, id);
   try {
     const response = await request(url, { method: "PUT", redirect: "error",
