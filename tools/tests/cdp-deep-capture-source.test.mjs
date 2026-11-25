@@ -15,7 +15,7 @@ test("click actions activate a matched control exactly once", async () => {
 });
 
 test("the summary is built only after the final reversible receipt refresh", async () => {
-  const source = await readFile(new URL("../cdp-deep-capture.mjs", import.meta.url), "utf8");
+  const source = (await readFile(new URL("../cdp-deep-capture.mjs", import.meta.url), "utf8")).replaceAll("\r\n", "\n");
   const finalFlush = source.indexOf("await flushArtifacts();\n    if (args.activeOperationPlan?.mode === \"reversible-scalar\")");
   const finalRefresh = source.indexOf("await refreshReversibleOperationReceipt();", finalFlush);
   const summary = source.indexOf("const summary = {", finalRefresh);

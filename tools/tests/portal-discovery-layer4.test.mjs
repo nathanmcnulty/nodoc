@@ -4,6 +4,10 @@ import { loadBenchmarkCorpus, runOfflineBenchmark } from "../portal-discovery-be
 import { calculateUnresolvedFrontier, compileOfflineFrontier, scheduleFrontier, validateFrontier, validateOfflineFrontier } from "../portal-discovery-frontier.mjs";
 import { compileIntegratedController, transitionControllerState } from "../portal-discovery-controller.mjs";
 import { buildPortfolioManifest } from "../portal-discovery-control-plane.mjs";
+import { buildObservation, buildSpecContext, aggregateCandidates } from "../generate-crawl-candidates.mjs";
+import { buildPartitionedCandidateHandoff } from "../discovery-candidate-handoff.mjs";
+import { compilePromotionPlan } from "../portal-discovery-promotion-planner.mjs";
+import { operationContract } from "../operation-contract.mjs";
 
 test("offline benchmark corpus is sanitized and stable", async () => {
   const corpus = await loadBenchmarkCorpus();
@@ -78,4 +82,36 @@ test("controller is report-only, idempotent, and blocks unresolved frontier", as
 test("controller state transitions fail closed", () => {
   assert.deepEqual(transitionControllerState("planned", "offline-ready", "offline-analysis-ready"), { state: "offline-ready", reasonCode: "offline-analysis-ready" });
   assert.throws(() => transitionControllerState("planned", "merged", "offline-analysis-ready"), /Invalid controller state/);
+});
+
+test("actual grouped handoff reaches integrated review with canonical typed API vocabulary", async () => {
+  const manifest = await buildPortfolioManifest();
+  const benchmarkCorpus = await loadBenchmarkCorpus();
+  const responseShape = { tenantId: "string", authorization: "string", secret: "string" };
+  const operation = { responses: { 200: { content: { "application/json": { schema: { type: "object", properties: Object.fromEntries(Object.keys(responseShape).map((key) => [key, { type: "string" }])) } } } } } };
+  const spec = { specId: "alpha", title: "alpha", serverUrls: ["https://alpha.example"], pathPrefixes: ["/items"], operations: [{ method: "GET", path: "/items", serverUrls: ["https://alpha.example"], contract: operationContract(operation) }] };
+  const candidates = aggregateCandidates([buildObservation({ method: "GET", url: "https://alpha.example/items", status: 200, mimeType: "application/json", responseShapeSummary: responseShape, responseShapeComplete: true, observationId: "obs-safe" }, "api-records.json", "confirmed")], buildSpecContext(spec), false);
+  const groupedHandoff = buildPartitionedCandidateHandoff({
+    schemaVersion: 1, spec: { id: "alpha" }, recovery: { captureComplete: true }, interactionHealthStatus: { available: true, accounting: { consistent: true } }, saturation: { eligibility: "known" },
+    confirmedReadCandidates: candidates, confirmedSafetyReviewCandidates: [], successfullyProbedCandidates: [], bundleOnlyCandidates: [], suppressedCandidates: [],
+    adjacentConfirmedReadCandidates: [], adjacentConfirmedSafetyReviewCandidates: [], adjacentSuccessfullyProbedCandidates: [], adjacentBundleOnlyCandidates: [],
+  });
+  const input = { manifest, benchmarkCorpus, groupedHandoff, specInventory: [spec], discovery: { health: { complete: true, available: true, accountingConsistent: true }, saturation: "unknown" } };
+  const controller = compileIntegratedController(input);
+  assert.equal(controller.reviewPlan.totals.candidateCount, 1);
+  assert.equal(controller.promotionPlan.mappings[0].outcome, "already-documented");
+  assert.deepEqual(controller.promotionPlan.mappings[0].contractObservations[0].responseShape, responseShape);
+  assert.deepEqual(controller, compileIntegratedController(input));
+  for (const mutate of [
+    (observation) => { observation.responseShape.tenantId = "raw-captured-value"; },
+    (observation) => { observation.responseShape.secret = "https://private.example"; },
+    (observation) => { observation.errorSignatures = ["sensitivecode"]; },
+    (observation) => { observation.observationIds = ["Bearer-private"]; },
+    (observation) => { observation.responseBody = "private-captured-body"; },
+  ]) {
+    const unsafe = structuredClone(groupedHandoff);
+    mutate(unsafe.partitions[0].candidates[0].contractObservations[0]);
+    assert.throws(() => compileIntegratedController({ ...input, groupedHandoff: unsafe }), /prohibited sensitive data/u);
+    assert.throws(() => compilePromotionPlan({ groupedHandoff: unsafe, specInventory: [spec] }), /prohibited sensitive data/u);
+  }
 });
