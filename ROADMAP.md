@@ -43,7 +43,7 @@ and is published on the site's [coverage page](https://nodoc.nathanmcnulty.com/c
 | --- | --- | --- | --- |
 | 1 | **Recover the drafts.** Reconcile each open draft with current main, its checks and its review threads. Recover source and private evidence independently. | A keep, split or supersede recommendation tied to the exact head. No historical receipt is reconstructed. | Done for #223 and #225; see [Draft recovery](#draft-recovery). |
 | 2 | **Define the portfolio.** Extend the portfolio, coverage ledger and frontier to include unpublished portals, native workflows, UI states and distinct API owners. Record role, license and feature limits as observed or unknown. | Every in-scope portal has a spec/recipe mapping or an explicit gap. Unassessed or unavailable never counts as complete. | Not started. |
-| 3 | **Measure lower-cost review.** Reuse exact inputs and cached analyses; give the worker a bounded evidence packet only where judgment is needed. Separate fixture self-checks from real worker answers. | Identical inputs produce identical plans. A missing answer cannot pass a measured benchmark. Report accepted operations and enrichments, review time, rejections and actual usage; unavailable cost stays unknown. | Measured benchmark mode delivered. Real-data Luna trials and usage accounting approved on November 25; first pilot in preparation. |
+| 3 | **Measure lower-cost review.** Reuse exact inputs and cached analyses; give the worker a bounded evidence packet only where judgment is needed. Separate fixture self-checks from real worker answers. | Identical inputs produce identical plans. A missing answer cannot pass a measured benchmark. Report accepted operations and enrichments, review time, rejections and actual usage; unavailable cost stays unknown. | First Luna pilot completed November 25: one authored M365 Admin contract reviewed offline. No new observations; the run did not establish cost per accepted change. |
 | 4 | **Make contracts usable.** Start from a real client workflow. Document observed parameters, body variants, auth context, status and media types, errors, pagination, concurrency and asynchronous steps. | A developer can implement a representative read-only task from the published contract and synthetic examples. Unobserved variants stay explicit. | Partly covered by #225's contract and behavior modules, which need to be split out. |
 | 5 | **Make the site useful to people and tools.** Show dated coverage next to authored quality, then add cross-portal operation search, stable operation links, machine-readable context and versioned bundled OpenAPI downloads. | Readers can find an operation by task and see what is documented versus observed. Building the site never renews observation dates. | Coverage page delivered. Search, links and downloads are next. |
 | 6 | **Qualify recurrence.** Pilot on separately authorized representative surfaces. Exercise a lost runner, unavailable auth, rate limiting, an exhausted budget and interrupted output. Test restoration from access-controlled backups. | Two cycles finish with a reviewed change, no-change result or blocker per item. Recovery does not duplicate work. | Not started; needs signed-in capture sessions. |
@@ -152,8 +152,12 @@ was updated on November 25, 2026.
 4. Feed failing benchmark scenarios into the discovery frontier. The frontier
    reads `benchmark.regressions`, which the scorecard does not produce today;
    the controller still blocks on any failure.
-5. Offline pilot on M365 Admin (48 of 320 observed in November): pick one
-   missing contract supported by retained evidence, or return no change.
+5. Extend the offline pilot only with evidence that can answer an open
+   contract question. For M365 Admin, the first pilot found that the public
+   `DarkModePreference` schema describes `IsDarkModeOn` as a boolean. The
+   synthetic example does not establish requiredness or minimum roles. No spec
+   change was justified, no endpoint was reverified, and the November 6 count
+   remains 48 of 320 for its original window.
 6. Website acceptance on Viva Engage, where all five operations were observed
    but all five had schema gaps; the page must convey both.
 
