@@ -32,7 +32,7 @@ function handoff(overrides = {}) {
 
 function approved(plan, candidateIds = ["extend", "new"]) {
   const assignment = plan.assignments[0];
-  return [{ assignmentId: assignment.assignmentId, assignmentDigest: assignment.assignmentDigest, assignmentType: "promotion-preparation", status: "completed", decision: "accept", reasonCodes: ["approved"], candidateAccounting: { accepted: candidateIds, rejected: [], escalated: [], blocked: [] } }];
+  return [{ assignmentId: assignment.assignmentId, assignmentDigest: assignment.assignmentDigest, sourceHandoffDigest: plan.sourceHandoffDigest, assignmentType: "promotion-preparation", status: "completed", decision: "accept", reasonCodes: ["approved"], candidateAccounting: { accepted: candidateIds, rejected: [], escalated: [], blocked: [] } }];
 }
 
 test("maps exact, extension, and new candidates with stable focused grouping", () => {
@@ -69,8 +69,9 @@ test("validates promotion result capability and exact cardinality", () => {
   const initial = compilePromotionPlan({ groupedHandoff: handoff(), specInventory: inventory });
   const plan = compilePromotionPlan({ groupedHandoff: handoff(), specInventory: inventory, workerResults: approved(initial) });
   const assignment = plan.assignments[0];
-  const result = { assignmentId: assignment.assignmentId, assignmentDigest: assignment.assignmentDigest, assignmentType: "promotion-preparation", status: "completed", decision: "accept", candidateAccounting: { accepted: assignment.candidateIds, rejected: [], escalated: [], blocked: [] } };
+  const result = { assignmentId: assignment.assignmentId, assignmentDigest: assignment.assignmentDigest, sourceHandoffDigest: plan.sourceHandoffDigest, assignmentType: "promotion-preparation", status: "completed", decision: "accept", candidateAccounting: { accepted: assignment.candidateIds, rejected: [], escalated: [], blocked: [] } };
   assert.equal(validatePromotionResult({ schemaVersion: 1, ...result }, plan).sanitized, true);
+  assert.throws(() => validatePromotionResult({ schemaVersion: 1, ...result, sourceHandoffDigest: undefined }, plan), /evidence binding/);
   assert.throws(() => validatePromotionResult({ schemaVersion: 1, ...result, candidateAccounting: { accepted: ["extend"], rejected: [], escalated: [], blocked: [] } }, plan), /exact/);
   assert.equal(typeof promotionDigest(plan), "string");
 });

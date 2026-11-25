@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -212,6 +212,27 @@ test("deduplicates duplicate bytes in memory and reports deterministic metrics",
       uniqueContentHashes: 1,
     });
     assert.deepEqual(result.candidates.map(({ sourceFile }) => sourceFile), ["first.js", "second.js"]);
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+test("same-basename bundles with different content retain distinct provenance without adding routes", async () => {
+  const directory = await fixtureDirectory();
+  try {
+    const firstDirectory = path.join(directory, "first");
+    const secondDirectory = path.join(directory, "second");
+    await Promise.all([mkdir(firstDirectory), mkdir(secondDirectory)]);
+    const first = path.join(firstDirectory, "bundle.js");
+    const second = path.join(secondDirectory, "bundle.js");
+    await Promise.all([
+      writeFile(first, 'fetch("/api/shared"); const marker = 1;'),
+      writeFile(second, 'fetch("/api/shared"); const marker = 2;'),
+    ]);
+    const result = await mineJavascriptBundles({ bundleFiles: [first, second], prefixes: ["/api/"], cacheMode: "disabled" });
+    assert.equal(result.candidates.length, 2);
+    assert.deepEqual(result.candidates.map(({ candidatePath }) => candidatePath), ["/api/shared", "/api/shared"]);
+    assert.equal(new Set(result.candidates.map(({ sourceHash }) => sourceHash)).size, 2);
   } finally {
     await rm(directory, { recursive: true, force: true });
   }

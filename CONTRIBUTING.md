@@ -39,6 +39,50 @@ Root `openapi.yml` files drive both website presentation and downstream artifact
 
 ## Quality metrics
 
+### Recorder exports
+
+The DevTools recorder produces sanitized draft observations and origin-bound OpenAPI documents. Exported values and credentials are redacted; review retained property, header, query and route names before sharing. Capture data remains private in memory. Observations do not establish supported-method completeness, required inputs, authorization, licensing causes or replay safety. See `tools/nodoc-recorder/README.md` for limits and the manual acceptance checklist.
+
+### Behavioral evidence
+
+Extend the existing `x-nodoc-operation-context` with `behavior` and `automationEvidence` when observations support it. These assertions are independent of the presentation quality score. Do not infer license or permission causes from HTTP status alone. Record compared conditions and counterexamples; multiple contextual explanations can coexist.
+
+```yaml
+x-nodoc-operation-context:
+  behavior:
+    methodKnowledge: observed # unknown | observed | validated-set; GET observed does not establish all supported methods
+    # logicalOperation: {kind: graphql, name: ListItems} # or rpc; distinct from transport POST
+    outcomes:
+      - conditions: ["Feature absent in one compared context; resource existence not independently verified"]
+        httpStatus: 404
+        serviceCode: FeatureUnavailable
+        messageSignature: "Sanitized structural signature, without account/resource values"
+        interpretation: "Feature availability is a hypothesis supported by comparison."
+        confidence: low # low | medium | high
+        observationIds: [obs-synthetic-a, obs-synthetic-b]
+        counterexampleIds: [obs-synthetic-c]
+        observedAt: '2026-10-30T00:00:00Z'
+    retry:
+      notes: ["Retry-After observed; idempotency and replay safety remain unknown"]
+      observationIds: [obs-synthetic-a]
+    # async uses the same notes/observationIds structure for polling and consistency evidence
+  automationEvidence:
+    existence:
+      state: verified # unknown | known | inferred | verified
+      observationIds: [obs-synthetic-a]
+      verifiedAt: '2026-10-30T00:00:00Z'
+    populatedResponse:
+      state: unknown # an empty array does not establish item structure
+```
+
+Use sanitized, stable references to observations and retain private capture mappings outside the repository. No credentials, account identifiers or raw operational receipts belong in these fields. `verified` requires an explicit UTC verification date and supporting observation IDs; every non-unknown state requires observation IDs. Dates describe evidence freshness, not perpetual validity. Confidence measures interpretation strength, not authorization to execute.
+
+`methodKnowledge: validated-set` additionally requires `supportedMethods` (uppercase method names) and `methodObservationIds`; it is an explicit assertion backed by evidence, not a conclusion from seeing one method or an instruction to probe other methods. Observation references are bounded opaque identifiers rather than private file paths or URLs.
+
+Run `npm run generate:automation-evidence -- --output <artifact-path>` for a deterministic per-operation readiness ledger, or use `--json`. Its dimensions are existence, method, input, populatedResponse, conditionalErrors, auth, pagination, retry, async and freshness. Each operation has an explicit `unknown` default for omitted dimensions. Existing specs receive no automatic readiness credit solely from metadata, examples, or an Advanced presentation score. This artifact is generated on demand; it does not rewrite presentation metrics or publish private evidence.
+
+Run `npm run test:evidence` for the scoped offline contract, provenance, report-only planning and export regressions. CI sets `NODOC_POSTMAN_PIPELINE=1` so the suite also runs the pinned Postman converter against synthetic fixtures; in PowerShell, set `$env:NODOC_POSTMAN_PIPELINE = '1'` before running the command locally. These tests do not contact a portal or establish live acceptance.
+
 The website now surfaces generated spec-quality metadata from the checked-in OpenAPI files, and the repo also keeps a machine-readable portal coverage ledger under `src/generated/`.
 
 - Regenerate it with `npm run generate:site-data`.

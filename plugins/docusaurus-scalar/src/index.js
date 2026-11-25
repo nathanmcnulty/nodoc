@@ -7,6 +7,7 @@ const _ = require("lodash");
 const path = require("path");
 const logger = require("@docusaurus/logger").default;
 const fsp = require("fs/promises");
+const { docuHash } = require("@docusaurus/utils");
 
 const DEFAULT_NAV_CONFIG = {
   labelFromSpec: true,
@@ -475,23 +476,46 @@ const ScalarDocusaurus = (context, userOptions) => {
     },
 
     async contentLoaded({ content, actions }) {
-      const { addRoute } = actions;
+      const { addRoute, createData } = actions;
       const baseUrl = context.baseUrl || "/";
-      content.forEach((contentItem) => {
+      for (const contentItem of content) {
         if (contentItem.route?.route) {
           // Docusaurus expects route paths to include baseUrl
           const routePath = path.posix.join(baseUrl, contentItem.route.route);
+          const routeHash = docuHash(routePath);
+          if (!/^[a-z0-9-]+$/u.test(routeHash)) {
+            throw new Error(`Unexpected Scalar route hash for ${routePath}.`);
+          }
+          const dataName = `scalar-${routeHash}.json`;
+          await createData(
+            dataName,
+            contentItem.scalarConfiguration
+          );
+          const info = contentItem.scalarConfiguration.content?.info;
+          const metadataName = `scalar-${routeHash}.meta.json`;
+          await createData(metadataName, {
+            title: info?.title,
+            description: typeof info?.description === "string"
+              ? info.description.replace(/\s+/gu, " ").trim()
+              : undefined,
+          });
+          // Keep route prefetches small: load the full spec only when rendered.
+          // Spec text stays in JSON data files; the module only references them.
+          const configuration = await createData(
+            `scalar-${routeHash}.js`,
+            `import metadata from "./${metadataName}";\nexport default { ...metadata, load: () => import("./${dataName}") };\n`
+          );
           addRoute({
             path: routePath,
             component: path.resolve(__dirname, "./ScalarDocusaurus"),
             exact: true,
-            configuration: contentItem.scalarConfiguration,
+            modules: { configuration },
           });
           if (contentItem.nav?.label) {
             addToNav(context, contentItem);
           }
         }
-      });
+      }
       collapseSingleItemDropdowns(context);
     },
   };
