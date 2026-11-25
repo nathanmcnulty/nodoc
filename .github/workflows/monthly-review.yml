@@ -1,0 +1,110 @@
+name: Monthly documentation review
+
+on:
+  workflow_dispatch:
+    inputs:
+      reviewer:
+        description: "none = deterministic public-source triage; copilot requires a dedicated credential"
+        type: choice
+        options: [none, copilot]
+        default: none
+      publish:
+        description: "Push a monthly review branch (never main)"
+        type: boolean
+        default: false
+  schedule:
+    - cron: "17 18 1 * *"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: monthly-documentation-review
+  cancel-in-progress: false
+
+jobs:
+  review:
+    if: github.event_name == 'workflow_dispatch' || vars.NODOC_MONTHLY_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      revision: ${{ steps.source.outputs.revision }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          persist-credentials: false
+      - id: source
+        run: echo "revision=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - run: npm ci
+      - name: Validate offline reporting
+        run: node --test tools/tests/public-coverage.test.mjs tools/tests/monthly-review.test.mjs
+      - name: Select reviewer
+        id: mode
+        env:
+          REVIEWER: ${{ inputs.reviewer || vars.NODOC_MONTHLY_REVIEWER || 'none' }}
+        run: |
+          case "$REVIEWER" in none|copilot) ;; *) echo "::error::Invalid reviewer"; exit 1;; esac
+          echo "reviewer=$REVIEWER" >> "$GITHUB_OUTPUT"
+      - name: Install pinned Copilot CLI
+        if: steps.mode.outputs.reviewer == 'copilot'
+        run: npm install --global @github/copilot@1.0.116
+      - name: Require private accounting storage for model runs
+        if: steps.mode.outputs.reviewer == 'copilot'
+        env:
+          USAGE_BLOB_SAS: ${{ secrets.NODOC_USAGE_BLOB_SAS_URL }}
+        run: |
+          if [ -z "$USAGE_BLOB_SAS" ]; then echo "::error::Configure private Azure usage storage before running Copilot"; exit 1; fi
+          node --input-type=module -e 'import {usageBlobUrl} from "./tools/store-monthly-usage.mjs"; import {randomUUID} from "node:crypto"; usageBlobUrl(process.env.USAGE_BLOB_SAS, randomUUID())'
+      - name: Prepare public report
+        env:
+          REVIEWER: ${{ steps.mode.outputs.reviewer }}
+          COPILOT_GITHUB_TOKEN: ${{ secrets.NODOC_COPILOT_TOKEN }}
+          MODEL: ${{ vars.NODOC_MONTHLY_MODEL || 'gpt-6-luna' }}
+        run: node tools/monthly-review.mjs --output "$RUNNER_TEMP/monthly" --reviewer "$REVIEWER" --model "$MODEL"
+      - name: Preserve private model accounting
+        if: steps.mode.outputs.reviewer == 'copilot'
+        env:
+          NODOC_USAGE_BLOB_SAS_URL: ${{ secrets.NODOC_USAGE_BLOB_SAS_URL }}
+        run: node tools/store-monthly-usage.mjs "$RUNNER_TEMP/monthly/model-usage.private.json"
+      - name: Retain only the publishable report
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: monthly-public-report
+          path: ${{ runner.temp }}/monthly/report.json
+          if-no-files-found: error
+          retention-days: 30
+      - name: Report completion
+        run: |
+          echo "Public-source triage complete; no new observations. Download monthly-public-report for the full result." >> "$GITHUB_STEP_SUMMARY"
+          echo "AI usage receipts go only to configured private Azure storage, not this public repository. USD cost is unknown." >> "$GITHUB_STEP_SUMMARY"
+
+  publish:
+    needs: review
+    if: (github.event_name == 'workflow_dispatch' && inputs.publish) || (github.event_name == 'schedule' && vars.NODOC_MONTHLY_ENABLED == 'true')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: monthly-public-report
+          path: ${{ runner.temp }}/monthly
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.review.outputs.revision }}
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - run: npm ci
+      - name: Revalidate and push only the public report
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node tools/publish-monthly-review.mjs --input "$RUNNER_TEMP/monthly/report.json"

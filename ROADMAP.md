@@ -44,7 +44,7 @@ and is published on the site's [coverage page](https://nodoc.nathanmcnulty.com/c
 | 1 | **Recover the drafts.** Reconcile each open draft with current main, its checks and its review threads. Recover source and private evidence independently. | A keep, split or supersede recommendation tied to the exact head. No historical receipt is reconstructed. | Done for #223 and #225; see [Draft recovery](#draft-recovery). |
 | 2 | **Define the portfolio.** Extend the portfolio, coverage ledger and frontier to include unpublished portals, native workflows, UI states and distinct API owners. Record role, license and feature limits as observed or unknown. | Every in-scope portal has a spec/recipe mapping or an explicit gap. Unassessed or unavailable never counts as complete. | Not started. |
 | 3 | **Measure lower-cost review.** Reuse exact inputs and cached analyses; give the worker a bounded evidence packet only where judgment is needed. Separate fixture self-checks from real worker answers. | Identical inputs produce identical plans. A missing answer cannot pass a measured benchmark. Report accepted operations and enrichments, review time, rejections and actual usage; unavailable cost stays unknown. | First Luna pilot completed November 25: one authored M365 Admin contract reviewed offline. No new observations; the run did not establish cost per accepted change. |
-| 4 | **Make contracts usable.** Start from a real client workflow. Document observed parameters, body variants, auth context, status and media types, errors, pagination, concurrency and asynchronous steps. | A developer can implement a representative read-only task from the published contract and synthetic examples. Unobserved variants stay explicit. | Contract and behavior foundations are under review in [#235](https://github.com/nathanmcnulty/nodoc/pull/235); representative client acceptance is still pending. |
+| 4 | **Make contracts usable.** Start from a real client workflow. Document observed parameters, body variants, auth context, status and media types, errors, pagination, concurrency and asynchronous steps. | A developer can implement a representative read-only task from the published contract and synthetic examples. Unobserved variants stay explicit. | Contract and behavior foundations merged in [#235](https://github.com/nathanmcnulty/nodoc/pull/235); representative client acceptance is still pending. |
 | 5 | **Make the site useful to people and tools.** Show dated coverage next to authored quality, then add cross-portal operation search, stable operation links, machine-readable context and versioned bundled OpenAPI downloads. | Readers can find an operation by task and see what is documented versus observed. Building the site never renews observation dates. | Coverage page delivered. Search, links and downloads are next. |
 | 6 | **Qualify recurrence.** Pilot on separately authorized representative surfaces. Exercise a lost runner, unavailable auth, rate limiting, an exhausted budget and interrupted output. Test restoration from access-controlled backups. | Two cycles finish with a reviewed change, no-change result or blocker per item. Recovery does not duplicate work. | Not started; needs signed-in capture sessions. |
 
@@ -80,15 +80,16 @@ Each step reuses existing tooling. Steps marked *owner* need a person.
 6. `npm run project:coverage -- --input <private inventory.json> --base-revision <sha>`,
    commit the new snapshot and update `REFRESH_STATUS.md`.
 
-### Proposed monthly scheduling
+### VM-independent monthly scheduling
 
-Start with one local Copilot automation, not separate schedules for every
-portal. The proposed first job is an **offline documentation review**, on the
-first of the month at 09:00 local time. Luna reads the public specifications
-and latest published assessment in a fresh worktree and returns up to three
-source-cited improvements in a private session report. It does not sign in,
-call APIs, publish changes or renew observation dates. The computer and app
-must be available; a local schedule does not guarantee catch-up after downtime.
+The local automation proposal is superseded by the
+[VM-independent runner and cloud design](MONTHLY_AUTOMATION.md).
+GitHub Actions can run public-source triage manually without a personal VM,
+or on the first of the month at 18:17 UTC once enabled. It can push a reviewed
+report candidate to a monthly branch, never directly to main. Optional Luna
+selection needs a dedicated credential and private accounting storage; the
+deterministic mode requires neither. It does not sign in, call portals or
+renew observation dates.
 
 Keep fresh observations separate from this reporting job. An operator can
 provide a separately reviewed, sanitized assessment; preserve its actual
@@ -103,10 +104,10 @@ available. Raw captures and tenant data are never committed or published.
 Proposals and public snapshots still require review; scheduling does not
 authorize automatic merging, new portal mutations or expanded access.
 
-The initial local schedule was prepared in the automation review dialog, not
-saved or enabled. Saving and enabling it are separate decisions. An always-on
-runner would be a different design, with its own availability and retention
-requirements.
+No local schedule was saved. The CI schedule is disabled by its repository
+variable until activation is approved. Azure Container Apps Jobs with Chromium
+are the preferred future private capture host; Kitesurf needs compatibility
+qualification before use with persistent authenticated portal sessions.
 
 ## Draft recovery
 
@@ -124,8 +125,7 @@ was updated on November 25, 2026.
   historical measurements remain in the PR rather than claiming universal
   latency improvement.
 - **[#225, evidence and behavioral contracts](https://github.com/nathanmcnulty/nodoc/pull/225#issuecomment-7175123670)**
-  (`f145adb`) is superseded for review by native stack 238. The original draft
-  remains open as a record, not a second merge candidate. Review bottom to top:
+  (`f145adb`) was recovered into native stack 238, merged November 25:
   1. [#235](https://github.com/nathanmcnulty/nodoc/pull/235) recovers the
      operation contract and behavior modules, automation evidence ledger,
      inventory integration and offline tests. It targets `main`.
@@ -140,16 +140,16 @@ was updated on November 25, 2026.
 
   All 32 original paths are accounted for: 29 appear in the replacement diff,
   two generated collections were unchanged, and one test file for the deferred
-  capture helpers was deliberately not imported. Before landing both this
-  roadmap and the stack, reconcile `package.json` and
-  `tools/portal-discovery-benchmark.mjs`: retain the evidence test command,
-  public coverage generation and validation, measured-mode scoring, and the
-  distinction between caller-supplied results and fixture self-checks.
+  capture helpers was deliberately not imported. The roadmap branch was
+  reconciled with the merged stack, preserving evidence tests, public coverage
+  generation/validation and measured-mode scoring.
+  The superseded draft was then closed without merging duplicate code; its
+  source branch remains available for the documented deferred capture work.
 
 ## Next increments
 
-1. Review the three replacement PRs bottom to top. Treat manual recorder
-   acceptance as a separate exercise, not an outcome of the offline review.
+1. Qualify a cloud-hosted private capture exercise. Treat manual recorder
+   acceptance as separate from the implemented offline review.
 2. Cross-portal operation search with stable per-operation links on the site.
    Group the per-specification navbar links first: at 1280 pixels the brand is
    already truncated, which is why Coverage is linked from the home page rather
@@ -171,5 +171,6 @@ was updated on November 25, 2026.
 - #223 was authorized and merged after review; splitting #225 was approved.
 - The owner can sign in when a specific capture needs an authenticated session.
   Sign-in alone does not repair missing or expired capture approvals.
-- The monthly automation's execution host, cadence and enablement remain to be
-  confirmed. No recurring schedule or automatic merging is enabled.
+- The monthly runner now uses GitHub Actions rather than the retiring VM.
+  Scheduled activation and optional AI credentials/private storage remain
+  owner-controlled. No automatic merging is enabled.

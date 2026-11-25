@@ -1,5 +1,9 @@
 # Contributing Guide
 
+The [monthly documentation runner](./MONTHLY_AUTOMATION.md) runs in GitHub
+Actions without a personal VM. Its reports are review candidates, not fresh
+portal observations or automatically applied specification changes. Guide
+
 Thanks for checking out this guide - we really appreciate any contributions to the project. This page outlines high-level guidance for contributing to any of the nodoc project, whether that be in this repository specifically, or within the seperate API repositories.
 
 We welcome a range of contributions including updates to:

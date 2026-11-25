@@ -214,6 +214,10 @@ storage blocker, not permission to use a partial final-file write.
 
 ## Publishing public coverage
 
+For VM-independent offline review and monthly branch publication, see
+[Monthly automation](MONTHLY_AUTOMATION.md). That job does not run this capture
+workflow or create a new observation snapshot.
+
 The site's [coverage page](https://nodoc.nathanmcnulty.com/coverage) reads
 reviewed snapshots from `src/data/coverageSnapshots/`, one file per assessment
 date. After the refresh report is reviewed, project its private output into a
