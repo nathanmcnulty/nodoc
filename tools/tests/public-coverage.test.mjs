@@ -135,7 +135,7 @@ test("reconciliation rejects leaked fields at every level", () => {
   }
 });
 
-test("only per-spec complete bodies may be unknown, and unknown rows skip that sum", () => {
+test("only per-spec complete bodies may be unknown", () => {
   const snapshot = clone(reconciled());
   for (const spec of snapshot.specs) spec.completeBodyObserved = null;
   snapshot.totals.completeBodyObserved = 5;
@@ -145,6 +145,21 @@ test("only per-spec complete bodies may be unknown, and unknown rows skip that s
   const unknownGap = clone(reconciled());
   unknownGap.specs[0].schemaGaps = null;
   assert.ok(reconcilePublicCoverageSnapshot(unknownGap).some(problem => problem.includes("schemaGaps must be a nonnegative integer")));
+});
+
+test("partial body counts constrain the total without guessing the unknown rows", () => {
+  const snapshot = reconciled();
+  snapshot.specs[0].completeBodyObserved = null;
+  for (const total of [2, 3, 4, 5]) {
+    snapshot.totals.completeBodyObserved = total;
+    assert.deepEqual(reconcilePublicCoverageSnapshot(snapshot), []);
+    assert.equal(snapshot.specs[0].completeBodyObserved, null);
+  }
+  // There are two verified bodies in the known row and three observations in the unknown row.
+  for (const total of [1, 6]) {
+    snapshot.totals.completeBodyObserved = total;
+    assert.throws(() => assertPublicCoverageSnapshot(snapshot), /completeBodyObserved must be between 2 and 5/u);
+  }
 });
 
 test("snapshot files must be named for their snapshot id", async () => {

@@ -94,8 +94,15 @@ export function reconcilePublicCoverageSnapshot(snapshot, { knownSpecIds = null 
   if (snapshot.totals.specs !== snapshot.specs.length) problems.push(`spec-count-mismatch: totals report ${snapshot.totals.specs} specs but ${snapshot.specs.length} rows are present`);
   for (const key of ["operations", ...measures]) {
     const values = snapshot.specs.map(row => row[key]);
-    // A published aggregate cannot be reconciled from unknown per-spec values.
-    if (values.some(value => value === null)) continue;
+    if (key === "completeBodyObserved" && values.includes(null)) {
+      const minimum = values.reduce((total, value) => total + (value ?? 0), 0);
+      const maximum = snapshot.specs.reduce((total, row) =>
+        total + (row.completeBodyObserved ?? (row.currentObservations + row.staleObservations)), 0);
+      if (snapshot.totals[key] < minimum || snapshot.totals[key] > maximum) {
+        problems.push(`measure-mismatch: ${key} must be between ${minimum} and ${maximum} given the known rows; totals report ${snapshot.totals[key]}`);
+      }
+      continue;
+    }
     const sum = values.reduce((total, value) => total + value, 0);
     if (sum !== snapshot.totals[key]) problems.push(`${key === "operations" ? "operation-count-mismatch" : "measure-mismatch"}: ${key} rows sum to ${sum} but totals report ${snapshot.totals[key]}`);
   }

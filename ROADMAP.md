@@ -44,7 +44,7 @@ and is published on the site's [coverage page](https://nodoc.nathanmcnulty.com/c
 | 1 | **Recover the drafts.** Reconcile each open draft with current main, its checks and its review threads. Recover source and private evidence independently. | A keep, split or supersede recommendation tied to the exact head. No historical receipt is reconstructed. | Done for #223 and #225; see [Draft recovery](#draft-recovery). |
 | 2 | **Define the portfolio.** Extend the portfolio, coverage ledger and frontier to include unpublished portals, native workflows, UI states and distinct API owners. Record role, license and feature limits as observed or unknown. | Every in-scope portal has a spec/recipe mapping or an explicit gap. Unassessed or unavailable never counts as complete. | Not started. |
 | 3 | **Measure lower-cost review.** Reuse exact inputs and cached analyses; give the worker a bounded evidence packet only where judgment is needed. Separate fixture self-checks from real worker answers. | Identical inputs produce identical plans. A missing answer cannot pass a measured benchmark. Report accepted operations and enrichments, review time, rejections and actual usage; unavailable cost stays unknown. | First Luna pilot completed November 25: one authored M365 Admin contract reviewed offline. No new observations; the run did not establish cost per accepted change. |
-| 4 | **Make contracts usable.** Start from a real client workflow. Document observed parameters, body variants, auth context, status and media types, errors, pagination, concurrency and asynchronous steps. | A developer can implement a representative read-only task from the published contract and synthetic examples. Unobserved variants stay explicit. | Partly covered by #225's contract and behavior modules, which need to be split out. |
+| 4 | **Make contracts usable.** Start from a real client workflow. Document observed parameters, body variants, auth context, status and media types, errors, pagination, concurrency and asynchronous steps. | A developer can implement a representative read-only task from the published contract and synthetic examples. Unobserved variants stay explicit. | Contract and behavior foundations are under review in [#235](https://github.com/nathanmcnulty/nodoc/pull/235); representative client acceptance is still pending. |
 | 5 | **Make the site useful to people and tools.** Show dated coverage next to authored quality, then add cross-portal operation search, stable operation links, machine-readable context and versioned bundled OpenAPI downloads. | Readers can find an operation by task and see what is documented versus observed. Building the site never renews observation dates. | Coverage page delivered. Search, links and downloads are next. |
 | 6 | **Qualify recurrence.** Pilot on separately authorized representative surfaces. Exercise a lost runner, unavailable auth, rate limiting, an exhausted budget and interrupted output. Test restoration from access-controlled backups. | Two cycles finish with a reviewed change, no-change result or blocker per item. Recovery does not duplicate work. | Not started; needs signed-in capture sessions. |
 
@@ -58,6 +58,9 @@ and is published on the site's [coverage page](https://nodoc.nathanmcnulty.com/c
 - **Coverage page.** `/coverage` shows the latest snapshot per specification,
   with observation measures from the snapshot and gap measures recomputed from
   current source, so later improvements are visible without renewing dates.
+  In the November build, the Viva Engage row shows all 5 operations observed
+  (100%) alongside 5 schema gaps and 1 example gap. Observation alone is not a
+  completeness score.
 - **Measured benchmark mode.** `npm run benchmark:portal-discovery -- --measured --inputs <file>`
   scores only supplied worker outputs. See the
   [runbook](AGENT_DISCOVERY_RUNBOOK.md).
@@ -125,10 +128,9 @@ was updated on November 25, 2026.
   modules are on main. It conflicts in seven files, mostly
   `tools/cdp-deep-capture.mjs`, which #226 and #230 reworked. The owner approved
   splitting it on November 25. Recovery is proceeding in dependency order:
-  1. Operation contract and behavior modules plus the automation evidence
-     ledger (`operation-contract.mjs`, `operation-behavior.mjs`,
-     `generate-automation-evidence-ledger.mjs`). These are new files and feed
-     stage 4.
+  1. [#235](https://github.com/nathanmcnulty/nodoc/pull/235) recovers the
+     operation contract and behavior modules, automation evidence ledger,
+     inventory integration and offline tests. It targets `main`.
   2. Recorder evidence and export privacy (`tools/nodoc-recorder/*` and its
      tests), including downstream export compatibility. These still need the
      live recorder acceptance listed as M6 in its plan.
@@ -143,7 +145,7 @@ was updated on November 25, 2026.
 
 ## Next increments
 
-1. Split #225 as above, starting with the contract and behavior modules.
+1. Finish the #225 split following the dependency order above.
 2. Cross-portal operation search with stable per-operation links on the site.
    Group the per-specification navbar links first: at 1280 pixels the brand is
    already truncated, which is why Coverage is linked from the home page rather
@@ -158,8 +160,6 @@ was updated on November 25, 2026.
    synthetic example does not establish requiredness or minimum roles. No spec
    change was justified, no endpoint was reverified, and the November 6 count
    remains 48 of 320 for its original window.
-6. Website acceptance on Viva Engage, where all five operations were observed
-   but all five had schema gaps; the page must convey both.
 
 ## Owner decisions and remaining prerequisites
 

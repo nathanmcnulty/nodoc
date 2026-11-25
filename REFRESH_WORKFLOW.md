@@ -240,7 +240,8 @@ updated `REFRESH_STATUS.md`. `npm run generate:site-data` validates every
 snapshot again; the page recomputes schema and example gaps from current source
 but never renews observation dates. Snapshots published by hand from an older
 report may set a per-spec `completeBodyObserved` to `null` when the report did
-not break it down.
+not break it down. The portfolio total must still include every known complete
+body; rows with an unknown count can contribute at most their observed operations.
 
 ## Focused proposals
 
