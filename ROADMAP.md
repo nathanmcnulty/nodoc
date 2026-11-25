@@ -80,18 +80,17 @@ Each step reuses existing tooling. Steps marked *owner* need a person.
 ### Proposed monthly scheduling
 
 Start with one local Copilot automation, not separate schedules for every
-portal. Each run starts a fresh worktree from main and reuses explicitly
-configured private evidence, ledger and browser-profile storage outside that
-disposable worktree. A local schedule requires the computer and app to be
-available; it does not provide an always-on hosted runner or guarantee catch-up
-after downtime.
+portal. The proposed first job is an **offline documentation review**, on the
+first of the month at 09:00 local time. Luna reads the public specifications
+and latest published assessment in a fresh worktree and returns up to three
+source-cited improvements in a private session report. It does not sign in,
+call APIs, publish changes or renew observation dates. The computer and app
+must be available; a local schedule does not guarantee catch-up after downtime.
 
-Keep the existing model policy: a Sol coordinator assigns bounded capture and
-offline-review packets to actual Luna workers. Inventory all supported portals,
-reuse qualified evidence first, and serialize live capture through the existing
-owner/lease lifecycle. Missing evidence, expired approvals and sign-in/MFA
-requirements produce explicit blockers, not synthetic observations or bypasses.
-The owner completes sign-in when needed.
+Keep fresh observations separate from this reporting job. An operator can
+provide a separately reviewed, sanitized assessment; preserve its actual
+date and window. Missing evidence or expired approvals are blockers, not
+synthetic observations. In particular, sign-in cannot renew a recipe approval.
 
 Each run should return the per-portal outcomes, reviewed proposals, coverage
 counts and private usage accounting. Preserve actual worker identities, token
@@ -101,11 +100,10 @@ available. Raw captures and tenant data are never committed or published.
 Proposals and public snapshots still require review; scheduling does not
 authorize automatic merging, new portal mutations or expanded access.
 
-The owner has expressed interest in monthly scheduling, but no schedule is
-saved or enabled yet. Confirm the execution host and cadence, establish the
-private storage configuration, and exercise the pilot before enabling live
-recurrence. An always-on runner is a separate design with its own approved
-authentication, retention and recovery setup.
+The initial local schedule was prepared in the automation review dialog, not
+saved or enabled. Saving and enabling it are separate decisions. An always-on
+runner would be a different design, with its own availability and retention
+requirements.
 
 ## Draft recovery
 

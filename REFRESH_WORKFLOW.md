@@ -223,10 +223,13 @@ public snapshot:
 npm run project:coverage -- --input C:/private/refresh/pass-1/inventory.json --base-revision <main-sha>
 ```
 
-`--input` also accepts `refresh-report.json`, which does not record its window,
-so pass `--window-days` with it. `--assessed-at` overrides the input's `asOf`;
-`--report` names the Markdown report the snapshot summarizes (default
-`REFRESH_STATUS.md`).
+`--input` also accepts `refresh-report.json`. New reports record the inventory's
+`asOf` and `freshnessDays`; for an older report that omits the window, supply its
+original `--window-days`. If that window is unknown, do not publish the counts.
+`--assessed-at` and `--window-days` cannot override recorded values. For a
+different assessment date or window, recalculate the inventory instead of
+relabeling old counts. `--report` names the Markdown report the snapshot
+summarizes (default `REFRESH_STATUS.md`).
 
 The projection copies only allowlisted per-spec and total counts and checks that
 current, stale and not-observed counts partition each denominator, that rows sum

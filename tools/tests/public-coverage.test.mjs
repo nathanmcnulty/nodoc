@@ -3,6 +3,7 @@ import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
+import { runPortfolioRefresh } from "../portal-refresh.mjs";
 import { buildSpecInventory } from "../spec-quality-lib.mjs";
 import {
   assertPublicCoverageSnapshot, loadPublicCoverageSnapshots, projectRefreshOutput, reconcilePublicCoverageSnapshot,
@@ -53,9 +54,32 @@ test("inventory projection copies only allowlisted aggregate counts", () => {
   }
 });
 
-test("report projection requires an explicit window and matches inventory projection", () => {
+test("legacy reports require an explicit window; new reports preserve the inventory window", () => {
   assert.throws(() => projectRefreshOutput(report(), options), /window-days/u);
   assert.deepEqual(projectRefreshOutput(report(), { ...options, windowDays: 30 }), reconciled());
+  assert.deepEqual(projectRefreshOutput({ ...report(), freshnessDays: 30 }, options), reconciled());
+});
+
+test("a report from the refresh controller projects with its actual non-default window", async () => {
+  const asOf = "2026-11-06";
+  const { report } = await runPortfolioRefresh({ captures: [], asOf, freshnessDays: 14 });
+  const snapshot = projectRefreshOutput(report, options);
+  assert.equal(snapshot.assessedAt, asOf);
+  assert.equal(snapshot.windowDays, 14);
+  assert.equal(snapshot.totals.currentObservations, 0);
+});
+
+test("a later monthly run cannot relabel the assessment date or freshness window", () => {
+  for (const input of [inventory(), { ...report(), freshnessDays: 30 }]) {
+    assert.deepEqual(projectRefreshOutput(input, { ...options, assessedAt: input.asOf, windowDays: 30 }), reconciled());
+    assert.throws(() => projectRefreshOutput(input, { ...options, assessedAt: "2027-01-01" }), /must match the input asOf/u);
+    assert.throws(() => projectRefreshOutput(input, { ...options, windowDays: 90 }), /must match the input freshnessDays/u);
+    delete input.asOf;
+    assert.throws(() => projectRefreshOutput(input, { ...options, assessedAt: "2027-01-01" }), /original asOf/u);
+  }
+  const incomplete = inventory();
+  delete incomplete.freshnessDays;
+  assert.throws(() => projectRefreshOutput(incomplete, { ...options, windowDays: 30 }), /missing freshnessDays/u);
 });
 
 test("projection never turns a missing measure into zero", () => {

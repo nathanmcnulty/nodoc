@@ -112,10 +112,16 @@ export function assertPublicCoverageSnapshot(snapshot, options) {
 // runPortfolioRefresh and copies only reviewed aggregate counts.
 export function projectRefreshOutput(input, { baseRevision, report = "REFRESH_STATUS.md", assessedAt = null, windowDays = null, knownSpecIds = null } = {}) {
   if (!plainObject(input) || input.schemaVersion !== 1) throw new Error("Refresh output must be a schemaVersion 1 inventory or report.");
-  const portfolio = plainObject(input.portfolio) ? input.portfolio : input;
+  const isReport = plainObject(input.portfolio);
+  const portfolio = isReport ? input.portfolio : input;
   if (!Array.isArray(portfolio.specs) || !plainObject(portfolio.summary)) throw new Error("Refresh output lacks per-spec rows or an independent summary.");
-  const window = windowDays ?? input.freshnessDays;
-  if (window === undefined || window === null) throw new Error("A refresh report does not record its window; pass --window-days explicitly.");
+  if (!validTimestamp(input.asOf)) throw new Error("Refresh output must have its original asOf date or UTC timestamp.");
+  if (assessedAt !== null && assessedAt !== input.asOf) throw new Error("--assessed-at must match the input asOf; rerun the inventory for a different assessment.");
+  const recordedWindow = Object.hasOwn(input, "freshnessDays");
+  if (!recordedWindow && !isReport) throw new Error("Refresh inventory is missing freshnessDays.");
+  if (recordedWindow && windowDays !== null && windowDays !== input.freshnessDays) throw new Error("--window-days must match the input freshnessDays; rerun the inventory for a different window.");
+  const window = recordedWindow ? input.freshnessDays : windowDays;
+  if (!recordedWindow && window === null) throw new Error("Legacy refresh report lacks freshnessDays; pass its original --window-days explicitly.");
   const field = (source, key, context) => {
     if (!Object.hasOwn(source, key)) throw new Error(`${context} lacks ${key}; missing measures are never treated as zero.`);
     return source[key];
@@ -126,11 +132,10 @@ export function projectRefreshOutput(input, { baseRevision, report = "REFRESH_ST
     completeBodyObserved: field(source, "completeBodyObserved", context), schemaGaps: field(source, "schemaGaps", context),
     exampleGaps: field(source, "exampleGaps", context),
   });
-  const timestamp = assessedAt ?? input.asOf;
   const snapshot = {
     schemaVersion: publicCoverageSchemaVersion,
-    snapshotId: typeof timestamp === "string" ? timestamp.slice(0, 10) : null,
-    assessedAt: timestamp, windowDays: window,
+    snapshotId: input.asOf.slice(0, 10),
+    assessedAt: input.asOf, windowDays: window,
     source: { report, baseRevision },
     totals: { specs: field(portfolio.summary, "specCount", "summary"), operations: field(portfolio.summary, "operationCount", "summary"), ...project(portfolio.summary, "summary") },
     specs: portfolio.specs.map((spec, index) => ({ specId: spec.specId, title: spec.title, operations: spec.operationCount, ...project(spec.freshness ?? {}, `specs[${index}].freshness`) }))
