@@ -39,6 +39,10 @@ Root `openapi.yml` files drive both website presentation and downstream artifact
 
 ## Quality metrics
 
+### Recorder exports
+
+The DevTools recorder produces sanitized draft observations and origin-bound OpenAPI documents. Exported values and credentials are redacted; review retained property, header, query and route names before sharing. Capture data remains private in memory. Observations do not establish supported-method completeness, required inputs, authorization, licensing causes or replay safety. See `tools/nodoc-recorder/README.md` for limits and the manual acceptance checklist.
+
 ### Behavioral evidence
 
 Extend the existing `x-nodoc-operation-context` with `behavior` and `automationEvidence` when observations support it. These assertions are independent of the presentation quality score. Do not infer license or permission causes from HTTP status alone. Record compared conditions and counterexamples; multiple contextual explanations can coexist.
