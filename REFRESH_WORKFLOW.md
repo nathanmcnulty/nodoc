@@ -212,6 +212,33 @@ overwrite tampered or historical partial evidence. Hard-link publication must
 be supported by the private cache filesystem; an unsupported filesystem is a
 storage blocker, not permission to use a partial final-file write.
 
+## Publishing public coverage
+
+The site's [coverage page](https://nodoc.nathanmcnulty.com/coverage) reads
+reviewed snapshots from `src/data/coverageSnapshots/`, one file per assessment
+date. After the refresh report is reviewed, project its private output into a
+public snapshot:
+
+```powershell
+npm run project:coverage -- --input C:/private/refresh/pass-1/inventory.json --base-revision <main-sha>
+```
+
+`--input` also accepts `refresh-report.json`, which does not record its window,
+so pass `--window-days` with it. `--assessed-at` overrides the input's `asOf`;
+`--report` names the Markdown report the snapshot summarizes (default
+`REFRESH_STATUS.md`).
+
+The projection copies only allowlisted per-spec and total counts and checks that
+current, stale and not-observed counts partition each denominator, that rows sum
+to the independent totals, and that every specification ID still exists. A
+missing measure fails instead of becoming zero, and an existing snapshot with
+different counts is never overwritten. Review the file, then commit it with the
+updated `REFRESH_STATUS.md`. `npm run generate:site-data` validates every
+snapshot again; the page recomputes schema and example gaps from current source
+but never renews observation dates. Snapshots published by hand from an older
+report may set a per-spec `completeBodyObserved` to `null` when the report did
+not break it down.
+
 ## Focused proposals
 
 Use the private cache entry as `analysisPath`. Select exact evidence IDs and

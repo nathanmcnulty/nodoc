@@ -96,7 +96,9 @@ export default function Home(): ReactElement {
               <Heading as="h2">Coverage</Heading>
               <p>
                 Every published spec has a matching checked-in Postman collection
-                and is grouped below by portal family.
+                and is grouped below by portal family.{" "}
+                <Link to="/coverage">See which operations were recently observed</Link>{" "}
+                and where schemas or examples are still missing.
               </p>
             </div>
             {apiCatalogByFamily.map(([family, familyApis]) => (

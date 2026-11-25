@@ -16,15 +16,47 @@ export async function loadBenchmarkCorpus(filePath = corpusPath) {
   return corpus;
 }
 
-export function runOfflineBenchmark(corpus, { inputs = {} } = {}) {
+export const benchmarkModes = ["fixture", "measured"];
+const plainObject = (value) => value !== null && typeof value === "object" && !Array.isArray(value);
+
+// Fixture mode falls back to each scenario's syntheticResult so the corpus can
+// self-test. Measured mode scores only supplied worker outputs; a missing
+// scenario fails instead of borrowing the fixture answer.
+function checkedInputs(corpus, inputs, mode) {
+  if (!benchmarkModes.includes(mode)) throw new Error(`Unsupported benchmark mode ${mode}.`);
+  if (!plainObject(inputs)) throw new Error("Benchmark inputs must be an object keyed by scenarioId.");
+  const known = new Set(corpus.scenarios.map((scenario) => scenario.scenarioId));
+  for (const [scenarioId, value] of Object.entries(inputs)) {
+    if (!known.has(scenarioId)) throw new Error(`Benchmark input names unknown scenario ${scenarioId}.`);
+    if (!plainObject(value)) throw new Error(`Benchmark input for ${scenarioId} must be an object.`);
+  }
+  if (unsafe.test(JSON.stringify(inputs))) throw new Error("Benchmark inputs contain prohibited sensitive data.");
+  return inputs;
+}
+
+export function runOfflineBenchmark(corpus, { inputs = {}, mode = "fixture" } = {}) {
   if (!corpus || corpus.schemaVersion !== benchmarkSchemaVersion) throw new Error("Unsupported benchmark corpus schema.");
+  const supplied = checkedInputs(corpus, inputs, mode);
+  const measured = mode === "measured";
   const results = corpus.scenarios.map((scenario) => {
-    const actual = inputs[scenario.scenarioId] ?? scenario.syntheticResult ?? {};
     const assertions = scenario.assertions ?? {};
+    const base = { scenarioId: scenario.scenarioId, scenarioDigest: benchmarkDigest(scenario), expected: assertions };
+    if (!Object.hasOwn(supplied, scenario.scenarioId) && measured) return { ...base, actual: null, evidenceSource: "missing", status: "missing-input", reasonCodes: ["missing-worker-output"] };
+    const evidenceSource = Object.hasOwn(supplied, scenario.scenarioId) ? "caller-supplied-result" : "fixture-self-check";
+    const actual = evidenceSource === "caller-supplied-result" ? supplied[scenario.scenarioId] : scenario.syntheticResult ?? {};
     const mismatches = Object.entries(assertions).filter(([key, expected]) => JSON.stringify(actual[key]) !== JSON.stringify(expected)).map(([key]) => `assertion:${key}`);
-    return { scenarioId: scenario.scenarioId, scenarioDigest: benchmarkDigest(scenario), expected: assertions, actual, status: mismatches.length ? "fail" : "pass", reasonCodes: mismatches };
+    return { ...base, actual, evidenceSource, status: mismatches.length ? "fail" : "pass", reasonCodes: mismatches };
   }).sort((a, b) => a.scenarioId.localeCompare(b.scenarioId));
-  const core = { schemaVersion: benchmarkSchemaVersion, corpusId: corpus.corpusId, corpusDigest: benchmarkDigest(corpus), results, measurements: { scenarioCount: results.length, passCount: results.filter((r) => r.status === "pass").length, failCount: results.filter((r) => r.status === "fail").length, driftCount: results.filter((r) => r.reasonCodes.length).length, inputBytes: Buffer.byteLength(stableJson(corpus), "utf8"), outputBytes: 0, synthetic: true, caveat: "Synthetic byte/cardinality/tokenizer-estimate proxies; not real token, cost, quality, or portal coverage claims." } };
+  const count = (predicate) => results.filter(predicate).length;
+  const core = { schemaVersion: benchmarkSchemaVersion, mode, corpusId: corpus.corpusId, corpusDigest: benchmarkDigest(corpus), results, measurements: {
+    scenarioCount: results.length, passCount: count((r) => r.status === "pass"), failCount: count((r) => r.status !== "pass"),
+    driftCount: count((r) => r.status === "fail"), missingInputCount: count((r) => r.status === "missing-input"),
+    suppliedInputCount: count((r) => r.evidenceSource === "caller-supplied-result"), fixtureFallbackCount: count((r) => r.evidenceSource === "fixture-self-check"),
+    inputBytes: Buffer.byteLength(stableJson(corpus), "utf8"), outputBytes: 0, synthetic: !measured,
+    caveat: measured
+      ? "Supplied worker outputs scored against synthetic assertions; byte values remain proxies, not real token, cost, quality, or portal coverage claims."
+      : "Synthetic byte/cardinality/tokenizer-estimate proxies; not real token, cost, quality, or portal coverage claims.",
+  } };
   core.measurements.outputBytes = Buffer.byteLength(stableJson(core), "utf8");
   return { ...core, benchmarkId: `benchmark-${benchmarkDigest(core).slice(0, 24)}`, benchmarkDigest: benchmarkDigest(core) };
 }
@@ -34,4 +66,28 @@ export function validateBenchmarkScorecard(scorecard) {
   return scorecard;
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) loadBenchmarkCorpus(process.argv[2] ?? corpusPath).then((corpus) => console.log(stableJson(runOfflineBenchmark(corpus)))).catch((error) => { console.error(error.message); process.exitCode = 1; });
+// A measured inputs file binds worker outputs to one corpus:
+// { "corpusId": "portal-discovery-offline-v1", "inputs": { "<scenarioId>": { ... } } }
+export async function loadBenchmarkInputs(filePath, corpus) {
+  const file = JSON.parse((await readFile(filePath, "utf8")).replace(/^\uFEFF/u, ""));
+  if (!plainObject(file) || file.corpusId !== corpus.corpusId || !plainObject(file.inputs)) throw new Error(`Benchmark inputs must declare corpusId ${corpus.corpusId} and an inputs object.`);
+  return file.inputs;
+}
+
+async function main(argv) {
+  let corpusFile = corpusPath, inputsFile = null, mode = "fixture";
+  for (let index = 0; index < argv.length; index += 1) {
+    if (argv[index] === "--measured") mode = "measured";
+    else if (argv[index] === "--inputs") inputsFile = argv[++index];
+    else if (argv[index].startsWith("--")) throw new Error(`Unknown option ${argv[index]}.`);
+    else corpusFile = argv[index];
+  }
+  if (mode === "measured" && !inputsFile) throw new Error("--measured requires --inputs <file>.");
+  const corpus = await loadBenchmarkCorpus(corpusFile);
+  const inputs = inputsFile ? await loadBenchmarkInputs(inputsFile, corpus) : {};
+  const scorecard = runOfflineBenchmark(corpus, { inputs, mode });
+  console.log(stableJson(scorecard));
+  if (scorecard.measurements.failCount > 0) process.exitCode = 1;
+}
+
+if (process.argv[1] === fileURLToPath(import.meta.url)) main(process.argv.slice(2)).catch((error) => { console.error(error.message); process.exitCode = 1; });

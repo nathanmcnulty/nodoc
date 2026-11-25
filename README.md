@@ -11,7 +11,9 @@ nodoc is a project created by Dolphin Labs to enable deeper understanding and ut
 
 Maintainers can inventory operation freshness and reuse retained evidence with
 the [portfolio refresh workflow](REFRESH_WORKFLOW.md). See the
-[current refresh results](REFRESH_STATUS.md) for observed coverage and remaining gaps.
+[current refresh results](REFRESH_STATUS.md) for observed coverage and remaining gaps,
+or the [coverage page](https://nodoc.nathanmcnulty.com/coverage) for the same
+counts per specification.
 
 The project currently publishes the following API definitions:
 
@@ -91,7 +93,8 @@ The repository also keeps checked-in collections under [`postman/collections/`](
 
 ## Roadmap
 
-These are project wide roadmap items:
+The plan for monthly, evidence-based portal documentation, including the state
+of open drafts, is in [ROADMAP.md](ROADMAP.md). Other project items:
 
 - [ ] Support [OpenAPI Links](https://swagger.io/docs/specification/links/)
 - [ ] Migrate to OpenAPI 3.1 ([blocker](https://community.postman.com/t/unable-to-validate-this-definition-when-choosing-3-1-0/56871/2))
