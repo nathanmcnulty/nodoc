@@ -380,7 +380,7 @@ export async function runPortfolioRefresh({ captures = [], cacheDir, asOf, fresh
   }
   const { buildRefreshInventory } = await import("./portal-refresh-inventory.mjs");
   const portfolio = await buildRefreshInventory({ asOf, freshnessDays, observations: results.flatMap(result => result.analysis.observations) });
-  const report = { schemaVersion: 1, mode: "report-only", asOf, actualAutomaticMergingEnabled: false,
+  const report = { schemaVersion: 1, mode: "report-only", asOf: portfolio.asOf, freshnessDays: portfolio.freshnessDays, actualAutomaticMergingEnabled: false,
     portfolio: { summary: portfolio.summary, specs: portfolio.specs.map(({ operations, ...spec }) => spec) },
     captures: results.map(({ analysis }) => ({ specId: analysis.specId, captureId: analysis.captureId, captureComplete: analysis.captureComplete,
       exactOperationCount: new Set(analysis.observations.map(entry => `${entry.specId}:${entry.method}:${entry.path}`)).size,

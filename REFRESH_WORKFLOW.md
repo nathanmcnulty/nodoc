@@ -212,6 +212,42 @@ overwrite tampered or historical partial evidence. Hard-link publication must
 be supported by the private cache filesystem; an unsupported filesystem is a
 storage blocker, not permission to use a partial final-file write.
 
+## Publishing public coverage
+
+For VM-independent offline review and monthly branch publication, see
+[Monthly automation](MONTHLY_AUTOMATION.md). That job does not run this capture
+workflow or create a new observation snapshot.
+
+The site's [coverage page](https://nodoc.nathanmcnulty.com/coverage) reads
+reviewed snapshots from `src/data/coverageSnapshots/`, one file per assessment
+date. After the refresh report is reviewed, project its private output into a
+public snapshot:
+
+```powershell
+npm run project:coverage -- --input C:/private/refresh/pass-1/inventory.json --base-revision <main-sha>
+```
+
+`--input` also accepts `refresh-report.json`. New reports record the inventory's
+`asOf` and `freshnessDays`; for an older report that omits the window, supply its
+original `--window-days`. If that window is unknown, do not publish the counts.
+`--assessed-at` and `--window-days` cannot override recorded values. For a
+different assessment date or window, recalculate the inventory instead of
+relabeling old counts. `--report` names the Markdown report the snapshot
+summarizes (default `REFRESH_STATUS.md`).
+
+The projection copies only allowlisted per-spec and total counts and checks that
+current, stale and not-observed counts partition each denominator, that rows sum
+to the independent totals, and that every specification ID still exists. Display
+titles come from the public specification catalog, not the private input. A
+missing measure fails instead of becoming zero, and an existing snapshot with
+different counts is never overwritten. Review the file, then commit it with the
+updated `REFRESH_STATUS.md`. `npm run generate:site-data` validates every
+snapshot again; the page recomputes schema and example gaps from current source
+but never renews observation dates. Snapshots published by hand from an older
+report may set a per-spec `completeBodyObserved` to `null` when the report did
+not break it down. The portfolio total must still include every known complete
+body; rows with an unknown count can contribute at most their observed operations.
+
 ## Focused proposals
 
 Use the private cache entry as `analysisPath`. Select exact evidence IDs and

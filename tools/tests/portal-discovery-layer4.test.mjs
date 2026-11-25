@@ -16,6 +16,55 @@ test("offline benchmark corpus is sanitized and stable", async () => {
   assert.equal(first.measurements.failCount, 0);
   assert.ok(first.measurements.inputBytes > 0);
   assert.doesNotMatch(JSON.stringify(corpus), /tenant|bearer|cookie|https?:\/\//iu);
+  assert.equal(first.mode, "fixture");
+  assert.equal(first.measurements.synthetic, true);
+  assert.equal(first.measurements.fixtureFallbackCount, corpus.scenarios.length);
+});
+
+test("measured benchmark scores only supplied worker outputs", async () => {
+  const corpus = await loadBenchmarkCorpus();
+  const [first, second, ...rest] = corpus.scenarios;
+  const inputs = { [first.scenarioId]: structuredClone(first.assertions), [second.scenarioId]: { ...second.assertions, unexpected: true } };
+  const key = Object.keys(second.assertions)[0];
+  inputs[second.scenarioId][key] = "drifted";
+
+  const measured = runOfflineBenchmark(corpus, { inputs, mode: "measured" });
+  const byId = Object.fromEntries(measured.results.map((result) => [result.scenarioId, result]));
+  assert.equal(measured.mode, "measured");
+  assert.equal(measured.measurements.synthetic, false);
+  assert.equal(byId[first.scenarioId].status, "pass");
+  assert.equal(byId[first.scenarioId].evidenceSource, "caller-supplied-result");
+  assert.deepEqual(byId[second.scenarioId].reasonCodes, [`assertion:${key}`]);
+  for (const scenario of rest) {
+    assert.equal(byId[scenario.scenarioId].status, "missing-input");
+    assert.equal(byId[scenario.scenarioId].actual, null);
+    assert.deepEqual(byId[scenario.scenarioId].reasonCodes, ["missing-worker-output"]);
+  }
+  assert.deepEqual(
+    [measured.measurements.passCount, measured.measurements.driftCount, measured.measurements.missingInputCount, measured.measurements.failCount, measured.measurements.fixtureFallbackCount],
+    [1, 1, rest.length, rest.length + 1, 0],
+  );
+
+  const fixture = runOfflineBenchmark(corpus, { inputs });
+  assert.equal(fixture.measurements.suppliedInputCount, 2);
+  assert.equal(fixture.measurements.fixtureFallbackCount, rest.length);
+  assert.equal(fixture.measurements.failCount, 1);
+
+  assert.throws(() => runOfflineBenchmark(corpus, { inputs: { "not-a-scenario": {} }, mode: "measured" }), /unknown scenario/u);
+  assert.throws(() => runOfflineBenchmark(corpus, { inputs: { [first.scenarioId]: [] } }), /must be an object/u);
+  assert.throws(() => runOfflineBenchmark(corpus, { inputs: [] }), /keyed by scenarioId/u);
+  assert.throws(() => runOfflineBenchmark(corpus, { mode: "live" }), /Unsupported benchmark mode/u);
+  assert.throws(() => runOfflineBenchmark(corpus, { inputs: { [first.scenarioId]: { note: "bearer abc" } } }), /prohibited sensitive data/u);
+});
+
+test("controller blocks when measured benchmark outputs are missing", async () => {
+  const manifest = await buildPortfolioManifest();
+  const benchmarkCorpus = await loadBenchmarkCorpus();
+  const discovery = { health: { complete: true, available: true, accountingConsistent: true }, saturation: "unknown" };
+  const report = compileIntegratedController({ manifest, benchmarkCorpus, discovery, stageInputs: { benchmarkMode: "measured", benchmarkInputs: {} } });
+  assert.equal(report.state, "blocked");
+  assert.equal(report.reasonCode, "benchmark-regression");
+  assert.equal(report.measurements.synthetic, false);
 });
 
 test("frontier covers classes, preserves IDs, and respects deterministic budgets", () => {

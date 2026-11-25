@@ -1,5 +1,9 @@
 # Contributing Guide
 
+The [monthly documentation runner](./MONTHLY_AUTOMATION.md) runs in GitHub
+Actions without a personal VM. Its reports are review candidates, not fresh
+portal observations or automatically applied specification changes. Guide
+
 Thanks for checking out this guide - we really appreciate any contributions to the project. This page outlines high-level guidance for contributing to any of the nodoc project, whether that be in this repository specifically, or within the seperate API repositories.
 
 We welcome a range of contributions including updates to:
@@ -91,6 +95,7 @@ The website now surfaces generated spec-quality metadata from the checked-in Ope
 - The same pass also refreshes `src/generated/portalCoverageLedger.json`, which captures per-portal seed URLs, observed hosts, promoted discoveries, telemetry exclusions, and open gaps for agent-driven discovery work.
 - It also refreshes `src/generated/operationLiveCaptureLedger.json`, which indexes repo-only `x-nodoc-live-capture` operation metadata for agents and tooling.
 - It also refreshes `src/generated/operationContextLedger.json`, which indexes validated `x-nodoc-headerProfiles`, `x-nodoc-authProfiles`, and `x-nodoc-operation-context` metadata for downstream tooling.
+- It also writes `src/generated/publicCoverage.ts` for the `/coverage` page from the reviewed snapshots in `src/data/coverageSnapshots/`. Add snapshots with `npm run project:coverage`, never by hand-editing the generated file; see [Publishing public coverage](./REFRESH_WORKFLOW.md#publishing-public-coverage).
 - Treat placeholder markers such as `pending` as real debt to remove with evidence, not as acceptable final-state documentation.
 
 ## Styling

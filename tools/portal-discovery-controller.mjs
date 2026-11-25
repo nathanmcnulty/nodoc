@@ -59,7 +59,7 @@ export function compileIntegratedController({ manifest, groupedHandoff = null, s
   if (promotionPlan) validatePromotionPlan(promotionPlan);
   const retrospective = retrospectiveInput ? compileRetrospective(retrospectiveInput) : null;
   if (retrospective) validateRetrospective(retrospective);
-  const benchmark = runOfflineBenchmark(benchmarkCorpus, { inputs: stageInputs.benchmarkInputs ?? {} });
+  const benchmark = runOfflineBenchmark(benchmarkCorpus, { inputs: stageInputs.benchmarkInputs ?? {}, mode: stageInputs.benchmarkMode ?? "fixture" });
   validateBenchmarkScorecard(benchmark);
   const frontier = calculateUnresolvedFrontier({ discovery, portfolio: manifest, benchmark, metadata: stageInputs.metadata ?? {} });
   validateFrontier(frontier);
@@ -67,7 +67,7 @@ export function compileIntegratedController({ manifest, groupedHandoff = null, s
   const benchmarkBlocked = benchmark.measurements.failCount > 0;
   const state = benchmarkBlocked ? "blocked" : frontier.items.length ? "capture-recommended" : (discovery.saturation === "reached" ? "saturated-complete" : "offline-ready");
   const reasonCode = benchmarkBlocked ? "benchmark-regression" : frontier.items.length ? "frontier-unresolved" : (state === "saturated-complete" ? "saturation-gates-passed" : "offline-analysis-ready");
-  const core = { schemaVersion: controllerSchemaVersion, mode: "report-only", state, reasonCode, portfolio: { manifestId: manifest.manifestId, planId: plan.planId, planDigest: plan.planDigest }, execution: { preflight: { dependencies: "validated", budgets: clean(budgets), apply: false }, captureQueue: plan.assignments.filter((entry) => entry.type === "capture"), offlineParallelUnits: plan.totals.parallelOfflineCount }, reviewPlan, promotionPlan, retrospective, benchmark, frontier, frontierSchedule, nextActions: state === "saturated-complete" ? ["retain protected landing and begin retrospective"] : state === "blocked" ? ["repair blockers before any apply"] : ["review report and authorize capture separately"], measurements: { synthetic: true, serializedCaptureCount: plan.totals.serializedCaptureCount, parallelOfflineCount: plan.totals.parallelOfflineCount, maxControllerPayloadBytes: Buffer.byteLength(stableJson({ plan, reviewPlan, promotionPlan, retrospective, benchmark, frontier }), "utf8") } };
+  const core = { schemaVersion: controllerSchemaVersion, mode: "report-only", state, reasonCode, portfolio: { manifestId: manifest.manifestId, planId: plan.planId, planDigest: plan.planDigest }, execution: { preflight: { dependencies: "validated", budgets: clean(budgets), apply: false }, captureQueue: plan.assignments.filter((entry) => entry.type === "capture"), offlineParallelUnits: plan.totals.parallelOfflineCount }, reviewPlan, promotionPlan, retrospective, benchmark, frontier, frontierSchedule, nextActions: state === "saturated-complete" ? ["retain protected landing and begin retrospective"] : state === "blocked" ? ["repair blockers before any apply"] : ["review report and authorize capture separately"], measurements: { synthetic: benchmark.measurements.synthetic, serializedCaptureCount: plan.totals.serializedCaptureCount, parallelOfflineCount: plan.totals.parallelOfflineCount, maxControllerPayloadBytes: Buffer.byteLength(stableJson({ plan, reviewPlan, promotionPlan, retrospective, benchmark, frontier }), "utf8") } };
   return { ...core, executionId: `controller-${digest(core).slice(0, 24)}`, executionDigest: digest(core) };
 }
 

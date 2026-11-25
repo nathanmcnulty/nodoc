@@ -45,6 +45,25 @@ Use sanitized checked-in stage inputs and the synthetic benchmark corpus only. T
 
 Benchmark drift, schema mismatch, digest tampering, privacy leakage, incomplete health, unknown saturation, and budget exhaustion fail closed. Re-running the command with identical inputs is idempotent and resumable because stage IDs and serialized output are deterministic.
 
+The benchmark has two modes. Fixture mode, the default, fills any scenario
+without a supplied input from the corpus's `syntheticResult`, so it only proves
+the corpus and scorer agree. Measured mode scores worker outputs alone: every
+scenario without a supplied output is `missing-input` with
+`missing-worker-output` and counts as a failure, and the scorecard reports
+`synthetic: false`. Use measured mode when comparing worker models, including
+lower-cost monthly maintenance models:
+
+```powershell
+# inputs.json: { "corpusId": "portal-discovery-offline-v1", "inputs": { "<scenarioId>": { ... } } }
+npm run benchmark:portal-discovery -- --measured --inputs .\inputs.json
+```
+
+Inputs naming an unknown scenario, non-object outputs, a different `corpusId`,
+or sensitive markers are rejected. The command exits nonzero when any scenario
+fails. In controller stage inputs, set `benchmarkMode` to `measured` beside
+`benchmarkInputs`. Measured scores compare outputs with synthetic assertions;
+they still do not measure real tokens, cost, or portal coverage.
+
 The authorization ceiling applies to every counted browser action, including
 implicit seed/bootstrap/navigation and replay expansion. Plan and surface the
 category totals before preflight and ledger-attempt consumption; reject
