@@ -482,22 +482,28 @@ const ScalarDocusaurus = (context, userOptions) => {
         if (contentItem.route?.route) {
           // Docusaurus expects route paths to include baseUrl
           const routePath = path.posix.join(baseUrl, contentItem.route.route);
-          const dataName = `scalar-${docuHash(routePath)}.json`;
+          const routeHash = docuHash(routePath);
+          if (!/^[a-z0-9-]+$/u.test(routeHash)) {
+            throw new Error(`Unexpected Scalar route hash for ${routePath}.`);
+          }
+          const dataName = `scalar-${routeHash}.json`;
           await createData(
             dataName,
             contentItem.scalarConfiguration
           );
           const info = contentItem.scalarConfiguration.content?.info;
-          const metadata = {
+          const metadataName = `scalar-${routeHash}.meta.json`;
+          await createData(metadataName, {
             title: info?.title,
             description: typeof info?.description === "string"
               ? info.description.replace(/\s+/gu, " ").trim()
               : undefined,
-          };
+          });
           // Keep route prefetches small: load the full spec only when rendered.
+          // Spec text stays in JSON data files; the module only references them.
           const configuration = await createData(
-            `scalar-${docuHash(routePath)}.js`,
-            `export default { ...${JSON.stringify(metadata)}, load: () => import(${JSON.stringify(`./${dataName}`)}) };`
+            `scalar-${routeHash}.js`,
+            `import metadata from "./${metadataName}";\nexport default { ...metadata, load: () => import("./${dataName}") };\n`
           );
           addRoute({
             path: routePath,
