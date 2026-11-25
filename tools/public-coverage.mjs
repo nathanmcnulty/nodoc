@@ -117,7 +117,7 @@ export function assertPublicCoverageSnapshot(snapshot, options) {
 
 // Accepts the private inventory.json or refresh-report.json written by
 // runPortfolioRefresh and copies only reviewed aggregate counts.
-export function projectRefreshOutput(input, { baseRevision, report = "REFRESH_STATUS.md", assessedAt = null, windowDays = null, knownSpecIds = null } = {}) {
+export function projectRefreshOutput(input, { baseRevision, report = "REFRESH_STATUS.md", assessedAt = null, windowDays = null, publicTitles } = {}) {
   if (!plainObject(input) || input.schemaVersion !== 1) throw new Error("Refresh output must be a schemaVersion 1 inventory or report.");
   const isReport = plainObject(input.portfolio);
   const portfolio = isReport ? input.portfolio : input;
@@ -129,6 +129,7 @@ export function projectRefreshOutput(input, { baseRevision, report = "REFRESH_ST
   if (recordedWindow && windowDays !== null && windowDays !== input.freshnessDays) throw new Error("--window-days must match the input freshnessDays; rerun the inventory for a different window.");
   const window = recordedWindow ? input.freshnessDays : windowDays;
   if (!recordedWindow && window === null) throw new Error("Legacy refresh report lacks freshnessDays; pass its original --window-days explicitly.");
+  if (!(publicTitles instanceof Map)) throw new Error("Projecting a private assessment requires titles from the public spec catalog.");
   const field = (source, key, context) => {
     if (!Object.hasOwn(source, key)) throw new Error(`${context} lacks ${key}; missing measures are never treated as zero.`);
     return source[key];
@@ -145,10 +146,13 @@ export function projectRefreshOutput(input, { baseRevision, report = "REFRESH_ST
     assessedAt: input.asOf, windowDays: window,
     source: { report, baseRevision },
     totals: { specs: field(portfolio.summary, "specCount", "summary"), operations: field(portfolio.summary, "operationCount", "summary"), ...project(portfolio.summary, "summary") },
-    specs: portfolio.specs.map((spec, index) => ({ specId: spec.specId, title: spec.title, operations: spec.operationCount, ...project(spec.freshness ?? {}, `specs[${index}].freshness`) }))
+    specs: portfolio.specs.map((spec, index) => {
+      if (!publicTitles.has(spec.specId)) throw new Error(`specs[${index}]: unknown specId; not in the public catalog.`);
+      return { specId: spec.specId, title: publicTitles.get(spec.specId), operations: spec.operationCount, ...project(spec.freshness ?? {}, `specs[${index}].freshness`) };
+    })
       .sort((a, b) => String(a.title).localeCompare(String(b.title))),
   };
-  return assertPublicCoverageSnapshot(snapshot, { knownSpecIds });
+  return assertPublicCoverageSnapshot(snapshot);
 }
 
 export async function loadPublicCoverageSnapshots(directory = snapshotDirectory) {
@@ -176,10 +180,10 @@ function parseArgs(argv) {
 
 async function main([command, ...rest]) {
   const { buildSpecInventory } = await import("./spec-quality-lib.mjs");
-  const knownSpecIds = new Set((await buildSpecInventory()).map(spec => spec.specId));
+  const publicTitles = new Map((await buildSpecInventory()).map(spec => [spec.specId, spec.title]));
   if (command === "check") {
     const snapshots = await loadPublicCoverageSnapshots();
-    assertPublicCoverageSnapshot(snapshots.at(-1), { knownSpecIds });
+    assertPublicCoverageSnapshot(snapshots.at(-1), { knownSpecIds: new Set(publicTitles.keys()) });
     console.log(`Reconciled ${snapshots.length} public coverage snapshot(s).`);
     return;
   }
@@ -189,7 +193,7 @@ async function main([command, ...rest]) {
   const input = JSON.parse((await readFile(path.resolve(args.input), "utf8")).replace(/^\uFEFF/u, ""));
   const snapshot = projectRefreshOutput(input, {
     baseRevision: args["base-revision"], report: args.report ?? "REFRESH_STATUS.md", assessedAt: args["assessed-at"] ?? null,
-    windowDays: args["window-days"] === undefined ? null : Number(args["window-days"]), knownSpecIds,
+    windowDays: args["window-days"] === undefined ? null : Number(args["window-days"]), publicTitles,
   });
   const destination = path.join(snapshotDirectory, `${snapshot.snapshotId}.json`);
   const bytes = `${JSON.stringify(snapshot, null, 2)}\n`;

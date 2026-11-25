@@ -25,7 +25,7 @@ const report = () => {
   const { summary, specs } = inventory();
   return { schemaVersion: 1, asOf: "2026-12-04T10:00:00.000Z", portfolio: { summary, specs: specs.map(({ operations, ...spec }) => spec) } };
 };
-const options = { baseRevision: "abc1234" };
+const options = { baseRevision: "abc1234", publicTitles: new Map([["zeta", "Zeta Portal"], ["alpha", "Alpha Portal"]]) };
 const clone = value => structuredClone(value);
 const reconciled = () => projectRefreshOutput(inventory(), options);
 
@@ -42,14 +42,17 @@ test("the published November snapshot reconciles against current spec ids", asyn
 });
 
 test("inventory projection copies only allowlisted aggregate counts", () => {
-  const snapshot = reconciled();
+  const input = inventory();
+  input.specs[0].title = "Private Customer";
+  const snapshot = projectRefreshOutput(input, options);
   assert.equal(snapshot.snapshotId, "2026-12-04");
   assert.equal(snapshot.windowDays, 30);
   assert.deepEqual(snapshot.specs.map(spec => spec.specId), ["alpha", "zeta"]);
+  assert.equal(snapshot.specs[1].title, "Zeta Portal");
   assert.equal(snapshot.specs[0].latestErrorObserved, 1);
   assert.equal(snapshot.totals.latestErrorObserved, 2);
   const serialized = JSON.stringify(snapshot);
-  for (const leaked of ["/secret", "C:/private", "specPath", "historicalCaptureAnnotations", "wholeSpecCurrent", "recipeCount", "errorObserved\""]) {
+  for (const leaked of ["Private Customer", "/secret", "C:/private", "specPath", "historicalCaptureAnnotations", "wholeSpecCurrent", "recipeCount", "errorObserved\""]) {
     assert.equal(serialized.includes(leaked), false, `${leaked} leaked into the public snapshot`);
   }
 });
@@ -63,7 +66,8 @@ test("legacy reports require an explicit window; new reports preserve the invent
 test("a report from the refresh controller projects with its actual non-default window", async () => {
   const asOf = "2026-11-06";
   const { report } = await runPortfolioRefresh({ captures: [], asOf, freshnessDays: 14 });
-  const snapshot = projectRefreshOutput(report, options);
+  const publicTitles = new Map((await buildSpecInventory()).map(spec => [spec.specId, spec.title]));
+  const snapshot = projectRefreshOutput(report, { ...options, publicTitles });
   assert.equal(snapshot.assessedAt, asOf);
   assert.equal(snapshot.windowDays, 14);
   assert.equal(snapshot.totals.currentObservations, 0);
@@ -92,10 +96,11 @@ test("projection never turns a missing measure into zero", () => {
 });
 
 test("projection rejects unknown spec ids and unsupported inputs", () => {
-  assert.throws(() => projectRefreshOutput(inventory(), { ...options, knownSpecIds: new Set(["alpha"]) }), /unknown specId zeta/u);
+  assert.throws(() => projectRefreshOutput(inventory(), { ...options, publicTitles: new Map([["alpha", "Alpha Portal"]]) }), /unknown specId/u);
+  assert.throws(() => projectRefreshOutput(inventory(), { baseRevision: "abc1234" }), /public spec catalog/u);
   assert.throws(() => projectRefreshOutput({ schemaVersion: 2 }, options), /schemaVersion 1/u);
   assert.throws(() => projectRefreshOutput({ schemaVersion: 1, specs: [] }, options), /independent summary/u);
-  assert.throws(() => projectRefreshOutput(inventory(), { baseRevision: "not-a-sha" }), /baseRevision/u);
+  assert.throws(() => projectRefreshOutput(inventory(), { ...options, baseRevision: "not-a-sha" }), /baseRevision/u);
 });
 
 test("reconciliation reports each class of mismatch", () => {

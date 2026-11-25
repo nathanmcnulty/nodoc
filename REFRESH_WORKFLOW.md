@@ -233,7 +233,8 @@ summarizes (default `REFRESH_STATUS.md`).
 
 The projection copies only allowlisted per-spec and total counts and checks that
 current, stale and not-observed counts partition each denominator, that rows sum
-to the independent totals, and that every specification ID still exists. A
+to the independent totals, and that every specification ID still exists. Display
+titles come from the public specification catalog, not the private input. A
 missing measure fails instead of becoming zero, and an existing snapshot with
 different counts is never overwritten. Review the file, then commit it with the
 updated `REFRESH_STATUS.md`. `npm run generate:site-data` validates every
