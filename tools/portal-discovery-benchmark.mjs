@@ -19,10 +19,11 @@ export async function loadBenchmarkCorpus(filePath = corpusPath) {
 export function runOfflineBenchmark(corpus, { inputs = {} } = {}) {
   if (!corpus || corpus.schemaVersion !== benchmarkSchemaVersion) throw new Error("Unsupported benchmark corpus schema.");
   const results = corpus.scenarios.map((scenario) => {
-    const actual = inputs[scenario.scenarioId] ?? scenario.syntheticResult ?? {};
+    const supplied = Object.hasOwn(inputs, scenario.scenarioId);
+    const actual = supplied ? inputs[scenario.scenarioId] ?? {} : scenario.syntheticResult ?? {};
     const assertions = scenario.assertions ?? {};
     const mismatches = Object.entries(assertions).filter(([key, expected]) => JSON.stringify(actual[key]) !== JSON.stringify(expected)).map(([key]) => `assertion:${key}`);
-    return { scenarioId: scenario.scenarioId, scenarioDigest: benchmarkDigest(scenario), expected: assertions, actual, status: mismatches.length ? "fail" : "pass", reasonCodes: mismatches };
+    return { scenarioId: scenario.scenarioId, scenarioDigest: benchmarkDigest(scenario), evidenceSource: supplied ? "caller-supplied-result" : "fixture-self-check", expected: assertions, actual, status: mismatches.length ? "fail" : "pass", reasonCodes: mismatches };
   }).sort((a, b) => a.scenarioId.localeCompare(b.scenarioId));
   const core = { schemaVersion: benchmarkSchemaVersion, corpusId: corpus.corpusId, corpusDigest: benchmarkDigest(corpus), results, measurements: { scenarioCount: results.length, passCount: results.filter((r) => r.status === "pass").length, failCount: results.filter((r) => r.status === "fail").length, driftCount: results.filter((r) => r.reasonCodes.length).length, inputBytes: Buffer.byteLength(stableJson(corpus), "utf8"), outputBytes: 0, synthetic: true, caveat: "Synthetic byte/cardinality/tokenizer-estimate proxies; not real token, cost, quality, or portal coverage claims." } };
   core.measurements.outputBytes = Buffer.byteLength(stableJson(core), "utf8");

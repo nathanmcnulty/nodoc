@@ -999,7 +999,7 @@ export async function mineJavascriptBundles(options) {
       result = remapSourceFile(result, path.basename(bundleFile));
     }
     if (cacheEnabled) memory.set(key, result);
-    results.push(result);
+    results.push({ ...result, sourceHash });
   }
   metrics.uniqueContentHashes = memory.size;
 
@@ -1008,14 +1008,14 @@ export async function mineJavascriptBundles(options) {
   for (const result of results) {
     for (const candidate of result.candidates) {
       candidateMap.set(
-        `${candidate.method ?? "ANY"} ${candidate.candidatePath} ${candidate.sourceFile}`,
-        candidate,
+        `${candidate.method ?? "ANY"} ${candidate.baseUrl ?? candidate.hostname ?? "NO_HOST"} ${candidate.candidatePath} ${candidate.sourceFile} ${result.sourceHash}`,
+        { ...candidate, sourceHash: result.sourceHash },
       );
     }
     for (const operation of result.graphqlOperations) {
       graphqlMap.set(
-        `${operation.operationType} ${operation.name} ${operation.sourceFile}`,
-        operation,
+        `${operation.operationType} ${operation.name} ${operation.sourceFile} ${result.sourceHash}`,
+        { ...operation, sourceHash: result.sourceHash },
       );
     }
   }

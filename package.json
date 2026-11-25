@@ -44,6 +44,7 @@
     "validate:response-privacy": "node tools/response-evidence.mjs scan-public",
     "review:source": "node tools/source-review-workflow.mjs",
     "test:discovery": "node --test --test-concurrency=4 tools/tests/*.test.mjs",
+    "test:evidence": "node --test --test-concurrency=4 tools/tests/evidence-pipeline.test.mjs tools/tests/recorder-evidence.test.mjs tools/tests/recorder-postman-export.test.mjs tools/tests/operation-contract.test.mjs tools/tests/operation-behavior.test.mjs tools/tests/discovery-review-assignments.test.mjs tools/tests/discovery-derivative-families.test.mjs tools/tests/portal-discovery-promotion-planner.test.mjs tools/tests/portal-discovery-layer4.test.mjs tools/tests/mine-javascript-bundles.test.mjs tools/tests/cdp-deep-capture-source.test.mjs tools/tests/generate-postman-collections.test.mjs tools/tests/spec-quality.test.mjs tools/tests/portal-discovery-evidence-contract.test.mjs",
     "validate:site-data": "npm run generate:site-data && git diff --exit-code -- src/generated/specQuality.ts src/generated/portalCoverageLedger.json src/generated/operationLiveCaptureLedger.json src/generated/operationContextLedger.json",
     "validate:spec-quality": "node tools/validate-spec-quality.mjs",
     "swizzle": "docusaurus swizzle",

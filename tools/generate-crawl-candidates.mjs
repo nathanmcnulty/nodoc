@@ -1,12 +1,14 @@
 import { access, readFile, realpath, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { createHash } from "node:crypto";
 
 import fg from "fast-glob";
 
 import { sanitizeObservedHostFamily } from "./discovery-safety.mjs";
 import { getCandidateSuppressions } from "./portal-discovery-metadata.mjs";
 import { buildSpecRouteInventory } from "./spec-quality-lib.mjs";
+import { contractObservation, mergeContractObservations } from "./operation-contract.mjs";
 
 const httpMethods = new Set([
   "GET",
@@ -486,7 +488,7 @@ function walkArtifact(value, handler, context = {}) {
   }
 }
 
-function buildObservation(record, sourceFile, evidence, context = {}) {
+export function buildObservation(record, sourceFile, evidence, context = {}) {
   const rawPath = typeof record.path === "string" && record.path.trim()
     ? record.path.trim()
     : record.url;
@@ -517,6 +519,14 @@ function buildObservation(record, sourceFile, evidence, context = {}) {
 
   return {
     evidence,
+    originBindingId: baseUrl ? createHash("sha256").update(baseUrl).digest("hex") : null,
+    contractObservations: evidence === "bundle-discovered" ? [] : mergeContractObservations(
+      [contractObservation(record), ...(Array.isArray(record.responseVariants) ? record.responseVariants : [])],
+    ).filter((observation) => observation.status
+      || observation.requestShape !== "unknown"
+      || observation.responseShape !== "unknown"
+      || observation.errorSignatures.length
+      || observation.omittedVariantCount),
     method,
     normalizedPath,
     rawPath,
@@ -968,6 +978,7 @@ async function collectBundleObservations(options) {
   for (const record of candidateRecords.values()) {
     observations.push({
       evidence: "bundle-discovered",
+      originBindingId: record.baseUrl ? createHash("sha256").update(record.baseUrl).digest("hex") : null,
       method: record.method,
       normalizedPath: record.normalizedPath,
       rawPath: record.normalizedPath,
@@ -1053,7 +1064,7 @@ function hostTemplateToRegex(hostTemplate) {
   );
 }
 
-function buildSpecContext(specRecord) {
+export function buildSpecContext(specRecord) {
   const scopeServerUrls = Array.isArray(specRecord.scopeServerUrls)
     ? specRecord.scopeServerUrls
     : specRecord.serverUrls;
@@ -1250,7 +1261,7 @@ function buildScopeReviewContext(observation, specContext, specContexts) {
   };
 }
 
-function aggregateCandidates(
+export function aggregateCandidates(
   observations,
   specContext,
   includeDocumented,
@@ -1266,7 +1277,7 @@ function aggregateCandidates(
       ? sanitizeScopeReviewPath(observation.normalizedPath)
       : observation.normalizedPath;
     const key = [
-      scopeReviewContext?.hostFamily,
+      observation.originBindingId ?? observation.hostname ?? scopeReviewContext?.hostFamily,
       observation.method ?? "ANY",
       candidatePath,
     ].filter(Boolean).join(" ");
@@ -1299,6 +1310,11 @@ function aggregateCandidates(
         matchedSpecMethods,
         method: observation.method,
         normalizedPath: candidatePath,
+        originBindingId: observation.originBindingId ?? null,
+        contractObservations: observation.contractObservations ?? [],
+        ...(!scopeReview && observation.hostname
+          ? { hostFamily: sanitizeObservedHostFamily(observation.hostname, specContext.hostTemplates) }
+          : {}),
         rawPaths: new Set([observation.rawPath]),
         requiredInputs: new Set(extractRequiredInputs(observation)),
         safeMethodToTest: safeMethodToTest(observation.method),
@@ -1318,6 +1334,10 @@ function aggregateCandidates(
       });
     } else {
       const candidate = aggregated.get(key);
+      candidate.contractObservations = mergeContractObservations(
+        candidate.contractObservations,
+        observation.contractObservations ?? [],
+      );
       candidate.confidenceScore = Math.max(candidate.confidenceScore, observation.confidenceScore);
       candidate.evidence.add(observation.evidence);
       candidate.featureFamily = candidate.featureFamily || observation.featureFamily;
@@ -1381,6 +1401,7 @@ function aggregateCandidates(
     .filter((candidate) => (
       scopeReview
       || includeDocumented
+      || candidate.contractObservations.length > 0
       || candidate.documentationStatus !== "documented"
     ))
     .sort((left, right) => {

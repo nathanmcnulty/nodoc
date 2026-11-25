@@ -147,29 +147,33 @@ function sha256(value) {
   return createHash("sha256").update(String(value ?? "")).digest("hex");
 }
 
-function shapeOf(value, depth = 0) {
+function shapeOf(value, depth = 0, completeness = null) {
   if (depth >= 8) {
+    if (completeness) completeness.complete = false;
     return "max-depth";
   }
   if (value === null) {
     return "null";
   }
   if (Array.isArray(value)) {
-    const shapes = uniqueSorted(value.slice(0, 20).map((item) => JSON.stringify(shapeOf(item, depth + 1))));
+    if (value.length > 20 && completeness) completeness.complete = false;
+    const shapes = uniqueSorted(value.slice(0, 20).map((item) => JSON.stringify(shapeOf(item, depth + 1, completeness))));
     return { array: shapes.map((item) => JSON.parse(item)) };
   }
   if (typeof value === "object") {
     const result = {};
     let dynamic = false;
+    if (Object.keys(value).length > 128 && completeness) completeness.complete = false;
     for (const key of Object.keys(value).sort((left, right) => left.localeCompare(right)).slice(0, 128)) {
       if (key.length > 128
-          || /[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}/iu.test(key)
+          || /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/iu.test(key)
           || /[\w.+-]+@[\w.-]+\.[a-z]{2,}/iu.test(key)
           || /\.onmicrosoft\.com/iu.test(key)) {
         dynamic = true;
+        if (completeness) completeness.complete = false;
         continue;
       }
-      result[key] = shapeOf(value[key], depth + 1);
+      result[key] = shapeOf(value[key], depth + 1, completeness);
     }
     if (dynamic) result["{dynamicProperty}"] = "unknown";
     return result;
@@ -178,7 +182,7 @@ function shapeOf(value, depth = 0) {
 }
 
 function bodyShapeSummary(value) {
-  if (!value) return null;
+  if (value === undefined || value === null || value === "") return null;
   try {
     const parsed = typeof value === "string" ? JSON.parse(value) : value;
     return shapeOf(parsed);
@@ -187,8 +191,20 @@ function bodyShapeSummary(value) {
   }
 }
 
+function bodyShapeComplete(value) {
+  if (value === undefined || value === null || value === "") return false;
+  try {
+    const parsed = typeof value === "string" ? JSON.parse(value) : value;
+    const completeness = { complete: true };
+    shapeOf(parsed, 0, completeness);
+    return completeness.complete;
+  } catch {
+    return false;
+  }
+}
+
 function bodyShapeFingerprint(value) {
-  if (!value) {
+  if (value === undefined || value === null || value === "") {
     return null;
   }
   try {
@@ -262,14 +278,48 @@ export function requestEvidence(request) {
     ? { state: requestBodyCaptureState,
       digest: request.requestBodyValueFingerprint ?? (hasRequestBody ? sha256(request.requestBody) : null),
       ...(!request.requestBodyValueFingerprint && requestBodyCaptureState !== "captured" ? { observation: request.evidenceId ?? null } : {}) } : null;
+  const requestMediaType = normalizedRequestMediaType(request);
+  const requestShapeComplete = request.requestShapeComplete
+    ?? (requestBodyCaptureState === "truncated" ? false : bodyShapeComplete(request.requestBody));
+  const responseBodyForShape = request.responseBodyForAnalysis ?? request.responseBody ?? request.responseBodySample;
+  const responseShapeComplete = request.responseShapeComplete
+    ?? (request.bodyCapture?.state === "truncated" || request.responseBodyCapture?.sampleTruncated === true
+      ? false : bodyShapeComplete(responseBodyForShape));
+  const requestBodyCapture = request.requestBodyCapture ?? {
+    state: requestBodyCaptureState === "captured" || requestBodyCaptureState === "truncated"
+      ? "captured"
+      : requestBodyCaptureState === "unavailable" ? "unavailable"
+        : requestBodyCaptureState === "size-limit" ? "size-limit"
+          : requestBodyCaptureState === "empty" ? "empty" : "unknown",
+    ...(requestBodyCaptureState === "not-observed" ? { reason: "no-post-data-reported" } : {}),
+  };
+  const responseCaptureState = request.responseBodyCapture?.state ?? request.bodyCapture?.state;
+  const responseBodyCapture = request.responseBodyCapture ?? {
+    state: responseCaptureState === "complete" || responseCaptureState === "truncated" || responseCaptureState === "captured"
+      ? "captured"
+      : responseCaptureState === "empty" ? "empty"
+        : responseCaptureState === "omitted-size" || responseCaptureState === "size-limit" ? "omitted"
+          : responseCaptureState === "decode-failed" || responseCaptureState === "failed" ? "failed"
+            : responseCaptureState === "unavailable" ? "unavailable"
+              : responseBodyForShape === "" ? "empty"
+                : responseBodyForShape === undefined || responseBodyForShape === null ? "unknown" : "captured",
+    ...(request.bodyCapture?.state === "truncated" ? { reason: "sample-truncated" } : {}),
+  };
   try {
     const parsed = new URL(request.url);
     const queryParameterNames = uniqueSorted(Array.from(parsed.searchParams.keys()));
     const requestShapeFingerprint =
       request.requestShapeFingerprint ?? bodyShapeFingerprint(request.requestBody);
     const responseShapeFingerprint =
-      request.responseShapeFingerprint ?? bodyShapeFingerprint(request.responseBody);
+      request.responseShapeFingerprint ?? bodyShapeFingerprint(responseBodyForShape);
     return {
+      operationFingerprint: sha256(JSON.stringify({ origin: parsed.origin, method: request.method, path: parsed.pathname })),
+      requestMediaType,
+      requestContentType: requestMediaType,
+      requestShapeComplete,
+      responseShapeComplete,
+      requestBodyCapture,
+      responseBodyCapture,
       queryParameterNames,
       requestFingerprint: sha256(JSON.stringify({
         origin: parsed.origin,
@@ -280,6 +330,13 @@ export function requestEvidence(request) {
         responseShapeFingerprint,
         status: request.status ?? null,
         mediaType: request.mimeType ?? null,
+        requestMediaType,
+        requestShapeComplete,
+        responseShapeComplete,
+        requestBodyCaptureState: requestBodyCapture.state ?? "unknown",
+        requestBodyCaptureReason: requestBodyCapture.reason ?? null,
+        responseBodyCaptureState: responseBodyCapture.state ?? "unknown",
+        responseBodyCaptureReason: responseBodyCapture.reason ?? null,
         graphQlSelectors,
         requestBodyVariant,
         ...(errorSignature ? { errorSignature } : {}),
@@ -289,12 +346,18 @@ export function requestEvidence(request) {
       requestShapeFingerprint,
       responseShapeFingerprint,
       requestShapeSummary: request.requestShapeSummary ?? bodyShapeSummary(request.requestBody),
-      responseShapeSummary: request.responseShapeSummary ?? bodyShapeSummary(request.responseBody),
+      responseShapeSummary: request.responseShapeSummary ?? bodyShapeSummary(responseBodyForShape),
       requestHeaderNames: uniqueSorted(normalizeHeaderEntries(request.headers).map(([name]) => name)),
       responseHeaderNames: uniqueSorted(normalizeHeaderEntries(request.responseHeaders).map(([name]) => name)),
     };
   } catch {
     return {
+      requestMediaType,
+      requestContentType: requestMediaType,
+      requestShapeComplete,
+      responseShapeComplete,
+      requestBodyCapture,
+      responseBodyCapture,
       queryParameterNames: [],
       requestFingerprint: sha256(JSON.stringify([request.method, request.url, errorSignature, graphQlSelectors, requestBodyVariant])),
       responseErrorSignature: errorSignature,
@@ -302,13 +365,20 @@ export function requestEvidence(request) {
       requestShapeFingerprint:
         request.requestShapeFingerprint ?? bodyShapeFingerprint(request.requestBody),
       responseShapeFingerprint:
-        request.responseShapeFingerprint ?? bodyShapeFingerprint(request.responseBody),
+        request.responseShapeFingerprint ?? bodyShapeFingerprint(responseBodyForShape),
       requestShapeSummary: request.requestShapeSummary ?? bodyShapeSummary(request.requestBody),
-      responseShapeSummary: request.responseShapeSummary ?? bodyShapeSummary(request.responseBody),
+      responseShapeSummary: request.responseShapeSummary ?? bodyShapeSummary(responseBodyForShape),
       requestHeaderNames: uniqueSorted(normalizeHeaderEntries(request.headers).map(([name]) => name)),
       responseHeaderNames: uniqueSorted(normalizeHeaderEntries(request.responseHeaders).map(([name]) => name)),
     };
   }
+}
+
+function normalizedRequestMediaType(request) {
+  const value = request.requestMediaType ?? request.requestContentType
+    ?? normalizeHeaderMap(request.headers ?? request.requestHeaders)["content-type"];
+  const mediaType = String(value ?? "").split(";", 1)[0].trim().toLowerCase();
+  return /^[a-z0-9!#$&^_.+-]+\/[a-z0-9!#$&^_.+-]+$/u.test(mediaType) ? mediaType : null;
 }
 
 export function graphQlOperationMetadata(request) {
@@ -1468,6 +1538,7 @@ export function mergeItems(existing, next) {
   for (const key of [
     "querySamples",
     "requestBodySamples",
+    "observationIds",
     "sameOriginLinks",
     "seenOnPages",
     "sessionSnapshots",
@@ -1492,14 +1563,41 @@ export function mergeItems(existing, next) {
     "mimeType",
     "observedAt",
     "responseBodySample",
+    "responseBodyCapture",
+    "responseShapeComplete",
     "responseErrorSignature",
     "responseShapeFingerprint",
     "responseShapeSummary",
+    "requestBodyCapture",
+    "requestShapeComplete",
+    "requestMediaType",
     "status",
     "url",
   ]) {
     if (Object.hasOwn(selectedResponse, key)) merged[key] = selectedResponse[key];
     else delete merged[key];
+  }
+
+  if ("responseBodySample" in existing || "responseBodySample" in next) {
+    const samples = [existing, next].flatMap((item) => item.responseBodySamples
+      ?? (item.responseBodySample === null || item.responseBodySample === undefined ? [] : [{
+        body: item.responseBodySample,
+        responseShapeSummary: item.responseShapeSummary ?? null,
+        responseShapeComplete: item.responseShapeComplete ?? false,
+        responseErrorSignature: item.responseErrorSignature ?? null,
+        observationIds: item.observationIds ?? [],
+      }]));
+    const distinct = new Map();
+    for (const sample of samples) {
+      const key = JSON.stringify([sample.body, sample.responseShapeSummary, sample.responseShapeComplete, sample.responseErrorSignature]);
+      const previous = distinct.get(key);
+      distinct.set(key, { ...sample, observationIds: mergeArray(previous?.observationIds, sample.observationIds) });
+    }
+    const ordered = [...distinct.entries()].sort(([left], [right]) => left.localeCompare(right));
+    merged.responseBodySamples = ordered.slice(0, 8).map(([, sample]) => sample);
+    merged.responseBodySamplesTruncated = Boolean(existing.responseBodySamplesTruncated
+      || next.responseBodySamplesTruncated || ordered.length > 8);
+    merged.sampleLimit = 8;
   }
 
   return merged;
@@ -2044,13 +2142,14 @@ function buildProbeExpression(value) {
   })()`;
 }
 
-function toApiRecord(request, portalName) {
+export function toApiRecord(request, portalName) {
   try {
     const parsed = new URL(request.url);
     const querySample = parsed.search ? parsed.search : null;
     return {
       schemaVersion: captureArtifactSchemaVersion,
       ...requestEvidence(request),
+      observationIds: request.evidenceId ? [request.evidenceId] : [],
       abortedBeforeSend: request.abortedBeforeSend === true,
       attribution: request.attribution,
       confidence: "confirmed-traffic",
@@ -2061,7 +2160,7 @@ function toApiRecord(request, portalName) {
       portalName,
       querySamples: querySample ? [querySample] : [],
       requestBodySamples: request.requestBody ? [request.requestBody] : [],
-      responseBodySample: request.responseBody ?? null,
+      responseBodySample: request.responseBody ?? request.responseBodySample ?? null,
       evidenceId: request.evidenceId,
       bodyCapture: request.bodyCapture ?? bodyCaptureWithoutSidecar("truncated"),
       ...(request.bodyCaptureDiagnostic ? { bodyCaptureDiagnostic: request.bodyCaptureDiagnostic } : {}),
@@ -2079,6 +2178,7 @@ function toApiRecord(request, portalName) {
     return {
       schemaVersion: captureArtifactSchemaVersion,
       ...requestEvidence(request),
+      observationIds: request.evidenceId ? [request.evidenceId] : [],
       abortedBeforeSend: request.abortedBeforeSend === true,
       attribution: request.attribution,
       confidence: "confirmed-traffic",
@@ -2089,7 +2189,7 @@ function toApiRecord(request, portalName) {
       portalName,
       querySamples: [],
       requestBodySamples: request.requestBody ? [request.requestBody] : [],
-      responseBodySample: request.responseBody ?? null,
+      responseBodySample: request.responseBody ?? request.responseBodySample ?? null,
       evidenceId: request.evidenceId,
       bodyCapture: request.bodyCapture ?? bodyCaptureWithoutSidecar("truncated"),
       ...(request.bodyCaptureDiagnostic ? { bodyCaptureDiagnostic: request.bodyCaptureDiagnostic } : {}),

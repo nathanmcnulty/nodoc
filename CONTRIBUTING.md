@@ -81,6 +81,8 @@ Use sanitized, stable references to observations and retain private capture mapp
 
 Run `npm run generate:automation-evidence -- --output <artifact-path>` for a deterministic per-operation readiness ledger, or use `--json`. Its dimensions are existence, method, input, populatedResponse, conditionalErrors, auth, pagination, retry, async and freshness. Each operation has an explicit `unknown` default for omitted dimensions. Existing specs receive no automatic readiness credit solely from metadata, examples, or an Advanced presentation score. This artifact is generated on demand; it does not rewrite presentation metrics or publish private evidence.
 
+Run `npm run test:evidence` for the scoped offline contract, provenance, report-only planning and export regressions. CI sets `NODOC_POSTMAN_PIPELINE=1` so the suite also runs the pinned Postman converter against synthetic fixtures; in PowerShell, set `$env:NODOC_POSTMAN_PIPELINE = '1'` before running the command locally. These tests do not contact a portal or establish live acceptance.
+
 The website now surfaces generated spec-quality metadata from the checked-in OpenAPI files, and the repo also keeps a machine-readable portal coverage ledger under `src/generated/`.
 
 - Regenerate it with `npm run generate:site-data`.
