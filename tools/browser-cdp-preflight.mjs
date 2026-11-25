@@ -148,6 +148,11 @@ function connectAndEvaluate(webSocketUrl, timeoutMs) {
   });
 }
 
+export function assertSelectedNativeTenant(nativeUrl, expectedTenantId) {
+  let observed; try { observed = new URL(nativeUrl).searchParams.getAll('tid'); } catch { /* invalid or absent native URL */ }
+  if (typeof expectedTenantId !== 'string' || !expectedTenantId.trim() || !observed || observed.length !== 1 || !observed[0] || observed[0].toLowerCase() !== expectedTenantId.toLowerCase()) throw new Error('Native selected tenant is missing or changed.');
+}
+
 export async function runBrowserCdpPreflight({
   endpoint = "http://127.0.0.1:9222",
   expectedProduct = null,
@@ -312,6 +317,8 @@ export async function alignBrowserCdpTarget({
   entryUrl,
   featureCriteria,
   bootstrapCriteria,
+  targetId = null,
+  assertPreflight = () => {},
   endpoint = "http://127.0.0.1:9222",
   expectedProduct = null,
   stabilityMs = defaultStabilityMs,
@@ -324,10 +331,12 @@ export async function alignBrowserCdpTarget({
       endpoint,
       expectedProduct,
       ...featureCriteria,
+      targetId,
       stabilityMs,
       pollMs,
       timeoutMs,
     });
+    await assertPreflight(featurePreflight);
     return {
       ...featurePreflight,
       alignment: {
@@ -352,20 +361,23 @@ export async function alignBrowserCdpTarget({
     endpoint,
     expectedProduct,
     ...bootstrapCriteria,
+    targetId,
     stabilityMs,
     pollMs,
     timeoutMs,
   });
+  await assertPreflight(bootstrapPreflight);
   await navigateExactTarget(bootstrapPreflight.target, trustedUrl, timeoutMs);
   const alignedPreflight = await waitForAlignedTarget({
     endpoint,
     expectedProduct,
-    ...featureCriteria,
+    featureCriteria,
     targetId: bootstrapPreflight.target.id,
     stabilityMs,
     pollMs,
     timeoutMs,
   });
+  await assertPreflight(alignedPreflight);
   return {
     ...alignedPreflight,
     alignment: {

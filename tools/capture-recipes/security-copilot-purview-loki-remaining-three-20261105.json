@@ -1,0 +1,110 @@
+{
+  "portal": "Purview Data Lifecycle",
+  "url": "https://purview.microsoft.com/home",
+  "nativeEntryUrlShape": "https://purview.microsoft.com/datalifecyclemanagement/import",
+  "pageTarget": {
+    "matchHosts": [
+      "purview.microsoft.com"
+    ],
+    "matchPathPrefixes": [
+      "/datalifecyclemanagement/import"
+    ],
+    "allowedEntryQueryParameters": [
+      "tid"
+    ],
+    "bootstrap": {
+      "matchHosts": [
+        "purview.microsoft.com"
+      ],
+      "matchPathnames": [
+        "/home"
+      ]
+    }
+  },
+  "matchHosts": [
+    "ecs.office.com"
+  ],
+  "matchPathPrefixes": [
+    "/config/v1/LokiService/1.0.0.0"
+  ],
+  "inspectionPolicy": {
+    "mode": "observe-only",
+    "prohibitedControlPatterns": [
+      "Add",
+      "Create",
+      "Delete",
+      "Export",
+      "Remove",
+      "Save",
+      "Submit",
+      "Update",
+      "Purchase",
+      "Activate",
+      "Start trial"
+    ]
+  },
+  "responseBodyLimits": {
+    "perBodyBytes": 16777216,
+    "totalBytes": 268435456
+  },
+  "captureScripts": false,
+  "settleMs": 8000,
+  "postActionSettleMs": 6000,
+  "maxActions": 6,
+  "actions": [
+    {
+      "type": "navigate",
+      "value": "${NativeEntryUrl}",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "6000",
+      "required": true
+    },
+    {
+      "type": "reload",
+      "value": "loki-response-body",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "8000",
+      "required": true
+    },
+    {
+      "type": "capture",
+      "value": "loki-response-body",
+      "required": true
+    }
+  ],
+  "knownOperationRefresh": {
+    "status": "active",
+    "method": "GET",
+    "host": "ecs.office.com",
+    "routes": [
+      "/config/v1/LokiService/1.0.0.0"
+    ],
+    "actionIndexes": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "state": "Fresh observed native Data Lifecycle import href replaces the unsupported historical overview entry. Exact ECS LokiService response is a passive objective; emission from this newly observed caller state is unproved until capture. Canonical backend owner is Security Copilot, caller is Purview; no native Copilot workflow claim. Preserve the native cached caller session; selected tenant identity is unproved. NativeEntryUrl is copied literally from observed portal evidence without constructing tenant queries. No tenant switch, active API request, configuration change, business-health or minimum-role claim.",
+    "documentationObjectives": [
+      "schema-evidence",
+      "usage-observation",
+      "error-example"
+    ],
+    "evidenceIds": [
+      "opaque:remaining-three-loki-native-entry",
+      "opaque:remaining-three-loki-historical-body-gap"
+    ],
+    "approvalExpiresAt": "2026-11-06T05:45:00.000Z",
+    "variableBindingsDigest": "df68dfb5fe56c74e723457c4b2707422f989e520956276727c334dc8692e8a74",
+    "approvalArtifact": "tools/frontier-approvals/security-copilot-purview-loki-remaining-three-20261105.json",
+    "approvalDigest": "2e3e4879e9401c10c70a6a978bbecb3701f3486eecd4b09f66873030d97e5080"
+  }
+}

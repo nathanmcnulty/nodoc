@@ -23,6 +23,9 @@ const config: Config = {
   tagline: siteTagline,
   titleDelimiter: "·",
   favicon: "img/favicon.svg",
+  stylesheets: [
+    "https://fonts.googleapis.com/css2?family=Jura:wght@300..700&family=Space+Grotesk:wght@300..700&display=swap",
+  ],
   headTags: [
     {
       tagName: "script",

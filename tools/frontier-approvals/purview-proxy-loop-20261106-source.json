@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "kind": "known-operation-refresh-approval-source",
+  "status": "pending-actual-independent-review",
+  "specId": "purview",
+  "recipeDestination": "tools/capture-recipes/purview-proxy-loop-20261106.json",
+  "sourceRecipe": {
+    "path": "tools/capture-recipes/purview-home-announcements-remaining-three-20261105.json",
+    "sha256": "939d3a53c9207f6597b0140b02ba5807ef9976117ed860e184f6c14cb1e4e52f"
+  },
+  "target": {
+    "method": "GET",
+    "host": "purview.microsoft.com",
+    "canonicalPath": "/msgraph/v1.0/admin/serviceAnnouncement/messages",
+    "wirePath": "/apiproxy/msgraph/v1.0/admin/serviceAnnouncement/messages"
+  },
+  "retainedEvidence": {
+    "evidenceId": "request-e09f1f92a2892f5212cb",
+    "observedAt": "2026-11-06T03:29:16.977Z",
+    "actionIndex": 0,
+    "causalAction": {
+      "type": "navigate",
+      "value": "https://purview.microsoft.com/home"
+    },
+    "nativeEntryAction": {
+      "type": "navigate",
+      "value": "https://purview.microsoft.com/home"
+    },
+    "bodyState": "complete",
+    "health": "successful-body-observed",
+    "limitations": "Historical portal-proxy evidence; no direct Graph or current authentication/tenant/role proof."
+  },
+  "freshObjective": "Current-date proxy response shape and authentication drift are unavailable from retained November6 early-UTC observations. One bounded native Home navigation and reload exercises the existing capture, verification, discovery and enrichment loop without inventing API requests.",
+  "authority": {
+    "operationCeiling": "observe-only",
+    "userGoal": "Representative fresh read-only collection; normal sign-in for previously selected account explicitly allowed if needed.",
+    "noNewConsent": true,
+    "noPermissionChanges": true,
+    "noTenantSwitching": true,
+    "noPortalWrites": true
+  },
+  "actionBudget": {
+    "recipeActions": 5,
+    "mandatoryDriverNavigation": 1,
+    "maximumDriverActions": 6,
+    "ownerStartupNavigations": 1,
+    "preflightAlignmentNavigations": 0,
+    "maximumCombinedBudgetUnits": 7
+  },
+  "authenticationRecovery": "Reuse dedicated Purview cached/WAM session first; normal browser/OS sign-in only for same unambiguous selected account. Stop on consent, account ambiguity, unavailable login/feature or missing roles; never device-code auth.",
+  "failureRecovery": "Preserve every checkpoint and failed body. No unchanged failed-route/login retry. Require an observed distinct remedy/new reviewed plan for incomplete bodies or unavailable states. No errors or absence imply removal.",
+  "captureRole": {
+    "model": "gpt-6-luna",
+    "reasoning": "low"
+  },
+  "reviewRequirement": {
+    "model": "gpt-6-luna",
+    "reasoning": "xhigh"
+  },
+  "responseBodyLimits": {
+    "perBodyBytes": 16777216,
+    "totalBytes": 268435456
+  },
+  "expiresAt": "2026-11-07T06:00:00.000Z",
+  "refreshDigest": "ba5f7925b32607fc20bc0e742a76c63c3113a0ad0e655cd6c7b46407a6fe472c",
+  "executionDigest": "d89d88bb99eb9b4ccc1211d8f3a0f30aa012f4e7de1b1e13ac52c3042f03be75"
+}

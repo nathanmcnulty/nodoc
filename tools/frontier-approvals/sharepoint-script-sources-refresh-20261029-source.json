@@ -1,0 +1,111 @@
+{
+  "schemaVersion": 1,
+  "kind": "known-operation-refresh-approval-source",
+  "status": "pending-fresh-independent-review",
+  "specId": "sharepoint-admin",
+  "refreshDate": "2026-10-29",
+  "refreshDigest": "dcab39548a7f33667549140332f73cb1fc1837953374738f6fdcbb8e1dc521a6",
+  "recipePath": "tools/capture-recipes/sharepoint-script-sources-known-refresh.json",
+  "proposedRecipeSha256": "381835ef6cda74ff1713339f89be818894695ab8606c340aea71ce5b9f4ead29",
+  "baselineRecipeSha256": "7ca7522fe58c7902e3dda0a30da9f364747490d02a0f56f89cd31f53097c660b",
+  "specification": {
+    "path": "specifications/nodoc-sharepoint-admin/specification/openapi.yml",
+    "sha256": "f05c61df22fa17d35987136cd91f8974825017f2b5df0838191a8dc23209cdd9"
+  },
+  "retainedPlanningEvidence": {
+    "path": "private-artifacts/sharepoint-script-sources-20260831T043154991Z/api-records.json",
+    "sha256": "7428fbb70e709dd0813cd573673eb4efea22472344b7e3ea20d9f27e7635b8ad",
+    "recordIndex": 1,
+    "historicOnly": true,
+    "notCurrentProof": true,
+    "available": true,
+    "actualSha256": "7428fbb70e709dd0813cd573673eb4efea22472344b7e3ea20d9f27e7635b8ad",
+    "matchesRecordedSha256": true
+  },
+  "target": {
+    "status": "active",
+    "method": "GET",
+    "host": "${tenant}-admin.sharepoint.com",
+    "routes": [
+      "/_api/SPO.SPOContentSecurityPolicyConfiguration"
+    ],
+    "state": "Content security policy Script sources after exact passive navigation",
+    "actionIndexes": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "approvalExpiresAt": "2026-10-31T08:00:00.000Z",
+    "variableBindingsDigest": "84f43778fd7dd21c5808b6324a479bb0e8112099362fdf6e1e18356070012e24",
+    "documentationObjectives": [
+      "freshness",
+      "response-example",
+      "schema-evidence",
+      "usage-observation"
+    ],
+    "evidenceIds": [
+      "retained-sharepoint-script-sources-record-1",
+      "checked-in-sharepoint-csp-state-20261029"
+    ]
+  },
+  "resolvedTarget": {
+    "entryUrlSha256": "ad6557a73b4d26eb09d9d21219d4e05d7f4f4b97c06d221e4a06b266c46412ad",
+    "entryHostSha256": "c5a1ee417f3958a24de94ecf12860a8e99bf68aa4df3efffc67432410b644191",
+    "apiHostSha256": "c5a1ee417f3958a24de94ecf12860a8e99bf68aa4df3efffc67432410b644191",
+    "variableBindingsDigest": "84f43778fd7dd21c5808b6324a479bb0e8112099362fdf6e1e18356070012e24"
+  },
+  "policyBindings": [
+    {
+      "path": "PORTAL_DISCOVERY_AGENT_PROMPT.md",
+      "sha256": "57b6acf49eac1afc6e51b014039a6cba694adeeb058b13fa549f0610e20ae8b5"
+    },
+    {
+      "path": "AGENT_DISCOVERY_RUNBOOK.md",
+      "sha256": "4ef12fc4e271e17094dbb5da447b6f535bf2a63b457089ce5bd7f6876126b079"
+    },
+    {
+      "path": "AGENT_DISCOVERY_PLAYBOOK.md",
+      "sha256": "c12b9cecf0a3a85e8c760a8e7b310c0d0528f41cb65c8fe2c95eb420ca3fb119"
+    },
+    {
+      "path": "tools/portal-discovery-model-policy.mjs",
+      "sha256": "5d4b65b60d21a5b7431828b41694c49e85c58fb1497a2c3fb1cf53483066c346"
+    },
+    {
+      "path": "tools/portal-discovery-operation-safety.mjs",
+      "sha256": "425a1466f41aed855a0871548ee464670c350ce9b2954eba0e220c9a38d86ca3"
+    },
+    {
+      "path": "tools/discovery-safety.mjs",
+      "sha256": "e406c0fcd3401092ab2ef8318d41c17bb72956eec84638f2a00b9535dda8c8a1"
+    }
+  ],
+  "safety": {
+    "uiActions": "navigate/wait/reload/capture only",
+    "apiProbeAuthorized": false,
+    "mutationAuthorized": false,
+    "deviceCodeAuthorized": false,
+    "auth": "cached/WAM or normal browser only",
+    "browserLifecycle": "operator-owned serialized"
+  },
+  "coverage": {
+    "primaryWitness": "GET /_api/SPO.SPOContentSecurityPolicyConfiguration",
+    "boundedRepresentativeStates": [
+      "Content security policy Script sources"
+    ],
+    "uncoveredFamilies": [
+      "tenant settings",
+      "other SharePoint route families"
+    ],
+    "claim": "health witness only; every uncovered family requires explicit disposition; no all-spec freshness or schema completeness claim"
+  },
+  "requiredLiveProof": [
+    "all required action indexes completed",
+    "exact action-attributed method/host/route target",
+    "HTTP 2xx without GraphQL errors where applicable",
+    "complete sanitized hash-bound scoped sidecar",
+    "observedAt timestamp from source request"
+  ]
+}

@@ -1,0 +1,194 @@
+{
+  "schemaVersion": 1,
+  "kind": "known-operation-refresh-approval-source",
+  "status": "proposal-pending-independent-xhigh-review-and-root-registration",
+  "specId": "purview",
+  "createdAt": "2026-10-31T07:27:01.050Z",
+  "plannedAssignmentId": "purview-home-response-diagnostic-20261031-01",
+  "recipeDestination": "tools/capture-recipes/purview-home-response-diagnostic-20261031.json",
+  "captureRole": {
+    "model": "gpt-6-luna",
+    "reasoning": "low"
+  },
+  "reviewRequirement": {
+    "model": "gpt-6-luna",
+    "reasoning": "xhigh",
+    "status": "not-performed"
+  },
+  "newCycleReason": "A fresh bounded response-only objective is prepared for exact previously observed routes. It does not author, replay, or infer safety/effects for the passive POST and does not upgrade old evidence into current proof. Exact retained Home actions also emitted both source-owned Insider Risk GETs, whose bodies were excluded by the prior response path allowlist. This new narrowly tenant-bound retention objective uses the same actions and unchanged ceiling; old previews are not schema evidence.",
+  "primaryCanonicalOperation": {
+    "specId": "purview",
+    "method": "GET",
+    "host": "purview.microsoft.com",
+    "basePath": "/apiproxy",
+    "canonicalPath": "/medeina/auth/expiryDate",
+    "wirePath": "/apiproxy/medeina/auth/expiryDate",
+    "operationId": "getCopilotAuthExpiryDate",
+    "sourceFile": "specifications/nodoc-purview/specification/copilot.yml",
+    "sourceFileSha256": "30f839a77827f151947abf6a60242fc990eb76232f514d129b19b852df87bc3e",
+    "observedCaller": "Purview Home",
+    "opaqueEvidenceId": "opaque:purview-home-expiryDate-404-action2",
+    "actionIndex": 2
+  },
+  "additionalPassiveOperations": [
+    {
+      "specId": "purview",
+      "method": "POST",
+      "host": "purview.microsoft.com",
+      "basePath": "/apiproxy",
+      "canonicalPath": "/cpm/v1.0/Tenant/CompliancePostureSummary",
+      "wirePath": "/apiproxy/cpm/v1.0/Tenant/CompliancePostureSummary",
+      "operationId": "getTenantCompliancePostureSummary",
+      "sourceFile": "specifications/nodoc-purview/specification/compliance_manager.yml",
+      "sourceSha256": "47d82e323b9e92dd697ff2bbb8e09ce932981b1445d127e2d632675e312dc08e",
+      "observedCaller": "Purview Home",
+      "opaqueEvidenceId": "opaque:purview-home-compliance-posture-passive-post",
+      "actionIndex": 0,
+      "observedStatus": 200,
+      "bodyState": "truncated",
+      "qualification": "Passively observed request/response only; effects are unknown. No authored request, replay, read-only, idempotence, or side-effect-free claim."
+    },
+    {
+      "specId": "purview",
+      "method": "GET",
+      "host": "purview.microsoft.com",
+      "basePath": "/apiproxy",
+      "canonicalPath": "/msgraph/v1.0/admin/serviceAnnouncement/messages",
+      "wirePath": "/apiproxy/msgraph/v1.0/admin/serviceAnnouncement/messages",
+      "operationId": "getServiceAnnouncementMessages",
+      "sourceFile": "specifications/nodoc-purview/specification/graph_proxy.yml",
+      "sourceSha256": "5f2bacc1d7eb8958fc5b7799d54fb13f5825322872ad193c0ed531e4b4beb0d4",
+      "observedCaller": "Purview Home",
+      "opaqueEvidenceId": "opaque:purview-home-serviceAnnouncement-proxy-get",
+      "actionIndex": 0,
+      "observedStatus": 200,
+      "bodyState": "decode-failed",
+      "qualification": "Purview proxy observation only; not a direct Graph request, Graph permission/grant evidence, or Graph portal workflow."
+    },
+    {
+      "specId": "purview",
+      "method": "GET",
+      "host": "purview.microsoft.com",
+      "basePath": "/apiproxy",
+      "canonicalPath": "/insiderrisk/insiderrisk/api/v1.0/{tenantId}/InsiderRiskAnalyticsInsightMetadata('{date}')",
+      "wirePath": "/apiproxy/insiderrisk/insiderrisk/api/v1.0/{tenantId}/InsiderRiskAnalyticsInsightMetadata('{date}')",
+      "operationId": "getInsiderRiskAnalyticsInsightMetadata",
+      "sourceFile": "specifications/nodoc-purview/specification/insider_risk.yml",
+      "sourceSha256": "66826de9ea2d79f60dc2399b1e96e5028e0b8173308b5b87a3b5385b74be8e52",
+      "observedCaller": "Purview Home",
+      "opaqueEvidenceId": "opaque:purview-home-irm-insight-action0-2",
+      "actionIndexes": [
+        0,
+        2
+      ],
+      "observedStatus": 200,
+      "bodyState": "truncated",
+      "qualification": "Previously observed passive GET with exact canonical owner; scope-excluded preview is not complete-body evidence. Future complete bodies remain subject to per-operation error/schema/privacy review."
+    },
+    {
+      "specId": "purview",
+      "method": "GET",
+      "host": "purview.microsoft.com",
+      "basePath": "/apiproxy",
+      "canonicalPath": "/insiderrisk/insiderrisk/api/v1.0/{tenantId}/InsiderRiskTenantPolicyAnalytics('{policyAnalyticsType}')",
+      "wirePath": "/apiproxy/insiderrisk/insiderrisk/api/v1.0/{tenantId}/InsiderRiskTenantPolicyAnalytics('{policyAnalyticsType}')",
+      "operationId": "getInsiderRiskTenantPolicyAnalytics",
+      "sourceFile": "specifications/nodoc-purview/specification/insider_risk.yml",
+      "sourceSha256": "66826de9ea2d79f60dc2399b1e96e5028e0b8173308b5b87a3b5385b74be8e52",
+      "observedCaller": "Purview Home",
+      "opaqueEvidenceId": "opaque:purview-home-irm-policy-action0-2",
+      "actionIndexes": [
+        0,
+        2
+      ],
+      "observedStatus": 200,
+      "bodyState": "truncated",
+      "qualification": "Previously observed passive GET with exact canonical owner; scope-excluded preview is not complete-body evidence. Future complete bodies remain subject to per-operation error/schema/privacy review."
+    }
+  ],
+  "observedUiUrlTemplate": "https://purview.microsoft.com/home?tid=${TenantId}",
+  "sourceCallerPortal": "purview-home",
+  "canonicalBackendOwner": "purview",
+  "callerRelation": "All five operations are Purview Home caller traffic with authoritative Purview ownership. The CompliancePostureSummary POST remains passive with unknown effects; the Graph route is a Purview proxy. The two Insider Risk routes are newly included narrowly bound response-retention objectives, not new API requests or a license/role/analytics-readiness claim.",
+  "privateEvidenceBindings": {
+    "assessmentArtifactId": "purview-home-body-enrichment-20261030",
+    "assessmentSha256": "7437cccde8348572d2813cfe1aa24b1c9b53a69368a5dfeb11f420dbfb0eac6d",
+    "preferredLifecycle": "purview-home-body-enrichment-01",
+    "primaryOpaqueEvidenceId": "opaque:purview-home-expiryDate-404-action2",
+    "actionIndex": 2,
+    "callerPageHost": "purview.microsoft.com",
+    "callerPathPrefix": "/home",
+    "callerEntryQueryNames": [
+      "tid"
+    ],
+    "historicalOnly": true,
+    "currentAuthenticationProof": false,
+    "currentNativeTenantProof": false,
+    "historicalPrimaryStatus": 404,
+    "historicalPrimaryBodyState": "truncated",
+    "canonicalSourceFiles": [
+      {
+        "repoPath": "specifications/nodoc-purview/specification/openapi.yml",
+        "sha256": "bdfd0187da55757ac94dba524b4634b504d742db8523b5ff87db4c8f10771781"
+      },
+      {
+        "repoPath": "specifications/nodoc-purview/specification/copilot.yml",
+        "sha256": "30f839a77827f151947abf6a60242fc990eb76232f514d129b19b852df87bc3e"
+      },
+      {
+        "repoPath": "specifications/nodoc-purview/specification/compliance_manager.yml",
+        "sha256": "47d82e323b9e92dd697ff2bbb8e09ce932981b1445d127e2d632675e312dc08e"
+      },
+      {
+        "repoPath": "specifications/nodoc-purview/specification/common.yml",
+        "sha256": "c046e80346ac42f1c750bcd59138e6a5cd82cc4aa13d3313c6a2cf8360d68e0e"
+      },
+      {
+        "repoPath": "specifications/nodoc-purview/specification/graph_proxy.yml",
+        "sha256": "5f2bacc1d7eb8958fc5b7799d54fb13f5825322872ad193c0ed531e4b4beb0d4"
+      },
+      {
+        "repoPath": "specifications/nodoc-purview/specification/insider_risk.yml",
+        "sha256": "66826de9ea2d79f60dc2399b1e96e5028e0b8173308b5b87a3b5385b74be8e52"
+      }
+    ],
+    "irmRetainedEvidenceArtifactId": "remaining-five-gap-disposition-20261031",
+    "irmRetainedEvidenceSha256": "7437cccde8348572d2813cfe1aa24b1c9b53a69368a5dfeb11f420dbfb0eac6d"
+  },
+  "bodyPolicy": {
+    "maxResponseBytes": 524288,
+    "ceilingIncreased": false,
+    "exactPrimaryCount": 1,
+    "separatelyAccountedExtras": 4,
+    "perRouteDisposition": [
+      "expected",
+      "observed-or-no-signal",
+      "HTTP-status",
+      "body-complete-or-incomplete",
+      "semantic-status-qualified"
+    ]
+  },
+  "budget": {
+    "recipeActions": 5,
+    "mandatoryNavigation": 1,
+    "total": 6
+  },
+  "authenticationPreflightRequired": true,
+  "exactTargetPinRequired": true,
+  "nativeCachedSelectedTenantPreserved": true,
+  "currentTenantBindingProof": "not established; future owner must verify native selected-tenant match before navigation/driver allocation",
+  "noSyntheticTenantQuery": false,
+  "noTenantSwitch": true,
+  "noApiProbes": true,
+  "noFeatureActivation": true,
+  "noForeignOwnerReuseOrCleanup": true,
+  "liveAuthorized": false,
+  "runtimePrerequisites": "Fresh authenticated selected user, fresh native current-tenant match, and strict exact-target preflight are required before navigation. The private TenantId variable here is identifier input only, not tenant proof or authentication.",
+  "rawRefreshDigest": "73d5a5e92b1fb0e3a5dc9e7b4d2f08a82e4b5335f8d4b4ddd49e5ee9c8de82aa",
+  "resolvedRefreshDigest": "0a636a5442e280a346dd2aa7d1fb4d32857c4f779b9c37ad0328d6f79da5aaa3",
+  "approvalExpiresAt": "2026-10-31T11:26:59.993Z",
+  "rawExecutionDigest": "ec0e54178ec89ed04d7f7a549bd4c97449e205a7e1f21301df8800912ddb85df",
+  "resolvedExecutionDigest": "ab8faf11a4345e8c226554aada3d51580b1a6071259075ec0b606f4c31bd1b08",
+  "executionBindingRecordedAt": "2026-10-31T08:14:00.029Z",
+  "executionBindingScope": "Canonical full executable recipe, including every action/scope/required flag, target/network scope, policy, budgets/capture flags/timeouts and all other recipe fields. Only cyclic knownOperationRefresh.approvalDigest and exact internal resolver digest are excluded; variable bindings remain separately enforced. This records a fresh approval commitment, not a new capture or rewrite of historical execution."
+}

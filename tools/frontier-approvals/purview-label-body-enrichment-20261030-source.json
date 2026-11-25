@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "kind": "known-operation-refresh-approval-source",
+  "status": "proposal-pending-actual-independent-review",
+  "specId": "purview",
+  "createdAt": "2026-10-30T17:32:57.715Z",
+  "plannedAssignmentId": "purview-label-body-enrichment-20261030-01",
+  "newCycleReason": "Actual exact-owned Label GET was passively observed HTTP200 in two preserved Portal captures but bodies are truncated because that backend belongs to Purview. This new owning-spec plan retains only exact observed DLP navigation and passive reload, with a complete-body/schema objective. It is not a blind health replay or novelty claim.",
+  "recipeDestination": "tools/capture-recipes/purview-label-body-enrichment-20261030.json",
+  "primaryCanonicalOperation": {
+    "method": "GET",
+    "host": "purview.microsoft.com",
+    "serverBase": "/apiproxy",
+    "path": "/di/find/Label",
+    "wirePath": "/apiproxy/di/find/Label"
+  },
+  "boundedAdditionalPassivePaths": [
+    "/apiproxy/di/find/FeatureConfiguration",
+    "/apiproxy/purviewplatform/api/v1/insight/GetOverallProtectionStatus"
+  ],
+  "observedUiUrl": "https://purview.microsoft.com/datalossprevention/overview",
+  "privateEvidenceBindings": {
+    "artifactId": "representative-enrichment-provenance-private",
+    "sha256": "b9bd71a55c8c3b763fb07d6da53e92734d8a030220beb6607dbbd524a2994e04",
+    "sourceCaptureSha256": "2c9584c7ca44c0384b2115762ef94adcb03e7552cee481a6ab95ae10d700b7a6",
+    "sourceActionIndex": 5,
+    "evidenceId": "request-307671cd18ea9b27444d"
+  },
+  "nativeTenantPreflightRequired": true,
+  "noTenantSwitch": true,
+  "noApiProbes": true,
+  "noFeatureActivation": true,
+  "budget": {
+    "recipeActions": 5,
+    "mandatoryNavigation": 1,
+    "total": 6
+  },
+  "rawSourceRefreshDigest": "81d337e031dce7f7b3a4d5d51d760ba8349c75ecf72d5c9a19988a270e0dec7d",
+  "resolvedRefreshDigest": "81d337e031dce7f7b3a4d5d51d760ba8349c75ecf72d5c9a19988a270e0dec7d",
+  "approvalExpiresAt": "2026-10-31T05:32:57.717Z",
+  "policyBindings": [
+    {
+      "path": "PORTAL_DISCOVERY_AGENT_PROMPT.md",
+      "sha256": "340f089b36357a4a65e993397ffd6e60d88c4d915b6e5ecb7244aee84a97e39c",
+      "phase": "Draft snapshot only; actual root runtime authorization must bind final reviewed runtime bytes."
+    },
+    {
+      "path": "AGENT_DISCOVERY_RUNBOOK.md",
+      "sha256": "056fea096f7cd354429f606b6d7ad99e05f7f48ef019d56bc1dae629cdab4113",
+      "phase": "Draft snapshot only; actual root runtime authorization must bind final reviewed runtime bytes."
+    },
+    {
+      "path": "AGENT_DISCOVERY_PLAYBOOK.md",
+      "sha256": "ceccace5f3e9ac18d8c5743dab23973b5aab4cfe3160c1f6a645581469ddc3b9",
+      "phase": "Draft snapshot only; actual root runtime authorization must bind final reviewed runtime bytes."
+    },
+    {
+      "path": "tools/portal-discovery-model-policy.mjs",
+      "sha256": "5d4b65b60d21a5b7431828b41694c49e85c58fb1497a2c3fb1cf53483066c346",
+      "phase": "Draft snapshot only; actual root runtime authorization must bind final reviewed runtime bytes."
+    }
+  ]
+}

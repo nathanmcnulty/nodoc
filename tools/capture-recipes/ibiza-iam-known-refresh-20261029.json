@@ -1,0 +1,97 @@
+{
+  "portal": "Entra IAM",
+  "url": "https://entra.microsoft.com/#view/Microsoft_AAD_UsersAndTenants/UserManagementMenuBlade/~/AllUsers/menuId/",
+  "pageTarget": {
+    "matchHosts": [
+      "entra.microsoft.com"
+    ],
+    "matchPathPrefixes": [
+      "/"
+    ]
+  },
+  "matchHosts": [
+    "main.iam.ad.ext.azure.com"
+  ],
+  "matchPathPrefixes": [
+    "/api"
+  ],
+  "inspectionPolicy": {
+    "mode": "observe-only",
+    "prohibitedControlPatterns": [
+      "Add",
+      "Create",
+      "Delete",
+      "Export",
+      "Remove",
+      "Save",
+      "Submit",
+      "Update",
+      "Purchase",
+      "Activate",
+      "Start trial"
+    ]
+  },
+  "captureScripts": false,
+  "postActionSettleMs": 6000,
+  "settleMs": 8000,
+  "maxActions": 6,
+  "actions": [
+    {
+      "type": "navigate",
+      "value": "https://entra.microsoft.com/#view/Microsoft_AAD_UsersAndTenants/UserManagementMenuBlade/~/AllUsers/menuId/",
+      "required": true,
+      "highValue": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "2000",
+      "required": true
+    },
+    {
+      "type": "reload",
+      "value": "entra-all-users",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "6000",
+      "required": true
+    },
+    {
+      "type": "capture",
+      "value": "permissions-response-example",
+      "required": true
+    }
+  ],
+  "knownOperationRefresh": {
+    "status": "active",
+    "method": "GET",
+    "host": "main.iam.ad.ext.azure.com",
+    "routes": [
+      "/api/Permissions"
+    ],
+    "state": "Entra IAM bounded passive representative states from tools/capture-recipes/entra-iam-permissions-response-example-frontier.json",
+    "actionIndexes": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "approvalExpiresAt": "2026-10-31T08:00:00.000Z",
+    "variableBindingsDigest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "documentationObjectives": [
+      "freshness",
+      "health",
+      "schema-evidence",
+      "usage-observation",
+      "error-example"
+    ],
+    "evidenceIds": [
+      "retained-ibiza-iam-primary-witness",
+      "checked-in-ui-state-entra-iam-permissions-response-example-frontier"
+    ],
+    "approvalArtifact": "tools/frontier-approvals/ibiza-iam-refresh-20261029.json",
+    "approvalDigest": "195097073a29b3e4659097e43b1dba7c3f17d36d9e077247c6d0a122e7e84d33"
+  }
+}

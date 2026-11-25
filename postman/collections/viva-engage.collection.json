@@ -10,7 +10,7 @@
                     "request": {
                         "name": "Execute Viva Engage admin GraphQL operations",
                         "description": {
-                            "content": "Same-origin persisted GraphQL endpoint exposed by the Viva Engage web application.\n\nThe authenticated admin landing capture observed 27 unique persisted operations on this\nroute, including `CurrentUserClients`, `FeatureAccessSettingsClients`,\n`AdminFeatureAccessSettingsClients`, `TenantConfigurationAndRoles`, and\n`RealtimeConnectionSettingsClients`.\n\nFollow-up direct-route captures on `/main/admin/segmentation`,\n`/main/admin/external-networks-settings`, and\n`/main/admin/setup-external-network` added route-specific operations such as\n`NetworkSegmentationQueryClients` and `ExternalNetworksAdminSettingsClients`.\n\nRepeated admin captures also observed `UniversalCreateButtonQueryClients`, which returned\ncreate-capability flags and dismissable prompt state for the shell `Create new`\naffordance.\n\nA no-submit probe of a visible access-code control such as `Generate code` or\n`Redeem code` stayed on `/main/admin/setup-external-network` and did not emit a\ndistinct write or redemption request before the next user-input step.\n\nThe same authenticated admin shell also issued `RealtimeConnectionSettingsClients`, which\nreturned a tenant- and user-scoped `cometdBaseUrl` that the browser immediately used for\ntransient `*.rt.yammer.com` Bayeux relay traffic.\n",
+                            "content": "Same-origin persisted GraphQL endpoint exposed by the Viva Engage web application.\n\nThe authenticated admin landing capture observed 27 unique persisted operations on this\nroute, including `CurrentUserClients`, `FeatureAccessSettingsClients`,\n`AdminFeatureAccessSettingsClients`, `TenantConfigurationAndRoles`, and\n`RealtimeConnectionSettingsClients`.\n\nFollow-up direct-route captures on `/main/admin/segmentation`,\n`/main/admin/external-networks-settings`, and\n`/main/admin/setup-external-network` added route-specific operations such as\n`NetworkSegmentationQueryClients` and `ExternalNetworksAdminSettingsClients`.\n\nRepeated admin captures also observed `UniversalCreateButtonQueryClients`, which returned\ncreate-capability flags and dismissable prompt state for the shell `Create new`\naffordance.\n\nA no-submit probe of a visible access-code control such as `Generate code` or\n`Redeem code` stayed on `/main/admin/setup-external-network` and did not emit a\ndistinct write or redemption request before the next user-input step.\n\nThe same authenticated admin shell also issued `RealtimeConnectionSettingsClients`, which\nreturned a tenant- and user-scoped `cometdBaseUrl` that the browser immediately used for\ntransient `*.rt.yammer.com` Bayeux relay traffic.\n\nThe 2026-10-29 landing/reload refresh retained complete bodies for 28\npersisted operation names. The approved `TenantConfigurationAndRoles`\nquery again returned HTTP 200 without GraphQL errors. The client emitted\na different persisted hash for the already documented\n`UniversalCreateButtonQuery`; the historical request example is retained.\n",
                             "type": "text/plain"
                         },
                         "url": {
@@ -91,7 +91,7 @@
                                     "value": "application/json"
                                 }
                             ],
-                            "body": "{\n  \"data\": {\n    \"key_0\": 2498.316407489126,\n    \"key_1\": true\n  },\n  \"errors\": [\n    {\n      \"message\": \"string\",\n      \"path\": [\n        \"string\",\n        \"string\"\n      ],\n      \"locations\": [\n        {\n          \"line\": 5859,\n          \"column\": 1859\n        },\n        {\n          \"line\": 5911,\n          \"column\": 8558\n        }\n      ],\n      \"extensions\": {\n        \"key_0\": true,\n        \"key_1\": 6834\n      }\n    },\n    {\n      \"message\": \"string\",\n      \"path\": [\n        \"string\",\n        \"string\"\n      ],\n      \"locations\": [\n        {\n          \"line\": 8505,\n          \"column\": 7649\n        },\n        {\n          \"line\": 1012,\n          \"column\": 6426\n        }\n      ],\n      \"extensions\": {\n        \"key_0\": false,\n        \"key_1\": 9400\n      }\n    }\n  ],\n  \"extensions\": {\n    \"key_0\": \"string\"\n  }\n}",
+                            "body": "{\n  \"data\": {\n    \"settings\": {\n      \"adminSettings\": {\n        \"viewerCanDeleteUser\": false,\n        \"viewerCanHideUsersForNetworkInDiscovery\": false,\n        \"viewerCanManageComplianceData\": false,\n        \"viewerCanManageMultiTenantOrganizationPolicy\": false,\n        \"viewerCanManageViewOnlyModeUsers\": false\n      },\n      \"analytics\": {\n        \"viewerCanAccessAdminSettings\": false,\n        \"viewerCanEditCampaignAnalyticsSettings\": false,\n        \"viewerCanEditLeadershipAnalyticsSettings\": false,\n        \"viewerCanEditNetworkActivityAnalyticsSettings\": false,\n        \"viewerCanEditNetworkQuestionAnalyticsSettings\": false\n      },\n      \"leader\": {\n        \"viewerCanEditSettings\": false\n      },\n      \"networkQuestion\": {\n        \"viewerCanEditNetworkQuestionsOnlyMode\": false,\n        \"viewerCanEditSettings\": false\n      }\n    }\n  }\n}",
                             "cookie": [],
                             "_postman_previewlanguage": "json"
                         },
@@ -264,36 +264,6 @@
                                                 "auth": null
                                             },
                                             "response": [
-                                                {
-                                                    "id": "a28c7739-9a3c-4109-84ca-6c3a23c20eb2",
-                                                    "name": "Token-helper response observed, but response content was not retained by the capture after the browser aborted the request.",
-                                                    "originalRequest": {
-                                                        "url": {
-                                                            "protocol": "https",
-                                                            "path": [
-                                                                "api",
-                                                                "v1",
-                                                                "oauth2",
-                                                                "aad_access_token"
-                                                            ],
-                                                            "host": [
-                                                                "api",
-                                                                "engage",
-                                                                "cloud",
-                                                                "microsoft"
-                                                            ],
-                                                            "query": [],
-                                                            "variable": []
-                                                        },
-                                                        "method": "GET",
-                                                        "body": {}
-                                                    },
-                                                    "status": "OK",
-                                                    "code": 200,
-                                                    "header": [],
-                                                    "cookie": [],
-                                                    "_postman_previewlanguage": "text"
-                                                },
                                                 {
                                                     "id": "8ea6b2f6-c7f4-4cc4-8b3e-025f6c1f001b",
                                                     "name": "Authentication is required or the browser-issued bearer token is no longer valid.",

@@ -1,0 +1,111 @@
+{
+  "schemaVersion": 1,
+  "kind": "known-operation-refresh-approval-source",
+  "status": "proposal-pending-independent-xhigh-review-and-root-registration",
+  "specId": "security-copilot",
+  "createdAt": "2026-10-31T07:27:00.876Z",
+  "plannedAssignmentId": "security-copilot-purview-loki-shared-client-20261031-01",
+  "recipeDestination": "tools/capture-recipes/security-copilot-purview-loki-shared-client-20261031.json",
+  "captureRole": {
+    "model": "gpt-6-luna",
+    "reasoning": "low"
+  },
+  "reviewRequirement": {
+    "model": "gpt-6-luna",
+    "reasoning": "xhigh",
+    "status": "not-performed"
+  },
+  "newCycleReason": "A fresh bounded response-body objective is prepared for the exact known GET using the observed Purview Data Lifecycle root overview URL template. Earlier action evidence is historical only; native tenant/auth proof must be freshly established before any future run.",
+  "primaryCanonicalOperation": {
+    "specId": "security-copilot",
+    "method": "GET",
+    "host": "ecs.office.com",
+    "basePath": "/",
+    "canonicalPath": "/config/v1/LokiService/1.0.0.0",
+    "wirePath": "/config/v1/LokiService/1.0.0.0",
+    "operationId": "SecurityCopilotPortal.Store.GetLokiServiceClientConfiguration",
+    "sourceFile": "specifications/nodoc-security-copilot/specification/openapi.yml",
+    "sourceFileSha256": "b43cfe283b2da3009c68d5e70662b7604c4a5c421c77e651a52408267dc33a65",
+    "observedCaller": "Purview Data Lifecycle",
+    "opaqueEvidenceId": "opaque:purview-loki-action-5",
+    "actionIndex": 5
+  },
+  "additionalPassiveOperations": [],
+  "observedUiUrlTemplate": "https://purview.microsoft.com/datalifecyclemanagement/overview?tid=${TenantId}",
+  "sourceCallerPortal": "purview-data-lifecycle",
+  "canonicalBackendOwner": "security-copilot",
+  "callerRelation": "The exact ECS LokiService client-configuration GET is declared under Security Copilot but historically emitted by the Purview Data Lifecycle shell. This records the caller/backend relationship only and does not establish Security Copilot workflow, entitlement, or feature state.",
+  "privateEvidenceBindings": {
+    "assessmentArtifactId": "ten-candidate-prerequisites-20261030",
+    "assessmentSha256": "08dafb4c8cc0045568eb8fb999ab66bc78b365594915c96c7794ca1e3066168d",
+    "preferredLifecycle": "purview-01",
+    "primaryOpaqueEvidenceId": "opaque:purview-loki-action-5",
+    "actionIndex": 5,
+    "callerPageHost": "purview.microsoft.com",
+    "callerPathPrefix": "/datalifecyclemanagement/overview",
+    "callerEntryQueryNames": [
+      "tid"
+    ],
+    "historicalOnly": true,
+    "currentAuthenticationProof": false,
+    "currentNativeTenantProof": false,
+    "historicalPrimaryStatus": null,
+    "historicalPrimaryBodyState": null,
+    "canonicalSourceFiles": [
+      {
+        "repoPath": "specifications/nodoc-security-copilot/specification/openapi.yml",
+        "sha256": "b43cfe283b2da3009c68d5e70662b7604c4a5c421c77e651a52408267dc33a65"
+      }
+    ]
+  },
+  "bodyPolicy": {
+    "maxResponseBytes": 524288,
+    "ceilingIncreased": false,
+    "exactPrimaryCount": 1,
+    "separatelyAccountedExtras": 0,
+    "perRouteDisposition": [
+      "expected",
+      "observed-or-no-signal",
+      "HTTP-status",
+      "body-complete-or-incomplete",
+      "semantic-status-qualified"
+    ]
+  },
+  "budget": {
+    "recipeActions": 5,
+    "mandatoryNavigation": 1,
+    "total": 6,
+    "countedCaptureActions": 6,
+    "maximumSeparatePreflightAlignmentNavigations": 1,
+    "physicalSetupAndCaptureCountsReportedSeparately": true
+  },
+  "authenticationPreflightRequired": true,
+  "exactTargetPinRequired": true,
+  "nativeCachedSelectedTenantPreserved": true,
+  "currentTenantBindingProof": "not established; future owner must verify native selected-tenant match before navigation/driver allocation",
+  "noSyntheticTenantQuery": false,
+  "noTenantSwitch": true,
+  "noApiProbes": true,
+  "noFeatureActivation": true,
+  "noForeignOwnerReuseOrCleanup": true,
+  "liveAuthorized": false,
+  "runtimePrerequisites": "Fresh authenticated selected user, fresh native current-tenant match, and strict exact-target preflight are required before navigation. The private TenantId variable here is identifier input only, not tenant proof or authentication. The fresh owner starts at the unbound Purview origin. Require its native Home URL to carry the matching selected tid before any bound navigation. Only then may the supported preflight bootstrap align the SAME target from exact /home to the already observed /datalifecyclemanagement/overview entry. Existing alignment validates selected tenant before and after Page.navigate. Missing/mismatched native tenant or target proof blocks; do not synthesize a tid query to obtain that proof.",
+  "rawRefreshDigest": "0b558745876e42680ecfe9eb5cb45bdebf358e0f56ece5f4a251eb546a82c0d8",
+  "resolvedRefreshDigest": "82a8b2f1740dff2ed8fe1c1cd9d353904320c27491265807b3e1b8c5d1462f63",
+  "approvalExpiresAt": "2026-10-31T11:26:59.993Z",
+  "rawExecutionDigest": "867fe464a5fc32450e7199772741f9c7b172bf1e1dd6713dae94ac5531983872",
+  "resolvedExecutionDigest": "9f3d8ae15789667ab8205e5fba16fb660ddc12d6364e1eb7a13ee67bf976b59b",
+  "executionBindingRecordedAt": "2026-10-31T08:43:31.326Z",
+  "executionBindingScope": "Canonical full executable recipe, including every action/scope/required flag, target/network scope, policy, budgets/capture flags/timeouts and all other recipe fields. Only cyclic knownOperationRefresh.approvalDigest and exact internal resolver digest are excluded; variable bindings remain separately enforced. This records a fresh approval commitment, not a new capture or rewrite of historical execution.",
+  "preflightBootstrap": {
+    "neutralOwnerEntry": "https://purview.microsoft.com",
+    "nativeBootstrapPath": "/home",
+    "nativeSelectedTenantMatchRequiredBeforeBoundNavigation": true,
+    "exactTargetIdentityMustRemainUnchanged": true,
+    "alignmentEntryUrlTemplate": "https://purview.microsoft.com/datalifecyclemanagement/overview?tid=${TenantId}",
+    "maximumPreflightAlignmentNavigations": 1,
+    "countsSeparateFromCaptureActionResults": true,
+    "noParentRouteGuess": true,
+    "noTrialActivationOrTenantSwitch": true
+  }
+}

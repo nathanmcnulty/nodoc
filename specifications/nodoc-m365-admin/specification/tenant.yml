@@ -82,6 +82,24 @@ paths:
         Retrieve billing accounts associated with the tenant, integrated
         with the admin portal shell.
       operationId: Tenant.GetBillingAccounts
+      x-nodoc-live-capture:
+        source: authenticated Microsoft 365 admin center passive representative states
+        browsedPages:
+          - Microsoft 365 admin center
+      x-nodoc-operation-context:
+        surface: Microsoft 365 admin center
+        workflows:
+          - Observe native requests during the approved passive representative portal states.
+        availability:
+          level: user-context
+          notes:
+            - One authenticated portal session; standalone execution, parameter requiredness, effective grants and minimum roles are not established.
+        provenance:
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - "GET admin.cloud.microsoft/admin/api/tenant/billingAccountsWithShell; HTTP 200; action 18; observed 2026-10-29T20:34:53.796Z; complete response (privately hash-verified)."
+              - Current complete response shape was observed in the captured portal session; no broader operation or state coverage is implied.
       tags: [Tenant]
       responses:
         '200':
@@ -89,9 +107,12 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: common.yml#/components/schemas/BillingAccountWithShell
+                oneOf:
+                  - type: array
+                    items:
+                      $ref: common.yml#/components/schemas/BillingAccountWithShell
+                  - type: object
+                    additionalProperties: true
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 

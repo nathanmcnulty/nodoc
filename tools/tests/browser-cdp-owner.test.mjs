@@ -20,10 +20,11 @@ import {
   profileDigest,
 } from "../browser-cdp-owner.mjs";
 
-const root = "C:\\Users\\operator\\AppData\\Local\\nodoc-cdp";
-const profilePath = `${root}\\profiles\\m365-admin`;
-const manifestPath = `${root}\\manifests\\m365-admin-9222.json`;
-const binaryPath = "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe";
+const root = join(tmpdir(), "nodoc-cdp-owner-tests");
+const profilePath = join(root, "profiles", "m365-admin");
+const manifestPath = join(root, "manifests", "m365-admin-9222.json");
+const binaryPath = join(tmpdir(), "nodoc cdp mock", "msedge.exe");
+const localAppData = join(tmpdir(), "nodoc-cdp-owner-localappdata");
 const endpoint = "http://127.0.0.1:9222";
 const ownerToken = "12345678-1234-1234-1234-123456789abc";
 
@@ -59,8 +60,8 @@ function options(overrides = {}) {
     profileKey: "m365-admin",
     portalUrl: "https://admin.cloud.microsoft/",
     ownerRoot: root,
-    cwd: "C:\\work\\nodoc",
-    env: { LOCALAPPDATA: "C:\\Users\\operator\\AppData\\Local" },
+    cwd: process.cwd(),
+    env: { LOCALAPPDATA: localAppData },
     platform: "win32",
     ...overrides,
   };
@@ -82,8 +83,8 @@ function assertOwnerReadyNextStep(nextStep) {
 test("rejects default profile keys and normal browser data roots", () => {
   assert.throws(() => validateProfileKey("Default"), (error) => error.code === "default-profile-rejected");
   assert.throws(() => assertDedicatedProfilePath(
-    "C:\\Users\\operator\\AppData\\Local\\Microsoft\\Edge\\User Data",
-    { ownerRoot: root, env: { LOCALAPPDATA: "C:\\Users\\operator\\AppData\\Local" } },
+    join(localAppData, "Microsoft", "Edge", "User Data"),
+    { ownerRoot: root, env: { LOCALAPPDATA: localAppData } },
   ), (error) => error.code === "default-profile-rejected");
 });
 
@@ -99,7 +100,7 @@ test("resolves Edge before Chrome deterministically", async () => {
     pathExists: async (path) => path.endsWith("msedge.exe") || path.endsWith("chrome.exe"),
   });
   assert.equal(result.product, "Edge");
-  assert.equal(result.path, "C:\\PF86\\Microsoft\\Edge\\Application\\msedge.exe");
+  assert.equal(result.path, join("C:\\PF86", "Microsoft\\Edge\\Application\\msedge.exe"));
 });
 
 test("fails closed when the fixed port is occupied by an unknown process", async () => {
@@ -236,15 +237,22 @@ test("treats an exact or suspicious profile reference as in-use", () => {
   assert.equal(isBrowserProcessUsingProfile({
     commandLine: `"${binaryPath}" --user-data-dir="${profilePath}"`,
   }, profilePath), true);
-  assert.equal(isBrowserProcessUsingProfile({
-    commandLine: `"${binaryPath}" --user-data-dir="${profilePath}-other"`,
-  }, profilePath), true);
-  assert.equal(isBrowserProcessUsingProfile({
-    commandLine: `"${binaryPath}" --user-data-dir="C:\\other-profile"`,
-  }, profilePath), false);
-  assert.equal(isBrowserProcessUsingProfile({
-    commandLine: `"${binaryPath}" --user-data-dir="${profilePath}`,
-  }, profilePath), true);
+  if (process.platform === "win32") {
+    // Raw malformed/prefix matching normalizes Windows separators only.
+    assert.equal(isBrowserProcessUsingProfile({
+      commandLine: `"${binaryPath}" --user-data-dir="${profilePath}-other"`,
+    }, profilePath), true);
+    assert.equal(isBrowserProcessUsingProfile({
+      commandLine: `"${binaryPath}" --user-data-dir="C:\\other-profile"`,
+    }, profilePath), false);
+    assert.equal(isBrowserProcessUsingProfile({
+      commandLine: `"${binaryPath}" --user-data-dir="${profilePath}`,
+    }, profilePath), true);
+  } else {
+    assert.equal(isBrowserProcessUsingProfile({
+      commandLine: `"${binaryPath}" --user-data-dir="/other-profile"`,
+    }, profilePath), false);
+  }
 });
 
 test("launch retries a transient zero-candidate handoff before binding the exact owner", async () => {
@@ -434,7 +442,7 @@ test("constructs a loopback fixed-port dedicated-profile launch command", () => 
     port: 9222,
     portalUrl: "https://admin.cloud.microsoft/",
     ownerToken,
-    env: { LOCALAPPDATA: "C:\\Users\\operator\\AppData\\Local" },
+    env: { LOCALAPPDATA: localAppData },
   });
   assert.equal(launch.command, binaryPath);
   assert.deepEqual(launch.args, [

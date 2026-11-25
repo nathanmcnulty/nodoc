@@ -1,0 +1,100 @@
+{
+  "portal": "Purview",
+  "url": "https://purview.microsoft.com/home?tid=${TenantId}",
+  "pageTarget": {
+    "matchHosts": [
+      "purview.microsoft.com"
+    ],
+    "matchPathPrefixes": [
+      "/home"
+    ],
+    "allowedEntryQueryParameters": [
+      "tid"
+    ]
+  },
+  "matchHosts": [
+    "purview.microsoft.com"
+  ],
+  "matchPathPrefixes": [
+    "/apiproxy/di/find/ProtectionCompliancePolicy",
+    "/apiproxy/purviewplatform/api/v1/insight/GetOverallProtectionStatus",
+    "/apiproxy/dgs/item/GetTypesV2",
+    "/apiproxy/purviewplatform/api/v1/insight/GetTypeAggregatesByWorkload"
+  ],
+  "inspectionPolicy": {
+    "mode": "observe-only",
+    "prohibitedControlPatterns": [
+      "Add",
+      "Create",
+      "Delete",
+      "Export",
+      "Remove",
+      "Save",
+      "Submit",
+      "Update",
+      "Purchase",
+      "Activate",
+      "Start trial"
+    ]
+  },
+  "captureScripts": false,
+  "postActionSettleMs": 6000,
+  "settleMs": 8000,
+  "maxActions": 6,
+  "actions": [
+    {
+      "type": "navigate",
+      "value": "https://purview.microsoft.com/home?tid=${TenantId}",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "6000",
+      "required": true
+    },
+    {
+      "type": "reload",
+      "value": "purview-owned-home-policy-complete-body",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "8000",
+      "required": true
+    },
+    {
+      "type": "capture",
+      "value": "purview-owned-home-policy-complete-body",
+      "required": true
+    }
+  ],
+  "knownOperationRefresh": {
+    "status": "active",
+    "method": "GET",
+    "host": "purview.microsoft.com",
+    "routes": [
+      "/apiproxy/di/find/ProtectionCompliancePolicy"
+    ],
+    "actionIndexes": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "state": "Fresh owner-matched Purview Home response-body objective for the exact existing ProtectionCompliancePolicy GET; three separately accounted known GET extras. Retained action evidence belongs to the Portal caller and same-owner bodies are only bootstrap evidence. No trial, activation, direct API probe or tenant change.",
+    "documentationObjectives": [
+      "schema-evidence",
+      "health",
+      "usage-observation"
+    ],
+    "evidenceIds": [
+      "reviewed-portal-home-actions-0-2",
+      "owner-matched-purview-home-body-gap-20261030"
+    ],
+    "approvalExpiresAt": "2026-10-31T05:32:57.717Z",
+    "variableBindingsDigest": "8b8e73b61a28c8be7ab1756d51ae796571279c94e70ffc4e8be35661de37ae65",
+    "approvalArtifact": "tools/frontier-approvals/purview-home-body-enrichment-20261030.json",
+    "approvalDigest": "388c275b5f4b23e6fb3137893387dabfd381ad6146d331fead4fb80449d757f3"
+  }
+}

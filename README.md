@@ -9,6 +9,10 @@ nodoc is a project created by Dolphin Labs to enable deeper understanding and ut
 
 ## Coverage
 
+Maintainers can inventory operation freshness and reuse retained evidence with
+the [portfolio refresh workflow](REFRESH_WORKFLOW.md). See the
+[current refresh results](REFRESH_STATUS.md) for observed coverage and remaining gaps.
+
 The project currently publishes the following API definitions:
 
 | API | Ops | Access model | Site page | Checked-in Postman collection |
@@ -16,25 +20,25 @@ The project currently publishes the following API definitions:
 | Defender XDR | 585 | Portal session cookie (`sccauth`) | [Browse](https://nodoc.nathanmcnulty.com/defender) | `postman/collections/defender.collection.json` |
 | Defender XDR (MTO) | 19 | Defender session + MTO tenant/XSRF routing context | [Browse](https://nodoc.nathanmcnulty.com/defender-mto) | `postman/collections/defender-mto.collection.json` |
 | Microsoft Graph Research | 2 | Delegated Microsoft Graph bearer token | [Browse](https://nodoc.nathanmcnulty.com/microsoft-graph-research) | `postman/collections/graph-research.collection.json` |
-| M365 Admin | 213 | Portal session + custom admin headers | [Browse](https://nodoc.nathanmcnulty.com/m365-admin) | `postman/collections/m365-admin.collection.json` |
-| Exchange | 61 | Legacy portal cookie or current admin-shell bearer token | [Browse](https://nodoc.nathanmcnulty.com/exchange) | `postman/collections/exchange-beta.collection.json` |
-| SharePoint | 41 | Portal session cookie (`FedAuth`) + SharePoint form digest | [Browse](https://nodoc.nathanmcnulty.com/sharepoint-admin) | `postman/collections/sharepoint-admin.collection.json` |
-| Teams | 99 | Portal bearer token + same-origin portal context | [Browse](https://nodoc.nathanmcnulty.com/teams) | `postman/collections/teams.collection.json` |
+| M365 Admin | 320 | Portal session + custom admin headers | [Browse](https://nodoc.nathanmcnulty.com/m365-admin) | `postman/collections/m365-admin.collection.json` |
+| Exchange | 62 | Legacy portal cookie or current admin-shell bearer token | [Browse](https://nodoc.nathanmcnulty.com/exchange) | `postman/collections/exchange-beta.collection.json` |
+| SharePoint | 43 | Portal session cookie (`FedAuth`) + SharePoint form digest | [Browse](https://nodoc.nathanmcnulty.com/sharepoint-admin) | `postman/collections/sharepoint-admin.collection.json` |
+| Teams | 100 | Portal bearer token + same-origin portal context | [Browse](https://nodoc.nathanmcnulty.com/teams) | `postman/collections/teams.collection.json` |
 | Viva Engage | 5 | MSAL PKCE bearer token + same-origin GraphQL | [Browse](https://nodoc.nathanmcnulty.com/viva-engage) | `postman/collections/viva-engage.collection.json` |
-| M365 Apps Config | 23 | Portal bearer token + diagnostic headers | [Browse](https://nodoc.nathanmcnulty.com/m-365-apps-config) | `postman/collections/m365-apps-config.collection.json` |
+| M365 Apps Config | 24 | Portal bearer token + diagnostic headers | [Browse](https://nodoc.nathanmcnulty.com/m-365-apps-config) | `postman/collections/m365-apps-config.collection.json` |
 | M365 Apps Services | 9 | Portal bearer token + diagnostic headers | [Browse](https://nodoc.nathanmcnulty.com/m-365-apps-services) | `postman/collections/m365-apps-services.collection.json` |
 | M365 Apps Inventory | 27 | Portal bearer token + diagnostic headers | [Browse](https://nodoc.nathanmcnulty.com/m-365-apps-inventory) | `postman/collections/m365-apps-inventory.collection.json` |
 | Intune Autopatch | 53 | Portal bearer token + x-ms portal headers | [Browse](https://nodoc.nathanmcnulty.com/intune-autopatch) | `postman/collections/intune-autopatch.collection.json` |
 | Intune Portal | 5 | Portal bearer token + same-origin portal context | [Browse](https://nodoc.nathanmcnulty.com/intune-portal) | `postman/collections/intune-portal.collection.json` |
-| Power Platform | 244 | Portal bearer tokens + service-specific audiences | [Browse](https://nodoc.nathanmcnulty.com/power-platform) | `postman/collections/power-platform.collection.json` |
-| Purview | 124 | Portal session cookie (`sccauth`) | [Browse](https://nodoc.nathanmcnulty.com/purview) | `postman/collections/purview.collection.json` |
+| Power Platform | 248 | Portal bearer tokens + service-specific audiences | [Browse](https://nodoc.nathanmcnulty.com/power-platform) | `postman/collections/power-platform.collection.json` |
+| Purview | 136 | Portal session cookie (`sccauth`) | [Browse](https://nodoc.nathanmcnulty.com/purview) | `postman/collections/purview.collection.json` |
 | Purview Portal | 8 | Portal session cookie (`sccauth`) + same-origin portal context | [Browse](https://nodoc.nathanmcnulty.com/purview-portal) | `postman/collections/purview-portal.collection.json` |
-| Security Copilot | 32 | Portal bearer tokens + workspace context | [Browse](https://nodoc.nathanmcnulty.com/security-copilot) | `postman/collections/security-copilot.collection.json` |
+| Security Copilot | 42 | Portal bearer tokens + workspace context | [Browse](https://nodoc.nathanmcnulty.com/security-copilot) | `postman/collections/security-copilot.collection.json` |
 | Entra IAM | 286 | Delegated OAuth2 + `X-Ms-Client-Request-Id` | [Browse](https://nodoc.nathanmcnulty.com/entra-iam) | `postman/collections/entra-iam.collection.json` |
 | Entra PIM | 16 | Azure AD bearer token | [Browse](https://nodoc.nathanmcnulty.com/entra-pim) | `postman/collections/entra-pim.collection.json` |
-| Entra IGA | 17 | Azure AD bearer token | [Browse](https://nodoc.nathanmcnulty.com/entra-iga) | `postman/collections/entra-iga.collection.json` |
+| Entra IGA | 13 | Azure AD bearer token | [Browse](https://nodoc.nathanmcnulty.com/entra-iga) | `postman/collections/entra-iga.collection.json` |
 | Entra IDGov | 17 | Azure AD bearer token | [Browse](https://nodoc.nathanmcnulty.com/entra-id-gov) | `postman/collections/entra-idgov.collection.json` |
-| Entra B2C | 6 | Azure AD bearer token + `tenantId` context | [Browse](https://nodoc.nathanmcnulty.com/entra-b-2-c) | `postman/collections/entra-b2c.collection.json` |
+| Entra B2C | 7 | Azure AD bearer token + `tenantId` context | [Browse](https://nodoc.nathanmcnulty.com/entra-b-2-c) | `postman/collections/entra-b2c.collection.json` |
 
 ## Getting started
 

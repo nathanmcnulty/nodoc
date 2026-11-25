@@ -5,13 +5,37 @@ paths:
         description: "Business App Platform resource provider"
     get:
       operationId: BusinessAppPlatform_get_providers_Microsoft_BusinessAppPlatform_environmentGroups
+      x-nodoc-operation-context:
+        surface: Power Platform admin center
+        workflows:
+          - Observe native requests during approved passive representative portal states.
+        availability:
+          level: user-context
+          notes:
+            - One authenticated portal session; standalone execution, parameter requiredness, effective grants and minimum roles are not established.
+        provenance:
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - GET api.bap.microsoft.com/providers/Microsoft.BusinessAppPlatform/environmentGroups; HTTP 200; action 4; observed 2026-10-29T21:57:55.756Z; complete response privately hash-verified.
+              - This specific native GET returned a complete HTTP200 response after the approved passive reload; it supports scoped type evidence only.
+              - The broader bounded run retained an initial navigation/accounting gap. Product availability, grants, requiredness, minimum roles and standalone execution are not established.
+          - source: authenticated-portal-capture-20261030
+            confidence: high
+            notes:
+              - Exact wire GET api.bap.microsoft.com/providers/Microsoft.BusinessAppPlatform/environmentGroups matched the existing canonical route /providers/Microsoft.BusinessAppPlatform/environmentGroups; concrete query values and response values are withheld.
+              - Action 5 at 2026-10-30T11:42:18.940Z; evidence request-7b8a7e03cbd5796c0994; HTTP 200 complete response privately verified.
+              - Action 5 at 2026-10-30T11:42:18.660Z; evidence request-8637487e4fa520ba7f06; HTTP 200 complete response privately verified.
+              - The retained canonical /home entry and existing environments state close the prior initial-navigation accounting gap. The prior complete observations with missing action 0 remain historical and are not relabeled.
+              - Two complete HTTP 200 observations represent one canonical environment-groups operation. Existing collection and EnvironmentGroup property types were corroborated without copying tenant, group, identity or feature values; no schema delta is asserted.
+              - JSON string types remain strings, including createdTime. No date format, enum, requiredness, write safety, current feature activation or grant is established by the observed types.
+              - Only this primary operation is refreshed here. The earlier broader 2026-10-29 observations remain scoped historical evidence; no request was authored or replayed and no tenant setting was changed.
+              - All required actions were accounted in this new reviewed remedy. This is scoped operation evidence; broader spec freshness, product health, standalone execution, effective permissions, consent, minimum roles and least privilege remain unverified.
       summary: "GET /providers/Microsoft.BusinessAppPlatform/environmentGroups"
       x-nodoc-live-capture:
-        source: "authenticated Power Platform admin center"
+        source: Observe-only gap remediation 2026-10-30; primary HTTP 200 observation(s)
         browsedPages:
-          - "https://admin.powerplatform.microsoft.com/deployment/overview"
-          - "https://admin.powerplatform.microsoft.com/deployment/pipelines"
-          - "https://admin.powerplatform.microsoft.com/deployment/settings"
+          - Power Platform admin center > Home > Environments
       tags:
         - BusinessAppPlatform
       parameters:
@@ -30,6 +54,23 @@ paths:
       responses:
         '200':
           description: "200 captured response"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvironmentGroupCollectionResponse'
+              examples:
+                syntheticRefresh:
+                  summary: Synthetic values illustrating an observed response shape; not a captured response.
+                  description: Based on passive portal observation 2026-10-29T21:57:55.756Z, evidence request-79ce7b87e058edef7cc1. Scalar values are synthesized; this example illustrates one observed shape.
+                  value:
+                    value:
+                      - createdBy:
+                          id: example
+                          type: example
+                        createdTime: example
+                        description: example
+                        displayName: example
+                        id: example
   /providers/Microsoft.BusinessAppPlatform/environmentLocations:
     servers:
       - url: "https://api.bap.microsoft.com"
@@ -41,8 +82,8 @@ paths:
         source: "authenticated Power Platform admin center"
         browsedPages:
           - "https://admin.powerplatform.microsoft.com/billing/licenses/powerPages/overview"
-          - "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/Share%20My%20Labs%20(default)/portals"
-          - "https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub"
+          - "https://admin.powerplatform.microsoft.com/environments/{id}/{label}/portals"
+          - "https://admin.powerplatform.microsoft.com/environments/environment/Default-{id}/hub"
       tags:
         - BusinessAppPlatform
       parameters:
@@ -100,9 +141,9 @@ paths:
       x-nodoc-live-capture:
         source: "authenticated Power Platform admin center"
         browsedPages:
-          - "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/applications"
-          - "https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub"
-          - "https://admin.powerplatform.microsoft.com/manage/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/applications"
+          - "https://admin.powerplatform.microsoft.com/environments/{id}/applications"
+          - "https://admin.powerplatform.microsoft.com/environments/environment/Default-{id}/hub"
+          - "https://admin.powerplatform.microsoft.com/manage/environments/{id}/applications"
       tags:
         - BusinessAppPlatform
       parameters:
@@ -111,7 +152,7 @@ paths:
           required: true
           schema:
             type: string
-            example: "Default-847b5907-ca15-40f4-b171-eb18619dbfab"
+            example: "Default-11111111-1111-4111-8111-111111111111"
         - name: "api-version"
           in: query
           required: false
@@ -142,6 +183,21 @@ paths:
         description: "Business App Platform resource provider"
     get:
       operationId: BusinessAppPlatform_get_providers_Microsoft_BusinessAppPlatform_environments_default
+      x-nodoc-operation-context:
+        surface: Power Platform admin center
+        workflows:
+          - Observe native requests during approved passive representative portal states.
+        availability:
+          level: user-context
+          notes:
+            - One authenticated portal session; standalone execution, parameter requiredness, effective grants and minimum roles are not established.
+        provenance:
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - GET api.bap.microsoft.com/providers/Microsoft.BusinessAppPlatform/environments/~default; HTTP 200; action 4; observed 2026-10-29T21:57:54.841Z; complete response privately hash-verified.
+              - This specific native GET returned a complete HTTP200 response after the approved passive reload; it supports scoped type evidence only.
+              - The broader bounded run retained an initial navigation/accounting gap. Product availability, grants, requiredness, minimum roles and standalone execution are not established.
       summary: "GET /providers/Microsoft.BusinessAppPlatform/environments/~default"
       x-nodoc-live-capture:
         source: "authenticated Power Platform admin center"
@@ -162,7 +218,24 @@ paths:
             example: "2021-04-01"
       responses:
         '200':
-          description: "200 captured response"
+          description: 200 captured response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  type:
+                    type: string
+                  location:
+                    type: string
+                  name:
+                    type: string
+                  properties:
+                    type: object
+                    additionalProperties: true
+                additionalProperties: true
   /providers/Microsoft.BusinessAppPlatform/environments/getOrCreate:
     servers:
       - url: "https://api.bap.microsoft.com"
@@ -227,7 +300,7 @@ paths:
       x-nodoc-live-capture:
         source: "authenticated Power Platform admin center"
         browsedPages:
-          - "https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub"
+          - "https://admin.powerplatform.microsoft.com/environments/environment/Default-{id}/hub"
       tags:
         - BusinessAppPlatform
       parameters:
@@ -236,7 +309,7 @@ paths:
           required: false
           schema:
             type: string
-            example: "environment eq 'Default-847b5907-ca15-40f4-b171-eb18619dbfab'"
+            example: "environment eq 'Default-11111111-1111-4111-8111-111111111111'"
         - name: "api-version"
           in: query
           required: false
@@ -279,6 +352,21 @@ paths:
         description: "Business App Platform resource provider"
     get:
       operationId: BusinessAppPlatform_get_providers_Microsoft_BusinessAppPlatform_locations
+      x-nodoc-operation-context:
+        surface: Power Platform admin center
+        workflows:
+          - Observe native requests during approved passive representative portal states.
+        availability:
+          level: user-context
+          notes:
+            - One authenticated portal session; standalone execution, parameter requiredness, effective grants and minimum roles are not established.
+        provenance:
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - GET api.bap.microsoft.com/providers/Microsoft.BusinessAppPlatform/locations; HTTP 200; action 4; observed 2026-10-29T21:57:55.757Z; complete response privately hash-verified.
+              - This specific native GET returned a complete HTTP200 response after the approved passive reload; it supports scoped type evidence only.
+              - The broader bounded run retained an initial navigation/accounting gap. Product availability, grants, requiredness, minimum roles and standalone execution are not established.
       summary: "GET /providers/Microsoft.BusinessAppPlatform/locations"
       x-nodoc-live-capture:
         source: "authenticated Power Platform admin center"
@@ -299,7 +387,21 @@ paths:
             example: "2021-04-01"
       responses:
         '200':
-          description: "200 captured response"
+          description: 200 captured response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  value:
+                    type: array
+                    items: {}
+                  tenantProvisioningMode:
+                    type: string
+                  macroRegions:
+                    type: array
+                    items: {}
+                additionalProperties: true
   /providers/Microsoft.BusinessAppPlatform/locations/{locationName}/environmentCurrencies:
     servers:
       - url: "https://api.bap.microsoft.com"
@@ -310,7 +412,7 @@ paths:
       x-nodoc-live-capture:
         source: "authenticated Power Platform admin center"
         browsedPages:
-          - "https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub"
+          - "https://admin.powerplatform.microsoft.com/environments/environment/Default-{id}/hub"
       tags:
         - BusinessAppPlatform
       parameters:
@@ -339,7 +441,7 @@ paths:
       x-nodoc-live-capture:
         source: "authenticated Power Platform admin center"
         browsedPages:
-          - "https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub"
+          - "https://admin.powerplatform.microsoft.com/environments/environment/Default-{id}/hub"
       tags:
         - BusinessAppPlatform
       parameters:
@@ -368,7 +470,7 @@ paths:
       x-nodoc-live-capture:
         source: "authenticated Power Platform admin center"
         browsedPages:
-          - "https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub"
+          - "https://admin.powerplatform.microsoft.com/environments/environment/Default-{id}/hub"
       tags:
         - BusinessAppPlatform
       parameters:
@@ -449,8 +551,11 @@ paths:
           - Requires a Power Platform service bearer token and an administrative role allowed to list environments.
         pagination:
           style: odata
-          requestParameters: [$top]
-          responseFields: [value, nextLink]
+          requestParameters:
+            - $top
+          responseFields:
+            - value
+            - nextLink
           notes:
             - A current targeted response returned value; a separate current bootstrap request also exposed nextLink.
         troubleshooting:
@@ -461,6 +566,12 @@ paths:
             confidence: high
             notes:
               - Exact collection GET returned 200 application/json from the Environments list state in the August 2026 bounded capture.
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - GET api.bap.microsoft.com/providers/Microsoft.BusinessAppPlatform/scopes/admin/environments; HTTP 200; action 4; observed 2026-10-29T21:57:55.757Z; complete response privately hash-verified.
+              - This specific native GET returned a complete HTTP200 response after the approved passive reload; it supports scoped type evidence only.
+              - The broader bounded run retained an initial navigation/accounting gap. Product availability, grants, requiredness, minimum roles and standalone execution are not established.
       parameters:
         - name: "$expand"
           in: query
@@ -614,6 +725,11 @@ paths:
                                     lastActivityTime:
                                       type: string
                                       format: date-time
+                                    lastUpdatedTime:
+                                      type: string
+                                environmentPartnerLastActivity:
+                                  type: object
+                                  additionalProperties: true
                             lifecycleOperationsEnforcement:
                               type: object
                               properties:
@@ -763,10 +879,10 @@ paths:
       x-nodoc-live-capture:
         source: "authenticated Power Platform admin center"
         browsedPages:
-          - "https://admin.powerplatform.microsoft.com/environments/default-847b5907-ca15-40f4-b171-eb18619dbfab/flows"
-          - "https://admin.powerplatform.microsoft.com/environments/default-847b5907-ca15-40f4-b171-eb18619dbfab/powerapps"
-          - "https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub"
-          - "https://admin.powerplatform.microsoft.com/manage/environments/default-847b5907-ca15-40f4-b171-eb18619dbfab/flows"
+          - "https://admin.powerplatform.microsoft.com/environments/default-{id}/flows"
+          - "https://admin.powerplatform.microsoft.com/environments/default-{id}/powerapps"
+          - "https://admin.powerplatform.microsoft.com/environments/environment/Default-{id}/hub"
+          - "https://admin.powerplatform.microsoft.com/manage/environments/default-{id}/flows"
         additionalPageCount: 1
       tags:
         - BusinessAppPlatform
@@ -776,7 +892,7 @@ paths:
           required: true
           schema:
             type: string
-            example: "Default-847b5907-ca15-40f4-b171-eb18619dbfab"
+            example: "Default-11111111-1111-4111-8111-111111111111"
         - name: "$expand"
           in: query
           required: false
@@ -808,7 +924,7 @@ paths:
       x-nodoc-live-capture:
         source: "authenticated Power Platform admin center"
         browsedPages:
-          - "https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub"
+          - "https://admin.powerplatform.microsoft.com/environments/environment/Default-{id}/hub"
       tags:
         - BusinessAppPlatform
       parameters:
@@ -817,7 +933,7 @@ paths:
           required: true
           schema:
             type: string
-            example: "Default-847b5907-ca15-40f4-b171-eb18619dbfab"
+            example: "Default-11111111-1111-4111-8111-111111111111"
         - name: "api-version"
           in: query
           required: false
@@ -837,7 +953,7 @@ paths:
       x-nodoc-live-capture:
         source: "authenticated Power Platform admin center"
         browsedPages:
-          - "https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub"
+          - "https://admin.powerplatform.microsoft.com/environments/environment/Default-{id}/hub"
       tags:
         - BusinessAppPlatform
       parameters:
@@ -850,17 +966,46 @@ paths:
       responses:
         '200':
           description: "200 captured response"
+          content:
+            application/json:
+              schema:
+                properties:
+                  value:
+                    items: {}
+                    type: array
+                type: object
+              examples:
+                syntheticRefresh:
+                  summary: Synthetic values illustrating an observed response shape; not a captured response.
+                  description: Based on passive portal observation 2026-10-29T21:57:55.932Z, evidence request-d01154603b965104e057. Scalar values are synthesized; this example illustrates one observed shape.
+                  value:
+                    value: []
   /providers/Microsoft.BusinessAppPlatform/t2tmigrations:
     servers:
       - url: "https://api.bap.microsoft.com"
         description: "Business App Platform resource provider"
     get:
       operationId: BusinessAppPlatform_get_providers_Microsoft_BusinessAppPlatform_t2tmigrations
+      x-nodoc-operation-context:
+        surface: Power Platform admin center
+        workflows:
+          - Observe native requests during approved passive representative portal states.
+        availability:
+          level: user-context
+          notes:
+            - One authenticated portal session; standalone execution, parameter requiredness, effective grants and minimum roles are not established.
+        provenance:
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - GET api.bap.microsoft.com/providers/Microsoft.BusinessAppPlatform/t2tmigrations; HTTP 200; action 4; observed 2026-10-29T21:57:55.932Z; complete response privately hash-verified.
+              - This specific native GET returned a complete HTTP200 response after the approved passive reload; it supports scoped type evidence only.
+              - The broader bounded run retained an initial navigation/accounting gap. Product availability, grants, requiredness, minimum roles and standalone execution are not established.
       summary: "GET /providers/Microsoft.BusinessAppPlatform/t2tmigrations"
       x-nodoc-live-capture:
         source: "authenticated Power Platform admin center"
         browsedPages:
-          - "https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub"
+          - "https://admin.powerplatform.microsoft.com/environments/environment/Default-{id}/hub"
       tags:
         - BusinessAppPlatform
       parameters:
@@ -872,13 +1017,37 @@ paths:
             example: "2021-04-01"
       responses:
         '200':
-          description: "200 captured response"
+          description: 200 captured response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  value:
+                    type: array
+                    items: {}
+                additionalProperties: true
   /providers/Microsoft.BusinessAppPlatform/tenant:
     servers:
       - url: "https://api.bap.microsoft.com"
         description: "Business App Platform resource provider"
     get:
       operationId: BusinessAppPlatform_get_providers_Microsoft_BusinessAppPlatform_tenant
+      x-nodoc-operation-context:
+        surface: Power Platform admin center
+        workflows:
+          - Observe native requests during approved passive representative portal states.
+        availability:
+          level: user-context
+          notes:
+            - One authenticated portal session; standalone execution, parameter requiredness, effective grants and minimum roles are not established.
+        provenance:
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - GET api.bap.microsoft.com/providers/Microsoft.BusinessAppPlatform/tenant; HTTP 200; action 4; observed 2026-10-29T21:57:55.933Z; complete response privately hash-verified.
+              - This specific native GET returned a complete HTTP200 response after the approved passive reload; it supports scoped type evidence only.
+              - The broader bounded run retained an initial navigation/accounting gap. Product availability, grants, requiredness, minimum roles and standalone execution are not established.
       summary: "GET /providers/Microsoft.BusinessAppPlatform/tenant"
       x-nodoc-live-capture:
         source: "authenticated Power Platform admin center"
@@ -899,7 +1068,45 @@ paths:
             example: "2020-08-01"
       responses:
         '200':
-          description: "200 captured response"
+          description: 200 captured response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tenantId:
+                    type: string
+                  state:
+                    type: string
+                  location:
+                    type: string
+                  aadCountryGeo:
+                    type: string
+                  dataStorageGeo:
+                    type: string
+                  defaultEnvironmentGeo:
+                    type: string
+                  aadDataBoundary:
+                    type: string
+                  fedRAMPHighCertificationRequired:
+                    type: boolean
+                  tenantProvisioningMode:
+                    type: string
+                additionalProperties: true
+              examples:
+                syntheticRefresh:
+                  summary: Synthetic values illustrating an observed response shape; not a captured response.
+                  description: Based on passive portal observation 2026-10-29T21:57:54.840Z, evidence request-cc1716dfd1cf3eb418e7. Scalar values are synthesized; this example illustrates one observed shape.
+                  value:
+                    aadCountryGeo: example
+                    aadDataBoundary: example
+                    dataStorageGeo: example
+                    defaultEnvironmentGeo: example
+                    fedRAMPHighCertificationRequired: false
+                    location: example
+                    state: example
+                    tenantId: example
+                    tenantProvisioningMode: example
   /providers/PowerPlatform.Governance/v1/tenants/{tenantId}/tenantIsolationPolicy:
     servers:
       - url: "https://api.bap.microsoft.com"
@@ -933,3 +1140,52 @@ paths:
       responses:
         '200':
           description: Tenant isolation policy response observed in normal portal traffic.
+
+components:
+  schemas:
+    EnvironmentGroupCreatedBy:
+      type: object
+      nullable: true
+      description: Creator reference shape observed in the 2026-08-30 environment-groups response.
+      properties:
+        id:
+          type: string
+          nullable: true
+        type:
+          type: string
+          nullable: true
+      additionalProperties: true
+    EnvironmentGroup:
+      type: object
+      nullable: true
+      description: |
+        Environment-group item observed with this key and type shape in a
+        successful read-only response captured on 2026-08-30. The retained
+        evidence does not establish required-field or non-null rules.
+      properties:
+        createdBy:
+          $ref: '#/components/schemas/EnvironmentGroupCreatedBy'
+        createdTime:
+          type: string
+          nullable: true
+        "description":
+          type: string
+          nullable: true
+        displayName:
+          type: string
+          nullable: true
+        id:
+          type: string
+          nullable: true
+      additionalProperties: true
+    EnvironmentGroupCollectionResponse:
+      type: object
+      nullable: true
+      description: Environment-group collection envelope observed in a successful read-only response on 2026-08-30.
+      properties:
+        value:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/EnvironmentGroup'
+      additionalProperties: true

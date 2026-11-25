@@ -1,11 +1,305 @@
 [
   {
+    "title": "Defender XDR",
+    "specId": "defender-xdr",
+    "specPath": "specifications/nodoc-defender-xdr/specification/openapi.yml",
+    "nodocRoute": "defender",
+    "nodocCategory": "Defender",
+    "operations": [
+      {
+        "operationId": "Incidents.GetDisruptionSummary",
+        "summary": "Get disruption summary",
+        "method": "GET",
+        "path": "/mtp/phoenixValueReflectionApi/disrupt",
+        "source": "authenticated Microsoft Defender portal representative overview states passive representative states",
+        "browsedPages": [
+          "Microsoft Defender portal representative overview states"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "Incidents.GetSummaryTotals",
+        "summary": "Get incident summary totals",
+        "method": "GET",
+        "path": "/mtp/phoenixValueReflectionApi/summary/total",
+        "source": "authenticated Microsoft Defender portal representative overview states passive representative states",
+        "browsedPages": [
+          "Microsoft Defender portal representative overview states"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "EndpointDevices.GetDeviceTotals",
+        "summary": "Get device totals",
+        "method": "GET",
+        "path": "/mtp/ndr/machines/deviceTotals",
+        "source": "authenticated Microsoft Defender portal representative overview states passive representative states",
+        "browsedPages": [
+          "Microsoft Defender portal representative overview states"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "Configuration.GetTenantContext",
+        "summary": "Get tenant context",
+        "method": "GET",
+        "path": "/mtp/sccManagement/mgmt/TenantContext",
+        "source": "authenticated Microsoft Defender portal representative overview states passive representative states",
+        "browsedPages": [
+          "Microsoft Defender portal representative overview states"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "PortalServices.GetUserPreferences",
+        "summary": "Get user preferences",
+        "method": "GET",
+        "path": "/mtp/userPreferences/api/mgmt/userpreferencesservice/userPreference",
+        "source": "authenticated Microsoft Defender portal representative overview states passive representative states",
+        "browsedPages": [
+          "Microsoft Defender portal representative overview states"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      }
+    ]
+  },
+  {
+    "title": "Entra B2C",
+    "specId": "entra-b2c",
+    "specPath": "specifications/nodoc-entra-b2c/specification/openapi.yml",
+    "nodocRoute": null,
+    "nodocCategory": "Entra",
+    "operations": [
+      {
+        "operationId": "Tenants.GetTenantInfo",
+        "summary": "Get tenant info and feature flags",
+        "method": "GET",
+        "path": "/api/tenants/GetTenantInfo",
+        "source": "Observe-only partial portal refresh 2026-10-29; API connectors action 5; request-f4f012ce1d31c2a35de7; HTTP 200",
+        "browsedPages": [
+          "External Identities > API connectors"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "UserAttributes.ListAvailableOutputClaims",
+        "summary": "List available output claims for custom user attributes",
+        "method": "GET",
+        "path": "/api/userAttribute/GetAvailableOutputClaimsList",
+        "source": "Observe-only gap remediation 2026-10-30; Custom user attributes reload action 2; HTTP 400",
+        "browsedPages": [
+          "External Identities > Custom user attributes"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "ApiConnectors.List",
+        "summary": "Read the feature-gated API connector collection",
+        "method": "GET",
+        "path": "/graph/cpimApiConnectors/",
+        "source": "Observe-only partial portal refresh 2026-10-29; API connectors action 5; request-7aa703a5ca66e7e7f207; HTTP 400",
+        "browsedPages": [
+          "External Identities > API connectors"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      }
+    ]
+  },
+  {
+    "title": "Entra IAM",
+    "specId": "ibiza-iam",
+    "specPath": "specifications/nodoc-ibiza-iam/specification/openapi.yml",
+    "nodocRoute": null,
+    "nodocCategory": "Entra",
+    "operations": [
+      {
+        "operationId": "Permissions.Get",
+        "summary": "Get current permissions",
+        "method": "GET",
+        "path": "/Permissions",
+        "source": "Observe-only portal refresh 2026-10-29; All users/reload; request-0adec0070e3efad4ee87; HTTP 200",
+        "browsedPages": [
+          "Users > All users"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      }
+    ]
+  },
+  {
+    "title": "Entra IDGov",
+    "specId": "entra-idgov",
+    "specPath": "specifications/nodoc-entra-idgov/specification/openapi.yml",
+    "nodocRoute": null,
+    "nodocCategory": "Entra",
+    "operations": [
+      {
+        "operationId": "AccessReviews.GetProviderFeatureFlags",
+        "summary": "Get feature flags for a provider",
+        "method": "GET",
+        "path": "/accessReviews/v2.0/approvalWorkflowProviders/{providerId}/featureFlags",
+        "source": "Observe-only gap remediation 2026-10-30; 1 complete native HTTP 200 observation(s)",
+        "browsedPages": [
+          "Entra Identity Governance > Access reviews > Controls"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "AccessReviews.ListBusinessFlows",
+        "summary": "List business flows for a provider",
+        "method": "GET",
+        "path": "/accessReviews/v2.0/approvalWorkflowProviders/{providerId}/businessFlows",
+        "source": "Observe-only gap remediation 2026-10-30; 1 complete native HTTP 200 observation(s)",
+        "browsedPages": [
+          "Entra Identity Governance > Access reviews > Programs"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "AccessReviews.ListRequests",
+        "summary": "List access review requests",
+        "method": "GET",
+        "path": "/accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests",
+        "source": "Observe-only gap remediation 2026-10-30; 1 complete native HTTP 200 observation(s)",
+        "browsedPages": [
+          "Entra Identity Governance > Access reviews > Controls"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "AccessReviews.ListReports",
+        "summary": "List access review reports",
+        "method": "GET",
+        "path": "/accessReviews/v2.0/reports",
+        "source": "Observe-only gap remediation 2026-10-30; 1 complete native HTTP 200 observation(s)",
+        "browsedPages": [
+          "Entra Identity Governance > Access reviews > Review History"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "AccessReviews.ListRequestInstances",
+        "summary": "List instances of an access review",
+        "method": "GET",
+        "path": "/accessReviews/v2.0/approvalWorkflowProviders/{providerId}/requests/{requestId}/instances",
+        "source": "Observe-only gap remediation 2026-10-30; 5 complete native HTTP 200 observation(s)",
+        "browsedPages": [
+          "Entra Identity Governance > Access reviews > Controls"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      }
+    ]
+  },
+  {
+    "title": "Entra IGA",
+    "specId": "entra-iga",
+    "specPath": "specifications/nodoc-entra-iga/specification/openapi.yml",
+    "nodocRoute": null,
+    "nodocCategory": "Entra",
+    "operations": [
+      {
+        "operationId": null,
+        "summary": "List access package catalog summaries",
+        "method": "GET",
+        "path": "/api/v1/accessPackageCatalogs",
+        "source": "Observe-only portal refresh 2026-10-29; Catalogs action 3; request-32f8062f4023aa4f4ab6 and request-75a2be8b894e7978d5e3; HTTP 200",
+        "browsedPages": [
+          "Identity governance > Catalogs"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": null,
+        "summary": "Check authorization for an entitlement-management action",
+        "method": "POST",
+        "path": "/api/v1/checkAccess",
+        "source": "Observe-only portal refresh 2026-10-29; Connected organizations action 6; request-c3f6c9e6cd7b6de03934; HTTP 200",
+        "browsedPages": [
+          "Identity governance > Connected organizations"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      }
+    ]
+  },
+  {
+    "title": "Entra PIM",
+    "specId": "entra-pim",
+    "specPath": "specifications/nodoc-entra-pim/specification/openapi.yml",
+    "nodocRoute": null,
+    "nodocCategory": "Entra",
+    "operations": [
+      {
+        "operationId": null,
+        "summary": "List role assignments",
+        "method": "GET",
+        "path": "/api/v2/privilegedAccess/{provider}/roleAssignments",
+        "source": "Observe-only portal refresh 2026-10-29; Access Packages dashboard reload; request-2371325fd2ece391eb59 and request-b8696ea933d5dcfbbe1d; HTTP 200",
+        "browsedPages": [
+          "Identity governance > Access Packages dashboard bootstrap"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": null,
+        "summary": "Get current user's PIM permissions for a resource",
+        "method": "GET",
+        "path": "/api/v2/privilegedAccess/{provider}/resources/{resourceId}/permissions",
+        "source": "Observe-only portal refresh 2026-10-29; Access Packages dashboard reload; request-d4880a805c46d250f22a; HTTP 200",
+        "browsedPages": [
+          "Identity governance > Access Packages dashboard bootstrap"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      }
+    ]
+  },
+  {
     "title": "Exchange",
     "specId": "exchange-beta",
     "specPath": "specifications/nodoc-exchange-beta/specification/openapi.yml",
     "nodocRoute": null,
     "nodocCategory": null,
     "operations": [
+      {
+        "operationId": "ExchangeBeta.Bootstrap.GetShell",
+        "summary": "Get Exchange shell bootstrap",
+        "method": "GET",
+        "path": "/beta/Shell",
+        "source": "authenticated Exchange admin center passive home/bootstrap capture",
+        "browsedPages": [
+          "Exchange admin center > Home/bootstrap"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "ExchangeBeta.Bootstrap.GetCmdletInfo",
+        "summary": "Get cmdlet metadata",
+        "method": "GET",
+        "path": "/beta/CmdletInfo",
+        "source": "authenticated Exchange admin center passive home/bootstrap capture",
+        "browsedPages": [
+          "Exchange admin center > Home/bootstrap"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
       {
         "operationId": "ExchangeBeta.Bootstrap.GetMyTimeZone",
         "summary": "Get the current user's Exchange time zone",
@@ -14,6 +308,18 @@
         "source": "authenticated Exchange admin center exact same-origin GET",
         "browsedPages": [
           "https://admin.exchange.microsoft.com/#/"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "ExchangeBeta.Preferences.GetUserProfile",
+        "summary": "Get the Exchange portal user profile",
+        "method": "GET",
+        "path": "/beta/UserProfile",
+        "source": "authenticated Exchange admin center passive home/bootstrap capture",
+        "browsedPages": [
+          "Exchange admin center > Home/bootstrap"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -47,6 +353,30 @@
         "source": "authenticated Intune admin center",
         "browsedPages": [
           "https://intune.microsoft.com/#view/Microsoft_Intune_Enrollment/ReportingMenu/~/windowsQualityUpdatesReactView"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "IntuneAutopatch.Tenant.Resolve",
+        "summary": "Resolve tenant enrollment state",
+        "method": "GET",
+        "path": "/api/v1.0/tenant/resolve",
+        "source": "authenticated Intune admin center passive reload",
+        "browsedPages": [
+          "Intune admin center > Windows Autopatch"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "IntuneAutopatch.Tenant.GetFeatureEnablementStatus",
+        "summary": "Get starter feature enablement status",
+        "method": "GET",
+        "path": "/tenant-management/v1/Enrollment/Starter/featureEnablementStatus",
+        "source": "authenticated Intune admin center passive reload",
+        "browsedPages": [
+          "Intune admin center > Windows Autopatch > Tenant management"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -123,6 +453,18 @@
         "pageCount": 2
       },
       {
+        "operationId": "IntunePortal.Experimentation.GetExtensionVariants",
+        "summary": "Get extension variants",
+        "method": "GET",
+        "path": "/api/Experimentation/GetExtensionVariants",
+        "source": "authenticated Intune admin center passive reload",
+        "browsedPages": [
+          "Intune admin center > Tenant administration"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
         "operationId": "IntunePortal.Settings.Select",
         "summary": "Read portal persistent settings",
         "method": "POST",
@@ -138,6 +480,369 @@
     ]
   },
   {
+    "title": "M365 Admin",
+    "specId": "m365-admin",
+    "specPath": "specifications/nodoc-m365-admin/specification/openapi.yml",
+    "nodocRoute": "m365-admin",
+    "nodocCategory": null,
+    "operations": [
+      {
+        "operationId": "UsersGroups.ListIntuneDevices",
+        "summary": "List Intune-managed devices",
+        "method": "GET",
+        "path": "/admin/api/Intune/devices",
+        "source": "authenticated Microsoft 365 admin center passive representative states",
+        "browsedPages": [
+          "Microsoft 365 admin center"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "UsersGroups.GetDirectoryRoleCustomization",
+        "summary": "Get directory-role list customization",
+        "method": "GET",
+        "path": "/admin/api/rbac/roles/customization",
+        "source": "authenticated Microsoft 365 admin center passive representative states",
+        "browsedPages": [
+          "Microsoft 365 admin center"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "UsersGroups.GetCurrentUser",
+        "summary": "Get current user info",
+        "method": "GET",
+        "path": "/admin/api/users/currentUser",
+        "source": "authenticated Microsoft 365 admin center passive representative states",
+        "browsedPages": [
+          "Microsoft 365 admin center"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "UsersGroups.GetGroupPermissions",
+        "summary": "Get group permissions",
+        "method": "GET",
+        "path": "/admin/api/groups/permissions",
+        "source": "Observe-only gap remediation 2026-10-30; primary HTTP 200 observation(s)",
+        "browsedPages": [
+          "Microsoft 365 admin center > Groups"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "Tenant.GetBillingAccounts",
+        "summary": "Get billing accounts",
+        "method": "GET",
+        "path": "/admin/api/tenant/billingAccountsWithShell",
+        "source": "authenticated Microsoft 365 admin center passive representative states",
+        "browsedPages": [
+          "Microsoft 365 admin center"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "Edge.GetExtensionFeedback",
+        "summary": "Get Edge extension feedback",
+        "method": "GET",
+        "path": "/fd/edgeenterpriseextensionsmanagement/api/extensions/extensionFeedback",
+        "source": "authenticated Microsoft 365 admin center passive representative states",
+        "browsedPages": [
+          "Microsoft 365 admin center"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "Edge.ListFeatureManagementProfiles",
+        "summary": "List Edge feature management profiles",
+        "method": "GET",
+        "path": "/fd/edgeenterpriseextensionsmanagement/api/featureManagement/profiles",
+        "source": "authenticated Microsoft 365 admin center passive representative states",
+        "browsedPages": [
+          "Microsoft 365 admin center"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "Edge.ListReleaseVersions",
+        "summary": "List Edge release versions",
+        "method": "GET",
+        "path": "/fd/edgeenterpriseextensionsmanagement/api/version/releases",
+        "source": "authenticated Microsoft 365 admin center passive representative states",
+        "browsedPages": [
+          "Microsoft 365 admin center"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "Edge.GetVersionUpdate",
+        "summary": "Get Edge update information",
+        "method": "GET",
+        "path": "/fd/edgeenterpriseextensionsmanagement/api/version/update",
+        "source": "authenticated Microsoft 365 admin center passive representative states",
+        "browsedPages": [
+          "Microsoft 365 admin center"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "Edge.GetBrowserPolicies",
+        "summary": "Get Edge browser policies",
+        "method": "GET",
+        "path": "/fd/OfficePolicyAdmin/v1.0/edge/policies",
+        "source": "authenticated Microsoft 365 admin center passive representative states",
+        "browsedPages": [
+          "Microsoft 365 admin center"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "IntegratedApps.GetApps",
+        "summary": "Get integrated apps",
+        "method": "GET",
+        "path": "/fd/addins/api/apps",
+        "source": "authenticated Microsoft 365 admin center passive representative states",
+        "browsedPages": [
+          "Microsoft 365 admin center"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "IntegratedApps.GetRecommendations",
+        "summary": "Get app recommendations",
+        "method": "GET",
+        "path": "/fd/addins/api/recommendations/appRecommendations",
+        "source": "authenticated Microsoft 365 admin center passive representative states",
+        "browsedPages": [
+          "Microsoft 365 admin center"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "Billing.ListSoftwareKeys",
+        "summary": "List software keys",
+        "method": "GET",
+        "path": "/fd/KeyFulfillment/v3.0/softwareKeys",
+        "source": "authenticated Microsoft 365 admin center passive representative states",
+        "browsedPages": [
+          "Microsoft 365 admin center"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "UsersGroups.GetAdministrativeUnits",
+        "summary": "Get administrative units",
+        "method": "GET",
+        "path": "/admin/api/users/administrativeunits",
+        "source": "authenticated Microsoft 365 admin center passive representative states",
+        "browsedPages": [
+          "Microsoft 365 admin center"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "UsersGroups.ListRbacRoles",
+        "summary": "List RBAC roles",
+        "method": "GET",
+        "path": "/admin/api/rbac/roles",
+        "source": "authenticated Microsoft 365 admin center passive representative states",
+        "browsedPages": [
+          "Microsoft 365 admin center"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "Billing.ListBillingSubscriptions",
+        "summary": "List billing subscriptions",
+        "method": "GET",
+        "path": "/fd/arm/providers/Microsoft.Billing/billingAccounts/{billingAccountId}/billingSubscriptions",
+        "source": "authenticated Microsoft 365 admin center passive representative states",
+        "browsedPages": [
+          "Microsoft 365 admin center"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      }
+    ]
+  },
+  {
+    "title": "M365 Apps Config",
+    "specId": "m365-apps-config",
+    "specPath": "specifications/nodoc-m365-apps-config/specification/openapi.yml",
+    "nodocRoute": null,
+    "nodocCategory": "M365 Apps",
+    "operations": [
+      {
+        "operationId": null,
+        "summary": "Get service health bootstrap data",
+        "method": "GET",
+        "path": "/appConfig/v1.0/ServiceHealth",
+        "source": "authenticated Microsoft 365 Apps admin center passive representative states",
+        "browsedPages": [
+          "Microsoft 365 Apps admin center"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": null,
+        "summary": "Get portal shell metadata",
+        "method": "GET",
+        "path": "/appConfig/v1.0/ShellService/GetShellInfo",
+        "source": "authenticated Microsoft 365 Apps admin center passive representative states",
+        "browsedPages": [
+          "Microsoft 365 Apps admin center"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": null,
+        "summary": "Get portal feature flights",
+        "method": "GET",
+        "path": "/appConfig/v1.0/userflights",
+        "source": "authenticated Microsoft 365 Apps admin center passive representative states",
+        "browsedPages": [
+          "Microsoft 365 Apps admin center"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": null,
+        "summary": "Check DBS licensing",
+        "method": "GET",
+        "path": "/policyadmin/v1.0/DbsLicensing/HasDbsLicense",
+        "source": "authenticated Microsoft 365 Apps admin center passive representative states",
+        "browsedPages": [
+          "Microsoft 365 Apps admin center"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": null,
+        "summary": "Get tenant residency metadata",
+        "method": "GET",
+        "path": "/rollout/v1.0/residency",
+        "source": "authenticated Microsoft 365 Apps admin center passive representative states",
+        "browsedPages": [
+          "Microsoft 365 Apps admin center"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": null,
+        "summary": "List servicing profiles",
+        "method": "GET",
+        "path": "/ServiceProfile/v1.0/Profiles",
+        "source": "authenticated Microsoft 365 Apps admin center passive representative states",
+        "browsedPages": [
+          "Microsoft 365 Apps admin center"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      }
+    ]
+  },
+  {
+    "title": "M365 Apps Inventory",
+    "specId": "m365-apps-inventory",
+    "specPath": "specifications/nodoc-m365-apps-inventory/specification/openapi.yml",
+    "nodocRoute": null,
+    "nodocCategory": "M365 Apps",
+    "operations": [
+      {
+        "operationId": null,
+        "summary": "Get device summary",
+        "method": "GET",
+        "path": "/inventory/api/Devices/GetDeviceSummary",
+        "source": "authenticated Microsoft 365 Apps admin center > Inventory passive representative states",
+        "browsedPages": [
+          "Microsoft 365 Apps admin center > Inventory"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": null,
+        "summary": "Query devices with cloud management info",
+        "method": "GET",
+        "path": "/inventory/api/DevicesWithCloudManagementInfo",
+        "source": "authenticated Microsoft 365 Apps admin center > Inventory passive representative states",
+        "browsedPages": [
+          "Microsoft 365 Apps admin center > Inventory"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": null,
+        "summary": "Get Office build channel summary with metadata",
+        "method": "GET",
+        "path": "/inventory/api/DevicesWithMetadata/GetOfficeBuildChannelSummaryWithMetadata",
+        "source": "authenticated Microsoft 365 Apps admin center > Inventory passive representative states",
+        "browsedPages": [
+          "Microsoft 365 Apps admin center > Inventory"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": null,
+        "summary": "Get Office build device summary with metadata",
+        "method": "GET",
+        "path": "/inventory/api/DevicesWithMetadata/GetOfficeBuildDeviceSummaryWithMetadata",
+        "source": "authenticated Microsoft 365 Apps admin center > Inventory passive representative states",
+        "browsedPages": [
+          "Microsoft 365 Apps admin center > Inventory"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": null,
+        "summary": "List Office add-ins",
+        "method": "GET",
+        "path": "/inventory/api/OfficeAddins",
+        "source": "authenticated Microsoft 365 Apps admin center > Inventory passive representative states",
+        "browsedPages": [
+          "Microsoft 365 Apps admin center > Inventory"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": null,
+        "summary": "Count Office add-ins",
+        "method": "GET",
+        "path": "/inventory/api/OfficeAddins/$Count",
+        "source": "authenticated Microsoft 365 Apps admin center > Inventory passive representative states",
+        "browsedPages": [
+          "Microsoft 365 Apps admin center > Inventory"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      }
+    ]
+  },
+  {
     "title": "Power Platform",
     "specId": "power-platform",
     "specPath": "specifications/nodoc-power-platform/specification/openapi.yml",
@@ -149,14 +854,12 @@
         "summary": "GET /providers/Microsoft.BusinessAppPlatform/environmentGroups",
         "method": "GET",
         "path": "/providers/Microsoft.BusinessAppPlatform/environmentGroups",
-        "source": "authenticated Power Platform admin center",
+        "source": "Observe-only gap remediation 2026-10-30; primary HTTP 200 observation(s)",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/deployment/overview",
-          "https://admin.powerplatform.microsoft.com/deployment/pipelines",
-          "https://admin.powerplatform.microsoft.com/deployment/settings"
+          "Power Platform admin center > Home > Environments"
         ],
         "additionalPageCount": 0,
-        "pageCount": 3
+        "pageCount": 1
       },
       {
         "operationId": "BusinessAppPlatform_get_providers_Microsoft_BusinessAppPlatform_environmentLocations",
@@ -166,8 +869,8 @@
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
           "https://admin.powerplatform.microsoft.com/billing/licenses/powerPages/overview",
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/Share%20My%20Labs%20(default)/portals",
-          "https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/{label}/portals",
+          "https://admin.powerplatform.microsoft.com/environments/environment/Default-{id}/hub"
         ],
         "additionalPageCount": 0,
         "pageCount": 3
@@ -191,9 +894,9 @@
         "path": "/providers/Microsoft.BusinessAppPlatform/environments/{environmentId}/checkAccess",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/applications",
-          "https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub",
-          "https://admin.powerplatform.microsoft.com/manage/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/applications"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/applications",
+          "https://admin.powerplatform.microsoft.com/environments/environment/Default-{id}/hub",
+          "https://admin.powerplatform.microsoft.com/manage/environments/{id}/applications"
         ],
         "additionalPageCount": 0,
         "pageCount": 3
@@ -235,7 +938,7 @@
         "path": "/providers/Microsoft.BusinessAppPlatform/lifecycleOperations",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub"
+          "https://admin.powerplatform.microsoft.com/environments/environment/Default-{id}/hub"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -277,7 +980,7 @@
         "path": "/providers/Microsoft.BusinessAppPlatform/locations/{locationName}/environmentCurrencies",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub"
+          "https://admin.powerplatform.microsoft.com/environments/environment/Default-{id}/hub"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -289,7 +992,7 @@
         "path": "/providers/Microsoft.BusinessAppPlatform/locations/{locationName}/environmentLanguages",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub"
+          "https://admin.powerplatform.microsoft.com/environments/environment/Default-{id}/hub"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -301,7 +1004,7 @@
         "path": "/providers/Microsoft.BusinessAppPlatform/locations/unitedstates/templates",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub"
+          "https://admin.powerplatform.microsoft.com/environments/environment/Default-{id}/hub"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -344,10 +1047,10 @@
         "path": "/providers/Microsoft.BusinessAppPlatform/scopes/admin/environments/{environmentId}",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/default-847b5907-ca15-40f4-b171-eb18619dbfab/flows",
-          "https://admin.powerplatform.microsoft.com/environments/default-847b5907-ca15-40f4-b171-eb18619dbfab/powerapps",
-          "https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub",
-          "https://admin.powerplatform.microsoft.com/manage/environments/default-847b5907-ca15-40f4-b171-eb18619dbfab/flows"
+          "https://admin.powerplatform.microsoft.com/environments/default-{id}/flows",
+          "https://admin.powerplatform.microsoft.com/environments/default-{id}/powerapps",
+          "https://admin.powerplatform.microsoft.com/environments/environment/Default-{id}/hub",
+          "https://admin.powerplatform.microsoft.com/manage/environments/default-{id}/flows"
         ],
         "additionalPageCount": 1,
         "pageCount": 5
@@ -359,7 +1062,7 @@
         "path": "/providers/Microsoft.BusinessAppPlatform/scopes/admin/environments/{environmentId}/lastActivity",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub"
+          "https://admin.powerplatform.microsoft.com/environments/environment/Default-{id}/hub"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -371,7 +1074,7 @@
         "path": "/providers/Microsoft.BusinessAppPlatform/t2tmigrationapprovals",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub"
+          "https://admin.powerplatform.microsoft.com/environments/environment/Default-{id}/hub"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -383,7 +1086,7 @@
         "path": "/providers/Microsoft.BusinessAppPlatform/t2tmigrations",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub"
+          "https://admin.powerplatform.microsoft.com/environments/environment/Default-{id}/hub"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -1402,8 +2105,8 @@
         "path": "/api/AppManagement/TenantProducts",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/applications",
-          "https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/applications",
+          "https://admin.powerplatform.microsoft.com/environments/environment/Default-{id}/hub"
         ],
         "additionalPageCount": 0,
         "pageCount": 2
@@ -1415,7 +2118,7 @@
         "path": "/api/environments/{environmentsId}/features",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub"
+          "https://admin.powerplatform.microsoft.com/environments/environment/Default-{id}/hub"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -1442,9 +2145,9 @@
         "path": "/appmanagement/environments/{environmentId}/AvailablePackages/Microsoft.Crm.Cloud.Pes.Tps.UserGetAvailableInstancePackages(Lcid='1033',InstanceCountryCode='US',CrmVersion='9.2.26031.180')",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/applications",
-          "https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub",
-          "https://admin.powerplatform.microsoft.com/manage/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/applications"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/applications",
+          "https://admin.powerplatform.microsoft.com/environments/environment/Default-{id}/hub",
+          "https://admin.powerplatform.microsoft.com/manage/environments/{id}/applications"
         ],
         "additionalPageCount": 0,
         "pageCount": 3
@@ -1456,9 +2159,9 @@
         "path": "/appmanagement/environments/{environmentId}/InstancePackages/Microsoft.Crm.Cloud.Pes.Tps.UserGetInstancePackages(Lcid='1033')",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/applications",
-          "https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub",
-          "https://admin.powerplatform.microsoft.com/manage/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/applications"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/applications",
+          "https://admin.powerplatform.microsoft.com/environments/environment/Default-{id}/hub",
+          "https://admin.powerplatform.microsoft.com/manage/environments/{id}/applications"
         ],
         "additionalPageCount": 0,
         "pageCount": 3
@@ -1500,10 +2203,10 @@
         "path": "/api/data/v9.0/$batch",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/appusers",
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/businessUnits",
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/businessUnits/acfd911c-d1d0-f011-8543-7c1e52689cc6/businessUnitDetails",
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/default-847b5907-ca15-40f4-b171-eb18619dbfab/users"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/appusers",
+          "https://admin.powerplatform.microsoft.com/environments/{id}/businessUnits",
+          "https://admin.powerplatform.microsoft.com/environments/{id}/businessUnits/{id}/businessUnitDetails",
+          "https://admin.powerplatform.microsoft.com/environments/{id}/default-{id}/users"
         ],
         "additionalPageCount": 54,
         "pageCount": 58
@@ -1515,9 +2218,9 @@
         "path": "/api/data/v9.0/applicationusers",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/appusers",
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/default-847b5907-ca15-40f4-b171-eb18619dbfab/users",
-          "https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/appusers",
+          "https://admin.powerplatform.microsoft.com/environments/{id}/default-{id}/users",
+          "https://admin.powerplatform.microsoft.com/environments/environment/Default-{id}/hub"
         ],
         "additionalPageCount": 0,
         "pageCount": 3
@@ -1529,9 +2232,9 @@
         "path": "/api/data/v9.0/appmodules/Microsoft.Dynamics.CRM.RetrieveUnpublishedMultiple()",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/default-847b5907-ca15-40f4-b171-eb18619dbfab/powerapps",
-          "https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub",
-          "https://admin.powerplatform.microsoft.com/manage/environments/default-847b5907-ca15-40f4-b171-eb18619dbfab/powerapps"
+          "https://admin.powerplatform.microsoft.com/environments/default-{id}/powerapps",
+          "https://admin.powerplatform.microsoft.com/environments/environment/Default-{id}/hub",
+          "https://admin.powerplatform.microsoft.com/manage/environments/default-{id}/powerapps"
         ],
         "additionalPageCount": 0,
         "pageCount": 3
@@ -1543,7 +2246,7 @@
         "path": "/api/data/v9.0/audits",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/businessUnits/acfd911c-d1d0-f011-8543-7c1e52689cc6/businessUnitDetails"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/businessUnits/{id}/businessUnitDetails"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -1555,10 +2258,10 @@
         "path": "/api/data/v9.0/businessunits",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/appusers",
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/default-847b5907-ca15-40f4-b171-eb18619dbfab/users",
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles",
-          "https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/appusers",
+          "https://admin.powerplatform.microsoft.com/environments/{id}/default-{id}/users",
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles",
+          "https://admin.powerplatform.microsoft.com/environments/environment/Default-{id}/hub"
         ],
         "additionalPageCount": 0,
         "pageCount": 4
@@ -1570,9 +2273,9 @@
         "path": "/api/data/v9.0/businessunits({businessunitId})",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/businessUnits",
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/businessUnits/acfd911c-d1d0-f011-8543-7c1e52689cc6/businessUnitDetails",
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/default-847b5907-ca15-40f4-b171-eb18619dbfab/users"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/businessUnits",
+          "https://admin.powerplatform.microsoft.com/environments/{id}/businessUnits/{id}/businessUnitDetails",
+          "https://admin.powerplatform.microsoft.com/environments/{id}/default-{id}/users"
         ],
         "additionalPageCount": 0,
         "pageCount": 3
@@ -1609,10 +2312,10 @@
         "path": "/api/data/v9.0/EntityDefinitions",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/businessUnits",
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/businessUnits/acfd911c-d1d0-f011-8543-7c1e52689cc6/businessUnitDetails",
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/default-847b5907-ca15-40f4-b171-eb18619dbfab/users",
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/businessUnits",
+          "https://admin.powerplatform.microsoft.com/environments/{id}/businessUnits/{id}/businessUnitDetails",
+          "https://admin.powerplatform.microsoft.com/environments/{id}/default-{id}/users",
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles"
         ],
         "additionalPageCount": 50,
         "pageCount": 54
@@ -1624,10 +2327,10 @@
         "path": "/api/data/v9.0/EntityDefinitions(LogicalName='businessunit')",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/businessUnits",
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/businessUnits/acfd911c-d1d0-f011-8543-7c1e52689cc6/businessUnitDetails",
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/default-847b5907-ca15-40f4-b171-eb18619dbfab/users",
-          "https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/businessUnits",
+          "https://admin.powerplatform.microsoft.com/environments/{id}/businessUnits/{id}/businessUnitDetails",
+          "https://admin.powerplatform.microsoft.com/environments/{id}/default-{id}/users",
+          "https://admin.powerplatform.microsoft.com/environments/environment/Default-{id}/hub"
         ],
         "additionalPageCount": 0,
         "pageCount": 4
@@ -1639,8 +2342,8 @@
         "path": "/api/data/v9.0/EntityDefinitions(LogicalName='role')/Attributes(LogicalName='issytemgenerated')",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles",
-          "https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles",
+          "https://admin.powerplatform.microsoft.com/environments/environment/Default-{id}/hub"
         ],
         "additionalPageCount": 0,
         "pageCount": 2
@@ -1652,7 +2355,7 @@
         "path": "/api/data/v9.0/EntityDefinitions(LogicalName='systemuser')",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/businessUnits/acfd911c-d1d0-f011-8543-7c1e52689cc6/businessUnitDetails"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/businessUnits/{id}/businessUnitDetails"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -1664,8 +2367,8 @@
         "path": "/api/data/v9.0/EntityDefinitions(LogicalName='systemuser')/Attributes(LogicalName='systemmanagedusertype')",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/default-847b5907-ca15-40f4-b171-eb18619dbfab/users",
-          "https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/default-{id}/users",
+          "https://admin.powerplatform.microsoft.com/environments/environment/Default-{id}/hub"
         ],
         "additionalPageCount": 0,
         "pageCount": 2
@@ -1677,7 +2380,7 @@
         "path": "/api/data/v9.0/EntityDefinitions(LogicalName='team')",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/businessUnits/acfd911c-d1d0-f011-8543-7c1e52689cc6/businessUnitDetails"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/businessUnits/{id}/businessUnitDetails"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -1689,13 +2392,11 @@
         "path": "/api/data/v9.0/GetClientMetadata(ClientMetadataQuery=@ClientMetadataQuery)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles",
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/0002921c-d1d0-f011-8543-7c1e52689cc6/roleeditor",
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/02123b67-66ae-4a69-8cdc-6473b94ad1a9/roleeditor",
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/169ead94-a7e8-42c5-9ae8-d81205dfee77/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles",
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 47,
-        "pageCount": 51
+        "pageCount": 49
       },
       {
         "operationId": "DynamicsCrm_post_api_data_v9_0_GetFeatureEnabledState",
@@ -1704,8 +2405,8 @@
         "path": "/api/data/v9.0/GetFeatureEnabledState",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/default-847b5907-ca15-40f4-b171-eb18619dbfab/users",
-          "https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/default-{id}/users",
+          "https://admin.powerplatform.microsoft.com/environments/environment/Default-{id}/hub"
         ],
         "additionalPageCount": 0,
         "pageCount": 2
@@ -1717,10 +2418,10 @@
         "path": "/api/data/v9.0/organizations",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/appusers",
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/default-847b5907-ca15-40f4-b171-eb18619dbfab/users",
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/teams",
-          "https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/appusers",
+          "https://admin.powerplatform.microsoft.com/environments/{id}/default-{id}/users",
+          "https://admin.powerplatform.microsoft.com/environments/{id}/teams",
+          "https://admin.powerplatform.microsoft.com/environments/environment/Default-{id}/hub"
         ],
         "additionalPageCount": 0,
         "pageCount": 4
@@ -1732,13 +2433,11 @@
         "path": "/api/data/v9.0/privileges",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles",
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/0002921c-d1d0-f011-8543-7c1e52689cc6/roleeditor",
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/02123b67-66ae-4a69-8cdc-6473b94ad1a9/roleeditor",
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/169ead94-a7e8-42c5-9ae8-d81205dfee77/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles",
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 47,
-        "pageCount": 51
+        "pageCount": 49
       },
       {
         "operationId": "DynamicsCrm_post_api_data_v9_0_RetrieveFeatureControlSettingsByNamespace",
@@ -1762,8 +2461,8 @@
         "path": "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=0002921c-d1d0-f011-8543-7c1e52689cc6)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles",
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/0002921c-d1d0-f011-8543-7c1e52689cc6/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles",
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 2
@@ -1775,7 +2474,7 @@
         "path": "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=02123b67-66ae-4a69-8cdc-6473b94ad1a9)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/02123b67-66ae-4a69-8cdc-6473b94ad1a9/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -1787,7 +2486,7 @@
         "path": "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=169ead94-a7e8-42c5-9ae8-d81205dfee77)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/169ead94-a7e8-42c5-9ae8-d81205dfee77/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -1799,7 +2498,7 @@
         "path": "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=1a6feece-0ba1-4739-8dee-eb83b1b591ea)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/1a6feece-0ba1-4739-8dee-eb83b1b591ea/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -1811,8 +2510,8 @@
         "path": "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=1bb44f6d-15a5-48aa-a2f2-8d2cb0095d2d)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles",
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/1bb44f6d-15a5-48aa-a2f2-8d2cb0095d2d/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles",
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 2
@@ -1824,7 +2523,7 @@
         "path": "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=1f6c957f-9851-4dbe-ab1c-508c06faa8be)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/1f6c957f-9851-4dbe-ab1c-508c06faa8be/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -1836,7 +2535,7 @@
         "path": "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=20902168-ee38-ea11-a81c-000d3ac3e6d8)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/20902168-ee38-ea11-a81c-000d3ac3e6d8/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -1848,7 +2547,7 @@
         "path": "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=25f9a5ed-60fd-4bcf-bf4b-b40296410bf4)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/25f9a5ed-60fd-4bcf-bf4b-b40296410bf4/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -1860,7 +2559,7 @@
         "path": "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=2c321cf0-f096-ea11-a81a-000d3a6ecd99)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/2c321cf0-f096-ea11-a81a-000d3a6ecd99/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -1872,7 +2571,7 @@
         "path": "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=2fe4d72e-e538-ea11-a81c-000d3ac3e6d8)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/2fe4d72e-e538-ea11-a81c-000d3ac3e6d8/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -1884,7 +2583,7 @@
         "path": "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=313995f9-4a4a-4d4a-afd1-c892da78e13e)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/313995f9-4a4a-4d4a-afd1-c892da78e13e/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -1896,8 +2595,8 @@
         "path": "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=3f199ebd-977e-43e5-abe5-fe865a1f2904)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles",
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/3f199ebd-977e-43e5-abe5-fe865a1f2904/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles",
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 2
@@ -1909,7 +2608,7 @@
         "path": "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=4931681d-8163-e811-a965-000d3a11fe32)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/4931681d-8163-e811-a965-000d3a11fe32/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -1921,7 +2620,7 @@
         "path": "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=4f9dbfce-f797-40d8-a8ac-902e441e371b)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/4f9dbfce-f797-40d8-a8ac-902e441e371b/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -1933,8 +2632,8 @@
         "path": "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=500073fc-54f7-429b-822e-f28b01fa5148)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles",
-          "https://admin.powerplatform.microsoft.com/manage/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/500073fc-54f7-429b-822e-f28b01fa5148/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles",
+          "https://admin.powerplatform.microsoft.com/manage/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 2
@@ -1946,7 +2645,7 @@
         "path": "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=5225adeb-859b-42f3-8289-a399e47512d5)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/5225adeb-859b-42f3-8289-a399e47512d5/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -1958,7 +2657,7 @@
         "path": "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=6b860c71-0e4e-ec11-b1b5-000d3a6ed5b3)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/6b860c71-0e4e-ec11-b1b5-000d3a6ed5b3/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -1970,7 +2669,7 @@
         "path": "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=726d11d6-d9cf-4503-ade9-d6a4be7fa095)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/726d11d6-d9cf-4503-ade9-d6a4be7fa095/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -1982,7 +2681,7 @@
         "path": "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=7be5a395-6b58-4f8c-908f-97dc8810fc50)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/7be5a395-6b58-4f8c-908f-97dc8810fc50/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -1994,8 +2693,8 @@
         "path": "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=854af338-f3c5-e711-8122-000d3aa01c52)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles",
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/854af338-f3c5-e711-8122-000d3aa01c52/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles",
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 2
@@ -2007,8 +2706,8 @@
         "path": "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=88b87c37-1472-4798-ac48-d56509eb6e1d)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles",
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/88b87c37-1472-4798-ac48-d56509eb6e1d/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles",
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 2
@@ -2020,7 +2719,7 @@
         "path": "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=896a28e5-678d-4fa8-ad59-c606d1aa98ce)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/896a28e5-678d-4fa8-ad59-c606d1aa98ce/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -2032,7 +2731,7 @@
         "path": "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=8a2f35d9-e447-4285-974c-81382317ca21)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/8a2f35d9-e447-4285-974c-81382317ca21/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -2044,7 +2743,7 @@
         "path": "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=95aa4c68-04e0-4982-b994-7b5ed6c0771d)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/95aa4c68-04e0-4982-b994-7b5ed6c0771d/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -2056,8 +2755,8 @@
         "path": "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=979144c2-989b-41a5-a146-6b3ea4130e8c)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles",
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/979144c2-989b-41a5-a146-6b3ea4130e8c/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles",
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 2
@@ -2069,7 +2768,7 @@
         "path": "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=987674dd-f4a4-45a8-a1f7-f2cce1cf87f8)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/987674dd-f4a4-45a8-a1f7-f2cce1cf87f8/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -2081,8 +2780,8 @@
         "path": "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=99b7f9c4-5c1e-4b9a-b756-fdfa137b6f85)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles",
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/99b7f9c4-5c1e-4b9a-b756-fdfa137b6f85/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles",
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 2
@@ -2094,7 +2793,7 @@
         "path": "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=9f572d55-6090-493b-904a-3956bdc55343)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/9f572d55-6090-493b-904a-3956bdc55343/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -2106,7 +2805,7 @@
         "path": "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=a0537877-879d-4b70-a391-bb07b94fbba2)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/a0537877-879d-4b70-a391-bb07b94fbba2/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -2118,7 +2817,7 @@
         "path": "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=a0a59a4a-b5a8-4e6f-a094-a866573c17d4)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/a0a59a4a-b5a8-4e6f-a094-a866573c17d4/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -2130,7 +2829,7 @@
         "path": "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=a1801436-efd6-e811-a96e-000d3a3ab886)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/a1801436-efd6-e811-a96e-000d3a3ab886/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -2142,8 +2841,8 @@
         "path": "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=ab8b8c58-1f50-4037-8b26-7523d6145cc3)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles",
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/ab8b8c58-1f50-4037-8b26-7523d6145cc3/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles",
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 2
@@ -2155,7 +2854,7 @@
         "path": "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=b21a7144-299d-4c21-a116-30f60e9c159a)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/b21a7144-299d-4c21-a116-30f60e9c159a/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -2167,8 +2866,8 @@
         "path": "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=b9b08637-acf6-e711-a95a-000d3a11f5ee)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles",
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/b9b08637-acf6-e711-a95a-000d3a11f5ee/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles",
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 2
@@ -2180,7 +2879,7 @@
         "path": "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=bdf1780b-2867-4c3e-8957-dce785eac543)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/bdf1780b-2867-4c3e-8957-dce785eac543/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -2192,7 +2891,7 @@
         "path": "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=c95980b3-97dc-4762-a037-c15fe02dae8c)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/c95980b3-97dc-4762-a037-c15fe02dae8c/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -2204,7 +2903,7 @@
         "path": "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=d19d7df9-96e3-440a-ada1-7f469d2a00d1)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/d19d7df9-96e3-440a-ada1-7f469d2a00d1/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -2216,7 +2915,7 @@
         "path": "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=d58407f2-48d5-e711-a82c-000d3a37c848)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/d58407f2-48d5-e711-a82c-000d3a37c848/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -2228,7 +2927,7 @@
         "path": "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=d6e926ad-4afc-42fb-97f1-6e50c2ef174e)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/d6e926ad-4afc-42fb-97f1-6e50c2ef174e/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -2240,7 +2939,7 @@
         "path": "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=e0d2794e-82f3-e811-a951-000d3a1bcf17)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/e0d2794e-82f3-e811-a951-000d3a1bcf17/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -2252,8 +2951,8 @@
         "path": "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=e389a4a6-b53b-4828-bca9-4b5d25f1763b)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles",
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/e389a4a6-b53b-4828-bca9-4b5d25f1763b/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles",
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 2
@@ -2265,8 +2964,8 @@
         "path": "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=e57bff35-58b4-4725-aee2-40fb18f4c8bd)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles",
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/e57bff35-58b4-4725-aee2-40fb18f4c8bd/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles",
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 2
@@ -2278,7 +2977,7 @@
         "path": "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=edfcbfd2-358f-ea11-a81f-000d3a6eafd3)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/edfcbfd2-358f-ea11-a81f-000d3a6eafd3/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -2290,7 +2989,7 @@
         "path": "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=ee18dcf2-6f83-4cd7-aa5c-1d8a88947d51)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/ee18dcf2-6f83-4cd7-aa5c-1d8a88947d51/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -2302,7 +3001,7 @@
         "path": "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=ee2c8e11-6d57-4c5d-9f84-659c0db132bb)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/ee2c8e11-6d57-4c5d-9f84-659c0db132bb/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -2314,7 +3013,7 @@
         "path": "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=ee7bc749-3dd6-45ac-b95d-a3031463380b)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/ee7bc749-3dd6-45ac-b95d-a3031463380b/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -2326,7 +3025,7 @@
         "path": "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=f600921c-d1d0-f011-8543-7c1e52689cc6)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/f600921c-d1d0-f011-8543-7c1e52689cc6/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -2338,7 +3037,7 @@
         "path": "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=f9e46d0f-d53e-4d5c-b06b-24948b4606ed)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/f9e46d0f-d53e-4d5c-b06b-24948b4606ed/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -2350,7 +3049,7 @@
         "path": "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=fc3e65d9-450a-4301-933b-f9bcaee20521)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/fc3e65d9-450a-4301-933b-f9bcaee20521/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -2362,7 +3061,7 @@
         "path": "/api/data/v9.0/RetrieveRolePrivilegesRole(RoleId=ffadce64-3542-4bf1-a83a-ac9941104680)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/ffadce64-3542-4bf1-a83a-ac9941104680/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -2423,13 +3122,11 @@
         "path": "/api/data/v9.0/roleeditorlayouts",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles",
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/0002921c-d1d0-f011-8543-7c1e52689cc6/roleeditor",
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/02123b67-66ae-4a69-8cdc-6473b94ad1a9/roleeditor",
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/169ead94-a7e8-42c5-9ae8-d81205dfee77/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles",
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 47,
-        "pageCount": 51
+        "pageCount": 49
       },
       {
         "operationId": "DynamicsCrm_get_api_data_v9_0_roles",
@@ -2438,8 +3135,8 @@
         "path": "/api/data/v9.0/roles",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles",
-          "https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles",
+          "https://admin.powerplatform.microsoft.com/environments/environment/Default-{id}/hub"
         ],
         "additionalPageCount": 0,
         "pageCount": 2
@@ -2451,8 +3148,8 @@
         "path": "/api/data/v9.0/roles(roleid = 0002921c-d1d0-f011-8543-7c1e52689cc6)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles",
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/0002921c-d1d0-f011-8543-7c1e52689cc6/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles",
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 2
@@ -2464,7 +3161,7 @@
         "path": "/api/data/v9.0/roles(roleid = 02123b67-66ae-4a69-8cdc-6473b94ad1a9)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/02123b67-66ae-4a69-8cdc-6473b94ad1a9/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -2476,7 +3173,7 @@
         "path": "/api/data/v9.0/roles(roleid = 169ead94-a7e8-42c5-9ae8-d81205dfee77)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/169ead94-a7e8-42c5-9ae8-d81205dfee77/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -2488,7 +3185,7 @@
         "path": "/api/data/v9.0/roles(roleid = 1a6feece-0ba1-4739-8dee-eb83b1b591ea)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/1a6feece-0ba1-4739-8dee-eb83b1b591ea/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -2500,8 +3197,8 @@
         "path": "/api/data/v9.0/roles(roleid = 1bb44f6d-15a5-48aa-a2f2-8d2cb0095d2d)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles",
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/1bb44f6d-15a5-48aa-a2f2-8d2cb0095d2d/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles",
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 2
@@ -2513,7 +3210,7 @@
         "path": "/api/data/v9.0/roles(roleid = 1f6c957f-9851-4dbe-ab1c-508c06faa8be)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/1f6c957f-9851-4dbe-ab1c-508c06faa8be/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -2525,7 +3222,7 @@
         "path": "/api/data/v9.0/roles(roleid = 20902168-ee38-ea11-a81c-000d3ac3e6d8)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/20902168-ee38-ea11-a81c-000d3ac3e6d8/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -2537,7 +3234,7 @@
         "path": "/api/data/v9.0/roles(roleid = 25f9a5ed-60fd-4bcf-bf4b-b40296410bf4)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/25f9a5ed-60fd-4bcf-bf4b-b40296410bf4/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -2549,7 +3246,7 @@
         "path": "/api/data/v9.0/roles(roleid = 2c321cf0-f096-ea11-a81a-000d3a6ecd99)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/2c321cf0-f096-ea11-a81a-000d3a6ecd99/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -2561,7 +3258,7 @@
         "path": "/api/data/v9.0/roles(roleid = 2fe4d72e-e538-ea11-a81c-000d3ac3e6d8)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/2fe4d72e-e538-ea11-a81c-000d3ac3e6d8/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -2573,7 +3270,7 @@
         "path": "/api/data/v9.0/roles(roleid = 313995f9-4a4a-4d4a-afd1-c892da78e13e)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/313995f9-4a4a-4d4a-afd1-c892da78e13e/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -2585,8 +3282,8 @@
         "path": "/api/data/v9.0/roles(roleid = 3f199ebd-977e-43e5-abe5-fe865a1f2904)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles",
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/3f199ebd-977e-43e5-abe5-fe865a1f2904/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles",
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 2
@@ -2598,7 +3295,7 @@
         "path": "/api/data/v9.0/roles(roleid = 4931681d-8163-e811-a965-000d3a11fe32)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/4931681d-8163-e811-a965-000d3a11fe32/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -2610,7 +3307,7 @@
         "path": "/api/data/v9.0/roles(roleid = 4f9dbfce-f797-40d8-a8ac-902e441e371b)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/4f9dbfce-f797-40d8-a8ac-902e441e371b/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -2622,8 +3319,8 @@
         "path": "/api/data/v9.0/roles(roleid = 500073fc-54f7-429b-822e-f28b01fa5148)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles",
-          "https://admin.powerplatform.microsoft.com/manage/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/500073fc-54f7-429b-822e-f28b01fa5148/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles",
+          "https://admin.powerplatform.microsoft.com/manage/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 2
@@ -2635,7 +3332,7 @@
         "path": "/api/data/v9.0/roles(roleid = 5225adeb-859b-42f3-8289-a399e47512d5)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/5225adeb-859b-42f3-8289-a399e47512d5/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -2647,7 +3344,7 @@
         "path": "/api/data/v9.0/roles(roleid = 6b860c71-0e4e-ec11-b1b5-000d3a6ed5b3)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/6b860c71-0e4e-ec11-b1b5-000d3a6ed5b3/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -2659,7 +3356,7 @@
         "path": "/api/data/v9.0/roles(roleid = 726d11d6-d9cf-4503-ade9-d6a4be7fa095)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/726d11d6-d9cf-4503-ade9-d6a4be7fa095/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -2671,7 +3368,7 @@
         "path": "/api/data/v9.0/roles(roleid = 7be5a395-6b58-4f8c-908f-97dc8810fc50)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/7be5a395-6b58-4f8c-908f-97dc8810fc50/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -2683,8 +3380,8 @@
         "path": "/api/data/v9.0/roles(roleid = 854af338-f3c5-e711-8122-000d3aa01c52)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles",
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/854af338-f3c5-e711-8122-000d3aa01c52/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles",
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 2
@@ -2696,8 +3393,8 @@
         "path": "/api/data/v9.0/roles(roleid = 88b87c37-1472-4798-ac48-d56509eb6e1d)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles",
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/88b87c37-1472-4798-ac48-d56509eb6e1d/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles",
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 2
@@ -2709,7 +3406,7 @@
         "path": "/api/data/v9.0/roles(roleid = 896a28e5-678d-4fa8-ad59-c606d1aa98ce)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/896a28e5-678d-4fa8-ad59-c606d1aa98ce/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -2721,7 +3418,7 @@
         "path": "/api/data/v9.0/roles(roleid = 8a2f35d9-e447-4285-974c-81382317ca21)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/8a2f35d9-e447-4285-974c-81382317ca21/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -2733,7 +3430,7 @@
         "path": "/api/data/v9.0/roles(roleid = 95aa4c68-04e0-4982-b994-7b5ed6c0771d)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/95aa4c68-04e0-4982-b994-7b5ed6c0771d/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -2745,8 +3442,8 @@
         "path": "/api/data/v9.0/roles(roleid = 979144c2-989b-41a5-a146-6b3ea4130e8c)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles",
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/979144c2-989b-41a5-a146-6b3ea4130e8c/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles",
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 2
@@ -2758,7 +3455,7 @@
         "path": "/api/data/v9.0/roles(roleid = 987674dd-f4a4-45a8-a1f7-f2cce1cf87f8)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/987674dd-f4a4-45a8-a1f7-f2cce1cf87f8/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -2770,8 +3467,8 @@
         "path": "/api/data/v9.0/roles(roleid = 99b7f9c4-5c1e-4b9a-b756-fdfa137b6f85)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles",
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/99b7f9c4-5c1e-4b9a-b756-fdfa137b6f85/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles",
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 2
@@ -2783,7 +3480,7 @@
         "path": "/api/data/v9.0/roles(roleid = 9f572d55-6090-493b-904a-3956bdc55343)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/9f572d55-6090-493b-904a-3956bdc55343/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -2795,7 +3492,7 @@
         "path": "/api/data/v9.0/roles(roleid = a0537877-879d-4b70-a391-bb07b94fbba2)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/a0537877-879d-4b70-a391-bb07b94fbba2/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -2807,7 +3504,7 @@
         "path": "/api/data/v9.0/roles(roleid = a0a59a4a-b5a8-4e6f-a094-a866573c17d4)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/a0a59a4a-b5a8-4e6f-a094-a866573c17d4/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -2819,7 +3516,7 @@
         "path": "/api/data/v9.0/roles(roleid = a1801436-efd6-e811-a96e-000d3a3ab886)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/a1801436-efd6-e811-a96e-000d3a3ab886/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -2831,8 +3528,8 @@
         "path": "/api/data/v9.0/roles(roleid = ab8b8c58-1f50-4037-8b26-7523d6145cc3)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles",
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/ab8b8c58-1f50-4037-8b26-7523d6145cc3/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles",
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 2
@@ -2844,7 +3541,7 @@
         "path": "/api/data/v9.0/roles(roleid = b21a7144-299d-4c21-a116-30f60e9c159a)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/b21a7144-299d-4c21-a116-30f60e9c159a/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -2856,8 +3553,8 @@
         "path": "/api/data/v9.0/roles(roleid = b9b08637-acf6-e711-a95a-000d3a11f5ee)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles",
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/b9b08637-acf6-e711-a95a-000d3a11f5ee/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles",
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 2
@@ -2869,7 +3566,7 @@
         "path": "/api/data/v9.0/roles(roleid = bdf1780b-2867-4c3e-8957-dce785eac543)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/bdf1780b-2867-4c3e-8957-dce785eac543/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -2881,7 +3578,7 @@
         "path": "/api/data/v9.0/roles(roleid = c95980b3-97dc-4762-a037-c15fe02dae8c)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/c95980b3-97dc-4762-a037-c15fe02dae8c/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -2893,7 +3590,7 @@
         "path": "/api/data/v9.0/roles(roleid = d19d7df9-96e3-440a-ada1-7f469d2a00d1)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/d19d7df9-96e3-440a-ada1-7f469d2a00d1/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -2905,7 +3602,7 @@
         "path": "/api/data/v9.0/roles(roleid = d58407f2-48d5-e711-a82c-000d3a37c848)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/d58407f2-48d5-e711-a82c-000d3a37c848/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -2917,7 +3614,7 @@
         "path": "/api/data/v9.0/roles(roleid = d6e926ad-4afc-42fb-97f1-6e50c2ef174e)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/d6e926ad-4afc-42fb-97f1-6e50c2ef174e/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -2929,7 +3626,7 @@
         "path": "/api/data/v9.0/roles(roleid = e0d2794e-82f3-e811-a951-000d3a1bcf17)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/e0d2794e-82f3-e811-a951-000d3a1bcf17/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -2941,8 +3638,8 @@
         "path": "/api/data/v9.0/roles(roleid = e389a4a6-b53b-4828-bca9-4b5d25f1763b)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles",
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/e389a4a6-b53b-4828-bca9-4b5d25f1763b/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles",
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 2
@@ -2954,8 +3651,8 @@
         "path": "/api/data/v9.0/roles(roleid = e57bff35-58b4-4725-aee2-40fb18f4c8bd)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles",
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/e57bff35-58b4-4725-aee2-40fb18f4c8bd/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles",
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 2
@@ -2967,7 +3664,7 @@
         "path": "/api/data/v9.0/roles(roleid = edfcbfd2-358f-ea11-a81f-000d3a6eafd3)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/edfcbfd2-358f-ea11-a81f-000d3a6eafd3/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -2979,7 +3676,7 @@
         "path": "/api/data/v9.0/roles(roleid = ee18dcf2-6f83-4cd7-aa5c-1d8a88947d51)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/ee18dcf2-6f83-4cd7-aa5c-1d8a88947d51/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -2991,7 +3688,7 @@
         "path": "/api/data/v9.0/roles(roleid = ee2c8e11-6d57-4c5d-9f84-659c0db132bb)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/ee2c8e11-6d57-4c5d-9f84-659c0db132bb/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -3003,7 +3700,7 @@
         "path": "/api/data/v9.0/roles(roleid = ee7bc749-3dd6-45ac-b95d-a3031463380b)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/ee7bc749-3dd6-45ac-b95d-a3031463380b/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -3015,7 +3712,7 @@
         "path": "/api/data/v9.0/roles(roleid = f600921c-d1d0-f011-8543-7c1e52689cc6)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/f600921c-d1d0-f011-8543-7c1e52689cc6/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -3027,7 +3724,7 @@
         "path": "/api/data/v9.0/roles(roleid = f9e46d0f-d53e-4d5c-b06b-24948b4606ed)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/f9e46d0f-d53e-4d5c-b06b-24948b4606ed/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -3039,7 +3736,7 @@
         "path": "/api/data/v9.0/roles(roleid = fc3e65d9-450a-4301-933b-f9bcaee20521)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/fc3e65d9-450a-4301-933b-f9bcaee20521/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -3051,7 +3748,7 @@
         "path": "/api/data/v9.0/roles(roleid = ffadce64-3542-4bf1-a83a-ac9941104680)",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/ffadce64-3542-4bf1-a83a-ac9941104680/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -3063,10 +3760,10 @@
         "path": "/api/data/v9.0/savedqueries",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/businessUnits",
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/businessUnits/acfd911c-d1d0-f011-8543-7c1e52689cc6/businessUnitDetails",
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/default-847b5907-ca15-40f4-b171-eb18619dbfab/users",
-          "https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/businessUnits",
+          "https://admin.powerplatform.microsoft.com/environments/{id}/businessUnits/{id}/businessUnitDetails",
+          "https://admin.powerplatform.microsoft.com/environments/{id}/default-{id}/users",
+          "https://admin.powerplatform.microsoft.com/environments/environment/Default-{id}/hub"
         ],
         "additionalPageCount": 0,
         "pageCount": 4
@@ -3078,13 +3775,11 @@
         "path": "/api/data/v9.0/solutions",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles",
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/0002921c-d1d0-f011-8543-7c1e52689cc6/roleeditor",
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/02123b67-66ae-4a69-8cdc-6473b94ad1a9/roleeditor",
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/169ead94-a7e8-42c5-9ae8-d81205dfee77/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles",
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 50,
-        "pageCount": 54
+        "pageCount": 52
       },
       {
         "operationId": "DynamicsCrm_get_api_data_v9_0_solutions_solutionId",
@@ -3093,13 +3788,11 @@
         "path": "/api/data/v9.0/solutions({solutionId})",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles",
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/0002921c-d1d0-f011-8543-7c1e52689cc6/roleeditor",
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/02123b67-66ae-4a69-8cdc-6473b94ad1a9/roleeditor",
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/securityroles/169ead94-a7e8-42c5-9ae8-d81205dfee77/roleeditor"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles",
+          "https://admin.powerplatform.microsoft.com/environments/{id}/securityroles/{id}/roleeditor"
         ],
         "additionalPageCount": 47,
-        "pageCount": 51
+        "pageCount": 49
       },
       {
         "operationId": "DynamicsCrm_get_api_data_v9_0_systemusers",
@@ -3109,9 +3802,9 @@
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
           "https://admin.powerplatform.microsoft.com/deployment/settings",
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/appusers",
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/default-847b5907-ca15-40f4-b171-eb18619dbfab/users",
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/teams"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/appusers",
+          "https://admin.powerplatform.microsoft.com/environments/{id}/default-{id}/users",
+          "https://admin.powerplatform.microsoft.com/environments/{id}/teams"
         ],
         "additionalPageCount": 3,
         "pageCount": 7
@@ -3124,9 +3817,9 @@
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
           "https://admin.powerplatform.microsoft.com/deployment/settings",
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/default-847b5907-ca15-40f4-b171-eb18619dbfab/users",
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/teams",
-          "https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/default-{id}/users",
+          "https://admin.powerplatform.microsoft.com/environments/{id}/teams",
+          "https://admin.powerplatform.microsoft.com/environments/environment/Default-{id}/hub"
         ],
         "additionalPageCount": 0,
         "pageCount": 4
@@ -3139,9 +3832,9 @@
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
           "https://admin.powerplatform.microsoft.com/deployment/settings",
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/default-847b5907-ca15-40f4-b171-eb18619dbfab/users",
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/teams",
-          "https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/default-{id}/users",
+          "https://admin.powerplatform.microsoft.com/environments/{id}/teams",
+          "https://admin.powerplatform.microsoft.com/environments/environment/Default-{id}/hub"
         ],
         "additionalPageCount": 0,
         "pageCount": 4
@@ -3153,9 +3846,9 @@
         "path": "/api/data/v9.0/teammemberships",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/default-847b5907-ca15-40f4-b171-eb18619dbfab/powerapps",
-          "https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub",
-          "https://admin.powerplatform.microsoft.com/manage/environments/default-847b5907-ca15-40f4-b171-eb18619dbfab/powerapps"
+          "https://admin.powerplatform.microsoft.com/environments/default-{id}/powerapps",
+          "https://admin.powerplatform.microsoft.com/environments/environment/Default-{id}/hub",
+          "https://admin.powerplatform.microsoft.com/manage/environments/default-{id}/powerapps"
         ],
         "additionalPageCount": 0,
         "pageCount": 3
@@ -3167,8 +3860,8 @@
         "path": "/api/data/v9.0/teams",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/teams",
-          "https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/teams",
+          "https://admin.powerplatform.microsoft.com/environments/environment/Default-{id}/hub"
         ],
         "additionalPageCount": 0,
         "pageCount": 2
@@ -3180,8 +3873,8 @@
         "path": "/api/data/v9.1/systemusers",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/manage/dataverse/621c0f33-3fd1-f011-83fb-000d3a106b3b/apis",
-          "https://admin.powerplatform.microsoft.com/manage/dataverse/621c0f33-3fd1-f011-83fb-000d3a106b3b/users"
+          "https://admin.powerplatform.microsoft.com/manage/dataverse/{id}/apis",
+          "https://admin.powerplatform.microsoft.com/manage/dataverse/{id}/users"
         ],
         "additionalPageCount": 0,
         "pageCount": 2
@@ -3193,7 +3886,7 @@
         "path": "/api/nosql/audit/isreadenabled",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub"
+          "https://admin.powerplatform.microsoft.com/environments/environment/Default-{id}/hub"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -3205,7 +3898,7 @@
         "path": "/api/v1/powerPortal/environment/CoreEntitiesPackageInstallStatus",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub"
+          "https://admin.powerplatform.microsoft.com/environments/environment/Default-{id}/hub"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -3217,7 +3910,7 @@
         "path": "/api/v1/powerPortal/environment/optInStatus",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub"
+          "https://admin.powerplatform.microsoft.com/environments/environment/Default-{id}/hub"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -3229,7 +3922,7 @@
         "path": "/api/v1/powerPortal/FeatureConfiguration/GetFeatureControlValues",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub"
+          "https://admin.powerplatform.microsoft.com/environments/environment/Default-{id}/hub"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -3241,7 +3934,7 @@
         "path": "/api/v1/powerPortal/GetEnvironment",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub"
+          "https://admin.powerplatform.microsoft.com/environments/environment/Default-{id}/hub"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -3253,7 +3946,7 @@
         "path": "/api/v1/powerPortal/IsCDSOrg",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub"
+          "https://admin.powerplatform.microsoft.com/environments/environment/Default-{id}/hub"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -3277,7 +3970,7 @@
         "path": "/api/v1/powerPortal/ListPortalsByOrgId",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub"
+          "https://admin.powerplatform.microsoft.com/environments/environment/Default-{id}/hub"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -3289,7 +3982,7 @@
         "path": "/api/v1/powerPortal/tps/GetAvailablePackages",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub"
+          "https://admin.powerplatform.microsoft.com/environments/environment/Default-{id}/hub"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -3301,7 +3994,7 @@
         "path": "/api/v1/powerPortal/tps/GetInstancePackages",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub"
+          "https://admin.powerplatform.microsoft.com/environments/environment/Default-{id}/hub"
         ],
         "additionalPageCount": 0,
         "pageCount": 1
@@ -3313,11 +4006,257 @@
         "path": "/api/v1/powerPortal/ZAP/GetDeepScanEnabledPortalByTenant",
         "source": "authenticated Power Platform admin center",
         "browsedPages": [
-          "https://admin.powerplatform.microsoft.com/environments/621c0f33-3fd1-f011-83fb-000d3a106b3b/Share%20My%20Labs%20(default)/portals",
-          "https://admin.powerplatform.microsoft.com/environments/environment/Default-847b5907-ca15-40f4-b171-eb18619dbfab/hub"
+          "https://admin.powerplatform.microsoft.com/environments/{id}/{label}/portals",
+          "https://admin.powerplatform.microsoft.com/environments/environment/Default-{id}/hub"
         ],
         "additionalPageCount": 0,
         "pageCount": 2
+      }
+    ]
+  },
+  {
+    "title": "Purview",
+    "specId": "purview",
+    "specPath": "specifications/nodoc-purview/specification/openapi.yml",
+    "nodocRoute": null,
+    "nodocCategory": "Purview",
+    "operations": [
+      {
+        "operationId": "getDlpCompliancePolicies",
+        "summary": "Get DLP compliance policies",
+        "method": "GET",
+        "path": "/di/find/DlpCompliancePolicy",
+        "source": "authenticated Microsoft Purview portal passive representative states",
+        "browsedPages": [
+          "Microsoft Purview portal"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "getLabelPolicies",
+        "summary": "Get label policies",
+        "method": "GET",
+        "path": "/di/find/LabelPolicy",
+        "source": "authenticated Microsoft Purview portal passive representative states",
+        "browsedPages": [
+          "Microsoft Purview portal"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "getInsiderRiskEntityList",
+        "summary": "Get insider risk entity list",
+        "method": "GET",
+        "path": "/di/find/InsiderRiskEntityList",
+        "source": "Observe-only gap remediation 2026-10-30; primary HTTP 200 observation(s)",
+        "browsedPages": [
+          "Microsoft Purview > Insider Risk Management > Overview"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "getInsiderRiskPolicies",
+        "summary": "Get insider risk management policies",
+        "method": "GET",
+        "path": "/di/find/InsiderRiskPolicy",
+        "source": "authenticated Microsoft Purview portal passive representative states",
+        "browsedPages": [
+          "Microsoft Purview portal"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "getDataGovernanceTypeAggregates",
+        "summary": "Get type aggregates",
+        "method": "GET",
+        "path": "/dgs/aggregate/GetTypeAggregates",
+        "source": "authenticated Microsoft Purview portal passive representative states",
+        "browsedPages": [
+          "Microsoft Purview portal"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "checkCopilotAuth",
+        "summary": "Check Copilot authentication status",
+        "method": "GET",
+        "path": "/medeina/auth",
+        "source": "authenticated Microsoft Purview portal passive representative states",
+        "browsedPages": [
+          "Microsoft Purview portal"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      }
+    ]
+  },
+  {
+    "title": "Purview Portal",
+    "specId": "purview-portal",
+    "specPath": "specifications/nodoc-purview-portal/specification/openapi.yml",
+    "nodocRoute": null,
+    "nodocCategory": "Purview",
+    "operations": [
+      {
+        "operationId": "PurviewPortal.Auth.GetCachedRoles",
+        "summary": "Get cached Purview roles",
+        "method": "GET",
+        "path": "/api/v2/auth/GetCachedRoles",
+        "source": "Observe-only gap remediation 2026-10-30; primary HTTP 200 observation(s)",
+        "browsedPages": [
+          "Microsoft Purview portal > Home > Portal shell"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "PurviewPortal.Users.Search",
+        "summary": "Search users for portal pickers",
+        "method": "GET",
+        "path": "/api/user/",
+        "source": "authenticated Microsoft Purview portal passive representative states",
+        "browsedPages": [
+          "Microsoft Purview portal"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      }
+    ]
+  },
+  {
+    "title": "Security Copilot",
+    "specId": "security-copilot",
+    "specPath": "specifications/nodoc-security-copilot/specification/openapi.yml",
+    "nodocRoute": "security-copilot",
+    "nodocCategory": null,
+    "operations": [
+      {
+        "operationId": "SecurityCopilotPortal.Auth.GetExpiryDate",
+        "summary": "Get workspace capacity auth expiry state",
+        "method": "GET",
+        "path": "/auth/expiryDate",
+        "source": "authenticated Security Copilot passive provisioning/readiness entry surface passive representative states",
+        "browsedPages": [
+          "Security Copilot passive provisioning/readiness entry surface"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "SecurityCopilotPortal.Provisioning.GetAccount",
+        "summary": "Get Security Platform account and pod inventory",
+        "method": "GET",
+        "path": "/provisioning/account",
+        "source": "authenticated Security Copilot passive provisioning/readiness entry surface passive representative states",
+        "browsedPages": [
+          "Security Copilot passive provisioning/readiness entry surface"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": "SecurityCopilotPortal.Provisioning.CheckTenant",
+        "summary": "Check Security Platform tenant eligibility",
+        "method": "GET",
+        "path": "/provisioning/checkTenant",
+        "source": "authenticated Security Copilot passive provisioning/readiness entry surface passive representative states",
+        "browsedPages": [
+          "Security Copilot passive provisioning/readiness entry surface"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      }
+    ]
+  },
+  {
+    "title": "SharePoint",
+    "specId": "sharepoint-admin",
+    "specPath": "specifications/nodoc-sharepoint-admin/specification/openapi.yml",
+    "nodocRoute": "sharepoint-admin",
+    "nodocCategory": "SharePoint",
+    "operations": [
+      {
+        "operationId": "SharePointAdmin.GetContentSecurityPolicyConfiguration",
+        "summary": "Get allowed script sources",
+        "method": "GET",
+        "path": "/_api/SPO.SPOContentSecurityPolicyConfiguration",
+        "source": "Observe-only portal refresh 2026-10-29; sharepoint-admin-02/capture; request-d17dc2215ed76c860c2e; HTTP 200",
+        "browsedPages": [
+          "Advanced > Script sources"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      }
+    ]
+  },
+  {
+    "title": "Teams",
+    "specId": "teams",
+    "specPath": "specifications/nodoc-teams/specification/openapi.yml",
+    "nodocRoute": null,
+    "nodocCategory": "Teams",
+    "operations": [
+      {
+        "operationId": null,
+        "summary": "Get saved Teams admin grid settings",
+        "method": "GET",
+        "path": "/api/v1/usersettings",
+        "source": "authenticated Teams admin center representative user-management states passive representative states",
+        "browsedPages": [
+          "Teams admin center representative user-management states"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": null,
+        "summary": "Get Teams admin dashboard preferences",
+        "method": "GET",
+        "path": "/api/v1/userpreference",
+        "source": "authenticated Teams admin center representative user-management states passive representative states",
+        "browsedPages": [
+          "Teams admin center representative user-management states"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      },
+      {
+        "operationId": null,
+        "summary": "Get a Teams user record",
+        "method": "GET",
+        "path": "/Teams.User/users/{userId}",
+        "source": "authenticated Teams admin center representative user-management states passive representative states",
+        "browsedPages": [
+          "Teams admin center representative user-management states"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
+      }
+    ]
+  },
+  {
+    "title": "Viva Engage",
+    "specId": "viva-engage",
+    "specPath": "specifications/nodoc-viva-engage/specification/openapi.yml",
+    "nodocRoute": null,
+    "nodocCategory": "Viva",
+    "operations": [
+      {
+        "operationId": "AdminGraphQL_PostGraphql",
+        "summary": "Execute Viva Engage admin GraphQL operations",
+        "method": "POST",
+        "path": "/graphql",
+        "source": "Observe-only portal refresh 2026-10-29; Viva admin landing/reload; TenantConfigurationAndRoles; HTTP 200; request-59258e853d95e7568f27",
+        "browsedPages": [
+          "Admin landing"
+        ],
+        "additionalPageCount": 0,
+        "pageCount": 1
       }
     ]
   }

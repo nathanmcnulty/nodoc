@@ -1,0 +1,100 @@
+{
+  "portal": "Purview Home",
+  "url": "https://purview.microsoft.com/home",
+  "nativeEntryUrlShape": "https://purview.microsoft.com/home",
+  "pageTarget": {
+    "matchHosts": [
+      "purview.microsoft.com"
+    ],
+    "matchPathPrefixes": [
+      "/home"
+    ],
+    "allowedEntryQueryParameters": []
+  },
+  "matchHosts": [
+    "purview.microsoft.com"
+  ],
+  "matchPathPrefixes": [
+    "/apiproxy/msgraph/v1.0/admin/serviceAnnouncement/messages"
+  ],
+  "inspectionPolicy": {
+    "mode": "observe-only",
+    "prohibitedControlPatterns": [
+      "Add",
+      "Create",
+      "Delete",
+      "Export",
+      "Remove",
+      "Save",
+      "Submit",
+      "Update",
+      "Purchase",
+      "Activate",
+      "Start trial"
+    ]
+  },
+  "responseBodyLimits": {
+    "perBodyBytes": 16777216,
+    "totalBytes": 268435456
+  },
+  "captureScripts": false,
+  "settleMs": 8000,
+  "postActionSettleMs": 6000,
+  "maxActions": 6,
+  "actions": [
+    {
+      "type": "navigate",
+      "value": "${NativeEntryUrl}",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "6000",
+      "required": true
+    },
+    {
+      "type": "reload",
+      "value": "proxy-response-body",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "8000",
+      "required": true
+    },
+    {
+      "type": "capture",
+      "value": "proxy-response-body",
+      "required": true
+    }
+  ],
+  "knownOperationRefresh": {
+    "status": "active",
+    "method": "GET",
+    "host": "purview.microsoft.com",
+    "routes": [
+      "/apiproxy/msgraph/v1.0/admin/serviceAnnouncement/messages"
+    ],
+    "actionIndexes": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "state": "Previously unavailable body retrieval reopened after reviewed prompt bounded response fetching and durable-buffer capability negotiation. Historical failure cause remains unknown. This is Purview-proxied observation, not direct Graph permission or execution proof. Preserve the native cached caller session; selected tenant identity is unproved. NativeEntryUrl is copied literally from observed portal evidence without constructing tenant queries. No tenant switch, active API request, configuration change, business-health or minimum-role claim.",
+    "documentationObjectives": [
+      "schema-evidence",
+      "usage-observation",
+      "error-example"
+    ],
+    "evidenceIds": [
+      "opaque:remaining-three-proxy-native-entry",
+      "opaque:remaining-three-proxy-historical-body-gap"
+    ],
+    "approvalExpiresAt": "2026-11-06T05:45:00.000Z",
+    "variableBindingsDigest": "1281f673133f33b2a196d1231413d0bca7bf12a3a464c90edcd47b04b83aa86a",
+    "approvalArtifact": "tools/frontier-approvals/purview-home-announcements-remaining-three-20261105.json",
+    "approvalDigest": "063b1cec8fe296d7e1a4377f2933baf1064c405b9943edb199cded089d2f35ba"
+  }
+}

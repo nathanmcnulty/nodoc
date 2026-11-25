@@ -1,0 +1,76 @@
+{
+  "portal": "Entra IDGov",
+  "url": "https://entra.microsoft.com/#blade/Microsoft_AAD_ERM/DashboardBlade",
+  "pageTarget": {
+    "matchHosts": [
+      "entra.microsoft.com"
+    ],
+    "matchPathPrefixes": [
+      "/"
+    ]
+  },
+  "matchHosts": [
+    "api.accessreviews.identitygovernance.azure.com"
+  ],
+  "matchPathPrefixes": [
+    "/accessReviews"
+  ],
+  "inspectionPolicy": {
+    "mode": "observe-only",
+    "prohibitedControlPatterns": [
+      "Add",
+      "Create",
+      "Delete",
+      "Export",
+      "Remove",
+      "Save",
+      "Submit",
+      "Update",
+      "Purchase",
+      "Activate",
+      "Start trial"
+    ]
+  },
+  "captureScripts": false,
+  "postActionSettleMs": 6000,
+  "settleMs": 8000,
+  "maxActions": 6,
+  "actions": [
+    "navigate=https://entra.microsoft.com/#blade/Microsoft_AAD_ERM/DashboardBlade",
+    "wait-ms=6000",
+    "reload=idgov-current-dashboard",
+    "wait-ms=8000",
+    "capture=idgov-current-dashboard"
+  ],
+  "knownOperationRefresh": {
+    "status": "active",
+    "method": "GET",
+    "host": "api.accessreviews.identitygovernance.azure.com",
+    "routes": [
+      "/accessReviews/v2.0/reports"
+    ],
+    "state": "ID Governance dashboard passive landing and reload; deeper Access reviews, Programs and Review History omitted without immutable exact href provenance",
+    "actionIndexes": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "approvalExpiresAt": "2026-10-31T08:00:00.000Z",
+    "variableBindingsDigest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "documentationObjectives": [
+      "freshness",
+      "health",
+      "schema-evidence",
+      "usage-observation",
+      "error-example"
+    ],
+    "evidenceIds": [
+      "checked-in-ui-state-entra-idgov-deep",
+      "checked-in-openapi-static-operation"
+    ],
+    "approvalArtifact": "tools/frontier-approvals/entra-idgov-refresh-20261029.json",
+    "approvalDigest": "aeaea0f1271f89ef1384c5c36e65debf82ce5e15133e99b159840eeba0db5b0c"
+  }
+}

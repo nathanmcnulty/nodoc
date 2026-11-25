@@ -1372,9 +1372,19 @@ function normalizeOperationContext(
       }
 
       const notes = normalizeOperationContextStringArray(entry.notes, provenanceContext, "notes");
+      const artifactSha256 = normalizeOperationContextString(entry.artifactSha256, provenanceContext, "artifactSha256");
+      const reviewDigest = normalizeOperationContextString(entry.reviewDigest, provenanceContext, "reviewDigest");
+      const evidenceId = normalizeOperationContextString(entry.evidenceId, provenanceContext, "evidenceId");
+      const evidenceBindings = [artifactSha256, reviewDigest, evidenceId].filter(Boolean);
+      if (evidenceBindings.length > 0 && (evidenceBindings.length !== 3 || !/^[a-f0-9]{64}$/u.test(artifactSha256) || !/^[a-f0-9]{64}$/u.test(reviewDigest))) {
+        throw new Error(`${provenanceContext} immutable observation provenance requires evidenceId plus SHA-256 artifactSha256 and reviewDigest.`);
+      }
       return {
         source,
         confidence,
+        ...(artifactSha256 !== undefined ? { artifactSha256 } : {}),
+        ...(reviewDigest !== undefined ? { reviewDigest } : {}),
+        ...(evidenceId !== undefined ? { evidenceId } : {}),
         ...(notes !== undefined ? { notes } : {}),
       };
     });
@@ -1790,16 +1800,62 @@ export async function buildOperationContextLedger() {
     const {
       headerProfiles,
       authProfiles,
-      operations,
+      operations: contextOperations,
     } = getNormalizedOperationContextRecords(bundledSpecification, title);
-
-    if (
-      Object.keys(headerProfiles).length === 0
-      && Object.keys(authProfiles).length === 0
-      && operations.length === 0
-    ) {
-      continue;
-    }
+    const contextByKey = new Map(contextOperations.map((entry) => [`${entry.method} ${entry.path}`, entry.operationContext]));
+    const operationEntries = getOperationEntries(bundledSpecification);
+    // This generator reads checked-in annotations only. It has no trusted artifact/review
+    // resolver, so annotation digests may be displayed but cannot elevate any field to
+    // observed. A future resolver must verify the artifact, accepted review, and exact
+    // field category before passing an observed result into the workbook.
+    const status = (present) => present ? "partial" : "unknown";
+    const operationRows = operationEntries.map(({ method, operation, path: operationPath, effectiveServerUrls }) => {
+      const operationContext = contextByKey.get(`${method} ${operationPath}`) ?? null;
+      const requestMedia = Object.values(operation.requestBody?.content ?? {});
+      const hasRequestExample = requestMedia.some((media) => media?.example !== undefined || Object.keys(media?.examples ?? {}).length > 0 || media?.schema?.example !== undefined);
+      const errorResponses = Object.entries(operation.responses ?? {}).filter(([code]) => /^[45]\d\d$/u.test(code));
+      const authProfile = operationContext?.authProfile ? authProfiles[operationContext.authProfile] : null;
+      const headerProfile = operationContext?.headerProfile ? headerProfiles[operationContext.headerProfile] : null;
+      const provenance = operationContext?.provenance ?? [];
+      const liveCapture = normalizeLiveCaptureMetadata(operation["x-nodoc-live-capture"], `${title} ${method} ${operationPath}`);
+      const paginationPresent = Boolean(operationContext?.pagination) || [...(operation.parameters ?? [])].some((parameter) => parameter?.in === "query" && /^(?:\$?top|\$?skip|cursor|continuation|limit|offset|page)/iu.test(String(parameter.name ?? "")));
+      const fields = {
+        workflow: status((operationContext?.workflows?.length ?? 0) > 0),
+        authHeaders: status(Boolean(operationContext?.headerProfile || operationContext?.authProfile || headerProfile || authProfile)),
+        audience: status(Boolean(authProfile?.tokens?.some((token) => token?.audience || token?.resource))),
+        prerequisites: status(Boolean((operationContext?.permissions?.length ?? 0) || operationContext?.availability || (operationContext?.troubleshooting?.length ?? 0))),
+        requestExamples: status(hasRequestExample || (operationContext?.requestShapes?.length ?? 0) > 0),
+        errors: status(errorResponses.length > 0),
+        pagination: status(paginationPresent),
+      };
+      const strengths = [
+        ...provenance.map((entry) => ({ source: entry.source, strength: "partial", reason: "checked-in-annotation-not-cross-validated-by-a-trusted-artifact-and-review-resolver", evidenceId: entry.evidenceId ?? null, artifactSha256: entry.artifactSha256 ?? null, reviewDigest: entry.reviewDigest ?? null })),
+        ...(liveCapture ? [{ source: "x-nodoc-live-capture", strength: "partial", reason: "checked-in-metadata-without-verified-immutable-artifact-binding" }] : []),
+      ];
+      const nonUnknown = Object.values(fields).filter((value) => value !== "unknown");
+      return {
+        operationId: typeof operation.operationId === "string" ? operation.operationId : null,
+        summary: typeof operation.summary === "string" ? operation.summary : null,
+        method,
+        path: operationPath,
+        effectiveServerUrls,
+        category: typeof operation["x-nodoc-category"] === "string" ? operation["x-nodoc-category"] : bundledSpecification.info?.["x-nodoc-category"] ?? null,
+        operationContext,
+        contextCompleteness: { overall: nonUnknown.length === 0 ? "unknown" : nonUnknown.length === Object.keys(fields).length && nonUnknown.every((value) => value === "observed") ? "observed" : "partial", ...fields },
+        evidenceStrength: strengths.length > 0 ? strengths : [{ source: "none", strength: "unknown" }],
+        usage: {
+          status: nonUnknown.length > 0 || liveCapture ? "partial" : "unknown",
+          workflow: { status: fields.workflow, values: operationContext?.workflows ?? [] },
+          authHeaders: { status: fields.authHeaders, headerProfile: operationContext?.headerProfile ?? null, authProfile: operationContext?.authProfile ?? null },
+          audience: { status: fields.audience, values: (authProfile?.tokens ?? []).flatMap((token) => [token?.audience, token?.resource].filter(Boolean)) },
+          prerequisites: { status: fields.prerequisites, permissions: operationContext?.permissions ?? [], availability: operationContext?.availability ?? null },
+          requestExamples: { status: fields.requestExamples },
+          errors: { status: fields.errors, responseStatuses: errorResponses.map(([code]) => code) },
+          pagination: { status: fields.pagination, value: operationContext?.pagination ?? null },
+          leastPrivilege: { status: "unknown", reason: "not-inferred-from-observed-portal-traffic-or-operation-names" },
+        },
+      };
+    });
 
     ledger.push({
       title,
@@ -1815,17 +1871,21 @@ export async function buildOperationContextLedger() {
           : null,
       headerProfiles,
       ...(Object.keys(authProfiles).length > 0 ? { authProfiles } : {}),
-      operations: operations.map(({ method, operation, path: operationPath, operationContext }) => ({
-        operationId:
-          typeof operation.operationId === "string" ? operation.operationId : null,
-        summary:
-          typeof operation.summary === "string" ? operation.summary : null,
-        method,
-        path: operationPath,
-        operationContext,
-      })),
+      operationCount: operationRows.length,
+      contextOperationCount: operationRows.filter((operation) => operation.operationContext).length,
+      missingContextOperationCount: operationRows.filter((operation) => !operation.operationContext).length,
+      operations: operationRows,
     });
   }
-
-  return ledger.sort((left, right) => left.title.localeCompare(right.title));
+  const specifications = ledger.sort((left, right) => left.title.localeCompare(right.title));
+  return {
+    schemaVersion: 2,
+    summary: {
+      specificationCount: specifications.length,
+      operationCount: specifications.reduce((sum, spec) => sum + spec.operationCount, 0),
+      contextOperationCount: specifications.reduce((sum, spec) => sum + spec.contextOperationCount, 0),
+      missingContextOperationCount: specifications.reduce((sum, spec) => sum + spec.missingContextOperationCount, 0),
+    },
+    specifications,
+  };
 }

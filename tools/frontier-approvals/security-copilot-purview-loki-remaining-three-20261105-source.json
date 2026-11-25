@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "kind": "known-operation-refresh-approval-source",
+  "status": "proposal-pending-independent-review-and-separate-live-authority",
+  "specId": "security-copilot",
+  "recipeDestination": "tools/capture-recipes/security-copilot-purview-loki-remaining-three-20261105.json",
+  "plannedAssignmentId": "remaining-three-20261105-loki-01",
+  "captureRole": {
+    "model": "gpt-6-luna",
+    "reasoning": "low"
+  },
+  "reviewRequirement": {
+    "model": "gpt-6-luna",
+    "reasoning": "xhigh"
+  },
+  "primaryCanonicalOperation": {
+    "method": "GET",
+    "host": "ecs.office.com",
+    "canonicalPath": "/config/v1/LokiService/1.0.0.0",
+    "wirePath": "/config/v1/LokiService/1.0.0.0",
+    "operationId": "SecurityCopilotPortal.Store.GetLokiServiceClientConfiguration",
+    "sourceFile": "specifications/nodoc-security-copilot/specification/openapi.yml",
+    "sourceFileSha256": "4c6a5770b14fa18c391bca423b3484424cab55360cdce478501ae561ceeff346"
+  },
+  "observedCaller": "Purview Data Lifecycle",
+  "observedEntryUrlTemplate": "${NativeEntryUrl}",
+  "observedEntryPath": "/datalifecyclemanagement/import",
+  "observedEntryQueryNames": [
+    "tid"
+  ],
+  "nativeEntryEvidence": {
+    "artifactId": "remaining-three-native-home-inspection-v3",
+    "sha256": "f78f00b1b397dbd93040b090d1df3812de9f6316c8a7d4dfe703ca7025cea626",
+    "closureArtifactId": "remaining-three-native-home-inspection-closure",
+    "closureSha256": "e5cf68ab219e52717c11346ea7980b4ffd7640234c1e1314514bacabf9b61e0c",
+    "privateEntryBindingArtifactId": "remaining-three-native-entry-bindings",
+    "privateEntryBindingSha256": "9d906a139b41158839e58432ebbba5802456e82d04b5d9265e6ba2ffd477494d"
+  },
+  "tenantIdentityUnproved": true,
+  "reason": "Fresh observed native Data Lifecycle import href replaces the unsupported historical overview entry. Exact ECS LokiService response is a passive objective; emission from this newly observed caller state is unproved until capture. Canonical backend owner is Security Copilot, caller is Purview; no native Copilot workflow claim.",
+  "responseBodyLimits": {
+    "perBodyBytes": 16777216,
+    "totalBytes": 268435456
+  },
+  "actionBudget": {
+    "maximumDriverActions": 6,
+    "recipeActions": 5,
+    "mandatoryDriverHomeNavigation": 1,
+    "maximumOwnerStartupNavigations": 1,
+    "maximumPreflightAlignmentNavigations": 1,
+    "maximumCombinedBudgetUnits": 8,
+    "rootUrl": "https://purview.microsoft.com/home",
+    "alignmentEntry": "${NativeEntryUrl}",
+    "allNavigationLanesExplicit": true
+  },
+  "rawRefreshDigest": "e64d99050f43b15a03501c0257632fee1f3bf708282eb6be9fcd89016decbaea",
+  "resolvedRefreshDigest": "9031fadaf88a63de436b7b8a3e1e90b54cf9b5709540ef0402d9dfa9b0a4c1f4",
+  "rawExecutionDigest": "c1ad8ee305a8ee2830bd6f62ce135f6ba6cc426f4584c63dd56eed7cc524ded8",
+  "resolvedExecutionDigest": "03a2b87a0a8f382ca6cd68364f741f23ff07d75b03cf30c27db2f60bd616a841",
+  "approvalExpiresAt": "2026-11-06T05:45:00.000Z",
+  "limitations": [
+    "Native entry proof does not prove endpoint emission or API health.",
+    "No direct API replay, tenant change or configuration mutation.",
+    "Private values remain external; independent body/source review follows capture."
+  ]
+}

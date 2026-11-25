@@ -1,0 +1,156 @@
+{
+  "schemaVersion": 1,
+  "kind": "known-operation-refresh-approval-source",
+  "status": "pending-fresh-independent-v4-dsl-review",
+  "specId": "entra-idgov",
+  "refreshDate": "2026-10-29",
+  "refreshDigest": "186eeed9a8c6ebf48cc4ded81bcfe3ce9100534a469d8c556a3b615a9adcd808",
+  "recipeDestination": "tools/capture-recipes/entra-idgov-known-refresh-20261029.json",
+  "proposedRecipeSha256": "7bee23eda8f19f99fafedd45b6d37b7f6c0f12da63f734ff0a8328cf5499f284",
+  "sourceRecipe": {
+    "path": "tools/capture-recipes/entra-idgov-deep.json",
+    "sha256": "b82e10e239bafbfb1829f1f26f8283088fd0c10bafc69f94db238487132e1bf5"
+  },
+  "specification": {
+    "path": "specifications/nodoc-entra-idgov/specification/openapi.yml",
+    "sha256": "e2a90c6f20abed1f56e085a2e52c3f7798aabdb7c1c7a6a1aeb100624b120698",
+    "operationCount": 17
+  },
+  "policyBindings": [
+    {
+      "path": "PORTAL_DISCOVERY_AGENT_PROMPT.md",
+      "sha256": "57b6acf49eac1afc6e51b014039a6cba694adeeb058b13fa549f0610e20ae8b5"
+    },
+    {
+      "path": "AGENT_DISCOVERY_RUNBOOK.md",
+      "sha256": "4ef12fc4e271e17094dbb5da447b6f535bf2a63b457089ce5bd7f6876126b079"
+    },
+    {
+      "path": "AGENT_DISCOVERY_PLAYBOOK.md",
+      "sha256": "c12b9cecf0a3a85e8c760a8e7b310c0d0528f41cb65c8fe2c95eb420ca3fb119"
+    },
+    {
+      "path": "tools/portal-discovery-model-policy.mjs",
+      "sha256": "5d4b65b60d21a5b7431828b41694c49e85c58fb1497a2c3fb1cf53483066c346"
+    },
+    {
+      "path": "tools/portal-discovery-operation-safety.mjs",
+      "sha256": "425a1466f41aed855a0871548ee464670c350ce9b2954eba0e220c9a38d86ca3"
+    },
+    {
+      "path": "tools/discovery-safety.mjs",
+      "sha256": "e406c0fcd3401092ab2ef8318d41c17bb72956eec84638f2a00b9535dda8c8a1"
+    }
+  ],
+  "target": {
+    "status": "active",
+    "method": "GET",
+    "host": "api.accessreviews.identitygovernance.azure.com",
+    "routes": [
+      "/accessReviews/v2.0/reports"
+    ],
+    "state": "ID Governance dashboard passive landing and reload; deeper Access reviews, Programs and Review History omitted without immutable exact href provenance",
+    "actionIndexes": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "approvalExpiresAt": "2026-10-31T08:00:00.000Z",
+    "variableBindingsDigest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "documentationObjectives": [
+      "freshness",
+      "health",
+      "schema-evidence",
+      "usage-observation",
+      "error-example"
+    ],
+    "evidenceIds": [
+      "checked-in-ui-state-entra-idgov-deep",
+      "checked-in-openapi-static-operation"
+    ]
+  },
+  "retainedPlanningEvidence": [],
+  "uiProvenance": {
+    "sourceRecipe": "tools/capture-recipes/entra-idgov-deep.json",
+    "entryUrl": "https://entra.microsoft.com/#blade/Microsoft_AAD_ERM/DashboardBlade",
+    "actionCount": 5,
+    "usesOnlyKnownStates": true,
+    "noveltyNotRequired": true,
+    "exactRepairProvenance": {
+      "kind": "checked-in-static-landing-only",
+      "path": "tools/capture-recipes/entra-idgov-deep.json",
+      "sha256": "b82e10e239bafbfb1829f1f26f8283088fd0c10bafc69f94db238487132e1bf5",
+      "deeperStates": "uncovered-no-href-provenance"
+    }
+  },
+  "coverage": {
+    "primaryWitness": "GET /accessReviews/v2.0/reports",
+    "representativeActions": [
+      "navigate=https://entra.microsoft.com/#blade/Microsoft_AAD_ERM/DashboardBlade",
+      "wait-ms=6000",
+      "reload=idgov-current-dashboard",
+      "wait-ms=8000",
+      "capture=idgov-current-dashboard"
+    ],
+    "uncoveredFamilies": [
+      "no prior admitted native HTTP witness",
+      "provider-bound business-flow detail",
+      "current Programs/Review History controls availability",
+      "Access reviews, Programs and Review History views omitted because observe-only mode forbids label clicks and no immutable exact href was bound"
+    ],
+    "requiredDisposition": "Each uncovered family must be observed, unchanged with evidence, adjacent, unreachable in approved state, blocked with precise prerequisite, or separately approved state required. One witness never closes spec."
+  },
+  "safety": {
+    "apiProbeAuthorized": false,
+    "mutationAuthorized": false,
+    "deviceCodeAuthorized": false,
+    "auth": "cached/WAM or normal browser only",
+    "passiveMethods": "all naturally emitted methods retained; no authored requests",
+    "browserLifecycle": "one global endpoint, serialized owner/preflight/worker/terminal/review/disposition/stop"
+  },
+  "caveats": [
+    "static ID-free spec route plus checked-in passive UI actions, not retained healthy witness",
+    "new current-health attempt explicitly requested; failures/no-target retained as current blockers",
+    "no provider IDs guessed"
+  ],
+  "preflightChecks": {
+    "metadata": "accepted",
+    "operationOwnership": "accepted",
+    "safety": {
+      "safe": true,
+      "unsafeActions": []
+    },
+    "executorDsl": "actual-executor-parser-pass"
+  },
+  "requiredLiveProof": [
+    "terminal discovery-run.json + summary.json + candidate-handoff.json",
+    "all required action indexes accounted with canonical results",
+    "action-attributed exact wire method/host/route",
+    "complete sanitized sidecars with every referenced SHA/length/path verified",
+    "observedAt from source request",
+    "actual statuses and health/error classification",
+    "per-family coverage disposition; no fabricated full-spec freshness"
+  ],
+  "dslRepair": {
+    "reason": "observe-only executor and full metadata validator allow only navigate/reload/wait-ms/capture; clicks excluded",
+    "previousRecipeSha256": "e5e162c30e9a159963438b672aaf3975ca0ebd992738cb76d20aadecaa1f8c7e",
+    "previousSourceSha256": "08563b4a9f5561ab9bce10a891e8513801c6e1e9e474e30e8b599fe45a4e2b92",
+    "safetyModeUnchanged": true,
+    "provenance": {
+      "kind": "checked-in-static-landing-only",
+      "path": "tools/capture-recipes/entra-idgov-deep.json",
+      "sha256": "b82e10e239bafbfb1829f1f26f8283088fd0c10bafc69f94db238487132e1bf5",
+      "deeperStates": "uncovered-no-href-provenance"
+    },
+    "actualExecutorAudit": {
+      "artifactPath": "private-artifacts/refresh-20261029/contracts/dsl-v4/all19-actual-executor-parser-audit.json",
+      "sha256": "c8238c16557a971b76925c46d17e48e128d863f6e54c2cded4a487fac9832370",
+      "executorSourceSha256": "df75ca174b816d1e4391f1f5e51e037f81cffc00b66d909c729ecbcb9cbd567f",
+      "passed": 19,
+      "failed": 0,
+      "noBrowserOrNetwork": true
+    }
+  }
+}

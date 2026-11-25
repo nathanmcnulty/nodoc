@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "decision": "accept-bounded-known-operation-refresh",
+  "specId": "viva-engage",
+  "workerModel": "gpt-5.6-luna",
+  "workerReasoning": "xhigh",
+  "refreshDigest": "ae4fd1a5463af618367a44ae996f02e669ab6d8fc3d3f518ffce0afdf55c19dd",
+  "expiresAt": "2026-10-04T18:00:00.000Z",
+  "reviewPacketSha256": "574c017549f647f068ef4bf12d0dea22bcf2e8b952218122a0fa7df9fef05f10",
+  "reviewedRecipeSha256": "325985367fbf2e12e357c1d765f21cc3b5627cd91a4f9b19101357cd6e9f3676",
+  "correctedReloadReview": {
+    "decision": "accept",
+    "productionEvidence": [
+      "cdp-deep-capture.mjs parseActionSpec/observe-only allowlist/reloadRoot/action dispatch",
+      "discovery-capture-policy.mjs reload load-event and exact-URL validation"
+    ]
+  },
+  "blockers": [],
+  "requiredLiveProof": [
+    "actions 0-4 complete",
+    "action-attributed HTTP 2xx exact target/query hash",
+    "GraphQL response has no errors",
+    "complete sanitized hash-bound scoped sidecar",
+    "source-request observedAt"
+  ],
+  "source": {
+    "artifactPath": "tools/frontier-approvals/viva-engage-tenant-config-known-refresh-source.json",
+    "artifactSha256": "fcd537f0f1ee9a93b95cdeb5c7c04476a541ea42e84f3e03f762d8e9908b73e2"
+  }
+}

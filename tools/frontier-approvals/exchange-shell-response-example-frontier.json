@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "specId": "exchange-beta",
+  "decision": "accept-bounded-frontier",
+  "workerModel": "gpt-5.6-luna",
+  "workerReasoning": "xhigh",
+  "approvedAt": "2026-10-03T11:30:23.899Z",
+  "source": {
+    "head": "d59f4460e59fe490307f3256ee7b56f608e5b7e9",
+    "artifactPath": "tools/frontier-approvals/exchange-shell-response-example-frontier-source.json",
+    "artifactSha256": "cc6a88b585335f41faa9d5f1a62d5c0f287bbbe63a47f9f63da1f968ac6222da",
+    "frontierSetId": "offline-frontier-set-6884dacefe13496aa22fbee7",
+    "frontierSetDigest": "6884dacefe13496aa22fbee7d6a44ed4554874073a836e8ab12f906f99d81a85"
+  },
+  "state": "Exchange admin landing after a passive same-origin reload",
+  "canonicalShellUrl": "https://admin.exchange.microsoft.com/#/",
+  "apiEvidenceScope": {
+    "hosts": [
+      "admin.exchange.microsoft.com"
+    ],
+    "pathPrefixes": [
+      "/beta"
+    ]
+  },
+  "safeActions": [
+    "navigate=https://admin.exchange.microsoft.com/#/",
+    "wait-ms=3000",
+    "reload=exchange-legacy-host-bootstrap",
+    "wait-ms=6000",
+    "capture=exchange-shell-response-example"
+  ],
+  "acceptedItems": [
+    {
+      "frontierId": "offline-frontier-6e6f88b121edf70cb8c3f4e2",
+      "frontierDigest": "6e6f88b121edf70cb8c3f4e27d5db0eb64aea391926cf4abf6ecf448325b2340",
+      "canonicalKey": "admin.exchange.microsoft.com GET /beta/Shell"
+    }
+  ],
+  "deferredItemCount": 220,
+  "blockedItemCount": 220,
+  "constraints": [
+    "Passive navigation, same-origin reload, wait, and capture only",
+    "Accept only the known GET /beta/Shell HTTP 200 application/json response matching fingerprint cac37a75e926d0f582ad3d5ed2a8f9f3d90db68275e6c27868744edcbb8b6f8c",
+    "Do not issue the prior direct GET probe, use dynamic controls, or preserve user, tenant, domain, URL, token, or current-state values"
+  ]
+}

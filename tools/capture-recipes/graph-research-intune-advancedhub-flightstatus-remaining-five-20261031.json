@@ -1,0 +1,94 @@
+{
+  "portal": "Intune Autopatch Advanced Hub",
+  "url": "https://intune.microsoft.com/#view/Microsoft_Intune_DeviceSettings/TenantAdminMenu/~/advancedHub",
+  "pageTarget": {
+    "matchHosts": [
+      "intune.microsoft.com"
+    ],
+    "matchPathPrefixes": [
+      "/"
+    ]
+  },
+  "matchHosts": [
+    "graph.microsoft.com"
+  ],
+  "matchPathPrefixes": [
+    "/beta/deviceManagement/retrieveProjectFlightingStatuses(projectNames=null)"
+  ],
+  "inspectionPolicy": {
+    "mode": "observe-only",
+    "prohibitedControlPatterns": [
+      "Add",
+      "Create",
+      "Delete",
+      "Export",
+      "Remove",
+      "Save",
+      "Submit",
+      "Update",
+      "Purchase",
+      "Activate",
+      "Start trial"
+    ]
+  },
+  "captureScripts": false,
+  "postActionSettleMs": 6000,
+  "settleMs": 8000,
+  "maxActions": 6,
+  "actions": [
+    {
+      "type": "navigate",
+      "value": "https://intune.microsoft.com/#view/Microsoft_Intune_DeviceSettings/TenantAdminMenu/~/advancedHub",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "6000",
+      "required": true
+    },
+    {
+      "type": "reload",
+      "value": "graph-flight-response-body",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "8000",
+      "required": true
+    },
+    {
+      "type": "capture",
+      "value": "graph-flight-response-body",
+      "required": true
+    }
+  ],
+  "knownOperationRefresh": {
+    "status": "active",
+    "method": "GET",
+    "host": "graph.microsoft.com",
+    "routes": [
+      "/beta/deviceManagement/retrieveProjectFlightingStatuses(projectNames=null)"
+    ],
+    "actionIndexes": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "state": "One exact previously observed Graph-research GET passively emitted by the Intune Advanced Hub worker caller. Backend/source owner and UI caller remain distinct. No direct Graph API execution, Graph portal workflow, permission/grant evidence, or standalone health claim.",
+    "documentationObjectives": [
+      "schema-evidence",
+      "usage-observation",
+      "error-example"
+    ],
+    "evidenceIds": [
+      "opaque:intune-graph-flight-action2"
+    ],
+    "approvalExpiresAt": "2026-11-01T00:45:00.000Z",
+    "variableBindingsDigest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "approvalArtifact": "tools/frontier-approvals/graph-research-intune-advancedhub-flightstatus-remaining-five-20261031.json",
+    "approvalDigest": "6884ce409e061f6e297ecd8577cbe348a8f3367a57456e56b321fe50944dffce"
+  },
+  "matchUrlPattern": "^https://intune\\.microsoft\\.com/#view/Microsoft_Intune_DeviceSettings/TenantAdminMenu/~/advancedHub$"
+}

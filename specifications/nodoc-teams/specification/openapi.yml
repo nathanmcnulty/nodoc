@@ -458,6 +458,24 @@ components:
           type: string
           format: uuid
       additionalProperties: true
+    TeamsUpgradePolicy:
+      type: object
+      nullable: true
+      description: |
+        Teams upgrade policy assignment observed with this stable key and type
+        shape in three successful read-only responses captured on 2026-08-31.
+        The retained evidence does not establish required-field or non-null rules.
+      properties:
+        assignmentType:
+          type: string
+          nullable: true
+        authority:
+          type: string
+          nullable: true
+        name:
+          type: string
+          nullable: true
+      additionalProperties: true
     TeamsUserRecord:
       type: object
       description: Teams user record returned by the interfaces records service.
@@ -495,6 +513,8 @@ components:
           type: string
         teamsUpgradeNotificationsEnabled:
           type: string
+        teamsUpgradePolicy:
+          $ref: '#/components/schemas/TeamsUpgradePolicy'
         teamsUpgradePolicyIsReadOnly:
           type: string
         telephoneNumbers:
@@ -833,6 +853,26 @@ paths:
       - url: https://noneu-admin.teams.microsoft.com
         description: Regional Teams admin preference service
     get:
+      x-nodoc-live-capture:
+        source: authenticated Teams admin center representative user-management states passive representative states
+        browsedPages:
+          - Teams admin center representative user-management states
+      x-nodoc-operation-context:
+        surface: Teams admin center representative user-management states
+        workflows:
+          - Observe native requests during approved passive representative portal states.
+        availability:
+          level: user-context
+          notes:
+            - One authenticated portal session; standalone execution, parameter requiredness, effective grants and minimum roles are not established.
+        provenance:
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - GET noneu-admin.teams.microsoft.com/api/v1/usersettings; HTTP 200; action 5; observed 2026-10-29T23:22:49.430Z; complete response privately hash-verified.
+              - Existing declared JSON types remain compatible in this representative response; tenant preferences, user identities and values are not reproduced.
+              - This single authenticated passive context does not establish parameter requiredness, standalone execution, effective grants or minimum roles.
+              - The refresh evaluator remains blocked at initial checkpoint0; raw target traffic does not override the missing-action assessment.
       tags: [RegionalAdmin]
       summary: Get saved Teams admin grid settings
       description: |
@@ -854,6 +894,38 @@ paths:
       - url: https://noneu-admin.teams.microsoft.com
         description: Regional Teams admin preference service
     get:
+      x-nodoc-live-capture:
+        source: authenticated Teams admin center representative user-management states passive representative states
+        browsedPages:
+          - Teams admin center representative user-management states
+      x-nodoc-operation-context:
+        surface: Teams admin center representative user-management states
+        workflows:
+          - Observe native requests during approved passive representative portal states.
+        availability:
+          level: user-context
+          notes:
+            - One authenticated portal session; standalone execution, parameter requiredness, effective grants and minimum roles are not established.
+        provenance:
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - GET noneu-admin.teams.microsoft.com/api/v1/userpreference; HTTP 200; action 5; observed 2026-10-29T23:22:49.427Z; complete response privately hash-verified.
+              - Existing declared JSON types remain compatible in this representative response; tenant preferences, user identities and values are not reproduced.
+              - This single authenticated passive context does not establish parameter requiredness, standalone execution, effective grants or minimum roles.
+              - The refresh evaluator remains blocked at initial checkpoint0; raw target traffic does not override the missing-action assessment.
+          - source: authenticated-portal-capture-20261030
+            confidence: high
+            notes:
+              - Exact wire GET noneu-admin.teams.microsoft.com/api/v1/userpreference matched the existing canonical route /api/v1/userpreference; query values and response values are withheld.
+              - Action 5 at 2026-10-30T13:34:33.870Z; evidence request-5b1875b8cfa001a31562; HTTP 200 complete response privately verified.
+              - The retained /dashboardV2 entry and Users state close the prior initial-navigation accounting gap. All eight recipe actions and the mandatory orchestration action completed; the earlier incomplete capture remains historical.
+              - The complete parsed JSON root is an object compatible with the existing generic response schema. No conventional root logical error envelope was observed; individual preference, feature and metric field types are not established by the permissive schema.
+              - User, tenant, role, permission and feature-state values are not copied. A preference/configuration response does not prove effective grants, minimum roles, least privilege, standalone execution or product activation.
+              - One normalized primary API response at action 5 is distinct from four raw target transport observations. These represent one operation rather than four operations or whole-spec freshness.
+              - The selected target identity was bound from strict authenticated preflight through assignment, exact packet command arrays and driver readiness. No tenant switch, authored API query, request replay or mutation was performed.
+              - Only this primary operation is refreshed. The three other previously scoped native GET observations and the earlier empty dataProviderErrors record remain bounded historical evidence, not revalidated by this response.
+              - All required actions were accounted in this fresh reviewed remedy. This is scoped operation evidence, not whole-spec freshness, product health, standalone invocation, effective permissions, consent or minimum-role proof.
       tags: [RegionalAdmin]
       summary: Get Teams admin dashboard preferences
       description: |
@@ -1473,6 +1545,27 @@ paths:
       - url: https://api.interfaces.records.teams.microsoft.com
         description: Teams interfaces records service
     get:
+      x-nodoc-live-capture:
+        source: authenticated Teams admin center representative user-management states passive representative states
+        browsedPages:
+          - Teams admin center representative user-management states
+      x-nodoc-operation-context:
+        surface: Teams admin center representative user-management states
+        workflows:
+          - Observe native requests during approved passive representative portal states.
+        availability:
+          level: user-context
+          notes:
+            - One authenticated portal session; standalone execution, parameter requiredness, effective grants and minimum roles are not established.
+        provenance:
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - GET api.interfaces.records.teams.microsoft.com/Teams.User/users/{userId}; HTTP 200; action 5; observed 2026-10-29T23:22:51.164Z; complete response privately hash-verified.
+              - Existing declared JSON types remain compatible in this representative response; tenant preferences, user identities and values are not reproduced.
+              - The wire pathname is displayed as its existing route template; the concrete path identifier remains private.
+              - This single authenticated passive context does not establish parameter requiredness, standalone execution, effective grants or minimum roles.
+              - The refresh evaluator remains blocked at initial checkpoint0; raw target traffic does not override the missing-action assessment.
       tags: [TeamsUsers]
       summary: Get a Teams user record
       description: |
@@ -1532,8 +1625,11 @@ paths:
         headerProfile: teams-service-bearer
         pagination:
           style: link
-          requestParameters: [pageSize]
-          responseFields: ['@nextLink', users]
+          requestParameters:
+            - pageSize
+          responseFields:
+            - "@nextLink"
+            - users
           notes:
             - The portal requested 20 records and received a continuation link; follow the returned link instead of manufacturing a token.
         availability:
@@ -1549,6 +1645,14 @@ paths:
             confidence: high
             notes:
               - A bounded August 2026 Manage users capture returned 200 with a non-empty collection and no mutation requests.
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - GET api.interfaces.records.teams.microsoft.com/Teams.User/users; HTTP 200; action 5; observed 2026-10-29T23:22:51.336Z; complete response privately hash-verified.
+              - Existing declared JSON types remain compatible in this representative response; tenant preferences, user identities and values are not reproduced.
+              - The pagination field retains its declared string type; cursor following and final-page behavior are untested.
+              - This single authenticated passive context does not establish parameter requiredness, standalone execution, effective grants or minimum roles.
+              - The refresh evaluator remains blocked at initial checkpoint0; raw target traffic does not override the missing-action assessment.
       responses:
         '200':
           description: Teams user inventory payload.

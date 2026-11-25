@@ -1,0 +1,206 @@
+{
+  "schemaVersion": 1,
+  "kind": "known-operation-refresh-approval-source",
+  "status": "pending-fresh-independent-review",
+  "specId": "intune-autopatch",
+  "refreshDate": "2026-10-29",
+  "refreshDigest": "61112f7dd4c2da2c9565e42b682ecc106cd03f9692efdfddea01cecdbe45d117",
+  "recipeDestination": "tools/capture-recipes/intune-autopatch-known-refresh-20261029.json",
+  "proposedRecipeSha256": "4561d7eed7a8c3d59423a704372478562726d3b06e06882a941dbd0d25075fdd",
+  "sourceRecipe": {
+    "path": "tools/capture-recipes/intune-portal-deep.json",
+    "sha256": "f801f7a21193218f3f4492cbab9fe7c045143be433b3e85b0f87ba3b6c7b171c"
+  },
+  "specification": {
+    "path": "specifications/nodoc-intune-autopatch/specification/openapi.yml",
+    "sha256": "0a918b33a55a004cdb10d0f57d309d6f32b5b21c4beaef822ebaa437df96be86",
+    "operationCount": 53
+  },
+  "policyBindings": [
+    {
+      "path": "PORTAL_DISCOVERY_AGENT_PROMPT.md",
+      "sha256": "57b6acf49eac1afc6e51b014039a6cba694adeeb058b13fa549f0610e20ae8b5"
+    },
+    {
+      "path": "AGENT_DISCOVERY_RUNBOOK.md",
+      "sha256": "4ef12fc4e271e17094dbb5da447b6f535bf2a63b457089ce5bd7f6876126b079"
+    },
+    {
+      "path": "AGENT_DISCOVERY_PLAYBOOK.md",
+      "sha256": "c12b9cecf0a3a85e8c760a8e7b310c0d0528f41cb65c8fe2c95eb420ca3fb119"
+    },
+    {
+      "path": "tools/portal-discovery-model-policy.mjs",
+      "sha256": "5d4b65b60d21a5b7431828b41694c49e85c58fb1497a2c3fb1cf53483066c346"
+    },
+    {
+      "path": "tools/portal-discovery-operation-safety.mjs",
+      "sha256": "425a1466f41aed855a0871548ee464670c350ce9b2954eba0e220c9a38d86ca3"
+    },
+    {
+      "path": "tools/discovery-safety.mjs",
+      "sha256": "e406c0fcd3401092ab2ef8318d41c17bb72956eec84638f2a00b9535dda8c8a1"
+    }
+  ],
+  "target": {
+    "status": "active",
+    "method": "GET",
+    "host": "services.autopatch.microsoft.com",
+    "routes": [
+      "/tenant-management/v1/Enrollment/Starter/featureEnablementStatus"
+    ],
+    "state": "Intune Autopatch bounded passive representative states from tools/capture-recipes/intune-portal-deep.json",
+    "actionIndexes": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "approvalExpiresAt": "2026-10-31T08:00:00.000Z",
+    "variableBindingsDigest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "documentationObjectives": [
+      "freshness",
+      "health",
+      "schema-evidence",
+      "usage-observation",
+      "error-example"
+    ],
+    "evidenceIds": [
+      "retained-intune-autopatch-primary-witness",
+      "checked-in-ui-state-intune-portal-deep"
+    ]
+  },
+  "retainedPlanningEvidence": [
+    {
+      "artifactPath": "private-artifacts/intune-addons-recovery-20260819T194005/api-records.json",
+      "sha256": "c9f49e97a8064cca0a3ff1172f188913ee32704782f6295be9d2ac6761193280",
+      "recordIndex": 101,
+      "method": "GET",
+      "host": "services.autopatch.microsoft.com",
+      "route": "/tenant-management/v1/Enrollment/Starter/featureEnablementStatus",
+      "status": 200,
+      "mimeType": "application/json",
+      "seenOnPageCount": 1,
+      "observedAt": null,
+      "historicOnly": true
+    },
+    {
+      "artifactPath": "private-artifacts/intune-graph-inventory-corroboration-20260829T223113209/api-records.json",
+      "sha256": "6ff2fc74473d28adf914498f082b9e23074e7131cfc51754a6febecd6f0cf40c",
+      "recordIndex": 164,
+      "method": "GET",
+      "host": "services.autopatch.microsoft.com",
+      "route": "/tenant-management/v1/Enrollment/Starter/featureEnablementStatus",
+      "status": 200,
+      "mimeType": "application/json",
+      "seenOnPageCount": 1,
+      "observedAt": null,
+      "historicOnly": true
+    },
+    {
+      "artifactPath": "private-artifacts/intune-graph-inventory-optimized-20260829T222438391/api-records.json",
+      "sha256": "6a002df3139c1aa87ea4c98ebc053990a574d9246f880cd173ee3afa07c5e151",
+      "recordIndex": 164,
+      "method": "GET",
+      "host": "services.autopatch.microsoft.com",
+      "route": "/tenant-management/v1/Enrollment/Starter/featureEnablementStatus",
+      "status": 200,
+      "mimeType": "application/json",
+      "seenOnPageCount": 1,
+      "observedAt": null,
+      "historicOnly": true
+    },
+    {
+      "artifactPath": "private-artifacts/intune-graph-inventory-postmerge-20260829T220024254/api-records.json",
+      "sha256": "d99341a98bfc17355c08baff7a635040af6c2c71bc7c7a114e2b1b4e0b73b8ad",
+      "recordIndex": 136,
+      "method": "GET",
+      "host": "services.autopatch.microsoft.com",
+      "route": "/tenant-management/v1/Enrollment/Starter/featureEnablementStatus",
+      "status": 200,
+      "mimeType": "application/json",
+      "seenOnPageCount": 1,
+      "observedAt": null,
+      "historicOnly": true
+    },
+    {
+      "artifactPath": "private-artifacts/intune-graph-refresh-20260831T174500Z/api-records.json",
+      "sha256": "691bad3e4a80c2d2f3da8bd7964ec4e69eeb0666416443ba56e4ed85c42c7c75",
+      "recordIndex": 164,
+      "method": "GET",
+      "host": "services.autopatch.microsoft.com",
+      "route": "/tenant-management/v1/Enrollment/Starter/featureEnablementStatus",
+      "status": 200,
+      "mimeType": "application/json",
+      "seenOnPageCount": 1,
+      "observedAt": null,
+      "historicOnly": true
+    },
+    {
+      "artifactPath": "private-artifacts/intune-portal-novelty-20260819T192056/api-records.json",
+      "sha256": "0c3a6ab455cd675db82acbd620a50614e5db085044403210947e49358c9847d6",
+      "recordIndex": 148,
+      "method": "GET",
+      "host": "services.autopatch.microsoft.com",
+      "route": "/tenant-management/v1/Enrollment/Starter/featureEnablementStatus",
+      "status": 200,
+      "mimeType": "application/json",
+      "seenOnPageCount": 1,
+      "observedAt": null,
+      "historicOnly": true
+    }
+  ],
+  "uiProvenance": {
+    "sourceRecipe": "tools/capture-recipes/intune-portal-deep.json",
+    "entryUrl": "https://intune.microsoft.com/#view/Microsoft_Intune_DeviceSettings/TenantAdminMenu/~/advancedHub",
+    "actionCount": 5,
+    "usesOnlyKnownStates": true,
+    "noveltyNotRequired": true
+  },
+  "coverage": {
+    "primaryWitness": "GET /tenant-management/v1/Enrollment/Starter/featureEnablementStatus",
+    "representativeActions": [
+      "navigate=https://intune.microsoft.com/#view/Microsoft_Intune_DeviceSettings/TenantAdminMenu/~/advancedHub",
+      "wait-ms=6000",
+      "reload=autopatch-advanced-hub",
+      "wait-ms=8000",
+      "capture=autopatch-advanced-hub"
+    ],
+    "uncoveredFamilies": [
+      "management-summary/reporting states not naturally emitted",
+      "support-entitlement",
+      "Autopatch groups detail"
+    ],
+    "requiredDisposition": "Each uncovered family must be observed, unchanged with evidence, adjacent, unreachable in approved state, blocked with precise prerequisite, or separately approved state required. One witness never closes spec."
+  },
+  "safety": {
+    "apiProbeAuthorized": false,
+    "mutationAuthorized": false,
+    "deviceCodeAuthorized": false,
+    "auth": "cached/WAM or normal browser only",
+    "passiveMethods": "all naturally emitted methods retained; no authored requests",
+    "browserLifecycle": "one global endpoint, serialized owner/preflight/worker/terminal/review/disposition/stop"
+  },
+  "caveats": [
+    "Update Windows from the cloud control excluded",
+    "feature enablement observed on retained Advanced Hub state; no enablement action"
+  ],
+  "preflightChecks": {
+    "metadata": "accepted",
+    "operationOwnership": "accepted",
+    "safety": {
+      "safe": true,
+      "unsafeActions": []
+    }
+  },
+  "requiredLiveProof": [
+    "terminal discovery-run.json + summary.json + candidate-handoff.json",
+    "all required action indexes accounted with canonical results",
+    "action-attributed exact wire method/host/route",
+    "complete sanitized sidecars with every referenced SHA/length/path verified",
+    "observedAt from source request",
+    "actual statuses and health/error classification",
+    "per-family coverage disposition; no fabricated full-spec freshness"
+  ]
+}

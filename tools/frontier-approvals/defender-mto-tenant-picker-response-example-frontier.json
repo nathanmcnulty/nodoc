@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "specId": "defender-mto",
+  "decision": "accept-bounded-frontier",
+  "workerModel": "gpt-5.6-luna",
+  "workerReasoning": "xhigh",
+  "approvedAt": "2026-10-03T11:46:11.931Z",
+  "source": {
+    "head": "d59f4460e59fe490307f3256ee7b56f608e5b7e9",
+    "artifactPath": "tools/frontier-approvals/defender-mto-tenant-picker-response-example-frontier-source.json",
+    "artifactSha256": "ec645ef4b03566d81f2eb06fce57e8f25e35439f7b2d738c54e44284ffea6aa0",
+    "frontierSetId": "offline-frontier-set-58f0699331b26097a06a63b6",
+    "frontierSetDigest": "58f0699331b26097a06a63b6f82574612dd2010a94badc725b7d7e4917034cb1"
+  },
+  "state": "Defender Multi-Tenant Management landing after a passive same-origin reload",
+  "canonicalShellUrl": "https://mto.security.microsoft.com",
+  "apiEvidenceScope": {
+    "hosts": [
+      "mto.security.microsoft.com"
+    ],
+    "pathPrefixes": [
+      "/mtoapi"
+    ]
+  },
+  "safeActions": [
+    "navigate=https://mto.security.microsoft.com",
+    "wait-ms=10000",
+    "capture=mto-landing-initial",
+    "reload=mto-landing",
+    "wait-ms=10000",
+    "capture=mto-landing-reloaded"
+  ],
+  "acceptedItems": [
+    {
+      "frontierId": "offline-frontier-1140646ba3cfc857080ea66c",
+      "frontierDigest": "1140646ba3cfc857080ea66c4700bb6d86f580eebae0115af22a9878443413af",
+      "canonicalKey": "mto.security.microsoft.com GET /mtoapi/tenants/TenantPicker"
+    }
+  ],
+  "deferredItemCount": 70,
+  "blockedItemCount": 70,
+  "constraints": [
+    "Passive navigation, wait, capture, same-origin reload, wait, and capture only",
+    "Accept only a newly action-attributed GET /mtoapi/tenants/TenantPicker response on the canonical MTO host with complete healthy accounting",
+    "Do not switch tenants, click controls, issue probes or authored API requests, or retain tenant identifiers, names, cookies, headers, or current-state values"
+  ]
+}

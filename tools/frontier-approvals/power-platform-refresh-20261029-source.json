@@ -1,0 +1,173 @@
+{
+  "schemaVersion": 1,
+  "kind": "known-operation-refresh-approval-source",
+  "status": "pending-fresh-independent-v4-dsl-review",
+  "specId": "power-platform",
+  "refreshDate": "2026-10-29",
+  "refreshDigest": "b7a02e581159857e90f273aca6dc69b2903f70a874cf94b88c3f3ef176b0225f",
+  "recipeDestination": "tools/capture-recipes/power-platform-known-refresh-20261029.json",
+  "proposedRecipeSha256": "c8fe0cd1cdebd4aeab8794f9ca16d570e3bf53680283399318a4f7c82ff256c6",
+  "sourceRecipe": {
+    "path": "tools/capture-recipes/power-platform-environments-novelty.json",
+    "sha256": "07d6eb288f0712b8a38441d72d5e4cd82a8d762312735aa48050ace5bd5f2ed0"
+  },
+  "specification": {
+    "path": "specifications/nodoc-power-platform/specification/openapi.yml",
+    "sha256": "53aeb00b2a632a3f26164261cf7a092c434d7870ecf06580cea661bc39624254",
+    "operationCount": 248
+  },
+  "policyBindings": [
+    {
+      "path": "PORTAL_DISCOVERY_AGENT_PROMPT.md",
+      "sha256": "57b6acf49eac1afc6e51b014039a6cba694adeeb058b13fa549f0610e20ae8b5"
+    },
+    {
+      "path": "AGENT_DISCOVERY_RUNBOOK.md",
+      "sha256": "4ef12fc4e271e17094dbb5da447b6f535bf2a63b457089ce5bd7f6876126b079"
+    },
+    {
+      "path": "AGENT_DISCOVERY_PLAYBOOK.md",
+      "sha256": "c12b9cecf0a3a85e8c760a8e7b310c0d0528f41cb65c8fe2c95eb420ca3fb119"
+    },
+    {
+      "path": "tools/portal-discovery-model-policy.mjs",
+      "sha256": "5d4b65b60d21a5b7431828b41694c49e85c58fb1497a2c3fb1cf53483066c346"
+    },
+    {
+      "path": "tools/portal-discovery-operation-safety.mjs",
+      "sha256": "425a1466f41aed855a0871548ee464670c350ce9b2954eba0e220c9a38d86ca3"
+    },
+    {
+      "path": "tools/discovery-safety.mjs",
+      "sha256": "e406c0fcd3401092ab2ef8318d41c17bb72956eec84638f2a00b9535dda8c8a1"
+    }
+  ],
+  "target": {
+    "status": "active",
+    "method": "GET",
+    "host": "api.bap.microsoft.com",
+    "routes": [
+      "/providers/Microsoft.BusinessAppPlatform/environmentGroups"
+    ],
+    "state": "Power Platform known landing/reload followed by immutable observed /manage/environments navigation",
+    "actionIndexes": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "approvalExpiresAt": "2026-10-31T08:00:00.000Z",
+    "variableBindingsDigest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "documentationObjectives": [
+      "freshness",
+      "health",
+      "schema-evidence",
+      "usage-observation",
+      "error-example"
+    ],
+    "evidenceIds": [
+      "retained-power-platform-primary-witness",
+      "checked-in-ui-state-power-platform-environments-novelty"
+    ]
+  },
+  "retainedPlanningEvidence": [
+    {
+      "artifactPath": "private-artifacts/power-platform-environments-20260830T0910Z/api-records.json",
+      "sha256": "83a016fbc41c93974515b12f266c1e735243dea35c5419d108b9e24b73e842ef",
+      "recordIndex": 25,
+      "method": "GET",
+      "host": "api.bap.microsoft.com",
+      "route": "/providers/Microsoft.BusinessAppPlatform/environmentGroups",
+      "status": 200,
+      "mimeType": "application/json",
+      "seenOnPageCount": 1,
+      "observedAt": null,
+      "historicOnly": true
+    }
+  ],
+  "uiProvenance": {
+    "sourceRecipe": "tools/capture-recipes/power-platform-environments-novelty.json",
+    "entryUrl": "https://admin.powerplatform.microsoft.com",
+    "actionCount": 7,
+    "usesOnlyKnownStates": true,
+    "noveltyNotRequired": true,
+    "exactRepairProvenance": {
+      "kind": "retained-exact-page-url",
+      "artifactPath": "private-artifacts/power-platform-environments-20260830T0910Z/page-states.json",
+      "sha256": "72ba450b11f8f2ba70d6ff042b5d281aad4fa9c4f9f843ebaeaf6cf48911acd2",
+      "recordIndex": 0,
+      "url": "https://admin.powerplatform.microsoft.com/manage/environments"
+    }
+  },
+  "coverage": {
+    "primaryWitness": "GET /providers/Microsoft.BusinessAppPlatform/environmentGroups",
+    "representativeActions": [
+      "navigate=https://admin.powerplatform.microsoft.com",
+      "wait-ms=6000",
+      "reload=power-platform-landing",
+      "wait-ms=8000",
+      "navigate=https://admin.powerplatform.microsoft.com/manage/environments",
+      "wait-ms=8000",
+      "capture=power-platform-environments"
+    ],
+    "uncoveredFamilies": [
+      "migration/approval detail",
+      "managed-license summary",
+      "tenant/settings families not naturally emitted"
+    ],
+    "requiredDisposition": "Each uncovered family must be observed, unchanged with evidence, adjacent, unreachable in approved state, blocked with precise prerequisite, or separately approved state required. One witness never closes spec."
+  },
+  "safety": {
+    "apiProbeAuthorized": false,
+    "mutationAuthorized": false,
+    "deviceCodeAuthorized": false,
+    "auth": "cached/WAM or normal browser only",
+    "passiveMethods": "all naturally emitted methods retained; no authored requests",
+    "browserLifecycle": "one global endpoint, serialized owner/preflight/worker/terminal/review/disposition/stop"
+  },
+  "caveats": [
+    "no environment IDs guessed or environment creation"
+  ],
+  "preflightChecks": {
+    "metadata": "accepted",
+    "operationOwnership": "accepted",
+    "safety": {
+      "safe": true,
+      "unsafeActions": []
+    },
+    "executorDsl": "actual-executor-parser-pass"
+  },
+  "requiredLiveProof": [
+    "terminal discovery-run.json + summary.json + candidate-handoff.json",
+    "all required action indexes accounted with canonical results",
+    "action-attributed exact wire method/host/route",
+    "complete sanitized sidecars with every referenced SHA/length/path verified",
+    "observedAt from source request",
+    "actual statuses and health/error classification",
+    "per-family coverage disposition; no fabricated full-spec freshness"
+  ],
+  "dslRepair": {
+    "reason": "observe-only executor and full metadata validator allow only navigate/reload/wait-ms/capture; clicks excluded",
+    "previousRecipeSha256": "27d9048108acca3e9a0cba1b25374b665c6f0d012164c03e75215cadf2423ba5",
+    "previousSourceSha256": "7dd60db128fe5824cf685eadb3c469f76faa89d6dbaa7906e6cf38ff0b7ef20d",
+    "safetyModeUnchanged": true,
+    "provenance": {
+      "kind": "retained-exact-page-url",
+      "artifactPath": "private-artifacts/power-platform-environments-20260830T0910Z/page-states.json",
+      "sha256": "72ba450b11f8f2ba70d6ff042b5d281aad4fa9c4f9f843ebaeaf6cf48911acd2",
+      "recordIndex": 0,
+      "url": "https://admin.powerplatform.microsoft.com/manage/environments"
+    },
+    "actualExecutorAudit": {
+      "artifactPath": "private-artifacts/refresh-20261029/contracts/dsl-v4/all19-actual-executor-parser-audit.json",
+      "sha256": "c8238c16557a971b76925c46d17e48e128d863f6e54c2cded4a487fac9832370",
+      "executorSourceSha256": "df75ca174b816d1e4391f1f5e51e037f81cffc00b66d909c729ecbcb9cbd567f",
+      "passed": 19,
+      "failed": 0,
+      "noBrowserOrNetwork": true
+    }
+  }
+}

@@ -1,0 +1,239 @@
+{
+  "schemaVersion": 1,
+  "kind": "known-operation-refresh-approval-source",
+  "status": "pending-fresh-independent-review",
+  "specId": "ibiza-iam",
+  "refreshDate": "2026-10-29",
+  "refreshDigest": "edd928506e42c2324014d00d8f721773141dd99656f4e60b782ee1e4bce8cffa",
+  "recipeDestination": "tools/capture-recipes/ibiza-iam-known-refresh-20261029.json",
+  "proposedRecipeSha256": "e930fc1a19aa68f83fc94de0308058eb2f173fb2beb2601cd79ab3e9ef72338f",
+  "sourceRecipe": {
+    "path": "tools/capture-recipes/entra-iam-permissions-response-example-frontier.json",
+    "sha256": "cb860d8a49c04382cb7da3b33fd1915b2fa77c3ede7761d5d4d003a407f2b238"
+  },
+  "specification": {
+    "path": "specifications/nodoc-ibiza-iam/specification/openapi.yml",
+    "sha256": "a36d72ec9f70964811b7197b915077824e03e986e984b4b94558e95753224a7f",
+    "operationCount": 286
+  },
+  "policyBindings": [
+    {
+      "path": "PORTAL_DISCOVERY_AGENT_PROMPT.md",
+      "sha256": "57b6acf49eac1afc6e51b014039a6cba694adeeb058b13fa549f0610e20ae8b5"
+    },
+    {
+      "path": "AGENT_DISCOVERY_RUNBOOK.md",
+      "sha256": "4ef12fc4e271e17094dbb5da447b6f535bf2a63b457089ce5bd7f6876126b079"
+    },
+    {
+      "path": "AGENT_DISCOVERY_PLAYBOOK.md",
+      "sha256": "c12b9cecf0a3a85e8c760a8e7b310c0d0528f41cb65c8fe2c95eb420ca3fb119"
+    },
+    {
+      "path": "tools/portal-discovery-model-policy.mjs",
+      "sha256": "5d4b65b60d21a5b7431828b41694c49e85c58fb1497a2c3fb1cf53483066c346"
+    },
+    {
+      "path": "tools/portal-discovery-operation-safety.mjs",
+      "sha256": "425a1466f41aed855a0871548ee464670c350ce9b2954eba0e220c9a38d86ca3"
+    },
+    {
+      "path": "tools/discovery-safety.mjs",
+      "sha256": "e406c0fcd3401092ab2ef8318d41c17bb72956eec84638f2a00b9535dda8c8a1"
+    }
+  ],
+  "target": {
+    "status": "active",
+    "method": "GET",
+    "host": "main.iam.ad.ext.azure.com",
+    "routes": [
+      "/api/Permissions"
+    ],
+    "state": "Entra IAM bounded passive representative states from tools/capture-recipes/entra-iam-permissions-response-example-frontier.json",
+    "actionIndexes": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "approvalExpiresAt": "2026-10-31T08:00:00.000Z",
+    "variableBindingsDigest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "documentationObjectives": [
+      "freshness",
+      "health",
+      "schema-evidence",
+      "usage-observation",
+      "error-example"
+    ],
+    "evidenceIds": [
+      "retained-ibiza-iam-primary-witness",
+      "checked-in-ui-state-entra-iam-permissions-response-example-frontier"
+    ]
+  },
+  "retainedPlanningEvidence": [
+    {
+      "artifactPath": "private-artifacts/entra-graph-inventory-postmerge-20260829T214058205/api-records.json",
+      "sha256": "401278cf3deafec7c072836a94e4554b554be8bb3375ba2b02ec6f5c4f54ac1a",
+      "recordIndex": 8,
+      "method": "GET",
+      "host": "main.iam.ad.ext.azure.com",
+      "route": "/api/Permissions",
+      "status": 200,
+      "mimeType": "application/json",
+      "seenOnPageCount": 2,
+      "observedAt": null,
+      "historicOnly": true
+    },
+    {
+      "artifactPath": "private-artifacts/entra-graph-inventory-retry-20260829T190904367/api-records.json",
+      "sha256": "17edb5ad1d89e36c773d3199d3cf15d9ff6893c1c439b11c31e5dd1337f9c535",
+      "recordIndex": 7,
+      "method": "GET",
+      "host": "main.iam.ad.ext.azure.com",
+      "route": "/api/Permissions",
+      "status": 200,
+      "mimeType": "application/json",
+      "seenOnPageCount": 1,
+      "observedAt": null,
+      "historicOnly": true
+    },
+    {
+      "artifactPath": "private-artifacts/entra-graph-refresh-20260831T200000Z/api-records.json",
+      "sha256": "d4d31142e60e529e9a9c34b3fec0cd25b2cc7d267f4e1600c3b52be79176b221",
+      "recordIndex": 8,
+      "method": "GET",
+      "host": "main.iam.ad.ext.azure.com",
+      "route": "/api/Permissions",
+      "status": 200,
+      "mimeType": "application/json",
+      "seenOnPageCount": 2,
+      "observedAt": null,
+      "historicOnly": true
+    },
+    {
+      "artifactPath": "private-artifacts/entra-iam-permissions-20261003T112604Z/api-records.json",
+      "sha256": "579ca8db1e7ce8c02d610ad1085a18e721bea16a2b383dbbc79c4caf0e24c1d9",
+      "recordIndex": 6,
+      "method": "GET",
+      "host": "main.iam.ad.ext.azure.com",
+      "route": "/api/Permissions",
+      "status": 200,
+      "mimeType": "application/json",
+      "seenOnPageCount": 1,
+      "observedAt": null,
+      "historicOnly": true
+    },
+    {
+      "artifactPath": "private-artifacts/ibiza-iam-identity-providers-retry3-direct-20260829T2010Z/api-records.json",
+      "sha256": "8f3567049fed7022d3f6862c2a219b4804c4a1487f317fa29e5cfc69d708e044",
+      "recordIndex": 6,
+      "method": "GET",
+      "host": "main.iam.ad.ext.azure.com",
+      "route": "/api/Permissions",
+      "status": 200,
+      "mimeType": "application/json",
+      "seenOnPageCount": 1,
+      "observedAt": null,
+      "historicOnly": true
+    },
+    {
+      "artifactPath": "private-artifacts/ibiza-iam-reactblade-final-20260819T205155/api-records.json",
+      "sha256": "e40219189d9f05572eceefe1c0e570f84f0d3e1ad6aa32ed6bf00a73c2319269",
+      "recordIndex": 5,
+      "method": "GET",
+      "host": "main.iam.ad.ext.azure.com",
+      "route": "/api/Permissions",
+      "status": 200,
+      "mimeType": "application/json",
+      "seenOnPageCount": 2,
+      "observedAt": null,
+      "historicOnly": true
+    },
+    {
+      "artifactPath": "private-artifacts/ibiza-iam-reactblade-retry-20260819T202945/api-records.json",
+      "sha256": "f116b81233f515ff2fdec50c49779cef7448199d89ff76187b2e251b12228566",
+      "recordIndex": 4,
+      "method": "GET",
+      "host": "main.iam.ad.ext.azure.com",
+      "route": "/api/Permissions",
+      "status": 200,
+      "mimeType": "application/json",
+      "seenOnPageCount": 1,
+      "observedAt": null,
+      "historicOnly": true
+    }
+  ],
+  "uiProvenance": {
+    "sourceRecipe": "tools/capture-recipes/entra-iam-permissions-response-example-frontier.json",
+    "entryUrl": "https://entra.microsoft.com/#view/Microsoft_AAD_UsersAndTenants/UserManagementMenuBlade/~/AllUsers/menuId/",
+    "actionCount": 5,
+    "usesOnlyKnownStates": true,
+    "noveltyNotRequired": true
+  },
+  "coverage": {
+    "primaryWitness": "GET /api/Permissions",
+    "representativeActions": [
+      {
+        "type": "navigate",
+        "value": "https://entra.microsoft.com/#view/Microsoft_AAD_UsersAndTenants/UserManagementMenuBlade/~/AllUsers/menuId/",
+        "required": true,
+        "highValue": true
+      },
+      {
+        "type": "wait-ms",
+        "value": "2000",
+        "required": true
+      },
+      {
+        "type": "reload",
+        "value": "entra-all-users",
+        "required": true
+      },
+      {
+        "type": "wait-ms",
+        "value": "6000",
+        "required": true
+      },
+      {
+        "type": "capture",
+        "value": "permissions-response-example",
+        "required": true
+      }
+    ],
+    "uncoveredFamilies": [
+      "identity provider exact transition",
+      "other identity entity/detail families"
+    ],
+    "requiredDisposition": "Each uncovered family must be observed, unchanged with evidence, adjacent, unreachable in approved state, blocked with precise prerequisite, or separately approved state required. One witness never closes spec."
+  },
+  "safety": {
+    "apiProbeAuthorized": false,
+    "mutationAuthorized": false,
+    "deviceCodeAuthorized": false,
+    "auth": "cached/WAM or normal browser only",
+    "passiveMethods": "all naturally emitted methods retained; no authored requests",
+    "browserLifecycle": "one global endpoint, serialized owner/preflight/worker/terminal/review/disposition/stop"
+  },
+  "caveats": [
+    "effective privilege values type/redacted only",
+    "requires declared server-base ownership repair"
+  ],
+  "preflightChecks": {
+    "metadata": "accepted",
+    "operationOwnership": "accepted",
+    "safety": {
+      "safe": true,
+      "unsafeActions": []
+    }
+  },
+  "requiredLiveProof": [
+    "terminal discovery-run.json + summary.json + candidate-handoff.json",
+    "all required action indexes accounted with canonical results",
+    "action-attributed exact wire method/host/route",
+    "complete sanitized sidecars with every referenced SHA/length/path verified",
+    "observedAt from source request",
+    "actual statuses and health/error classification",
+    "per-family coverage disposition; no fabricated full-spec freshness"
+  ]
+}

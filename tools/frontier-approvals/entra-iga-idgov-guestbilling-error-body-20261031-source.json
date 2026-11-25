@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "kind": "known-operation-refresh-approval-source",
+  "status": "proposal-pending-independent-review-and-canonical-registration",
+  "specId": "entra-iga",
+  "createdAt": "2026-10-31T07:50:21.780Z",
+  "plannedAssignmentId": "entra-iga-idgov-guestbilling-error-body-20261031-01",
+  "recipeDestination": "tools/capture-recipes/entra-iga-idgov-guestbilling-error-body-20261031.json",
+  "newCycleReason": "Prior owning-route traffic was observed only through adjacent recipes that excluded this exact backend host/path from complete body retention. This narrowly scoped body/error/empty-response objective changes retention scope, not the native passive state or tenant configuration.",
+  "primaryCanonicalOperation": {
+    "specId": "entra-iga",
+    "method": "GET",
+    "host": "elm.iga.azure.com",
+    "basePath": "/",
+    "canonicalPath": "/api/v1/billingConfigurations/guestBilling",
+    "wirePath": "/api/v1/billingConfigurations/guestBilling",
+    "observedCaller": "Entra Identity Governance Dashboard",
+    "actionIndexes": [
+      0,
+      2
+    ]
+  },
+  "observedUiUrl": "https://entra.microsoft.com/#blade/Microsoft_AAD_ERM/DashboardBlade",
+  "sourceCallerPortal": "entra-idgov",
+  "canonicalBackendOwner": "entra-iga",
+  "callerRelation": "Entra IGA owns the backend operation; the observed caller is the Identity Governance dashboard and its ReactBlade child frame. Future attribution must prove exact root/child lineage; no native standalone IGA or direct API execution is asserted.",
+  "privateEvidenceBindings": {
+    "assessmentArtifactId": "guest-billing-truncation-diagnosis-addendum-20261031",
+    "assessmentSha256": "a5d8790a8880bd6162ced1823441b6a241ac14145bac367f97ca9a2d4f137079",
+    "preferredLifecycle": "entra-idgov-01",
+    "canonicalSourceRepoPath": "specifications/nodoc-entra-iga/specification/openapi.yml",
+    "canonicalSourceSha256": "8220369914f262db954cf7cccba0e8ca4b77ebf6498f46c7bdb80ff90e5f7c13",
+    "historicalOnly": true,
+    "currentAuthenticationProof": false
+  },
+  "bodyPolicy": {
+    "maxResponseBytes": 524288,
+    "ceilingIncreased": false,
+    "exactPrimaryCount": 1,
+    "separatelyAccountedExtras": 0,
+    "requiredPerRouteDisposition": [
+      "HTTP-status",
+      "observed-or-no-signal",
+      "verified-complete-empty-text-or-JSON-body",
+      "semantic-status-qualified"
+    ],
+    "emptyResponseDoesNotEstablishJsonSchema": true,
+    "pathRetentionMatcherMethodAgnostic": true,
+    "samePathPutNotObservedOrAuthorized": true
+  },
+  "budget": {
+    "recipeActions": 5,
+    "mandatoryNavigation": 1,
+    "total": 6
+  },
+  "authenticationPreflightRequired": true,
+  "exactTargetPinRequired": true,
+  "nativeCachedSelectedTenantPreserved": true,
+  "specificTenantIdentity": "unproved; no tenant identifier is bound by this static contract",
+  "noSyntheticTenantQuery": true,
+  "noTenantSwitch": true,
+  "noApiProbes": true,
+  "noFeatureActivation": true,
+  "noForeignOwnerReuseOrCleanup": true,
+  "runtimePrerequisites": "Fresh native cached authenticated Entra session and strict exact-target preflight; preserve selected account/directory without switching. No tenant identity is proved, no billing configuration control may be activated, no GET/PUT request may be authored. A future HTTP404, including a verified empty response, does not establish its entitlement/configuration/role cause.",
+  "rawRefreshDigest": "a3df19372d1b6b66cb3d186f5c676591b0bff68013c239c5764f162ee5396317",
+  "resolvedRefreshDigest": "a3df19372d1b6b66cb3d186f5c676591b0bff68013c239c5764f162ee5396317",
+  "approvalExpiresAt": "2026-10-31T11:26:59.993Z",
+  "liveAuthorized": false,
+  "rawExecutionDigest": "87f272fa61cd4d7d96287b88ca660fa1c3c63ee449b7ed7e61ab798ecc7ed2d8",
+  "resolvedExecutionDigest": "87f272fa61cd4d7d96287b88ca660fa1c3c63ee449b7ed7e61ab798ecc7ed2d8",
+  "executionBindingRecordedAt": "2026-10-31T08:14:00.283Z",
+  "executionBindingScope": "Canonical full executable recipe, including every action/scope/required flag, target/network scope, policy, budgets/capture flags/timeouts and all other recipe fields. Only cyclic knownOperationRefresh.approvalDigest and exact internal resolver digest are excluded; variable bindings remain separately enforced. This records a fresh approval commitment, not a new capture or rewrite of historical execution."
+}

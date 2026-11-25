@@ -6946,7 +6946,7 @@
                             "request": {
                                 "name": "List Teams user records",
                                 "description": {
-                                    "content": "User inventory route observed from `Users > Manage users` before drilling into per-user detail\npages.\n",
+                                    "content": "User inventory route observed from `Users > Manage users` before drilling into per-user detail\npages. The portal requests a projected, ordered page that excludes soft-deleted records and\nfollows the service-provided `@nextLink` when another page is available.\n",
                                     "type": "text/plain"
                                 },
                                 "url": {
@@ -6957,7 +6957,44 @@
                                     "host": [
                                         "{{baseUrl}}"
                                     ],
-                                    "query": [],
+                                    "query": [
+                                        {
+                                            "disabled": false,
+                                            "description": {
+                                                "content": "Comma-separated projection used by the Manage users inventory.",
+                                                "type": "text/plain"
+                                            },
+                                            "key": "$select",
+                                            "value": "OwnerUrn,EnterpriseVoiceEnabled,DirectoryStatus,FeatureTypes,UserType,AccountType,state,city,surname,givenName,telephoneNumbers"
+                                        },
+                                        {
+                                            "disabled": false,
+                                            "description": {
+                                                "content": "OData ordering clause used by the inventory.",
+                                                "type": "text/plain"
+                                            },
+                                            "key": "$orderby",
+                                            "value": "displayName"
+                                        },
+                                        {
+                                            "disabled": false,
+                                            "description": {
+                                                "content": "OData filter used to exclude soft-deleted records from the active inventory.",
+                                                "type": "text/plain"
+                                            },
+                                            "key": "$filter",
+                                            "value": "SoftDeletionTimeStamp eq null"
+                                        },
+                                        {
+                                            "disabled": false,
+                                            "description": {
+                                                "content": "Maximum number of user records requested for the current page.",
+                                                "type": "text/plain"
+                                            },
+                                            "key": "pageSize",
+                                            "value": "20"
+                                        }
+                                    ],
                                     "variable": []
                                 },
                                 "header": [
@@ -6983,7 +7020,44 @@
                                             "host": [
                                                 "{{baseUrl}}"
                                             ],
-                                            "query": [],
+                                            "query": [
+                                                {
+                                                    "disabled": false,
+                                                    "description": {
+                                                        "content": "Comma-separated projection used by the Manage users inventory.",
+                                                        "type": "text/plain"
+                                                    },
+                                                    "key": "$select",
+                                                    "value": "OwnerUrn,EnterpriseVoiceEnabled,DirectoryStatus,FeatureTypes,UserType,AccountType,state,city,surname,givenName,telephoneNumbers"
+                                                },
+                                                {
+                                                    "disabled": false,
+                                                    "description": {
+                                                        "content": "OData ordering clause used by the inventory.",
+                                                        "type": "text/plain"
+                                                    },
+                                                    "key": "$orderby",
+                                                    "value": "displayName"
+                                                },
+                                                {
+                                                    "disabled": false,
+                                                    "description": {
+                                                        "content": "OData filter used to exclude soft-deleted records from the active inventory.",
+                                                        "type": "text/plain"
+                                                    },
+                                                    "key": "$filter",
+                                                    "value": "SoftDeletionTimeStamp eq null"
+                                                },
+                                                {
+                                                    "disabled": false,
+                                                    "description": {
+                                                        "content": "Maximum number of user records requested for the current page.",
+                                                        "type": "text/plain"
+                                                    },
+                                                    "key": "pageSize",
+                                                    "value": "20"
+                                                }
+                                            ],
                                             "variable": []
                                         },
                                         "header": [
@@ -7003,7 +7077,7 @@
                                             "value": "application/json"
                                         }
                                     ],
-                                    "body": "{\n  \"key_0\": \"string\",\n  \"key_1\": 211.00851639329065\n}",
+                                    "body": "{\n  \"@nextLink\": \"{continuation-link}\",\n  \"users\": [\n    {\n      \"accountType\": \"string\",\n      \"assignedPlans\": [\n        {\n          \"assignedTimestamp\": \"2026-08-31T00:00:00Z\",\n          \"capability\": \"string\",\n          \"capabilityStatus\": \"string\",\n          \"isInGracePeriod\": false,\n          \"serviceInstance\": \"string\",\n          \"servicePlanId\": \"11111111-1111-4111-8111-111111111111\",\n          \"subscribedPlanId\": \"22222222-2222-4222-8222-222222222222\"\n        }\n      ],\n      \"city\": \"Example City\",\n      \"dataProviderErrors\": {},\n      \"directoryStatus\": \"string\",\n      \"displayName\": \"Example Administrator\",\n      \"enterpriseVoiceEnabled\": false,\n      \"featureTypes\": [\n        \"string\"\n      ],\n      \"givenName\": \"Example\",\n      \"interpretedUserType\": \"string\",\n      \"objectId\": \"33333333-3333-4333-8333-333333333333\",\n      \"state\": \"Example State\",\n      \"surname\": \"Administrator\",\n      \"teamsUpgradeNotificationsEnabled\": \"string\",\n      \"teamsUpgradePolicyIsReadOnly\": \"string\",\n      \"telephoneNumbers\": [],\n      \"usageLocation\": \"US\",\n      \"userPrincipalName\": \"administrator@example.invalid\",\n      \"userType\": \"string\"\n    }\n  ]\n}",
                                     "cookie": [],
                                     "_postman_previewlanguage": "json"
                                 },
@@ -7019,7 +7093,44 @@
                                             "host": [
                                                 "{{baseUrl}}"
                                             ],
-                                            "query": [],
+                                            "query": [
+                                                {
+                                                    "disabled": false,
+                                                    "description": {
+                                                        "content": "Comma-separated projection used by the Manage users inventory.",
+                                                        "type": "text/plain"
+                                                    },
+                                                    "key": "$select",
+                                                    "value": "OwnerUrn,EnterpriseVoiceEnabled,DirectoryStatus,FeatureTypes,UserType,AccountType,state,city,surname,givenName,telephoneNumbers"
+                                                },
+                                                {
+                                                    "disabled": false,
+                                                    "description": {
+                                                        "content": "OData ordering clause used by the inventory.",
+                                                        "type": "text/plain"
+                                                    },
+                                                    "key": "$orderby",
+                                                    "value": "displayName"
+                                                },
+                                                {
+                                                    "disabled": false,
+                                                    "description": {
+                                                        "content": "OData filter used to exclude soft-deleted records from the active inventory.",
+                                                        "type": "text/plain"
+                                                    },
+                                                    "key": "$filter",
+                                                    "value": "SoftDeletionTimeStamp eq null"
+                                                },
+                                                {
+                                                    "disabled": false,
+                                                    "description": {
+                                                        "content": "Maximum number of user records requested for the current page.",
+                                                        "type": "text/plain"
+                                                    },
+                                                    "key": "pageSize",
+                                                    "value": "20"
+                                                }
+                                            ],
                                             "variable": []
                                         },
                                         "method": "GET",

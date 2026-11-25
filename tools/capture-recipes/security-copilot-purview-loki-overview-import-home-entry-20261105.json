@@ -1,0 +1,117 @@
+{
+  "portal": "Purview Data Lifecycle",
+  "matchUrlPattern": "^https://purview\\.microsoft\\.com/(?:home|datalifecyclemanagement/(?:overview|import))(?:\\?tid=[^&#]+)?$",
+  "url": "https://purview.microsoft.com/home",
+  "nativeEntryUrlShape": "https://purview.microsoft.com/datalifecyclemanagement/overview",
+  "pageTarget": {
+    "matchHosts": [
+      "purview.microsoft.com"
+    ],
+    "matchPathPrefixes": [
+      "/home",
+      "/datalifecyclemanagement/overview",
+      "/datalifecyclemanagement/import"
+    ],
+    "allowedEntryQueryParameters": [
+      "tid"
+    ]
+  },
+  "matchHosts": [
+    "ecs.office.com"
+  ],
+  "matchPathPrefixes": [
+    "/config/v1/LokiService/1.0.0.0"
+  ],
+  "inspectionPolicy": {
+    "mode": "observe-only",
+    "prohibitedControlPatterns": [
+      "Add",
+      "Create",
+      "Delete",
+      "Export",
+      "Remove",
+      "Save",
+      "Submit",
+      "Update",
+      "Purchase",
+      "Activate",
+      "Start trial"
+    ]
+  },
+  "responseBodyLimits": {
+    "perBodyBytes": 16777216,
+    "totalBytes": 268435456
+  },
+  "captureScripts": false,
+  "settleMs": 8000,
+  "postActionSettleMs": 6000,
+  "maxActions": 8,
+  "actions": [
+    {
+      "type": "navigate",
+      "value": "${NativeEntryUrl}",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "6000",
+      "required": true
+    },
+    {
+      "type": "navigate",
+      "value": "${NativeImportUrl}",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "6000",
+      "required": true
+    },
+    {
+      "type": "reload",
+      "value": "loki-response-body",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "8000",
+      "required": true
+    },
+    {
+      "type": "capture",
+      "value": "loki-response-body",
+      "required": true
+    }
+  ],
+  "knownOperationRefresh": {
+    "status": "active",
+    "method": "GET",
+    "host": "ecs.office.com",
+    "routes": [
+      "/config/v1/LokiService/1.0.0.0"
+    ],
+    "actionIndexes": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "state": "The exact observed native Home is an explicit preflight-ready state; no bootstrap or setup alignment is configured. The driver already records mandatory Home then the current captured Overview-to-Import sequence and reload. This removes redundant setup alignment as an operational design remedy, not a proven cause of the prior identity-stability failure. Both native hrefs are copied literally from recorded portal evidence. Canonical backend owner is Security Copilot and caller is Purview; endpoint emission, selected-tenant identity and passive effects remain unproved. Preserve the native cached caller session; selected tenant identity is unproved. NativeEntryUrl is copied literally from observed portal evidence without constructing tenant queries. Planned automation uses no explicit tenant-selection or configuration controls and authors no API request. Actual selected-tenant identity and passive operation effects remain unverified; no business-health or minimum-role claim.",
+    "documentationObjectives": [
+      "schema-evidence",
+      "usage-observation",
+      "error-example"
+    ],
+    "evidenceIds": [
+      "opaque:remaining-three-loki-native-entry",
+      "opaque:remaining-three-loki-historical-body-gap"
+    ],
+    "approvalExpiresAt": "2026-11-06T07:00:00.000Z",
+    "variableBindingsDigest": "c84a0930e1d82e9de82bfd98ed5f96d8df5bc12f992debbfe84e14ad44e52ab3",
+    "approvalArtifact": "tools/frontier-approvals/security-copilot-purview-loki-overview-import-home-entry-20261105.json",
+    "approvalDigest": "b9192380bd849741f5b55c71eeeed9a0bc62d8765abc9c66bbf744038c42828d"
+  }
+}

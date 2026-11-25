@@ -1,0 +1,81 @@
+{
+  "portal": "Defender MTO",
+  "url": "https://mto.security.microsoft.com",
+  "pageTarget": {
+    "matchHosts": [
+      "mto.security.microsoft.com"
+    ],
+    "matchPathPrefixes": [
+      "/"
+    ],
+    "bootstrap": {
+      "matchHosts": [
+        "mto.security.microsoft.com"
+      ],
+      "matchPathPrefixes": [
+        "/"
+      ]
+    }
+  },
+  "inspectionPolicy": {
+    "mode": "observe-only",
+    "prohibitedControlPatterns": [
+      "Activate",
+      "Assign",
+      "Buy",
+      "Create",
+      "Onboard",
+      "Purchase",
+      "Start trial",
+      "Switch tenant"
+    ]
+  },
+  "noveltyFrontier": null,
+  "matchHosts": [
+    "mto.security.microsoft.com"
+  ],
+  "matchPathPrefixes": [
+    "/mtoapi"
+  ],
+  "captureScripts": false,
+  "maxActions": 6,
+  "postActionSettleMs": 10000,
+  "settleMs": 10000,
+  "actions": [
+    {
+      "type": "wait-ms",
+      "value": "10000",
+      "required": true
+    },
+    {
+      "type": "capture",
+      "value": "mto-landing-initial",
+      "required": true
+    },
+    {
+      "type": "reload",
+      "value": "mto-landing",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "10000",
+      "required": true
+    },
+    {
+      "type": "capture",
+      "value": "mto-landing-reloaded",
+      "required": true
+    }
+  ],
+  "capturePrerequisite": {
+    "status": "blocked",
+    "code": "current-mto-native-target-not-emitted",
+    "reason": "The reviewed healthy passive retry completed all six counted actions with zero failures but emitted no scoped /mtoapi request and no TenantPicker target record.",
+    "nextRequirement": "Provide new immutable MTO entry or control provenance for a deterministic safe state that naturally emits an MTO-native /mtoapi operation, or evidence that the current homepage again emits GET /mtoapi/tenants/TenantPicker.",
+    "reopenCondition": "A new deterministic MTO state has exact immutable provenance and is reviewed to naturally emit an action-attributed MTO-native /mtoapi response without tenant switching, controls, probes, or authored API requests.",
+    "approvalArtifact": "tools/frontier-approvals/defender-mto-tenant-picker-response-example-retry.json",
+    "approvalDigest": "632ff92d5eb6db216f8478e45f85171f40544b058d9592f7027ea516d409e4ee",
+    "evidenceArtifact": "private-artifacts/defender-mto-retry-20261003T121234Z"
+  }
+}

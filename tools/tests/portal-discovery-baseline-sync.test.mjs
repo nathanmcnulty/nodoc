@@ -18,7 +18,7 @@ function approval(overrides = {}) {
     canonicalSignal: "api.example GET /items shape-a",
     signalClass: "response-shape",
     evidenceIds: ["evidence-1"],
-    workerModel: "gpt-5.6-luna",
+    workerModel: "gpt-6-luna",
     workerReasoning: "xhigh",
     decision: "accept",
     sourceArtifactDigest,
@@ -29,7 +29,7 @@ function approval(overrides = {}) {
   return { ...core, approvalDigest: baselineApprovalDigest(core) };
 }
 
-test("Luna-approved signals append idempotently with immutable provenance", () => {
+test("reviewed signals append idempotently with immutable provenance", () => {
   const first = compileBaselineSync({ specId: "alpha", recipe, approvals: [approval()], sourceArtifact });
   const second = compileBaselineSync({ specId: "alpha", recipe: first.updatedRecipe, approvals: [approval()], sourceArtifact });
   validateBaselineSync(first);
@@ -38,10 +38,27 @@ test("Luna-approved signals append idempotently with immutable provenance", () =
   assert.equal(second.addedSignals.length, 0);
 });
 
-test("baseline sync rejects wrong model, stale evidence, scope drift, and incomplete health", () => {
+test("baseline sync accepts recorded historical or future models without rewriting evidence", () => {
+  for (const attribution of [
+    { workerModel: "gpt-5.6-terra", workerReasoning: "high" },
+    { workerModel: "future-review-model", workerReasoning: "adaptive" },
+  ]) {
+    const reviewed = approval(attribution);
+    const before = JSON.stringify(reviewed);
+    const result = compileBaselineSync({ specId: "alpha", recipe, approvals: [reviewed], sourceArtifact });
+    assert.deepEqual(result.approvalDigests, [reviewed.approvalDigest]);
+    assert.equal(JSON.stringify(reviewed), before);
+  }
+});
+
+test("baseline sync rejects missing attribution, stale evidence, scope drift, and incomplete health", () => {
   for (const invalid of [
-    approval({ workerModel: "gpt-5.6-terra" }),
-    approval({ workerReasoning: "high" }),
+    approval({ workerModel: " " }),
+    approval({ workerModel: null }),
+    approval({ workerReasoning: "" }),
+    approval({ workerReasoning: 1 }),
+    approval({ decision: "reject" }),
+    { ...approval(), approvalDigest: "0".repeat(64) },
     approval({ sourceArtifactDigest: "2".repeat(64) }),
     approval({ specId: "beta" }),
     approval({ health: { complete: false, available: true, accountingConsistent: true } }),

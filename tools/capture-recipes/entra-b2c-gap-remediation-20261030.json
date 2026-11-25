@@ -1,0 +1,97 @@
+{
+  "portal": "Entra B2C",
+  "url": "https://entra.microsoft.com/#view/Microsoft_AAD_IAM/CompanyRelationshipsMenuBlade/~/UserAttributes/menuId/ExternalIdentitiesGettingStarted",
+  "pageTarget": {
+    "matchHosts": [
+      "entra.microsoft.com"
+    ],
+    "matchPathPrefixes": [
+      "/"
+    ]
+  },
+  "matchHosts": [
+    "main.b2cadmin.ext.azure.com"
+  ],
+  "matchPathPrefixes": [
+    "/api",
+    "/graph"
+  ],
+  "inspectionPolicy": {
+    "mode": "observe-only",
+    "prohibitedControlPatterns": [
+      "Add",
+      "Create",
+      "Delete",
+      "Export",
+      "Remove",
+      "Save",
+      "Submit",
+      "Update",
+      "Purchase",
+      "Activate",
+      "Start trial"
+    ]
+  },
+  "captureScripts": false,
+  "postActionSettleMs": 6000,
+  "settleMs": 8000,
+  "maxActions": 6,
+  "actions": [
+    {
+      "type": "navigate",
+      "value": "https://entra.microsoft.com/#view/Microsoft_AAD_IAM/CompanyRelationshipsMenuBlade/~/UserAttributes/menuId/ExternalIdentitiesGettingStarted",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "6000",
+      "required": true
+    },
+    {
+      "type": "reload",
+      "value": "b2c-custom-user-attributes",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "8000",
+      "required": true
+    },
+    {
+      "type": "capture",
+      "value": "b2c-custom-user-attributes",
+      "required": true
+    }
+  ],
+  "knownOperationRefresh": {
+    "status": "active",
+    "method": "GET",
+    "host": "main.b2cadmin.ext.azure.com",
+    "routes": [
+      "/api/userAttribute/GetAvailableOutputClaimsList"
+    ],
+    "state": "Use retained unvisited Custom user attributes href, not another unchanged external-identities/API-connectors pass.",
+    "actionIndexes": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "approvalExpiresAt": "2026-10-31T09:57:22.444Z",
+    "variableBindingsDigest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "documentationObjectives": [
+      "freshness",
+      "health",
+      "schema-evidence",
+      "usage-observation",
+      "error-example"
+    ],
+    "evidenceIds": [
+      "gap-remediation-plan-20261030:entra-b2c",
+      "retained-state-provenance-20261030:entra-b2c"
+    ],
+    "approvalArtifact": "tools/frontier-approvals/entra-b2c-gap-remediation-20261030.json",
+    "approvalDigest": "3404b2cde43da830e2c3ef33458dd612832de9284d81f6d4c532fbebc9700be6"
+  }
+}

@@ -2,11 +2,13 @@ import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { portalDiscoveryModelPolicy, validateReviewAttribution } from "./portal-discovery-model-policy.mjs";
 
 export const baselineApprovalSchemaVersion = 1;
 export const baselineSyncSchemaVersion = 1;
-export const baselineApprovalModel = "gpt-5.6-luna";
-export const baselineApprovalReasonings = Object.freeze(["xhigh", "max"]);
+// Defaults for new reviews; retained approvals keep their actual attribution.
+export const baselineApprovalModel = portalDiscoveryModelPolicy.offlineReview.model;
+export const baselineApprovalReasonings = portalDiscoveryModelPolicy.offlineReview.allowedReasoning;
 
 const signalClasses = new Map([
   ["query-metadata", "queryMetadata"],
@@ -31,8 +33,7 @@ function validateSourceArtifact(sourceArtifact) {
 export function validateBaselineApproval(approval, { sourceArtifact, specId } = {}) {
   const verifiedSource = validateSourceArtifact(sourceArtifact);
   if (!approval || approval.schemaVersion !== baselineApprovalSchemaVersion) throw new Error("Unsupported baseline approval schema.");
-  if (approval.workerModel !== baselineApprovalModel) throw new Error(`Baseline approval requires exact model ${baselineApprovalModel}.`);
-  if (!baselineApprovalReasonings.includes(approval.workerReasoning)) throw new Error("Baseline approval reasoning must be xhigh or max.");
+  validateReviewAttribution(approval);
   if (approval.decision !== "accept") throw new Error("Only accepted baseline approvals can be synchronized.");
   if (approval.specId !== specId) throw new Error("Baseline approval spec scope changed.");
   if (!signalClasses.has(approval.signalClass)) throw new Error("Baseline approval signalClass is unsupported.");

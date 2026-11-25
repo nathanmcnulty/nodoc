@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "kind": "known-operation-refresh-approval-source",
+  "status": "proposal-pending-independent-review-and-separate-live-authority",
+  "specId": "purview",
+  "recipeDestination": "tools/capture-recipes/purview-home-announcements-remaining-three-20261105.json",
+  "plannedAssignmentId": "remaining-three-20261105-proxy-01",
+  "captureRole": {
+    "model": "gpt-6-luna",
+    "reasoning": "low"
+  },
+  "reviewRequirement": {
+    "model": "gpt-6-luna",
+    "reasoning": "xhigh"
+  },
+  "primaryCanonicalOperation": {
+    "method": "GET",
+    "host": "purview.microsoft.com",
+    "canonicalPath": "/msgraph/v1.0/admin/serviceAnnouncement/messages",
+    "wirePath": "/apiproxy/msgraph/v1.0/admin/serviceAnnouncement/messages",
+    "operationId": "getServiceAnnouncementMessages",
+    "sourceFile": "specifications/nodoc-purview/specification/graph_proxy.yml",
+    "sourceFileSha256": "0c8689b489df0ae03c5dff13db338cafdf5e4f9d1d4127e5b85a2e63827a6931"
+  },
+  "observedCaller": "Purview Home",
+  "observedEntryUrlTemplate": "${NativeEntryUrl}",
+  "observedEntryPath": "/home",
+  "observedEntryQueryNames": [],
+  "nativeEntryEvidence": {
+    "artifactId": "remaining-three-native-home-inspection-v3",
+    "sha256": "f78f00b1b397dbd93040b090d1df3812de9f6316c8a7d4dfe703ca7025cea626",
+    "closureArtifactId": "remaining-three-native-home-inspection-closure",
+    "closureSha256": "e5cf68ab219e52717c11346ea7980b4ffd7640234c1e1314514bacabf9b61e0c",
+    "privateEntryBindingArtifactId": "remaining-three-native-entry-bindings",
+    "privateEntryBindingSha256": "9d906a139b41158839e58432ebbba5802456e82d04b5d9265e6ba2ffd477494d"
+  },
+  "tenantIdentityUnproved": true,
+  "reason": "Previously unavailable body retrieval reopened after reviewed prompt bounded response fetching and durable-buffer capability negotiation. Historical failure cause remains unknown. This is Purview-proxied observation, not direct Graph permission or execution proof.",
+  "responseBodyLimits": {
+    "perBodyBytes": 16777216,
+    "totalBytes": 268435456
+  },
+  "actionBudget": {
+    "maximumDriverActions": 6,
+    "recipeActions": 5,
+    "mandatoryDriverHomeNavigation": 1,
+    "maximumOwnerStartupNavigations": 1,
+    "maximumPreflightAlignmentNavigations": 0,
+    "maximumCombinedBudgetUnits": 7,
+    "rootUrl": "https://purview.microsoft.com/home",
+    "alignmentEntry": "${NativeEntryUrl}",
+    "allNavigationLanesExplicit": true
+  },
+  "rawRefreshDigest": "51175bc86f4dbae81aab557c2259176292d6b6872a63a652d2cce4975109e2db",
+  "resolvedRefreshDigest": "88f781aaa2ff7fac05b4f5c68ed9fbc8b53ebafef7ee2e143c025a7bbfbb3532",
+  "rawExecutionDigest": "7a2569159394870ffb251c27b6b399a098750500f05d08a0fb39de5a665ee197",
+  "resolvedExecutionDigest": "adb8e01595390c1a1581288eb668ce2da8aa0f0396a582fb9676df15a03d5649",
+  "approvalExpiresAt": "2026-11-06T05:45:00.000Z",
+  "limitations": [
+    "Native entry proof does not prove endpoint emission or API health.",
+    "No direct API replay, tenant change or configuration mutation.",
+    "Private values remain external; independent body/source review follows capture."
+  ]
+}

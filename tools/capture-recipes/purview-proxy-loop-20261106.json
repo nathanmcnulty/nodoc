@@ -1,0 +1,101 @@
+{
+  "portal": "Purview Home",
+  "url": "https://purview.microsoft.com/home",
+  "nativeEntryUrlShape": "https://purview.microsoft.com/home",
+  "pageTarget": {
+    "matchHosts": [
+      "purview.microsoft.com"
+    ],
+    "matchPathPrefixes": [
+      "/home"
+    ],
+    "allowedEntryQueryParameters": []
+  },
+  "matchHosts": [
+    "purview.microsoft.com"
+  ],
+  "matchPathPrefixes": [
+    "/apiproxy/msgraph/v1.0/admin/serviceAnnouncement/messages"
+  ],
+  "inspectionPolicy": {
+    "mode": "observe-only",
+    "prohibitedControlPatterns": [
+      "Add",
+      "Create",
+      "Delete",
+      "Export",
+      "Remove",
+      "Save",
+      "Submit",
+      "Update",
+      "Purchase",
+      "Activate",
+      "Start trial"
+    ]
+  },
+  "responseBodyLimits": {
+    "perBodyBytes": 16777216,
+    "totalBytes": 268435456
+  },
+  "captureScripts": false,
+  "settleMs": 8000,
+  "postActionSettleMs": 6000,
+  "maxActions": 6,
+  "actions": [
+    {
+      "type": "navigate",
+      "value": "https://purview.microsoft.com/home",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "6000",
+      "required": true
+    },
+    {
+      "type": "reload",
+      "value": "proxy-response-body",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "8000",
+      "required": true
+    },
+    {
+      "type": "capture",
+      "value": "proxy-response-body",
+      "required": true
+    }
+  ],
+  "knownOperationRefresh": {
+    "status": "active",
+    "method": "GET",
+    "host": "purview.microsoft.com",
+    "routes": [
+      "/apiproxy/msgraph/v1.0/admin/serviceAnnouncement/messages"
+    ],
+    "actionIndexes": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "state": "Current Purview Home native navigation and reviewed reload observing its Graph announcement proxy. Historical native entry and request witness verified; no direct Graph authentication, permission, standalone execution or tenant identity claim.",
+    "documentationObjectives": [
+      "freshness",
+      "health",
+      "schema-evidence",
+      "error-example"
+    ],
+    "evidenceIds": [
+      "request-e09f1f92a2892f5212cb",
+      "purview-proxy-current-loop-user-goal-20261106"
+    ],
+    "approvalExpiresAt": "2026-11-07T06:00:00.000Z",
+    "variableBindingsDigest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "approvalArtifact": "tools/frontier-approvals/purview-proxy-loop-20261106.json",
+    "approvalDigest": "0608ca5b6e9c0daba380168b05d8aa3c871e77187c831cb74571cf7677200a37"
+  }
+}

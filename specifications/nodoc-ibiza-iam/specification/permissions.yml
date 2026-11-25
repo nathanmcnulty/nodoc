@@ -8,6 +8,23 @@ paths:
         schema:
           type: boolean
     get:
+      x-nodoc-live-capture:
+        source: "Observe-only portal refresh 2026-10-29; All users/reload; request-0adec0070e3efad4ee87; HTTP 200"
+        browsedPages: ["Users > All users"]
+      x-nodoc-operation-context:
+        surface: Users > All users
+        availability:
+          level: user-context
+          notes:
+            - Effective permission maps depend on the authenticated caller; they do not establish minimum API privileges.
+        provenance:
+          - source: authenticated-portal-capture-20261029
+            confidence: high
+            notes:
+              - "Exact wire GET /api/Permissions returned HTTP 200 on reload action 2 at 2026-10-29T18:25:41.645Z; evidence request-0adec0070e3efad4ee87."
+              - "Complete sanitized response privately hash-verified."
+              - "allowedActions and ownerConditionalActions were non-empty objects mapping keys to arrays of strings. notApplicableActions was empty, so its value type remains unverified."
+              - "Authorization and X-Ms-Client-Request-Id headers were observed. The historical partial example continues to suppress caller-specific privilege values; standalone token acquisition and least privilege were not tested."
       summary: Get current permissions
       description: >-
         Retrieve a summary of the effective permissions for the currently authenticated user.
@@ -52,10 +69,28 @@ paths:
                 properties:
                   allowedActions:
                     type: object
+                    description: Current observed values are arrays of strings; map contents are caller-specific.
+                    additionalProperties:
+                      type: array
+                      items:
+                        type: string
                   ownerConditionalActions:
                     type: object
+                    description: Current observed values are arrays of strings; map contents are caller-specific.
+                    additionalProperties:
+                      type: array
+                      items:
+                        type: string
                   notApplicableActions:
                     type: object
+              x-nodoc-example-note: >-
+                Historical 2026-10-03 redacted partial response example.
+                Empty objects suppress effective privilege map values; they do
+                not assert that the caller lacks permissions.
+              example:
+                allowedActions: {}
+                ownerConditionalActions: {}
+                notApplicableActions: {}
         4XX:
           $ref: common.yml#/components/responses/ClientException
 

@@ -1,0 +1,160 @@
+{
+  "schemaVersion": 1,
+  "kind": "known-operation-refresh-approval-source",
+  "status": "pending-fresh-independent-review",
+  "specId": "purview",
+  "refreshDate": "2026-10-29",
+  "refreshDigest": "7c5520686ea20b33abb8c1edc252b3f81ba392e7f3a4ef0979b984d82d7c0d6e",
+  "recipeDestination": "tools/capture-recipes/purview-known-refresh-20261029.json",
+  "proposedRecipeSha256": "7817d506e63175db95c4f492b63578468094f0a6cf8f19adb1d6111decacf17f",
+  "sourceRecipe": {
+    "path": "tools/capture-recipes/purview-graph-inventory.json",
+    "sha256": "e92742c12e7a7f541ba99e5041efe35d9d66db93e123bf3ee9326306a2747089"
+  },
+  "specification": {
+    "path": "specifications/nodoc-purview/specification/openapi.yml",
+    "sha256": "bdfd0187da55757ac94dba524b4634b504d742db8523b5ff87db4c8f10771781",
+    "operationCount": 136
+  },
+  "policyBindings": [
+    {
+      "path": "PORTAL_DISCOVERY_AGENT_PROMPT.md",
+      "sha256": "57b6acf49eac1afc6e51b014039a6cba694adeeb058b13fa549f0610e20ae8b5"
+    },
+    {
+      "path": "AGENT_DISCOVERY_RUNBOOK.md",
+      "sha256": "4ef12fc4e271e17094dbb5da447b6f535bf2a63b457089ce5bd7f6876126b079"
+    },
+    {
+      "path": "AGENT_DISCOVERY_PLAYBOOK.md",
+      "sha256": "c12b9cecf0a3a85e8c760a8e7b310c0d0528f41cb65c8fe2c95eb420ca3fb119"
+    },
+    {
+      "path": "tools/portal-discovery-model-policy.mjs",
+      "sha256": "5d4b65b60d21a5b7431828b41694c49e85c58fb1497a2c3fb1cf53483066c346"
+    },
+    {
+      "path": "tools/portal-discovery-operation-safety.mjs",
+      "sha256": "425a1466f41aed855a0871548ee464670c350ce9b2954eba0e220c9a38d86ca3"
+    },
+    {
+      "path": "tools/discovery-safety.mjs",
+      "sha256": "e406c0fcd3401092ab2ef8318d41c17bb72956eec84638f2a00b9535dda8c8a1"
+    }
+  ],
+  "target": {
+    "status": "active",
+    "method": "GET",
+    "host": "purview.microsoft.com",
+    "routes": [
+      "/apiproxy/di/find/InsiderRiskEntityList"
+    ],
+    "state": "Purview bounded passive representative states from tools/capture-recipes/purview-graph-inventory.json",
+    "actionIndexes": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13
+    ],
+    "approvalExpiresAt": "2026-10-31T08:00:00.000Z",
+    "variableBindingsDigest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "documentationObjectives": [
+      "freshness",
+      "health",
+      "schema-evidence",
+      "usage-observation",
+      "error-example"
+    ],
+    "evidenceIds": [
+      "retained-purview-primary-witness",
+      "checked-in-ui-state-purview-graph-inventory"
+    ]
+  },
+  "retainedPlanningEvidence": [
+    {
+      "artifactPath": "private-artifacts/purview-graph-refresh-20260831T214500Z/api-records.json",
+      "sha256": "7a9c099625c7f5ce5cb58f939c04b5444e24bff4f3a52143b3c91d42054de8de",
+      "recordIndex": 34,
+      "method": "GET",
+      "host": "purview.microsoft.com",
+      "route": "/di/find/InsiderRiskEntityList",
+      "status": 200,
+      "mimeType": "application/json",
+      "seenOnPageCount": 1,
+      "observedAt": null,
+      "historicOnly": true
+    }
+  ],
+  "uiProvenance": {
+    "sourceRecipe": "tools/capture-recipes/purview-graph-inventory.json",
+    "entryUrl": "https://purview.microsoft.com/insiderriskmgmt",
+    "actionCount": 14,
+    "usesOnlyKnownStates": true,
+    "noveltyNotRequired": true
+  },
+  "coverage": {
+    "primaryWitness": "GET /apiproxy/di/find/InsiderRiskEntityList",
+    "representativeActions": [
+      "navigate=https://purview.microsoft.com/insiderriskmgmt",
+      "wait-ms=6000",
+      "reload=purview-insider-risk",
+      "wait-ms=8000",
+      "capture=purview-insider-risk",
+      "navigate=https://purview.microsoft.com/datalifecyclemanagement",
+      "wait-ms=6000",
+      "capture=purview-records-management",
+      "navigate=https://purview.microsoft.com/datalossprevention/overview",
+      "wait-ms=6000",
+      "capture=purview-dlp",
+      "navigate=https://purview.microsoft.com/compliancemanager/assessmentspage",
+      "wait-ms=6000",
+      "capture=purview-compliance-manager"
+    ],
+    "uncoveredFamilies": [
+      "eDiscovery case detail",
+      "Audit auth",
+      "DSPM/AI detail",
+      "other platform insight families"
+    ],
+    "requiredDisposition": "Each uncovered family must be observed, unchanged with evidence, adjacent, unreachable in approved state, blocked with precise prerequisite, or separately approved state required. One witness never closes spec."
+  },
+  "safety": {
+    "apiProbeAuthorized": false,
+    "mutationAuthorized": false,
+    "deviceCodeAuthorized": false,
+    "auth": "cached/WAM or normal browser only",
+    "passiveMethods": "all naturally emitted methods retained; no authored requests",
+    "browserLifecycle": "one global endpoint, serialized owner/preflight/worker/terminal/review/disposition/stop"
+  },
+  "caveats": [
+    "requires declared server-base ownership repair",
+    "Graph/Defender traffic retains adjacent ownership"
+  ],
+  "preflightChecks": {
+    "metadata": "accepted",
+    "operationOwnership": "accepted",
+    "safety": {
+      "safe": true,
+      "unsafeActions": []
+    }
+  },
+  "requiredLiveProof": [
+    "terminal discovery-run.json + summary.json + candidate-handoff.json",
+    "all required action indexes accounted with canonical results",
+    "action-attributed exact wire method/host/route",
+    "complete sanitized sidecars with every referenced SHA/length/path verified",
+    "observedAt from source request",
+    "actual statuses and health/error classification",
+    "per-family coverage disposition; no fabricated full-spec freshness"
+  ]
+}

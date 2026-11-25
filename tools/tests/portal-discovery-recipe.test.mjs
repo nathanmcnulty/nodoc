@@ -3,6 +3,31 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import test from "node:test";
 
+test("native whole-URL metadata shape is non-executing and the resolved literal remains strict", () => {
+  const recipe = {
+    url:'https://portal.example/home',
+    nativeEntryUrlShape:'https://portal.example/feature',
+    pageTarget:{matchHosts:['portal.example'],matchPathPrefixes:['/feature'],allowedEntryQueryParameters:['tid'],bootstrap:{matchHosts:['portal.example'],matchPathnames:['/home']}},
+    inspectionPolicy:{mode:'observe-only'},
+    actions:[{type:'navigate',value:'${NativeEntryUrl}',required:true},{type:'capture',value:'native',required:true}],
+  };
+  const original = JSON.stringify(recipe);
+  assert.equal(validateRecipeTargetMetadata(recipe,{metadataOnly:true}).entryUrl,'https://portal.example/feature');
+  assert.equal(JSON.stringify(recipe),original);
+  assert.throws(()=>validateRecipeTargetMetadata(recipe),/must be resolved/);
+  assert.equal(validateRecipeTargetMetadata(prepareRecipeForRun(recipe,['NativeEntryUrl=https://portal.example/feature?tid=private-test'])).entryQueryParameterNames[0],'tid');
+  for (const url of ['https://other.example/feature?tid=private-test','https://portal.example/elsewhere?tid=private-test','https://portal.example/feature?code=private-test','https://user:password@portal.example/feature','https://portal.example/feature?tid=private-test#unreviewed']) {
+    assert.throws(()=>validateRecipeTargetMetadata(prepareRecipeForRun(recipe,[`NativeEntryUrl=${url}`])));
+  }
+  for (const shape of ['https://other.example/feature','https://user:password@portal.example/feature','https://portal.example/feature?tid=private-test','https://portal.example/feature#fragment']) {
+    assert.throws(()=>validateRecipeTargetMetadata({...recipe,nativeEntryUrlShape:shape},{metadataOnly:true}));
+  }
+  const legacy = structuredClone(recipe);
+  delete legacy.nativeEntryUrlShape;
+  legacy.actions[0].value = 'https://portal.example/feature#reviewed-spa';
+  assert.equal(validateRecipeTargetMetadata(legacy).entryUrl, legacy.actions[0].value);
+});
+
 import {
   getRecipeEntryUrl,
   recipeEntryMatchesPageTarget,
@@ -101,27 +126,27 @@ test("CLI variables are expanded before recipe-gated target preflight", () => {
   };
   const recipe = expandRecipeVariables(
     sourceRecipe,
-    recipeVariables(sourceRecipe, ["tenant=sharemylabs"]),
+    recipeVariables(sourceRecipe, ["tenant=examplefixture"]),
   );
   assert.deepEqual(buildPreflightCriteria(recipe), {
-    matchHosts: ["sharemylabs-admin.sharepoint.com"],
+    matchHosts: ["examplefixture-admin.sharepoint.com"],
     matchPathPrefixes: ["/_layouts/15/online/AdminHome.aspx"],
     urlPattern: undefined,
     titlePattern: undefined,
     expectedTitlePattern: undefined,
     rejectBodyPattern: undefined,
   });
-  assert.equal(recipe.url, "https://sharemylabs-admin.sharepoint.com/_layouts/15/online/AdminHome.aspx#/home");
+  assert.equal(recipe.url, "https://examplefixture-admin.sharepoint.com/_layouts/15/online/AdminHome.aspx#/home");
 });
 
 test("the same expanded recipe is used by capture analysis", () => {
   const recipe = prepareRecipeForRun({
     url: "https://${tenant}-admin.sharepoint.com/",
     actions: ["navigate=https://${tenant}-admin.sharepoint.com/#/contentSecurityPolicy"],
-  }, ["tenant=sharemylabs"]);
-  assert.equal(recipe.url, "https://sharemylabs-admin.sharepoint.com/");
+  }, ["tenant=examplefixture"]);
+  assert.equal(recipe.url, "https://examplefixture-admin.sharepoint.com/");
   assert.deepEqual(recipe.actions, [
-    "navigate=https://sharemylabs-admin.sharepoint.com/#/contentSecurityPolicy",
+    "navigate=https://examplefixture-admin.sharepoint.com/#/contentSecurityPolicy",
   ]);
 });
 

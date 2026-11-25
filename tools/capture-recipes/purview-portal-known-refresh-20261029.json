@@ -1,0 +1,82 @@
+{
+  "portal": "Purview Portal",
+  "url": "https://purview.microsoft.com",
+  "pageTarget": {
+    "matchHosts": [
+      "purview.microsoft.com"
+    ],
+    "matchPathPrefixes": [
+      "/"
+    ]
+  },
+  "matchHosts": [
+    "purview.microsoft.com"
+  ],
+  "matchPathPrefixes": [
+    "/api"
+  ],
+  "inspectionPolicy": {
+    "mode": "observe-only",
+    "prohibitedControlPatterns": [
+      "Add",
+      "Create",
+      "Delete",
+      "Export",
+      "Remove",
+      "Save",
+      "Submit",
+      "Update",
+      "Purchase",
+      "Activate",
+      "Start trial"
+    ]
+  },
+  "captureScripts": false,
+  "postActionSettleMs": 6000,
+  "settleMs": 8000,
+  "maxActions": 9,
+  "actions": [
+    "navigate=https://purview.microsoft.com",
+    "wait-ms=6000",
+    "reload=purview-portal-roles",
+    "wait-ms=8000",
+    "capture=purview-portal-roles",
+    "navigate=https://purview.microsoft.com/datalossprevention/overview",
+    "wait-ms=6000",
+    "capture=purview-dlp-report"
+  ],
+  "knownOperationRefresh": {
+    "status": "active",
+    "method": "GET",
+    "host": "purview.microsoft.com",
+    "routes": [
+      "/api/v2/auth/GetCachedRoles"
+    ],
+    "state": "Purview passive landing/reload role witness and known exact Data Loss Prevention overview navigation",
+    "actionIndexes": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "approvalExpiresAt": "2026-10-31T08:00:00.000Z",
+    "variableBindingsDigest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "documentationObjectives": [
+      "freshness",
+      "health",
+      "schema-evidence",
+      "usage-observation",
+      "error-example"
+    ],
+    "evidenceIds": [
+      "retained-purview-portal-primary-witness",
+      "checked-in-ui-state-purview-portal-deep"
+    ],
+    "approvalArtifact": "tools/frontier-approvals/purview-portal-refresh-20261029.json",
+    "approvalDigest": "6a84a4086d649ef445a77f52717b8d0a3362cf384b293f279a233caa7ca13df5"
+  }
+}

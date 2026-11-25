@@ -1,0 +1,94 @@
+{
+  "portal": "Purview",
+  "url": "https://purview.microsoft.com/insiderriskmgmt",
+  "pageTarget": {
+    "matchHosts": [
+      "purview.microsoft.com"
+    ],
+    "matchPathPrefixes": [
+      "/insiderriskmgmt"
+    ]
+  },
+  "matchHosts": [
+    "purview.microsoft.com"
+  ],
+  "matchPathPrefixes": [
+    "/apiproxy"
+  ],
+  "inspectionPolicy": {
+    "mode": "observe-only",
+    "prohibitedControlPatterns": [
+      "Add",
+      "Create",
+      "Delete",
+      "Export",
+      "Remove",
+      "Save",
+      "Submit",
+      "Update",
+      "Purchase",
+      "Activate",
+      "Start trial"
+    ]
+  },
+  "captureScripts": false,
+  "postActionSettleMs": 6000,
+  "settleMs": 8000,
+  "maxActions": 15,
+  "actions": [
+    "navigate=https://purview.microsoft.com/insiderriskmgmt",
+    "wait-ms=6000",
+    "reload=purview-insider-risk",
+    "wait-ms=8000",
+    "capture=purview-insider-risk",
+    "navigate=https://purview.microsoft.com/datalifecyclemanagement",
+    "wait-ms=6000",
+    "capture=purview-records-management",
+    "navigate=https://purview.microsoft.com/datalossprevention/overview",
+    "wait-ms=6000",
+    "capture=purview-dlp",
+    "navigate=https://purview.microsoft.com/compliancemanager/assessmentspage",
+    "wait-ms=6000",
+    "capture=purview-compliance-manager"
+  ],
+  "knownOperationRefresh": {
+    "status": "active",
+    "method": "GET",
+    "host": "purview.microsoft.com",
+    "routes": [
+      "/apiproxy/di/find/InsiderRiskEntityList"
+    ],
+    "state": "Purview bounded passive representative states from tools/capture-recipes/purview-graph-inventory.json",
+    "actionIndexes": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13
+    ],
+    "approvalExpiresAt": "2026-10-31T08:00:00.000Z",
+    "variableBindingsDigest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "documentationObjectives": [
+      "freshness",
+      "health",
+      "schema-evidence",
+      "usage-observation",
+      "error-example"
+    ],
+    "evidenceIds": [
+      "retained-purview-primary-witness",
+      "checked-in-ui-state-purview-graph-inventory"
+    ],
+    "approvalArtifact": "tools/frontier-approvals/purview-refresh-20261029.json",
+    "approvalDigest": "9640afb045a17ead93edb1771f3bbb52db19142c7957f0ec79bdd9060fafdce1"
+  }
+}

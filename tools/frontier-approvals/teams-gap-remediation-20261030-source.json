@@ -1,0 +1,259 @@
+{
+  "schemaVersion": 1,
+  "kind": "known-operation-refresh-approval-source",
+  "status": "external-proposal-pending-actual-independent-review",
+  "specId": "teams",
+  "cycle": "gap-remediation-20261030",
+  "createdAt": "2026-10-30T09:57:22.446Z",
+  "plannedAssignmentId": "teams-remediation-20261030-01",
+  "newCycleReason": "Use observed /dashboardV2 entry, retaining the exact /users state.",
+  "recipeDestination": "tools/capture-recipes/teams-gap-remediation-20261030.json",
+  "priorRecipe": {
+    "path": "tools/capture-recipes/teams-known-refresh-20261029.json",
+    "sha256": "ab0028bdb9ceabf2b0bb9be081d20d0248b31caf444cee5f0f342746962708c7"
+  },
+  "specification": {
+    "path": "specifications/nodoc-teams/specification/openapi.yml",
+    "sha256": "c4ce9cf9b370961f7f600e007e1e022a17787a8e5f3bb61786b2e2b55a192bf7",
+    "operationCount": 100
+  },
+  "policyBindings": [
+    {
+      "path": "PORTAL_DISCOVERY_AGENT_PROMPT.md",
+      "sha256": "340f089b36357a4a65e993397ffd6e60d88c4d915b6e5ecb7244aee84a97e39c"
+    },
+    {
+      "path": "AGENT_DISCOVERY_RUNBOOK.md",
+      "sha256": "056fea096f7cd354429f606b6d7ad99e05f7f48ef019d56bc1dae629cdab4113"
+    },
+    {
+      "path": "AGENT_DISCOVERY_PLAYBOOK.md",
+      "sha256": "ceccace5f3e9ac18d8c5743dab23973b5aab4cfe3160c1f6a645581469ddc3b9"
+    },
+    {
+      "path": "tools/portal-discovery-model-policy.mjs",
+      "sha256": "5d4b65b60d21a5b7431828b41694c49e85c58fb1497a2c3fb1cf53483066c346"
+    },
+    {
+      "path": "tools/portal-discovery-operation-safety.mjs",
+      "sha256": "425a1466f41aed855a0871548ee464670c350ce9b2954eba0e220c9a38d86ca3"
+    },
+    {
+      "path": "tools/discovery-safety.mjs",
+      "sha256": "e406c0fcd3401092ab2ef8318d41c17bb72956eec84638f2a00b9535dda8c8a1"
+    },
+    {
+      "path": "tools/portal-discovery-evidence-contract.mjs",
+      "sha256": "e47c1ceed5329fe2ae15e25ba87e1c7d462ce5a0f0e3b0663b12616bd4d532f8"
+    },
+    {
+      "path": "tools/cdp-deep-capture.mjs",
+      "sha256": "0b56aa5558efd3ba950f906b0f5a7cbd1eeced1770aaab47aa40e79f6afcea63"
+    },
+    {
+      "path": "tools/run-portal-discovery.mjs",
+      "sha256": "a5a3e333f81dc1623129b1dc548b9fbe0a46312c9b6138894bc1fb8cda376663"
+    },
+    {
+      "path": "tools/portal-discovery-actions.mjs",
+      "sha256": "9e722135986319726294b75a731c603b4e387bbb9c132fc15e0c7e6ca466bab3"
+    },
+    {
+      "path": "tools/source-review-receipt.mjs",
+      "sha256": "d01e0d3178ff807925e8ba68efe70add7511f513a360cd8eaf2563a4916f81a6"
+    },
+    {
+      "path": "tools/source-review-workflow.mjs",
+      "sha256": "173cdd9203932c39d382a65e575d2ba27a04f2e8286c2e94875ef51c5778b669"
+    },
+    {
+      "path": "tools/response-evidence.mjs",
+      "sha256": "549ba0910e07c12ce2f5e763de93baf025228452b90c86145538daf0357f83a4"
+    }
+  ],
+  "implementationValidation": {
+    "receiptPath": "private-artifacts/improvements-20261030/validation/full-discovery-tests-status.json",
+    "receiptSha256": "c8e05a77fe72d07ee8b15b1adc4f9c9a86dc7efa2a32449ea63169383ea78956",
+    "passed": 343,
+    "staticSpecEvaluations": "separate open check:20 active static frontiers; no relabel/delete/bypass"
+  },
+  "binding": {
+    "kind": "authoritative-known-operation-refresh-plan",
+    "refreshDigest": "77a7acdd53d2446252ae5f73e9849ec3c297950b9e437a2d95222b9e006f57cd",
+    "variableBindingsDigest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "entryUrlTemplate": "https://admin.teams.microsoft.com/dashboardV2",
+    "requiredVariables": [],
+    "sourceRefreshDigest": "77a7acdd53d2446252ae5f73e9849ec3c297950b9e437a2d95222b9e006f57cd"
+  },
+  "target": {
+    "method": "GET",
+    "host": "noneu-admin.teams.microsoft.com",
+    "wireRoutes": [
+      "/api/v1/userpreference"
+    ],
+    "state": "Use observed /dashboardV2 entry, retaining the exact /users state.",
+    "actionIndexes": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "approvalExpiresAt": "2026-10-31T09:57:22.444Z"
+  },
+  "gapEvidence": {
+    "planPath": "private-artifacts/improvements-20261030/gap-remediation-plan.json",
+    "planSha256": "04d8eab4f0bcc91d24ca6e98ee2bdfc93844167b4ed1c370ee6658445ea2b63d",
+    "classification": "accounting-only-observed-dashboard-canonical-entry-mismatch",
+    "prior": {
+      "status": "action-accounting-incomplete",
+      "health": "incomplete",
+      "missingActionIndexes": [
+        0
+      ],
+      "matchedRecords": 1,
+      "successfulRecords": 1,
+      "completeTargetBodies": 1,
+      "physicalActions": 9
+    },
+    "failedNavigation": [
+      {
+        "index": 0,
+        "didLoad": true,
+        "componentDifferences": [
+          "pathname"
+        ],
+        "actual": "https://admin.teams.microsoft.com/dashboardV2",
+        "requested": "https://admin.teams.microsoft.com/",
+        "actionSucceeded": false
+      }
+    ],
+    "sourceArtifacts": {
+      "actions": {
+        "path": "private-artifacts/refresh-20261029/live/teams-01/capture/action-results.json",
+        "sha256": "e1430669a672cc7fea68f99d3d6dc71a3222cdcc5588b131708ab9679aa2b1b6"
+      },
+      "assessment": {
+        "path": "private-artifacts/refresh-20261029/live/teams-01/capture/known-operation-refresh-assessment.json",
+        "sha256": "3ff91b1f67143d8b14d760aea92376a4d4c3086c2ed4acd9495fb6494cf51a71"
+      },
+      "snapshots": {
+        "path": "private-artifacts/refresh-20261029/live/teams-01/capture/session-snapshots.json",
+        "sha256": "a4a6a9744067d9a187cf88de3dc6c1fd530cb59b5911115ec2e75d567761e4ba"
+      },
+      "pageStates": {
+        "path": "private-artifacts/refresh-20261029/live/teams-01/capture/page-states.json",
+        "sha256": "ac9ab9364119778e0337e31ed0bf95f951edbc619aaa2337c8bb635251386a6d"
+      },
+      "recipe": {
+        "path": "tools/capture-recipes/teams-known-refresh-20261029.json",
+        "sha256": "ab0028bdb9ceabf2b0bb9be081d20d0248b31caf444cee5f0f342746962708c7"
+      }
+    },
+    "entry": {
+      "url": "https://admin.teams.microsoft.com/dashboardV2",
+      "provenance": {
+        "path": "private-artifacts/refresh-20261029/live/teams-01/capture/action-results.json",
+        "sha256": "e1430669a672cc7fea68f99d3d6dc71a3222cdcc5588b131708ab9679aa2b1b6",
+        "jsonPointer": "/2/result/url",
+        "actionIndex": 2
+      }
+    }
+  },
+  "representativeActions": [
+    {
+      "type": "navigate",
+      "value": "https://admin.teams.microsoft.com/dashboardV2",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "6000",
+      "required": true
+    },
+    {
+      "type": "reload",
+      "value": "teams-canonical-dashboard",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "8000",
+      "required": true
+    },
+    {
+      "type": "capture",
+      "value": "teams-canonical-dashboard",
+      "required": true
+    },
+    {
+      "type": "navigate",
+      "value": "https://admin.teams.microsoft.com/users",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "6000",
+      "required": true
+    },
+    {
+      "type": "capture",
+      "value": "teams-users",
+      "required": true
+    }
+  ],
+  "actionBudget": {
+    "categories": {
+      "recipeActions": 8,
+      "mandatoryOrchestrationActions": 1,
+      "expandedReplayActions": 0
+    },
+    "countedActions": 9,
+    "maxActions": 9,
+    "budgetCategories": [
+      "recipeActions",
+      "mandatoryOrchestrationActions",
+      "expandedReplayActions"
+    ]
+  },
+  "prerequisites": [
+    "No concrete user ID route is needed for this primary remedy."
+  ],
+  "priorAttemptsPreserved": [],
+  "oldPlanFurtherAttemptAllowed": false,
+  "plannedArtifacts": {
+    "lifecycleDirectory": "private-artifacts/improvements-20261030/live/teams-remediation-01",
+    "captureDirectory": "private-artifacts/improvements-20261030/live/teams-remediation-01/capture",
+    "ledgerPath": "private-artifacts/improvements-20261030/live-ledger.jsonl",
+    "freshExclusiveDirectoryRequired": true
+  },
+  "safety": {
+    "mode": "observe-only",
+    "apiProbeAuthorized": false,
+    "mutationAuthorized": false,
+    "tenantSwitchAuthorized": false,
+    "trialPurchaseActivationAuthorized": false,
+    "deviceCodeAuthorized": false,
+    "passiveCapturedMethods": "all naturally emitted methods; no authored requests",
+    "auth": "legitimate cached/WAM or normal browser only"
+  },
+  "preflight": {
+    "authoritativeResolver": true,
+    "sharedActualExecutorDsl": true,
+    "ownedExactWireTarget": true,
+    "budgetCountMatches": true,
+    "realCliPlan": "pending external exact-byte mirror validation; canonical E plan requires real review and registration",
+    "targetMetadata": "actual-exported-validateRecipeTargetMetadata-pass"
+  },
+  "requiredProof": [
+    "Current profile/selected-tenant/auth/target preflight passes.",
+    "Terminal artifacts and exact action accounting; bootstrap-only traffic is not target acceptance.",
+    "Verify complete raw/API descriptor union and physical sidecars; keep fingerprints/lengths private.",
+    "Separate actual transport/logical errors, native partial coverage and whole-spec gaps.",
+    "Required actual independent review and Sol acceptance before source application; root explicit live authorization after validation."
+  ],
+  "claimBoundary": "No guaranteed target emission, whole-spec health, requiredness, activation, standalone invocation or minimum-role claim."
+}

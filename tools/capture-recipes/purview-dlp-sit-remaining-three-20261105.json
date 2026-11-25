@@ -1,0 +1,110 @@
+{
+  "portal": "Purview DLP",
+  "url": "https://purview.microsoft.com/home",
+  "nativeEntryUrlShape": "https://purview.microsoft.com/datalossprevention/overview",
+  "pageTarget": {
+    "matchHosts": [
+      "purview.microsoft.com"
+    ],
+    "matchPathPrefixes": [
+      "/datalossprevention/overview"
+    ],
+    "allowedEntryQueryParameters": [
+      "tid"
+    ],
+    "bootstrap": {
+      "matchHosts": [
+        "purview.microsoft.com"
+      ],
+      "matchPathnames": [
+        "/home"
+      ]
+    }
+  },
+  "matchHosts": [
+    "purview.microsoft.com"
+  ],
+  "matchPathPrefixes": [
+    "/apiproxy/di/find/DlpSensitiveInformationType"
+  ],
+  "inspectionPolicy": {
+    "mode": "observe-only",
+    "prohibitedControlPatterns": [
+      "Add",
+      "Create",
+      "Delete",
+      "Export",
+      "Remove",
+      "Save",
+      "Submit",
+      "Update",
+      "Purchase",
+      "Activate",
+      "Start trial"
+    ]
+  },
+  "responseBodyLimits": {
+    "perBodyBytes": 16777216,
+    "totalBytes": 268435456
+  },
+  "captureScripts": false,
+  "settleMs": 8000,
+  "postActionSettleMs": 6000,
+  "maxActions": 6,
+  "actions": [
+    {
+      "type": "navigate",
+      "value": "${NativeEntryUrl}",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "6000",
+      "required": true
+    },
+    {
+      "type": "reload",
+      "value": "sit-response-body",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "8000",
+      "required": true
+    },
+    {
+      "type": "capture",
+      "value": "sit-response-body",
+      "required": true
+    }
+  ],
+  "knownOperationRefresh": {
+    "status": "active",
+    "method": "GET",
+    "host": "purview.microsoft.com",
+    "routes": [
+      "/apiproxy/di/find/DlpSensitiveInformationType"
+    ],
+    "actionIndexes": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "state": "Previously oversized complete-body objective reopened under a newly reviewed configurable retention budget. Only native DLP overview navigation and reload; no filters, pagination or direct API request are authored. Preserve the native cached caller session; selected tenant identity is unproved. NativeEntryUrl is copied literally from observed portal evidence without constructing tenant queries. No tenant switch, active API request, configuration change, business-health or minimum-role claim.",
+    "documentationObjectives": [
+      "schema-evidence",
+      "usage-observation",
+      "error-example"
+    ],
+    "evidenceIds": [
+      "opaque:remaining-three-sit-native-entry",
+      "opaque:remaining-three-sit-historical-body-gap"
+    ],
+    "approvalExpiresAt": "2026-11-06T05:45:00.000Z",
+    "variableBindingsDigest": "5440e2f9b1d8cf81751d3b9dc2a42fd7deff81fe4d2ee225efc6a5d363e8a6a1",
+    "approvalArtifact": "tools/frontier-approvals/purview-dlp-sit-remaining-three-20261105.json",
+    "approvalDigest": "04d1cd13628f37adf9c00ae8da19fa73eb1c170e40631859ed84cbd50a7b8039"
+  }
+}

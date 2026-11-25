@@ -1,0 +1,99 @@
+{
+  "portal": "M365 Apps Services",
+  "url": "https://config.office.com/officeSettings",
+  "pageTarget": {
+    "matchHosts": [
+      "config.office.com"
+    ],
+    "matchPathPrefixes": [
+      "/officeSettings"
+    ]
+  },
+  "matchHosts": [
+    "clients.config.office.net"
+  ],
+  "matchPathPrefixes": [
+    "/intents",
+    "/odbhealth",
+    "/onboarding",
+    "/releases"
+  ],
+  "inspectionPolicy": {
+    "mode": "observe-only",
+    "prohibitedControlPatterns": [
+      "Add",
+      "Create",
+      "Delete",
+      "Export",
+      "Remove",
+      "Save",
+      "Submit",
+      "Update",
+      "Purchase",
+      "Activate",
+      "Start trial"
+    ]
+  },
+  "captureScripts": false,
+  "postActionSettleMs": 6000,
+  "settleMs": 8000,
+  "maxActions": 16,
+  "actions": [
+    "navigate=https://config.office.com/officeSettings/health",
+    "wait-ms=6000",
+    "capture=health",
+    "navigate=https://config.office.com/officeSettings/oneDrive",
+    "wait-ms=6000",
+    "capture=onedrive-sync",
+    "navigate=https://config.office.com/officeSettings/cloudUpdate",
+    "wait-ms=6000",
+    "capture=cloud-update",
+    "navigate=https://config.office.com/officeSettings/customization",
+    "wait-ms=6000",
+    "capture=customization",
+    "navigate=https://config.office.com/officeSettings/setup",
+    "wait-ms=6000",
+    "capture=setup"
+  ],
+  "knownOperationRefresh": {
+    "status": "active",
+    "method": "GET",
+    "host": "clients.config.office.net",
+    "routes": [
+      "/onboarding/odata/v1.0/FeatureData"
+    ],
+    "state": "M365 Apps Services bounded passive representative states from tools/capture-recipes/m365-apps-services-deep.json",
+    "actionIndexes": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14
+    ],
+    "approvalExpiresAt": "2026-10-31T08:00:00.000Z",
+    "variableBindingsDigest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "documentationObjectives": [
+      "freshness",
+      "health",
+      "schema-evidence",
+      "usage-observation",
+      "error-example"
+    ],
+    "evidenceIds": [
+      "retained-m365-apps-services-primary-witness",
+      "checked-in-ui-state-m365-apps-services-deep"
+    ],
+    "approvalArtifact": "tools/frontier-approvals/m365-apps-services-refresh-20261029.json",
+    "approvalDigest": "2014bf00b9232500b3b52cdaf60208afd60f5583a40dacab0df90dbe3e20dd19"
+  }
+}

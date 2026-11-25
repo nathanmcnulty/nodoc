@@ -1,0 +1,84 @@
+{
+  "portal": "Entra IGA",
+  "url": "https://entra.microsoft.com/#view/Microsoft_AAD_ERM/DashboardBlade/~/Dashboard/menuId/AccessPackages",
+  "pageTarget": {
+    "matchHosts": [
+      "entra.microsoft.com"
+    ],
+    "matchPathPrefixes": [
+      "/"
+    ]
+  },
+  "matchHosts": [
+    "elm.iga.azure.com"
+  ],
+  "matchPathPrefixes": [
+    "/api/v1"
+  ],
+  "inspectionPolicy": {
+    "mode": "observe-only",
+    "prohibitedControlPatterns": [
+      "Add",
+      "Create",
+      "Delete",
+      "Export",
+      "Remove",
+      "Save",
+      "Submit",
+      "Update",
+      "Purchase",
+      "Activate",
+      "Start trial"
+    ]
+  },
+  "captureScripts": false,
+  "postActionSettleMs": 6000,
+  "settleMs": 8000,
+  "maxActions": 10,
+  "actions": [
+    "navigate=https://entra.microsoft.com/#view/Microsoft_AAD_ERM/DashboardBlade/~/Dashboard/menuId/AccessPackages",
+    "wait-ms=6000",
+    "capture=access-packages",
+    "navigate=https://entra.microsoft.com/#view/Microsoft_AAD_ERM/DashboardBlade/~/elmCatalog",
+    "wait-ms=6000",
+    "capture=catalogs",
+    "navigate=https://entra.microsoft.com/#view/Microsoft_AAD_ERM/DashboardBlade/~/elmOrganizations",
+    "wait-ms=6000",
+    "capture=connected-organizations"
+  ],
+  "knownOperationRefresh": {
+    "status": "active",
+    "method": "GET",
+    "host": "elm.iga.azure.com",
+    "routes": [
+      "/api/v1/accessPackageCatalogs"
+    ],
+    "state": "Entra IGA bounded passive representative states from tools/capture-recipes/entra-iga-novelty.json",
+    "actionIndexes": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "approvalExpiresAt": "2026-10-31T08:00:00.000Z",
+    "variableBindingsDigest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "documentationObjectives": [
+      "freshness",
+      "health",
+      "schema-evidence",
+      "usage-observation",
+      "error-example"
+    ],
+    "evidenceIds": [
+      "retained-entra-iga-primary-witness",
+      "checked-in-ui-state-entra-iga-novelty"
+    ],
+    "approvalArtifact": "tools/frontier-approvals/entra-iga-refresh-20261029.json",
+    "approvalDigest": "b9c8c5541c4904805b027350bb00be4d440931412ac6b780e17dac278b009103"
+  }
+}

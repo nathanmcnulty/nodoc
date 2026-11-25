@@ -1,0 +1,128 @@
+{
+  "schemaVersion": 1,
+  "kind": "known-operation-refresh-approval-source",
+  "status": "pending-fresh-independent-review",
+  "specId": "defender-mto",
+  "refreshDate": "2026-10-29",
+  "refreshDigest": "7316210d92854312a0065ea4cd34496a29e5d5475d27db9b13bbc59126f0c897",
+  "recipeDestination": "tools/capture-recipes/defender-mto-known-refresh-20261029.json",
+  "proposedRecipeSha256": "0667b4d87de29e55b5627cde2bb81e7d31a87edebec73d8d2449f474bf73e672",
+  "sourceRecipe": {
+    "path": "tools/capture-recipes/defender-mto-landing-enrichment.json",
+    "sha256": "2e8d037d926d14b6c35b4829d5c32951452df3d957f8c7624e1b7287a30c9b44"
+  },
+  "specification": {
+    "path": "specifications/nodoc-defender-mto/specification/openapi.yml",
+    "sha256": "9bc2249cd48072a5c7c4a175e84148c514e1f321f2ba809e5cead63627f8f0e1",
+    "operationCount": 19
+  },
+  "policyBindings": [
+    {
+      "path": "PORTAL_DISCOVERY_AGENT_PROMPT.md",
+      "sha256": "57b6acf49eac1afc6e51b014039a6cba694adeeb058b13fa549f0610e20ae8b5"
+    },
+    {
+      "path": "AGENT_DISCOVERY_RUNBOOK.md",
+      "sha256": "4ef12fc4e271e17094dbb5da447b6f535bf2a63b457089ce5bd7f6876126b079"
+    },
+    {
+      "path": "AGENT_DISCOVERY_PLAYBOOK.md",
+      "sha256": "c12b9cecf0a3a85e8c760a8e7b310c0d0528f41cb65c8fe2c95eb420ca3fb119"
+    },
+    {
+      "path": "tools/portal-discovery-model-policy.mjs",
+      "sha256": "5d4b65b60d21a5b7431828b41694c49e85c58fb1497a2c3fb1cf53483066c346"
+    },
+    {
+      "path": "tools/portal-discovery-operation-safety.mjs",
+      "sha256": "425a1466f41aed855a0871548ee464670c350ce9b2954eba0e220c9a38d86ca3"
+    },
+    {
+      "path": "tools/discovery-safety.mjs",
+      "sha256": "e406c0fcd3401092ab2ef8318d41c17bb72956eec84638f2a00b9535dda8c8a1"
+    }
+  ],
+  "target": {
+    "status": "active",
+    "method": "GET",
+    "host": "mto.security.microsoft.com",
+    "routes": [
+      "/apiproxy/mtoapi/mtp/sccManagement/mgmt/TenantContext"
+    ],
+    "state": "Defender XDR (MTO) bounded passive representative states from tools/capture-recipes/defender-mto-landing-enrichment.json",
+    "actionIndexes": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "approvalExpiresAt": "2026-10-31T08:00:00.000Z",
+    "variableBindingsDigest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "documentationObjectives": [
+      "freshness",
+      "health",
+      "schema-evidence",
+      "usage-observation",
+      "error-example"
+    ],
+    "evidenceIds": [
+      "checked-in-ui-state-defender-mto-landing-enrichment",
+      "checked-in-openapi-static-operation"
+    ]
+  },
+  "retainedPlanningEvidence": [],
+  "uiProvenance": {
+    "sourceRecipe": "tools/capture-recipes/defender-mto-landing-enrichment.json",
+    "entryUrl": "https://mto.security.microsoft.com",
+    "actionCount": 5,
+    "usesOnlyKnownStates": true,
+    "noveltyNotRequired": true
+  },
+  "coverage": {
+    "primaryWitness": "GET /apiproxy/mtoapi/mtp/sccManagement/mgmt/TenantContext",
+    "representativeActions": [
+      "navigate=https://mto.security.microsoft.com",
+      "wait-ms=6000",
+      "reload=mto-current-landing-health",
+      "wait-ms=8000",
+      "capture=mto-current-landing-health"
+    ],
+    "uncoveredFamilies": [
+      "current native MTO signal not proven",
+      "tenant-selection native states",
+      "MTO incident/device/RBAC families"
+    ],
+    "requiredDisposition": "Each uncovered family must be observed, unchanged with evidence, adjacent, unreachable in approved state, blocked with precise prerequisite, or separately approved state required. One witness never closes spec."
+  },
+  "safety": {
+    "apiProbeAuthorized": false,
+    "mutationAuthorized": false,
+    "deviceCodeAuthorized": false,
+    "auth": "cached/WAM or normal browser only",
+    "passiveMethods": "all naturally emitted methods retained; no authored requests",
+    "browserLifecycle": "one global endpoint, serialized owner/preflight/worker/terminal/review/disposition/stop"
+  },
+  "caveats": [
+    "new bounded current-health attempt after 26 days explicitly requested by operator; not novelty",
+    "prior landing produced no scoped native /mtoapi; no healthy witness claimed",
+    "one exact landing/reload, no tenant selection, no retry unchanged if no-target-signal"
+  ],
+  "preflightChecks": {
+    "metadata": "accepted",
+    "operationOwnership": "accepted",
+    "safety": {
+      "safe": true,
+      "unsafeActions": []
+    }
+  },
+  "requiredLiveProof": [
+    "terminal discovery-run.json + summary.json + candidate-handoff.json",
+    "all required action indexes accounted with canonical results",
+    "action-attributed exact wire method/host/route",
+    "complete sanitized sidecars with every referenced SHA/length/path verified",
+    "observedAt from source request",
+    "actual statuses and health/error classification",
+    "per-family coverage disposition; no fabricated full-spec freshness"
+  ]
+}

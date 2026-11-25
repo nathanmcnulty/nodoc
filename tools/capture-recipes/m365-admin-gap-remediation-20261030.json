@@ -1,0 +1,97 @@
+{
+  "portal": "M365 Admin",
+  "url": "https://admin.cloud.microsoft/#/groups",
+  "pageTarget": {
+    "matchHosts": [
+      "admin.cloud.microsoft"
+    ],
+    "matchPathPrefixes": [
+      "/"
+    ]
+  },
+  "matchHosts": [
+    "admin.cloud.microsoft"
+  ],
+  "matchPathPrefixes": [
+    "/admin",
+    "/fd"
+  ],
+  "inspectionPolicy": {
+    "mode": "observe-only",
+    "prohibitedControlPatterns": [
+      "Add",
+      "Create",
+      "Delete",
+      "Export",
+      "Remove",
+      "Save",
+      "Submit",
+      "Update",
+      "Purchase",
+      "Activate",
+      "Start trial"
+    ]
+  },
+  "captureScripts": false,
+  "postActionSettleMs": 6000,
+  "settleMs": 8000,
+  "maxActions": 6,
+  "actions": [
+    {
+      "type": "navigate",
+      "value": "https://admin.cloud.microsoft/#/groups",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "6000",
+      "required": true
+    },
+    {
+      "type": "reload",
+      "value": "m365-groups-document-bootstrap",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "8000",
+      "required": true
+    },
+    {
+      "type": "capture",
+      "value": "m365-groups-document-bootstrap",
+      "required": true
+    }
+  ],
+  "knownOperationRefresh": {
+    "status": "active",
+    "method": "GET",
+    "host": "admin.cloud.microsoft",
+    "routes": [
+      "/admin/api/groups/permissions"
+    ],
+    "state": "One Groups-state document reload is a new bounded remedy: the previous22-action plan only navigated fragments.",
+    "actionIndexes": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "approvalExpiresAt": "2026-10-31T09:57:22.444Z",
+    "variableBindingsDigest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "documentationObjectives": [
+      "freshness",
+      "health",
+      "schema-evidence",
+      "usage-observation",
+      "error-example"
+    ],
+    "evidenceIds": [
+      "gap-remediation-plan-20261030:m365-admin",
+      "retained-state-provenance-20261030:m365-admin"
+    ],
+    "approvalArtifact": "tools/frontier-approvals/m365-admin-gap-remediation-20261030.json",
+    "approvalDigest": "a3ebe025495cbb30213158a5f0b0a0e46f6c07bacb389cdb7ce3f3a08fd18c0f"
+  }
+}

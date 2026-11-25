@@ -584,6 +584,24 @@ paths:
         Retrieve billing subscriptions associated with the selected billing account,
         including product, quantity, term, and renewal metadata.
       operationId: Billing.ListBillingSubscriptions
+      x-nodoc-live-capture:
+        source: authenticated Microsoft 365 admin center passive representative states
+        browsedPages:
+          - Microsoft 365 admin center
+      x-nodoc-operation-context:
+        surface: Microsoft 365 admin center
+        workflows:
+          - Observe native requests during the approved passive representative portal states.
+        availability:
+          level: user-context
+          notes:
+            - One authenticated portal session; standalone execution, parameter requiredness, effective grants and minimum roles are not established.
+        provenance:
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - "GET admin.cloud.microsoft/fd/arm/providers/Microsoft.Billing/billingAccounts/{billingAccountId}/billingSubscriptions; HTTP 200; action 18; observed 2026-10-29T20:34:57.743Z; complete response (privately hash-verified)."
+              - Current complete response shape was observed in the captured portal session; no broader operation or state coverage is implied.
       tags: [Billing]
       parameters:
         - name: billingAccountId
@@ -973,6 +991,24 @@ paths:
         Retrieve the software key inventory exposed by the subscriptions experience,
         optionally including detailed product key information.
       operationId: Billing.ListSoftwareKeys
+      x-nodoc-live-capture:
+        source: authenticated Microsoft 365 admin center passive representative states
+        browsedPages:
+          - Microsoft 365 admin center
+      x-nodoc-operation-context:
+        surface: Microsoft 365 admin center
+        workflows:
+          - Observe native requests during the approved passive representative portal states.
+        availability:
+          level: user-context
+          notes:
+            - One authenticated portal session; standalone execution, parameter requiredness, effective grants and minimum roles are not established.
+        provenance:
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - "GET admin.cloud.microsoft/fd/KeyFulfillment/v3.0/softwareKeys; HTTP 200; action 18; observed 2026-10-29T20:34:55.296Z; complete response (privately hash-verified)."
+              - Current complete response shape was observed in the captured portal session; no broader operation or state coverage is implied.
       tags: [Billing]
       parameters:
         - name: includeProductKeyDetails
@@ -986,8 +1022,11 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                description: Software key inventory payload. Exact schema pending.
+                oneOf:
+                  - type: object
+                    description: Software key inventory payload. Exact schema pending.
+                  - type: array
+                    items: {}
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 

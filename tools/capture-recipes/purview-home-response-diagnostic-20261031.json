@@ -1,0 +1,104 @@
+{
+  "portal": "Purview Home",
+  "url": "https://purview.microsoft.com/home?tid=${TenantId}",
+  "pageTarget": {
+    "matchHosts": [
+      "purview.microsoft.com"
+    ],
+    "matchPathPrefixes": [
+      "/home"
+    ],
+    "allowedEntryQueryParameters": [
+      "tid"
+    ]
+  },
+  "matchHosts": [
+    "purview.microsoft.com"
+  ],
+  "matchPathPrefixes": [
+    "/apiproxy/medeina/auth/expiryDate",
+    "/apiproxy/cpm/v1.0/Tenant/CompliancePostureSummary",
+    "/apiproxy/msgraph/v1.0/admin/serviceAnnouncement/messages",
+    "/apiproxy/insiderrisk/insiderrisk/api/v1.0/${TenantId}/InsiderRiskAnalyticsInsightMetadata(",
+    "/apiproxy/insiderrisk/insiderrisk/api/v1.0/${TenantId}/InsiderRiskTenantPolicyAnalytics("
+  ],
+  "inspectionPolicy": {
+    "mode": "observe-only",
+    "prohibitedControlPatterns": [
+      "Add",
+      "Create",
+      "Delete",
+      "Export",
+      "Remove",
+      "Save",
+      "Submit",
+      "Update",
+      "Purchase",
+      "Activate",
+      "Start trial"
+    ]
+  },
+  "captureScripts": false,
+  "postActionSettleMs": 6000,
+  "settleMs": 8000,
+  "maxActions": 6,
+  "actions": [
+    {
+      "type": "navigate",
+      "value": "https://purview.microsoft.com/home?tid=${TenantId}",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "6000",
+      "required": true
+    },
+    {
+      "type": "reload",
+      "value": "purview-home-response-body",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "8000",
+      "required": true
+    },
+    {
+      "type": "capture",
+      "value": "purview-home-response-body",
+      "required": true
+    }
+  ],
+  "knownOperationRefresh": {
+    "status": "active",
+    "method": "GET",
+    "host": "purview.microsoft.com",
+    "routes": [
+      "/apiproxy/medeina/auth/expiryDate"
+    ],
+    "actionIndexes": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "state": "Response-only diagnostic objective for the exact previously observed Purview Home expiryDate GET, historically HTTP 404, plus two separately dispositioned passive responses: CompliancePostureSummary POST and Purview-proxied serviceAnnouncement GET. The passive POST has unknown effects and is neither authored nor called read-only, replay-safe, or side-effect-free. The proxy GET is not direct Graph execution/permission evidence. No health/removal, capacity, trial, activation, or tenant-switch inference. Additionally retain and separately assess two exact previously observed Insider Risk GET response bodies from the same Home actions; bind path scope to the existing native TenantId. Old previews were scope-excluded, not complete bodies. No direct requests, new UI actions, policy/configuration changes or populated-schema inference are authorized.",
+    "documentationObjectives": [
+      "schema-evidence",
+      "usage-observation",
+      "error-example"
+    ],
+    "evidenceIds": [
+      "opaque:purview-home-expiryDate-404-action2",
+      "opaque:purview-home-compliance-posture-passive-post",
+      "opaque:purview-home-serviceAnnouncement-proxy-get",
+      "opaque:purview-home-irm-insight-action0-2",
+      "opaque:purview-home-irm-policy-action0-2"
+    ],
+    "approvalExpiresAt": "2026-10-31T11:26:59.993Z",
+    "variableBindingsDigest": "8b8e73b61a28c8be7ab1756d51ae796571279c94e70ffc4e8be35661de37ae65",
+    "approvalArtifact": "tools/frontier-approvals/purview-home-response-diagnostic-20261031.json",
+    "approvalDigest": "2621bd7ba8485c0688d18529998efffc624dad8dcbf8057829e622b23dd0f04a"
+  }
+}

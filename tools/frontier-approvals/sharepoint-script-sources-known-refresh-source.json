@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "kind": "known-operation-refresh-approval-source",
+  "status": "pending-exact-luna-repair-review",
+  "specId": "sharepoint-admin",
+  "portal": "SharePoint",
+  "recipeCoreSha256": "1ae698c434bde6529cd7ed3d69bb570bc0cc134b42217a8a1c35cd10f53bb554",
+  "liveValidationPlanSha256": "aad3092bbbbd88fea51fe8ffad51316c9eefd7d8c2e8f57e15b094f67de29d5d",
+  "implementationSolQualityGateSha256": "ed521a1636a772ac47f625c0e732a18b3b8981e066a004fb2f54a8c45efa7c32",
+  "finalImplementationManifestSha256": "faaf6e0d8aa049e055e13cbcad8677c070a1f999e4c4fba6b8c24101e01ddf33",
+  "specification": {
+    "path": "specifications/nodoc-sharepoint-admin/specification/openapi.yml",
+    "sha256": "f05c61df22fa17d35987136cd91f8974825017f2b5df0838191a8dc23209cdd9"
+  },
+  "retainedPlanningEvidence": {
+    "path": "private-artifacts/sharepoint-script-sources-20260831T043154991Z/api-records.json",
+    "sha256": "7428fbb70e709dd0813cd573673eb4efea22472344b7e3ea20d9f27e7635b8ad",
+    "recordIndex": 1,
+    "historicOnly": true,
+    "notCurrentProof": true
+  },
+  "target": {
+    "status": "active",
+    "method": "GET",
+    "host": "${tenant}-admin.sharepoint.com",
+    "routes": [
+      "/_api/SPO.SPOContentSecurityPolicyConfiguration"
+    ],
+    "state": "Content security policy Script sources after exact passive navigation",
+    "actionIndexes": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "approvalExpiresAt": "2026-10-04T18:00:00.000Z",
+    "variableBindingsDigest": "84f43778fd7dd21c5808b6324a479bb0e8112099362fdf6e1e18356070012e24",
+    "documentationObjectives": [
+      "freshness",
+      "response-example",
+      "schema-evidence",
+      "usage-observation"
+    ],
+    "evidenceIds": [
+      "historic-sharepoint-script-sources-record-1"
+    ]
+  },
+  "safety": {
+    "uiActions": "passive only",
+    "apiProbeAuthorized": false,
+    "mutationAuthorized": false,
+    "deviceCodeAuthorized": false,
+    "auth": "cached/WAM or normal browser only"
+  },
+  "requiredLiveProof": [
+    "all required action indexes completed",
+    "exact action-attributed method/host/route target",
+    "HTTP 2xx without GraphQL errors where applicable",
+    "complete sanitized hash-bound scoped sidecar",
+    "observedAt timestamp from source request"
+  ],
+  "failedLiveAttempt": {
+    "artifactDirectory": "[external]/sharepoint-known-refresh-202603T1915Z",
+    "discoveryRunSha256": "4543d8a1e71250f0ac6c3feb3d0d3d85a5eb75017f11a38c6f5d7fc8badb3704",
+    "actionResultsSha256": "5f7263acf379fa611ceb928b9755ab29de903c4944f077eda7c6a357968870ce",
+    "assessmentSha256": "1c7fc3dd9838ef7495b5f97339f2bf53632c8deb01192b4e7f1646811d9441b7",
+    "disposition": "blocked-before-target-observation; preserved; no promotion"
+  },
+  "repair": {
+    "accounting": "use canonical production action result semantics with explicit capture/wait checks",
+    "recipe": "same exact approved passive state plus one Page.reload before the capture checkpoint",
+    "focusedTests": "42/42 passed",
+    "files": [
+      "tools/portal-discovery-evidence-contract.mjs",
+      "tools/capture-recipes/sharepoint-script-sources-known-refresh.json",
+      "tools/tests/portal-discovery-evidence-contract.test.mjs",
+      "tools/tests/known-operation-fullpath.test.mjs"
+    ]
+  }
+}

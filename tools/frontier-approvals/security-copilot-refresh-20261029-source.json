@@ -1,0 +1,174 @@
+{
+  "schemaVersion": 1,
+  "kind": "known-operation-refresh-approval-source",
+  "status": "pending-fresh-independent-review",
+  "specId": "security-copilot",
+  "refreshDate": "2026-10-29",
+  "refreshDigest": "fe1fbdaa3ff149bfd1613ac696c0f57788d18d4f61369f46b3e896d963219378",
+  "recipeDestination": "tools/capture-recipes/security-copilot-known-refresh-20261029.json",
+  "proposedRecipeSha256": "233f2c232351ca24e1c93ae9113ee1fcb02b4d861035e0841be6a6a87d4a1ef5",
+  "sourceRecipe": {
+    "path": "tools/capture-recipes/security-copilot-trial-checktenant-frontier.json",
+    "sha256": "f35c0e87c1bd97e08ffd968f21263bf39a2e478b264d5015abeda877620252fb"
+  },
+  "specification": {
+    "path": "specifications/nodoc-security-copilot/specification/openapi.yml",
+    "sha256": "63cbc265fe93fa8263399b53611bbbfe91f7973ca36e5d811e1b758ac1f1ca28",
+    "operationCount": 42
+  },
+  "policyBindings": [
+    {
+      "path": "PORTAL_DISCOVERY_AGENT_PROMPT.md",
+      "sha256": "57b6acf49eac1afc6e51b014039a6cba694adeeb058b13fa549f0610e20ae8b5"
+    },
+    {
+      "path": "AGENT_DISCOVERY_RUNBOOK.md",
+      "sha256": "4ef12fc4e271e17094dbb5da447b6f535bf2a63b457089ce5bd7f6876126b079"
+    },
+    {
+      "path": "AGENT_DISCOVERY_PLAYBOOK.md",
+      "sha256": "c12b9cecf0a3a85e8c760a8e7b310c0d0528f41cb65c8fe2c95eb420ca3fb119"
+    },
+    {
+      "path": "tools/portal-discovery-model-policy.mjs",
+      "sha256": "5d4b65b60d21a5b7431828b41694c49e85c58fb1497a2c3fb1cf53483066c346"
+    },
+    {
+      "path": "tools/portal-discovery-operation-safety.mjs",
+      "sha256": "425a1466f41aed855a0871548ee464670c350ce9b2954eba0e220c9a38d86ca3"
+    },
+    {
+      "path": "tools/discovery-safety.mjs",
+      "sha256": "e406c0fcd3401092ab2ef8318d41c17bb72956eec84638f2a00b9535dda8c8a1"
+    }
+  ],
+  "target": {
+    "status": "active",
+    "method": "GET",
+    "host": "api.securityplatform.microsoft.com",
+    "routes": [
+      "/provisioning/checkTenant"
+    ],
+    "state": "Security Copilot bounded passive representative states from tools/capture-recipes/security-copilot-trial-checktenant-frontier.json",
+    "actionIndexes": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "approvalExpiresAt": "2026-10-31T08:00:00.000Z",
+    "variableBindingsDigest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "documentationObjectives": [
+      "freshness",
+      "health",
+      "schema-evidence",
+      "usage-observation",
+      "error-example"
+    ],
+    "evidenceIds": [
+      "retained-security-copilot-primary-witness",
+      "checked-in-ui-state-security-copilot-trial-checktenant-frontier"
+    ]
+  },
+  "retainedPlanningEvidence": [
+    {
+      "artifactPath": "private-artifacts/security-copilot-checktenant-20261003T104700Z/api-records.json",
+      "sha256": "6c2be5142043c9cb78d28ee5df5fb7c5c66fcb6398a14964aec419d6cd84f9c6",
+      "recordIndex": 28,
+      "method": "GET",
+      "host": "api.securityplatform.microsoft.com",
+      "route": "/provisioning/checkTenant",
+      "status": 200,
+      "mimeType": "application/json",
+      "seenOnPageCount": 3,
+      "observedAt": null,
+      "historicOnly": true
+    },
+    {
+      "artifactPath": "private-artifacts/security-copilot-refresh-20260831T230000Z/api-records.json",
+      "sha256": "465cab207a5c8f361b2fc3c569bf30e5a85ae7775c770252b2491e25293c8ee9",
+      "recordIndex": 27,
+      "method": "GET",
+      "host": "api.securityplatform.microsoft.com",
+      "route": "/provisioning/checkTenant",
+      "status": 200,
+      "mimeType": "application/json",
+      "seenOnPageCount": 1,
+      "observedAt": null,
+      "historicOnly": true
+    }
+  ],
+  "uiProvenance": {
+    "sourceRecipe": "tools/capture-recipes/security-copilot-trial-checktenant-frontier.json",
+    "entryUrl": "https://securitycopilot.microsoft.com/trial",
+    "actionCount": 5,
+    "usesOnlyKnownStates": true,
+    "noveltyNotRequired": true
+  },
+  "coverage": {
+    "primaryWitness": "GET /provisioning/checkTenant",
+    "representativeActions": [
+      {
+        "type": "navigate",
+        "value": "https://securitycopilot.microsoft.com/trial",
+        "required": true,
+        "highValue": true
+      },
+      {
+        "type": "wait-ms",
+        "value": "10000",
+        "required": true
+      },
+      {
+        "type": "reload",
+        "value": "security-copilot-trial",
+        "required": true
+      },
+      {
+        "type": "wait-ms",
+        "value": "10000",
+        "required": true
+      },
+      {
+        "type": "capture",
+        "value": "checktenant-schema",
+        "required": true
+      }
+    ],
+    "uncoveredFamilies": [
+      "capacity-provisioned config/session states",
+      "other bootstrap families"
+    ],
+    "requiredDisposition": "Each uncovered family must be observed, unchanged with evidence, adjacent, unreachable in approved state, blocked with precise prerequisite, or separately approved state required. One witness never closes spec."
+  },
+  "safety": {
+    "apiProbeAuthorized": false,
+    "mutationAuthorized": false,
+    "deviceCodeAuthorized": false,
+    "auth": "cached/WAM or normal browser only",
+    "passiveMethods": "all naturally emitted methods retained; no authored requests",
+    "browserLifecycle": "one global endpoint, serialized owner/preflight/worker/terminal/review/disposition/stop"
+  },
+  "caveats": [
+    "trial/capacity activation prohibited",
+    "Purview-owned checkTenant traffic adjacent"
+  ],
+  "preflightChecks": {
+    "metadata": "accepted",
+    "operationOwnership": "accepted",
+    "safety": {
+      "safe": true,
+      "unsafeActions": []
+    }
+  },
+  "requiredLiveProof": [
+    "terminal discovery-run.json + summary.json + candidate-handoff.json",
+    "all required action indexes accounted with canonical results",
+    "action-attributed exact wire method/host/route",
+    "complete sanitized sidecars with every referenced SHA/length/path verified",
+    "observedAt from source request",
+    "actual statuses and health/error classification",
+    "per-family coverage disposition; no fabricated full-spec freshness"
+  ]
+}

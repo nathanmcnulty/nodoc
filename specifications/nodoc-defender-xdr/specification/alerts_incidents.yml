@@ -1216,6 +1216,26 @@ paths:
         contained accounts, contained devices, and malicious OAuth apps over the selected
         lookback window.
       operationId: Incidents.GetDisruptionSummary
+      x-nodoc-live-capture:
+        source: authenticated Microsoft Defender portal representative overview states passive representative states
+        browsedPages:
+          - Microsoft Defender portal representative overview states
+      x-nodoc-operation-context:
+        surface: Microsoft Defender portal representative overview states
+        workflows:
+          - Observe native requests during approved passive representative portal states.
+        availability:
+          level: user-context
+          notes:
+            - One authenticated portal session; standalone execution, parameter requiredness, effective grants and minimum roles are not established.
+        provenance:
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - GET security.microsoft.com/apiproxy/mtp/phoenixValueReflectionApi/disrupt; HTTP 200; action 5; observed 2026-10-29T23:06:31.094Z; complete response privately hash-verified.
+              - The selected complete response has no conventional logical error envelope; existing declared types remain compatible.
+              - One passive authenticated user context; standalone execution, requiredness, effective grants and minimum roles remain unverified.
+              - The refresh evaluator remains blocked at checkpoint5; raw target traffic does not clear that accounting gap.
       tags: [Incidents]
       parameters:
         - name: lookbackDays
@@ -1256,6 +1276,26 @@ paths:
         Retrieve the high-level alert and incident totals shown on the Defender portal's
         incident value-reflection summary.
       operationId: Incidents.GetSummaryTotals
+      x-nodoc-live-capture:
+        source: authenticated Microsoft Defender portal representative overview states passive representative states
+        browsedPages:
+          - Microsoft Defender portal representative overview states
+      x-nodoc-operation-context:
+        surface: Microsoft Defender portal representative overview states
+        workflows:
+          - Observe native requests during approved passive representative portal states.
+        availability:
+          level: user-context
+          notes:
+            - One authenticated portal session; standalone execution, parameter requiredness, effective grants and minimum roles are not established.
+        provenance:
+          - source: live-authenticated-capture
+            confidence: high
+            notes:
+              - GET security.microsoft.com/apiproxy/mtp/phoenixValueReflectionApi/summary/total; HTTP 200; action 5; observed 2026-10-29T23:06:31.095Z; complete response privately hash-verified.
+              - The selected complete response has no conventional logical error envelope; existing declared types remain compatible.
+              - One passive authenticated user context; standalone execution, requiredness, effective grants and minimum roles remain unverified.
+              - The refresh evaluator remains blocked at checkpoint5; raw target traffic does not clear that accounting gap.
       tags: [Incidents]
       parameters:
         - name: lookbackDays

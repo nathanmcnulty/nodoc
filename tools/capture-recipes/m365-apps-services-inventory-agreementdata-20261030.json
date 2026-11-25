@@ -1,0 +1,94 @@
+{
+  "portal": "Inventory overview",
+  "url": "https://config.office.com/officeSettings/inventory",
+  "pageTarget": {
+    "matchHosts": [
+      "config.office.com"
+    ],
+    "matchPathPrefixes": [
+      "/officeSettings/inventory"
+    ]
+  },
+  "matchHosts": [
+    "clients.config.office.net"
+  ],
+  "matchPathPrefixes": [
+    "/onboarding/odata/v1.0/Agreementdata"
+  ],
+  "inspectionPolicy": {
+    "mode": "observe-only",
+    "prohibitedControlPatterns": [
+      "Add",
+      "Create",
+      "Delete",
+      "Export",
+      "Remove",
+      "Save",
+      "Submit",
+      "Update",
+      "Purchase",
+      "Activate",
+      "Start trial"
+    ]
+  },
+  "captureScripts": false,
+  "settleMs": 8000,
+  "postActionSettleMs": 6000,
+  "maxActions": 6,
+  "actions": [
+    {
+      "type": "navigate",
+      "value": "https://config.office.com/officeSettings/inventory",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "6000",
+      "required": true
+    },
+    {
+      "type": "reload",
+      "value": "inventory-agreement",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "8000",
+      "required": true
+    },
+    {
+      "type": "capture",
+      "value": "inventory-agreement",
+      "required": true
+    }
+  ],
+  "knownOperationRefresh": {
+    "status": "active",
+    "method": "GET",
+    "host": "clients.config.office.net",
+    "routes": [
+      "/onboarding/odata/v1.0/Agreementdata"
+    ],
+    "actionIndexes": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "state": "Fresh body-evidence objective for one exact existing GET passively emitted by the observed Inventory overview view. Canonical backend ownership and observed caller remain distinct; no direct API replay, current-tenant assertion, business-health or feature-entitlement claim.",
+    "documentationObjectives": [
+      "schema-evidence",
+      "usage-observation",
+      "error-example"
+    ],
+    "evidenceIds": [
+      "candidate:inventory-agreement:action2",
+      "assessment-sha256:08dafb4c8cc0045568eb8fb999ab66bc78b365594915c96c7794ca1e3066168d"
+    ],
+    "approvalExpiresAt": "2026-10-31T11:41:36.483Z",
+    "variableBindingsDigest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "approvalArtifact": "tools/frontier-approvals/m365-apps-services-inventory-agreementdata-20261030.json",
+    "approvalDigest": "467617917ecbdfce6182a5726557b02a40389918bcc79e2375a76ed8dad8e951"
+  }
+}

@@ -1,0 +1,84 @@
+{
+  "portal": "M365 Apps Config",
+  "url": "https://config.office.com/officeSettings",
+  "pageTarget": {
+    "matchHosts": [
+      "config.office.com"
+    ],
+    "matchPathPrefixes": [
+      "/officeSettings"
+    ]
+  },
+  "matchHosts": [
+    "config.office.com"
+  ],
+  "matchPathPrefixes": [
+    "/appConfig",
+    "/endpointprovisionhealth",
+    "/intents",
+    "/policyadmin",
+    "/releases",
+    "/rollout",
+    "/serviceProfile",
+    "/ServiceProfile",
+    "/settings"
+  ],
+  "inspectionPolicy": {
+    "mode": "observe-only",
+    "prohibitedControlPatterns": [
+      "Add",
+      "Create",
+      "Delete",
+      "Export",
+      "Remove",
+      "Save",
+      "Submit",
+      "Update",
+      "Purchase",
+      "Activate",
+      "Start trial"
+    ]
+  },
+  "captureScripts": false,
+  "postActionSettleMs": 6000,
+  "settleMs": 8000,
+  "maxActions": 6,
+  "actions": [
+    "navigate=https://config.office.com/officeSettings",
+    "wait-ms=6000",
+    "reload=apps-config-landing",
+    "wait-ms=8000",
+    "capture=apps-config-landing"
+  ],
+  "knownOperationRefresh": {
+    "status": "active",
+    "method": "GET",
+    "host": "config.office.com",
+    "routes": [
+      "/appConfig/v1.0/userflights"
+    ],
+    "state": "M365 Apps Config bounded passive representative states from tools/capture-recipes/m365-apps-config-deep.json",
+    "actionIndexes": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "approvalExpiresAt": "2026-10-31T08:00:00.000Z",
+    "variableBindingsDigest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "documentationObjectives": [
+      "freshness",
+      "health",
+      "schema-evidence",
+      "usage-observation",
+      "error-example"
+    ],
+    "evidenceIds": [
+      "retained-m365-apps-config-primary-witness",
+      "checked-in-ui-state-m365-apps-config-deep"
+    ],
+    "approvalArtifact": "tools/frontier-approvals/m365-apps-config-refresh-20261029.json",
+    "approvalDigest": "4362b5530cdabbc3bbed24aeac8b3152576a5d27ebbc3c64c3035f9c7adabd44"
+  }
+}

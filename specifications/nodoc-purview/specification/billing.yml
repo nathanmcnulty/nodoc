@@ -15,6 +15,13 @@ paths:
               schema:
                 type: object
                 description: pending
+            text/plain:
+              schema:
+                type: array
+                items:
+                  type: object
+                  additionalProperties: true
+                description: Retained response container only; no trial eligibility, activation, provisioning, purchase, entitlement or business-state conclusion is established.
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -23,6 +30,29 @@ paths:
 
         '404':
           $ref: common.yml#/components/responses/NotFound
+      x-nodoc-operation-context:
+        surface: Microsoft Purview portal (retained native navigation)
+        workflows:
+          - Observe traffic emitted by the normal authenticated portal during the originally recorded native navigation; reuse retained evidence for offline documentation review.
+        requestShapes:
+          - name: retained-native-get
+            bodyKind: none
+            notes: "Observed query parameter names: none recorded. Values are withheld; presence does not test requiredness and existing parameter declarations are unchanged."
+        availability:
+          level: user-context
+          notes:
+            - Historical user-session observation only; no feature activation, tenant switch, role/grant/minimum-permission inference or standalone usage validation.
+        provenance:
+          - source: retained-native-portal-evidence-reviewed-20261030
+            confidence: high
+            notes:
+              - Exact declared GET purview.microsoft.com/apiproxy/cbill/purview/offer/freetrial maps to canonical /cbill/purview/offer/freetrial; current declared server/base/path and original request binding were checked privately.
+              - Retained purview-01 action 5 at 2026-10-29T22:14:01.501Z; evidence request-d100306b8fd6d55d98dd; HTTP 200 complete body privately verified.
+              - Retained purview-remediation-02 action 5 at 2026-10-30T12:27:12.233Z; evidence request-a37669c41f23eb6cd083; HTTP 200 complete body privately verified.
+              - Original capture dates and action attribution are retained. Reusing these bodies for offline review does not create a fresh native observation or clear any historical run-level accounting gaps.
+              - HTTP 200, complete body bytes and limited type checks do not establish application/business success, feature availability, entitlement, provisioning, effective permissions or minimum roles.
+              - This is neutral historical response-shape evidence only; no trial, activation, purchase or provisioning action was performed for this review.
+              - Captured scalar values, role/feature-map keys, credentials, tenant data, response fingerprints, byte lengths and examples are withheld. No new route or requiredness, enum, format, authentication or standalone execution claim follows.
 
   /cbill/PurviewAccount:
     get:

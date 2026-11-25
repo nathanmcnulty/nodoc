@@ -19,7 +19,18 @@ paths:
           content:
             application/json:
               schema:
-                $ref: common.yml#/components/schemas/GovernanceRolesWithScopeInfoResponse
+                allOf:
+                  - $ref: common.yml#/components/schemas/GovernanceRolesWithScopeInfoResponse
+                  - type: object
+                    properties:
+                      Allowed:
+                        type: boolean
+                      Permission:
+                        type: string
+                      ScopeInfos:
+                        type: array
+                        items: {}
+                description: Preserves the existing declared schema and adds only optional newly observed static fields; no grant or minimum-permission conclusion follows.
         '401':
           $ref: common.yml#/components/responses/Unauthorized
 
@@ -28,6 +39,29 @@ paths:
 
         '404':
           $ref: common.yml#/components/responses/NotFound
+      x-nodoc-operation-context:
+        surface: Microsoft Purview portal (retained native navigation)
+        workflows:
+          - Observe traffic emitted by the normal authenticated portal during the originally recorded native navigation; reuse retained evidence for offline documentation review.
+        requestShapes:
+          - name: passively-observed-post-no-replay
+            bodyKind: unknown
+            notes: "Observed query parameter names: none recorded. Values are withheld; presence does not test requiredness and existing parameter declarations are unchanged."
+        availability:
+          level: user-context
+          notes:
+            - Historical user-session observation only; no feature activation, tenant switch, role/grant/minimum-permission inference or standalone usage validation.
+        provenance:
+          - source: retained-native-portal-evidence-reviewed-20261030
+            confidence: high
+            notes:
+              - Exact declared POST purview.microsoft.com/apiproxy/gws/ComplianceAuthServer/v1.0/IsAllowedPermissionWithScopes maps to canonical /gws/ComplianceAuthServer/v1.0/IsAllowedPermissionWithScopes; current declared server/base/path and original request binding were checked privately.
+              - Retained purview-01 action 5 at 2026-10-29T22:14:06.101Z; evidence request-dd37c93a618fd04da631; HTTP 200 complete body privately verified.
+              - Retained purview-remediation-02 action 8 at 2026-10-30T12:28:00.866Z; evidence request-2403f31259f1fb6b5993; HTTP 200 complete body privately verified.
+              - Original capture dates and action attribution are retained. Reusing these bodies for offline review does not create a fresh native observation or clear any historical run-level accounting gaps.
+              - HTTP 200, complete body bytes and limited type checks do not establish application/business success, feature availability, entitlement, provisioning, effective permissions or minimum roles.
+              - This POST was passively observed during the original portal capture, not authored, invoked, probed or replayed by this review. Request shape remains unknown because no complete verified request sidecar is available; replay safety, idempotence, effects and rollback are unproven.
+              - Captured scalar values, role/feature-map keys, credentials, tenant data, response fingerprints, byte lengths and examples are withheld. No new route or requiredness, enum, format, authentication or standalone execution claim follows.
 
   /gws/ComplianceAuthServer/v1.0/GetUserRolesWithScopeInfo:
     post:

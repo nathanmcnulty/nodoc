@@ -29,6 +29,28 @@ paths:
 
         '404':
           $ref: common.yml#/components/responses/NotFound
+      x-nodoc-operation-context:
+        surface: Microsoft Purview portal (retained native navigation)
+        workflows:
+          - Observe traffic emitted by the normal authenticated portal during the originally recorded native navigation; reuse retained evidence for offline documentation review.
+        requestShapes:
+          - name: retained-native-get
+            bodyKind: none
+            notes: "Observed query parameter names: type. Values are withheld; presence does not test requiredness and existing parameter declarations are unchanged."
+        availability:
+          level: user-context
+          notes:
+            - Historical user-session observation only; no feature activation, tenant switch, role/grant/minimum-permission inference or standalone usage validation.
+        provenance:
+          - source: retained-native-portal-evidence-reviewed-20261030
+            confidence: high
+            notes:
+              - Exact declared GET purview.microsoft.com/apiproxy/purviewplatform/api/v1/insight/GetTypeAggregates maps to canonical /purviewplatform/api/v1/insight/GetTypeAggregates; current declared server/base/path and original request binding were checked privately.
+              - Retained purview-01 action 11 at 2026-10-29T22:15:42.827Z; evidence request-ff692341ce8cf645a115; HTTP 200 complete body privately verified.
+              - Retained purview-remediation-02 action 0 at 2026-10-30T12:25:45.096Z; evidence request-ac9806d18b5fe28ca898; HTTP 200 complete body privately verified.
+              - Original capture dates and action attribution are retained. Reusing these bodies for offline review does not create a fresh native observation or clear any historical run-level accounting gaps.
+              - HTTP 200, complete body bytes and limited type checks do not establish application/business success, feature availability, entitlement, provisioning, effective permissions or minimum roles.
+              - Captured scalar values, role/feature-map keys, credentials, tenant data, response fingerprints, byte lengths and examples are withheld. No new route or requiredness, enum, format, authentication or standalone execution claim follows.
 
   /purviewplatform/api/v1/insight/GetOverallProtectionStatus:
     get:
@@ -53,7 +75,30 @@ paths:
 
         '404':
           $ref: common.yml#/components/responses/NotFound
+      x-nodoc-operation-context:
+        surface: Historical portal caller / declared backend transport relationship
+        provenance:
+          - source: retained-adjacent-portal-transport-reviewed-20261030
+            confidence: high
+            notes:
+              - Historical transport identity is exact GET purview.microsoft.com/apiproxy/purviewplatform/api/v1/insight/GetOverallProtectionStatus, canonical /purviewplatform/api/v1/insight/GetOverallProtectionStatus under the currently declared backend specification purview.
+              - "Original caller capture assignments: purview-portal. Caller page attribution and assignment labels do not by themselves establish causal execution of the backend owner's UI."
+              - Retained purview-portal-02 action 0 at 2026-10-29T22:45:12.147Z; evidence request-c7f2fb33438aee43ddcb; HTTP 200.
+              - Retained purview-portal-remediation-01 action 0 at 2026-10-30T12:38:23.665Z; evidence request-7e9464720ecf2044de63; HTTP 200.
+              - "Observed query parameter names: none recorded. Values and derived page-label strings are withheld; parameter presence is not requiredness testing."
+              - This review used raw transport metadata only. No qualifying complete action-attributed response body was available in the selected retained evidence; bootstrap-only complete responses are excluded as action witnesses. Response/body/schema gaps remain open.
+              - Existing response schemas are unchanged. Any newly listed status is description-only, with no inferred error body, status cause, route removal or availability conclusion.
+              - Original dates/actions remain historical; this is not fresh capture, current tenant validation, business or application health, standalone invocation, role/grant/minimum-permission proof, or an owning-portal workflow test.
+              - GET is the recorded method, not a safety or idempotence determination. No request was authored, invoked, probed or replayed by this offline review; effects and rollback are untested.
+              - Confidence applies only to the verified historical method/host/path/status metadata. Captured values, identifiers, credentials, response fingerprints, body lengths and examples are withheld.
 
+          - source: purview-home-body-enrichment-20261030-01
+            confidence: high
+            notes:
+              - "Own Purview Home capture on 2026-10-30 retained two verified complete HTTP 200 JSON bodies attributed to actions 0 and 2; evidence IDs: request-5f24481e934185971224, request-6f5ed7ad0d24e94a697c."
+              - "Observed query parameter names: none. Values, response content, fingerprints and lengths are withheld; parameter presence does not establish requiredness."
+              - HTTP status and body shape do not establish business or application success; ResultCode semantics are unknown. Standalone use, minimum roles, grants, activation and replay remain untested.
+              - No active operation was authored or probed; background passive requests, including POSTs, may have effects that were not determined.
   /purviewplatform/api/v1/insight/GetTypeAggregatesByWorkload:
     get:
       operationId: getTypeAggregatesByWorkload
@@ -84,7 +129,30 @@ paths:
 
         '404':
           $ref: common.yml#/components/responses/NotFound
+      x-nodoc-operation-context:
+        surface: Historical portal caller / declared backend transport relationship
+        provenance:
+          - source: retained-adjacent-portal-transport-reviewed-20261030
+            confidence: high
+            notes:
+              - Historical transport identity is exact GET purview.microsoft.com/apiproxy/purviewplatform/api/v1/insight/GetTypeAggregatesByWorkload, canonical /purviewplatform/api/v1/insight/GetTypeAggregatesByWorkload under the currently declared backend specification purview.
+              - "Original caller capture assignments: purview-portal. Caller page attribution and assignment labels do not by themselves establish causal execution of the backend owner's UI."
+              - Retained purview-portal-02 action 0 at 2026-10-29T22:45:15.350Z; evidence request-475aa2b84bd88640f606; HTTP 200.
+              - Retained purview-portal-remediation-01 action 0 at 2026-10-30T12:38:27.871Z; evidence request-f1636f5fe9e8a5983c1c; HTTP 200.
+              - "Observed query parameter names: type. Values and derived page-label strings are withheld; parameter presence is not requiredness testing."
+              - This review used raw transport metadata only. No qualifying complete action-attributed response body was available in the selected retained evidence; bootstrap-only complete responses are excluded as action witnesses. Response/body/schema gaps remain open.
+              - Existing response schemas are unchanged. Any newly listed status is description-only, with no inferred error body, status cause, route removal or availability conclusion.
+              - Original dates/actions remain historical; this is not fresh capture, current tenant validation, business or application health, standalone invocation, role/grant/minimum-permission proof, or an owning-portal workflow test.
+              - GET is the recorded method, not a safety or idempotence determination. No request was authored, invoked, probed or replayed by this offline review; effects and rollback are untested.
+              - Confidence applies only to the verified historical method/host/path/status metadata. Captured values, identifiers, credentials, response fingerprints, body lengths and examples are withheld.
 
+          - source: purview-home-body-enrichment-20261030-01
+            confidence: high
+            notes:
+              - "Own Purview Home capture on 2026-10-30 retained two verified complete HTTP 200 JSON bodies attributed to actions 0 and 2; evidence IDs: request-0058e82f356bb6cc767b, request-633d539ed7e6227ce189."
+              - "Observed query parameter names: type. Values, response content, fingerprints and lengths are withheld; parameter presence does not establish requiredness."
+              - HTTP status and body shape do not establish business or application success; ResultCode semantics are unknown. Standalone use, minimum roles, grants, activation and replay remain untested.
+              - No active operation was authored or probed; background passive requests, including POSTs, may have effects that were not determined.
   /shell/api/shell/shellinfo:
     get:
       operationId: getShellInfo
@@ -171,6 +239,28 @@ paths:
 
         '404':
           $ref: common.yml#/components/responses/NotFound
+      x-nodoc-operation-context:
+        surface: Microsoft Purview portal (retained native navigation)
+        workflows:
+          - Observe traffic emitted by the normal authenticated portal during the originally recorded native navigation; reuse retained evidence for offline documentation review.
+        requestShapes:
+          - name: retained-native-get
+            bodyKind: none
+            notes: "Observed query parameter names: EopForest, SccPortalType, SccRegion, SccTrialHorizontalSku, SccTrialHorizontalStatus, country, locale, placement. Values are withheld; presence does not test requiredness and existing parameter declarations are unchanged."
+        availability:
+          level: user-context
+          notes:
+            - Historical user-session observation only; no feature activation, tenant switch, role/grant/minimum-permission inference or standalone usage validation.
+        provenance:
+          - source: retained-native-portal-evidence-reviewed-20261030
+            confidence: high
+            notes:
+              - Exact declared GET purview.microsoft.com/apiproxy/iris/v4/api/selection maps to canonical /iris/v4/api/selection; current declared server/base/path and original request binding were checked privately.
+              - Retained purview-01 action 8 at 2026-10-29T22:14:59.915Z; evidence request-f4d92dd1f5394e13ba1a; HTTP 200 complete body privately verified.
+              - Retained purview-remediation-02 action 2 at 2026-10-30T12:26:22.625Z; evidence request-fa202508527f197a7346; HTTP 200 complete body privately verified.
+              - Original capture dates and action attribution are retained. Reusing these bodies for offline review does not create a fresh native observation or clear any historical run-level accounting gaps.
+              - HTTP 200, complete body bytes and limited type checks do not establish application/business success, feature availability, entitlement, provisioning, effective permissions or minimum roles.
+              - Captured scalar values, role/feature-map keys, credentials, tenant data, response fingerprints, byte lengths and examples are withheld. No new route or requiredness, enum, format, authentication or standalone execution claim follows.
 
   /azurepurview/account:
     get:

@@ -1,0 +1,149 @@
+{
+  "schemaVersion": 1,
+  "kind": "known-operation-refresh-approval-source",
+  "status": "pending-fresh-independent-review",
+  "specId": "m365-apps-config",
+  "refreshDate": "2026-10-29",
+  "refreshDigest": "79db5a73b0c89d3de474b8857a98857d69fd2c3f8684c3739967bcfeab64ea65",
+  "recipeDestination": "tools/capture-recipes/m365-apps-config-known-refresh-20261029.json",
+  "proposedRecipeSha256": "10a929b564001abef67e73e4ea5fb5daf9a575d8580de098c5ccca25b383897e",
+  "sourceRecipe": {
+    "path": "tools/capture-recipes/m365-apps-config-deep.json",
+    "sha256": "cca45202ae74c331db27c8fda97e6c3eff77e600d79f1c66d5c4cdadcc37f44b"
+  },
+  "specification": {
+    "path": "specifications/nodoc-m365-apps-config/specification/openapi.yml",
+    "sha256": "25465c28f3270c89ce21386eea1908ca2bd889dd5b6e9672ae3e95449654f544",
+    "operationCount": 24
+  },
+  "policyBindings": [
+    {
+      "path": "PORTAL_DISCOVERY_AGENT_PROMPT.md",
+      "sha256": "57b6acf49eac1afc6e51b014039a6cba694adeeb058b13fa549f0610e20ae8b5"
+    },
+    {
+      "path": "AGENT_DISCOVERY_RUNBOOK.md",
+      "sha256": "4ef12fc4e271e17094dbb5da447b6f535bf2a63b457089ce5bd7f6876126b079"
+    },
+    {
+      "path": "AGENT_DISCOVERY_PLAYBOOK.md",
+      "sha256": "c12b9cecf0a3a85e8c760a8e7b310c0d0528f41cb65c8fe2c95eb420ca3fb119"
+    },
+    {
+      "path": "tools/portal-discovery-model-policy.mjs",
+      "sha256": "5d4b65b60d21a5b7431828b41694c49e85c58fb1497a2c3fb1cf53483066c346"
+    },
+    {
+      "path": "tools/portal-discovery-operation-safety.mjs",
+      "sha256": "425a1466f41aed855a0871548ee464670c350ce9b2954eba0e220c9a38d86ca3"
+    },
+    {
+      "path": "tools/discovery-safety.mjs",
+      "sha256": "e406c0fcd3401092ab2ef8318d41c17bb72956eec84638f2a00b9535dda8c8a1"
+    }
+  ],
+  "target": {
+    "status": "active",
+    "method": "GET",
+    "host": "config.office.com",
+    "routes": [
+      "/appConfig/v1.0/userflights"
+    ],
+    "state": "M365 Apps Config bounded passive representative states from tools/capture-recipes/m365-apps-config-deep.json",
+    "actionIndexes": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "approvalExpiresAt": "2026-10-31T08:00:00.000Z",
+    "variableBindingsDigest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "documentationObjectives": [
+      "freshness",
+      "health",
+      "schema-evidence",
+      "usage-observation",
+      "error-example"
+    ],
+    "evidenceIds": [
+      "retained-m365-apps-config-primary-witness",
+      "checked-in-ui-state-m365-apps-config-deep"
+    ]
+  },
+  "retainedPlanningEvidence": [
+    {
+      "artifactPath": "private-artifacts/m365-apps-inventory-20260810T074500Z/api-records.json",
+      "sha256": "ca746113a140e67cdb7319dd219c8a1a8b700aec726cad910bbc237cc4fb88f2",
+      "recordIndex": 5,
+      "method": "GET",
+      "host": "config.office.com",
+      "route": "/appConfig/v1.0/userflights",
+      "seenOnPageCount": 5,
+      "observedAt": null,
+      "historicOnly": true
+    },
+    {
+      "artifactPath": "private-artifacts/m365-apps-inventory-20260810T200000Z-coverage-gap-followup/api-records.json",
+      "sha256": "5a89aa992ffbe7c4c73e60d22ffa1513766864900eeb33c3d53d3410d082b699",
+      "recordIndex": 5,
+      "method": "GET",
+      "host": "config.office.com",
+      "route": "/appConfig/v1.0/userflights",
+      "seenOnPageCount": 13,
+      "observedAt": null,
+      "historicOnly": true
+    }
+  ],
+  "uiProvenance": {
+    "sourceRecipe": "tools/capture-recipes/m365-apps-config-deep.json",
+    "entryUrl": "https://config.office.com/officeSettings",
+    "actionCount": 5,
+    "usesOnlyKnownStates": true,
+    "noveltyNotRequired": true
+  },
+  "coverage": {
+    "primaryWitness": "GET /appConfig/v1.0/userflights",
+    "representativeActions": [
+      "navigate=https://config.office.com/officeSettings",
+      "wait-ms=6000",
+      "reload=apps-config-landing",
+      "wait-ms=8000",
+      "capture=apps-config-landing"
+    ],
+    "uncoveredFamilies": [
+      "rollout/residency",
+      "populated policy/service-profile states"
+    ],
+    "requiredDisposition": "Each uncovered family must be observed, unchanged with evidence, adjacent, unreachable in approved state, blocked with precise prerequisite, or separately approved state required. One witness never closes spec."
+  },
+  "safety": {
+    "apiProbeAuthorized": false,
+    "mutationAuthorized": false,
+    "deviceCodeAuthorized": false,
+    "auth": "cached/WAM or normal browser only",
+    "passiveMethods": "all naturally emitted methods retained; no authored requests",
+    "browserLifecycle": "one global endpoint, serialized owner/preflight/worker/terminal/review/disposition/stop"
+  },
+  "caveats": [
+    "historic api-record status missing; raw authoritative HTTP status still to be joined",
+    "no policy creation or setup submission"
+  ],
+  "preflightChecks": {
+    "metadata": "accepted",
+    "operationOwnership": "accepted",
+    "safety": {
+      "safe": true,
+      "unsafeActions": []
+    }
+  },
+  "requiredLiveProof": [
+    "terminal discovery-run.json + summary.json + candidate-handoff.json",
+    "all required action indexes accounted with canonical results",
+    "action-attributed exact wire method/host/route",
+    "complete sanitized sidecars with every referenced SHA/length/path verified",
+    "observedAt from source request",
+    "actual statuses and health/error classification",
+    "per-family coverage disposition; no fabricated full-spec freshness"
+  ]
+}

@@ -1,0 +1,71 @@
+{
+  "portal": "SharePoint",
+  "url": "https://${tenant}-admin.sharepoint.com/_layouts/15/online/AdminHome.aspx#/contentSecurityPolicy",
+  "pageTarget": {
+    "matchHosts": [
+      "${tenant}-admin.sharepoint.com"
+    ],
+    "matchPathPrefixes": [
+      "/_layouts/15/online/AdminHome.aspx"
+    ]
+  },
+  "matchHosts": [
+    "${tenant}-admin.sharepoint.com"
+  ],
+  "matchPathPrefixes": [
+    "/_api/SPO.SPOContentSecurityPolicyConfiguration"
+  ],
+  "inspectionPolicy": {
+    "mode": "observe-only",
+    "prohibitedControlPatterns": [
+      "Add",
+      "Create",
+      "Delete",
+      "Export",
+      "Remove",
+      "Save",
+      "Submit",
+      "Update"
+    ]
+  },
+  "postActionSettleMs": 10000,
+  "settleMs": 12000,
+  "maxActions": 6,
+  "actions": [
+    "navigate=https://${tenant}-admin.sharepoint.com/_layouts/15/online/AdminHome.aspx#/contentSecurityPolicy",
+    "wait-ms=6000",
+    "reload=script-sources-known-refresh",
+    "wait-ms=6000",
+    "capture=script-sources-known-refresh"
+  ],
+  "knownOperationRefresh": {
+    "status": "active",
+    "method": "GET",
+    "host": "${tenant}-admin.sharepoint.com",
+    "routes": [
+      "/_api/SPO.SPOContentSecurityPolicyConfiguration"
+    ],
+    "state": "Content security policy Script sources after exact passive navigation",
+    "actionIndexes": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "approvalExpiresAt": "2026-10-31T08:00:00.000Z",
+    "variableBindingsDigest": "84f43778fd7dd21c5808b6324a479bb0e8112099362fdf6e1e18356070012e24",
+    "documentationObjectives": [
+      "freshness",
+      "response-example",
+      "schema-evidence",
+      "usage-observation"
+    ],
+    "evidenceIds": [
+      "retained-sharepoint-script-sources-record-1",
+      "checked-in-sharepoint-csp-state-20261029"
+    ],
+    "approvalArtifact": "tools/frontier-approvals/sharepoint-script-sources-refresh-20261029.json",
+    "approvalDigest": "e24d0bd191ecacbe52eea95cf580b6628fe61d323ae7f916d3b2d52617109d2b"
+  }
+}

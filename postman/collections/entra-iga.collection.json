@@ -22,7 +22,7 @@
                                             "request": {
                                                 "name": "Get guest billing configuration",
                                                 "description": {
-                                                    "content": "Retrieves the guest user billing configuration for the tenant.\nControls whether the tenant pays for guest user access to\nentitlement management resources.\n\n**Note:** Returns 404 if the guest billing feature has not been\nconfigured for the tenant.\n",
+                                                    "content": "Retrieves the guest user billing configuration for the tenant.\nControls whether the tenant pays for guest user access to\nentitlement management resources.\n\n**Note:** Recent native dashboard observations returned HTTP 404 with\nan empty captured response body. Configuration, licensing and\npermission causes are not established by that status.\n",
                                                     "type": "text/plain"
                                                 },
                                                 "url": {
@@ -88,8 +88,8 @@
                                                     "_postman_previewlanguage": "json"
                                                 },
                                                 {
-                                                    "id": "c101a186-3427-4fdf-8edd-7b28557cebb5",
-                                                    "name": "Guest billing not configured for this tenant",
+                                                    "id": "930d8712-a7dc-4e5f-bf44-6a8f26dcd42f",
+                                                    "name": "Not found; an empty response body was observed. The status cause is unverified.",
                                                     "originalRequest": {
                                                         "url": {
                                                             "path": [
@@ -222,7 +222,7 @@
                                     "request": {
                                         "name": "List access package catalog summaries",
                                         "description": {
-                                            "content": "Retrieves catalog summary records used by the Access Packages portal\nview. Each record links a catalog identifier to aggregate access-package\nand resource counts. The portal was observed using both list-ordering\nand projection/expansion query variants.\n",
+                                            "content": "Retrieves catalog records used by the entitlement-management portal.\nList-ordering queries can return descriptive and lifecycle fields with\nan OData count; projection/expansion queries can return identifiers and\naggregate access-package/resource counts in additionalInfo.\n",
                                             "type": "text/plain"
                                         },
                                         "url": {

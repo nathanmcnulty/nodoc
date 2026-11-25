@@ -1,0 +1,174 @@
+{
+  "schemaVersion": 1,
+  "kind": "known-operation-refresh-approval-source",
+  "status": "pending-fresh-independent-review",
+  "specId": "m365-admin",
+  "refreshDate": "2026-10-29",
+  "refreshDigest": "1dc2dd4d98397e16cbee198052a349eaf865c2b11af1aa70e6c383a3e8f60b68",
+  "recipeDestination": "tools/capture-recipes/m365-admin-known-refresh-20261029.json",
+  "proposedRecipeSha256": "125d13b52919dcb5560153092e05f112499a0a998e9bb70f93ea56f38d348e5b",
+  "sourceRecipe": {
+    "path": "tools/capture-recipes/m365-admin-graph-inventory.json",
+    "sha256": "9cdb67157b7b2b76f5497ddb5d6b2f1a89ddc9b9598db9a8f4553a12f6f650b6"
+  },
+  "specification": {
+    "path": "specifications/nodoc-m365-admin/specification/openapi.yml",
+    "sha256": "556083c6966af05a49a28890a7ed4613616235702ac4453a5e31418be4d18ea1",
+    "operationCount": 320
+  },
+  "policyBindings": [
+    {
+      "path": "PORTAL_DISCOVERY_AGENT_PROMPT.md",
+      "sha256": "57b6acf49eac1afc6e51b014039a6cba694adeeb058b13fa549f0610e20ae8b5"
+    },
+    {
+      "path": "AGENT_DISCOVERY_RUNBOOK.md",
+      "sha256": "4ef12fc4e271e17094dbb5da447b6f535bf2a63b457089ce5bd7f6876126b079"
+    },
+    {
+      "path": "AGENT_DISCOVERY_PLAYBOOK.md",
+      "sha256": "c12b9cecf0a3a85e8c760a8e7b310c0d0528f41cb65c8fe2c95eb420ca3fb119"
+    },
+    {
+      "path": "tools/portal-discovery-model-policy.mjs",
+      "sha256": "5d4b65b60d21a5b7431828b41694c49e85c58fb1497a2c3fb1cf53483066c346"
+    },
+    {
+      "path": "tools/portal-discovery-operation-safety.mjs",
+      "sha256": "425a1466f41aed855a0871548ee464670c350ce9b2954eba0e220c9a38d86ca3"
+    },
+    {
+      "path": "tools/discovery-safety.mjs",
+      "sha256": "e406c0fcd3401092ab2ef8318d41c17bb72956eec84638f2a00b9535dda8c8a1"
+    }
+  ],
+  "target": {
+    "status": "active",
+    "method": "GET",
+    "host": "admin.cloud.microsoft",
+    "routes": [
+      "/admin/api/groups/permissions"
+    ],
+    "state": "M365 Admin bounded passive representative states from tools/capture-recipes/m365-admin-graph-inventory.json",
+    "actionIndexes": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20
+    ],
+    "approvalExpiresAt": "2026-10-31T08:00:00.000Z",
+    "variableBindingsDigest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "documentationObjectives": [
+      "freshness",
+      "health",
+      "schema-evidence",
+      "usage-observation",
+      "error-example"
+    ],
+    "evidenceIds": [
+      "retained-m365-admin-primary-witness",
+      "checked-in-ui-state-m365-admin-graph-inventory"
+    ]
+  },
+  "retainedPlanningEvidence": [
+    {
+      "artifactPath": "private-artifacts/m365-admin-graph-refresh-20260831T223000Z/api-records.json",
+      "sha256": "07e127e792465dc308d2ae6b6969b8f809ebb0828f7534dae394bf6391c7d74f",
+      "recordIndex": 3,
+      "method": "GET",
+      "host": "admin.cloud.microsoft",
+      "route": "/admin/api/groups/permissions",
+      "status": 200,
+      "mimeType": "application/json",
+      "seenOnPageCount": 1,
+      "observedAt": null,
+      "historicOnly": true
+    }
+  ],
+  "uiProvenance": {
+    "sourceRecipe": "tools/capture-recipes/m365-admin-graph-inventory.json",
+    "entryUrl": "https://admin.cloud.microsoft/#/groups",
+    "actionCount": 21,
+    "usesOnlyKnownStates": true,
+    "noveltyNotRequired": true
+  },
+  "coverage": {
+    "primaryWitness": "GET /admin/api/groups/permissions",
+    "representativeActions": [
+      "navigate=https://admin.cloud.microsoft/#/groups",
+      "wait-ms=8000",
+      "capture=m365-groups-graph",
+      "navigate=https://admin.cloud.microsoft/#/adminunits",
+      "wait-ms=8000",
+      "capture=m365-administrative-units-graph",
+      "navigate=https://admin.cloud.microsoft/#/rbac/directory",
+      "wait-ms=8000",
+      "capture=m365-directory-roles-graph",
+      "navigate=https://admin.cloud.microsoft/#/IntuneDevices",
+      "wait-ms=8000",
+      "capture=m365-intune-devices-graph",
+      "navigate=https://admin.cloud.microsoft/#/Edge",
+      "wait-ms=8000",
+      "capture=m365-edge-management-graph",
+      "navigate=https://admin.cloud.microsoft/#/Settings/IntegratedApps",
+      "wait-ms=8000",
+      "capture=m365-integrated-apps-graph",
+      "navigate=https://admin.cloud.microsoft/#/subscriptions",
+      "wait-ms=8000",
+      "capture=m365-subscriptions-graph"
+    ],
+    "uncoveredFamilies": [
+      "user/resource detail",
+      "recommendations",
+      "support widgets",
+      "tenant-specific billing/license states"
+    ],
+    "requiredDisposition": "Each uncovered family must be observed, unchanged with evidence, adjacent, unreachable in approved state, blocked with precise prerequisite, or separately approved state required. One witness never closes spec."
+  },
+  "safety": {
+    "apiProbeAuthorized": false,
+    "mutationAuthorized": false,
+    "deviceCodeAuthorized": false,
+    "auth": "cached/WAM or normal browser only",
+    "passiveMethods": "all naturally emitted methods retained; no authored requests",
+    "browserLifecycle": "one global endpoint, serialized owner/preflight/worker/terminal/review/disposition/stop"
+  },
+  "caveats": [
+    "no purchasing/trials",
+    "other product calls separated by host ownership"
+  ],
+  "preflightChecks": {
+    "metadata": "accepted",
+    "operationOwnership": "accepted",
+    "safety": {
+      "safe": true,
+      "unsafeActions": []
+    }
+  },
+  "requiredLiveProof": [
+    "terminal discovery-run.json + summary.json + candidate-handoff.json",
+    "all required action indexes accounted with canonical results",
+    "action-attributed exact wire method/host/route",
+    "complete sanitized sidecars with every referenced SHA/length/path verified",
+    "observedAt from source request",
+    "actual statuses and health/error classification",
+    "per-family coverage disposition; no fabricated full-spec freshness"
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "specId": "ibiza-iam",
+  "decision": "accept-bounded-frontier",
+  "workerModel": "gpt-5.6-luna",
+  "workerReasoning": "xhigh",
+  "approvedAt": "2026-10-03T11:18:47.374Z",
+  "source": {
+    "head": "d59f4460e59fe490307f3256ee7b56f608e5b7e9",
+    "artifactPath": "tools/frontier-approvals/entra-iam-permissions-response-example-frontier-source.json",
+    "artifactSha256": "c420ec3a19ad0df289a79a82dc9dfae9ed9a2cac6ff9bc4f7733431e1cedac46",
+    "frontierSetId": "offline-frontier-set-c7db4c0c1429ae37c277e23c",
+    "frontierSetDigest": "c7db4c0c1429ae37c277e23c05c99c86038b1a182f0dce836c03c7661a452d97"
+  },
+  "state": "Entra IAM All Users page after a passive same-origin reload",
+  "canonicalShellUrl": "https://entra.microsoft.com/#view/Microsoft_AAD_UsersAndTenants/UserManagementMenuBlade/~/AllUsers/menuId/",
+  "apiEvidenceScope": {
+    "hosts": [
+      "main.iam.ad.ext.azure.com"
+    ],
+    "pathPrefixes": [
+      "/api"
+    ]
+  },
+  "safeActions": [
+    "navigate=https://entra.microsoft.com/#view/Microsoft_AAD_UsersAndTenants/UserManagementMenuBlade/~/AllUsers/menuId/",
+    "wait-ms=2000",
+    "reload=entra-all-users",
+    "wait-ms=6000",
+    "capture=permissions-response-example"
+  ],
+  "acceptedItems": [
+    {
+      "frontierId": "offline-frontier-d23e0b2a012dbf3a9bf3a24f",
+      "frontierDigest": "d23e0b2a012dbf3a9bf3a24ff4376e23f2989c425f4287c8a2535b1ebe8c44dc",
+      "canonicalKey": "main.iam.ad.ext.azure.com GET /Permissions"
+    }
+  ],
+  "deferredItemCount": 1462,
+  "blockedItemCount": 1462,
+  "constraints": [
+    "Passive navigation, same-origin reload, wait, and capture only",
+    "Accept only the known GET /api/Permissions HTTP 200 application/json response matching fingerprint c42e3850899583f4a7ea94309d357b5e1b1b6551cc0ef935e8434e21b9635086",
+    "Do not issue direct API probes, use dynamic controls, or preserve tenant-specific permission values"
+  ]
+}

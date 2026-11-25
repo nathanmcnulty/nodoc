@@ -1,0 +1,252 @@
+{
+  "schemaVersion": 1,
+  "kind": "known-operation-refresh-approval-source",
+  "status": "external-proposal-pending-actual-independent-review",
+  "specId": "entra-b2c",
+  "cycle": "gap-remediation-20261030",
+  "createdAt": "2026-10-30T09:57:22.446Z",
+  "plannedAssignmentId": "entra-b2c-remediation-20261030-01",
+  "newCycleReason": "Use retained unvisited Custom user attributes href, not another unchanged external-identities/API-connectors pass.",
+  "recipeDestination": "tools/capture-recipes/entra-b2c-gap-remediation-20261030.json",
+  "priorRecipe": {
+    "path": "tools/capture-recipes/entra-b2c-known-refresh-20261029.json",
+    "sha256": "5b281a188ab62ddca3d38844b0ea99e2d2dc2b89c3911df0777f32c91f8b2f0f"
+  },
+  "specification": {
+    "path": "specifications/nodoc-entra-b2c/specification/openapi.yml",
+    "sha256": "21e679a5d9da8b51959716eaca437cf5e0a9487cb5224aa268a380376c3fbb3e",
+    "operationCount": 7
+  },
+  "policyBindings": [
+    {
+      "path": "PORTAL_DISCOVERY_AGENT_PROMPT.md",
+      "sha256": "340f089b36357a4a65e993397ffd6e60d88c4d915b6e5ecb7244aee84a97e39c"
+    },
+    {
+      "path": "AGENT_DISCOVERY_RUNBOOK.md",
+      "sha256": "056fea096f7cd354429f606b6d7ad99e05f7f48ef019d56bc1dae629cdab4113"
+    },
+    {
+      "path": "AGENT_DISCOVERY_PLAYBOOK.md",
+      "sha256": "ceccace5f3e9ac18d8c5743dab23973b5aab4cfe3160c1f6a645581469ddc3b9"
+    },
+    {
+      "path": "tools/portal-discovery-model-policy.mjs",
+      "sha256": "5d4b65b60d21a5b7431828b41694c49e85c58fb1497a2c3fb1cf53483066c346"
+    },
+    {
+      "path": "tools/portal-discovery-operation-safety.mjs",
+      "sha256": "425a1466f41aed855a0871548ee464670c350ce9b2954eba0e220c9a38d86ca3"
+    },
+    {
+      "path": "tools/discovery-safety.mjs",
+      "sha256": "e406c0fcd3401092ab2ef8318d41c17bb72956eec84638f2a00b9535dda8c8a1"
+    },
+    {
+      "path": "tools/portal-discovery-evidence-contract.mjs",
+      "sha256": "e47c1ceed5329fe2ae15e25ba87e1c7d462ce5a0f0e3b0663b12616bd4d532f8"
+    },
+    {
+      "path": "tools/cdp-deep-capture.mjs",
+      "sha256": "0b56aa5558efd3ba950f906b0f5a7cbd1eeced1770aaab47aa40e79f6afcea63"
+    },
+    {
+      "path": "tools/run-portal-discovery.mjs",
+      "sha256": "a5a3e333f81dc1623129b1dc548b9fbe0a46312c9b6138894bc1fb8cda376663"
+    },
+    {
+      "path": "tools/portal-discovery-actions.mjs",
+      "sha256": "9e722135986319726294b75a731c603b4e387bbb9c132fc15e0c7e6ca466bab3"
+    },
+    {
+      "path": "tools/source-review-receipt.mjs",
+      "sha256": "d01e0d3178ff807925e8ba68efe70add7511f513a360cd8eaf2563a4916f81a6"
+    },
+    {
+      "path": "tools/source-review-workflow.mjs",
+      "sha256": "173cdd9203932c39d382a65e575d2ba27a04f2e8286c2e94875ef51c5778b669"
+    },
+    {
+      "path": "tools/response-evidence.mjs",
+      "sha256": "549ba0910e07c12ce2f5e763de93baf025228452b90c86145538daf0357f83a4"
+    }
+  ],
+  "implementationValidation": {
+    "receiptPath": "private-artifacts/improvements-20261030/validation/full-discovery-tests-status.json",
+    "receiptSha256": "c8e05a77fe72d07ee8b15b1adc4f9c9a86dc7efa2a32449ea63169383ea78956",
+    "passed": 343,
+    "staticSpecEvaluations": "separate open check:20 active static frontiers; no relabel/delete/bypass"
+  },
+  "binding": {
+    "kind": "authoritative-known-operation-refresh-plan",
+    "refreshDigest": "6cd5a87ad2a28c50fe47d88a635e978d1b49a937fa18a711e01152e0ff050634",
+    "variableBindingsDigest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "entryUrlTemplate": "https://entra.microsoft.com/#view/Microsoft_AAD_IAM/CompanyRelationshipsMenuBlade/~/UserAttributes/menuId/ExternalIdentitiesGettingStarted",
+    "requiredVariables": [],
+    "sourceRefreshDigest": "6cd5a87ad2a28c50fe47d88a635e978d1b49a937fa18a711e01152e0ff050634"
+  },
+  "target": {
+    "method": "GET",
+    "host": "main.b2cadmin.ext.azure.com",
+    "wireRoutes": [
+      "/api/userAttribute/GetAvailableOutputClaimsList"
+    ],
+    "state": "Use retained unvisited Custom user attributes href, not another unchanged external-identities/API-connectors pass.",
+    "actionIndexes": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "approvalExpiresAt": "2026-10-31T09:57:22.444Z"
+  },
+  "gapEvidence": {
+    "planPath": "private-artifacts/improvements-20261030/gap-remediation-plan.json",
+    "planSha256": "04d8eab4f0bcc91d24ca6e98ee2bdfc93844167b4ed1c370ee6658445ea2b63d",
+    "classification": "mixed-accounting-mismatch-and-unobserved-target",
+    "prior": {
+      "status": "action-accounting-incomplete",
+      "health": "incomplete",
+      "missingActionIndexes": [
+        0
+      ],
+      "matchedRecords": 0,
+      "successfulRecords": 0,
+      "completeTargetBodies": 0,
+      "physicalActions": 9
+    },
+    "failedNavigation": [
+      {
+        "index": 0,
+        "didLoad": false,
+        "componentDifferences": [
+          "hash"
+        ],
+        "actual": "https://entra.microsoft.com/#view/Microsoft_AAD_IAM/CompanyRelationshipsMenuBlade/~/ExternalIdentitiesGettingStarted/menuId/ExternalIdentitiesGettingStarted",
+        "requested": "https://entra.microsoft.com/#blade/Microsoft_AAD_IAM/CompanyRelationshipsMenuBlade/menuId/ExternalIdentitiesGettingStarted",
+        "actionSucceeded": false
+      }
+    ],
+    "sourceArtifacts": {
+      "actions": {
+        "path": "private-artifacts/refresh-20261029/live/entra-b2c-01/capture/action-results.json",
+        "sha256": "a50ab785367069daffde6b556b62eaa708562ad1e608a98442b408a511378e9d"
+      },
+      "assessment": {
+        "path": "private-artifacts/refresh-20261029/live/entra-b2c-01/capture/known-operation-refresh-assessment.json",
+        "sha256": "25a69557cfeb9815f8217c6f77916b53c7ad7831733d542f0e574be3c64bf816"
+      },
+      "snapshots": {
+        "path": "private-artifacts/refresh-20261029/live/entra-b2c-01/capture/session-snapshots.json",
+        "sha256": "8eeced1fc875514ab20f50d32aa64591705870c6831bf9f304beb7511b13683b"
+      },
+      "pageStates": {
+        "path": "private-artifacts/refresh-20261029/live/entra-b2c-01/capture/page-states.json",
+        "sha256": "68bd538e70ee2f041536d174808d24b2f5a28de6acdd2eaf25a0abbe5cb8edea"
+      },
+      "recipe": {
+        "path": "tools/capture-recipes/entra-b2c-known-refresh-20261029.json",
+        "sha256": "5b281a188ab62ddca3d38844b0ea99e2d2dc2b89c3911df0777f32c91f8b2f0f"
+      }
+    },
+    "entry": {
+      "label": "Custom user attributes",
+      "url": "https://entra.microsoft.com/#view/Microsoft_AAD_IAM/CompanyRelationshipsMenuBlade/~/UserAttributes/menuId/ExternalIdentitiesGettingStarted",
+      "provenance": {
+        "path": "private-artifacts/refresh-20261029/live/entra-b2c-01/capture/session-snapshots.json",
+        "sha256": "8eeced1fc875514ab20f50d32aa64591705870c6831bf9f304beb7511b13683b",
+        "jsonPointer": "/0/sessionSnapshots/0/controls/25/href",
+        "baseUrlPointer": "/0/sessionSnapshots/0/url",
+        "targetId": "39D928D6BA594FA3A782711EA4AA9368",
+        "sessionId": "root",
+        "targetType": "iframe",
+        "control": {
+          "tag": "a",
+          "role": null,
+          "automationId": "",
+          "text": "Custom user attributes"
+        }
+      }
+    }
+  },
+  "representativeActions": [
+    {
+      "type": "navigate",
+      "value": "https://entra.microsoft.com/#view/Microsoft_AAD_IAM/CompanyRelationshipsMenuBlade/~/UserAttributes/menuId/ExternalIdentitiesGettingStarted",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "6000",
+      "required": true
+    },
+    {
+      "type": "reload",
+      "value": "b2c-custom-user-attributes",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "8000",
+      "required": true
+    },
+    {
+      "type": "capture",
+      "value": "b2c-custom-user-attributes",
+      "required": true
+    }
+  ],
+  "actionBudget": {
+    "categories": {
+      "recipeActions": 5,
+      "mandatoryOrchestrationActions": 1,
+      "expandedReplayActions": 0
+    },
+    "countedActions": 6,
+    "maxActions": 6,
+    "budgetCategories": [
+      "recipeActions",
+      "mandatoryOrchestrationActions",
+      "expandedReplayActions"
+    ]
+  },
+  "prerequisites": [
+    "Same selected tenant/user only; no tenant switch or feature activation.",
+    "The endpoint/state association is a hypothesis, not a current native witness. Preserve a feature-gated or no-target result."
+  ],
+  "priorAttemptsPreserved": [],
+  "oldPlanFurtherAttemptAllowed": false,
+  "plannedArtifacts": {
+    "lifecycleDirectory": "private-artifacts/improvements-20261030/live/entra-b2c-remediation-01",
+    "captureDirectory": "private-artifacts/improvements-20261030/live/entra-b2c-remediation-01/capture",
+    "ledgerPath": "private-artifacts/improvements-20261030/live-ledger.jsonl",
+    "freshExclusiveDirectoryRequired": true
+  },
+  "safety": {
+    "mode": "observe-only",
+    "apiProbeAuthorized": false,
+    "mutationAuthorized": false,
+    "tenantSwitchAuthorized": false,
+    "trialPurchaseActivationAuthorized": false,
+    "deviceCodeAuthorized": false,
+    "passiveCapturedMethods": "all naturally emitted methods; no authored requests",
+    "auth": "legitimate cached/WAM or normal browser only"
+  },
+  "preflight": {
+    "authoritativeResolver": true,
+    "sharedActualExecutorDsl": true,
+    "ownedExactWireTarget": true,
+    "budgetCountMatches": true,
+    "realCliPlan": "pending external exact-byte mirror validation; canonical E plan requires real review and registration",
+    "targetMetadata": "actual-exported-validateRecipeTargetMetadata-pass"
+  },
+  "requiredProof": [
+    "Current profile/selected-tenant/auth/target preflight passes.",
+    "Terminal artifacts and exact action accounting; bootstrap-only traffic is not target acceptance.",
+    "Verify complete raw/API descriptor union and physical sidecars; keep fingerprints/lengths private.",
+    "Separate actual transport/logical errors, native partial coverage and whole-spec gaps.",
+    "Required actual independent review and Sol acceptance before source application; root explicit live authorization after validation."
+  ],
+  "claimBoundary": "No guaranteed target emission, whole-spec health, requiredness, activation, standalone invocation or minimum-role claim."
+}

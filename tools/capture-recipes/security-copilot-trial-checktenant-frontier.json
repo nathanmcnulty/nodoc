@@ -1,0 +1,123 @@
+{
+  "portal": "Security Copilot",
+  "url": "https://securitycopilot.microsoft.com",
+  "pageTarget": {
+    "matchHosts": [
+      "securitycopilot.microsoft.com"
+    ],
+    "matchPathPrefixes": [
+      "/trial"
+    ],
+    "bootstrap": {
+      "matchHosts": [
+        "securitycopilot.microsoft.com"
+      ],
+      "matchPathnames": [
+        "/"
+      ]
+    }
+  },
+  "inspectionPolicy": {
+    "mode": "observe-only",
+    "prohibitedControlPatterns": [
+      "Start trial",
+      "Activate trial",
+      "Create capacity",
+      "Purchase",
+      "Buy"
+    ]
+  },
+  "noveltyFrontier": null,
+  "matchHosts": [
+    "securitycopilot.microsoft.com",
+    "api.securitycopilot.microsoft.com",
+    "api.securityplatform.microsoft.com",
+    "us.api.securityplatform.microsoft.com"
+  ],
+  "matchPathPrefixes": [
+    "/trial",
+    "/provisioning"
+  ],
+  "captureScripts": false,
+  "maxActions": 6,
+  "postActionSettleMs": 10000,
+  "settleMs": 10000,
+  "actions": [
+    {
+      "type": "navigate",
+      "value": "https://securitycopilot.microsoft.com/trial",
+      "required": true,
+      "highValue": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "10000",
+      "required": true
+    },
+    {
+      "type": "reload",
+      "value": "security-copilot-trial",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "10000",
+      "required": true
+    },
+    {
+      "type": "capture",
+      "value": "checktenant-schema",
+      "required": true
+    }
+  ],
+  "noveltyStatus": {
+    "status": "satisfied",
+    "reason": "The approved passive trial landing reload completed with healthy action accounting and promoted the action-attributed GET /provisioning/checkTenant response shape and sanitized example.",
+    "nextRequirement": "Identify a different exact Security Copilot state, route, query key, status, media type, or response shape absent from the checked-in baseline before another live run.",
+    "approvalArtifact": "tools/frontier-approvals/security-copilot-trial-checktenant-frontier.json",
+    "approvalDigest": "53b6663280ffb0e198d9c72fc7681b405d3c895cfd222f68aea40ac15b5594f8",
+    "baseline": "checked-in-spec-and-coverage-ledgers",
+    "baselineSignals": {
+      "queryMetadata": [],
+      "requestShapes": [],
+      "responseMetadata": [
+        "api.securityplatform.microsoft.com GET /provisioning/checkTenant mime:application/json",
+        "api.securityplatform.microsoft.com GET /provisioning/checkTenant status:200"
+      ],
+      "responseShapes": [],
+      "routes": [
+        "api.securityplatform.microsoft.com GET /provisioning/checkTenant"
+      ]
+    },
+    "reopenCondition": "The authenticated Security Copilot trial landing emits GET /provisioning/checkTenant with response-shape fingerprint 7e789f8166e93f6eba5733b42b054b3c308c4e086a4c8a5040b715e2c3788409 after the exact passive navigate, wait, same-origin reload, wait, and capture sequence.",
+    "targets": [
+      {
+        "id": "security-copilot-checktenant-response-shape",
+        "state": "Security Copilot trial eligibility landing",
+        "evidenceLevel": "confirmed",
+        "expectedHostFamilies": [
+          "api.securityplatform.microsoft.com"
+        ],
+        "expectedRoutes": [
+          "/provisioning/checkTenant"
+        ],
+        "expectedInformationClasses": [
+          "response-shape"
+        ],
+        "expectedDocumentationObjectives": [
+          "response-example"
+        ],
+        "actionIndexes": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "safeAction": "Navigate to the Security Copilot trial landing, wait, reload the same page, wait, and passively capture the normal eligibility bootstrap response.",
+        "acceptanceKey": "security-copilot-checktenant-response-shape",
+        "rationale": "The existing documented eligibility operation has a retained body shape but only seed attribution. A numbered observe-only landing reload repairs attribution without starting a trial, creating capacity, or authoring an API request."
+      }
+    ]
+  }
+}

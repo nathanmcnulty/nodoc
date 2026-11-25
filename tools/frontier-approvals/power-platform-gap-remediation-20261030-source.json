@@ -1,0 +1,259 @@
+{
+  "schemaVersion": 1,
+  "kind": "known-operation-refresh-approval-source",
+  "status": "external-proposal-pending-actual-independent-review",
+  "specId": "power-platform",
+  "cycle": "gap-remediation-20261030",
+  "createdAt": "2026-10-30T09:57:22.446Z",
+  "plannedAssignmentId": "power-platform-remediation-20261030-01",
+  "newCycleReason": "Use observed /home entry and retain exact /manage/environments state that produced two primary200s.",
+  "recipeDestination": "tools/capture-recipes/power-platform-gap-remediation-20261030.json",
+  "priorRecipe": {
+    "path": "tools/capture-recipes/power-platform-known-refresh-20261029.json",
+    "sha256": "dcf0037ed2fdf4ec37fa12cc897f86eaa0089f2a998d965a56680a50ebb1e1f3"
+  },
+  "specification": {
+    "path": "specifications/nodoc-power-platform/specification/openapi.yml",
+    "sha256": "53aeb00b2a632a3f26164261cf7a092c434d7870ecf06580cea661bc39624254",
+    "operationCount": 248
+  },
+  "policyBindings": [
+    {
+      "path": "PORTAL_DISCOVERY_AGENT_PROMPT.md",
+      "sha256": "340f089b36357a4a65e993397ffd6e60d88c4d915b6e5ecb7244aee84a97e39c"
+    },
+    {
+      "path": "AGENT_DISCOVERY_RUNBOOK.md",
+      "sha256": "056fea096f7cd354429f606b6d7ad99e05f7f48ef019d56bc1dae629cdab4113"
+    },
+    {
+      "path": "AGENT_DISCOVERY_PLAYBOOK.md",
+      "sha256": "ceccace5f3e9ac18d8c5743dab23973b5aab4cfe3160c1f6a645581469ddc3b9"
+    },
+    {
+      "path": "tools/portal-discovery-model-policy.mjs",
+      "sha256": "5d4b65b60d21a5b7431828b41694c49e85c58fb1497a2c3fb1cf53483066c346"
+    },
+    {
+      "path": "tools/portal-discovery-operation-safety.mjs",
+      "sha256": "425a1466f41aed855a0871548ee464670c350ce9b2954eba0e220c9a38d86ca3"
+    },
+    {
+      "path": "tools/discovery-safety.mjs",
+      "sha256": "e406c0fcd3401092ab2ef8318d41c17bb72956eec84638f2a00b9535dda8c8a1"
+    },
+    {
+      "path": "tools/portal-discovery-evidence-contract.mjs",
+      "sha256": "e47c1ceed5329fe2ae15e25ba87e1c7d462ce5a0f0e3b0663b12616bd4d532f8"
+    },
+    {
+      "path": "tools/cdp-deep-capture.mjs",
+      "sha256": "0b56aa5558efd3ba950f906b0f5a7cbd1eeced1770aaab47aa40e79f6afcea63"
+    },
+    {
+      "path": "tools/run-portal-discovery.mjs",
+      "sha256": "a5a3e333f81dc1623129b1dc548b9fbe0a46312c9b6138894bc1fb8cda376663"
+    },
+    {
+      "path": "tools/portal-discovery-actions.mjs",
+      "sha256": "9e722135986319726294b75a731c603b4e387bbb9c132fc15e0c7e6ca466bab3"
+    },
+    {
+      "path": "tools/source-review-receipt.mjs",
+      "sha256": "d01e0d3178ff807925e8ba68efe70add7511f513a360cd8eaf2563a4916f81a6"
+    },
+    {
+      "path": "tools/source-review-workflow.mjs",
+      "sha256": "173cdd9203932c39d382a65e575d2ba27a04f2e8286c2e94875ef51c5778b669"
+    },
+    {
+      "path": "tools/response-evidence.mjs",
+      "sha256": "549ba0910e07c12ce2f5e763de93baf025228452b90c86145538daf0357f83a4"
+    }
+  ],
+  "implementationValidation": {
+    "receiptPath": "private-artifacts/improvements-20261030/validation/full-discovery-tests-status.json",
+    "receiptSha256": "c8e05a77fe72d07ee8b15b1adc4f9c9a86dc7efa2a32449ea63169383ea78956",
+    "passed": 343,
+    "staticSpecEvaluations": "separate open check:20 active static frontiers; no relabel/delete/bypass"
+  },
+  "binding": {
+    "kind": "authoritative-known-operation-refresh-plan",
+    "refreshDigest": "a7b4c443cd6768055164ca36d21b5e6d8acb85c58baf954c46fcfc18190b1bc8",
+    "variableBindingsDigest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "entryUrlTemplate": "https://admin.powerplatform.microsoft.com/home",
+    "requiredVariables": [],
+    "sourceRefreshDigest": "a7b4c443cd6768055164ca36d21b5e6d8acb85c58baf954c46fcfc18190b1bc8"
+  },
+  "target": {
+    "method": "GET",
+    "host": "api.bap.microsoft.com",
+    "wireRoutes": [
+      "/providers/Microsoft.BusinessAppPlatform/environmentGroups"
+    ],
+    "state": "Use observed /home entry and retain exact /manage/environments state that produced two primary200s.",
+    "actionIndexes": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "approvalExpiresAt": "2026-10-31T09:57:22.444Z"
+  },
+  "gapEvidence": {
+    "planPath": "private-artifacts/improvements-20261030/gap-remediation-plan.json",
+    "planSha256": "04d8eab4f0bcc91d24ca6e98ee2bdfc93844167b4ed1c370ee6658445ea2b63d",
+    "classification": "accounting-only-canonical-entry-mismatch",
+    "prior": {
+      "status": "action-accounting-incomplete",
+      "health": "incomplete",
+      "missingActionIndexes": [
+        0
+      ],
+      "matchedRecords": 2,
+      "successfulRecords": 2,
+      "completeTargetBodies": 2,
+      "physicalActions": 8
+    },
+    "failedNavigation": [
+      {
+        "index": 0,
+        "didLoad": true,
+        "componentDifferences": [
+          "pathname"
+        ],
+        "actual": "https://admin.powerplatform.microsoft.com/home",
+        "requested": "https://admin.powerplatform.microsoft.com/",
+        "actionSucceeded": false
+      }
+    ],
+    "sourceArtifacts": {
+      "actions": {
+        "path": "private-artifacts/refresh-20261029/live/power-platform-01/capture/action-results.json",
+        "sha256": "9374341ddfd8dcd9bcb711d579c1701c4fd3612e14b07e30f9aa2ef2104d7330"
+      },
+      "assessment": {
+        "path": "private-artifacts/refresh-20261029/live/power-platform-01/capture/known-operation-refresh-assessment.json",
+        "sha256": "b9c21c8ba133fda1a7fd08238c553369ea58401e543a823f7f8f1e6046d966ca"
+      },
+      "snapshots": {
+        "path": "private-artifacts/refresh-20261029/live/power-platform-01/capture/session-snapshots.json",
+        "sha256": "edf879ee98589d4b2afd586382ac3738d065ca10924e4992f384317ae055ecd8"
+      },
+      "pageStates": {
+        "path": "private-artifacts/refresh-20261029/live/power-platform-01/capture/page-states.json",
+        "sha256": "a8e5cf53b7477b808e349833d66bdcb33128446486df41ded5ef889794a8bb80"
+      },
+      "recipe": {
+        "path": "tools/capture-recipes/power-platform-known-refresh-20261029.json",
+        "sha256": "dcf0037ed2fdf4ec37fa12cc897f86eaa0089f2a998d965a56680a50ebb1e1f3"
+      }
+    },
+    "entry": {
+      "url": "https://admin.powerplatform.microsoft.com/home",
+      "provenance": {
+        "path": "private-artifacts/refresh-20261029/live/power-platform-01/capture/action-results.json",
+        "sha256": "9374341ddfd8dcd9bcb711d579c1701c4fd3612e14b07e30f9aa2ef2104d7330",
+        "jsonPointer": "/2/result/url",
+        "actionIndex": 2
+      }
+    }
+  },
+  "representativeActions": [
+    {
+      "type": "navigate",
+      "value": "https://admin.powerplatform.microsoft.com/home",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "6000",
+      "required": true
+    },
+    {
+      "type": "reload",
+      "value": "power-platform-canonical-home",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "8000",
+      "required": true
+    },
+    {
+      "type": "capture",
+      "value": "power-platform-canonical-home",
+      "required": true
+    },
+    {
+      "type": "navigate",
+      "value": "https://admin.powerplatform.microsoft.com/manage/environments",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "6000",
+      "required": true
+    },
+    {
+      "type": "capture",
+      "value": "power-platform-environments",
+      "required": true
+    }
+  ],
+  "actionBudget": {
+    "categories": {
+      "recipeActions": 8,
+      "mandatoryOrchestrationActions": 1,
+      "expandedReplayActions": 0
+    },
+    "countedActions": 9,
+    "maxActions": 9,
+    "budgetCategories": [
+      "recipeActions",
+      "mandatoryOrchestrationActions",
+      "expandedReplayActions"
+    ]
+  },
+  "prerequisites": [
+    "Do not permit arbitrary same-origin redirects; use the exact observed canonical state."
+  ],
+  "priorAttemptsPreserved": [],
+  "oldPlanFurtherAttemptAllowed": false,
+  "plannedArtifacts": {
+    "lifecycleDirectory": "private-artifacts/improvements-20261030/live/power-platform-remediation-01",
+    "captureDirectory": "private-artifacts/improvements-20261030/live/power-platform-remediation-01/capture",
+    "ledgerPath": "private-artifacts/improvements-20261030/live-ledger.jsonl",
+    "freshExclusiveDirectoryRequired": true
+  },
+  "safety": {
+    "mode": "observe-only",
+    "apiProbeAuthorized": false,
+    "mutationAuthorized": false,
+    "tenantSwitchAuthorized": false,
+    "trialPurchaseActivationAuthorized": false,
+    "deviceCodeAuthorized": false,
+    "passiveCapturedMethods": "all naturally emitted methods; no authored requests",
+    "auth": "legitimate cached/WAM or normal browser only"
+  },
+  "preflight": {
+    "authoritativeResolver": true,
+    "sharedActualExecutorDsl": true,
+    "ownedExactWireTarget": true,
+    "budgetCountMatches": true,
+    "realCliPlan": "pending external exact-byte mirror validation; canonical E plan requires real review and registration",
+    "targetMetadata": "actual-exported-validateRecipeTargetMetadata-pass"
+  },
+  "requiredProof": [
+    "Current profile/selected-tenant/auth/target preflight passes.",
+    "Terminal artifacts and exact action accounting; bootstrap-only traffic is not target acceptance.",
+    "Verify complete raw/API descriptor union and physical sidecars; keep fingerprints/lengths private.",
+    "Separate actual transport/logical errors, native partial coverage and whole-spec gaps.",
+    "Required actual independent review and Sol acceptance before source application; root explicit live authorization after validation."
+  ],
+  "claimBoundary": "No guaranteed target emission, whole-spec health, requiredness, activation, standalone invocation or minimum-role claim."
+}

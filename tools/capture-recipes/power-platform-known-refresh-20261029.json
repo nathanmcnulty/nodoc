@@ -1,0 +1,80 @@
+{
+  "portal": "Power Platform",
+  "url": "https://admin.powerplatform.microsoft.com",
+  "pageTarget": {
+    "matchHosts": [
+      "admin.powerplatform.microsoft.com"
+    ],
+    "matchPathPrefixes": [
+      "/"
+    ]
+  },
+  "matchHosts": [
+    "api.bap.microsoft.com"
+  ],
+  "matchPathPrefixes": [
+    "/providers/Microsoft.BusinessAppPlatform"
+  ],
+  "inspectionPolicy": {
+    "mode": "observe-only",
+    "prohibitedControlPatterns": [
+      "Add",
+      "Create",
+      "Delete",
+      "Export",
+      "Remove",
+      "Save",
+      "Submit",
+      "Update",
+      "Purchase",
+      "Activate",
+      "Start trial"
+    ]
+  },
+  "captureScripts": false,
+  "postActionSettleMs": 6000,
+  "settleMs": 8000,
+  "maxActions": 8,
+  "actions": [
+    "navigate=https://admin.powerplatform.microsoft.com",
+    "wait-ms=6000",
+    "reload=power-platform-landing",
+    "wait-ms=8000",
+    "navigate=https://admin.powerplatform.microsoft.com/manage/environments",
+    "wait-ms=8000",
+    "capture=power-platform-environments"
+  ],
+  "knownOperationRefresh": {
+    "status": "active",
+    "method": "GET",
+    "host": "api.bap.microsoft.com",
+    "routes": [
+      "/providers/Microsoft.BusinessAppPlatform/environmentGroups"
+    ],
+    "state": "Power Platform known landing/reload followed by immutable observed /manage/environments navigation",
+    "actionIndexes": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "approvalExpiresAt": "2026-10-31T08:00:00.000Z",
+    "variableBindingsDigest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "documentationObjectives": [
+      "freshness",
+      "health",
+      "schema-evidence",
+      "usage-observation",
+      "error-example"
+    ],
+    "evidenceIds": [
+      "retained-power-platform-primary-witness",
+      "checked-in-ui-state-power-platform-environments-novelty"
+    ],
+    "approvalArtifact": "tools/frontier-approvals/power-platform-refresh-20261029.json",
+    "approvalDigest": "dade4f3c3133dec43205732dc837939fdf0c8402fd46ac0b0fa40c3c531be46d"
+  }
+}

@@ -1,0 +1,109 @@
+{
+  "portal": "M365 Admin",
+  "url": "https://admin.cloud.microsoft/#/groups",
+  "pageTarget": {
+    "matchHosts": [
+      "admin.cloud.microsoft"
+    ],
+    "matchPathPrefixes": [
+      "/"
+    ]
+  },
+  "matchHosts": [
+    "admin.cloud.microsoft"
+  ],
+  "matchPathPrefixes": [
+    "/admin",
+    "/fd"
+  ],
+  "inspectionPolicy": {
+    "mode": "observe-only",
+    "prohibitedControlPatterns": [
+      "Add",
+      "Create",
+      "Delete",
+      "Export",
+      "Remove",
+      "Save",
+      "Submit",
+      "Update",
+      "Purchase",
+      "Activate",
+      "Start trial"
+    ]
+  },
+  "captureScripts": false,
+  "postActionSettleMs": 6000,
+  "settleMs": 8000,
+  "maxActions": 22,
+  "actions": [
+    "navigate=https://admin.cloud.microsoft/#/groups",
+    "wait-ms=8000",
+    "capture=m365-groups-graph",
+    "navigate=https://admin.cloud.microsoft/#/adminunits",
+    "wait-ms=8000",
+    "capture=m365-administrative-units-graph",
+    "navigate=https://admin.cloud.microsoft/#/rbac/directory",
+    "wait-ms=8000",
+    "capture=m365-directory-roles-graph",
+    "navigate=https://admin.cloud.microsoft/#/IntuneDevices",
+    "wait-ms=8000",
+    "capture=m365-intune-devices-graph",
+    "navigate=https://admin.cloud.microsoft/#/Edge",
+    "wait-ms=8000",
+    "capture=m365-edge-management-graph",
+    "navigate=https://admin.cloud.microsoft/#/Settings/IntegratedApps",
+    "wait-ms=8000",
+    "capture=m365-integrated-apps-graph",
+    "navigate=https://admin.cloud.microsoft/#/subscriptions",
+    "wait-ms=8000",
+    "capture=m365-subscriptions-graph"
+  ],
+  "knownOperationRefresh": {
+    "status": "active",
+    "method": "GET",
+    "host": "admin.cloud.microsoft",
+    "routes": [
+      "/admin/api/groups/permissions"
+    ],
+    "state": "M365 Admin bounded passive representative states from tools/capture-recipes/m365-admin-graph-inventory.json",
+    "actionIndexes": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20
+    ],
+    "approvalExpiresAt": "2026-10-31T08:00:00.000Z",
+    "variableBindingsDigest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "documentationObjectives": [
+      "freshness",
+      "health",
+      "schema-evidence",
+      "usage-observation",
+      "error-example"
+    ],
+    "evidenceIds": [
+      "retained-m365-admin-primary-witness",
+      "checked-in-ui-state-m365-admin-graph-inventory"
+    ],
+    "approvalArtifact": "tools/frontier-approvals/m365-admin-refresh-20261029.json",
+    "approvalDigest": "e1489f0cacd139faccd5496e7f23f0db0af1f677316299cd3bc1b5accb080330"
+  }
+}

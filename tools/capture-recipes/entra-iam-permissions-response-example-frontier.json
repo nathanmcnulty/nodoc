@@ -1,0 +1,122 @@
+{
+  "portal": "Entra IAM",
+  "url": "https://entra.microsoft.com/#view/Microsoft_AAD_UsersAndTenants/UserManagementMenuBlade/~/AllUsers/menuId/",
+  "pageTarget": {
+    "matchHosts": [
+      "entra.microsoft.com"
+    ],
+    "matchPathPrefixes": [
+      "/"
+    ],
+    "bootstrap": {
+      "matchHosts": [
+        "entra.microsoft.com"
+      ],
+      "matchPathnames": [
+        "/"
+      ]
+    }
+  },
+  "inspectionPolicy": {
+    "mode": "observe-only",
+    "prohibitedControlPatterns": [
+      "Create",
+      "Delete",
+      "Invite",
+      "New user",
+      "Save"
+    ]
+  },
+  "noveltyFrontier": null,
+  "matchHosts": [
+    "entra.microsoft.com",
+    "main.iam.ad.ext.azure.com"
+  ],
+  "matchPathPrefixes": [
+    "/api"
+  ],
+  "captureScripts": false,
+  "maxActions": 6,
+  "postActionSettleMs": 8000,
+  "settleMs": 10000,
+  "actions": [
+    {
+      "type": "navigate",
+      "value": "https://entra.microsoft.com/#view/Microsoft_AAD_UsersAndTenants/UserManagementMenuBlade/~/AllUsers/menuId/",
+      "required": true,
+      "highValue": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "2000",
+      "required": true
+    },
+    {
+      "type": "reload",
+      "value": "entra-all-users",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "6000",
+      "required": true
+    },
+    {
+      "type": "capture",
+      "value": "permissions-response-example",
+      "required": true
+    }
+  ],
+  "noveltyStatus": {
+    "status": "satisfied",
+    "reason": "The approved passive All Users reload completed with healthy action accounting and promoted a type-only redacted partial example for GET /api/Permissions.",
+    "nextRequirement": "Identify a different exact Entra IAM state, route, query key, status, media type, or response shape absent from the checked-in baseline before another live run.",
+    "approvalArtifact": "tools/frontier-approvals/entra-iam-permissions-response-example-frontier.json",
+    "approvalDigest": "9c88d589077d7a36653c8a61040a058a1f0ae70988eb90a6c3e815c1e33a4171",
+    "baseline": "checked-in-spec-and-coverage-ledgers",
+    "baselineSignals": {
+      "queryMetadata": [],
+      "requestShapes": [],
+      "responseMetadata": [
+        "main.iam.ad.ext.azure.com GET /Permissions mime:application/json",
+        "main.iam.ad.ext.azure.com GET /Permissions status:200"
+      ],
+      "responseShapes": [
+        "main.iam.ad.ext.azure.com GET /Permissions c42e3850899583f4a7ea94309d357b5e1b1b6551cc0ef935e8434e21b9635086"
+      ],
+      "routes": [
+        "main.iam.ad.ext.azure.com GET /Permissions"
+      ]
+    },
+    "reopenCondition": "The deterministic Entra All Users page emitted GET /api/Permissions with response-shape fingerprint c42e3850899583f4a7ea94309d357b5e1b1b6551cc0ef935e8434e21b9635086 after the exact passive navigate, wait, same-origin reload, wait, and capture sequence.",
+    "targets": [
+      {
+        "id": "entra-iam-permissions-response-example",
+        "state": "Entra IAM All Users page after a passive same-origin reload",
+        "evidenceLevel": "confirmed",
+        "expectedHostFamilies": [
+          "main.iam.ad.ext.azure.com"
+        ],
+        "expectedRoutes": [
+          "/Permissions"
+        ],
+        "expectedInformationClasses": [
+          "response-shape"
+        ],
+        "expectedDocumentationObjectives": [
+          "response-example"
+        ],
+        "actionIndexes": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "safeAction": "Navigate to the exact Entra All Users blade, wait, reload the same page, wait, and passively capture its normal permission bootstrap response.",
+        "acceptanceKey": "entra-iam-permissions-response-example",
+        "rationale": "The checked-in operation lacked a safe example; the fresh numbered passive reload captured the known GET without authoring an API request or using a dynamic control."
+      }
+    ]
+  }
+}

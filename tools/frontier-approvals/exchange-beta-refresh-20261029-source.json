@@ -1,0 +1,200 @@
+{
+  "schemaVersion": 1,
+  "kind": "known-operation-refresh-approval-source",
+  "status": "pending-fresh-independent-review",
+  "specId": "exchange-beta",
+  "refreshDate": "2026-10-29",
+  "refreshDigest": "d2401e96bca32c98a7f7bfaedf95c320919d0111390bc61c6c02eee6b63dcbdd",
+  "recipeDestination": "tools/capture-recipes/exchange-beta-known-refresh-20261029.json",
+  "proposedRecipeSha256": "f9d3f8d37ff49133bd777103f4c4a9367707f28b0339af8568475613aa009a3f",
+  "sourceRecipe": {
+    "path": "tools/capture-recipes/exchange-shell-response-example-frontier.json",
+    "sha256": "e887d7f3a31f6683464e56b083068842cf618190d937ab447b32f1f76ae285bf"
+  },
+  "specification": {
+    "path": "specifications/nodoc-exchange-beta/specification/openapi.yml",
+    "sha256": "9658e9b9cceede8aa34cf91f467673f5f5045d932c41ad22ff7b554b3ae278ad",
+    "operationCount": 62
+  },
+  "policyBindings": [
+    {
+      "path": "PORTAL_DISCOVERY_AGENT_PROMPT.md",
+      "sha256": "57b6acf49eac1afc6e51b014039a6cba694adeeb058b13fa549f0610e20ae8b5"
+    },
+    {
+      "path": "AGENT_DISCOVERY_RUNBOOK.md",
+      "sha256": "4ef12fc4e271e17094dbb5da447b6f535bf2a63b457089ce5bd7f6876126b079"
+    },
+    {
+      "path": "AGENT_DISCOVERY_PLAYBOOK.md",
+      "sha256": "c12b9cecf0a3a85e8c760a8e7b310c0d0528f41cb65c8fe2c95eb420ca3fb119"
+    },
+    {
+      "path": "tools/portal-discovery-model-policy.mjs",
+      "sha256": "5d4b65b60d21a5b7431828b41694c49e85c58fb1497a2c3fb1cf53483066c346"
+    },
+    {
+      "path": "tools/portal-discovery-operation-safety.mjs",
+      "sha256": "425a1466f41aed855a0871548ee464670c350ce9b2954eba0e220c9a38d86ca3"
+    },
+    {
+      "path": "tools/discovery-safety.mjs",
+      "sha256": "e406c0fcd3401092ab2ef8318d41c17bb72956eec84638f2a00b9535dda8c8a1"
+    }
+  ],
+  "target": {
+    "status": "active",
+    "method": "GET",
+    "host": "admin.exchange.microsoft.com",
+    "routes": [
+      "/beta/Shell"
+    ],
+    "state": "Exchange bounded passive representative states from tools/capture-recipes/exchange-shell-response-example-frontier.json",
+    "actionIndexes": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "approvalExpiresAt": "2026-10-31T08:00:00.000Z",
+    "variableBindingsDigest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "documentationObjectives": [
+      "freshness",
+      "health",
+      "schema-evidence",
+      "usage-observation",
+      "error-example"
+    ],
+    "evidenceIds": [
+      "retained-exchange-beta-primary-witness",
+      "checked-in-ui-state-exchange-shell-response-example-frontier"
+    ]
+  },
+  "retainedPlanningEvidence": [
+    {
+      "artifactPath": "private-artifacts/exchange-legacy-bootstrap-20260831T084600Z/api-records.json",
+      "sha256": "62d25b42066b958aa5fd1d3480f0a7b5e80b179a38420783682c6e2ff17ac6c3",
+      "recordIndex": 0,
+      "method": "GET",
+      "host": "admin.exchange.microsoft.com",
+      "route": "/beta/Shell",
+      "status": 200,
+      "mimeType": "application/json",
+      "seenOnPageCount": 1,
+      "observedAt": null,
+      "historicOnly": true
+    },
+    {
+      "artifactPath": "private-artifacts/exchange-shell-20261003T113852Z/api-records.json",
+      "sha256": "40c7482fb6599636fa007536892cde2b34a7aac7dde02483bcbfc226b0f1b021",
+      "recordIndex": 23,
+      "method": "GET",
+      "host": "admin.exchange.microsoft.com",
+      "route": "/beta/Shell",
+      "status": 200,
+      "mimeType": "application/json",
+      "seenOnPageCount": 1,
+      "observedAt": null,
+      "historicOnly": true
+    },
+    {
+      "artifactPath": "private-artifacts/exchange-timezone-probe-20260831T162500Z/api-records.json",
+      "sha256": "fb2d382ba905c2f05a60e7f511efc46513a96551fe4ad44c0ea8ed81daa0550c",
+      "recordIndex": 24,
+      "method": "GET",
+      "host": "admin.exchange.microsoft.com",
+      "route": "/beta/Shell",
+      "status": 200,
+      "mimeType": "application/json",
+      "seenOnPageCount": 1,
+      "observedAt": null,
+      "historicOnly": true
+    },
+    {
+      "artifactPath": "private-artifacts/exchange-timezone-probe-retry-20260831T163200Z/api-records.json",
+      "sha256": "f26e921dc3e0d72cbe005bc74b7ae540e5bc665294cc084a04bd394a9fc5e40e",
+      "recordIndex": 26,
+      "method": "GET",
+      "host": "admin.exchange.microsoft.com",
+      "route": "/beta/Shell",
+      "status": 200,
+      "mimeType": "application/json",
+      "seenOnPageCount": 1,
+      "observedAt": null,
+      "historicOnly": true
+    }
+  ],
+  "uiProvenance": {
+    "sourceRecipe": "tools/capture-recipes/exchange-shell-response-example-frontier.json",
+    "entryUrl": "https://admin.exchange.microsoft.com/#/",
+    "actionCount": 5,
+    "usesOnlyKnownStates": true,
+    "noveltyNotRequired": true
+  },
+  "coverage": {
+    "primaryWitness": "GET /beta/Shell",
+    "representativeActions": [
+      {
+        "type": "navigate",
+        "value": "https://admin.exchange.microsoft.com/#/",
+        "required": true,
+        "highValue": true
+      },
+      {
+        "type": "wait-ms",
+        "value": "3000",
+        "required": true
+      },
+      {
+        "type": "reload",
+        "value": "exchange-legacy-host-bootstrap",
+        "required": true
+      },
+      {
+        "type": "wait-ms",
+        "value": "6000",
+        "required": true
+      },
+      {
+        "type": "capture",
+        "value": "exchange-shell-response-example",
+        "required": true
+      }
+    ],
+    "uncoveredFamilies": [
+      "mailbox/contact/resource detail",
+      "migration/report detail",
+      "accepted-domain populated state"
+    ],
+    "requiredDisposition": "Each uncovered family must be observed, unchanged with evidence, adjacent, unreachable in approved state, blocked with precise prerequisite, or separately approved state required. One witness never closes spec."
+  },
+  "safety": {
+    "apiProbeAuthorized": false,
+    "mutationAuthorized": false,
+    "deviceCodeAuthorized": false,
+    "auth": "cached/WAM or normal browser only",
+    "passiveMethods": "all naturally emitted methods retained; no authored requests",
+    "browserLifecycle": "one global endpoint, serialized owner/preflight/worker/terminal/review/disposition/stop"
+  },
+  "caveats": [
+    "no API probes; include both documented Exchange portal hosts as observed scope"
+  ],
+  "preflightChecks": {
+    "metadata": "accepted",
+    "operationOwnership": "accepted",
+    "safety": {
+      "safe": true,
+      "unsafeActions": []
+    }
+  },
+  "requiredLiveProof": [
+    "terminal discovery-run.json + summary.json + candidate-handoff.json",
+    "all required action indexes accounted with canonical results",
+    "action-attributed exact wire method/host/route",
+    "complete sanitized sidecars with every referenced SHA/length/path verified",
+    "observedAt from source request",
+    "actual statuses and health/error classification",
+    "per-family coverage disposition; no fabricated full-spec freshness"
+  ]
+}

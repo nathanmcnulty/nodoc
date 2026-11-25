@@ -8,6 +8,7 @@ import {
   deriveActionEligibility,
   deriveControlSelectorHints,
   decodeBoundedCdpBody,
+  responseBodyCaptureLimit,
   shouldRequestResponseBody,
   summarizeActionResults,
 } from "../discovery-capture-policy.mjs";
@@ -203,8 +204,8 @@ test("saturation output is deterministically ordered and integer-valued", () => 
 test("response bodies require a known bounded transfer size", () => {
   assert.equal(shouldRequestResponseBody(undefined), false);
   assert.equal(shouldRequestResponseBody(Number.NaN), false);
-  assert.equal(shouldRequestResponseBody(512 * 1024), true);
-  assert.equal(shouldRequestResponseBody(512 * 1024 + 1), false);
+  assert.equal(shouldRequestResponseBody(responseBodyCaptureLimit), true);
+  assert.equal(shouldRequestResponseBody(responseBodyCaptureLimit + 1), false);
 });
 
 test("decoded response bodies are rejected above the byte limit", () => {

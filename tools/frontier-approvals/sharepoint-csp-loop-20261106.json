@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "decision": "accept-bounded-known-operation-refresh",
+  "specId": "sharepoint-admin",
+  "workerModel": "gpt-6-luna",
+  "workerReasoning": "xhigh",
+  "captureRole": {
+    "model": "gpt-6-luna",
+    "reasoning": "low"
+  },
+  "sourceRefreshDigest": "833d2f59f277afaf76ec5517e03acc4981d1d66ca05c293179daf62cb7e5f767",
+  "refreshDigest": "e0a599d7cd121acbd92a389afd1707bd94ea4916e5e9740b52950eb2acab26e5",
+  "sourceExecutionDigest": "e1272498a54d7890dbdbae8c2e36a52c30e76099a4e946f6e659c2f5e99f434e",
+  "executionDigest": "fc7679375abbfb4c0360530d1c881c21a4f073e57db50a85a7eb349d2c41341d",
+  "variableBindingsDigest": "84f43778fd7dd21c5808b6324a479bb0e8112099362fdf6e1e18356070012e24",
+  "expiresAt": "2026-11-07T06:00:00.000Z",
+  "source": {
+    "artifactPath": "tools/capture-recipes/sharepoint-script-sources-known-refresh.json",
+    "artifactSha256": "dab05c50635a62b9b26fede8f8aca6958fcd4464910c6413a75e97dd61a2203b"
+  },
+  "approvalArtifact": "tools/frontier-approvals/sharepoint-csp-loop-20261106.json",
+  "recipeDestination": "tools/capture-recipes/sharepoint-csp-loop-20261106.json",
+  "operation": {
+    "method": "GET",
+    "route": "/_api/SPO.SPOContentSecurityPolicyConfiguration",
+    "hostBinding": "private tenant-host template resolves from the retained observed hostname; raw host withheld"
+  },
+  "actionIndexes": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "actionBudget": {
+    "recipeActions": 5,
+    "mandatoryDriverNavigation": 1,
+    "maximumDriverActions": 6,
+    "ownerStartupNavigations": 1,
+    "preflightAlignmentNavigations": 0,
+    "maximumCombinedBudgetUnits": 7
+  },
+  "policy": {
+    "inspectionMode": "observe-only",
+    "captureScripts": false,
+    "responseBodyLimitsExplicitAndCurrentDefault": true,
+    "noWrites": true
+  },
+  "finalApprovalDigest": "derive from exact materialized approval bytes, bind into the recipe, then rerun the CLI plan",
+  "materialized": false
+}

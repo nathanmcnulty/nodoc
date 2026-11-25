@@ -1,0 +1,98 @@
+{
+  "portal": "Purview Home Insider Risk complete-body scope repair",
+  "url": "https://purview.microsoft.com/home?tid=${TenantId}",
+  "pageTarget": {
+    "matchHosts": [
+      "purview.microsoft.com"
+    ],
+    "matchPathPrefixes": [
+      "/home"
+    ],
+    "allowedEntryQueryParameters": [
+      "tid"
+    ]
+  },
+  "matchHosts": [
+    "purview.microsoft.com"
+  ],
+  "matchPathPrefixes": [
+    "/apiproxy/insiderrisk/insiderrisk/api/v1.0/${TenantId}/InsiderRiskAnalyticsInsightMetadata",
+    "/apiproxy/insiderrisk/insiderrisk/api/v1.0/${TenantId}/InsiderRiskTenantPolicyAnalytics"
+  ],
+  "inspectionPolicy": {
+    "mode": "observe-only",
+    "prohibitedControlPatterns": [
+      "Add",
+      "Create",
+      "Delete",
+      "Export",
+      "Remove",
+      "Save",
+      "Submit",
+      "Update",
+      "Purchase",
+      "Activate",
+      "Start trial"
+    ]
+  },
+  "captureScripts": false,
+  "postActionSettleMs": 6000,
+  "settleMs": 8000,
+  "maxActions": 6,
+  "actions": [
+    {
+      "type": "navigate",
+      "value": "https://purview.microsoft.com/home?tid=${TenantId}",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "6000",
+      "required": true
+    },
+    {
+      "type": "reload",
+      "value": "purview-home-response-body",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "8000",
+      "required": true
+    },
+    {
+      "type": "capture",
+      "value": "purview-home-response-body",
+      "required": true
+    }
+  ],
+  "knownOperationRefresh": {
+    "status": "active",
+    "method": "GET",
+    "host": "purview.microsoft.com",
+    "routes": [
+      "/apiproxy/insiderrisk/insiderrisk/api/v1.0/${TenantId}/InsiderRiskAnalyticsInsightMetadata('${InsightDate}')"
+    ],
+    "actionIndexes": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "state": "Fresh narrowly scoped complete-response objective justified by independently reproduced opening-parenthesis allowlist mismatch. Same existing Purview Home navigation/reload actions and fixed cap; two exact previously observed Insider Risk GET operation boundaries only. Primary exact metadata request selector is privately bound from retained action2; policy analytics variants are separately assessed extras, never inferred successful from primary. No API request/probe, parameterized request authoring, new UI, policy/configuration change or tenant switch. Preview-only historical bodies supply no schema/health evidence.",
+    "documentationObjectives": [
+      "schema-evidence",
+      "usage-observation"
+    ],
+    "evidenceIds": [
+      "opaque:purview-home-irm-insight-action2-scope-excluded",
+      "opaque:purview-home-irm-policy-action2-scope-excluded",
+      "opaque:irm-opening-parenthesis-boundary-diagnosis"
+    ],
+    "approvalExpiresAt": "2026-10-31T11:26:59.993Z",
+    "variableBindingsDigest": "a9533a12962ab7d34e09f6c0d8171a932cc8bb07d858b3d940e74f9cf930099b",
+    "approvalArtifact": "tools/frontier-approvals/purview-home-irm-body-scope-repair-20261031.json",
+    "approvalDigest": "2ec39b0b6019b7769ef9a8bfe70178be2fd96e3562a4041c203fa47db6e6eb78"
+  }
+}

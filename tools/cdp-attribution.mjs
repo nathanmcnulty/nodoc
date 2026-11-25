@@ -83,8 +83,10 @@ export class CdpAttributionRegistry {
   }
 
   updateTarget(sessionId, targetInfo = {}) {
-    const entry = this.sessions.get(sessionId)
-      ?? Array.from(this.sessions.values()).find((candidate) => candidate.targetId === targetInfo.targetId);
+    const targetId = targetInfo.targetId ?? targetInfo.id;
+    const entry = targetId === undefined
+      ? this.sessions.get(sessionId)
+      : Array.from(this.sessions.values()).find((candidate) => candidate.targetId === targetId);
     if (!entry) {
       return;
     }

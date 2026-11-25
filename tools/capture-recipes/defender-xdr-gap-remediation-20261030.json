@@ -1,0 +1,132 @@
+{
+  "portal": "Defender XDR",
+  "url": "https://security.microsoft.com/security-graph",
+  "pageTarget": {
+    "matchHosts": [
+      "security.microsoft.com"
+    ],
+    "matchPathPrefixes": [
+      "/security-graph"
+    ]
+  },
+  "matchHosts": [
+    "security.microsoft.com"
+  ],
+  "matchPathPrefixes": [
+    "/apiproxy"
+  ],
+  "inspectionPolicy": {
+    "mode": "observe-only",
+    "prohibitedControlPatterns": [
+      "Add",
+      "Create",
+      "Delete",
+      "Export",
+      "Remove",
+      "Save",
+      "Submit",
+      "Update",
+      "Purchase",
+      "Activate",
+      "Start trial"
+    ]
+  },
+  "captureScripts": false,
+  "postActionSettleMs": 6000,
+  "settleMs": 8000,
+  "maxActions": 12,
+  "actions": [
+    {
+      "type": "navigate",
+      "value": "https://security.microsoft.com/security-graph",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "6000",
+      "required": true
+    },
+    {
+      "type": "reload",
+      "value": "defender-graph",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "8000",
+      "required": true
+    },
+    {
+      "type": "capture",
+      "value": "defender-graph",
+      "required": true
+    },
+    {
+      "type": "navigate",
+      "value": "https://security.microsoft.com/casesv2?viewId=${ObservedIncidentsViewId}&tid=${TenantId}",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "6000",
+      "required": true
+    },
+    {
+      "type": "capture",
+      "value": "defender-canonical-incidents",
+      "required": true
+    },
+    {
+      "type": "navigate",
+      "value": "https://security.microsoft.com/threatpolicy",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "6000",
+      "required": true
+    },
+    {
+      "type": "capture",
+      "value": "defender-threatpolicy",
+      "required": true
+    }
+  ],
+  "knownOperationRefresh": {
+    "status": "active",
+    "method": "GET",
+    "host": "security.microsoft.com",
+    "routes": [
+      "/apiproxy/mtp/sccManagement/mgmt/TenantContext"
+    ],
+    "state": "Replace /incidents with observed /casesv2 and privately bound retained viewId/TenantId; retain graph/threat-policy states.",
+    "actionIndexes": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "approvalExpiresAt": "2026-10-31T09:57:22.444Z",
+    "variableBindingsDigest": "7f0d78cc4bdda992aaaf779df753fd99575987561beebf349f5d16964c6b7d15",
+    "documentationObjectives": [
+      "freshness",
+      "health",
+      "schema-evidence",
+      "usage-observation",
+      "error-example"
+    ],
+    "evidenceIds": [
+      "gap-remediation-plan-20261030:defender-xdr",
+      "retained-state-provenance-20261030:defender-xdr"
+    ],
+    "approvalArtifact": "tools/frontier-approvals/defender-xdr-gap-remediation-20261030.json",
+    "approvalDigest": "f6b28734105cb2cde9bc9e9eeb57dc76eb720f67c4816984183f33afa6939707"
+  }
+}

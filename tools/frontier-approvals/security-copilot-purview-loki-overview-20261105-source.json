@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "kind": "known-operation-refresh-approval-source",
+  "status": "proposal-pending-independent-review-and-separate-live-authority",
+  "specId": "security-copilot",
+  "recipeDestination": "tools/capture-recipes/security-copilot-purview-loki-overview-20261105.json",
+  "plannedAssignmentId": "remaining-three-20261105-loki-overview-01",
+  "captureRole": {
+    "model": "gpt-6-luna",
+    "reasoning": "low"
+  },
+  "reviewRequirement": {
+    "model": "gpt-6-luna",
+    "reasoning": "xhigh"
+  },
+  "primaryCanonicalOperation": {
+    "method": "GET",
+    "host": "ecs.office.com",
+    "canonicalPath": "/config/v1/LokiService/1.0.0.0",
+    "wirePath": "/config/v1/LokiService/1.0.0.0",
+    "operationId": "SecurityCopilotPortal.Store.GetLokiServiceClientConfiguration",
+    "sourceFile": "specifications/nodoc-security-copilot/specification/openapi.yml",
+    "sourceFileSha256": "4c6a5770b14fa18c391bca423b3484424cab55360cdce478501ae561ceeff346"
+  },
+  "observedCaller": "Purview Data Lifecycle",
+  "observedEntryUrlTemplate": "${NativeEntryUrl}",
+  "observedEntryPath": "/datalifecyclemanagement/overview",
+  "observedEntryQueryNames": [
+    "tid"
+  ],
+  "nativeEntryEvidence": {
+    "artifactId": "remaining-three-loki-native-links-diagnostic-v2",
+    "sha256": "dd020ad1ee6623995a1b966d1a922aeb8ad7f8ffc288cc005127ff1a12063547",
+    "privateEntryBindingArtifactId": "remaining-three-loki-overview-native-entry-binding",
+    "privateEntryBindingSha256": "b0e0ee863d55468d3d6435d45af904db1f463931dff76a968cc6433df9d1936d"
+  },
+  "tenantIdentityUnproved": true,
+  "reason": "Fresh exact visible native Data Lifecycle overview href observed by the reviewed read-only diagnostic replaces the now-absent saved import link. The old import recipe remains unchanged and unexecuted. Exact ECS LokiService response is a passive objective; endpoint emission remains unproved until capture. Canonical backend owner is Security Copilot; actual caller is Purview, not a native Copilot workflow.",
+  "responseBodyLimits": {
+    "perBodyBytes": 16777216,
+    "totalBytes": 268435456
+  },
+  "actionBudget": {
+    "maximumDriverActions": 6,
+    "recipeActions": 5,
+    "mandatoryDriverHomeNavigation": 1,
+    "maximumOwnerStartupNavigations": 1,
+    "maximumPreflightAlignmentNavigations": 1,
+    "maximumCombinedBudgetUnits": 8,
+    "rootUrl": "https://purview.microsoft.com/home",
+    "alignmentEntry": "${NativeEntryUrl}",
+    "allNavigationLanesExplicit": true
+  },
+  "rawRefreshDigest": "0e92a24b72b376047409e97adc0160bb6833c777a0bff1dc71c9171c0c3411e5",
+  "resolvedRefreshDigest": "957d5b59fe5885c3c27b4a26346ecb592029e04228ae1fdae2b68ee94b0d5953",
+  "rawExecutionDigest": "77bf8a5a811cb6713be77ac691df8689e46f6f7b3687934c9803b330edee81df",
+  "resolvedExecutionDigest": "6d2bcae269ee567d5de725de150bf08193ae517b27d6bc01ec748668ce724eb9",
+  "approvalExpiresAt": "2026-11-06T05:45:00.000Z",
+  "limitations": [
+    "Native entry proof does not prove endpoint emission or API health.",
+    "Planned automation authors no API replay or explicit configuration/tenant-selection control; actual passive effects remain unverified.",
+    "Private values remain external; independent body/source review follows capture."
+  ]
+}

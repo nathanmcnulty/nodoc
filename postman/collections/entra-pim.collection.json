@@ -26,7 +26,7 @@
                                                     "request": {
                                                         "name": "List role assignments",
                                                         "description": {
-                                                            "content": "Retrieves role assignments for the specified provider. Supports OData filtering\nto query eligible, active, or specific role assignments.\n\nCommon filters:\n- `status eq 'Active'` - Active assignments only\n- `status eq 'Eligible'` - Eligible assignments only\n- `roleDefinitionId eq '{id}'` - Assignments for a specific role\n- `subjectId eq '{id}'` - Assignments for a specific user\n",
+                                                            "content": "Retrieves role assignments for the specified provider. Supports OData filtering\nto query eligible, active, or specific role assignments.\n\nCommon filters:\n- `assignmentState eq 'Active'` - Active assignments only\n- `assignmentState eq 'Eligible'` - Eligible assignments only\n- `roleDefinitionId eq '{id}'` - Assignments for a specific role\n- `subjectId eq '{id}'` - Assignments for a specific user\n",
                                                             "type": "text/plain"
                                                         },
                                                         "url": {
@@ -58,6 +58,15 @@
                                                                     },
                                                                     "key": "$top",
                                                                     "value": "8154"
+                                                                },
+                                                                {
+                                                                    "disabled": false,
+                                                                    "description": {
+                                                                        "content": "OData count flag supplied by the portal; requiredness outside the captured workflow is unverified.",
+                                                                        "type": "text/plain"
+                                                                    },
+                                                                    "key": "$count",
+                                                                    "value": "false"
                                                                 },
                                                                 {
                                                                     "disabled": false,
@@ -94,7 +103,7 @@
                                                                     "key": "provider",
                                                                     "disabled": false,
                                                                     "description": {
-                                                                        "content": "(Required) The PIM provider type (This can only be one of aadroles,azureResources,aadgroup)",
+                                                                        "content": "(Required) The PIM provider type (This can only be one of aadroles,aadRoles,azureResources,aadgroup)",
                                                                         "type": "text/plain"
                                                                     }
                                                                 }
@@ -148,6 +157,15 @@
                                                                         {
                                                                             "disabled": false,
                                                                             "description": {
+                                                                                "content": "OData count flag supplied by the portal; requiredness outside the captured workflow is unverified.",
+                                                                                "type": "text/plain"
+                                                                            },
+                                                                            "key": "$count",
+                                                                            "value": "false"
+                                                                        },
+                                                                        {
+                                                                            "disabled": false,
+                                                                            "description": {
                                                                                 "content": "Number of results to skip",
                                                                                 "type": "text/plain"
                                                                             },
@@ -177,7 +195,7 @@
                                                                         {
                                                                             "disabled": false,
                                                                             "description": {
-                                                                                "content": "(Required) The PIM provider type (This can only be one of aadroles,azureResources,aadgroup)",
+                                                                                "content": "(Required) The PIM provider type (This can only be one of aadroles,aadRoles,azureResources,aadgroup)",
                                                                                 "type": "text/plain"
                                                                             },
                                                                             "type": "any",
@@ -284,7 +302,7 @@
                                                                     "key": "provider",
                                                                     "disabled": false,
                                                                     "description": {
-                                                                        "content": "(Required) The PIM provider type (This can only be one of aadroles,azureResources,aadgroup)",
+                                                                        "content": "(Required) The PIM provider type (This can only be one of aadroles,aadRoles,azureResources,aadgroup)",
                                                                         "type": "text/plain"
                                                                     }
                                                                 }
@@ -358,7 +376,7 @@
                                                                         {
                                                                             "disabled": false,
                                                                             "description": {
-                                                                                "content": "(Required) The PIM provider type (This can only be one of aadroles,azureResources,aadgroup)",
+                                                                                "content": "(Required) The PIM provider type (This can only be one of aadroles,aadRoles,azureResources,aadgroup)",
                                                                                 "type": "text/plain"
                                                                             },
                                                                             "type": "any",
@@ -384,7 +402,7 @@
                                                                     "value": "application/json"
                                                                 }
                                                             ],
-                                                            "body": "{\n  \"value\": [\n    {\n      \"id\": \"7b3b4f66-5879-4d9d-9a0d-e9b49c718615\",\n      \"resourceId\": \"847b5907-ca15-40f4-b171-eb18619dbfab\",\n      \"roleDefinitionId\": \"62e90394-69f5-4237-9190-012177145e10\",\n      \"subjectId\": \"ab69ffc3-e508-4f8e-af8b-8d626d6764c9\",\n      \"assignmentState\": \"Eligible\",\n      \"status\": \"Provisioned\",\n      \"type\": \"AdminAdd\",\n      \"reason\": \"Breakglass renewal\",\n      \"schedule\": {\n        \"type\": \"Once\",\n        \"startDateTime\": \"2026-02-01T08:00:00Z\",\n        \"endDateTime\": \"2026-02-01T16:00:00Z\"\n      }\n    }\n  ]\n}",
+                                                            "body": "{\n  \"value\": [\n    {\n      \"id\": \"7b3b4f66-5879-4d9d-9a0d-e9b49c718615\",\n      \"resourceId\": \"11111111-1111-4111-8111-111111111111\",\n      \"roleDefinitionId\": \"62e90394-69f5-4237-9190-012177145e10\",\n      \"subjectId\": \"ab69ffc3-e508-4f8e-af8b-8d626d6764c9\",\n      \"assignmentState\": \"Eligible\",\n      \"status\": \"Provisioned\",\n      \"type\": \"AdminAdd\",\n      \"reason\": \"Breakglass renewal\",\n      \"schedule\": {\n        \"type\": \"Once\",\n        \"startDateTime\": \"2026-02-01T08:00:00Z\",\n        \"endDateTime\": \"2026-02-01T16:00:00Z\"\n      }\n    }\n  ]\n}",
                                                             "cookie": [],
                                                             "_postman_previewlanguage": "json"
                                                         }
@@ -422,7 +440,7 @@
                                                                     "key": "provider",
                                                                     "disabled": false,
                                                                     "description": {
-                                                                        "content": "(Required) The PIM provider type (This can only be one of aadroles,azureResources,aadgroup)",
+                                                                        "content": "(Required) The PIM provider type (This can only be one of aadroles,aadRoles,azureResources,aadgroup)",
                                                                         "type": "text/plain"
                                                                     }
                                                                 }
@@ -468,7 +486,7 @@
                                                                         {
                                                                             "disabled": false,
                                                                             "description": {
-                                                                                "content": "(Required) The PIM provider type (This can only be one of aadroles,azureResources,aadgroup)",
+                                                                                "content": "(Required) The PIM provider type (This can only be one of aadroles,aadRoles,azureResources,aadgroup)",
                                                                                 "type": "text/plain"
                                                                             },
                                                                             "type": "any",
@@ -521,7 +539,7 @@
                                                                         {
                                                                             "disabled": false,
                                                                             "description": {
-                                                                                "content": "(Required) The PIM provider type (This can only be one of aadroles,azureResources,aadgroup)",
+                                                                                "content": "(Required) The PIM provider type (This can only be one of aadroles,aadRoles,azureResources,aadgroup)",
                                                                                 "type": "text/plain"
                                                                             },
                                                                             "type": "any",
@@ -574,7 +592,7 @@
                                                                         {
                                                                             "disabled": false,
                                                                             "description": {
-                                                                                "content": "(Required) The PIM provider type (This can only be one of aadroles,azureResources,aadgroup)",
+                                                                                "content": "(Required) The PIM provider type (This can only be one of aadroles,aadRoles,azureResources,aadgroup)",
                                                                                 "type": "text/plain"
                                                                             },
                                                                             "type": "any",
@@ -648,7 +666,7 @@
                                                                                     "key": "provider",
                                                                                     "disabled": false,
                                                                                     "description": {
-                                                                                        "content": "(Required) The PIM provider type (This can only be one of aadroles,azureResources,aadgroup)",
+                                                                                        "content": "(Required) The PIM provider type (This can only be one of aadroles,aadRoles,azureResources,aadgroup)",
                                                                                         "type": "text/plain"
                                                                                     }
                                                                                 },
@@ -691,7 +709,7 @@
                                                                                         {
                                                                                             "disabled": false,
                                                                                             "description": {
-                                                                                                "content": "(Required) The PIM provider type (This can only be one of aadroles,azureResources,aadgroup)",
+                                                                                                "content": "(Required) The PIM provider type (This can only be one of aadroles,aadRoles,azureResources,aadgroup)",
                                                                                                 "type": "text/plain"
                                                                                             },
                                                                                             "type": "any",
@@ -741,7 +759,7 @@
                                                                                         {
                                                                                             "disabled": false,
                                                                                             "description": {
-                                                                                                "content": "(Required) The PIM provider type (This can only be one of aadroles,azureResources,aadgroup)",
+                                                                                                "content": "(Required) The PIM provider type (This can only be one of aadroles,aadRoles,azureResources,aadgroup)",
                                                                                                 "type": "text/plain"
                                                                                             },
                                                                                             "type": "any",
@@ -832,7 +850,7 @@
                                                                     "key": "provider",
                                                                     "disabled": false,
                                                                     "description": {
-                                                                        "content": "(Required) The PIM provider type (This can only be one of aadroles,azureResources,aadgroup)",
+                                                                        "content": "(Required) The PIM provider type (This can only be one of aadroles,aadRoles,azureResources,aadgroup)",
                                                                         "type": "text/plain"
                                                                     }
                                                                 }
@@ -888,7 +906,7 @@
                                                                         {
                                                                             "disabled": false,
                                                                             "description": {
-                                                                                "content": "(Required) The PIM provider type (This can only be one of aadroles,azureResources,aadgroup)",
+                                                                                "content": "(Required) The PIM provider type (This can only be one of aadroles,aadRoles,azureResources,aadgroup)",
                                                                                 "type": "text/plain"
                                                                             },
                                                                             "type": "any",
@@ -990,7 +1008,7 @@
                                                                                     "key": "provider",
                                                                                     "disabled": false,
                                                                                     "description": {
-                                                                                        "content": "(Required) The PIM provider type (This can only be one of aadroles,azureResources,aadgroup)",
+                                                                                        "content": "(Required) The PIM provider type (This can only be one of aadroles,aadRoles,azureResources,aadgroup)",
                                                                                         "type": "text/plain"
                                                                                     }
                                                                                 },
@@ -1067,7 +1085,7 @@
                                                                                         {
                                                                                             "disabled": false,
                                                                                             "description": {
-                                                                                                "content": "(Required) The PIM provider type (This can only be one of aadroles,azureResources,aadgroup)",
+                                                                                                "content": "(Required) The PIM provider type (This can only be one of aadroles,aadRoles,azureResources,aadgroup)",
                                                                                                 "type": "text/plain"
                                                                                             },
                                                                                             "type": "any",
@@ -1145,7 +1163,7 @@
                                                                                             "key": "provider",
                                                                                             "disabled": false,
                                                                                             "description": {
-                                                                                                "content": "(Required) The PIM provider type (This can only be one of aadroles,azureResources,aadgroup)",
+                                                                                                "content": "(Required) The PIM provider type (This can only be one of aadroles,aadRoles,azureResources,aadgroup)",
                                                                                                 "type": "text/plain"
                                                                                             }
                                                                                         },
@@ -1199,7 +1217,7 @@
                                                                                                 {
                                                                                                     "disabled": false,
                                                                                                     "description": {
-                                                                                                        "content": "(Required) The PIM provider type (This can only be one of aadroles,azureResources,aadgroup)",
+                                                                                                        "content": "(Required) The PIM provider type (This can only be one of aadroles,aadRoles,azureResources,aadgroup)",
                                                                                                         "type": "text/plain"
                                                                                                     },
                                                                                                     "type": "any",
@@ -1309,7 +1327,7 @@
                                                                                     "key": "provider",
                                                                                     "disabled": false,
                                                                                     "description": {
-                                                                                        "content": "(Required) The PIM provider type (This can only be one of aadroles,azureResources,aadgroup)",
+                                                                                        "content": "(Required) The PIM provider type (This can only be one of aadroles,aadRoles,azureResources,aadgroup)",
                                                                                         "type": "text/plain"
                                                                                     }
                                                                                 },
@@ -1386,7 +1404,7 @@
                                                                                         {
                                                                                             "disabled": false,
                                                                                             "description": {
-                                                                                                "content": "(Required) The PIM provider type (This can only be one of aadroles,azureResources,aadgroup)",
+                                                                                                "content": "(Required) The PIM provider type (This can only be one of aadroles,aadRoles,azureResources,aadgroup)",
                                                                                                 "type": "text/plain"
                                                                                             },
                                                                                             "type": "any",
@@ -1464,7 +1482,7 @@
                                                                                             "key": "provider",
                                                                                             "disabled": false,
                                                                                             "description": {
-                                                                                                "content": "(Required) The PIM provider type (This can only be one of aadroles,azureResources,aadgroup)",
+                                                                                                "content": "(Required) The PIM provider type (This can only be one of aadroles,aadRoles,azureResources,aadgroup)",
                                                                                                 "type": "text/plain"
                                                                                             }
                                                                                         },
@@ -1518,7 +1536,7 @@
                                                                                                 {
                                                                                                     "disabled": false,
                                                                                                     "description": {
-                                                                                                        "content": "(Required) The PIM provider type (This can only be one of aadroles,azureResources,aadgroup)",
+                                                                                                        "content": "(Required) The PIM provider type (This can only be one of aadroles,aadRoles,azureResources,aadgroup)",
                                                                                                         "type": "text/plain"
                                                                                                     },
                                                                                                     "type": "any",
@@ -1593,7 +1611,7 @@
                                                                                             "key": "provider",
                                                                                             "disabled": false,
                                                                                             "description": {
-                                                                                                "content": "(Required) The PIM provider type (This can only be one of aadroles,azureResources,aadgroup)",
+                                                                                                "content": "(Required) The PIM provider type (This can only be one of aadroles,aadRoles,azureResources,aadgroup)",
                                                                                                 "type": "text/plain"
                                                                                             }
                                                                                         },
@@ -1662,7 +1680,7 @@
                                                                                                 {
                                                                                                     "disabled": false,
                                                                                                     "description": {
-                                                                                                        "content": "(Required) The PIM provider type (This can only be one of aadroles,azureResources,aadgroup)",
+                                                                                                        "content": "(Required) The PIM provider type (This can only be one of aadroles,aadRoles,azureResources,aadgroup)",
                                                                                                         "type": "text/plain"
                                                                                                     },
                                                                                                     "type": "any",
@@ -1759,7 +1777,7 @@
                                                                                     "key": "provider",
                                                                                     "disabled": false,
                                                                                     "description": {
-                                                                                        "content": "(Required) The PIM provider type (This can only be one of aadroles,azureResources,aadgroup)",
+                                                                                        "content": "(Required) The PIM provider type (This can only be one of aadroles,aadRoles,azureResources,aadgroup)",
                                                                                         "type": "text/plain"
                                                                                     }
                                                                                 },
@@ -1808,7 +1826,7 @@
                                                                                         {
                                                                                             "disabled": false,
                                                                                             "description": {
-                                                                                                "content": "(Required) The PIM provider type (This can only be one of aadroles,azureResources,aadgroup)",
+                                                                                                "content": "(Required) The PIM provider type (This can only be one of aadroles,aadRoles,azureResources,aadgroup)",
                                                                                                 "type": "text/plain"
                                                                                             },
                                                                                             "type": "any",
@@ -1900,7 +1918,7 @@
                                                                                     "key": "provider",
                                                                                     "disabled": false,
                                                                                     "description": {
-                                                                                        "content": "(Required) The PIM provider type (This can only be one of aadroles,azureResources,aadgroup)",
+                                                                                        "content": "(Required) The PIM provider type (This can only be one of aadroles,aadRoles,azureResources,aadgroup)",
                                                                                         "type": "text/plain"
                                                                                     }
                                                                                 },
@@ -1959,7 +1977,7 @@
                                                                                         {
                                                                                             "disabled": false,
                                                                                             "description": {
-                                                                                                "content": "(Required) The PIM provider type (This can only be one of aadroles,azureResources,aadgroup)",
+                                                                                                "content": "(Required) The PIM provider type (This can only be one of aadroles,aadRoles,azureResources,aadgroup)",
                                                                                                 "type": "text/plain"
                                                                                             },
                                                                                             "type": "any",
@@ -2037,7 +2055,7 @@
                                                                                             "key": "provider",
                                                                                             "disabled": false,
                                                                                             "description": {
-                                                                                                "content": "(Required) The PIM provider type (This can only be one of aadroles,azureResources,aadgroup)",
+                                                                                                "content": "(Required) The PIM provider type (This can only be one of aadroles,aadRoles,azureResources,aadgroup)",
                                                                                                 "type": "text/plain"
                                                                                             }
                                                                                         },
@@ -2091,7 +2109,7 @@
                                                                                                 {
                                                                                                     "disabled": false,
                                                                                                     "description": {
-                                                                                                        "content": "(Required) The PIM provider type (This can only be one of aadroles,azureResources,aadgroup)",
+                                                                                                        "content": "(Required) The PIM provider type (This can only be one of aadroles,aadRoles,azureResources,aadgroup)",
                                                                                                         "type": "text/plain"
                                                                                                     },
                                                                                                     "type": "any",
@@ -2171,7 +2189,7 @@
                                                                                                     "key": "provider",
                                                                                                     "disabled": false,
                                                                                                     "description": {
-                                                                                                        "content": "(Required) The PIM provider type (This can only be one of aadroles,azureResources,aadgroup)",
+                                                                                                        "content": "(Required) The PIM provider type (This can only be one of aadroles,aadRoles,azureResources,aadgroup)",
                                                                                                         "type": "text/plain"
                                                                                                     }
                                                                                                 },
@@ -2226,7 +2244,7 @@
                                                                                                         {
                                                                                                             "disabled": false,
                                                                                                             "description": {
-                                                                                                                "content": "(Required) The PIM provider type (This can only be one of aadroles,azureResources,aadgroup)",
+                                                                                                                "content": "(Required) The PIM provider type (This can only be one of aadroles,aadRoles,azureResources,aadgroup)",
                                                                                                                 "type": "text/plain"
                                                                                                             },
                                                                                                             "type": "any",
@@ -2349,7 +2367,7 @@
                                                                     "key": "provider",
                                                                     "disabled": false,
                                                                     "description": {
-                                                                        "content": "(Required) The PIM provider type (This can only be one of aadroles,azureResources,aadgroup)",
+                                                                        "content": "(Required) The PIM provider type (This can only be one of aadroles,aadRoles,azureResources,aadgroup)",
                                                                         "type": "text/plain"
                                                                     }
                                                                 }
@@ -2423,7 +2441,7 @@
                                                                         {
                                                                             "disabled": false,
                                                                             "description": {
-                                                                                "content": "(Required) The PIM provider type (This can only be one of aadroles,azureResources,aadgroup)",
+                                                                                "content": "(Required) The PIM provider type (This can only be one of aadroles,aadRoles,azureResources,aadgroup)",
                                                                                 "type": "text/plain"
                                                                             },
                                                                             "type": "any",
@@ -2492,7 +2510,7 @@
                                                                             "key": "provider",
                                                                             "disabled": false,
                                                                             "description": {
-                                                                                "content": "(Required) The PIM provider type (This can only be one of aadroles,azureResources,aadgroup)",
+                                                                                "content": "(Required) The PIM provider type (This can only be one of aadroles,aadRoles,azureResources,aadgroup)",
                                                                                 "type": "text/plain"
                                                                             }
                                                                         }
@@ -2524,7 +2542,7 @@
                                                                                 {
                                                                                     "disabled": false,
                                                                                     "description": {
-                                                                                        "content": "(Required) The PIM provider type (This can only be one of aadroles,azureResources,aadgroup)",
+                                                                                        "content": "(Required) The PIM provider type (This can only be one of aadroles,aadRoles,azureResources,aadgroup)",
                                                                                         "type": "text/plain"
                                                                                     },
                                                                                     "type": "any",

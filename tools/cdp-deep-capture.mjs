@@ -1,7 +1,10 @@
+import { assertSelectedNativeTenant } from './browser-cdp-preflight.mjs';
+import { parseActionSpec, normalizeRecipeAction, validateInspectionActions, navigationDescriptors, createNavigationObservation } from "./portal-discovery-actions.mjs";
 import { createHash } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
+import { fileURLToPath } from "node:url";
 
 import { mineJavascriptBundles } from "./mine-javascript-bundles.mjs";
 import {
@@ -13,13 +16,26 @@ import {
 import { planActionBudget, validateActionBudgetResult } from "./portal-discovery-action-budget.mjs";
 import {
   buildTransitionEvidence,
+  classifyResponseBodyRetrievalError,
+  configureResponseBodyNetwork,
+  createResponseBodyQueue,
+  createResponseBodySessionPool,
   decodeBoundedCdpBody,
+  decodeBoundedCdpBodyResult,
   deriveActionEligibility,
   deriveControlSelectorHints,
-  responseBodyCaptureLimit,
+  responseBodyLimits,
+  responseBodyAdmission,
+  resolveResponseBodyLimits,
+  maximumResponseBodyBytes,
   shouldRequestResponseBody,
   summarizeActionResults,
 } from "./discovery-capture-policy.mjs";
+import {
+  bodyCaptureWithoutSidecar,
+  sanitizeResponseBody,
+  writeResponseBodySidecar,
+} from "./response-body-sidecars.mjs";
 import {
   buildStableEvidenceId,
   captureArtifactSchemaVersion,
@@ -93,47 +109,6 @@ async function writeCaptureFailure(args, error) {
 
 function stripBom(value) {
   return typeof value === "string" ? value.replace(/^\uFEFF/u, "") : value;
-}
-
-function parseActionSpec(value) {
-  const separator = value.indexOf("=");
-  if (separator <= 0) {
-    throw new Error(`Invalid --action value "${value}". Expected type=value.`);
-  }
-
-  const rawType = value.slice(0, separator).trim();
-  const rawValue = value.slice(separator + 1);
-  const normalizedType = rawType.replace(/-(root|iframe)$/u, "");
-  const scope = rawType.endsWith("-root")
-    ? "root"
-    : rawType.endsWith("-iframe")
-      ? "iframe"
-      : "any";
-
-  const type = normalizedType === "click" ? "click-label" : normalizedType;
-  if (![
-    "capture",
-    "click-contains",
-    "click-automation-id",
-    "click-href",
-    "click-label",
-    "crawl-links",
-    "navigate",
-    "probe-get",
-    "reload",
-    "replay-seeded-links",
-    "replay-seeded-routes",
-    "wait-ms",
-  ].includes(type)) {
-    throw new Error(`Unsupported action type "${rawType}".`);
-  }
-
-  return {
-    raw: value,
-    scope,
-    type,
-    value: rawValue,
-  };
 }
 
 function parseVarSpec(value) {
@@ -224,7 +199,69 @@ function bodyShapeFingerprint(value) {
   }
 }
 
-function requestEvidence(request) {
+// PRIVATE variant identity only. Never export these value-derived digests in a
+// candidate handoff, public spec or collection. A complete decoded/verified body
+// takes precedence over its preview, which may stop before the error envelope.
+export function responseErrorSignature(request) {
+  const fullBody = typeof request.responseBodyForAnalysis === "string";
+  const source = fullBody ? request.responseBodyForAnalysis : request.responseBody ?? request.responseBodySample;
+  if (source === undefined || source === null || source === "") return null;
+  const httpError = Number(request.status) >= 400;
+  const state = fullBody ? "full-body" : `preview:${request.bodyCapture?.state ?? "unknown"}`;
+  let text;
+  try { text = typeof source === "string" ? source : JSON.stringify(source); } catch { return null; }
+  if (typeof text !== "string" || Buffer.byteLength(text, "utf8") > maximumResponseBodyBytes) return null;
+  let body;
+  try { body = JSON.parse(text); } catch {
+    // Malformed or partial text is opaque evidence, never a semantic-error claim.
+    return httpError && text.trim() ? sha256(JSON.stringify([state, "unparsed-http-error", sha256(text)])) : null;
+  }
+  const populated = value => value != null && value !== false && value !== ""
+    && (typeof value !== "object" || Object.keys(value).length > 0);
+  const errorRoots = body && typeof body === "object" && !Array.isArray(body)
+    ? Object.entries(body).filter(([key, value]) => (/^(?:error|errors|errorMessage)$/iu.test(key) && populated(value))
+      || (/^errorData$/iu.test(key) && value && typeof value === "object"
+        && Object.entries(value).some(([field, entry]) => /^(?:errorMessage|errorType|exceptionName)$/iu.test(field) && populated(entry)))
+      || (/^success$/iu.test(key) && value === false)) : [];
+  if (!httpError && !errorRoots.length) return null;
+  const values = [];
+  let incomplete = false;
+  const visit = (value, depth = 0, structuralPath = []) => {
+    if (!value || typeof value !== "object") return;
+    if (depth > 4) { incomplete = true; return; }
+    const keys = Object.keys(value).sort();
+    if (keys.length > 128) incomplete = true;
+    for (const key of keys.slice(0, 128)) {
+      const nested = value[key];
+      const fieldPath = [...structuralPath, Array.isArray(value) ? Number(key) : key];
+      if (/^(?:code|errorcode|error_code|message|errormessage|error_description|reason|errortype|exceptionname)$/iu.test(key)
+          && ["string", "number"].includes(typeof nested)) {
+        values.push([fieldPath, typeof nested, sha256(String(nested))]);
+      } else if (/^error$/iu.test(key) && typeof nested === "string") {
+        values.push([fieldPath, "string", sha256(nested)]);
+      } else if (nested && typeof nested === "object") visit(nested, depth + 1, fieldPath);
+    }
+  };
+  // HTTP 200 partial GraphQL errors are identified independently of changing data.
+  const errorBody = httpError ? body : Object.fromEntries(errorRoots);
+  visit(errorBody);
+  const fallback = incomplete || !values.length
+    ? sha256(httpError ? text : JSON.stringify(errorBody)) : null;
+  return sha256(JSON.stringify([state, values, fallback]));
+}
+
+export function requestEvidence(request) {
+  const errorSignature = typeof request.responseBodyForAnalysis === "string"
+    ? responseErrorSignature(request) : request.responseErrorSignature ?? responseErrorSignature(request);
+  const graphQlSelectors = graphQlOperationMetadata(request);
+  const hasRequestBody = typeof request.requestBody === "string";
+  const requestBodyCaptureState = request.requestBodyCaptureState ?? (hasRequestBody ? "legacy-unknown" : "not-observed");
+  // Values distinguish RPC commands without guessing which field is a command.
+  // An unverified retained prefix has per-observation identity, not full-body identity.
+  const requestBodyVariant = hasRequestBody || requestBodyCaptureState === "unavailable" || requestBodyCaptureState === "size-limit"
+    ? { state: requestBodyCaptureState,
+      digest: request.requestBodyValueFingerprint ?? (hasRequestBody ? sha256(request.requestBody) : null),
+      ...(!request.requestBodyValueFingerprint && requestBodyCaptureState !== "captured" ? { observation: request.evidenceId ?? null } : {}) } : null;
   try {
     const parsed = new URL(request.url);
     const queryParameterNames = uniqueSorted(Array.from(parsed.searchParams.keys()));
@@ -235,13 +272,20 @@ function requestEvidence(request) {
     return {
       queryParameterNames,
       requestFingerprint: sha256(JSON.stringify({
+        origin: parsed.origin,
         method: request.method,
         path: parsed.pathname,
         queryParameterNames,
         requestShapeFingerprint,
         responseShapeFingerprint,
         status: request.status ?? null,
+        mediaType: request.mimeType ?? null,
+        graphQlSelectors,
+        requestBodyVariant,
+        ...(errorSignature ? { errorSignature } : {}),
       })),
+      responseErrorSignature: errorSignature,
+      requestBodyCaptureState,
       requestShapeFingerprint,
       responseShapeFingerprint,
       requestShapeSummary: request.requestShapeSummary ?? bodyShapeSummary(request.requestBody),
@@ -252,7 +296,9 @@ function requestEvidence(request) {
   } catch {
     return {
       queryParameterNames: [],
-      requestFingerprint: sha256(`${request.method} ${request.url}`),
+      requestFingerprint: sha256(JSON.stringify([request.method, request.url, errorSignature, graphQlSelectors, requestBodyVariant])),
+      responseErrorSignature: errorSignature,
+      requestBodyCaptureState,
       requestShapeFingerprint:
         request.requestShapeFingerprint ?? bodyShapeFingerprint(request.requestBody),
       responseShapeFingerprint:
@@ -263,6 +309,48 @@ function requestEvidence(request) {
       responseHeaderNames: uniqueSorted(normalizeHeaderEntries(request.responseHeaders).map(([name]) => name)),
     };
   }
+}
+
+export function graphQlOperationMetadata(request) {
+  try {
+    const parsedUrl = new URL(request.url);
+    if (!/\/(?:graphql|gql)\/?$/iu.test(parsedUrl.pathname)) return { kind: null, name: null, persistedQuerySha256Hash: null, literalQuerySha256Hash: null };
+    if (request.graphQlOperationSelectors) {
+      const selectors = request.graphQlOperationSelectors;
+      return {
+        kind: ["query", "mutation", "subscription"].includes(selectors.kind) ? selectors.kind : null,
+        name: typeof selectors.name === "string" && /^[A-Za-z_][A-Za-z0-9_]{0,127}$/u.test(selectors.name) ? selectors.name : null,
+        persistedQuerySha256Hash: /^[a-f0-9]{64}$/u.test(selectors.persistedQuerySha256Hash) ? selectors.persistedQuerySha256Hash : null,
+        literalQuerySha256Hash: /^[a-f0-9]{64}$/u.test(selectors.literalQuerySha256Hash) ? selectors.literalQuerySha256Hash : null,
+      };
+    }
+    if (typeof request.requestBody !== "string") return { kind: null, name: null, persistedQuerySha256Hash: null, literalQuerySha256Hash: null };
+    const parsedBody = JSON.parse(request.requestBody);
+    const value = String(parsedBody?.operationName ?? "").trim();
+    const query = String(parsedBody?.query ?? "").trim();
+    const kind = /^(query|mutation|subscription)(?:\s|\{|$)/iu.exec(query)?.[1]?.toLowerCase() ?? null;
+    const persistedQuerySha256Hash = String(parsedBody?.extensions?.persistedQuery?.sha256Hash ?? "").trim().toLowerCase();
+    return {
+      kind,
+      name: /^[A-Za-z_][A-Za-z0-9_]{0,127}$/u.test(value) ? value : null,
+      persistedQuerySha256Hash: /^[a-f0-9]{64}$/u.test(persistedQuerySha256Hash) ? persistedQuerySha256Hash : null,
+      literalQuerySha256Hash: query ? sha256(query) : null,
+    };
+  } catch {
+    return { kind: null, name: null, persistedQuerySha256Hash: null, literalQuerySha256Hash: null };
+  }
+}
+
+// PRIVATE capture-text identity. A digest of returned postData is not proof that
+// CDP supplied every on-wire byte (for example uploaded multipart file bytes).
+export function privateRequestBodyEvidence({ url, sanitizedBody, hasPostData = false }) {
+  if (typeof sanitizedBody !== "string") return { requestBodyCaptureState: hasPostData ? "unavailable" : "not-observed" };
+  if (Buffer.byteLength(sanitizedBody, "utf8") > maximumResponseBodyBytes) return { requestBodyCaptureState: "size-limit" };
+  return {
+    requestBodyCaptureState: sanitizedBody.length > 5000 ? "truncated" : "captured",
+    requestBodyValueFingerprint: sha256(sanitizedBody),
+    graphQlOperationSelectors: graphQlOperationMetadata({ url, requestBody: sanitizedBody }),
+  };
 }
 
 function normalizeHeaderEntries(headers = {}) {
@@ -466,32 +554,6 @@ function expandTemplateVariables(value, variables) {
   return value;
 }
 
-function normalizeRecipeAction(action) {
-  if (typeof action === "string") {
-    return parseActionSpec(action);
-  }
-
-  if (!action || typeof action !== "object") {
-    throw new Error("Recipe actions must be strings or objects.");
-  }
-
-  const rawType = String(action.type || "").trim();
-  if (!rawType) {
-    throw new Error("Recipe action objects must include a type.");
-  }
-
-  const scopedType =
-    action.scope && action.scope !== "any"
-      ? `${rawType}-${String(action.scope).trim()}`
-      : rawType;
-  return {
-    ...parseActionSpec(`${scopedType}=${action.value ?? ""}`),
-    highValue: action.highValue === true,
-    optional: action.optional === true,
-    required: Boolean(action.required),
-  };
-}
-
 function resolveRecipePath(value, recipeDir) {
   if (!value) {
     return null;
@@ -538,6 +600,7 @@ function normalizeSeedRouteGroups(groups = {}) {
 
 function applyRecipeConfig(args, recipeConfig, recipePath) {
   const recipeDir = path.dirname(recipePath);
+  args.responseBodyLimits = resolveResponseBodyLimits(recipeConfig.responseBodyLimits);
   if (recipeConfig.url) {
     args.url = recipeConfig.url;
   }
@@ -628,7 +691,12 @@ function applyRecipeConfig(args, recipeConfig, recipePath) {
   args.actionBudget = planActionBudget(recipeConfig, { maxActions: recipeConfig.maxActions });
 }
 
-async function parseArgs(argv) {
+export async function navigateAfterTenantCheck({ variables, getRootUrl, navigateRoot, url }) {
+  if (Object.hasOwn(variables, 'TenantId')) assertSelectedNativeTenant(await getRootUrl(), variables.TenantId);
+  return navigateRoot(url);
+}
+
+export async function parseArgs(argv) {
   const args = {
     activeOperations: [],
     activeOperationPlan: null,
@@ -654,6 +722,7 @@ async function parseArgs(argv) {
     portal: null,
     postActionSettleMs: defaultPostActionSettleMs,
     recipePath: null,
+    responseBodyLimits,
     seedArtifacts: null,
     seedLinkContains: [],
     seedLinkLimit: defaultSeedLinkLimit,
@@ -668,6 +737,12 @@ async function parseArgs(argv) {
 
   let recipePath = null;
   const cliVariables = {};
+  let tenantBindingSeen = false;
+  const addCliVariable = ({name,value}) => {
+    if (name === 'TenantId' && tenantBindingSeen) throw new Error('Duplicate TenantId bindings are not allowed.');
+    if (name === 'TenantId') tenantBindingSeen = true;
+    cliVariables[name] = value;
+  };
 
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index];
@@ -686,18 +761,19 @@ async function parseArgs(argv) {
 
     if (arg === "--var" && next) {
       const { name, value } = parseVarSpec(next);
-      cliVariables[name] = value;
+      addCliVariable({name,value});
       index += 1;
       continue;
     }
 
     if (arg.startsWith("--var=")) {
       const { name, value } = parseVarSpec(arg.slice("--var=".length));
-      cliVariables[name] = value;
+      addCliVariable({name,value});
       continue;
     }
   }
 
+  args.variables = cliVariables;
   if (recipePath) {
     const recipeSource = JSON.parse(stripBom(await readFile(recipePath, "utf8")));
     const expandedRecipe = expandTemplateVariables(
@@ -709,7 +785,7 @@ async function parseArgs(argv) {
     );
     applyRecipeConfig(args, expandedRecipe, recipePath);
     args.recipePath = recipePath;
-    args.variables = cliVariables;
+    args.variables = { ...(recipeSource.variables ?? {}), ...cliVariables };
   }
 
   for (let index = 0; index < argv.length; index += 1) {
@@ -1033,13 +1109,7 @@ async function parseArgs(argv) {
     ceiling: args.operationCeiling,
   });
   if (args.inspectionPolicy?.mode === "observe-only") {
-    const allowedInspectionActions = new Set(["capture", "navigate", "reload", "wait-ms"]);
-    if (args.operationCeiling !== "observe-only" || args.activeOperationPlan) {
-      throw new Error("Observe-only inspection recipes cannot authorize active operations.");
-    }
-    if (args.actions.some((action) => !allowedInspectionActions.has(action.type))) {
-      throw new Error("Observe-only inspection recipes may use only navigate, reload, wait-ms, and capture actions.");
-    }
+    validateInspectionActions(args.actions, args.inspectionPolicy, args.operationCeiling, args.activeOperationPlan);
   }
   if (args.activeOperationPlan) {
     const allowedHosts = new Set(args.matchHosts.map((value) => String(value).toLowerCase()));
@@ -1144,98 +1214,102 @@ function graphBatchResponseMetadata(existing, body) {
   }
 }
 
-const redactedBodyValue = "[redacted]";
-const sensitiveBodyKeys = new Set([
-  "accesstoken",
-  "assertion",
-  "authorization",
-  "authtoken",
-  "clientsecret",
-  "hubtenanttoken",
-  "idtoken",
-  "password",
-  "refreshtoken",
-  "secret",
-  "token",
-]);
-
-function normalizeSensitiveKey(value) {
-  return String(value ?? "").toLowerCase().replace(/[^a-z0-9]/gu, "");
+export function sanitizeCapturedBody(value) {
+  return sanitizeResponseBody(value);
 }
 
-function sanitizeTokenLikeString(value) {
-  if (typeof value !== "string" || !value) {
-    return value;
-  }
-
-  return value
-    .replace(/\b(Bearer)\s+[A-Za-z0-9._~+/=-]+/gu, "$1 [redacted]")
-    .replace(/\beyJ[A-Za-z0-9_-]+\.[A-Za-z0-9._-]+\.[A-Za-z0-9._-]+\b/gu, redactedBodyValue)
-    .replace(
-      /([?&](?:access_token|refresh_token|id_token|client_secret|assertion|token)=)[^&\s]+/giu,
-      `$1${redactedBodyValue}`,
-    );
+export function buildRequestEvidenceId({ attribution, method, requestId, requestUrl, startedAt }) {
+  return buildStableEvidenceId("request", {
+    actionIndex: attribution.actionIndex,
+    attempt: attribution.attempt,
+    frameId: attribution.frameId,
+    loaderId: attribution.loaderId,
+    method,
+    normalizedUrl: normalizeAttributionUrl(requestUrl),
+    pageLabel: attribution.pageLabel,
+    requestId,
+    sessionId: attribution.sessionId,
+    startedAt,
+    targetId: attribution.targetId,
+  });
 }
 
-function redactStructuredBody(value) {
-  if (Array.isArray(value)) {
-    return value.map((entry) => redactStructuredBody(entry));
+export async function captureResponseBodyEvidence({
+  artifactDir,
+  evidenceId,
+  payload,
+  requestUrl,
+  matchHosts = [],
+  matchPathPrefixes = [],
+  status = null,
+  writeSidecar = writeResponseBodySidecar,
+  limits = responseBodyLimits,
+} = {}) {
+  limits = resolveResponseBodyLimits(limits);
+  const decoded = decodeBoundedCdpBodyResult(payload, limits.perBodyBytes);
+  if (decoded.state !== "complete") {
+    return {
+      sanitizedBody: null,
+      responseBody: null,
+      bodyCapture: bodyCaptureWithoutSidecar(decoded.state, decoded.byteLength),
+      responseShapeFingerprint: null,
+      responseShapeSummary: null,
+      ...(decoded.state === "decode-failed" ? { bodyCaptureDiagnostic: "bounded-response-body-decode-failed" } : {}),
+    };
   }
-
-  if (value && typeof value === "object") {
-    return Object.fromEntries(
-      Object.entries(value).map(([key, entryValue]) => [
-        key,
-        sensitiveBodyKeys.has(normalizeSensitiveKey(key))
-          ? redactedBodyValue
-          : redactStructuredBody(entryValue),
-      ]),
-    );
+  const sanitizedBody = sanitizeCapturedBody(decoded.body);
+  if (typeof sanitizedBody !== "string") {
+    return {
+      sanitizedBody: null,
+      responseBody: null,
+      bodyCapture: bodyCaptureWithoutSidecar("decode-failed", decoded.byteLength),
+      responseShapeFingerprint: null,
+      responseShapeSummary: null,
+      bodyCaptureDiagnostic: "response-body-sanitization-rejected",
+    };
   }
-
-  if (typeof value === "string") {
-    return sanitizeTokenLikeString(value);
-  }
-
-  return value;
+  const scoped = shouldMatchRequest(requestUrl, { matchHosts, matchPathPrefixes });
+  const sidecar = scoped
+    ? await writeSidecar({ artifactDir, evidenceId, sanitizedBody, limits })
+    : { preview: truncate(sanitizedBody), bodyCapture: bodyCaptureWithoutSidecar("truncated", Buffer.byteLength(sanitizedBody, "utf8")) };
+  return {
+    sanitizedBody,
+    responseBody: sidecar.preview,
+    bodyCapture: sidecar.bodyCapture,
+    responseShapeFingerprint: bodyShapeFingerprint(sanitizedBody),
+    responseShapeSummary: bodyShapeSummary(sanitizedBody),
+    responseErrorSignature: responseErrorSignature({ status, responseBodyForAnalysis: sanitizedBody }),
+    ...(sidecar.bodyCaptureDiagnostic ? { bodyCaptureDiagnostic: sidecar.bodyCaptureDiagnostic }
+      : sidecar.bodyCapture.state === "incomplete-write" ? { bodyCaptureDiagnostic: "response-body-sidecar-incomplete" } : {}),
+  };
 }
 
-function sanitizeCapturedBody(value) {
-  if (typeof value !== "string") {
-    return value;
-  }
-
-  const trimmed = value.trim();
-  if (!trimmed) {
-    return value;
-  }
-
+export async function captureResponseBodyWithLoader({ loadPayload, ...options } = {}) {
+  let payload;
   try {
-    return JSON.stringify(redactStructuredBody(JSON.parse(trimmed)));
-  } catch {
-    // Try additional body formats.
+    payload = await loadPayload();
+  } catch (error) {
+    return {
+      sanitizedBody: null,
+      responseBody: null,
+      bodyCapture: bodyCaptureWithoutSidecar("decode-failed"),
+      responseShapeFingerprint: null,
+      responseShapeSummary: null,
+      bodyCaptureDiagnostic: classifyResponseBodyRetrievalError(error),
+    };
   }
-
   try {
-    const params = new URLSearchParams(trimmed);
-    let changed = false;
-    for (const key of new Set(Array.from(params.keys()))) {
-      if (!sensitiveBodyKeys.has(normalizeSensitiveKey(key))) {
-        continue;
-      }
-
-      params.set(key, redactedBodyValue);
-      changed = true;
-    }
-
-    if (changed) {
-      return params.toString();
-    }
+    return await captureResponseBodyEvidence({ ...options, payload });
   } catch {
-    // Fall back to plain string sanitization.
+    return {
+      sanitizedBody: null,
+      responseBody: null,
+      bodyCapture: bodyCaptureWithoutSidecar("decode-failed"),
+      responseShapeFingerprint: null,
+      responseShapeSummary: null,
+      bodyCaptureDiagnostic: "response-body-capture-failed",
+    };
   }
-
-  return sanitizeTokenLikeString(value);
 }
 
 function uniqueSorted(values) {
@@ -1366,7 +1440,29 @@ function buildSeedRouteUrl(routeTemplate, seedValue, rootOrigin) {
   return resolveMaybeRelativeUrl(interpolatedTemplate, `${rootOrigin}/`);
 }
 
-function mergeItems(existing, next) {
+function hasResponseEvidence(item) {
+  if (typeof item?.responseBodySample === "string") return true;
+  return hasCompleteResponseEvidence(item);
+}
+
+function hasCompleteResponseEvidence(item) {
+  const descriptor = item?.bodyCapture;
+  const evidenceId = item?.evidenceId;
+  return descriptor?.state === "complete"
+    && typeof evidenceId === "string"
+    && /^[a-z0-9][a-z0-9-]{0,127}$/u.test(evidenceId)
+    && descriptor.path === `response-body-sidecars/${evidenceId}.body`
+    && typeof descriptor.sha256 === "string"
+    && /^[a-f0-9]{64}$/u.test(descriptor.sha256)
+    && Number.isSafeInteger(descriptor.byteLength)
+    && descriptor.byteLength >= 0
+    && descriptor.byteLength <= maximumResponseBodyBytes;
+}
+
+export function mergeItems(existing, next) {
+  const preserveExistingResponse = (hasCompleteResponseEvidence(existing) && !hasCompleteResponseEvidence(next))
+    || (hasResponseEvidence(existing) && !hasResponseEvidence(next));
+  const selectedResponse = preserveExistingResponse ? existing : next;
   const merged = { ...existing, ...next };
 
   for (const key of [
@@ -1384,8 +1480,26 @@ function mergeItems(existing, next) {
     }
   }
 
-  if (existing.responseBodySample && next.responseBodySample && existing.responseBodySample !== next.responseBodySample) {
-    merged.responseBodySample = existing.responseBodySample;
+  // Select the response preview, descriptor, and stage diagnostic as one
+  // evidence-bound unit. A newer record without a preview must not orphan a
+  // prior complete preview, while a newer preview must clear stale diagnostics.
+  for (const key of [
+    "attribution",
+    "bodyCapture",
+    "bodyCaptureDiagnostic",
+    "evidenceId",
+    "graphBatch",
+    "mimeType",
+    "observedAt",
+    "responseBodySample",
+    "responseErrorSignature",
+    "responseShapeFingerprint",
+    "responseShapeSummary",
+    "status",
+    "url",
+  ]) {
+    if (Object.hasOwn(selectedResponse, key)) merged[key] = selectedResponse[key];
+    else delete merged[key];
   }
 
   return merged;
@@ -1540,7 +1654,9 @@ class CdpClient {
         this.pending.delete(key);
         clearTimeout(entry.timeout);
         if (message.error) {
-          entry.reject(new Error(message.error.message));
+          const error = new Error(message.error.message);
+          error.code = message.error.code;
+          entry.reject(error);
           return;
         }
 
@@ -1678,6 +1794,8 @@ function buildDomSnapshotExpression() {
       .filter((element) => visible(element))
       .map((element) => ({
         ariaLabel: normalizeText(element.getAttribute("aria-label")),
+        enabled: !element.matches(":disabled") && element.getAttribute("aria-disabled") !== "true",
+        visible: true,
         automationId: normalizeText(element.getAttribute("data-automation-id")),
         href: element.getAttribute("href"),
         role: element.getAttribute("role"),
@@ -1936,6 +2054,7 @@ function toApiRecord(request, portalName) {
       abortedBeforeSend: request.abortedBeforeSend === true,
       attribution: request.attribution,
       confidence: "confirmed-traffic",
+      matchesCurrentSpec: request.matchesCurrentSpec === true,
       method: request.method,
       mimeType: request.mimeType ?? null,
       path: parsed.pathname,
@@ -1943,7 +2062,15 @@ function toApiRecord(request, portalName) {
       querySamples: querySample ? [querySample] : [],
       requestBodySamples: request.requestBody ? [request.requestBody] : [],
       responseBodySample: request.responseBody ?? null,
+      evidenceId: request.evidenceId,
+      bodyCapture: request.bodyCapture ?? bodyCaptureWithoutSidecar("truncated"),
+      ...(request.bodyCaptureDiagnostic ? { bodyCaptureDiagnostic: request.bodyCaptureDiagnostic } : {}),
       graphBatch: request.graphBatch ?? null,
+      graphQlOperationKind: graphQlOperationMetadata(request).kind,
+      graphQlOperationName: graphQlOperationMetadata(request).name,
+      graphQlPersistedQuerySha256Hash: graphQlOperationMetadata(request).persistedQuerySha256Hash,
+      graphQlLiteralQuerySha256Hash: graphQlOperationMetadata(request).literalQuerySha256Hash,
+      observedAt: request.observedAt ?? null,
       seenOnPages: [request.pageLabel],
       status: request.status ?? null,
       url: request.url,
@@ -1955,6 +2082,7 @@ function toApiRecord(request, portalName) {
       abortedBeforeSend: request.abortedBeforeSend === true,
       attribution: request.attribution,
       confidence: "confirmed-traffic",
+      matchesCurrentSpec: request.matchesCurrentSpec === true,
       method: request.method,
       mimeType: request.mimeType ?? null,
       path: request.url,
@@ -1962,7 +2090,15 @@ function toApiRecord(request, portalName) {
       querySamples: [],
       requestBodySamples: request.requestBody ? [request.requestBody] : [],
       responseBodySample: request.responseBody ?? null,
+      evidenceId: request.evidenceId,
+      bodyCapture: request.bodyCapture ?? bodyCaptureWithoutSidecar("truncated"),
+      ...(request.bodyCaptureDiagnostic ? { bodyCaptureDiagnostic: request.bodyCaptureDiagnostic } : {}),
       graphBatch: request.graphBatch ?? null,
+      graphQlOperationKind: graphQlOperationMetadata(request).kind,
+      graphQlOperationName: graphQlOperationMetadata(request).name,
+      graphQlPersistedQuerySha256Hash: graphQlOperationMetadata(request).persistedQuerySha256Hash,
+      graphQlLiteralQuerySha256Hash: graphQlOperationMetadata(request).literalQuerySha256Hash,
+      observedAt: request.observedAt ?? null,
       seenOnPages: [request.pageLabel],
       status: request.status ?? null,
       url: request.url,
@@ -2187,7 +2323,7 @@ async function main() {
   const scriptBodies = new Map();
   const inFlightRequests = new Set();
   const pendingBodyCaptures = new Set();
-  let responseBodyTail = Promise.resolve();
+  const queueResponseBody = createResponseBodyQueue(args.responseBodyLimits);
   const capturedRequests = [];
   const pageStates = [];
   const sessionSnapshots = [];
@@ -2202,6 +2338,9 @@ async function main() {
   const operationInterceptionEvents = new Map();
   const actionStartedAt = new Map([[-1, Date.now()]]);
   const boundedNetworkSessions = new Set();
+  const networkSessionPool = createResponseBodySessionPool(args.responseBodyLimits);
+  const detachedNetworkSessions = new Set();
+  const responseBodyNetwork = [];
   const configuredSessions = new Set();
   const fetchEnabledSessions = new Set();
   const fetchAbortedNetworkRequests = new Set();
@@ -2222,6 +2361,7 @@ async function main() {
   const attributionRegistry = new CdpAttributionRegistry(target, currentContext);
   const sessions = attributionRegistry.sessions;
   let currentLoadResolver = null;
+  let currentWithinDocumentEvents = null;
   let lastNetworkActivityAt = Date.now();
 
   async function persistOperationReceipts() {
@@ -2392,15 +2532,20 @@ async function main() {
       return;
     }
 
-    try {
-      await client.send("Network.enable", {
-        maxPostDataSize: 1024 * 128,
-        maxResourceBufferSize: responseBodyCaptureLimit,
-        maxTotalBufferSize: responseBodyCaptureLimit * 32,
-      }, sessionId);
-      boundedNetworkSessions.add(key);
-    } catch {
-      await client.send("Network.enable", { maxPostDataSize: 1024 * 128 }, sessionId);
+    const sessionLimits = networkSessionPool.reserve(key);
+    if (!sessionLimits) {
+      responseBodyNetwork.push({ sessionId, durable: false, diagnostic: "cdp-response-body-session-budget-exhausted" });
+    } else {
+      try {
+        const capability = await configureResponseBodyNetwork((method, params) => client.send(method, params, sessionId), sessionLimits);
+        if (!detachedNetworkSessions.has(key)) {
+          responseBodyNetwork.push({ sessionId, ...capability });
+          boundedNetworkSessions.add(key);
+        }
+      } catch {
+        networkSessionPool.release(key);
+        responseBodyNetwork.push({ sessionId, durable: false, diagnostic: "cdp-response-body-network-unavailable" });
+      }
     }
 
     for (const [method, params] of [
@@ -2426,6 +2571,7 @@ async function main() {
     const context = activeAbortContext;
     const sessionId = metadata.sessionId ?? null;
     const requestSessionId = sessionId ?? "root";
+    const sanitizedRequestBody = sanitizeCapturedBody(params.request?.postData ?? null);
     const request = {
       attribution: resolveEventAttribution("Fetch.requestPaused", sessionId, params),
       evidenceId: buildStableEvidenceId("mutation", {
@@ -2437,7 +2583,8 @@ async function main() {
       }),
       headers: params.request?.headers ?? {},
       method: params.request?.method ?? null,
-      requestBody: truncate(sanitizeCapturedBody(params.request?.postData ?? null)),
+      requestBody: truncate(sanitizedRequestBody),
+      ...privateRequestBodyEvidence({ url: params.request?.url, sanitizedBody: sanitizedRequestBody, hasPostData: params.request?.hasPostData }),
       requestShapeFingerprint: bodyShapeFingerprint(params.request?.postData ?? null),
       responseBody: null,
       sessionId: requestSessionId,
@@ -2553,6 +2700,10 @@ async function main() {
     pendingFetchHandlers.add(handler);
   });
 
+  client.on("Page.navigatedWithinDocument", (params, metadata) => {
+    currentWithinDocumentEvents?.recordEvent(params, metadata);
+  });
+
   client.on("Page.loadEventFired", (_params, metadata) => {
     if (metadata.sessionId) {
       return;
@@ -2604,6 +2755,9 @@ async function main() {
     const detachedSessionId = params.sessionId ?? null;
     if (detachedSessionId) {
       attributionRegistry.markDetached(detachedSessionId);
+      detachedNetworkSessions.add(detachedSessionId);
+      boundedNetworkSessions.delete(detachedSessionId);
+      networkSessionPool.release(detachedSessionId);
     }
   });
 
@@ -2688,22 +2842,20 @@ async function main() {
     requestMap.set(key, {
       attribution,
       abortedBeforeSend,
-      evidenceId: buildStableEvidenceId("request", {
-        actionIndex: attribution.actionIndex,
-        attempt: attribution.attempt,
-        frameId: attribution.frameId,
-        loaderId: attribution.loaderId,
+      evidenceId: buildRequestEvidenceId({
+        attribution,
         method: params.request.method,
-        normalizedUrl: normalizeAttributionUrl(requestUrl),
-        pageLabel: attribution.pageLabel,
-        sessionId: attribution.sessionId,
-        targetId: attribution.targetId,
+        requestId: params.requestId,
+        requestUrl,
+        startedAt: params.timestamp,
       }),
       headers: params.request.headers ?? {},
       method: params.request.method,
+      observedAt: Number.isFinite(Number(params.wallTime)) ? new Date(Number(params.wallTime) * 1000).toISOString() : null,
       pageLabel: attribution.pageLabel,
       probeId,
       requestBody: truncate(sanitizedRequestBody),
+      ...privateRequestBodyEvidence({ url: requestUrl, sanitizedBody: sanitizedRequestBody, hasPostData: params.request.hasPostData }),
       graphBatch: graphBatchRequestMetadata(requestUrl, sanitizedRequestBody),
       requestShapeFingerprint: bodyShapeFingerprint(sanitizedRequestBody),
       requestShapeSummary: bodyShapeSummary(sanitizedRequestBody),
@@ -2773,49 +2925,71 @@ async function main() {
     }
 
     record.failureText = params.errorText ?? "loading failed";
+    record.bodyCapture = bodyCaptureWithoutSidecar("truncated");
     capturedRequests.push(record);
     requestMap.delete(key);
   });
 
   client.on("Network.loadingFinished", (params, metadata) => {
     const key = requestKey(params.requestId, metadata.sessionId);
-    const captureResponseBody = async () => {
+    const record = requestMap.get(key);
+    const admission = responseBodyAdmission(params.encodedDataLength, boundedNetworkSessions.has(metadata.sessionId ?? "root"), args.responseBodyLimits.perBodyBytes);
+    const captureResponseBody = async (loadPayload) => {
       scriptRequestMap.delete(key);
 
-      const record = requestMap.get(key);
       if (record) {
-        const sessionKey = metadata.sessionId ?? "root";
-        if (
-          boundedNetworkSessions.has(sessionKey)
-          && shouldRequestResponseBody(params.encodedDataLength)
-        ) {
+        if (admission) {
+          record.responseBody = null;
+          record.bodyCapture = bodyCaptureWithoutSidecar(admission.state, params.encodedDataLength);
+          record.bodyCaptureDiagnostic = admission.diagnostic;
+        } else {
           try {
-            const body = await client.send("Network.getResponseBody", {
-              requestId: params.requestId,
-            }, metadata.sessionId);
-            const sanitizedResponseBody = sanitizeCapturedBody(decodeBoundedCdpBody(body));
-            record.graphBatch = graphBatchResponseMetadata(record.graphBatch, sanitizedResponseBody);
-            record.responseBody = truncate(sanitizedResponseBody);
-            record.responseShapeFingerprint = bodyShapeFingerprint(sanitizedResponseBody);
-            record.responseShapeSummary = bodyShapeSummary(sanitizedResponseBody);
+            const captured = await captureResponseBodyWithLoader({
+              artifactDir: args.outDir,
+              evidenceId: record.evidenceId,
+              requestUrl: record.url,
+              matchHosts: args.matchHosts,
+              matchPathPrefixes: args.matchPathPrefixes,
+              limits: args.responseBodyLimits,
+              status: record.status,
+              loadPayload,
+            });
+            record.graphBatch = graphBatchResponseMetadata(record.graphBatch, captured.sanitizedBody);
+            record.responseBody = captured.responseBody;
+            record.bodyCapture = captured.bodyCapture;
+            record.bodyCaptureDiagnostic = captured.bodyCaptureDiagnostic ?? null;
+            record.responseShapeFingerprint = captured.responseShapeFingerprint;
+            record.responseShapeSummary = captured.responseShapeSummary;
+            record.responseErrorSignature = captured.responseErrorSignature ?? null;
           } catch {
             record.responseBody = null;
+            record.bodyCapture = bodyCaptureWithoutSidecar("decode-failed");
+            record.bodyCaptureDiagnostic = "response-body-capture-failed";
           }
-        } else {
-          record.responseBody = null;
         }
 
         capturedRequests.push(record);
-        requestMap.delete(key);
+        if (requestMap.get(key) === record) requestMap.delete(key);
       }
     };
-    const bodyCapture = responseBodyTail.then(captureResponseBody).finally(() => {
+    const eligible = record && !admission;
+    const queued = eligible ? queueResponseBody(
+      () => client.send("Network.getResponseBody", { requestId: params.requestId }, metadata.sessionId),
+      captureResponseBody,
+    ) : null;
+    // Budget exhaustion retains metadata, never a misleading complete body.
+    const work = queued ?? captureResponseBody(async () => {
+      const error = new Error("Response body queue budget exhausted.");
+      error.code = "RESPONSE_BODY_BUDGET";
+      throw error;
+    });
+    const bodyCapture = work.finally(() => {
       inFlightRequests.delete(key);
       lastNetworkActivityAt = Date.now();
       pendingBodyCaptures.delete(bodyCapture);
     });
-    responseBodyTail = bodyCapture.catch(() => {});
     pendingBodyCaptures.add(bodyCapture);
+    void bodyCapture.catch(() => {});
   });
 
   async function waitForNetworkIdle(maxWaitMs) {
@@ -3084,7 +3258,14 @@ async function main() {
         probeOutcome: request.probeId ? probeOutcomes.get(request.probeId) ?? null : null,
         requestBody: request.requestBody ?? null,
         graphBatch: request.graphBatch ?? null,
+        graphQlOperationKind: graphQlOperationMetadata(request).kind,
+        graphQlOperationName: graphQlOperationMetadata(request).name,
+        graphQlPersistedQuerySha256Hash: graphQlOperationMetadata(request).persistedQuerySha256Hash,
+        graphQlLiteralQuerySha256Hash: graphQlOperationMetadata(request).literalQuerySha256Hash,
+        observedAt: request.observedAt ?? null,
         responseBody: request.responseBody ?? null,
+        bodyCapture: request.bodyCapture ?? bodyCaptureWithoutSidecar("truncated"),
+        ...(request.bodyCaptureDiagnostic ? { bodyCaptureDiagnostic: request.bodyCaptureDiagnostic } : {}),
         status: request.status ?? null,
         url: request.url,
         abortedBeforeSend: request.abortedBeforeSend === true,
@@ -3197,7 +3378,7 @@ async function main() {
           if (
             resource.type !== "Script"
             || !resource.url
-            || !shouldRequestResponseBody(resource.contentSize)
+            || !shouldRequestResponseBody(resource.contentSize, args.responseBodyLimits.perBodyBytes)
           ) {
             continue;
           }
@@ -3215,7 +3396,7 @@ async function main() {
               frameId: frameTree.frame.id,
               url: resource.url,
             }, sessionId);
-            const source = decodeBoundedCdpBody(content);
+            const source = decodeBoundedCdpBody(content, args.responseBodyLimits.perBodyBytes);
             if (source) {
               scriptBodies.set(resource.url, {
                 ...scriptRecord,
@@ -3286,6 +3467,7 @@ async function main() {
       url: rootSnapshot.url ?? null,
       visibleControls: combinedControls,
       visibleTabs: combinedTabs,
+      navigationDescriptors: navigationDescriptors(snapshots),
     });
     sessionSnapshots.push({
       schemaVersion: captureArtifactSchemaVersion,
@@ -3352,6 +3534,13 @@ async function main() {
     const resolvedUrl = isAbsoluteUrl(targetUrl)
       ? String(targetUrl)
       : resolveMaybeRelativeUrl(targetUrl, await getRootUrl());
+    const frameTree = await Promise.race([
+      client.send("Page.getFrameTree").catch(() => null),
+      delay(Math.min(args.navigationTimeoutMs, 1000)).then(() => null),
+    ]);
+    const navigationObservation = createNavigationObservation(frameTree?.frameTree?.frame?.id ?? null);
+    currentWithinDocumentEvents = navigationObservation;
+    try {
     const navigationPromise = new Promise((resolve) => {
       const timeout = setTimeout(() => {
         currentLoadResolver = null;
@@ -3365,12 +3554,14 @@ async function main() {
       };
     });
 
-    const navigateIssued = await Promise.race([
-      client.send("Page.navigate", { url: resolvedUrl }).then(() => true).catch(() => false),
-      delay(Math.min(args.navigationTimeoutMs, 5000)).then(() => false),
+    const navigateResponse = await Promise.race([
+      client.send("Page.navigate", { url: resolvedUrl })
+        .then((response) => { navigationObservation.recordResponse(response); return response; })
+        .catch(() => { navigationObservation.recordResponse(null); return null; }),
+      delay(Math.min(args.navigationTimeoutMs, 5000)).then(() => null),
     ]);
 
-    if (!navigateIssued) {
+    if (!navigateResponse) {
       await evaluateJson(client, `location.href = ${JSON.stringify(resolvedUrl)}`);
     }
 
@@ -3390,10 +3581,14 @@ async function main() {
 
     return {
       didLoad,
+      ...navigationObservation.snapshot(),
       resolvedUrl,
       settleResult,
       url: currentUrl,
     };
+    } finally {
+      currentWithinDocumentEvents = null;
+    }
   }
 
   async function reloadRoot() {
@@ -4046,7 +4241,7 @@ async function main() {
 
   try {
     setCaptureContext(args.label ?? "seed-00", -1, args.url);
-    const initialNavigation = await navigateRoot(args.url);
+    const initialNavigation = await navigateAfterTenantCheck({ variables: args.variables, getRootUrl, navigateRoot, url: args.url });
     actionResults.push({
       actionIndex: -1,
       allowCanonicalRedirect: true,
@@ -4310,6 +4505,8 @@ async function main() {
     const actionBudget = validateActionBudgetResult(actionResults, args.actionBudget);
     const summary = {
       schemaVersion: captureArtifactSchemaVersion,
+      responseBodyLimits: args.responseBodyLimits,
+      responseBodyNetwork,
       actionValidation,
       actions: actionResults.length,
       actionBudget,
@@ -4364,7 +4561,7 @@ async function main() {
   }
 }
 
-main().catch(async (error) => {
+if (process.argv[1] === fileURLToPath(import.meta.url)) main().catch(async (error) => {
   try {
     const argv = process.argv.slice(2);
     const outIndex = argv.findIndex((arg) => arg === "--out");

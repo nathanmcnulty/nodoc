@@ -1,0 +1,121 @@
+{
+  "portal": "Exchange",
+  "url": "https://admin.exchange.microsoft.com/#/",
+  "pageTarget": {
+    "matchHosts": [
+      "admin.exchange.microsoft.com"
+    ],
+    "matchPathPrefixes": [
+      "/"
+    ],
+    "bootstrap": {
+      "matchHosts": [
+        "admin.exchange.microsoft.com"
+      ],
+      "matchPathnames": [
+        "/"
+      ]
+    }
+  },
+  "inspectionPolicy": {
+    "mode": "observe-only",
+    "prohibitedControlPatterns": [
+      "Create",
+      "Delete",
+      "New",
+      "Save"
+    ]
+  },
+  "noveltyFrontier": null,
+  "matchHosts": [
+    "admin.exchange.microsoft.com",
+    "exchange.admin.cloud.microsoft"
+  ],
+  "matchPathPrefixes": [
+    "/beta"
+  ],
+  "captureScripts": false,
+  "maxActions": 6,
+  "postActionSettleMs": 10000,
+  "settleMs": 12000,
+  "actions": [
+    {
+      "type": "navigate",
+      "value": "https://admin.exchange.microsoft.com/#/",
+      "required": true,
+      "highValue": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "3000",
+      "required": true
+    },
+    {
+      "type": "reload",
+      "value": "exchange-legacy-host-bootstrap",
+      "required": true
+    },
+    {
+      "type": "wait-ms",
+      "value": "6000",
+      "required": true
+    },
+    {
+      "type": "capture",
+      "value": "exchange-shell-response-example",
+      "required": true
+    }
+  ],
+  "noveltyStatus": {
+    "status": "satisfied",
+    "reason": "The approved passive Exchange landing reload completed with healthy action accounting and promoted a synthetic type-preserving redacted example for GET /beta/Shell.",
+    "nextRequirement": "Identify a different exact Exchange state, route, query key, status, media type, or response shape absent from the checked-in baseline before another live run.",
+    "approvalArtifact": "tools/frontier-approvals/exchange-shell-response-example-frontier.json",
+    "approvalDigest": "41f3d177bec6b31a3118cca37d2b61317edff6652305b3a39c7bdf68b795a76f",
+    "baseline": "checked-in-spec-and-coverage-ledgers",
+    "baselineSignals": {
+      "queryMetadata": [],
+      "requestShapes": [],
+      "responseMetadata": [
+        "admin.exchange.microsoft.com GET /beta/Shell mime:application/json",
+        "admin.exchange.microsoft.com GET /beta/Shell status:200"
+      ],
+      "responseShapes": [
+        "admin.exchange.microsoft.com GET /beta/Shell cac37a75e926d0f582ad3d5ed2a8f9f3d90db68275e6c27868744edcbb8b6f8c"
+      ],
+      "routes": [
+        "admin.exchange.microsoft.com GET /beta/Shell"
+      ]
+    },
+    "reopenCondition": "The authenticated Exchange admin landing emitted GET /beta/Shell with response-shape fingerprint cac37a75e926d0f582ad3d5ed2a8f9f3d90db68275e6c27868744edcbb8b6f8c after the exact passive navigate, wait, same-origin reload, wait, and capture sequence.",
+    "targets": [
+      {
+        "id": "exchange-shell-bootstrap-response-example",
+        "state": "Exchange admin landing after a passive same-origin reload",
+        "evidenceLevel": "confirmed",
+        "expectedHostFamilies": [
+          "admin.exchange.microsoft.com"
+        ],
+        "expectedRoutes": [
+          "/beta/Shell"
+        ],
+        "expectedInformationClasses": [
+          "response-shape"
+        ],
+        "expectedDocumentationObjectives": [
+          "response-example"
+        ],
+        "actionIndexes": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "safeAction": "Navigate to the exact Exchange admin landing, wait, reload the same page, wait, and passively capture the normal shell bootstrap response.",
+        "acceptanceKey": "exchange-shell-bootstrap-response-example",
+        "rationale": "The checked-in operation has a typed response but no safe example. A fresh numbered passive reload can capture the known GET without the prior authored probe or any dynamic control."
+      }
+    ]
+  }
+}

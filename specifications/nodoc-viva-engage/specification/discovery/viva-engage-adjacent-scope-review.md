@@ -21,7 +21,7 @@ adjacent confirmed reads and six adjacent safety items; the ownership rules belo
 
 Portal: Viva Engage  
 Spec: viva-engage  
-Artifacts directory: `C:\Users\NATHAN~1\AppData\Local\Temp\nodoc-viva-engage-bundle-retry-a288c459-0894-487d-97b3-b228229483b8`
+Artifacts directory: Private lifecycle artifacts are retained externally; machine-local path omitted.
 
 ## Run completion
 

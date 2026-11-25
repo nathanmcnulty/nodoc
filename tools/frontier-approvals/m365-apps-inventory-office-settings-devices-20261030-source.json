@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "kind": "known-operation-refresh-approval-source",
+  "status": "proposal-pending-independent-review-and-canonical-registration",
+  "specId": "m365-apps-inventory",
+  "createdAt": "2026-10-31T05:41:36.483Z",
+  "plannedAssignmentId": "m365-apps-inventory-office-settings-devices-20261030-01",
+  "recipeDestination": "tools/capture-recipes/m365-apps-inventory-office-settings-devices-20261030.json",
+  "newCycleReason": "The approved prerequisite inventory identified this exact static, previously observed GET route with no reusable complete action body. This is a narrowly scoped missing-body objective, not an unchanged retry.",
+  "primaryCanonicalOperation": {
+    "specId": "m365-apps-inventory",
+    "method": "GET",
+    "host": "query.inventory.insights.office.net",
+    "basePath": "/",
+    "canonicalPath": "/inventory/api/Devices",
+    "wirePath": "/inventory/api/Devices",
+    "observedCaller": "Office settings",
+    "opaqueEvidenceId": "office-settings-devices:action-2",
+    "actionIndex": 2
+  },
+  "observedUiUrl": "https://config.office.com/officeSettings",
+  "sourceCallerPortal": "office-settings",
+  "canonicalBackendOwner": "m365-apps-inventory",
+  "callerRelation": "Inventory Devices is a backend GET passively emitted by the observed common Office settings view; this does not establish native Inventory-tab causality.",
+  "privateEvidenceBindings": {
+    "assessmentArtifactId": "ten-candidate-prerequisites-20261030",
+    "assessmentSha256": "08dafb4c8cc0045568eb8fb999ab66bc78b365594915c96c7794ca1e3066168d",
+    "opaqueEvidenceId": "office-settings-devices:action-2",
+    "preferredLifecycle": "m365-apps-config-01",
+    "actionIndex": 2,
+    "callerPageHost": "config.office.com",
+    "callerPagePath": "/officeSettings",
+    "canonicalSourceRepoPath": "specifications/nodoc-m365-apps-inventory/specification/openapi.yml",
+    "canonicalSourceSha256": "837b568be3c671d4612fb780afeebb881707ac79feeb8d229d5eaee179a94a68"
+  },
+  "bodyPolicy": {
+    "maxResponseBytes": 524288,
+    "ceilingIncreased": false,
+    "exactPrimaryCount": 1,
+    "separatelyAccountedExtras": 0,
+    "requiredPerRouteDisposition": [
+      "expected",
+      "observed-or-no-signal",
+      "body-complete-or-incomplete",
+      "semantic-status-qualified"
+    ]
+  },
+  "budget": {
+    "recipeActions": 5,
+    "mandatoryNavigation": 1,
+    "total": 6
+  },
+  "authenticationPreflightRequired": true,
+  "exactTargetPinRequired": true,
+  "nativeCachedSelectedTenantPreserved": true,
+  "specificTenantIdentity": "unproved; no tenant value is bound by this inert contract",
+  "noSyntheticTenantQuery": true,
+  "noTenantSwitch": true,
+  "noApiProbes": true,
+  "noFeatureActivation": true,
+  "noForeignOwnerReuseOrCleanup": true,
+  "runtimePrerequisites": "Before future execution require a fresh authenticated native session and strict exact-target preflight. Preserve the cached selected account and directory without switching. Specific tenant identity remains unproved because no tenant value is bound by this static contract; historical evidence is not current authentication proof.",
+  "rawRefreshDigest": "b315891092df7ad560db3083c423ef287bf2935bd7f001bf0bbb5da86d414ef9",
+  "resolvedRefreshDigest": "b315891092df7ad560db3083c423ef287bf2935bd7f001bf0bbb5da86d414ef9",
+  "approvalExpiresAt": "2026-10-31T11:41:36.483Z",
+  "liveAuthorized": false
+}

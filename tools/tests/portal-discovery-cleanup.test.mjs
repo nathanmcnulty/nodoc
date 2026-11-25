@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
 import test from "node:test";
 import { join } from "node:path";
 
@@ -26,7 +27,7 @@ function completedRun(artifacts) {
 }
 
 async function fixture(t, { status = "completed" } = {}) {
-  const root = await mkdtemp(join(process.env.TEMP ?? process.env.TMP ?? ".", "nodoc-close-"));
+  const root = await mkdtemp(join(tmpdir(), "nodoc-close-"));
   const ownerRoot = join(root, "nodoc-cdp");
   const artifacts = join(ownerRoot, "artifacts", "m365-admin-run");
   const profilePath = join(ownerRoot, "profiles", "m365-admin");

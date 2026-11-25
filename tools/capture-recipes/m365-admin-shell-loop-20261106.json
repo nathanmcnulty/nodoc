@@ -1,0 +1,76 @@
+{
+  "portal": "M365 Admin",
+  "url": "https://admin.cloud.microsoft/#/groups",
+  "pageTarget": {
+    "matchHosts": [
+      "admin.cloud.microsoft"
+    ],
+    "matchPathPrefixes": [
+      "/"
+    ]
+  },
+  "matchHosts": [
+    "admin.cloud.microsoft"
+  ],
+  "matchPathPrefixes": [
+    "/admin",
+    "/fd"
+  ],
+  "inspectionPolicy": {
+    "mode": "observe-only",
+    "prohibitedControlPatterns": [
+      "Add",
+      "Create",
+      "Delete",
+      "Export",
+      "Remove",
+      "Save",
+      "Submit",
+      "Update",
+      "Purchase",
+      "Activate",
+      "Start trial"
+    ]
+  },
+  "captureScripts": false,
+  "postActionSettleMs": 6000,
+  "settleMs": 8000,
+  "maxActions": 4,
+  "actions": [
+    "navigate=https://admin.cloud.microsoft/#/adminunits",
+    "wait-ms=8000",
+    "capture=m365-groups-current-shape"
+  ],
+  "knownOperationRefresh": {
+    "status": "active",
+    "method": "GET",
+    "host": "admin.cloud.microsoft",
+    "routes": [
+      "/admin/api/navigation/darkmode"
+    ],
+    "state": "M365 shell preference during the proven Groups-to-Administrative-units passive transition, current-session and response-shape refresh; no filters, forms, API replay or writes.",
+    "actionIndexes": [
+      0,
+      1,
+      2
+    ],
+    "approvalExpiresAt": "2026-11-07T06:00:00.000Z",
+    "variableBindingsDigest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "documentationObjectives": [
+      "freshness",
+      "health",
+      "schema-evidence",
+      "error-example"
+    ],
+    "evidenceIds": [
+      "request-133e72682b371feb6b32",
+      "m365-groups-current-loop-user-goal-20261106"
+    ],
+    "approvalArtifact": "tools/frontier-approvals/m365-admin-shell-loop-20261106.json",
+    "approvalDigest": "80e5db9054dec88149637d2f4fa3818be9c07a7642eec0f74fa506db67588963"
+  },
+  "responseBodyLimits": {
+    "perBodyBytes": 4194304,
+    "totalBytes": 67108864
+  }
+}
