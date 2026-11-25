@@ -123,11 +123,9 @@ was updated on November 25, 2026.
   for slower first navigation from the home page to large specifications; the
   historical measurements remain in the PR rather than claiming universal
   latency improvement.
-- **#225, evidence and behavioral contracts**
-  (`feat/evidence-behavior-contracts-20261030`, `f145adb`). None of its new
-  modules are on main. It conflicts in seven files, mostly
-  `tools/cdp-deep-capture.mjs`, which #226 and #230 reworked. The owner approved
-  splitting it on November 25. Recovery is proceeding in dependency order:
+- **[#225, evidence and behavioral contracts](https://github.com/nathanmcnulty/nodoc/pull/225#issuecomment-7175123670)**
+  (`f145adb`) is superseded for review by native stack 238. The original draft
+  remains open as a record, not a second merge candidate. Review bottom to top:
   1. [#235](https://github.com/nathanmcnulty/nodoc/pull/235) recovers the
      operation contract and behavior modules, automation evidence ledger,
      inventory integration and offline tests. It targets `main`.
@@ -135,17 +133,23 @@ was updated on November 25, 2026.
      redaction and binds Postman examples to the matching operation and
      origin. Regenerating Exchange and SharePoint from current public specs
      produced no tracked changes. Live recorder acceptance (M6) remains open.
-  3. CDP capture, crawl-candidate and promotion-planner changes, rebased onto
-     the #230 capture pipeline with fresh review, plus remaining review/evidence
-     integration and end-to-end tests.
-  Preserve the original PR until the replacement layers account for its entire
-  source diff; splitting does not establish live acceptance.
-  Its benchmark change, labeling each result's evidence source, is already covered
-  by measured mode using the same `evidenceSource` vocabulary.
+  3. [#237](https://github.com/nathanmcnulty/nodoc/pull/237) compares supplied
+     observations against documented contracts, binds reviews to their evidence
+     and produces recommendations without writing specs. It does not change
+     live CDP body retrieval. Its implementation plan records the deferred work.
+
+  All 32 original paths are accounted for: 29 appear in the replacement diff,
+  two generated collections were unchanged, and one test file for the deferred
+  capture helpers was deliberately not imported. Before landing both this
+  roadmap and the stack, reconcile `package.json` and
+  `tools/portal-discovery-benchmark.mjs`: retain the evidence test command,
+  public coverage generation and validation, measured-mode scoring, and the
+  distinction between caller-supplied results and fixture self-checks.
 
 ## Next increments
 
-1. Finish the #225 split following the dependency order above.
+1. Review the three replacement PRs bottom to top. Treat manual recorder
+   acceptance as a separate exercise, not an outcome of the offline review.
 2. Cross-portal operation search with stable per-operation links on the site.
    Group the per-specification navbar links first: at 1280 pixels the brand is
    already truncated, which is why Coverage is linked from the home page rather
