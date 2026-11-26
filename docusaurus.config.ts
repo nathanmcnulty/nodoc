@@ -127,6 +127,7 @@ const config: Config = {
         },
       };
     },
+    "./plugins/nodoc-site-artifacts",
     [
       "./plugins/docusaurus-scalar", {
         withDefaultFonts: false,
@@ -135,7 +136,8 @@ const config: Config = {
         hideTestRequestButton: true,
         layout: "modern",
         nav: {
-          categoryFromPath: false
+          categoryFromPath: false,
+          group: { label: "APIs" },
         },
         operationTitleSource: "summary",
         orderSchemaPropertiesBy: "preserve",
@@ -188,6 +190,16 @@ const config: Config = {
     navbar: {
       title: "nodoc",
       items: [
+        {
+          to: "/operations",
+          label: "Operations",
+          position: "left",
+        },
+        {
+          to: "/coverage",
+          label: "Coverage",
+          position: "left",
+        },
         {
           href: "https://github.com/nathanmcnulty/nodoc",
           className: "icon--github navbar--icon-link",

@@ -51,7 +51,7 @@ export function hasSchemaGap(schema, depth = 0) {
   return false;
 }
 
-function authoredGaps(operation) {
+export function authoredGaps(operation) {
   const schema = [], examples = [];
   const inspect = (content, prefix) => {
     for (const [mediaType, media] of Object.entries(content ?? {})) {

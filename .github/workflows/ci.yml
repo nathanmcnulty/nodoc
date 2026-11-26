@@ -172,5 +172,8 @@ jobs:
       - name: Build site
         run: npm run build
 
+      - name: Validate published site artifacts
+        run: npm run validate:site-artifacts
+
       - name: Typecheck
         run: npm run typecheck

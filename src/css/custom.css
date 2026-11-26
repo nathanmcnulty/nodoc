@@ -159,3 +159,39 @@ html[data-theme="dark"] .icon--github:before {
 .sidebar-heading-type {
   color: var(--method-color, var(--scalar-color-1)) !important;
 }
+
+/* Grouped API reference menu. The class lands on the toggle link, so the menu is its sibling. */
+.nodoc-api-menu + .dropdown__menu {
+  max-height: min(70vh, 36rem);
+  overflow-y: auto;
+  min-width: 15rem;
+}
+
+.dropdown__menu .nodoc-api-menu__heading {
+  padding: 0.35rem 0.75rem 0.15rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ifm-color-emphasis-600);
+  pointer-events: none;
+}
+
+.dropdown__menu .nodoc-api-menu__heading:not(:first-child) {
+  margin-top: 0.35rem;
+  border-top: 1px solid var(--ifm-color-emphasis-200);
+  padding-top: 0.5rem;
+}
+
+.dropdown__link.nodoc-api-menu__nested {
+  padding-left: 1.25rem;
+}
+
+.menu__list-item.nodoc-api-menu__heading {
+  padding: 0.5rem var(--ifm-menu-link-padding-horizontal) 0.1rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ifm-color-emphasis-600);
+}

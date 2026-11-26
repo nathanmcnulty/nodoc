@@ -57,13 +57,14 @@ test("stalled child produces a typed parent supervision timeout", async () => {
   const artifactDir = await mkdtemp(path.join(os.tmpdir(), "nodoc-process-timeout-"));
   const childPath = path.join(artifactDir, "child.mjs");
   try {
-    await writeFile(childPath, "await new Promise(() => {});\n", "utf8");
+    // The interval keeps the child alive; a bare pending promise lets Node exit with code 13 and race the timer.
+    await writeFile(childPath, "setInterval(() => {}, 60_000);\nawait new Promise(() => {});\n", "utf8");
     await assert.rejects(
       runNode(childPath, [], 25, { cwd: repoRoot, stdio: "ignore" }),
       (error) => error instanceof ProcessSupervisionTimeoutError
         && error.timeoutMs === 25,
     );
-    assert.equal(await readFile(childPath, "utf8"), "await new Promise(() => {});\n");
+    assert.equal(await readFile(childPath, "utf8"), "setInterval(() => {}, 60_000);\nawait new Promise(() => {});\n");
   } finally {
     await rm(artifactDir, { force: true, recursive: true });
   }
