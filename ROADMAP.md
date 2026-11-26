@@ -42,11 +42,11 @@ and is published on the site's [coverage page](https://nodoc.nathanmcnulty.com/c
 | # | Stage | Acceptance criterion | Status |
 | --- | --- | --- | --- |
 | 1 | **Recover the drafts.** Reconcile each open draft with current main, its checks and its review threads. Recover source and private evidence independently. | A keep, split or supersede recommendation tied to the exact head. No historical receipt is reconstructed. | Done for #223 and #225; see [Draft recovery](#draft-recovery). |
-| 2 | **Define the portfolio.** Extend the portfolio, coverage ledger and frontier to include unpublished portals, native workflows, UI states and distinct API owners. Record role, license and feature limits as observed or unknown. | Every in-scope portal has a spec/recipe mapping or an explicit gap. Unassessed or unavailable never counts as complete. | Not started. |
-| 3 | **Measure lower-cost review.** Reuse exact inputs and cached analyses; give the worker a bounded evidence packet only where judgment is needed. Separate fixture self-checks from real worker answers. | Identical inputs produce identical plans. A missing answer cannot pass a measured benchmark. Report accepted operations and enrichments, review time, rejections and actual usage; unavailable cost stays unknown. | First Luna pilot completed November 25: one authored M365 Admin contract reviewed offline. No new observations; the run did not establish cost per accepted change. |
-| 4 | **Make contracts usable.** Start from a real client workflow. Document observed parameters, body variants, auth context, status and media types, errors, pagination, concurrency and asynchronous steps. | A developer can implement a representative read-only task from the published contract and synthetic examples. Unobserved variants stay explicit. | Contract and behavior foundations merged in [#235](https://github.com/nathanmcnulty/nodoc/pull/235); representative client acceptance is still pending. |
-| 5 | **Make the site useful to people and tools.** Show dated coverage next to authored quality, then add cross-portal operation search, stable operation links, machine-readable context and versioned bundled OpenAPI downloads. | Readers can find an operation by task and see what is documented versus observed. Building the site never renews observation dates. | Coverage page delivered. Search, links and downloads are next. |
-| 6 | **Qualify recurrence.** Pilot on separately authorized representative surfaces. Exercise a lost runner, unavailable auth, rate limiting, an exhausted budget and interrupted output. Test restoration from access-controlled backups. | Two cycles finish with a reviewed change, no-change result or blocker per item. Recovery does not duplicate work. | Not started; needs signed-in capture sessions. |
+| 2 | **Define the portfolio.** Extend the portfolio, coverage ledger and frontier to include unpublished portals, native workflows, UI states and distinct API owners. Record role, license and feature limits as observed or unknown. | Every in-scope portal has a spec/recipe mapping or an explicit gap. Unassessed or unavailable never counts as complete. | Mapping delivered in [#239](https://github.com/nathanmcnulty/nodoc/pull/239): 16 partial surfaces cover all 22 specifications, and 10 surfaces without a specification are explicit `unassessed` gaps. Workflows are unassessed leads and every role, license and feature limit is `unknown`; both enter the report-only frontier. Assessing them needs signed-in sessions. |
+| 3 | **Measure lower-cost review.** Reuse exact inputs and cached analyses; give the worker a bounded evidence packet only where judgment is needed. Separate fixture self-checks from real worker answers. | Identical inputs produce identical plans. A missing answer cannot pass a measured benchmark. Report accepted operations and enrichments, review time, rejections and actual usage; unavailable cost stays unknown. | First Luna pilot completed November 25: one authored M365 Admin contract reviewed offline. [#241](https://github.com/nathanmcnulty/nodoc/pull/241) turns every failed or missing benchmark scenario into a blocked frontier item. Cost per accepted change needs a live capture cycle. |
+| 4 | **Make contracts usable.** Start from a real client workflow. Document observed parameters, body variants, auth context, status and media types, errors, pagination, concurrency and asynchronous steps. | A developer can implement a representative read-only task from the published contract and synthetic examples. Unobserved variants stay explicit. | Offline acceptance delivered in [#242](https://github.com/nathanmcnulty/nodoc/pull/242): a GET-only Defender incident client built from the published contract and synthetic examples, with unobserved behavior reported as `unknown`. Live acceptance against a signed-in tenant is pending. |
+| 5 | **Make the site useful to people and tools.** Show dated coverage next to authored quality, then add cross-portal operation search, stable operation links, machine-readable context and versioned bundled OpenAPI downloads. | Readers can find an operation by task and see what is documented versus observed. Building the site never renews observation dates. | Delivered: the coverage page, then [#243](https://github.com/nathanmcnulty/nodoc/pull/243) added the operation index, deep links, bundled OpenAPI downloads, `operations.json` and `llms.txt`. Each download is listed with its spec version and SHA-256; earlier versions are in git history rather than archived on the site. |
+| 6 | **Qualify recurrence.** Pilot on separately authorized representative surfaces. Exercise a lost runner, unavailable auth, rate limiting, an exhausted budget and interrupted output. Test restoration from access-controlled backups. | Two cycles finish with a reviewed change, no-change result or blocker per item. Recovery does not duplicate work. | Not started; needs signed-in capture sessions. An undeployed Azure capture host template is ready ([#240](https://github.com/nathanmcnulty/nodoc/pull/240)). |
 
 ## Delivered
 
@@ -64,6 +64,26 @@ and is published on the site's [coverage page](https://nodoc.nathanmcnulty.com/c
 - **Measured benchmark mode.** `npm run benchmark:portal-discovery -- --measured --inputs <file>`
   scores only supplied worker outputs. See the
   [runbook](AGENT_DISCOVERY_RUNBOOK.md).
+- **Portfolio map.** `npm run show:portal-surfaces` maps every in-scope surface
+  to its specifications, API servers, recipes and referenced approvals, or
+  records an explicit gap. Referenced approvals are not a claim that they are
+  current.
+- **Benchmark regressions in the frontier.** Every non-passing scenario,
+  including a missing measured answer, becomes a blocked frontier item. The
+  controller still blocks on any failure.
+- **Offline client acceptance.** [`tools/clients/defender-incident-readonly/`](tools/clients/defender-incident-readonly/README.md)
+  fetches an incident and its alerts from a loopback mock using only the
+  published contract. Synthetic replay is not observation evidence.
+- **Developer surface.** [`/operations`](https://nodoc.nathanmcnulty.com/operations)
+  searches all 2,027 operations and links to their Scalar sections. The
+  [OpenAPI catalog](https://nodoc.nathanmcnulty.com/openapi/index.json),
+  `operations.json` and `llms.txt` give tools bundled specs with digests. The
+  navbar groups the APIs by portal.
+- **Azure capture host template.** [`infra/azure-capture`](infra/azure-capture/README.md)
+  defines a manual Container Apps Job, private blob storage, Key Vault and a
+  scoped identity. It is not deployed. The capture image, private uploader and
+  publisher are not implemented, and storage is authenticated but not network
+  isolated.
 
 ## Monthly cycle
 
@@ -148,16 +168,20 @@ was updated on November 25, 2026.
 
 ## Next increments
 
-1. Qualify a cloud-hosted private capture exercise. Treat manual recorder
-   acceptance as separate from the implemented offline review.
-2. Cross-portal operation search with stable per-operation links on the site.
-   Group the per-specification navbar links first: at 1280 pixels the brand is
-   already truncated, which is why Coverage is linked from the home page rather
-   than the navbar.
-3. Versioned bundled OpenAPI downloads and a machine-readable index for tools.
-4. Feed failing benchmark scenarios into the discovery frontier. The frontier
-   reads `benchmark.regressions`, which the scorecard does not produce today;
-   the controller still blocks on any failure.
+Each of these needs a signed-in session or an owner decision; see below.
+
+1. Qualify a cloud-hosted private capture exercise. Deploy `infra/azure-capture`
+   only after approval, then build the approved capture image, private
+   uploader with checkpointing, and publisher. Manual recorder acceptance (M6)
+   stays separate from the implemented offline review.
+2. Run the Defender incident client against a signed-in tenant and record the
+   observed auth, status and media types, errors and pagination as typed
+   evidence.
+3. Assess the 10 unassessed surfaces and the listed workflows from live
+   sessions. Mark a role, license or feature limit observed only with an
+   evidence reference.
+4. Measure Luna's cost per accepted change on a live capture cycle, scored
+   with the measured benchmark.
 5. Extend the offline pilot only with evidence that can answer an open
    contract question. For M365 Admin, the first pilot found that the public
    `DarkModePreference` schema describes `IsDarkModeOn` as a boolean. The
@@ -174,3 +198,12 @@ was updated on November 25, 2026.
 - The monthly runner now uses GitHub Actions rather than the retiring VM.
   Scheduled activation and optional AI credentials/private storage remain
   owner-controlled. No automatic merging is enabled.
+- Still needed from the owner:
+  - a tenant choice and a sign-in/MFA session for each live capture;
+  - renewed recipe approvals where they have expired;
+  - an Azure subscription, resource group, region, budget and network
+    decision before anything in `infra/azure-capture` is deployed;
+  - the `NODOC_COPILOT_TOKEN` secret and private accounting storage for
+    optional Luna runs, and setting `NODOC_MONTHLY_ENABLED` to start the schedule;
+  - confirming the receiver-side SHA-256 of the November 25 pilot evidence
+    archive sent to paseo.
