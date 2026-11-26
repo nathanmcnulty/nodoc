@@ -80,6 +80,13 @@ To make things easier, we've published the OpenAPI definitions in a couple of di
 
 The latest site published from this repository is accessible at [https://nodoc.nathanmcnulty.com](https://nodoc.nathanmcnulty.com). It is built using [Docusaurus](https://docusaurus.io/) and [Scalar](https://github.com/scalar/scalar). The files for the website are stored within this repository.
 
+- [Operation index](https://nodoc.nathanmcnulty.com/operations): search every documented operation by path, summary, operation ID, tag or portal, filter by method and authored gaps, and jump to its section in the API reference.
+- [OpenAPI catalog](https://nodoc.nathanmcnulty.com/openapi/index.json): one bundled OpenAPI JSON download per spec (`/openapi/<specId>.json`, no external `$ref`s) with page URL, operation count, byte size and SHA-256 digest.
+- [operations.json](https://nodoc.nathanmcnulty.com/operations.json): every operation with its authored gap flags and an absolute deep link.
+- [llms.txt](https://nodoc.nathanmcnulty.com/llms.txt): a short guide to these artifacts and every spec page for language models and agents.
+
+These downloads are served with `Access-Control-Allow-Origin: *`, so browser extensions and web tools can fetch them directly.
+
 ### Postman
 
 Postman collections and API definitions can be found for all nodoc APIs within [this workspace](https://www.postman.com/dolphinlabs/workspace/nodoc). These are auto-generated from the specifications using [openapi-to-postman](https://github.com/postmanlabs/openapi-to-postman).

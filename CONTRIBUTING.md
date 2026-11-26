@@ -96,6 +96,9 @@ The website now surfaces generated spec-quality metadata from the checked-in Ope
 - It also refreshes `src/generated/operationLiveCaptureLedger.json`, which indexes repo-only `x-nodoc-live-capture` operation metadata for agents and tooling.
 - It also refreshes `src/generated/operationContextLedger.json`, which indexes validated `x-nodoc-headerProfiles`, `x-nodoc-authProfiles`, and `x-nodoc-operation-context` metadata for downstream tooling.
 - It also writes `src/generated/publicCoverage.ts` for the `/coverage` page from the reviewed snapshots in `src/data/coverageSnapshots/`. Add snapshots with `npm run project:coverage`, never by hand-editing the generated file; see [Publishing public coverage](./REFRESH_WORKFLOW.md#publishing-public-coverage).
+- Finally it writes `src/generated/operationIndex.json` (or run `npm run generate:operation-index` alone), the committed source for the `/operations` page. Each operation carries authored schema/example gap flags and a Scalar section anchor resolved with Scalar's own navigation code, so deep links match the renderer. Gap flags describe the checked-in documents only, not observations.
+- `npm run build` also writes `build/openapi/<specId>.json`, `build/openapi/index.json`, `build/operations.json` and `build/llms.txt` through `plugins/nodoc-site-artifacts`. They exist only in production builds, not under `npm run start`. Run `npm run validate:site-artifacts` after a build to check digests, counts, links and that downloads are self-contained; CI runs it after every site build.
+- Spec page routes come from `x-nodoc-route` or the kebab-cased title (`plugins/docusaurus-scalar/src/routing.js`). Don't change an existing route; published links and deep links depend on it.
 - Treat placeholder markers such as `pending` as real debt to remove with evidence, not as acceptable final-state documentation.
 
 ## Styling

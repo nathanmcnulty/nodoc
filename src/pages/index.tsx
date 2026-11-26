@@ -98,7 +98,8 @@ export default function Home(): ReactElement {
                 Every published spec has a matching checked-in Postman collection
                 and is grouped below by portal family.{" "}
                 <Link to="/coverage">See which operations were recently observed</Link>{" "}
-                and where schemas or examples are still missing.
+                and where schemas or examples are still missing, or{" "}
+                <Link to="/operations">search every documented operation</Link>.
               </p>
             </div>
             {apiCatalogByFamily.map(([family, familyApis]) => (

@@ -98,7 +98,8 @@ export default function Coverage(): ReactElement {
           <p className={styles.pageIntro}>
             A specification can describe an operation that nobody has seen recently, and an
             observed operation can still lack a usable schema. This page reports those
-            measures separately so you can judge how much to trust each contract.
+            measures separately so you can judge how much to trust each contract. To find a
+            specific operation, use the <Link to="/operations">operation index</Link>.
           </p>
         </div>
       </header>

@@ -3,8 +3,11 @@
  * Uses fast-glob (CJS) and dynamic imports for the ESM Scalar packages.
  */
 const fg = require("fast-glob");
-const _ = require("lodash");
 const path = require("path");
+const {
+  splitPathSegments,
+  getSpecificationRouteSegments,
+} = require("./routing");
 const logger = require("@docusaurus/logger").default;
 const fsp = require("fs/promises");
 const { docuHash } = require("@docusaurus/utils");
@@ -51,23 +54,12 @@ async function getScalarParserModules() {
   return scalarParserModulesPromise;
 }
 
-function splitPathSegments(value) {
-  return (value || "").split(/[\\/]/).filter(Boolean);
-}
-
 function getRouteSegments(config, specification) {
   if (!config?.route?.routeFromSpec) {
     return [];
   }
 
-  const preferredRoute = specification?.info?.["x-nodoc-route"];
-  if (preferredRoute) {
-    return splitPathSegments(preferredRoute);
-  }
-
-  return splitPathSegments(specification?.info?.title || "").map((segment) =>
-    _.kebabCase(segment)
-  );
+  return getSpecificationRouteSegments(specification);
 }
 
 function cloneObject(value) {
@@ -449,6 +441,72 @@ function collapseSingleItemDropdowns(context) {
   });
 }
 
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+const GROUPED_NAV_CLASS = "nodoc-api-menu";
+
+// One dropdown keeps the navbar usable as specifications are added. Categories
+// with several specifications get a heading; single-spec categories stay links.
+function buildGroupedNavItem(contentItems, label) {
+  const groups = new Map();
+  for (const contentItem of contentItems) {
+    if (!contentItem.nav?.label || !contentItem.route?.route) {
+      continue;
+    }
+    const key = contentItem.nav.category || contentItem.nav.label;
+    if (!groups.has(key)) {
+      groups.set(key, []);
+    }
+    groups.get(key).push({
+      label: contentItem.nav.label,
+      to: contentItem.route.route,
+    });
+  }
+
+  const items = [];
+  for (const [key, entries] of [...groups].sort(([left], [right]) =>
+    left.localeCompare(right)
+  )) {
+    entries.sort((left, right) => left.label.localeCompare(right.label));
+    if (entries.length > 1) {
+      items.push({
+        type: "html",
+        value: `<span>${escapeHtml(key)}</span>`,
+        className: `${GROUPED_NAV_CLASS}__heading`,
+      });
+    }
+    for (const entry of entries) {
+      items.push({
+        ...entry,
+        className: entries.length > 1 ? `${GROUPED_NAV_CLASS}__nested` : undefined,
+      });
+    }
+  }
+
+  return {
+    type: "dropdown",
+    label,
+    position: "left",
+    className: GROUPED_NAV_CLASS,
+    items,
+  };
+}
+
+function addGroupedNav(context, contentItems, label) {
+  const navBar = context.siteConfig.themeConfig.navbar;
+  navBar.items = [
+    buildGroupedNavItem(contentItems, label),
+    ...navBar.items.filter((navItem) => navItem.className !== GROUPED_NAV_CLASS),
+  ];
+}
+
 const ScalarDocusaurus = (context, userOptions) => {
   const options = mergeConfig(userOptions, DEFAULT_SCALAR_CONFIG);
   return {
@@ -511,12 +569,16 @@ const ScalarDocusaurus = (context, userOptions) => {
             exact: true,
             modules: { configuration },
           });
-          if (contentItem.nav?.label) {
+          if (contentItem.nav?.label && !options.nav?.group?.label) {
             addToNav(context, contentItem);
           }
         }
       }
-      collapseSingleItemDropdowns(context);
+      if (options.nav?.group?.label) {
+        addGroupedNav(context, content, options.nav.group.label);
+      } else {
+        collapseSingleItemDropdowns(context);
+      }
     },
   };
 };
