@@ -2653,6 +2653,9 @@ async function main() {
       ["Network.setCacheDisabled", { cacheDisabled: true }],
       ["Page.enable", {}],
       ["DOM.enable", {}],
+      // Edge sleeping tabs and occlusion can freeze a reused owner tab; frozen SPAs ignore route changes.
+      ["Page.setWebLifecycleState", { state: "active" }],
+      ["Emulation.setFocusEmulationEnabled", { enabled: true }],
     ]) {
       try {
         await client.send(method, params, sessionId);
@@ -4408,7 +4411,11 @@ async function main() {
       }
 
       if (action.type === "navigate") {
-        const navigationResult = await navigateRoot(action.value);
+        const requestedUrl = isAbsoluteUrl(action.value) ? String(action.value) : resolveMaybeRelativeUrl(action.value, await getRootUrl());
+        // Navigating to the already-loaded URL is a no-op in hash-routed SPAs, so reload to make the action observable.
+        const navigationResult = requestedUrl === await getRootUrl()
+          ? { ...(await reloadRoot()), reloadedCurrentUrl: true }
+          : await navigateRoot(action.value);
         actionResults.push({
           actionIndex: index,
           page: pageLabel,

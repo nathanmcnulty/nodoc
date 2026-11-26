@@ -194,7 +194,14 @@ the capture/transfer/publication software can be exercised offline.
    sessions. Mark a role, license or feature limit observed only with an
    evidence reference.
 4. Measure Luna's cost per accepted change on a live capture cycle, scored
-   with the measured benchmark.
+   with the measured benchmark. The first live authenticated M365 Admin
+   known-operation refresh qualified on November 26 under a renewed owner
+   approval: the target operation was observed with a complete 200 response,
+   health was `healthy-observed`, and the passive capture queued 86 candidates
+   (71 documented, 15 undocumented) privately. Promoting the undocumented
+   candidates and scoring that cycle remain open. The run also fixed two
+   runtime defects: frozen (sleeping) reused tabs and same-URL first actions
+   being attributed to the seed navigation.
 5. Extend the offline pilot only with evidence that can answer an open
    contract question. For M365 Admin, the first pilot found that the public
    `DarkModePreference` schema describes `IsDarkModeOn` as a boolean. The
@@ -213,7 +220,8 @@ the capture/transfer/publication software can be exercised offline.
   owner-controlled. No automatic merging is enabled.
 - Still needed from the owner:
   - a tenant choice and a sign-in/MFA session for each live capture;
-  - renewed recipe approvals where they have expired;
+  - renewed recipe approvals where they have expired (M365 Admin renewed
+    through December 3, 2026);
   - an Azure subscription, resource group, region, budget and network
     decision before anything in `infra/azure-capture` is deployed;
   - the `NODOC_COPILOT_TOKEN` secret and private accounting storage for

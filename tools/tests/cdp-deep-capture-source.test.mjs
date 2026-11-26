@@ -82,3 +82,18 @@ test("bundle capture timeout preserves network evidence and emits a scoped diagn
   assert.ok(timeoutCatch >= 0);
   assert.ok(apiWrite > timeoutCatch);
 });
+
+test("reused owner tabs are un-frozen before capture actions", async () => {
+  const source = (await readFile(new URL("../cdp-deep-capture.mjs", import.meta.url), "utf8")).replaceAll("\r\n", "\n");
+  const configure = source.slice(source.indexOf("async function configureSession("), source.indexOf("client.on(\"Fetch.requestPaused\""));
+  assert.match(configure, /\["Page\.setWebLifecycleState", \{ state: "active" \}\]/);
+  assert.match(configure, /\["Emulation\.setFocusEmulationEnabled", \{ enabled: true \}\]/);
+});
+
+test("navigate actions reload an already-loaded URL so the action stays observable", async () => {
+  const source = (await readFile(new URL("../cdp-deep-capture.mjs", import.meta.url), "utf8")).replaceAll("\r\n", "\n");
+  assert.match(
+    source,
+    /const navigationResult = requestedUrl === await getRootUrl\(\)\n\s+\? \{ \.\.\.\(await reloadRoot\(\)\), reloadedCurrentUrl: true \}\n\s+: await navigateRoot\(action\.value\);/,
+  );
+});
