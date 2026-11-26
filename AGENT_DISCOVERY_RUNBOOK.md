@@ -1052,6 +1052,15 @@ CPU reduction only and does not claim downstream token savings.
   workers until the current owner has released the endpoint. Offline analysis
   and promotion review may run concurrently over different immutable artifact
   directories.
+- A reused owner browser tab may be frozen by Edge sleeping tabs or window
+  occlusion: `visibilityState` stays `hidden`, hash routes do not render and
+  network goes silent. Foregrounding the window does not reliably wake it, so
+  the capture runtime sets `Page.setWebLifecycleState` to `active` and enables
+  focus emulation for every session. A run that ends `no-target-signal` with
+  all records on `seed-00` should be checked for this first.
+- The runtime always performs a seed navigation to `recipe.url`. When a
+  recipe's first navigate action targets the same URL, the runtime reloads it
+  so the target traffic is attributed to that action instead of the seed.
 - Treat a worker that returns no message separately from a failed pipeline.
   Inspect the assigned directory for `discovery-run.json`. If capture artifacts
   are complete, they are accepted immutable evidence: run `analyze` once
