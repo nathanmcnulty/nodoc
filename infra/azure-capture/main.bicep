@@ -18,8 +18,13 @@ param vaultName string
 @maxLength(30)
 param namePrefix string
 
-@description('Approved publicly pullable capture image, pinned by digest. No image is supplied by this template.')
+@description('Approved publicly pullable capture image, pinned by digest. Build source is in this directory; no image is automatically published.')
 param captureImage string
+
+@description('SHA-256 of the explicitly approved private plan staged in Blob storage.')
+@minLength(64)
+@maxLength(64)
+param capturePlanDigest string
 
 var containerName = 'capture-private'
 var blobDataContributorRole = subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'ba92f5b4-2d11-453d-a403-e96b0029c9fe')
@@ -172,6 +177,10 @@ resource job 'Microsoft.App/jobs@2025-01-01' = {
             {
               name: 'CAPTURE_BLOB_CONTAINER'
               value: container.name
+            }
+            {
+              name: 'CAPTURE_PLAN_DIGEST'
+              value: capturePlanDigest
             }
             {
               name: 'CAPTURE_KEY_VAULT_URI'

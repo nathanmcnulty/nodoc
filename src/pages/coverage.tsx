@@ -73,7 +73,7 @@ export default function Coverage(): ReactElement {
   const totals = latest.totals;
   const current = publicCoverage.currentSource;
   const cards = [
-    { value: count(totals.operations), label: `Operations modeled at the ${assessedDate} assessment` },
+    { value: count(totals.operations), label: `Operations in ${count(totals.specs)} specifications assessed ${assessedDate}` },
     {
       value: count(totals.currentObservations),
       label: `Observed in the ${latest.windowDays}-day window (${percent(totals.currentObservations, totals.operations)})`,
@@ -135,7 +135,7 @@ export default function Coverage(): ReactElement {
               <div>
                 <dt>Not observed</dt>
                 <dd>
-                  No qualifying capture at all. It does not mean the endpoint was removed, and
+                  No qualifying observation in the captures included in this assessment. It does not mean the endpoint was removed, and
                   neither does an HTTP 404. Operations last seen before the window are noted
                   separately in the Observed column.
                 </dd>
@@ -164,7 +164,8 @@ export default function Coverage(): ReactElement {
             <div className={styles.sectionHeader}>
               <Heading as="h2">By specification</Heading>
               <p>
-                Observation columns come from the {assessedDate} snapshot. Gap columns use current
+                Observation columns cover only specifications assessed in the {assessedDate} snapshot;
+                other specifications are not assessed, not zero. Gap columns use current
                 source. Operation counts can differ when a specification changed after the snapshot.
               </p>
             </div>

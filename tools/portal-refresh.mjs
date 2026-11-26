@@ -358,6 +358,11 @@ export async function runPortfolioRefresh({ captures = [], cacheDir, asOf, fresh
   if (!asOf) throw new Error("An explicit asOf date is required for repeatable refresh reports.");
   if (!Array.isArray(captures)) throw new Error("captures must be an array.");
   const inventory = await buildSpecRouteInventory();
+  for (const capture of captures) {
+    if (!capture || typeof capture.specId !== "string" || !inventory.some(spec => spec.specId === capture.specId)) {
+      throw new Error("Each refresh capture must bind a known specId.");
+    }
+  }
   const results = [], blockers = [];
   const seen = new Set();
   for (const capture of captures) {
