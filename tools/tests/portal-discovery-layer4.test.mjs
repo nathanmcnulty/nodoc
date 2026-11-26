@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { loadBenchmarkCorpus, runOfflineBenchmark } from "../portal-discovery-benchmark.mjs";
+import { benchmarkDigest, loadBenchmarkCorpus, runOfflineBenchmark, validateBenchmarkScorecard } from "../portal-discovery-benchmark.mjs";
 import { calculateUnresolvedFrontier, compileOfflineFrontier, scheduleFrontier, validateFrontier, validateOfflineFrontier } from "../portal-discovery-frontier.mjs";
 import { compileIntegratedController, transitionControllerState } from "../portal-discovery-controller.mjs";
 import { buildPortfolioManifest } from "../portal-discovery-control-plane.mjs";
@@ -19,6 +19,8 @@ test("offline benchmark corpus is sanitized and stable", async () => {
   assert.equal(first.mode, "fixture");
   assert.equal(first.measurements.synthetic, true);
   assert.equal(first.measurements.fixtureFallbackCount, corpus.scenarios.length);
+  assert.deepEqual(first.regressions, []);
+  validateBenchmarkScorecard(first);
 });
 
 test("measured benchmark scores only supplied worker outputs", async () => {
@@ -29,6 +31,7 @@ test("measured benchmark scores only supplied worker outputs", async () => {
   inputs[second.scenarioId][key] = "drifted";
 
   const measured = runOfflineBenchmark(corpus, { inputs, mode: "measured" });
+  assert.deepEqual(measured, runOfflineBenchmark(corpus, { inputs, mode: "measured" }));
   const byId = Object.fromEntries(measured.results.map((result) => [result.scenarioId, result]));
   assert.equal(measured.mode, "measured");
   assert.equal(measured.measurements.synthetic, false);
@@ -44,17 +47,40 @@ test("measured benchmark scores only supplied worker outputs", async () => {
     [measured.measurements.passCount, measured.measurements.driftCount, measured.measurements.missingInputCount, measured.measurements.failCount, measured.measurements.fixtureFallbackCount],
     [1, 1, rest.length, rest.length + 1, 0],
   );
+  assert.deepEqual(measured.regressions.map((entry) => entry.scenarioId), measured.regressions.map((entry) => entry.scenarioId).sort((a, b) => a.localeCompare(b)));
+  assert.equal(measured.regressions.length, rest.length + 1);
+  assert.deepEqual(measured.regressions.find((entry) => entry.scenarioId === second.scenarioId), {
+    scenarioId: second.scenarioId, scenarioDigest: byId[second.scenarioId].scenarioDigest,
+    mode: "measured", status: "fail", evidenceSource: "caller-supplied-result", failedChecks: [`assertion:${key}`],
+  });
+  assert.ok(measured.regressions.filter((entry) => entry.status === "missing-input").every((entry) => entry.failedChecks[0] === "missing-worker-output" && entry.mode === "measured"));
+  validateBenchmarkScorecard(measured);
+  const tampered = structuredClone(measured);
+  tampered.regressions.pop();
+  const core = Object.fromEntries(Object.entries(tampered).filter(([name]) => !["benchmarkId", "benchmarkDigest"].includes(name)));
+  tampered.benchmarkDigest = benchmarkDigest(core);
+  tampered.benchmarkId = `benchmark-${tampered.benchmarkDigest.slice(0, 24)}`;
+  assert.throws(() => validateBenchmarkScorecard(tampered), /regressions mismatch/u);
 
   const fixture = runOfflineBenchmark(corpus, { inputs });
   assert.equal(fixture.measurements.suppliedInputCount, 2);
   assert.equal(fixture.measurements.fixtureFallbackCount, rest.length);
   assert.equal(fixture.measurements.failCount, 1);
+  assert.equal(fixture.regressions[0].mode, "fixture");
+  assert.equal(fixture.regressions[0].evidenceSource, "caller-supplied-result");
+  const brokenFixture = structuredClone(corpus);
+  brokenFixture.scenarios[0].syntheticResult = {};
+  const fixtureSelfCheck = runOfflineBenchmark(brokenFixture);
+  assert.equal(fixtureSelfCheck.regressions[0].mode, "fixture");
+  assert.equal(fixtureSelfCheck.regressions[0].evidenceSource, "fixture-self-check");
+  validateBenchmarkScorecard(fixtureSelfCheck);
 
   assert.throws(() => runOfflineBenchmark(corpus, { inputs: { "not-a-scenario": {} }, mode: "measured" }), /unknown scenario/u);
   assert.throws(() => runOfflineBenchmark(corpus, { inputs: { [first.scenarioId]: [] } }), /must be an object/u);
   assert.throws(() => runOfflineBenchmark(corpus, { inputs: [] }), /keyed by scenarioId/u);
   assert.throws(() => runOfflineBenchmark(corpus, { mode: "live" }), /Unsupported benchmark mode/u);
   assert.throws(() => runOfflineBenchmark(corpus, { inputs: { [first.scenarioId]: { note: "bearer abc" } } }), /prohibited sensitive data/u);
+  assert.throws(() => runOfflineBenchmark({ ...corpus, scenarios: [] }, { mode: "measured" }), /corrupt benchmark corpus/u);
 });
 
 test("controller blocks when measured benchmark outputs are missing", async () => {
@@ -65,6 +91,32 @@ test("controller blocks when measured benchmark outputs are missing", async () =
   assert.equal(report.state, "blocked");
   assert.equal(report.reasonCode, "benchmark-regression");
   assert.equal(report.measurements.synthetic, false);
+  const items = report.frontier.items.filter((item) => item.class === "benchmark-regression");
+  assert.equal(items.length, benchmarkCorpus.scenarios.length);
+  for (const regression of report.benchmark.regressions) {
+    const item = items.find((entry) => entry.subject === regression.scenarioId);
+    assert.deepEqual(item.metadata.benchmarkRegression, regression);
+    assert.deepEqual(item.sourceRefs, [report.benchmark.benchmarkId]);
+    assert.ok(report.frontierSchedule.blockers.includes(item.itemId));
+  }
+  const inputs = Object.fromEntries(benchmarkCorpus.scenarios.map((scenario) => [scenario.scenarioId, scenario.assertions]));
+  const pass = compileIntegratedController({ manifest, benchmarkCorpus, discovery, stageInputs: { benchmarkMode: "measured", benchmarkInputs: inputs } });
+  assert.equal(pass.state, "capture-recommended");
+  assert.equal(pass.reasonCode, "frontier-unresolved");
+  assert.equal(pass.mode, "report-only");
+  assert.equal(pass.execution.preflight.apply, false);
+  assert.deepEqual(pass.benchmark.regressions, []);
+  assert.equal(pass.frontier.items.filter((item) => item.class === "benchmark-regression").length, 0);
+  assert.ok(pass.frontier.items.some((item) => item.class === "portfolio-gap"));
+  assert.ok(pass.frontier.items.some((item) => item.class === "unassessed-workflow"));
+  const scenario = benchmarkCorpus.scenarios[0];
+  inputs[scenario.scenarioId] = {};
+  const fail = compileIntegratedController({ manifest, benchmarkCorpus, discovery, stageInputs: { benchmarkMode: "measured", benchmarkInputs: inputs } });
+  assert.equal(fail.state, "blocked");
+  assert.equal(fail.frontier.items.filter((item) => item.class === "benchmark-regression").length, 1);
+  const fixtureFail = compileIntegratedController({ manifest, benchmarkCorpus, discovery, stageInputs: { benchmarkInputs: inputs } });
+  assert.equal(fixtureFail.state, "blocked");
+  assert.equal(fixtureFail.benchmark.regressions[0].mode, "fixture");
 });
 
 test("frontier covers classes, preserves IDs, and respects deterministic budgets", () => {
@@ -75,7 +127,7 @@ test("frontier covers classes, preserves IDs, and respects deterministic budgets
       specEvidenceGaps: ["gap-a"], safetyOwnershipSchemaConflicts: ["conflict-a"],
       health: { complete: false, available: true, accountingConsistent: true },
     },
-    benchmark: { regressions: ["scenario-a"] },
+    benchmark: { regressions: [{ scenarioId: "scenario-a", mode: "fixture", status: "fail", evidenceSource: "fixture-self-check", failedChecks: ["assertion:status"] }] },
   });
   validateFrontier(frontier);
   assert.equal(frontier.items.length, 10);

@@ -137,6 +137,29 @@ cross into GitHub. This design still needs provisioning, approved capture inputs
 and a Chromium acceptance exercise; neither the offline workflow nor choosing
 a cloud platform closes M6.
 
+### Azure infrastructure template
+
+[`infra/azure-capture/`](infra/azure-capture/README.md) contains an undeployed
+Bicep template for a manual Container Apps Job and environment, private Blob
+container, RBAC Key Vault, scoped managed identity and Log Analytics workspace.
+Blob access is authenticated, but the storage and vault endpoints are not
+network-isolated. There is no schedule, budget, image, capture runner or
+publisher in the template. **Nothing has been deployed.**
+
+Before any deployment the owner must approve the subscription and resource
+group, budget and cost alerts, region and network exposure, tenant sign-in/MFA
+model, image and execution limits, each capture recipe, secret provisioning and
+rotation, and access/retention/publication procedures. The infrastructure README
+provides the exact deployment command and teardown guidance. Managed identity
+does not authenticate a portal user; do not weaken MFA or conditional access.
+
+The future runner must write private evidence, receipts and accounting to the
+private blob container without logging them. After offline validation and
+independent review, only allowlisted sanitized report candidates or spec
+proposals may be pushed to a monthly branch for a PR, never directly to main.
+That private-capture uploader and publisher remain to be implemented and
+accepted; the existing public monthly workflow does not perform those steps.
+
 ## Recovery and VM retirement
 
 The runner, validators, tests and this design live in Git. Public reports pushed
