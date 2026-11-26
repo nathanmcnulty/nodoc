@@ -99,6 +99,35 @@ permissions:
   contents: read
 
 jobs:
+  capture-image:
+    name: Private capture image
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Build the capture image without credentials
+        run: docker build --build-arg SOURCE_REVISION="$GITHUB_SHA" -f infra/azure-capture/Dockerfile -t nodoc-capture:test .
+      - name: Exercise the image with synthetic data and no external network
+        run: |
+          docker run --rm --network none --entrypoint node nodoc-capture:test --test /app/tools/tests/private-capture.test.mjs
+          docker run --rm --network none --entrypoint chromium nodoc-capture:test --version
+      - name: Start isolated synthetic Blob storage
+        run: |
+          key="$(printf %s 'nodoc-synthetic-storage-test-key-only' | base64 -w0)"
+          container="$(docker run --detach --rm -p 127.0.0.1:10000:10000 \
+            -e "AZURITE_ACCOUNTS=nodocsynthetic:$key" mcr.microsoft.com/azure-storage/azurite:3.35.0 \
+            azurite-blob --blobHost 0.0.0.0 --skipApiVersionCheck)"
+          echo "NODOC_AZURITE_ID=$container" >> "$GITHUB_ENV"
+          for attempt in $(seq 1 30); do
+            if curl --silent --output /dev/null http://127.0.0.1:10000/; then exit 0; fi
+            sleep 1
+          done
+          exit 1
+      - name: Verify the production SDK transport against the emulator
+        run: docker run --rm --network host -e NODOC_AZURITE=1 --entrypoint node nodoc-capture:test --test /app/tools/tests/private-capture-azure.test.mjs
+      - name: Stop synthetic storage
+        if: always() && env.NODOC_AZURITE_ID != ''
+        run: docker stop "$NODOC_AZURITE_ID"
   windows-postman:
     name: Windows Postman argument safety
     runs-on: windows-latest
@@ -116,6 +145,7 @@ jobs:
         run: node --test tools/tests/generate-postman-collections.test.mjs
   validate:
     name: site
+    needs: capture-image
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

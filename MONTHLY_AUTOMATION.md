@@ -114,6 +114,13 @@ are owner decisions; this implementation does neither automatically.
 
 ## Private capture design
 
+The [private capture runtime](infra/azure-capture/README.md) now supplies a
+container build, bounded adapter to the existing discovery driver, verified
+Azure Blob archives/restoration, interrupted-run handling and an independently
+approved coverage publisher. It is not deployed and does not create or
+authenticate a browser session. Its synthetic recovery exercises do not
+replace the signed-in acceptance described below.
+
 Keep portal sessions and raw evidence out of this public repository and its
 Actions logs. An Azure job would use an immutable image containing the existing
 Node tooling and Chromium, private Blob storage for inputs/checkpoints/outputs,
