@@ -1,12 +1,13 @@
 import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
-import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { lstat, mkdir, mkdtemp, realpath, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
 import { buildRefreshInventory } from "./portal-refresh-inventory.mjs";
 import { loadPublicCoverageSnapshots } from "./public-coverage.mjs";
+import { parseUsageReceipt, readUsageBytes } from "./store-monthly-usage.mjs";
 
 const hash = value => createHash("sha256").update(JSON.stringify(value)).digest("hex");
 const json = value => `${JSON.stringify(value, null, 2)}\n`;
@@ -119,28 +120,75 @@ export function reviewerArgs(packet, model, usagePath) {
     "--max-ai-credits", "30", "--usage-output-file", usagePath];
 }
 
-async function runReviewer(packet, model, outputDirectory) {
-  if (!process.env.COPILOT_GITHUB_TOKEN) throw new Error("Copilot review requested but COPILOT_GITHUB_TOKEN is missing.");
-  const directory = await mkdtemp(path.join(tmpdir(), "nodoc-monthly-model-"));
+async function assertPrivateParent(directory) {
+  const parent = await realpath(directory);
+  const root = await realpath(fileURLToPath(new URL("../", import.meta.url)));
+  const relative = path.relative(root, parent);
+  if (!relative || (!relative.startsWith(`..${path.sep}`) && relative !== ".." && !path.isAbsolute(relative))) throw new Error();
+  // Check filesystem markers rather than treating arbitrary Git errors as "not a checkout".
+  for (let ancestor = parent; ; ancestor = path.dirname(ancestor)) {
+    try {
+      await lstat(path.join(ancestor, ".git"));
+    } catch (error) {
+      if (error.code !== "ENOENT") throw new Error();
+      if (path.dirname(ancestor) === ancestor) return parent;
+      continue;
+    }
+    throw new Error();
+  }
+}
+
+async function runReviewer(packet, model, outputDirectory, { execute = execFileSync, env = process.env } = {}) {
+  if (!env.COPILOT_GITHUB_TOKEN) throw new Error("Copilot review requested but COPILOT_GITHUB_TOKEN is missing.");
+  const privateTemp = await assertPrivateParent(tmpdir());
+  const directory = await mkdtemp(path.join(privateTemp, "nodoc-monthly-model-"));
   try {
     // Isolated configuration prevents this job loading a developer's tools or instructions.
-    const stdout = execFileSync("copilot", reviewerArgs(packet, model, path.join(directory, "usage.json")), {
-      cwd: directory, timeout: 180_000, maxBuffer: 64 * 1024, encoding: "utf8",
-      env: { PATH: process.env.PATH, SystemRoot: process.env.SystemRoot, HOME: directory, USERPROFILE: directory,
-        TEMP: directory, TMP: directory, COPILOT_HOME: path.join(directory, "config"),
-        COPILOT_GITHUB_TOKEN: process.env.COPILOT_GITHUB_TOKEN, CI: "true" },
-      stdio: ["ignore", "pipe", "pipe"],
-    });
+    let stdout;
+    let commandFailed = false;
+    try {
+      stdout = execute("copilot", reviewerArgs(packet, model, path.join(directory, "usage.json")), {
+        cwd: directory, timeout: 180_000, maxBuffer: 64 * 1024, encoding: "utf8",
+        env: { PATH: env.PATH, SystemRoot: env.SystemRoot, HOME: directory, USERPROFILE: directory,
+          TEMP: directory, TMP: directory, COPILOT_HOME: path.join(directory, "config"),
+          COPILOT_GITHUB_TOKEN: env.COPILOT_GITHUB_TOKEN, CI: "true" },
+        stdio: ["ignore", "pipe", "pipe"],
+      });
+    } catch {
+      commandFailed = true;
+    }
+    // Capture the current attempt before accepting any answer, even after a nonzero exit,
+    // timeout or output overflow. A bounded malformed receipt stays private for diagnosis.
+    const bytes = await readUsageBytes(path.join(directory, "usage.json"));
+    await writeFile(path.join(outputDirectory, "model-usage.private.json"), bytes, { flag: "wx", mode: 0o600 });
+    parseUsageReceipt(bytes);
+    if (commandFailed) throw new Error();
     const output = JSON.parse(stdout.trim());
     validateSelections(output, packet);
-    // Usage is a separate private receipt, never part of the publishable report.
-    const receipt = JSON.parse(await readFile(path.join(directory, "usage.json"), "utf8"));
-    await writeFile(path.join(outputDirectory, "model-usage.private.json"), json(receipt));
     return { model, output };
-  } catch (error) {
-    throw new Error("Copilot review failed or returned invalid output; nothing will be published.", { cause: error });
+  } catch {
+    // No cause: subprocess and JSON errors may contain prompts, tokens or model stdout.
+    throw new Error("Copilot review or accounting failed; nothing will be published. Cost is unknown without a valid private receipt.");
   } finally {
     await rm(directory, { recursive: true, force: true });
+  }
+}
+
+export async function prepareMonthlyReview(packet, { outputDirectory, reviewer = "none", model = "gpt-6-luna", ...options }) {
+  try {
+    if (!["none", "copilot"].includes(reviewer)) throw new Error();
+    const directory = path.resolve(outputDirectory);
+    await mkdir(path.dirname(directory), { recursive: true });
+    if (reviewer === "copilot") await assertPrivateParent(path.dirname(directory));
+    // Exclusive reservation rejects any previous attempt, even one with no report.
+    // Never delete or consume a user's pre-existing outputs.
+    await mkdir(directory, { mode: 0o700 });
+    const review = reviewer === "copilot" ? await runReviewer(packet, model, directory, options) : null;
+    const report = assertMonthlyReport(buildMonthlyReport(packet, review), packet);
+    await writeFile(path.join(directory, "report.json"), json(report), { flag: "wx", mode: 0o600 });
+    return report;
+  } catch {
+    throw new Error("Monthly review failed; nothing will be published. Use a fresh output directory outside all checkouts for model runs; diagnose accounting privately.");
   }
 }
 
@@ -153,15 +201,11 @@ async function main() {
   if (!values.output || !["none", "copilot"].includes(values.reviewer)) throw new Error("--output and reviewer none|copilot are required.");
   const revision = execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim();
   const packet = await loadMonthlyPacket(values.month, revision);
-  const directory = path.resolve(values.output);
-  await mkdir(directory, { recursive: true });
-  const review = values.reviewer === "copilot" ? await runReviewer(packet, values.model, directory) : null;
-  const report = buildMonthlyReport(packet, review);
-  await writeFile(path.join(directory, "report.json"), json(assertMonthlyReport(report, packet)));
+  const report = await prepareMonthlyReview(packet, { outputDirectory: values.output, reviewer: values.reviewer, model: values.model });
   console.log(`Prepared ${packet.month}: ${packet.currentSource.length} public specs; ${report.review.status}; no new observations.`);
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) main().catch(error => {
-  console.error(error.message);
+if (process.argv[1] === fileURLToPath(import.meta.url)) main().catch(() => {
+  console.error("Monthly review failed; nothing will be published. Verify inputs, fresh private output location and accounting privately.");
   process.exitCode = 1;
 });
