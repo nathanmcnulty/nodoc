@@ -81,6 +81,351 @@ components:
             additionalProperties: true
 
 paths:
+  /api/concierge/GetConciergeConfig:
+    get:
+      operationId: Support.GetConciergeConfig
+      summary: Get support widget configuration
+      description: Retrieve shared support widget configuration for an application and culture.
+      tags:
+        - Support
+      x-nodoc-evidence:
+        record: ../evidence/live-refresh-20261126.json
+      x-nodoc-live-capture:
+        source: authenticated M365 Admin lab capture, 2026-11-26
+        browsedPages:
+          - Groups and shared portal shell
+      x-nodoc-operation-context:
+        surface: Shared support experience loaded by the M365 portal
+        availability:
+          level: user-context
+          notes:
+            - One lab session. Required inputs, standalone invocation, effective grants and minimum roles
+              remain untested.
+        behavior:
+          methodKnowledge: observed
+        automationEvidence:
+          existence:
+            state: verified
+            observationIds:
+              - request-6a0c0644ed61941fc693
+            verifiedAt: 2026-11-26T04:49:13.102Z
+        provenance:
+          - source: m365-known-refresh-20261126T3
+            confidence: high
+            notes:
+              - Exact native GET transport on admin.cloud.microsoft. Stable observation references and
+                per-response completeness are recorded in the linked evidence record.
+              - The response was captured incompletely; only transport, query names and observed status are
+                published. Response schema remains unknown.
+              - Native background traffic does not establish a causal workflow, absence of side effects,
+                replay safety, licensing or minimum roles.
+      parameters:
+        - name: appName
+          in: query
+          description: Observed query parameter. Values, accepted value sets and requiredness were not established.
+          schema:
+            type: string
+        - name: culture
+          in: query
+          description: Observed query parameter. Values, accepted value sets and requiredness were not established.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: HTTP 200 with application/json was observed. The retained response capture is incomplete, so no
+            response schema or example is asserted.
+          content:
+            application/json: {}
+  /api/concierge/GetConciergeConfigAll:
+    get:
+      operationId: Support.GetConciergeConfigAll
+      summary: Get extended support configuration
+      description: Retrieve the extended configuration loaded by the shared support experience.
+      tags:
+        - Support
+      x-nodoc-evidence:
+        record: ../evidence/live-refresh-20261126.json
+      x-nodoc-live-capture:
+        source: authenticated M365 Admin lab capture, 2026-11-26
+        browsedPages:
+          - Groups and shared portal shell
+      x-nodoc-operation-context:
+        surface: Shared support experience loaded by the M365 portal
+        availability:
+          level: user-context
+          notes:
+            - One lab session. Required inputs, standalone invocation, effective grants and minimum roles
+              remain untested.
+        behavior:
+          methodKnowledge: observed
+        automationEvidence:
+          existence:
+            state: verified
+            observationIds:
+              - request-8e562ffcf799c41717a4
+            verifiedAt: 2026-11-26T04:49:14.235Z
+        provenance:
+          - source: m365-known-refresh-20261126T3
+            confidence: high
+            notes:
+              - Exact native GET transport on admin.cloud.microsoft. Stable observation references and
+                per-response completeness are recorded in the linked evidence record.
+              - The response was captured incompletely; only transport, query names and observed status are
+                published. Response schema remains unknown.
+              - Native background traffic does not establish a causal workflow, absence of side effects,
+                replay safety, licensing or minimum roles.
+      responses:
+        "200":
+          description: HTTP 200 with application/json was observed. The retained response capture is incomplete, so no
+            response schema or example is asserted.
+          content:
+            application/json: {}
+  /api/concierge/ticket/search:
+    get:
+      operationId: Support.SearchTickets
+      summary: Search support tickets
+      description: Search support tickets through the shared support experience. The captured query names are
+        documented without assuming filter semantics or pagination guarantees.
+      tags:
+        - Support
+      x-nodoc-evidence:
+        record: ../evidence/live-refresh-20261126.json
+      x-nodoc-live-capture:
+        source: authenticated M365 Admin lab capture, 2026-11-26
+        browsedPages:
+          - Groups and shared portal shell
+      x-nodoc-operation-context:
+        surface: Shared support experience loaded by the M365 portal
+        availability:
+          level: user-context
+          notes:
+            - One lab session. Required inputs, standalone invocation, effective grants and minimum roles
+              remain untested.
+        behavior:
+          methodKnowledge: observed
+        automationEvidence:
+          existence:
+            state: verified
+            observationIds:
+              - request-8ea79fb8657e62956bf8
+            verifiedAt: 2026-11-26T04:49:16.350Z
+        provenance:
+          - source: m365-known-refresh-20261126T3
+            confidence: high
+            notes:
+              - Exact native GET transport on admin.cloud.microsoft. Stable observation references and
+                per-response completeness are recorded in the linked evidence record.
+              - The response was captured incompletely; only transport, query names and observed status are
+                published. Response schema remains unknown.
+              - Native background traffic does not establish a causal workflow, absence of side effects,
+                replay safety, licensing or minimum roles.
+      parameters:
+        - name: clientApp
+          in: query
+          description: Observed query parameter. Values, accepted value sets and requiredness were not established.
+          schema:
+            type: string
+        - name: clientAppName
+          in: query
+          description: Observed query parameter. Values, accepted value sets and requiredness were not established.
+          schema:
+            type: string
+        - name: createdBy
+          in: query
+          description: Observed query parameter. Values, accepted value sets and requiredness were not established.
+          schema:
+            type: string
+        - name: lookBackDays
+          in: query
+          description: Observed query parameter. Values, accepted value sets and requiredness were not established.
+          schema:
+            type: string
+        - name: pageIndex
+          in: query
+          description: Observed query parameter. Values, accepted value sets and requiredness were not established.
+          schema:
+            type: string
+        - name: pageKey
+          in: query
+          description: Observed query parameter. Values, accepted value sets and requiredness were not established.
+          schema:
+            type: string
+        - name: pageSize
+          in: query
+          description: Observed query parameter. Values, accepted value sets and requiredness were not established.
+          schema:
+            type: string
+        - name: product
+          in: query
+          description: Observed query parameter. Values, accepted value sets and requiredness were not established.
+          schema:
+            type: string
+        - name: query
+          in: query
+          description: Observed query parameter. Values, accepted value sets and requiredness were not established.
+          schema:
+            type: string
+        - name: severity
+          in: query
+          description: Observed query parameter. Values, accepted value sets and requiredness were not established.
+          schema:
+            type: string
+        - name: state
+          in: query
+          description: Observed query parameter. Values, accepted value sets and requiredness were not established.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: HTTP 200 with application/json was observed. The retained response capture is incomplete, so no
+            response schema or example is asserted.
+          content:
+            application/json: {}
+  /api/tenantauthorization/GetTenantInfoV2:
+    get:
+      operationId: Support.GetTenantInfoV2
+      summary: Get support tenant context
+      description: Retrieve tenant context used by the shared support experience.
+      tags:
+        - Support
+      x-nodoc-evidence:
+        record: ../evidence/live-refresh-20261126.json
+      x-nodoc-live-capture:
+        source: authenticated M365 Admin lab capture, 2026-11-26
+        browsedPages:
+          - Groups and shared portal shell
+      x-nodoc-operation-context:
+        surface: Shared support experience loaded by the M365 portal
+        availability:
+          level: user-context
+          notes:
+            - One lab session. Required inputs, standalone invocation, effective grants and minimum roles
+              remain untested.
+        behavior:
+          methodKnowledge: observed
+        automationEvidence:
+          existence:
+            state: verified
+            observationIds:
+              - request-e6ff3c4191610e585544
+            verifiedAt: 2026-11-26T04:49:12.077Z
+        provenance:
+          - source: m365-known-refresh-20261126T3
+            confidence: high
+            notes:
+              - Exact native GET transport on admin.cloud.microsoft. Stable observation references and
+                per-response completeness are recorded in the linked evidence record.
+              - The response was captured incompletely; only transport, query names and observed status are
+                published. Response schema remains unknown.
+              - Native background traffic does not establish a causal workflow, absence of side effects,
+                replay safety, licensing or minimum roles.
+      parameters:
+        - name: clientApp
+          in: query
+          description: Observed query parameter. Values, accepted value sets and requiredness were not established.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: HTTP 200 with application/json was observed. The retained response capture is incomplete, so no
+            response schema or example is asserted.
+          content:
+            application/json: {}
+  /api/tenantauthorization/TenantInfoModel:
+    get:
+      operationId: Support.GetTenantInfoModel
+      summary: Get the support tenant information model
+      description: Retrieve the tenant and contact information model used by the shared support experience.
+      tags:
+        - Support
+      x-nodoc-evidence:
+        record: ../evidence/live-refresh-20261126.json
+      x-nodoc-live-capture:
+        source: authenticated M365 Admin lab capture, 2026-11-26
+        browsedPages:
+          - Groups and shared portal shell
+      x-nodoc-operation-context:
+        surface: Shared support experience loaded by the M365 portal
+        availability:
+          level: user-context
+          notes:
+            - One lab session. Required inputs, standalone invocation, effective grants and minimum roles
+              remain untested.
+        behavior:
+          methodKnowledge: observed
+        automationEvidence:
+          existence:
+            state: verified
+            observationIds:
+              - request-40e1d7ab3a8b4b597732
+            verifiedAt: 2026-11-26T04:49:14.234Z
+        provenance:
+          - source: m365-known-refresh-20261126T3
+            confidence: high
+            notes:
+              - Exact native GET transport on admin.cloud.microsoft. Stable observation references and
+                per-response completeness are recorded in the linked evidence record.
+              - The response was captured incompletely; only transport, query names and observed status are
+                published. Response schema remains unknown.
+              - Native background traffic does not establish a causal workflow, absence of side effects,
+                replay safety, licensing or minimum roles.
+      parameters:
+        - name: hostingAppname
+          in: query
+          description: Observed query parameter. Values, accepted value sets and requiredness were not established.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: HTTP 200 with application/json was observed. The retained response capture is incomplete, so no
+            response schema or example is asserted.
+          content:
+            application/json: {}
+  /api/tenantauthorization/UserPreferences:
+    get:
+      operationId: Support.GetUserPreferences
+      summary: Get shared support user preferences
+      description: Retrieve the user preferences loaded by the shared support experience.
+      tags:
+        - Support
+      x-nodoc-evidence:
+        record: ../evidence/live-refresh-20261126.json
+      x-nodoc-live-capture:
+        source: authenticated M365 Admin lab capture, 2026-11-26
+        browsedPages:
+          - Groups and shared portal shell
+      x-nodoc-operation-context:
+        surface: Shared support experience loaded by the M365 portal
+        availability:
+          level: user-context
+          notes:
+            - One lab session. Required inputs, standalone invocation, effective grants and minimum roles
+              remain untested.
+        behavior:
+          methodKnowledge: observed
+        automationEvidence:
+          existence:
+            state: verified
+            observationIds:
+              - request-de8e367023625fd4d6d5
+            verifiedAt: 2026-11-26T04:49:15.483Z
+        provenance:
+          - source: m365-known-refresh-20261126T3
+            confidence: high
+            notes:
+              - Exact native GET transport on admin.cloud.microsoft. Stable observation references and
+                per-response completeness are recorded in the linked evidence record.
+              - The response was captured incompletely; only transport, query names and observed status are
+                published. Response schema remains unknown.
+              - Native background traffic does not establish a causal workflow, absence of side effects,
+                replay safety, licensing or minimum roles.
+      responses:
+        "200":
+          description: HTTP 200 with application/json was observed. The retained response capture is incomplete, so no
+            response schema or example is asserted.
+          content:
+            application/json: {}
+
   /api/concierge/DefaultMinimizeSupportWidget:
     get:
       operationId: Support.GetDefaultMinimizeSupportWidget

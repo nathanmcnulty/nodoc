@@ -1,0 +1,266 @@
+{
+  "schemaVersion": 1,
+  "artifactId": "m365-known-refresh-20261126T3",
+  "sourcePortal": "M365 Admin",
+  "assignedSpecId": "m365-admin",
+  "assignedHost": "admin.cloud.microsoft",
+  "captureMode": "passive-native-portal-traffic",
+  "candidateDisposition": {
+    "undocumentedQueueEntries": 15,
+    "publishedOperations": 10,
+    "templatedProductEntries": 4,
+    "excludedTelemetry": [
+      "GET /api/supportlog/WriteLog",
+      "POST /api/supportlog/PostLogBatch"
+    ]
+  },
+  "limitations": [
+    "One signed-in lab tenant; no authored API calls or replay validation.",
+    "Publication documents observations, not supported-method completeness, required inputs, permissions, licensing, business health or mutation safety.",
+    "Only complete, integrity-verified response sidecars supply published schemas. Incomplete response previews are not schema evidence.",
+    "Observed request properties are not requiredness guarantees. Query values, response values, credentials, concrete billing identifiers and private response fingerprints are omitted.",
+    "This publication does not renew the portfolio coverage assessment."
+  ],
+  "operations": [
+    {
+      "method": "GET",
+      "path": "/admin/api/features/agent365/config",
+      "operationId": "Features.GetAgent365Config",
+      "observedQueryParameters": [],
+      "responseSchemaPublished": true,
+      "requestSchemaPublished": false,
+      "observations": [
+        {
+          "observationId": "request-3331f03af22288391e73",
+          "observedAt": "2026-11-26T04:49:09.890Z",
+          "actionIndex": 0,
+          "httpStatus": 200,
+          "mediaType": "application/json",
+          "responseBodyState": "complete",
+          "completeSidecarVerified": true
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/concierge/GetConciergeConfig",
+      "operationId": "Support.GetConciergeConfig",
+      "observedQueryParameters": [
+        "appName",
+        "culture"
+      ],
+      "responseSchemaPublished": false,
+      "requestSchemaPublished": false,
+      "observations": [
+        {
+          "observationId": "request-6a0c0644ed61941fc693",
+          "observedAt": "2026-11-26T04:49:13.102Z",
+          "actionIndex": 0,
+          "httpStatus": 200,
+          "mediaType": "application/json",
+          "responseBodyState": "truncated",
+          "completeSidecarVerified": false
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/concierge/GetConciergeConfigAll",
+      "operationId": "Support.GetConciergeConfigAll",
+      "observedQueryParameters": [],
+      "responseSchemaPublished": false,
+      "requestSchemaPublished": false,
+      "observations": [
+        {
+          "observationId": "request-8e562ffcf799c41717a4",
+          "observedAt": "2026-11-26T04:49:14.235Z",
+          "actionIndex": 0,
+          "httpStatus": 200,
+          "mediaType": "application/json",
+          "responseBodyState": "truncated",
+          "completeSidecarVerified": false
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/concierge/ticket/search",
+      "operationId": "Support.SearchTickets",
+      "observedQueryParameters": [
+        "clientApp",
+        "clientAppName",
+        "createdBy",
+        "lookBackDays",
+        "pageIndex",
+        "pageKey",
+        "pageSize",
+        "product",
+        "query",
+        "severity",
+        "state"
+      ],
+      "responseSchemaPublished": false,
+      "requestSchemaPublished": false,
+      "observations": [
+        {
+          "observationId": "request-8ea79fb8657e62956bf8",
+          "observedAt": "2026-11-26T04:49:16.350Z",
+          "actionIndex": 0,
+          "httpStatus": 200,
+          "mediaType": "application/json",
+          "responseBodyState": "truncated",
+          "completeSidecarVerified": false
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/tenantauthorization/GetTenantInfoV2",
+      "operationId": "Support.GetTenantInfoV2",
+      "observedQueryParameters": [
+        "clientApp"
+      ],
+      "responseSchemaPublished": false,
+      "requestSchemaPublished": false,
+      "observations": [
+        {
+          "observationId": "request-e6ff3c4191610e585544",
+          "observedAt": "2026-11-26T04:49:12.077Z",
+          "actionIndex": 0,
+          "httpStatus": 200,
+          "mediaType": "application/json",
+          "responseBodyState": "truncated",
+          "completeSidecarVerified": false
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/tenantauthorization/TenantInfoModel",
+      "operationId": "Support.GetTenantInfoModel",
+      "observedQueryParameters": [
+        "hostingAppname"
+      ],
+      "responseSchemaPublished": false,
+      "requestSchemaPublished": false,
+      "observations": [
+        {
+          "observationId": "request-40e1d7ab3a8b4b597732",
+          "observedAt": "2026-11-26T04:49:14.234Z",
+          "actionIndex": 0,
+          "httpStatus": 200,
+          "mediaType": "application/json",
+          "responseBodyState": "truncated",
+          "completeSidecarVerified": false
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/tenantauthorization/UserPreferences",
+      "operationId": "Support.GetUserPreferences",
+      "observedQueryParameters": [],
+      "responseSchemaPublished": false,
+      "requestSchemaPublished": false,
+      "observations": [
+        {
+          "observationId": "request-de8e367023625fd4d6d5",
+          "observedAt": "2026-11-26T04:49:15.483Z",
+          "actionIndex": 0,
+          "httpStatus": 200,
+          "mediaType": "application/json",
+          "responseBodyState": "truncated",
+          "completeSidecarVerified": false
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/fd/arm/providers/Microsoft.Billing/billingAccounts/{billingAccountId}/providers/Microsoft.Marketplace/products/{productId}",
+      "operationId": "Billing.GetMarketplaceProduct",
+      "observedQueryParameters": [
+        "api-version",
+        "onBehalfOf",
+        "skuId"
+      ],
+      "responseSchemaPublished": true,
+      "requestSchemaPublished": false,
+      "observations": [
+        {
+          "observationId": "request-951e7ab746a19af0448f",
+          "observedAt": "2026-11-26T04:55:34.045Z",
+          "actionIndex": 18,
+          "httpStatus": 200,
+          "mediaType": "application/json",
+          "responseBodyState": "complete",
+          "completeSidecarVerified": true
+        },
+        {
+          "observationId": "request-021c0a8174d2592cc842",
+          "observedAt": "2026-11-26T04:55:34.045Z",
+          "actionIndex": 18,
+          "httpStatus": 200,
+          "mediaType": "application/json",
+          "responseBodyState": "complete",
+          "completeSidecarVerified": true
+        },
+        {
+          "observationId": "request-0d1231611f2ad5d06e86",
+          "observedAt": "2026-11-26T04:55:34.044Z",
+          "actionIndex": 18,
+          "httpStatus": 200,
+          "mediaType": "application/json",
+          "responseBodyState": "complete",
+          "completeSidecarVerified": true
+        },
+        {
+          "observationId": "request-493ae3b5b41868be7f43",
+          "observedAt": "2026-11-26T04:55:34.045Z",
+          "actionIndex": 18,
+          "httpStatus": 404,
+          "mediaType": "application/json",
+          "responseBodyState": "complete",
+          "completeSidecarVerified": true
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/fd/edgemanagementpft/api/analysis/releaseNotes",
+      "operationId": "Edge.AnalyzeReleaseNotes",
+      "observedQueryParameters": [],
+      "responseSchemaPublished": true,
+      "requestSchemaPublished": true,
+      "observations": [
+        {
+          "observationId": "request-142b4d7ea340ab631c09",
+          "observedAt": "2026-11-26T04:53:23.822Z",
+          "actionIndex": 12,
+          "httpStatus": 200,
+          "mediaType": "application/json",
+          "responseBodyState": "complete",
+          "completeSidecarVerified": true
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/fd/substrateSearchService/api/v1/suggestions",
+      "operationId": "Search.GetPortalSuggestions",
+      "observedQueryParameters": [],
+      "responseSchemaPublished": true,
+      "requestSchemaPublished": true,
+      "observations": [
+        {
+          "observationId": "request-c33b3433922a6f7b10ed",
+          "observedAt": "2026-11-26T04:49:12.995Z",
+          "actionIndex": 0,
+          "httpStatus": 200,
+          "mediaType": "application/json",
+          "responseBodyState": "complete",
+          "completeSidecarVerified": true
+        }
+      ]
+    }
+  ]
+}

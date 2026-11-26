@@ -1,4 +1,58 @@
 paths:
+  /fd/substrateSearchService/api/v1/suggestions:
+    post:
+      operationId: Search.GetPortalSuggestions
+      summary: Get portal search suggestions
+      description: Submit entity queries and scenario context to the portal suggestion service. Native portal use
+        was observed; side effects and replay safety have not been established.
+      tags:
+        - Search
+      x-nodoc-evidence:
+        record: ../evidence/live-refresh-20261126.json
+      x-nodoc-live-capture:
+        source: authenticated M365 Admin lab capture, 2026-11-26
+        browsedPages:
+          - Groups and shared portal shell
+      x-nodoc-operation-context:
+        surface: Shared M365 portal shell
+        availability:
+          level: user-context
+          notes:
+            - One lab session. Required inputs, standalone invocation, effective grants and minimum roles
+              remain untested.
+        behavior:
+          methodKnowledge: observed
+        automationEvidence:
+          existence:
+            state: verified
+            observationIds:
+              - request-c33b3433922a6f7b10ed
+            verifiedAt: 2026-11-26T04:49:12.995Z
+        provenance:
+          - source: m365-known-refresh-20261126T3
+            confidence: high
+            notes:
+              - Exact native POST transport on admin.cloud.microsoft. Stable observation references and
+                per-response completeness are recorded in the linked evidence record.
+              - Response schemas use complete, hash-verified private sidecars, not truncated previews. No
+                required fields, enums, formats or examples are inferred.
+              - Native background traffic does not establish a causal workflow, absence of side effects,
+                replay safety, licensing or minimum roles.
+      responses:
+        "200":
+          description: Observed JSON response.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PortalSuggestions"
+      requestBody:
+        description: JSON body sent by the native portal. The listed properties are observations, not required-field
+          guarantees.
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PortalSuggestionsRequest"
+
   /admin/api/searchadminapi/configurations:
     get:
       summary: Get search configurations
@@ -580,3 +634,163 @@ paths:
 
         '404':
           $ref: common.yml#/components/responses/NotFound
+
+components:
+  schemas:
+    PortalSuggestions:
+      type: object
+      properties:
+        Groups:
+          type: array
+          items:
+            type: object
+            properties:
+              Suggestions:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    CommandText:
+                      type: string
+                    DisplayCategory:
+                      type: string
+                    DisplayDescription:
+                      type: string
+                    DisplayText:
+                      type: string
+                    Id:
+                      type: string
+                    InteractionType:
+                      type: string
+                    Origin:
+                      type: string
+                    Products:
+                      type: array
+                      items:
+                        type: string
+                    PromptId:
+                      type: string
+                    ProviderId:
+                      type: string
+                    ProviderName:
+                      type: string
+                    ProviderPartyType:
+                      type: string
+                    ReferenceId:
+                      type: string
+                    ShortDisplayText:
+                      type: string
+                    ShowOnWork:
+                      type: boolean
+                    Slug:
+                      type: string
+                    Text:
+                      type: string
+                    Title:
+                      type: string
+                    UserActivity:
+                      type: object
+                      properties:
+                        Execution:
+                          type: object
+                          properties:
+                            TurnCount:
+                              type: integer
+                        Favorite:
+                          type: object
+                          properties:
+                            IsFavorite:
+                              type: boolean
+                    promptProfileAttributes:
+                      type: object
+                      properties:
+                        Departments:
+                          type: array
+                          items: {}
+                        Industries:
+                          type: array
+                          items: {}
+                        Roles:
+                          type: array
+                          items: {}
+                        Tags:
+                          type: array
+                          items:
+                            type: string
+                        TaskTypes:
+                          type: array
+                          items: {}
+              Type:
+                type: string
+        Instrumentation:
+          type: object
+          properties:
+            TraceId:
+              type: string
+            UserCohort:
+              type: string
+        LayoutHints:
+          type: object
+          properties:
+            BestMatchSuggestions:
+              type: array
+              items: {}
+      description: Observed JSON types from complete retained responses. Fields are not asserted required;
+        additional properties and unobserved variants remain possible.
+    PortalSuggestionsRequest:
+      type: object
+      properties:
+        Cvid:
+          type: string
+        EntityRequests:
+          type: array
+          items:
+            type: object
+            properties:
+              EntityType:
+                type: string
+              Filter:
+                type: object
+                properties:
+                  And:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        Or:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              Term:
+                                type: object
+                                properties:
+                                  Product:
+                                    type: string
+              Query:
+                type: object
+                properties:
+                  QueryString:
+                    type: string
+              Size:
+                type: integer
+        LogicalId:
+          type: string
+        Scenario:
+          type: object
+          properties:
+            Dimensions:
+              type: array
+              items:
+                type: object
+                properties:
+                  DimensionName:
+                    type: string
+                  DimensionValue:
+                    type: string
+            Name:
+              type: string
+        TimeZone:
+          type: string
+      description: Observed retained JSON request structure. Requiredness and supported variants were not tested;
+        examples and concrete values are withheld.

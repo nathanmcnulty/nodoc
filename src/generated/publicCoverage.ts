@@ -27,9 +27,9 @@ export const publicCoverage = {
   ],
   "currentSource": {
     "specs": 22,
-    "operations": 2027,
-    "schemaGaps": 1764,
-    "exampleGaps": 1704
+    "operations": 2037,
+    "schemaGaps": 1773,
+    "exampleGaps": 1714
   },
   "specs": [
     {
@@ -226,9 +226,9 @@ export const publicCoverage = {
       "specId": "m365-admin",
       "title": "M365 Admin",
       "current": {
-        "operations": 320,
-        "schemaGaps": 269,
-        "exampleGaps": 320
+        "operations": 330,
+        "schemaGaps": 278,
+        "exampleGaps": 330
       },
       "latest": {
         "operations": 320,

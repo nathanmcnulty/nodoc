@@ -39410,6 +39410,97 @@
                             "description": "",
                             "item": [
                                 {
+                                    "name": "agent365",
+                                    "description": "",
+                                    "item": [
+                                        {
+                                            "name": "config",
+                                            "description": "",
+                                            "item": [
+                                                {
+                                                    "id": "d5966bdc-cd1e-4e6b-a916-19f396c9e609",
+                                                    "name": "Get Agent 365 feature configuration",
+                                                    "request": {
+                                                        "name": "Get Agent 365 feature configuration",
+                                                        "description": {
+                                                            "content": "Retrieve the Agent 365 feature switches and scheduled-action rules loaded by the admin portal.",
+                                                            "type": "text/plain"
+                                                        },
+                                                        "url": {
+                                                            "path": [
+                                                                "admin",
+                                                                "api",
+                                                                "features",
+                                                                "agent365",
+                                                                "config"
+                                                            ],
+                                                            "host": [
+                                                                "{{baseUrl}}"
+                                                            ],
+                                                            "query": [],
+                                                            "variable": []
+                                                        },
+                                                        "header": [
+                                                            {
+                                                                "key": "Accept",
+                                                                "value": "application/json"
+                                                            }
+                                                        ],
+                                                        "method": "GET",
+                                                        "body": {},
+                                                        "auth": null
+                                                    },
+                                                    "response": [
+                                                        {
+                                                            "id": "aa3522d4-7eae-416b-857d-17abab034fdb",
+                                                            "name": "Observed JSON response.",
+                                                            "originalRequest": {
+                                                                "url": {
+                                                                    "path": [
+                                                                        "admin",
+                                                                        "api",
+                                                                        "features",
+                                                                        "agent365",
+                                                                        "config"
+                                                                    ],
+                                                                    "host": [
+                                                                        "{{baseUrl}}"
+                                                                    ],
+                                                                    "query": [],
+                                                                    "variable": []
+                                                                },
+                                                                "header": [
+                                                                    {
+                                                                        "key": "Accept",
+                                                                        "value": "application/json"
+                                                                    }
+                                                                ],
+                                                                "method": "GET",
+                                                                "body": {}
+                                                            },
+                                                            "status": "OK",
+                                                            "code": 200,
+                                                            "header": [
+                                                                {
+                                                                    "key": "Content-Type",
+                                                                    "value": "application/json"
+                                                                }
+                                                            ],
+                                                            "body": "{\n  \"EnableAXReqAgents\": \"string\",\n  \"EnableAXUserRequests\": \"string\",\n  \"EnableAgentXConvergence\": \"string\",\n  \"EnableAgentX_Block\": \"string\",\n  \"EnableAgentX_Unblock\": \"string\",\n  \"Rules\": {\n    \"AllowedScheduledActions\": [\n      \"\",\n      \"\"\n    ]\n  }\n}",
+                                                            "cookie": [],
+                                                            "_postman_previewlanguage": "json"
+                                                        }
+                                                    ],
+                                                    "event": [],
+                                                    "protocolProfileBehavior": {
+                                                        "disableBodyPruning": true
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
                                     "name": "initialload",
                                     "description": "",
                                     "item": [
@@ -50742,6 +50833,135 @@
                     ]
                 },
                 {
+                    "name": "substrateSearchService",
+                    "description": "",
+                    "item": [
+                        {
+                            "name": "api",
+                            "description": "",
+                            "item": [
+                                {
+                                    "name": "v1",
+                                    "description": "",
+                                    "item": [
+                                        {
+                                            "name": "suggestions",
+                                            "description": "",
+                                            "item": [
+                                                {
+                                                    "id": "e35da66e-e3de-445c-82b8-ae9395a62094",
+                                                    "name": "Get portal search suggestions",
+                                                    "request": {
+                                                        "name": "Get portal search suggestions",
+                                                        "description": {
+                                                            "content": "Submit entity queries and scenario context to the portal suggestion service. Native portal use was observed; side effects and replay safety have not been established.",
+                                                            "type": "text/plain"
+                                                        },
+                                                        "url": {
+                                                            "path": [
+                                                                "fd",
+                                                                "substrateSearchService",
+                                                                "api",
+                                                                "v1",
+                                                                "suggestions"
+                                                            ],
+                                                            "host": [
+                                                                "{{baseUrl}}"
+                                                            ],
+                                                            "query": [],
+                                                            "variable": []
+                                                        },
+                                                        "header": [
+                                                            {
+                                                                "key": "Content-Type",
+                                                                "value": "application/json"
+                                                            },
+                                                            {
+                                                                "key": "Accept",
+                                                                "value": "application/json"
+                                                            }
+                                                        ],
+                                                        "method": "POST",
+                                                        "body": {
+                                                            "mode": "raw",
+                                                            "raw": "{\n  \"Cvid\": \"string\",\n  \"EntityRequests\": [\n    {\n      \"EntityType\": \"string\",\n      \"Filter\": {\n        \"And\": [\n          {\n            \"Or\": [\n              {\n                \"Term\": {\n                  \"Product\": \"string\"\n                }\n              },\n              {\n                \"Term\": {\n                  \"Product\": \"string\"\n                }\n              }\n            ]\n          },\n          {\n            \"Or\": [\n              {\n                \"Term\": {\n                  \"Product\": \"string\"\n                }\n              },\n              {\n                \"Term\": {\n                  \"Product\": \"string\"\n                }\n              }\n            ]\n          }\n        ]\n      },\n      \"Query\": {\n        \"QueryString\": \"string\"\n      },\n      \"Size\": 2256\n    },\n    {\n      \"EntityType\": \"string\",\n      \"Filter\": {\n        \"And\": [\n          {\n            \"Or\": [\n              {\n                \"Term\": {\n                  \"Product\": \"string\"\n                }\n              },\n              {\n                \"Term\": {\n                  \"Product\": \"string\"\n                }\n              }\n            ]\n          },\n          {\n            \"Or\": [\n              {\n                \"Term\": {\n                  \"Product\": \"string\"\n                }\n              },\n              {\n                \"Term\": {\n                  \"Product\": \"string\"\n                }\n              }\n            ]\n          }\n        ]\n      },\n      \"Query\": {\n        \"QueryString\": \"string\"\n      },\n      \"Size\": 6175\n    }\n  ],\n  \"LogicalId\": \"string\",\n  \"Scenario\": {\n    \"Dimensions\": [\n      {\n        \"DimensionName\": \"string\",\n        \"DimensionValue\": \"string\"\n      },\n      {\n        \"DimensionName\": \"string\",\n        \"DimensionValue\": \"string\"\n      }\n    ],\n    \"Name\": \"string\"\n  },\n  \"TimeZone\": \"string\"\n}",
+                                                            "options": {
+                                                                "raw": {
+                                                                    "headerFamily": "json",
+                                                                    "language": "json"
+                                                                }
+                                                            }
+                                                        },
+                                                        "auth": null
+                                                    },
+                                                    "response": [
+                                                        {
+                                                            "id": "bd90282f-41a2-4ca4-8726-9d44a8e9cf04",
+                                                            "name": "Observed JSON response.",
+                                                            "originalRequest": {
+                                                                "url": {
+                                                                    "path": [
+                                                                        "fd",
+                                                                        "substrateSearchService",
+                                                                        "api",
+                                                                        "v1",
+                                                                        "suggestions"
+                                                                    ],
+                                                                    "host": [
+                                                                        "{{baseUrl}}"
+                                                                    ],
+                                                                    "query": [],
+                                                                    "variable": []
+                                                                },
+                                                                "header": [
+                                                                    {
+                                                                        "key": "Content-Type",
+                                                                        "value": "application/json"
+                                                                    },
+                                                                    {
+                                                                        "key": "Accept",
+                                                                        "value": "application/json"
+                                                                    }
+                                                                ],
+                                                                "method": "POST",
+                                                                "body": {
+                                                                    "mode": "raw",
+                                                                    "raw": "{\n  \"Cvid\": \"string\",\n  \"EntityRequests\": [\n    {\n      \"EntityType\": \"string\",\n      \"Filter\": {\n        \"And\": [\n          {\n            \"Or\": [\n              {\n                \"Term\": {\n                  \"Product\": \"string\"\n                }\n              },\n              {\n                \"Term\": {\n                  \"Product\": \"string\"\n                }\n              }\n            ]\n          },\n          {\n            \"Or\": [\n              {\n                \"Term\": {\n                  \"Product\": \"string\"\n                }\n              },\n              {\n                \"Term\": {\n                  \"Product\": \"string\"\n                }\n              }\n            ]\n          }\n        ]\n      },\n      \"Query\": {\n        \"QueryString\": \"string\"\n      },\n      \"Size\": 2256\n    },\n    {\n      \"EntityType\": \"string\",\n      \"Filter\": {\n        \"And\": [\n          {\n            \"Or\": [\n              {\n                \"Term\": {\n                  \"Product\": \"string\"\n                }\n              },\n              {\n                \"Term\": {\n                  \"Product\": \"string\"\n                }\n              }\n            ]\n          },\n          {\n            \"Or\": [\n              {\n                \"Term\": {\n                  \"Product\": \"string\"\n                }\n              },\n              {\n                \"Term\": {\n                  \"Product\": \"string\"\n                }\n              }\n            ]\n          }\n        ]\n      },\n      \"Query\": {\n        \"QueryString\": \"string\"\n      },\n      \"Size\": 6175\n    }\n  ],\n  \"LogicalId\": \"string\",\n  \"Scenario\": {\n    \"Dimensions\": [\n      {\n        \"DimensionName\": \"string\",\n        \"DimensionValue\": \"string\"\n      },\n      {\n        \"DimensionName\": \"string\",\n        \"DimensionValue\": \"string\"\n      }\n    ],\n    \"Name\": \"string\"\n  },\n  \"TimeZone\": \"string\"\n}",
+                                                                    "options": {
+                                                                        "raw": {
+                                                                            "headerFamily": "json",
+                                                                            "language": "json"
+                                                                        }
+                                                                    }
+                                                                }
+                                                            },
+                                                            "status": "OK",
+                                                            "code": 200,
+                                                            "header": [
+                                                                {
+                                                                    "key": "Content-Type",
+                                                                    "value": "application/json"
+                                                                }
+                                                            ],
+                                                            "body": "{\n  \"Groups\": [\n    {\n      \"Suggestions\": [\n        {\n          \"CommandText\": \"string\",\n          \"DisplayCategory\": \"string\",\n          \"DisplayDescription\": \"string\",\n          \"DisplayText\": \"string\",\n          \"Id\": \"string\",\n          \"InteractionType\": \"string\",\n          \"Origin\": \"string\",\n          \"Products\": [\n            \"string\",\n            \"string\"\n          ],\n          \"PromptId\": \"string\",\n          \"ProviderId\": \"string\",\n          \"ProviderName\": \"string\",\n          \"ProviderPartyType\": \"string\",\n          \"ReferenceId\": \"string\",\n          \"ShortDisplayText\": \"string\",\n          \"ShowOnWork\": false,\n          \"Slug\": \"string\",\n          \"Text\": \"string\",\n          \"Title\": \"string\",\n          \"UserActivity\": {\n            \"Execution\": {\n              \"TurnCount\": 5521\n            },\n            \"Favorite\": {\n              \"IsFavorite\": false\n            }\n          },\n          \"promptProfileAttributes\": {\n            \"Departments\": [\n              \"\",\n              \"\"\n            ],\n            \"Industries\": [\n              \"\",\n              \"\"\n            ],\n            \"Roles\": [\n              \"\",\n              \"\"\n            ],\n            \"Tags\": [\n              \"string\",\n              \"string\"\n            ],\n            \"TaskTypes\": [\n              \"\",\n              \"\"\n            ]\n          }\n        },\n        {\n          \"CommandText\": \"string\",\n          \"DisplayCategory\": \"string\",\n          \"DisplayDescription\": \"string\",\n          \"DisplayText\": \"string\",\n          \"Id\": \"string\",\n          \"InteractionType\": \"string\",\n          \"Origin\": \"string\",\n          \"Products\": [\n            \"string\",\n            \"string\"\n          ],\n          \"PromptId\": \"string\",\n          \"ProviderId\": \"string\",\n          \"ProviderName\": \"string\",\n          \"ProviderPartyType\": \"string\",\n          \"ReferenceId\": \"string\",\n          \"ShortDisplayText\": \"string\",\n          \"ShowOnWork\": false,\n          \"Slug\": \"string\",\n          \"Text\": \"string\",\n          \"Title\": \"string\",\n          \"UserActivity\": {\n            \"Execution\": {\n              \"TurnCount\": 2443\n            },\n            \"Favorite\": {\n              \"IsFavorite\": true\n            }\n          },\n          \"promptProfileAttributes\": {\n            \"Departments\": [\n              \"\",\n              \"\"\n            ],\n            \"Industries\": [\n              \"\",\n              \"\"\n            ],\n            \"Roles\": [\n              \"\",\n              \"\"\n            ],\n            \"Tags\": [\n              \"string\",\n              \"string\"\n            ],\n            \"TaskTypes\": [\n              \"\",\n              \"\"\n            ]\n          }\n        }\n      ],\n      \"Type\": \"string\"\n    },\n    {\n      \"Suggestions\": [\n        {\n          \"CommandText\": \"string\",\n          \"DisplayCategory\": \"string\",\n          \"DisplayDescription\": \"string\",\n          \"DisplayText\": \"string\",\n          \"Id\": \"string\",\n          \"InteractionType\": \"string\",\n          \"Origin\": \"string\",\n          \"Products\": [\n            \"string\",\n            \"string\"\n          ],\n          \"PromptId\": \"string\",\n          \"ProviderId\": \"string\",\n          \"ProviderName\": \"string\",\n          \"ProviderPartyType\": \"string\",\n          \"ReferenceId\": \"string\",\n          \"ShortDisplayText\": \"string\",\n          \"ShowOnWork\": true,\n          \"Slug\": \"string\",\n          \"Text\": \"string\",\n          \"Title\": \"string\",\n          \"UserActivity\": {\n            \"Execution\": {\n              \"TurnCount\": 7351\n            },\n            \"Favorite\": {\n              \"IsFavorite\": false\n            }\n          },\n          \"promptProfileAttributes\": {\n            \"Departments\": [\n              \"\",\n              \"\"\n            ],\n            \"Industries\": [\n              \"\",\n              \"\"\n            ],\n            \"Roles\": [\n              \"\",\n              \"\"\n            ],\n            \"Tags\": [\n              \"string\",\n              \"string\"\n            ],\n            \"TaskTypes\": [\n              \"\",\n              \"\"\n            ]\n          }\n        },\n        {\n          \"CommandText\": \"string\",\n          \"DisplayCategory\": \"string\",\n          \"DisplayDescription\": \"string\",\n          \"DisplayText\": \"string\",\n          \"Id\": \"string\",\n          \"InteractionType\": \"string\",\n          \"Origin\": \"string\",\n          \"Products\": [\n            \"string\",\n            \"string\"\n          ],\n          \"PromptId\": \"string\",\n          \"ProviderId\": \"string\",\n          \"ProviderName\": \"string\",\n          \"ProviderPartyType\": \"string\",\n          \"ReferenceId\": \"string\",\n          \"ShortDisplayText\": \"string\",\n          \"ShowOnWork\": false,\n          \"Slug\": \"string\",\n          \"Text\": \"string\",\n          \"Title\": \"string\",\n          \"UserActivity\": {\n            \"Execution\": {\n              \"TurnCount\": 1016\n            },\n            \"Favorite\": {\n              \"IsFavorite\": false\n            }\n          },\n          \"promptProfileAttributes\": {\n            \"Departments\": [\n              \"\",\n              \"\"\n            ],\n            \"Industries\": [\n              \"\",\n              \"\"\n            ],\n            \"Roles\": [\n              \"\",\n              \"\"\n            ],\n            \"Tags\": [\n              \"string\",\n              \"string\"\n            ],\n            \"TaskTypes\": [\n              \"\",\n              \"\"\n            ]\n          }\n        }\n      ],\n      \"Type\": \"string\"\n    }\n  ],\n  \"Instrumentation\": {\n    \"TraceId\": \"string\",\n    \"UserCohort\": \"string\"\n  },\n  \"LayoutHints\": {\n    \"BestMatchSuggestions\": [\n      \"\",\n      \"\"\n    ]\n  }\n}",
+                                                            "cookie": [],
+                                                            "_postman_previewlanguage": "json"
+                                                        }
+                                                    ],
+                                                    "event": [],
+                                                    "protocolProfileBehavior": {
+                                                        "disableBodyPruning": true
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
                     "name": "mssearchconnectors",
                     "description": "",
                     "item": [
@@ -60023,6 +60243,135 @@
                     ]
                 },
                 {
+                    "name": "edgemanagementpft",
+                    "description": "",
+                    "item": [
+                        {
+                            "name": "api",
+                            "description": "",
+                            "item": [
+                                {
+                                    "name": "analysis",
+                                    "description": "",
+                                    "item": [
+                                        {
+                                            "name": "releaseNotes",
+                                            "description": "",
+                                            "item": [
+                                                {
+                                                    "id": "8a5206ac-e488-4898-8d44-e3991040d5b0",
+                                                    "name": "Analyze Edge release notes",
+                                                    "request": {
+                                                        "name": "Analyze Edge release notes",
+                                                        "description": {
+                                                            "content": "Submit deployed Edge policy context and instructions for release-note analysis. Native portal use was observed; side effects and replay safety have not been established.",
+                                                            "type": "text/plain"
+                                                        },
+                                                        "url": {
+                                                            "path": [
+                                                                "fd",
+                                                                "edgemanagementpft",
+                                                                "api",
+                                                                "analysis",
+                                                                "releaseNotes"
+                                                            ],
+                                                            "host": [
+                                                                "{{baseUrl}}"
+                                                            ],
+                                                            "query": [],
+                                                            "variable": []
+                                                        },
+                                                        "header": [
+                                                            {
+                                                                "key": "Content-Type",
+                                                                "value": "application/json"
+                                                            },
+                                                            {
+                                                                "key": "Accept",
+                                                                "value": "application/json"
+                                                            }
+                                                        ],
+                                                        "method": "POST",
+                                                        "body": {
+                                                            "mode": "raw",
+                                                            "raw": "{\n  \"additionalInstruction\": \"string\",\n  \"deployedEdgePolicies\": {\n    \"key_0\": \"string\"\n  }\n}",
+                                                            "options": {
+                                                                "raw": {
+                                                                    "headerFamily": "json",
+                                                                    "language": "json"
+                                                                }
+                                                            }
+                                                        },
+                                                        "auth": null
+                                                    },
+                                                    "response": [
+                                                        {
+                                                            "id": "654343f6-4c4a-4b10-9cdd-9eb1828778f5",
+                                                            "name": "Observed JSON response.",
+                                                            "originalRequest": {
+                                                                "url": {
+                                                                    "path": [
+                                                                        "fd",
+                                                                        "edgemanagementpft",
+                                                                        "api",
+                                                                        "analysis",
+                                                                        "releaseNotes"
+                                                                    ],
+                                                                    "host": [
+                                                                        "{{baseUrl}}"
+                                                                    ],
+                                                                    "query": [],
+                                                                    "variable": []
+                                                                },
+                                                                "header": [
+                                                                    {
+                                                                        "key": "Content-Type",
+                                                                        "value": "application/json"
+                                                                    },
+                                                                    {
+                                                                        "key": "Accept",
+                                                                        "value": "application/json"
+                                                                    }
+                                                                ],
+                                                                "method": "POST",
+                                                                "body": {
+                                                                    "mode": "raw",
+                                                                    "raw": "{\n  \"additionalInstruction\": \"string\",\n  \"deployedEdgePolicies\": {\n    \"key_0\": \"string\"\n  }\n}",
+                                                                    "options": {
+                                                                        "raw": {
+                                                                            "headerFamily": "json",
+                                                                            "language": "json"
+                                                                        }
+                                                                    }
+                                                                }
+                                                            },
+                                                            "status": "OK",
+                                                            "code": 200,
+                                                            "header": [
+                                                                {
+                                                                    "key": "Content-Type",
+                                                                    "value": "application/json"
+                                                                }
+                                                            ],
+                                                            "body": "{\n  \"SchemaVersion\": \"string\",\n  \"Tabs\": [\n    {\n      \"Id\": \"string\",\n      \"Order\": 3283,\n      \"Sections\": [\n        {\n          \"Id\": \"string\",\n          \"Items\": [\n            {\n              \"Id\": \"string\",\n              \"Severity\": \"string\",\n              \"Text\": \"string\"\n            },\n            {\n              \"Id\": \"string\",\n              \"Severity\": \"string\",\n              \"Text\": \"string\"\n            }\n          ],\n          \"Order\": 5142\n        },\n        {\n          \"Id\": \"string\",\n          \"Items\": [\n            {\n              \"Id\": \"string\",\n              \"Severity\": \"string\",\n              \"Text\": \"string\"\n            },\n            {\n              \"Id\": \"string\",\n              \"Severity\": \"string\",\n              \"Text\": \"string\"\n            }\n          ],\n          \"Order\": 9798\n        }\n      ]\n    },\n    {\n      \"Id\": \"string\",\n      \"Order\": 9342,\n      \"Sections\": [\n        {\n          \"Id\": \"string\",\n          \"Items\": [\n            {\n              \"Id\": \"string\",\n              \"Severity\": \"string\",\n              \"Text\": \"string\"\n            },\n            {\n              \"Id\": \"string\",\n              \"Severity\": \"string\",\n              \"Text\": \"string\"\n            }\n          ],\n          \"Order\": 7263\n        },\n        {\n          \"Id\": \"string\",\n          \"Items\": [\n            {\n              \"Id\": \"string\",\n              \"Severity\": \"string\",\n              \"Text\": \"string\"\n            },\n            {\n              \"Id\": \"string\",\n              \"Severity\": \"string\",\n              \"Text\": \"string\"\n            }\n          ],\n          \"Order\": 3263\n        }\n      ]\n    }\n  ]\n}",
+                                                            "cookie": [],
+                                                            "_postman_previewlanguage": "json"
+                                                        }
+                                                    ],
+                                                    "event": [],
+                                                    "protocolProfileBehavior": {
+                                                        "disableBodyPruning": true
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
                     "name": "edgeenterprisesitemanagement",
                     "description": "",
                     "item": [
@@ -65590,6 +65939,310 @@
                                                     "name": "{billingAccountId}",
                                                     "description": "",
                                                     "item": [
+                                                        {
+                                                            "name": "providers",
+                                                            "description": "",
+                                                            "item": [
+                                                                {
+                                                                    "name": "Microsoft.Marketplace",
+                                                                    "description": "",
+                                                                    "item": [
+                                                                        {
+                                                                            "name": "products",
+                                                                            "description": "",
+                                                                            "item": [
+                                                                                {
+                                                                                    "name": "{productId}",
+                                                                                    "description": "",
+                                                                                    "item": [
+                                                                                        {
+                                                                                            "id": "7f523037-94a9-4dfc-bc02-2899baa4f2f0",
+                                                                                            "name": "Get a billing account marketplace product",
+                                                                                            "request": {
+                                                                                                "name": "Get a billing account marketplace product",
+                                                                                                "description": {
+                                                                                                    "content": "Retrieve product and plan details for a marketplace product in a billing account. Product availability can differ; a captured 404 does not establish removal or its cause.",
+                                                                                                    "type": "text/plain"
+                                                                                                },
+                                                                                                "url": {
+                                                                                                    "path": [
+                                                                                                        "fd",
+                                                                                                        "arm",
+                                                                                                        "providers",
+                                                                                                        "Microsoft.Billing",
+                                                                                                        "billingAccounts",
+                                                                                                        ":billingAccountId",
+                                                                                                        "providers",
+                                                                                                        "Microsoft.Marketplace",
+                                                                                                        "products",
+                                                                                                        ":productId"
+                                                                                                    ],
+                                                                                                    "host": [
+                                                                                                        "{{baseUrl}}"
+                                                                                                    ],
+                                                                                                    "query": [
+                                                                                                        {
+                                                                                                            "disabled": false,
+                                                                                                            "description": {
+                                                                                                                "content": "Observed query parameter. Values, accepted value sets and requiredness were not established.",
+                                                                                                                "type": "text/plain"
+                                                                                                            },
+                                                                                                            "key": "api-version",
+                                                                                                            "value": "string"
+                                                                                                        },
+                                                                                                        {
+                                                                                                            "disabled": false,
+                                                                                                            "description": {
+                                                                                                                "content": "Observed query parameter. Values, accepted value sets and requiredness were not established.",
+                                                                                                                "type": "text/plain"
+                                                                                                            },
+                                                                                                            "key": "onBehalfOf",
+                                                                                                            "value": "string"
+                                                                                                        },
+                                                                                                        {
+                                                                                                            "disabled": false,
+                                                                                                            "description": {
+                                                                                                                "content": "Observed query parameter. Values, accepted value sets and requiredness were not established.",
+                                                                                                                "type": "text/plain"
+                                                                                                            },
+                                                                                                            "key": "skuId",
+                                                                                                            "value": "string"
+                                                                                                        }
+                                                                                                    ],
+                                                                                                    "variable": [
+                                                                                                        {
+                                                                                                            "type": "any",
+                                                                                                            "value": "string",
+                                                                                                            "key": "billingAccountId",
+                                                                                                            "disabled": false,
+                                                                                                            "description": {
+                                                                                                                "content": "(Required) Billing account identifier from the portal context; concrete values are not published.",
+                                                                                                                "type": "text/plain"
+                                                                                                            }
+                                                                                                        },
+                                                                                                        {
+                                                                                                            "type": "any",
+                                                                                                            "value": "string",
+                                                                                                            "key": "productId",
+                                                                                                            "disabled": false,
+                                                                                                            "description": {
+                                                                                                                "content": "(Required) Marketplace product identifier from the portal context.",
+                                                                                                                "type": "text/plain"
+                                                                                                            }
+                                                                                                        }
+                                                                                                    ]
+                                                                                                },
+                                                                                                "header": [
+                                                                                                    {
+                                                                                                        "key": "Accept",
+                                                                                                        "value": "application/json"
+                                                                                                    }
+                                                                                                ],
+                                                                                                "method": "GET",
+                                                                                                "body": {},
+                                                                                                "auth": null
+                                                                                            },
+                                                                                            "response": [
+                                                                                                {
+                                                                                                    "id": "051dc148-e014-4bfc-8cb4-3c157095356f",
+                                                                                                    "name": "Observed JSON response.",
+                                                                                                    "originalRequest": {
+                                                                                                        "url": {
+                                                                                                            "path": [
+                                                                                                                "fd",
+                                                                                                                "arm",
+                                                                                                                "providers",
+                                                                                                                "Microsoft.Billing",
+                                                                                                                "billingAccounts",
+                                                                                                                ":billingAccountId",
+                                                                                                                "providers",
+                                                                                                                "Microsoft.Marketplace",
+                                                                                                                "products",
+                                                                                                                ":productId"
+                                                                                                            ],
+                                                                                                            "host": [
+                                                                                                                "{{baseUrl}}"
+                                                                                                            ],
+                                                                                                            "query": [
+                                                                                                                {
+                                                                                                                    "disabled": false,
+                                                                                                                    "description": {
+                                                                                                                        "content": "Observed query parameter. Values, accepted value sets and requiredness were not established.",
+                                                                                                                        "type": "text/plain"
+                                                                                                                    },
+                                                                                                                    "key": "api-version",
+                                                                                                                    "value": "string"
+                                                                                                                },
+                                                                                                                {
+                                                                                                                    "disabled": false,
+                                                                                                                    "description": {
+                                                                                                                        "content": "Observed query parameter. Values, accepted value sets and requiredness were not established.",
+                                                                                                                        "type": "text/plain"
+                                                                                                                    },
+                                                                                                                    "key": "onBehalfOf",
+                                                                                                                    "value": "string"
+                                                                                                                },
+                                                                                                                {
+                                                                                                                    "disabled": false,
+                                                                                                                    "description": {
+                                                                                                                        "content": "Observed query parameter. Values, accepted value sets and requiredness were not established.",
+                                                                                                                        "type": "text/plain"
+                                                                                                                    },
+                                                                                                                    "key": "skuId",
+                                                                                                                    "value": "string"
+                                                                                                                }
+                                                                                                            ],
+                                                                                                            "variable": [
+                                                                                                                {
+                                                                                                                    "disabled": false,
+                                                                                                                    "description": {
+                                                                                                                        "content": "(Required) Billing account identifier from the portal context; concrete values are not published.",
+                                                                                                                        "type": "text/plain"
+                                                                                                                    },
+                                                                                                                    "type": "any",
+                                                                                                                    "value": "string",
+                                                                                                                    "key": "billingAccountId"
+                                                                                                                },
+                                                                                                                {
+                                                                                                                    "disabled": false,
+                                                                                                                    "description": {
+                                                                                                                        "content": "(Required) Marketplace product identifier from the portal context.",
+                                                                                                                        "type": "text/plain"
+                                                                                                                    },
+                                                                                                                    "type": "any",
+                                                                                                                    "value": "string",
+                                                                                                                    "key": "productId"
+                                                                                                                }
+                                                                                                            ]
+                                                                                                        },
+                                                                                                        "header": [
+                                                                                                            {
+                                                                                                                "key": "Accept",
+                                                                                                                "value": "application/json"
+                                                                                                            }
+                                                                                                        ],
+                                                                                                        "method": "GET",
+                                                                                                        "body": {}
+                                                                                                    },
+                                                                                                    "status": "OK",
+                                                                                                    "code": 200,
+                                                                                                    "header": [
+                                                                                                        {
+                                                                                                            "key": "Content-Type",
+                                                                                                            "value": "application/json"
+                                                                                                        }
+                                                                                                    ],
+                                                                                                    "body": "{\n  \"associatedResourceProvider\": \"string\",\n  \"attributes\": \"\",\n  \"azureBenefit\": \"string\",\n  \"description\": \"string\",\n  \"disableSendEmailOnPurchase\": true,\n  \"displayName\": \"string\",\n  \"hasAddOns\": true,\n  \"hasMarketplaceFootprint\": true,\n  \"hasRiPlans\": false,\n  \"hasStandardContractAmendments\": false,\n  \"images\": [\n    {\n      \"context\": \"string\",\n      \"items\": [\n        {\n          \"id\": \"string\",\n          \"type\": \"string\",\n          \"uri\": \"string\"\n        },\n        {\n          \"id\": \"string\",\n          \"type\": \"string\",\n          \"uri\": \"string\"\n        }\n      ]\n    },\n    {\n      \"context\": \"string\",\n      \"items\": [\n        {\n          \"id\": \"string\",\n          \"type\": \"string\",\n          \"uri\": \"string\"\n        },\n        {\n          \"id\": \"string\",\n          \"type\": \"string\",\n          \"uri\": \"string\"\n        }\n      ]\n    }\n  ],\n  \"isPrivate\": false,\n  \"isReseller\": false,\n  \"isStopSell\": true,\n  \"isTestProduct\": true,\n  \"language\": \"string\",\n  \"largeIconUri\": \"string\",\n  \"legalTermsType\": \"string\",\n  \"offerId\": \"\",\n  \"plans\": [\n    {\n      \"availabilities\": [\n        {\n          \"actions\": [\n            \"string\",\n            \"string\"\n          ],\n          \"consumptionUnitType\": \"string\",\n          \"displayRank\": 4370,\n          \"endDate\": \"\",\n          \"hasFreeTrials\": false,\n          \"id\": \"string\",\n          \"invoicingPolicy\": {\n            \"filterInstructions\": [\n              {\n                \"filterName\": \"string\",\n                \"operator\": \"string\",\n                \"values\": [\n                  \"string\",\n                  \"string\"\n                ]\n              },\n              {\n                \"filterName\": \"string\",\n                \"operator\": \"string\",\n                \"values\": [\n                  \"string\",\n                  \"string\"\n                ]\n              }\n            ],\n            \"invoicingCadence\": \"string\"\n          },\n          \"isStopSell\": false,\n          \"market\": \"string\",\n          \"meter\": \"\",\n          \"pricingAudience\": \"string\",\n          \"startDate\": \"string\",\n          \"terms\": [\n            {\n              \"actions\": [\n                \"string\",\n                \"string\"\n              ],\n              \"billingPlan\": {\n                \"billingPeriod\": \"string\",\n                \"description\": \"string\",\n                \"price\": {\n                  \"currencyCode\": \"string\",\n                  \"isPiRequired\": true,\n                  \"listPrice\": 7348.51146028434,\n                  \"msrp\": 4228.651329669651\n                },\n                \"title\": \"string\"\n              },\n              \"isAutorenewable\": true,\n              \"lifecyclePolicy\": {\n                \"graceDuration\": \"string\",\n                \"inactiveDuration\": \"string\",\n                \"lockoutDuration\": \"string\"\n              },\n              \"price\": {\n                \"currencyCode\": \"string\",\n                \"isPiRequired\": true,\n                \"listPrice\": 4128.643048751387,\n                \"msrp\": 1972.0030981819425\n              },\n              \"productCode\": \"string\",\n              \"prorationPolicy\": {\n                \"minimumProratedUnits\": \"\"\n              },\n              \"renewTermId\": \"string\",\n              \"renewTermUnits\": \"string\",\n              \"renewToTermBillingPlan\": \"string\",\n              \"state\": \"string\",\n              \"termDescription\": \"string\",\n              \"termDescriptionParameters\": \"\",\n              \"termId\": \"string\",\n              \"termUnit\": \"string\"\n            },\n            {\n              \"actions\": [\n                \"string\",\n                \"string\"\n              ],\n              \"billingPlan\": {\n                \"billingPeriod\": \"string\",\n                \"description\": \"string\",\n                \"price\": {\n                  \"currencyCode\": \"string\",\n                  \"isPiRequired\": false,\n                  \"listPrice\": 3182.2395805605343,\n                  \"msrp\": 2808.3290720437435\n                },\n                \"title\": \"string\"\n              },\n              \"isAutorenewable\": false,\n              \"lifecyclePolicy\": {\n                \"graceDuration\": \"string\",\n                \"inactiveDuration\": \"string\",\n                \"lockoutDuration\": \"string\"\n              },\n              \"price\": {\n                \"currencyCode\": \"string\",\n                \"isPiRequired\": false,\n                \"listPrice\": 3327.2908414538138,\n                \"msrp\": 8900.413704680044\n              },\n              \"productCode\": \"string\",\n              \"prorationPolicy\": {\n                \"minimumProratedUnits\": \"\"\n              },\n              \"renewTermId\": \"string\",\n              \"renewTermUnits\": \"string\",\n              \"renewToTermBillingPlan\": \"string\",\n              \"state\": \"string\",\n              \"termDescription\": \"string\",\n              \"termDescriptionParameters\": \"\",\n              \"termId\": \"string\",\n              \"termUnit\": \"string\"\n            }\n          ]\n        },\n        {\n          \"actions\": [\n            \"string\",\n            \"string\"\n          ],\n          \"consumptionUnitType\": \"string\",\n          \"displayRank\": 9311,\n          \"endDate\": \"\",\n          \"hasFreeTrials\": true,\n          \"id\": \"string\",\n          \"invoicingPolicy\": {\n            \"filterInstructions\": [\n              {\n                \"filterName\": \"string\",\n                \"operator\": \"string\",\n                \"values\": [\n                  \"string\",\n                  \"string\"\n                ]\n              },\n              {\n                \"filterName\": \"string\",\n                \"operator\": \"string\",\n                \"values\": [\n                  \"string\",\n                  \"string\"\n                ]\n              }\n            ],\n            \"invoicingCadence\": \"string\"\n          },\n          \"isStopSell\": false,\n          \"market\": \"string\",\n          \"meter\": \"\",\n          \"pricingAudience\": \"string\",\n          \"startDate\": \"string\",\n          \"terms\": [\n            {\n              \"actions\": [\n                \"string\",\n                \"string\"\n              ],\n              \"billingPlan\": {\n                \"billingPeriod\": \"string\",\n                \"description\": \"string\",\n                \"price\": {\n                  \"currencyCode\": \"string\",\n                  \"isPiRequired\": false,\n                  \"listPrice\": 6921.876013178523,\n                  \"msrp\": 5466.029891288558\n                },\n                \"title\": \"string\"\n              },\n              \"isAutorenewable\": true,\n              \"lifecyclePolicy\": {\n                \"graceDuration\": \"string\",\n                \"inactiveDuration\": \"string\",\n                \"lockoutDuration\": \"string\"\n              },\n              \"price\": {\n                \"currencyCode\": \"string\",\n                \"isPiRequired\": false,\n                \"listPrice\": 203.23161634371866,\n                \"msrp\": 1567.0342937342607\n              },\n              \"productCode\": \"string\",\n              \"prorationPolicy\": {\n                \"minimumProratedUnits\": \"\"\n              },\n              \"renewTermId\": \"string\",\n              \"renewTermUnits\": \"string\",\n              \"renewToTermBillingPlan\": \"string\",\n              \"state\": \"string\",\n              \"termDescription\": \"string\",\n              \"termDescriptionParameters\": \"\",\n              \"termId\": \"string\",\n              \"termUnit\": \"string\"\n            },\n            {\n              \"actions\": [\n                \"string\",\n                \"string\"\n              ],\n              \"billingPlan\": {\n                \"billingPeriod\": \"string\",\n                \"description\": \"string\",\n                \"price\": {\n                  \"currencyCode\": \"string\",\n                  \"isPiRequired\": true,\n                  \"listPrice\": 5785.189138656754,\n                  \"msrp\": 50.758501224179575\n                },\n                \"title\": \"string\"\n              },\n              \"isAutorenewable\": false,\n              \"lifecyclePolicy\": {\n                \"graceDuration\": \"string\",\n                \"inactiveDuration\": \"string\",\n                \"lockoutDuration\": \"string\"\n              },\n              \"price\": {\n                \"currencyCode\": \"string\",\n                \"isPiRequired\": false,\n                \"listPrice\": 3522.498130795069,\n                \"msrp\": 5118.848374659873\n              },\n              \"productCode\": \"string\",\n              \"prorationPolicy\": {\n                \"minimumProratedUnits\": \"\"\n              },\n              \"renewTermId\": \"string\",\n              \"renewTermUnits\": \"string\",\n              \"renewToTermBillingPlan\": \"string\",\n              \"state\": \"string\",\n              \"termDescription\": \"string\",\n              \"termDescriptionParameters\": \"\",\n              \"termId\": \"string\",\n              \"termUnit\": \"string\"\n            }\n          ]\n        }\n      ],\n      \"benefits\": [\n        {\n          \"basePlanId\": \"string\",\n          \"baseProductCode\": \"\",\n          \"benefitType\": \"string\",\n          \"billingPlan\": \"string\",\n          \"meterType\": \"\",\n          \"termDuration\": \"string\"\n        },\n        {\n          \"basePlanId\": \"string\",\n          \"baseProductCode\": \"\",\n          \"benefitType\": \"string\",\n          \"billingPlan\": \"string\",\n          \"meterType\": \"\",\n          \"termDuration\": \"string\"\n        }\n      ],\n      \"categoryIds\": [\n        \"\",\n        \"\"\n      ],\n      \"constraintsData\": {\n        \"prerequisiteNegotiatedTerms\": {\n          \"mustHaveAll\": \"\",\n          \"mustHaveNone\": \"\"\n        },\n        \"prerequisiteSkus\": {\n          \"mustHaveAll\": \"\",\n          \"mustHaveAny\": \"\"\n        },\n        \"seatConstraints\": [\n          {\n            \"maxSeats\": 2238,\n            \"minSeats\": 2507,\n            \"type\": \"string\"\n          },\n          {\n            \"maxSeats\": 2857,\n            \"minSeats\": 224,\n            \"type\": \"string\"\n          }\n        ]\n      },\n      \"conversionTargetSkuIds\": [\n        \"\",\n        \"\"\n      ],\n      \"description\": \"string\",\n      \"displayName\": \"string\",\n      \"downloadOptions\": [\n        \"\",\n        \"\"\n      ],\n      \"entraIdVersion\": \"string\",\n      \"fulfillmentData\": {\n        \"additionalProducts\": \"\",\n        \"attributes\": \"\",\n        \"fulfillmentType\": \"string\"\n      },\n      \"hasConsumptionComponents\": true,\n      \"hasRi\": false,\n      \"id\": \"string\",\n      \"isAdminEligible\": false,\n      \"isBundle\": false,\n      \"isEndUserEligible\": false,\n      \"isHidden\": false,\n      \"isPrivate\": false,\n      \"isQuantifiable\": false,\n      \"isStopSell\": false,\n      \"maxQuantity\": 6610,\n      \"metadata\": {\n        \"altStackReference\": \"\",\n        \"generation\": \"\"\n      },\n      \"meterTypeDescriptions\": [\n        \"\",\n        \"\"\n      ],\n      \"minQuantity\": 2414,\n      \"offeringProperties\": \"\",\n      \"pricingTypes\": [\n        \"string\",\n        \"string\"\n      ],\n      \"skuAttributes\": \"\",\n      \"skuId\": \"string\",\n      \"skuTitle\": \"string\"\n    },\n    {\n      \"availabilities\": [\n        {\n          \"actions\": [\n            \"string\",\n            \"string\"\n          ],\n          \"consumptionUnitType\": \"string\",\n          \"displayRank\": 585,\n          \"endDate\": \"\",\n          \"hasFreeTrials\": true,\n          \"id\": \"string\",\n          \"invoicingPolicy\": {\n            \"filterInstructions\": [\n              {\n                \"filterName\": \"string\",\n                \"operator\": \"string\",\n                \"values\": [\n                  \"string\",\n                  \"string\"\n                ]\n              },\n              {\n                \"filterName\": \"string\",\n                \"operator\": \"string\",\n                \"values\": [\n                  \"string\",\n                  \"string\"\n                ]\n              }\n            ],\n            \"invoicingCadence\": \"string\"\n          },\n          \"isStopSell\": false,\n          \"market\": \"string\",\n          \"meter\": \"\",\n          \"pricingAudience\": \"string\",\n          \"startDate\": \"string\",\n          \"terms\": [\n            {\n              \"actions\": [\n                \"string\",\n                \"string\"\n              ],\n              \"billingPlan\": {\n                \"billingPeriod\": \"string\",\n                \"description\": \"string\",\n                \"price\": {\n                  \"currencyCode\": \"string\",\n                  \"isPiRequired\": false,\n                  \"listPrice\": 1386.3034144485375,\n                  \"msrp\": 7245.014923325072\n                },\n                \"title\": \"string\"\n              },\n              \"isAutorenewable\": false,\n              \"lifecyclePolicy\": {\n                \"graceDuration\": \"string\",\n                \"inactiveDuration\": \"string\",\n                \"lockoutDuration\": \"string\"\n              },\n              \"price\": {\n                \"currencyCode\": \"string\",\n                \"isPiRequired\": false,\n                \"listPrice\": 5728.318623782952,\n                \"msrp\": 3122.4587913223945\n              },\n              \"productCode\": \"string\",\n              \"prorationPolicy\": {\n                \"minimumProratedUnits\": \"\"\n              },\n              \"renewTermId\": \"string\",\n              \"renewTermUnits\": \"string\",\n              \"renewToTermBillingPlan\": \"string\",\n              \"state\": \"string\",\n              \"termDescription\": \"string\",\n              \"termDescriptionParameters\": \"\",\n              \"termId\": \"string\",\n              \"termUnit\": \"string\"\n            },\n            {\n              \"actions\": [\n                \"string\",\n                \"string\"\n              ],\n              \"billingPlan\": {\n                \"billingPeriod\": \"string\",\n                \"description\": \"string\",\n                \"price\": {\n                  \"currencyCode\": \"string\",\n                  \"isPiRequired\": true,\n                  \"listPrice\": 2183.6725659142144,\n                  \"msrp\": 3587.808852086958\n                },\n                \"title\": \"string\"\n              },\n              \"isAutorenewable\": true,\n              \"lifecyclePolicy\": {\n                \"graceDuration\": \"string\",\n                \"inactiveDuration\": \"string\",\n                \"lockoutDuration\": \"string\"\n              },\n              \"price\": {\n                \"currencyCode\": \"string\",\n                \"isPiRequired\": true,\n                \"listPrice\": 8109.897286495202,\n                \"msrp\": 7679.862085475804\n              },\n              \"productCode\": \"string\",\n              \"prorationPolicy\": {\n                \"minimumProratedUnits\": \"\"\n              },\n              \"renewTermId\": \"string\",\n              \"renewTermUnits\": \"string\",\n              \"renewToTermBillingPlan\": \"string\",\n              \"state\": \"string\",\n              \"termDescription\": \"string\",\n              \"termDescriptionParameters\": \"\",\n              \"termId\": \"string\",\n              \"termUnit\": \"string\"\n            }\n          ]\n        },\n        {\n          \"actions\": [\n            \"string\",\n            \"string\"\n          ],\n          \"consumptionUnitType\": \"string\",\n          \"displayRank\": 7641,\n          \"endDate\": \"\",\n          \"hasFreeTrials\": true,\n          \"id\": \"string\",\n          \"invoicingPolicy\": {\n            \"filterInstructions\": [\n              {\n                \"filterName\": \"string\",\n                \"operator\": \"string\",\n                \"values\": [\n                  \"string\",\n                  \"string\"\n                ]\n              },\n              {\n                \"filterName\": \"string\",\n                \"operator\": \"string\",\n                \"values\": [\n                  \"string\",\n                  \"string\"\n                ]\n              }\n            ],\n            \"invoicingCadence\": \"string\"\n          },\n          \"isStopSell\": false,\n          \"market\": \"string\",\n          \"meter\": \"\",\n          \"pricingAudience\": \"string\",\n          \"startDate\": \"string\",\n          \"terms\": [\n            {\n              \"actions\": [\n                \"string\",\n                \"string\"\n              ],\n              \"billingPlan\": {\n                \"billingPeriod\": \"string\",\n                \"description\": \"string\",\n                \"price\": {\n                  \"currencyCode\": \"string\",\n                  \"isPiRequired\": false,\n                  \"listPrice\": 8049.821385251048,\n                  \"msrp\": 227.09097602368388\n                },\n                \"title\": \"string\"\n              },\n              \"isAutorenewable\": false,\n              \"lifecyclePolicy\": {\n                \"graceDuration\": \"string\",\n                \"inactiveDuration\": \"string\",\n                \"lockoutDuration\": \"string\"\n              },\n              \"price\": {\n                \"currencyCode\": \"string\",\n                \"isPiRequired\": false,\n                \"listPrice\": 3200.939756751878,\n                \"msrp\": 9881.99923090852\n              },\n              \"productCode\": \"string\",\n              \"prorationPolicy\": {\n                \"minimumProratedUnits\": \"\"\n              },\n              \"renewTermId\": \"string\",\n              \"renewTermUnits\": \"string\",\n              \"renewToTermBillingPlan\": \"string\",\n              \"state\": \"string\",\n              \"termDescription\": \"string\",\n              \"termDescriptionParameters\": \"\",\n              \"termId\": \"string\",\n              \"termUnit\": \"string\"\n            },\n            {\n              \"actions\": [\n                \"string\",\n                \"string\"\n              ],\n              \"billingPlan\": {\n                \"billingPeriod\": \"string\",\n                \"description\": \"string\",\n                \"price\": {\n                  \"currencyCode\": \"string\",\n                  \"isPiRequired\": false,\n                  \"listPrice\": 1590.4734579246692,\n                  \"msrp\": 5847.244277079892\n                },\n                \"title\": \"string\"\n              },\n              \"isAutorenewable\": false,\n              \"lifecyclePolicy\": {\n                \"graceDuration\": \"string\",\n                \"inactiveDuration\": \"string\",\n                \"lockoutDuration\": \"string\"\n              },\n              \"price\": {\n                \"currencyCode\": \"string\",\n                \"isPiRequired\": false,\n                \"listPrice\": 9085.91264706123,\n                \"msrp\": 9914.83520298659\n              },\n              \"productCode\": \"string\",\n              \"prorationPolicy\": {\n                \"minimumProratedUnits\": \"\"\n              },\n              \"renewTermId\": \"string\",\n              \"renewTermUnits\": \"string\",\n              \"renewToTermBillingPlan\": \"string\",\n              \"state\": \"string\",\n              \"termDescription\": \"string\",\n              \"termDescriptionParameters\": \"\",\n              \"termId\": \"string\",\n              \"termUnit\": \"string\"\n            }\n          ]\n        }\n      ],\n      \"benefits\": [\n        {\n          \"basePlanId\": \"string\",\n          \"baseProductCode\": \"\",\n          \"benefitType\": \"string\",\n          \"billingPlan\": \"string\",\n          \"meterType\": \"\",\n          \"termDuration\": \"string\"\n        },\n        {\n          \"basePlanId\": \"string\",\n          \"baseProductCode\": \"\",\n          \"benefitType\": \"string\",\n          \"billingPlan\": \"string\",\n          \"meterType\": \"\",\n          \"termDuration\": \"string\"\n        }\n      ],\n      \"categoryIds\": [\n        \"\",\n        \"\"\n      ],\n      \"constraintsData\": {\n        \"prerequisiteNegotiatedTerms\": {\n          \"mustHaveAll\": \"\",\n          \"mustHaveNone\": \"\"\n        },\n        \"prerequisiteSkus\": {\n          \"mustHaveAll\": \"\",\n          \"mustHaveAny\": \"\"\n        },\n        \"seatConstraints\": [\n          {\n            \"maxSeats\": 6687,\n            \"minSeats\": 6450,\n            \"type\": \"string\"\n          },\n          {\n            \"maxSeats\": 4007,\n            \"minSeats\": 2064,\n            \"type\": \"string\"\n          }\n        ]\n      },\n      \"conversionTargetSkuIds\": [\n        \"\",\n        \"\"\n      ],\n      \"description\": \"string\",\n      \"displayName\": \"string\",\n      \"downloadOptions\": [\n        \"\",\n        \"\"\n      ],\n      \"entraIdVersion\": \"string\",\n      \"fulfillmentData\": {\n        \"additionalProducts\": \"\",\n        \"attributes\": \"\",\n        \"fulfillmentType\": \"string\"\n      },\n      \"hasConsumptionComponents\": true,\n      \"hasRi\": false,\n      \"id\": \"string\",\n      \"isAdminEligible\": false,\n      \"isBundle\": false,\n      \"isEndUserEligible\": false,\n      \"isHidden\": true,\n      \"isPrivate\": true,\n      \"isQuantifiable\": true,\n      \"isStopSell\": false,\n      \"maxQuantity\": 912,\n      \"metadata\": {\n        \"altStackReference\": \"\",\n        \"generation\": \"\"\n      },\n      \"meterTypeDescriptions\": [\n        \"\",\n        \"\"\n      ],\n      \"minQuantity\": 4661,\n      \"offeringProperties\": \"\",\n      \"pricingTypes\": [\n        \"string\",\n        \"string\"\n      ],\n      \"skuAttributes\": \"\",\n      \"skuId\": \"string\",\n      \"skuTitle\": \"string\"\n    }\n  ],\n  \"popularity\": 5975,\n  \"pricingTypes\": [\n    \"string\",\n    \"string\"\n  ],\n  \"productFamily\": \"string\",\n  \"productId\": \"string\",\n  \"productOwnershipSellingMotion\": \"string\",\n  \"productSubType\": \"string\",\n  \"productType\": \"string\",\n  \"publisherDisplayName\": \"string\",\n  \"publisherId\": \"string\",\n  \"publisherType\": \"string\",\n  \"publishingStage\": \"string\",\n  \"service\": \"string\",\n  \"serviceFamily\": \"string\",\n  \"skuAggregatedData\": {\n    \"actions\": [\n      \"string\",\n      \"string\"\n    ],\n    \"hasAdminEligibleSKUs\": false,\n    \"hasConsumptionComponents\": false,\n    \"hasEndUserEligibleSKUs\": true,\n    \"states\": [\n      \"string\",\n      \"string\"\n    ]\n  },\n  \"standardContractAmendmentsRevisionId\": \"string\"\n}",
+                                                                                                    "cookie": [],
+                                                                                                    "_postman_previewlanguage": "json"
+                                                                                                },
+                                                                                                {
+                                                                                                    "id": "466f4593-6728-46b1-b1f0-7d4999be0bda",
+                                                                                                    "name": "Observed error response; its cause and wider availability are not established.",
+                                                                                                    "originalRequest": {
+                                                                                                        "url": {
+                                                                                                            "path": [
+                                                                                                                "fd",
+                                                                                                                "arm",
+                                                                                                                "providers",
+                                                                                                                "Microsoft.Billing",
+                                                                                                                "billingAccounts",
+                                                                                                                ":billingAccountId",
+                                                                                                                "providers",
+                                                                                                                "Microsoft.Marketplace",
+                                                                                                                "products",
+                                                                                                                ":productId"
+                                                                                                            ],
+                                                                                                            "host": [
+                                                                                                                "{{baseUrl}}"
+                                                                                                            ],
+                                                                                                            "query": [
+                                                                                                                {
+                                                                                                                    "disabled": false,
+                                                                                                                    "description": {
+                                                                                                                        "content": "Observed query parameter. Values, accepted value sets and requiredness were not established.",
+                                                                                                                        "type": "text/plain"
+                                                                                                                    },
+                                                                                                                    "key": "api-version",
+                                                                                                                    "value": "string"
+                                                                                                                },
+                                                                                                                {
+                                                                                                                    "disabled": false,
+                                                                                                                    "description": {
+                                                                                                                        "content": "Observed query parameter. Values, accepted value sets and requiredness were not established.",
+                                                                                                                        "type": "text/plain"
+                                                                                                                    },
+                                                                                                                    "key": "onBehalfOf",
+                                                                                                                    "value": "string"
+                                                                                                                },
+                                                                                                                {
+                                                                                                                    "disabled": false,
+                                                                                                                    "description": {
+                                                                                                                        "content": "Observed query parameter. Values, accepted value sets and requiredness were not established.",
+                                                                                                                        "type": "text/plain"
+                                                                                                                    },
+                                                                                                                    "key": "skuId",
+                                                                                                                    "value": "string"
+                                                                                                                }
+                                                                                                            ],
+                                                                                                            "variable": [
+                                                                                                                {
+                                                                                                                    "disabled": false,
+                                                                                                                    "description": {
+                                                                                                                        "content": "(Required) Billing account identifier from the portal context; concrete values are not published.",
+                                                                                                                        "type": "text/plain"
+                                                                                                                    },
+                                                                                                                    "type": "any",
+                                                                                                                    "value": "string",
+                                                                                                                    "key": "billingAccountId"
+                                                                                                                },
+                                                                                                                {
+                                                                                                                    "disabled": false,
+                                                                                                                    "description": {
+                                                                                                                        "content": "(Required) Marketplace product identifier from the portal context.",
+                                                                                                                        "type": "text/plain"
+                                                                                                                    },
+                                                                                                                    "type": "any",
+                                                                                                                    "value": "string",
+                                                                                                                    "key": "productId"
+                                                                                                                }
+                                                                                                            ]
+                                                                                                        },
+                                                                                                        "header": [
+                                                                                                            {
+                                                                                                                "key": "Accept",
+                                                                                                                "value": "application/json"
+                                                                                                            }
+                                                                                                        ],
+                                                                                                        "method": "GET",
+                                                                                                        "body": {}
+                                                                                                    },
+                                                                                                    "status": "Not Found",
+                                                                                                    "code": 404,
+                                                                                                    "header": [
+                                                                                                        {
+                                                                                                            "key": "Content-Type",
+                                                                                                            "value": "application/json"
+                                                                                                        }
+                                                                                                    ],
+                                                                                                    "body": "{\n  \"error\": {\n    \"additionalMetaData\": \"\",\n    \"code\": \"string\",\n    \"details\": [\n      \"\",\n      \"\"\n    ],\n    \"message\": \"string\"\n  }\n}",
+                                                                                                    "cookie": [],
+                                                                                                    "_postman_previewlanguage": "json"
+                                                                                                }
+                                                                                            ],
+                                                                                            "event": [],
+                                                                                            "protocolProfileBehavior": {
+                                                                                                "disableBodyPruning": true
+                                                                                            }
+                                                                                        }
+                                                                                    ]
+                                                                                }
+                                                                            ]
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        },
                                                         {
                                                             "name": "billingProfiles",
                                                             "description": "",
@@ -76671,6 +77324,243 @@
                     "description": "",
                     "item": [
                         {
+                            "name": "GetConciergeConfig",
+                            "description": "",
+                            "item": [
+                                {
+                                    "id": "56db59af-8389-49fd-a376-fa74a53951c7",
+                                    "name": "Get support widget configuration",
+                                    "request": {
+                                        "name": "Get support widget configuration",
+                                        "description": {
+                                            "content": "Retrieve shared support widget configuration for an application and culture.",
+                                            "type": "text/plain"
+                                        },
+                                        "url": {
+                                            "path": [
+                                                "api",
+                                                "concierge",
+                                                "GetConciergeConfig"
+                                            ],
+                                            "host": [
+                                                "{{baseUrl}}"
+                                            ],
+                                            "query": [
+                                                {
+                                                    "disabled": false,
+                                                    "description": {
+                                                        "content": "Observed query parameter. Values, accepted value sets and requiredness were not established.",
+                                                        "type": "text/plain"
+                                                    },
+                                                    "key": "appName",
+                                                    "value": "string"
+                                                },
+                                                {
+                                                    "disabled": false,
+                                                    "description": {
+                                                        "content": "Observed query parameter. Values, accepted value sets and requiredness were not established.",
+                                                        "type": "text/plain"
+                                                    },
+                                                    "key": "culture",
+                                                    "value": "string"
+                                                }
+                                            ],
+                                            "variable": []
+                                        },
+                                        "method": "GET",
+                                        "body": {},
+                                        "auth": null
+                                    },
+                                    "response": [],
+                                    "event": [],
+                                    "protocolProfileBehavior": {
+                                        "disableBodyPruning": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "GetConciergeConfigAll",
+                            "description": "",
+                            "item": [
+                                {
+                                    "id": "dff8e519-e537-4e02-a87e-276066640d00",
+                                    "name": "Get extended support configuration",
+                                    "request": {
+                                        "name": "Get extended support configuration",
+                                        "description": {
+                                            "content": "Retrieve the extended configuration loaded by the shared support experience.",
+                                            "type": "text/plain"
+                                        },
+                                        "url": {
+                                            "path": [
+                                                "api",
+                                                "concierge",
+                                                "GetConciergeConfigAll"
+                                            ],
+                                            "host": [
+                                                "{{baseUrl}}"
+                                            ],
+                                            "query": [],
+                                            "variable": []
+                                        },
+                                        "method": "GET",
+                                        "body": {},
+                                        "auth": null
+                                    },
+                                    "response": [],
+                                    "event": [],
+                                    "protocolProfileBehavior": {
+                                        "disableBodyPruning": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "ticket",
+                            "description": "",
+                            "item": [
+                                {
+                                    "name": "search",
+                                    "description": "",
+                                    "item": [
+                                        {
+                                            "id": "b8160d17-b08d-4759-8165-b15c50dca873",
+                                            "name": "Search support tickets",
+                                            "request": {
+                                                "name": "Search support tickets",
+                                                "description": {
+                                                    "content": "Search support tickets through the shared support experience. The captured query names are documented without assuming filter semantics or pagination guarantees.",
+                                                    "type": "text/plain"
+                                                },
+                                                "url": {
+                                                    "path": [
+                                                        "api",
+                                                        "concierge",
+                                                        "ticket",
+                                                        "search"
+                                                    ],
+                                                    "host": [
+                                                        "{{baseUrl}}"
+                                                    ],
+                                                    "query": [
+                                                        {
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "Observed query parameter. Values, accepted value sets and requiredness were not established.",
+                                                                "type": "text/plain"
+                                                            },
+                                                            "key": "clientApp",
+                                                            "value": "string"
+                                                        },
+                                                        {
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "Observed query parameter. Values, accepted value sets and requiredness were not established.",
+                                                                "type": "text/plain"
+                                                            },
+                                                            "key": "clientAppName",
+                                                            "value": "string"
+                                                        },
+                                                        {
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "Observed query parameter. Values, accepted value sets and requiredness were not established.",
+                                                                "type": "text/plain"
+                                                            },
+                                                            "key": "createdBy",
+                                                            "value": "string"
+                                                        },
+                                                        {
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "Observed query parameter. Values, accepted value sets and requiredness were not established.",
+                                                                "type": "text/plain"
+                                                            },
+                                                            "key": "lookBackDays",
+                                                            "value": "string"
+                                                        },
+                                                        {
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "Observed query parameter. Values, accepted value sets and requiredness were not established.",
+                                                                "type": "text/plain"
+                                                            },
+                                                            "key": "pageIndex",
+                                                            "value": "string"
+                                                        },
+                                                        {
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "Observed query parameter. Values, accepted value sets and requiredness were not established.",
+                                                                "type": "text/plain"
+                                                            },
+                                                            "key": "pageKey",
+                                                            "value": "string"
+                                                        },
+                                                        {
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "Observed query parameter. Values, accepted value sets and requiredness were not established.",
+                                                                "type": "text/plain"
+                                                            },
+                                                            "key": "pageSize",
+                                                            "value": "string"
+                                                        },
+                                                        {
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "Observed query parameter. Values, accepted value sets and requiredness were not established.",
+                                                                "type": "text/plain"
+                                                            },
+                                                            "key": "product",
+                                                            "value": "string"
+                                                        },
+                                                        {
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "Observed query parameter. Values, accepted value sets and requiredness were not established.",
+                                                                "type": "text/plain"
+                                                            },
+                                                            "key": "query",
+                                                            "value": "string"
+                                                        },
+                                                        {
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "Observed query parameter. Values, accepted value sets and requiredness were not established.",
+                                                                "type": "text/plain"
+                                                            },
+                                                            "key": "severity",
+                                                            "value": "string"
+                                                        },
+                                                        {
+                                                            "disabled": false,
+                                                            "description": {
+                                                                "content": "Observed query parameter. Values, accepted value sets and requiredness were not established.",
+                                                                "type": "text/plain"
+                                                            },
+                                                            "key": "state",
+                                                            "value": "string"
+                                                        }
+                                                    ],
+                                                    "variable": []
+                                                },
+                                                "method": "GET",
+                                                "body": {},
+                                                "auth": null
+                                            },
+                                            "response": [],
+                                            "event": [],
+                                            "protocolProfileBehavior": {
+                                                "disableBodyPruning": true
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
                             "name": "DefaultMinimizeSupportWidget",
                             "description": "",
                             "item": [
@@ -77663,6 +78553,137 @@
                     "name": "tenantauthorization",
                     "description": "",
                     "item": [
+                        {
+                            "name": "GetTenantInfoV2",
+                            "description": "",
+                            "item": [
+                                {
+                                    "id": "963c6b4b-4446-4de1-a9a4-e51a18d7690f",
+                                    "name": "Get support tenant context",
+                                    "request": {
+                                        "name": "Get support tenant context",
+                                        "description": {
+                                            "content": "Retrieve tenant context used by the shared support experience.",
+                                            "type": "text/plain"
+                                        },
+                                        "url": {
+                                            "path": [
+                                                "api",
+                                                "tenantauthorization",
+                                                "GetTenantInfoV2"
+                                            ],
+                                            "host": [
+                                                "{{baseUrl}}"
+                                            ],
+                                            "query": [
+                                                {
+                                                    "disabled": false,
+                                                    "description": {
+                                                        "content": "Observed query parameter. Values, accepted value sets and requiredness were not established.",
+                                                        "type": "text/plain"
+                                                    },
+                                                    "key": "clientApp",
+                                                    "value": "string"
+                                                }
+                                            ],
+                                            "variable": []
+                                        },
+                                        "method": "GET",
+                                        "body": {},
+                                        "auth": null
+                                    },
+                                    "response": [],
+                                    "event": [],
+                                    "protocolProfileBehavior": {
+                                        "disableBodyPruning": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "TenantInfoModel",
+                            "description": "",
+                            "item": [
+                                {
+                                    "id": "29bc4908-9a11-47ac-8c4e-14d72fc50698",
+                                    "name": "Get the support tenant information model",
+                                    "request": {
+                                        "name": "Get the support tenant information model",
+                                        "description": {
+                                            "content": "Retrieve the tenant and contact information model used by the shared support experience.",
+                                            "type": "text/plain"
+                                        },
+                                        "url": {
+                                            "path": [
+                                                "api",
+                                                "tenantauthorization",
+                                                "TenantInfoModel"
+                                            ],
+                                            "host": [
+                                                "{{baseUrl}}"
+                                            ],
+                                            "query": [
+                                                {
+                                                    "disabled": false,
+                                                    "description": {
+                                                        "content": "Observed query parameter. Values, accepted value sets and requiredness were not established.",
+                                                        "type": "text/plain"
+                                                    },
+                                                    "key": "hostingAppname",
+                                                    "value": "string"
+                                                }
+                                            ],
+                                            "variable": []
+                                        },
+                                        "method": "GET",
+                                        "body": {},
+                                        "auth": null
+                                    },
+                                    "response": [],
+                                    "event": [],
+                                    "protocolProfileBehavior": {
+                                        "disableBodyPruning": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "UserPreferences",
+                            "description": "",
+                            "item": [
+                                {
+                                    "id": "ef1f8c18-fc39-4093-b388-9576cec7de2f",
+                                    "name": "Get shared support user preferences",
+                                    "request": {
+                                        "name": "Get shared support user preferences",
+                                        "description": {
+                                            "content": "Retrieve the user preferences loaded by the shared support experience.",
+                                            "type": "text/plain"
+                                        },
+                                        "url": {
+                                            "path": [
+                                                "api",
+                                                "tenantauthorization",
+                                                "UserPreferences"
+                                            ],
+                                            "host": [
+                                                "{{baseUrl}}"
+                                            ],
+                                            "query": [],
+                                            "variable": []
+                                        },
+                                        "method": "GET",
+                                        "body": {},
+                                        "auth": null
+                                    },
+                                    "response": [],
+                                    "event": [],
+                                    "protocolProfileBehavior": {
+                                        "disableBodyPruning": true
+                                    }
+                                }
+                            ]
+                        },
                         {
                             "name": "SupportVendors",
                             "description": "",

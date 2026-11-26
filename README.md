@@ -22,7 +22,7 @@ The project currently publishes the following API definitions:
 | Defender XDR | 585 | Portal session cookie (`sccauth`) | [Browse](https://nodoc.nathanmcnulty.com/defender) | `postman/collections/defender.collection.json` |
 | Defender XDR (MTO) | 19 | Defender session + MTO tenant/XSRF routing context | [Browse](https://nodoc.nathanmcnulty.com/defender-mto) | `postman/collections/defender-mto.collection.json` |
 | Microsoft Graph Research | 2 | Delegated Microsoft Graph bearer token | [Browse](https://nodoc.nathanmcnulty.com/microsoft-graph-research) | `postman/collections/graph-research.collection.json` |
-| M365 Admin | 320 | Portal session + custom admin headers | [Browse](https://nodoc.nathanmcnulty.com/m365-admin) | `postman/collections/m365-admin.collection.json` |
+| M365 Admin | 330 | Portal session + custom admin headers | [Browse](https://nodoc.nathanmcnulty.com/m365-admin) | `postman/collections/m365-admin.collection.json` |
 | Exchange | 62 | Legacy portal cookie or current admin-shell bearer token | [Browse](https://nodoc.nathanmcnulty.com/exchange) | `postman/collections/exchange-beta.collection.json` |
 | SharePoint | 43 | Portal session cookie (`FedAuth`) + SharePoint form digest | [Browse](https://nodoc.nathanmcnulty.com/sharepoint-admin) | `postman/collections/sharepoint-admin.collection.json` |
 | Teams | 100 | Portal bearer token + same-origin portal context | [Browse](https://nodoc.nathanmcnulty.com/teams) | `postman/collections/teams.collection.json` |
