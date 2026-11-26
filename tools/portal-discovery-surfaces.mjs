@@ -66,7 +66,12 @@ export async function materializeSurfaces(manifest, inventory) {
       portalUrls: surface.portalUrls, status: surface.status,
       apiOwnerStatus: mappings.some((mapping) => mapping.apiOwnerServers.length) ? "documented-in-spec" : "unknown",
       mappingStatus: mappings.length ? "mapped" : "gap", mappings,
-      limits: Object.fromEntries(dimensions.map((dimension) => [dimension, surface.limits?.[dimension] ?? manifest.surfaceDefaults.limits[dimension]])),
+      limits: Object.fromEntries(dimensions.map((dimension) => {
+        const limit = surface.limits?.[dimension] ?? manifest.surfaceDefaults.limits[dimension];
+        return [dimension, limit.status === "observed"
+          ? { status: limit.status, value: limit.value, evidence: limit.evidence }
+          : { status: "unknown" }];
+      })),
       workflows: surface.workflows.map((name) => ({ name, status: "unassessed", uiStates: "unknown" })),
     };
   }));

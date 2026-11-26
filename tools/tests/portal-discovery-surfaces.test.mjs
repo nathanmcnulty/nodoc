@@ -22,6 +22,10 @@ test("checked-in surfaces cover every spec and materialize source mappings witho
   assert.ok(teams.workflows.every((workflow) => workflow.status === "unassessed" && workflow.uiStates === "unknown"));
   assert.equal(surfaces.find((surface) => surface.id === "azure").status, "unassessed");
   assert.equal(surfaces.find((surface) => surface.id === "azure").apiOwnerStatus, "unknown");
+  const withExtra = structuredClone(manifest);
+  withExtra.surfaces[0].limits = { role: { status: "observed", value: "reader", evidence: "reference-1", privateField: "not-published" } };
+  const projected = await materializeSurfaces(withExtra, inventory);
+  assert.deepEqual(projected[0].limits.role, { status: "observed", value: "reader", evidence: "reference-1" });
 });
 
 test("surface validation rejects missing mappings, unknown specs and unsupported evidence claims", async () => {
