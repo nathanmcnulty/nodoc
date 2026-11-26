@@ -77,7 +77,7 @@ jobs:
         run: node tools/monthly-review.mjs --output "${{ steps.destination.outputs.directory }}" --reviewer copilot --model "$MODEL"
       - name: Preserve private model accounting
         id: accounting
-        if: ${{ !cancelled() && steps.mode.outputs.reviewer == 'copilot' && (steps.model.outcome == 'success' || steps.model.outcome == 'failure') }}
+        if: ${{ always() && steps.destination.outputs.directory != '' && steps.mode.outputs.reviewer == 'copilot' && (steps.model.outcome == 'success' || steps.model.outcome == 'failure' || steps.model.outcome == 'cancelled') }}
         env:
           NODOC_USAGE_BLOB_SAS_URL: ${{ secrets.NODOC_USAGE_BLOB_SAS_URL }}
         run: node tools/store-monthly-usage.mjs "${{ steps.destination.outputs.directory }}/model-usage.private.json"

@@ -125,12 +125,13 @@ totals can be partial/unavailable; retain them as reported, never infer zero
 from missing accounting. Public reports keep USD cost unknown.
 
 After a model attempt, Actions attempts a tightly scoped private upload even
-when the review step failed, unless the job is cancelled. Only successful review
+when the review step failed or was cancelled, if the runner can still execute
+and the current-run output location was reserved. Only successful review
 **and** successful accounting upload permit the public artifact and publisher.
 Raw CLI output, prompts, usage, credentials and underlying error details never
-enter public diagnostics or artifacts. Cancellation, hard runner loss, or CLI
-termination before a receipt is emitted can still lose accounting; upload
-failure also leaves only the ephemeral private local copy. Diagnose privately
+enter public diagnostics or artifacts. Cancellation or hard runner loss before
+a receipt is preserved, or CLI termination before it is emitted, can still lose
+accounting; upload failure also leaves only the ephemeral private local copy. Diagnose privately
 before retrying: absence of a receipt does not mean zero cost. Local execution
 does not upload automatically; preserve a valid receipt with
 `tools/store-monthly-usage.mjs` to the already-approved private destination

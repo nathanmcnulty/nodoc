@@ -334,9 +334,10 @@ test("workflow isolates the writer and never publishes usage or runs on pull req
   const accounting = steps.find(step => step.id === "accounting");
   assert.match(accounting.run, /steps.destination.outputs.directory/u);
   assert.match(uploads[0].with.path, /steps.destination.outputs.directory/u);
-  const evaluate = (expression, { success, cancelled, reviewer, model, accounting }) => {
+  const evaluate = (expression, { success, cancelled, reviewer, model, accounting, destination = "/current-run/review" }) => {
     const source = expression.replace(/^\$\{\{\s*|\s*\}\}$/gu, "")
-      .replaceAll("success()", String(success)).replaceAll("cancelled()", String(cancelled))
+      .replaceAll("always()", "true").replaceAll("success()", String(success)).replaceAll("cancelled()", String(cancelled))
+      .replaceAll("steps.destination.outputs.directory", JSON.stringify(destination))
       .replaceAll("steps.mode.outputs.reviewer", JSON.stringify(reviewer))
       .replaceAll("steps.model.outcome", JSON.stringify(model))
       .replaceAll("steps.accounting.outcome", JSON.stringify(accounting));
@@ -347,7 +348,7 @@ test("workflow isolates the writer and never publishes usage or runs on pull req
       for (const cancelled of [false, true]) {
         const state = { success: model === "success" && saved === "success" && !cancelled,
           cancelled, reviewer: "copilot", model, accounting: saved };
-        assert.equal(evaluate(accounting.if, state), !cancelled && ["success", "failure"].includes(model));
+        assert.equal(evaluate(accounting.if, state), ["success", "failure", "cancelled"].includes(model));
         assert.equal(evaluate(uploads[0].if, state), state.success);
       }
     }
@@ -358,6 +359,7 @@ test("workflow isolates the writer and never publishes usage or runs on pull req
   const failedEarlier = { ...deterministic, success: false, reviewer: "copilot" };
   assert.equal(evaluate(accounting.if, failedEarlier), false);
   assert.equal(evaluate(uploads[0].if, failedEarlier), false);
+  assert.equal(evaluate(accounting.if, { ...failedEarlier, model: "failure", destination: "" }), false);
   const ci = load(await readFile(new URL("../../.github/workflows/ci.yml", import.meta.url), "utf8"));
   assert.ok(ci.jobs["windows-postman"].steps.some(step => step.run?.includes("tools/tests/monthly-review.test.mjs")));
 });
